@@ -37,54 +37,18 @@ The following are some notes on the creation and support of package repositories
 
 Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
 
+ * If not already installed, install packages for _*createrepo*_, and _*genbasedir*_.  These packages have tools designed to make Yum and APT repos.
  * Go to web hosted directory:
    {{{
      zurawski@latrobe:~$ cd /var/www/default
    }}}
- * Create architecture directories:
+ * Checkout svn repository:
    {{{
-     zurawski@latrobe:/var/www/default# mkdir /var/www/default/rpms
-     zurawski@latrobe:/var/www/default# mkdir /var/www/default/rpms/x86_64
-     zurawski@latrobe:/var/www/default# mkdir /var/www/default/rpms/ppc
-     zurawski@latrobe:/var/www/default# mkdir /var/www/default/rpms/i386
-    }}}
- * In each _arch_ directory, make a directory for the _repo name_ (in our case I am just going to call it _main_), and a directory for the RPMS:
-   {{{
-     zurawski@latrobe:/var/www/default# mkdir -p /var/www/default/rpms/x86_64/main/RPMS
-     zurawski@latrobe:/var/www/default# mkdir -p /var/www/default/rpms/ppc/main/RPMS
-     zurawski@latrobe:/var/www/default# mkdir -p /var/www/default/rpms/i386/main/RPMS
+     zurawski@latrobe:/var/www/default$ svn checkout https://svn.internet2.edu/svn/software/trunk rpms
    }}}
- * Create directory for _source_ RPMS:
+ * Run _*createrepo*_ (N.B: don't run this on or in the _*RPMS*_ directory):
    {{{
-     zurawski@latrobe:/var/www/default# mkdir /var/www/default/rpms/SRPMS
-   }}}
- * Populate *SRPMS* and *RPMS* directories for a given architecture (e.g. I will show _i386_ only):
-   {{{
-     zurawski@latrobe:/var/www/default/rpms# find /var/www/default/rpms
-     /var/www/default/rpms
-     /var/www/default/rpms/x86_64
-     /var/www/default/rpms/x86_64/main
-     /var/www/default/rpms/x86_64/main/RPMS
-     /var/www/default/rpms/i386
-     /var/www/default/rpms/i386/main
-     /var/www/default/rpms/i386/main/RPMS
-     /var/www/default/rpms/i386/main/RPMS/I2util-1.1-1.i386.rpm
-     /var/www/default/rpms/i386/main/RPMS/bwctl-server-1.3-1.i386.rpm
-     /var/www/default/rpms/i386/main/RPMS/bwctl-client-1.3-1.i386.rpm
-     /var/www/default/rpms/i386/main/RPMS/owamp-server-3.1-2.i386.rpm
-     /var/www/default/rpms/i386/main/RPMS/owamp-client-3.1-1.i386.rpm
-     /var/www/default/rpms/ppc
-     /var/www/default/rpms/ppc/main
-     /var/www/default/rpms/ppc/main/RPMS
-     /var/www/default/rpms/SRPMS
-     /var/www/default/rpms/SRPMS/I2util-1.1-1.src.rpm
-     /var/www/default/rpms/SRPMS/bwctl-1.3-1.src.rpm
-     /var/www/default/rpms/SRPMS/owamp-3.1-2.src.rpm
-   }}}
- * If not already installed, install packages for _*createrepo*_, and _*genbasedir*_.  These packages have tools designed to make Yum and APT repos.
- * Run _*createrepo*_:
-   {{{
-     zurawski@latrobe:/var/www/default/rpms# cd /var/www/default/rpms/i386/main
+     zurawski@latrobe:/var/www/default# cd /var/www/default/rpms/i386/main
      zurawski@latrobe:/var/www/default/rpms# createrepo -p .
      5/5 - owamp-client-3.1-1.i386.rpm                                               
      Saving Primary metadata
@@ -94,34 +58,6 @@ Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
  * Contents after creating Yum repo:
    {{{
      zurawski@latrobe:/var/www/default/rpms/i386/main# find /var/www/default/rpms/i386
-     /var/www/default/rpms/i386
-     /var/www/default/rpms/i386/main
-     /var/www/default/rpms/i386/main/repodata
-     /var/www/default/rpms/i386/main/repodata/primary.xml.gz
-     /var/www/default/rpms/i386/main/repodata/other.xml.gz
-     /var/www/default/rpms/i386/main/repodata/repomd.xml
-     /var/www/default/rpms/i386/main/repodata/filelists.xml.gz
-     /var/www/default/rpms/i386/main/RPMS
-     /var/www/default/rpms/i386/main/RPMS/I2util-1.1-1.i386.rpm
-     /var/www/default/rpms/i386/main/RPMS/bwctl-server-1.3-1.i386.rpm
-     /var/www/default/rpms/i386/main/RPMS/bwctl-client-1.3-1.i386.rpm
-     /var/www/default/rpms/i386/main/RPMS/owamp-server-3.1-2.i386.rpm
-     /var/www/default/rpms/i386/main/RPMS/owamp-client-3.1-1.i386.rpm
-   }}}
- * Before creating the APT repo, a slight change to the directory structure is needed for the APT tool to recognize the content.  This can be done with symbolic links:
-   {{{
-     zurawski@latrobe:/var/www/default/rpms/i386/main# cd /var/www/default/rpms
-     zurawski@latrobe:/var/www/default/rpms# ln -s /var/www/default/rpms/SRPMS SRPMS.main
-     zurawski@latrobe:/var/www/default/rpms# ln -s /var/www/default/rpms/i386/main/RPMS i386/RPMS.main
-     zurawski@latrobe:/var/www/default/rpms# ln -s /var/www/default/rpms/ppc/main/RPMS ppc/RPMS.main
-     zurawski@latrobe:/var/www/default/rpms# ln -s /var/www/default/rpms/x86_64/main/RPMS x86_64/RPMS.main
-     zurawski@latrobe:/var/www/default/rpms# find /var/www/default/rpms
-     /var/www/default/rpms
-     /var/www/default/rpms/SRPMS.main
-     /var/www/default/rpms/x86_64
-     /var/www/default/rpms/x86_64/RPMS.main
-     /var/www/default/rpms/x86_64/main
-     /var/www/default/rpms/x86_64/main/RPMS
      /var/www/default/rpms/i386
      /var/www/default/rpms/i386/RPMS.main
      /var/www/default/rpms/i386/main
@@ -135,15 +71,7 @@ Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
      /var/www/default/rpms/i386/main/RPMS/bwctl-server-1.3-1.i386.rpm
      /var/www/default/rpms/i386/main/RPMS/bwctl-client-1.3-1.i386.rpm
      /var/www/default/rpms/i386/main/RPMS/owamp-server-3.1-2.i386.rpm
-     /var/www/default/rpms/i386/main/RPMS/owamp-client-3.1-1.i386.rpm
-     /var/www/default/rpms/ppc
-     /var/www/default/rpms/ppc/RPMS.main
-     /var/www/default/rpms/ppc/main
-     /var/www/default/rpms/ppc/main/RPMS
-     /var/www/default/rpms/SRPMS
-     /var/www/default/rpms/SRPMS/I2util-1.1-1.src.rpm
-     /var/www/default/rpms/SRPMS/bwctl-1.3-1.src.rpm
-     /var/www/default/rpms/SRPMS/owamp-3.1-2.src.rpm
+     /var/www/default/rpms/i386/main/RPMS/owamp-client-3.1-2.i386.rpm
    }}}
  * Run _*genbasedir*_:
    {{{
@@ -184,7 +112,7 @@ Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
 
 == Create Repo Package ==
 
-The following package was created and coverted into an RPM to allow for easy installation and configration of Yum and APT systems.  The package contains repository information as well as the GPG key used to sign the tools.  The package is build using the _*rpmbuild*_ package.
+The following package was created and coverted into an RPM (availabe in the repo [http://dc211.internet2.edu/rpms/i386/main/RPMS/Internet2-repo-0.1-1.noarch.rpm here]) to allow for easy installation and configration of Yum and APT systems.  The package contains repository information as well as the GPG key used to sign the tools.  The package is build using the _*rpmbuild*_ package.
 
 {{{
 [zurawski@fedora ~]$ mkdir Internet2-repo
@@ -357,27 +285,9 @@ Things to think about.
 
 Above example assumed _generic_ architecture (_i386_) and no flavor (e.g. Fedora, CentOS, RHEL).  This is the approach we should take, as long as we ensure the build RPMs work on the major flavors and versions.
 
-=== SVN as Repo Backing Store ===
-
- * Allows us to hand out _accounts_ to people outside of Internet2 to add content
- * Built in backups
- * Can reverse course on a bad upload
- * RPMs in SVN may not be space efficient
- * Would need to constantly rebuild metadata for repo (does that get stored in SVN too?)
-
 === Mirrors ===
 
 We would like others (Regionals/Campuses) to act as mirrors for our content - solution we pick should allow this.
-
-=== Contributions From Others ===
-
-Want to store software packaged by others that will end up on the Performance Node (and perfSONAR-PS contributions).  How to manage:
-
- * Release Manager(s) take care of repo uploads/rebuilds - loads release team (not aways, but occasionally). 
- * Hand out shell accounts - requires lots of supervision
- * SVN as backing store - will this be flexible enough?  Easy to manage?
-
-Look at how larger orgs handle this. 
  
 == Last Updated ==
 
