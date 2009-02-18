@@ -22,8 +22,8 @@
    * See [pSPS20090306Release] for details
    * See [YumRepository] for details on the Yum/APT repository
  # New 'type' for SNMP MA. A couple of issues need to be discussed
- # UDP testing, do we want to support high levels? If so, do we switch what
-services are run where?
+ # UDP testing
+   * do we want to support high levels? If so, do we switch what services are run where?
    * Brian asked "why"? A long discussion boiled down to the decision not to automatically run UDP tests, and not to automatically enable UDP testing. But, if UDP testing is enabled, to limit it to something around 75 Mbps. (This is fast enough to look for many problems, and slow enough to not be a problem with other things running on the host. It is roughly a factor of 10 less than where we saw most problems.)
  # CHEP
  # LHC/Atlas deployments
