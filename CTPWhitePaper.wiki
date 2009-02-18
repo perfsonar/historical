@@ -1,0 +1,138 @@
+= White Paper =
+
+Measurements and Monitoring to Support Cisco Telepresence Across the
+Greater Internet2
+
+
+== Immediate Goal (April timeframe assumed) ==
+    Provide validation for the network in support of Video Conferencing.
+    Provide a centralized location for an operations group to verify
+    the network performance for a specific set of endpoints.
+
+== Longer-term Goal ==
+    Provide an example of how perfSONAR measurement tools can be deployed
+    to support specific applications.
+
+== Proposed Solution (Immediate Goal) ==
+
+Deploy performance-nodes to a select set of participants. The performance-nodes
+will be based on the pS-NPToolkit but will have the functionality limited
+to allow for less hands-on configuration and more centralized management.
+
+The performance-nodes would be preconfingured to do owamp tests to all
+the other performance-nodes and would all send the resulting data
+to a database host in Ann Arbor (ndb1.internet2.edu). Web-based CGI
+scripts would interact with the database to provide a network
+performance dashboard similar to http://owamp.net.internet2.edu/. Some
+relatively simple nagios plugins could be written to add threshold
+alarms to the latency database which would then provide alarms in the cases
+of unavailable performance-nodes, or insufficient network performance.
+
+    * owamp MP at each host (NDT/NPAD as well for diagnostics)
+    * Full mesh continuous testing (10pps is recommended).
+    * Central database web GUI and management with Nagios alerts for interested parties. (Alerts can be sent to a list.)
+
+=== Software Development issues ===
+
+    * Initially use the current CGI scripts as much as possible.
+    * An updated web-dash board needs to be written in support of this effort.
+        * dash-board == highlight problems - current focus is on *all* data
+        * User views to only show 'paths of interest'.
+
+    * Data of interest will be delay-variation over short time intervals. This information is not currently stored in our database implementation, and will require development time.
+
+    * Tools are needed to aid in automatically updating the configuration on each performance-node. (Could shortcut initially using cron/rsync.) For example, if performance-nodes are not given long-term IP addresses from DHCP, each address change will need to propogate to all other performance-nodes.
+
+=== Hardware/Testing/Deployment issues ===
+
+    * Ideally located as close network wise to the CTS codec and IP phone.
+
+        * Asthetically pleasing so the device can set in the conference room.
+        * Local network needs to support DHCP, or the installer needs enough
+        savy to do limited configuration of the perf-node.
+
+    * Hardware will need to be tested in a similar conference room
+environment to ensure clock-drift issues can be accounted for on the
+specific hardware chosen. (This is hopefully not a problem, but our systems
+to date have been deployed in temperature controlled environments, so it would
+be good to test it ourselves before deploying out to remote sites.) We will
+want to run tests of a couple days to see the effects of ventalation cycles.
+
+    * Different hardware will use different system drivers. The specific
+hardware chosen for this application will need to be tested and the
+knoppix ISO may need to have different drivers installed on it.
+
+
+=== Ongoing operational responsibilities ===
+
+    The amount of resources this will require is highly dependent on the
+amount of coverage required. (weekends? nights?) I don't believe this
+would be too onerous for an existing operations group.
+
+    * Maintenance of a centralized configuration for the full mesh that is automatically polled from the performance nodes in this group on a regular basis.
+        * If IP addresses change, this configuration will need to be modified.
+    * Mainenance of good NTP servers for each performance-node.
+    * Diagnosing problems detected by the latency data.
+        * May be network, could be end host related (hardware problems, etc...).
+
+== Resources Required ==
+
+This will require resources across multiple sections - I will identify
+which groups I think are best positioned for the specific parts.
+
+    * Hardware:
+        N + 2 hosts. (N == number of CTP sites to be supported)
+
+        We will want to purchase at least 2 hosts immediately so we can test
+with them. TDD can outline general requirements/desired features. TSG is
+likely best positioned to know what hardware is likely to fulfill those
+requirements. ($750 per system)
+
+    * Integration:
+
+        OS updates for the knoppix system along with testing the resulting
+knoppix on the specific hardware. (TDD/TSG combination - TDD to put out
+new knoppix discs to test, TSG for testing and aiding in identifying
+required drivers.)
+
+    * Software Development:
+
+        TDD is best leveraged for this. However, an incremental development
+effort is likely required given the short time frame. First priority would
+be to get the software developed that needs to go on the performance-nodes
+themselves. Specifically, anything that needs to be developed to synchronize
+the configurations and any changes that need to be done to support the
+slightly different dataset.
+
+With this much complete, the systems could begin deploying while the
+remaining software development issues are addressed. Specifically, the
+database modifications and the first iterations of a web GUI and
+Nagios plugins.
+
+    * Operational:
+
+   The tasks here are outlined above in the on-going operational
+responsibilities. It is unclear to me if we should try and run this
+in-house initially for a 'pilot', or if we should immediately try
+to work with a regional to support this. But, it is clear to me that
+TDD does not have the right staff or support structure in place to
+do this even for a pilot.
+
+== Proposed Timeline ==
+
+    These estimates are given as if this was the number one priority of
+all people involved. If this is not the case, then we will need to scale back
+in either scope or timeframe. These are very aggressive estimates.
+
+2/23        Project Start
+2/23-3/2    Defining/ordering hardware
+3/2-3/13    Test hardware in AA
+2/23-3/13   OS integration and perf-node required software development
+2/23-3/13   Central configuration setup developed/tested. (rsync or other)
+3/16-4/6    Deployments of perf-nodes
+3/16-4/13   Development of database modifications, GUI, and Nagios plugins.
+4/6-4/13    Debugging of deployments/real-world data validation
+            (Probable flush of all existing data at the end of this period)
+4/13-4/24   Iterative development/testing of GUI/nagios alerts
+            (No database mods during this time, only presentation changes.)
+4/27        Ready to show community
