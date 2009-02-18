@@ -12,7 +12,7 @@
 
 == Introduction ==
 
-This page outlines details regarding the perfSONAR-PS release that began on February 16, 2008 and ended on March 6 2009 in the release of v0.10 of perfSONAR-PS.
+This page outlines details regarding the perfSONAR-PS release that began the week of February 16, 2008 and ended on March 27 2009 in the release of v0.10 of perfSONAR-PS.
 
 == Release Team ==
 
@@ -37,11 +37,11 @@ This page outlines details regarding the perfSONAR-PS release that began on Febr
 
 == Specifics ==
 
-The following outline some exceptions to the overall release process.
+The following outline some exceptions to the overall release process.  Also see [pSPSReleaseManagement] for overall recomendations on this process for the perfSONAR-PS group.
 
 === Code Reviews ===
 
-The code _review_ can be a lot more in depth than just reading in suggesting.  Any _*small*_ corrections can be done directly to the code base to save time in the process.  Reviewers are encouraged to run [http://perltidy.sourceforge.net/ perltidy] and [http://search.cpan.org/dist/Perl-Critic/bin/perlcritic perlcritic] at the end of the review.  
+The code _review_ can be a lot more in depth than just reading in suggesting.  Most corrections can be done directly to the code base to save time in the process.  Reviewers are encouraged to run [http://perltidy.sourceforge.net/ perltidy] and [http://search.cpan.org/dist/Perl-Critic/bin/perlcritic perlcritic] at the end of the review.  
 
 Things to think about as you review:
 
@@ -67,6 +67,8 @@ Things to think about as you review:
  * Test Cases
    * Ensure test cases for unit testing are appropriate in both structure and quantity
    * Ensure test cases for test harness are appropriate in both structure and quantity
+
+See the [pSPSReleaseManagement#Code_Review Code Review] section from the other document for more information.  The reviews should be shared with the entire group (use the mailing list).  
 
 === Documentation Reviews ===
 
@@ -102,7 +104,8 @@ Developers are responsible for testing their code:
 
  * Jason
    * Release Tasks
-     * Update Release Documentation - <font color=red>_*IN PROGRESS - 2/11*_</font>
+     * Prepare [YumRepository YUM] repo - <font color=red>_*IN PROGRESS - 2/17*_</font>
+     * Update Release Documentation - <font color=red>_*IN PROGRESS - 2/17*_</font>
      * Update Issue Tracker - _*PENDING*_
      * Review Code Reviews - _*PENDING*_
      * Review Doc Reviews - _*PENDING*_
