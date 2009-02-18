@@ -1,0 +1,30 @@
+=  February 23, 2009 Conference Call 2:30 pm EST =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+ # Team Updates
+   # Internet2
+   # IU
+   # UDEL
+   # ESNet
+   # FNAL
+ # perfSONAR-PS v0.10 Release Update
+   * Goal is to get all services out by March 6 (Date Negotiable - Must factor in time to release NPToolkit after)
+   * See [pSPS20090306Release] for details
+   * See [YumRepository] for details on the Yum/APT repository
+ # SNMP-MA ESnet new database integration update
+ # CHEP
+ # LHC/Atlas deployments
+ # GUI followup
+   # wmap still on the list
+   # gLS related GUIs under development
+ # GSoC
+ # Next meeting will March 2. 
+ # Other topics?
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
