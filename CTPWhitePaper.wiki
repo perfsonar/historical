@@ -1,10 +1,10 @@
-= White Paper =
+= CTP White Paper =
 
 Measurements and Monitoring to Support Cisco Telepresence Across the
 Greater Internet2
 
 
-== Immediate Goal (April timeframe assumed) ==
+== Immediate Goal (April SMM timeframe assumed) ==
     Provide validation for the network in support of Video Conferencing.
     Provide a centralized location for an operations group to verify
     the network performance for a specific set of endpoints.
@@ -28,7 +28,7 @@ relatively simple nagios plugins could be written to add threshold
 alarms to the latency database which would then provide alarms in the cases
 of unavailable performance-nodes, or insufficient network performance.
 
-    * owamp MP at each host (NDT/NPAD as well for diagnostics)
+    * OWAMP measurement point at each host (NDT/NPAD as well for diagnostics)
     * Full mesh continuous testing (10pps is recommended).
     * Central database web GUI and management with Nagios alerts for interested parties. (Alerts can be sent to a list.)
 
@@ -46,28 +46,17 @@ of unavailable performance-nodes, or insufficient network performance.
 === Hardware/Testing/Deployment issues ===
 
     * Ideally located as close network wise to the CTS codec and IP phone.
-
         * Asthetically pleasing so the device can set in the conference room.
-        * Local network needs to support DHCP, or the installer needs enough
-        savy to do limited configuration of the perf-node.
+        * Local network needs to support DHCP, or the installer needs enough savy to do limited configuration of the perf-node.
 
-    * Hardware will need to be tested in a similar conference room
-environment to ensure clock-drift issues can be accounted for on the
-specific hardware chosen. (This is hopefully not a problem, but our systems
-to date have been deployed in temperature controlled environments, so it would
-be good to test it ourselves before deploying out to remote sites.) We will
-want to run tests of a couple days to see the effects of ventalation cycles.
+    * Hardware will need to be tested in a similar conference room environment to ensure clock-drift issues can be accounted for on the specific hardware chosen. (This is hopefully not a problem, but our systems to date have been deployed in temperature controlled environments, so it would be good to test it ourselves before deploying out to remote sites.) We will want to run tests of a couple days to see the effects of ventalation cycles.
 
-    * Different hardware will use different system drivers. The specific
-hardware chosen for this application will need to be tested and the
-knoppix ISO may need to have different drivers installed on it.
+    * Different hardware will use different system drivers. The specific hardware chosen for this application will need to be tested and the knoppix ISO may need to have different drivers installed on it.
 
 
 === Ongoing operational responsibilities ===
 
-    The amount of resources this will require is highly dependent on the
-amount of coverage required. (weekends? nights?) I don't believe this
-would be too onerous for an existing operations group.
+    The amount of resources this will require is highly dependent on the amount of coverage required. (weekends? nights?) I don't believe this would be too onerous for an existing operations group.
 
     * Maintenance of a centralized configuration for the full mesh that is automatically polled from the performance nodes in this group on a regular basis.
         * If IP addresses change, this configuration will need to be modified.
@@ -86,7 +75,7 @@ which groups I think are best positioned for the specific parts.
         We will want to purchase at least 2 hosts immediately so we can test
 with them. TDD can outline general requirements/desired features. TSG is
 likely best positioned to know what hardware is likely to fulfill those
-requirements. ($750 per system)
+requirements. (wild guess at $750 per system - perhaps more to make it look nice and still perform well.)
 
     * Integration:
 
