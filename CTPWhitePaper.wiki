@@ -77,16 +77,14 @@ which groups I think are best positioned for the specific parts.
 
     * Software Development:
         TDD is best leveraged for this. However, an incremental development effort is likely required given the short time frame. First priority would be to get the software developed that needs to go on the performance-nodes themselves. Specifically, anything that needs to be developed to synchronize the configurations and any changes that need to be done to support the slightly different dataset.
-With this much complete, the systems could begin deploying while the remaining software development issues are addressed. Specifically, the database modifications and the first iterations of a web GUI and Nagios plugins.
+        With this much complete, the systems could begin deploying while the remaining software development issues are addressed. Specifically, the database modifications and the first iterations of a web GUI and Nagios plugins.
 
     * Operational:
         The tasks here are outlined above in the on-going operational responsibilities. It is unclear to me if we should try and run this in-house initially for a 'pilot', or if we should immediately try to work with a regional to support this. But, it is clear to me that TDD does not have the right staff or support structure in place to do this even for a pilot.
 
 == Proposed Timeline ==
 
-    These estimates are given as if this was the number one priority of
-all people involved. If this is not the case, then we will need to scale back
-in either scope or timeframe. These are very aggressive estimates.
+    These estimates are given as if this was the number one priority of all people involved. If this is not the case, then we will need to scale back in either scope or timeframe. These are very aggressive estimates.
 
 {{{
 2/23        Project Start
