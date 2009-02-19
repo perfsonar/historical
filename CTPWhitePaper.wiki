@@ -6,7 +6,7 @@ greater Internet2 Network.
  * [CTPWhitePaper#Immediate_Goal Immediate Goal (April SMM timeframe assumed)]
  * [CTPWhitePaper#Longer_term_Goal Longer-term Goal]
  * [CTPWhitePaper#Proposed_Solution Proposed Solution (Immediate Goal)]
-   * [CTPWhitePaper#Software_Development Software Development]
+   * [CTPWhitePaper#Software_Development_Issues Software Development Issues]
    * [CTPWhitePaper#Hardware_Testing_Deployment_Issues Hardware/Testing/Deployment Issues]
    * [CTPWhitePaper#Ongoing_Operational_Responsibilities Ongoing Operational Responsibilities]
  * [CTPWhitePaper#Resources_Required Resources Required]
