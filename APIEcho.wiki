@@ -52,7 +52,7 @@ The following may be used from this library.  Please see the perldoc internal to
 Creates a new instance of the _perfSONAR_PS::Client::Echo_ object.  There are two variables that may be passed on creation (in order):
 
  * _*URI*_ - Service URI to contact
- * _*EventType*_ - EventType, if ommited the default will be used.
+ * _*!EventType*_ - !EventType, if ommited the default will be used.
 
 Example use:
 
@@ -62,9 +62,9 @@ my $echo_service = perfSONAR_PS::Client::Echo->new( "http://localhost:8080/perfS
 
 === setEventType === 
 
-Sets (or re-sets) the eventType for an already created object.  This can be used instead of setting in [APIEcho#new new].  One variable is required:
+Sets (or re-sets) the !eventType for an already created object.  This can be used instead of setting in [APIEcho#new new].  One variable is required:
 
- * _*EventType*_ - EventType, if ommited the default will be used.
+ * _*!EventType*_ - !EventType, if ommited the default will be used.
 
 Example use:
 
@@ -88,12 +88,12 @@ $echo_service->setURIString( "http://localhost:8080/perfSONAR_PS/services/snmpMA
 
 === ping === 
 
-Performs the _EchoRequest_operation, and returns a status variable:
+Performs the _EchoRequest_ operation, and returns a status variable:
 
  * Status:
    * _*-1*_ = Failure 
    * _*0*_ = Success
- * Result: A string that describes the success or failure.  The success message is taken from the EchoResponse message directly. 
+ * Result: A string that describes the success or failure.  The success message is taken from the !EchoResponse message directly. 
 
 This method does not take any input variables.  Example use:
 
