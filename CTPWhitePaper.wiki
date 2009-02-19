@@ -25,18 +25,18 @@ greater Internet2 Network.
 == Proposed Solution ==
 
 Deploy performance-nodes to a select set of participants. The performance-nodes
-will be based on the [NPToolkit pS-NPToolkit] but will have the functionality
-limited to allow for less hands-on configuration and more centralized
+will be based on the [NPToolkit pS-NPToolkit] but will have specific
+functionality to allow for less hands-on configuration and more centralized
 management.
 
 The performance-nodes would be pre-configured to do
 [http://e2epi.internet2.edu/owamp/ owamp] tests to all the other
-performance-nodes and would all send the resulting data to a database host in
-Ann Arbor (ndb1.internet2.edu). Web-based CGI scripts would interact with the
-database to provide a network performance dashboard similar to
+performance-nodes and would send the resulting data to a central database host
+based in Ann Arbor (ndb1.internet2.edu). Web-based CGI scripts would interact
+with the database to provide a network performance dashboard similar to
 http://owamp.net.internet2.edu/. Some relatively simple
 [http://www.nagios.org/ nagios] plugins could be written to add threshold alarms
-to the latency database which would then provide alarms in the cases of
+to the latency database which could then provide alarms in the cases of
 unavailable performance-nodes, or insufficient network performance.
 
     * OWAMP measurement point at each host ([http://e2epi.internet2.edu/ndt/ NDT]/[http://www.psc.edu/networking/projects/pathdiag/ NPAD] as well for diagnostics)
@@ -47,8 +47,8 @@ unavailable performance-nodes, or insufficient network performance.
 
     * Initially use the current CGI scripts as much as possible.
     * An updated web-dash board needs to be written in support of this effort.
-        * _*dash-board*_ will be used to highlight problems - current focus is on *all* data
-        * User views to only show 'paths of interest'.
+        * _*dash-board*_ in this sense means a way to spotlight problems - current focus is on *all* data
+        * User views can dig down and show 'paths of interest'.
 
     * Data of interest will be delay-variation over short time intervals. This information is not currently stored in our database implementation, and will require development time.
 
