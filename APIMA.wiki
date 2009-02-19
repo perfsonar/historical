@@ -1,0 +1,26 @@
+= Measurement Archive (MA) API ==
+
+ * [APIMA#Introduction Introduction]
+ * [APIMA#Availability Availability]
+ * [APIMA#Functions Functions]
+ * [APIMA#Example_Use Example Use]
+ 
+== Introduction ==
+
+== Availability ==
+
+This API is available in perfSONAR-PS releases, and can be included as such:
+
+{{{
+use perfSONAR_PS::Client::MA;
+}}}
+
+== Functions ==
+
+The following may be used from this library.  Please see the perldoc internal to the library for a complete listing of functionality.
+
+== Example Use ==
+
+== Last Updated ==
+
+$Id$
