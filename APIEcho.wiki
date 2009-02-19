@@ -3,7 +3,7 @@
  * [APIEcho#Introduction Introduction]
  * [APIEcho#Availability Availability]
  * [APIEcho#Functions Functions]
-   * [APIEcho#new new]
+   * [APIEcho#new new]   
    * [APIEcho#setEventType setEventType]
    * [APIEcho#setURIString setURIString]
    * [APIEcho#ping ping]
@@ -33,7 +33,7 @@ The Echo API is a very simple wrapping around the perfSONAR-PS echo message: a m
 
 The only change available in this message is the _eventType_ which _*may*_ vary from service to service, but in practice remains a default value that the API is aware of.  
 
-This API is regularly used inside of other APIs (e.g. the [APIgLS gLS API]) to check the liveness of services before proceeding.  It should be used in client applications as a sanity check before spending time and compute cycles to retrieve information on a potentially non-responsive service. 
+This API is regularly used inside of other APIs (e.g. the [APIgLS gLS API]) to check the liveness of services before proceeding to query further.  It should be used in client applications as a sanity check before spending time and compute cycles to retrieve information on a potentially non-responsive service. 
 
 == Availability ==
 
@@ -45,14 +45,14 @@ use perfSONAR_PS::Client::Echo;
 
 == Functions ==
 
-The following may be used from this library.  Please see the perldoc internal to the library for a complete listing of functionality.
+The following functions may be used from this library.  Please see the perldoc internal to the library for a complete listing of functionality.  Unlisted functions should be viewed as internal to the module.  
 
 === new === 
 
-Creates a new instance of the _perfSONAR_PS::Client::Echo_ object.  There are two variables that may be passed on creation (in order):
+Creates a new instance of the _perfSONAR_PS::Client::Echo_ object.  There are two parameters that may be passed on creation (in order):
 
  * _*URI*_ - Service URI to contact
- * _*!EventType*_ - !EventType, if ommited the default will be used.
+ * _*!EventType*_ - !EventType, if omitted, a default will be used.
 
 Example use:
 
@@ -62,9 +62,9 @@ my $echo_service = perfSONAR_PS::Client::Echo->new( "http://localhost:8080/perfS
 
 === setEventType === 
 
-Sets (or re-sets) the !eventType for an already created object.  This can be used instead of setting in [APIEcho#new new].  One variable is required:
+Sets (or re-sets) the !eventType for an already created object.  This can be used instead of passing the value to [APIEcho#new new].  One variable is required:
 
- * _*!EventType*_ - !EventType, if ommited the default will be used.
+ * _*!EventType*_ - !EventType, if omitted, the default will be used.
 
 Example use:
 
@@ -75,7 +75,7 @@ $echo_service->setEventType( "http://schemas.perfsonar.net/tools/admin/echo/2.0"
 
 === setURIString === 
 
-Sets (or re-sets) the URI for an already created object.  This can be used instead of setting in [APIEcho#new new].  One variable is required:
+Sets (or re-sets) the URI for an already created object.  This can be used instead of passing the value to [APIEcho#new new].  One variable is required:
 
  * _*URI*_ - Service URI to contact
 
@@ -88,13 +88,13 @@ $echo_service->setURIString( "http://localhost:8080/perfSONAR_PS/services/snmpMA
 
 === ping === 
 
-Performs the _EchoRequest_ operation, and returns a status variable:
+Performs the _EchoRequest_ operation to a given service, and returns status information:
 
  * Status:
    * _*-1*_ = Failure 
    * _*0*_ = Success
- * Result: A string that describes the success or failure.  The success message is taken from the !EchoResponse message directly. 
-
+ * Result: A string that describes the success or failure.  The success message is taken from the !EchoResponse message directly.  
+ 
 This method does not take any input variables.  Example use:
 
 {{{

@@ -24,6 +24,8 @@ The LS API was designed to do the heavy lifting with regards to interacting with
  * _*LSKeepaliveRequest*_ - Allows a service to _*refresh*_ registration information.
  * _*LSQueryRequest*_ - Allows for queries, written in XQuery, to be performed.   
 
+The API makes access to these messages available, and returns results in easier to handle mediums beyond raw XML messages.
+
 == Availability ==
 
 This API is available in perfSONAR-PS releases, and can be included as such:
@@ -34,7 +36,7 @@ use perfSONAR_PS::Client::LS;
 
 == Functions ==
 
-The following may be used from this library.  Please see the perldoc internal to the library for a complete listing of functionality.
+The following functions may be used from this library.  Please see the perldoc internal to the library for a complete listing of functionality.  Unlisted functions should be viewed as internal to the module.  
 
 === new ===
 
@@ -50,7 +52,7 @@ my $ls = new perfSONAR_PS::Client::LS( { instance => "http://localhost:8080/perf
 
 === setInstance ===
 
-Sets (or re-sets) the URI of an LS for an already created object.  This can be used instead of setting in [APILS#new new].  One variable is required:
+Sets (or re-sets) the URI of an LS for an already created object.  This can be used instead of setting in [APILS#new new].  One parameter is required:
 
  * _*LS Instance*_ - URI of LS instance to interact with.
 
@@ -92,7 +94,7 @@ The use case for this particular function is registering the existence of a serv
    * http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/summary/2.0
    * http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0
 
- * _*data*_ - An array object containing XML data:
+ * _*data*_ - A required array object containing XML data:
     {{{
     my @rdata = ();
     $rdata[0] .= "    <nmwg:metadata id=\"meta\">\n";
@@ -108,13 +110,13 @@ The use case for this particular function is registering the existence of a serv
     $rdata[0] .= "    </nmwg:metadata>\n";
     }}}
 
-The returned value from this function is a structured result that contains:
+The returned value from this function is a structured result that _*may*_ contain:
 
  * _*eventType*_ - The returned _*status*_ of the operation, see the LS service documentation for exact values, but in practice using a regex to search for _*success*_ or _*failure*_ works well. 
  * _*response*_ - The readable response from the service, normally gives more insight than the eventType code.  
- * _*key*_ - The returned _*key*_ that can be used to identify the service, this should be remembered.   
+ * _*key*_ - The returned _*key*_ that can be used to identify the service, this should be remembered.  Note that this will only be returned on success. 
  
-Some examples on how to call this function:
+An example on how to call this function:
 
 {{{
 my $ls = new perfSONAR_PS::Client::LS( { instance => "http://localhost:8080/perfSONAR_PS/services/LS"} );
@@ -140,7 +142,7 @@ $rdata[0] .= "      <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utiliz
 $rdata[0] .= "    </nmwg:metadata>\n";
 
 my $result = $ls->registerRequestLS( { service => \%service, data => \@rdata } );
-if ( $result->{eventType} eq "success.ls.register" ) {
+if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
     print "Registration success.\n";
     print "eventType:\t" . $result->{eventType} . "\nResponse:\t" . $result->{response} . "\nKey:\t" . $result->{key} , "\n";
 }
@@ -152,16 +154,9 @@ else {
 
 === registerUpdateRequestLS ===
 
-This function is similar in spirit to [APILS#registerRequestLS registerRequestLS], but should be used to add additional information to an existing registration.  This nuance is controlled by the LS issued _*key*_ that identifies existing services.  .  This function has several potential inputs
+This function is similar in spirit to [APILS#registerRequestLS registerRequestLS], but should be used to add additional information to an existing registration.  This nuance is controlled by the LS issued _*key*_ that identifies existing services and is returned after initial registration.  This function has several potential inputs
 
- * _*key*_ - A required string used to identify the registered service with an LS.  The LS will pass back a value similar to this upon registration, this method only requires the actual value (no surrounding XML):
-   {{{
-    <nmwg:key>
-      <nmwg:parameters id="keys3">
-        <nmwg:parameter name="lsKey">5cfb07ea7a5b840ce4f8f48b842ac9c0</nmwg:parameter>
-      </nmwg:parameters>
-    </nmwg:key>
-   }}}
+ * _*key*_ - A required string used to identify the registered service with an LS.  The LS will pass back this value upon registration, or it can be retrieved using the [APILS#keyRequestLS keyRequestLS] call for a valid service.
     
  * _*eventType*_ - An eventType for registration.  This element is optional, and if so the first choice is assumed (e.g. _*standard*_ registration).  The options are:
    * http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/service/2.0
@@ -188,12 +183,14 @@ The returned value from this function is a structured result that contains:
 
  * _*eventType*_ - The returned _*status*_ of the operation, see the LS service documentation for exact values, but in practice using a regex to search for _*success*_ or _*failure*_ works well. 
  * _*response*_ - The readable response from the service, normally gives more insight than the eventType code.  
- * _*key*_ - The returned _*key*_ that can be used to identify the service, this should be remembered.   
+ * _*key*_ - The returned _*key*_ that can be used to identify the service, this should be remembered.  Note that this will only be returned on success.
   
 Some examples on how to call this function:
 
 {{{
 my $ls = new perfSONAR_PS::Client::LS( { instance => "http://localhost:8080/perfSONAR_PS/services/LS"} );
+
+my $key = "some key";
 
 my @rdata = ();
 $rdata[0] .= "    <nmwg:metadata id=\"meta\">\n";
@@ -209,7 +206,7 @@ $rdata[0] .= "      <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utiliz
 $rdata[0] .= "    </nmwg:metadata>\n";
 
 my $result = $ls->registerUpdateRequestLS( { key => $key, data => \@rdata } );
-if ( $result->{eventType} eq "success.ls.register" ) {
+if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
     print "Registration Update success.\n";
     print "eventType:\t" . $result->{eventType} . "\nResponse:\t" . $result->{response} . "\nKey:\t" . $result->{key} , "\n";
 }
@@ -223,14 +220,7 @@ else {
 
 Like [APILS#registerRequestLS registerRequestLS] and [APILS#registerUpdateRequestLS registerUpdateRequestLS], this function performs a registration task.  The specific purpose of this function is to _*clobber*_, or delete all knowledge of some service including data, and then start over again.  This function requires some specific inputs to work properly:
 
- * _*key*_ - A required string used to identify the registered service with an LS.  The LS will pass back a value similar to this upon registration, this method only requires the actual value (no surrounding XML):
-   {{{
-    <nmwg:key>
-      <nmwg:parameters id="keys3">
-        <nmwg:parameter name="lsKey">5cfb07ea7a5b840ce4f8f48b842ac9c0</nmwg:parameter>
-      </nmwg:parameters>
-    </nmwg:key>
-   }}}
+ * _*key*_ - A required string used to identify the registered service with an LS.  The LS will pass back this value upon registration, or it can be retrieved using the [APILS#keyRequestLS keyRequestLS] call for a valid service.
    
  * _*service*_ - A hash object containing service information. This may be used instead of raw XML.
     {{{
@@ -259,7 +249,7 @@ Like [APILS#registerRequestLS registerRequestLS] and [APILS#registerUpdateReques
    * http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/summary/2.0
    * http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0
 
- * _*data*_ - An array object containing XML data:
+ * _*data*_ - A required array object containing XML data:
     {{{
     my @rdata = ();
     $rdata[0] .= "    <nmwg:metadata id=\"meta\">\n";
@@ -279,7 +269,7 @@ The returned value from this function is a structured result that contains:
 
  * _*eventType*_ - The returned _*status*_ of the operation, see the LS service documentation for exact values, but in practice using a regex to search for _*success*_ or _*failure*_ works well. 
  * _*response*_ - The readable response from the service, normally gives more insight than the eventType code.  
- * _*key*_ - The returned _*key*_ that can be used to identify the service, this should be remembered.    
+ * _*key*_ - The returned _*key*_ that can be used to identify the service, this should be remembered.  Note that this will only be returned on success.
  
 Some examples on how to call this function:
 
@@ -307,7 +297,7 @@ $rdata[0] .= "      <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utiliz
 $rdata[0] .= "    </nmwg:metadata>\n";
 
 my $result = $ls->registerRequestLS( { service => \%service, data => \@rdata } );
-if ( $result->{eventType} eq "success.ls.register" ) {
+if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
     print "Registration success.\n";
     print "eventType:\t" . $result->{eventType} . "\nResponse:\t" . $result->{response} . "\nKey:\t" . $result->{key} , "\n";
     my $key = $result->{key};
@@ -318,8 +308,8 @@ if ( $result->{eventType} eq "success.ls.register" ) {
         accessPoint => "http://localhost:8080/perfSONAR_PS/services/snmpMA2"
     );
     $result = $ls->registerClobberRequestLS( { service => \%service, key => $key, data => \@rdata } );
-    if ( $result->{eventType} eq "success.ls.register" ) {
-        my $key = $result->{key};
+    if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
+        $key = $result->{key};
         print "Success, and here is the new key: \"" . $key . "\"\n";
         print "eventType:\t" . $result->{eventType} . "\nResponse:\t" . $result->{response} . "\nKey:\t" . $result->{key} , "\n";
     }
@@ -336,22 +326,15 @@ else {
 
 === deregisterRequestLS ===
 
-This call should be used to remove portions of service registered data, or the entire service.    This function requires some specific inputs to work properly:
+This call should be used to remove portions of service registered data, or the entire service.  This function requires some specific inputs to work properly:
 
- * _*key*_ - A required string used to identify the registered service with an LS.  The LS will pass back a value similar to this upon registration, this method only requires the actual value (no surrounding XML):
-   {{{
-    <nmwg:key>
-      <nmwg:parameters id="keys3">
-        <nmwg:parameter name="lsKey">5cfb07ea7a5b840ce4f8f48b842ac9c0</nmwg:parameter>
-      </nmwg:parameters>
-    </nmwg:key>
-   }}}
+ * _*key*_ - A required string used to identify the registered service with an LS.  The LS will pass back this value upon registration, or it can be retrieved using the [APILS#keyRequestLS keyRequestLS] call for a valid service.
     
  * _*eventType*_ - An eventType for deregistration.  This element is optional, and if so the first choice is assumed (e.g. _*standard*_ deregistration).  The options are:
    * http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/service/2.0
    * http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/summary/2.0
 
- * _*data*_ - An optional array object containing XML data:
+ * _*data*_ - An optional array object containing XML data (what is to be removed, if present):
     {{{
     my @rdata = ();
     $rdata[0] .= "    <nmwg:metadata id=\"meta\">\n";
@@ -380,7 +363,7 @@ my $ls = new perfSONAR_PS::Client::LS( { instance => "http://localhost:8080/perf
 my $key = "some key";
 
 my $result = $ls->deregisterRequestLS( { key => $key, data => \@rdata } );
-if ( $result->{eventType} eq "success.ls.register" ) {
+if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
     print "De-registration of one element successful.\n";
     print "eventType:\t" . $result->{eventType} . "\nResponse:\t" . $result->{response} . "\nKey:\t" . $result->{key} , "\n";
 }
@@ -390,7 +373,7 @@ else {
 }
 
 $result = $ls->deregisterRequestLS( { key => $key } );
-if ( $result->{eventType} eq "success.ls.register" ) {
+if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
     print "De-registration of service successful.\n";
     print "eventType:\t" . $result->{eventType} . "\nResponse:\t" . $result->{response} . "\nKey:\t" . $result->{key} , "\n";
 }
@@ -398,21 +381,13 @@ else {
     print "Failed to deregister service.\n";
     print "eventType:\t" . $result->{eventType} . "\nResponse:\t" . $result->{response} , "\n";
 }
-
 }}}
 
 === keepaliveRequestLS ===
 
-This function is used to _*refresh*_ already registered data so that the LS does not remove it from memory.  The LS will periodically do this for services that do not announce themselves.  There are two inputs:
+This function is used to _*refresh*_ already registered data so that the LS does not remove it from memory.  The LS will periodically do this for services that do not announce themselves as being _live_.  There are two inputs:
 
- * _*key*_ - A required string used to identify the registered service with an LS.  The LS will pass back a value similar to this upon registration, this method only requires the actual value (no surrounding XML):
-   {{{
-    <nmwg:key>
-      <nmwg:parameters id="keys3">
-        <nmwg:parameter name="lsKey">5cfb07ea7a5b840ce4f8f48b842ac9c0</nmwg:parameter>
-      </nmwg:parameters>
-    </nmwg:key>
-   }}}
+ * _*key*_ - A required string used to identify the registered service with an LS.  The LS will pass back this value upon registration, or it can be retrieved using the [APILS#keyRequestLS keyRequestLS] call for a valid service.
     
  * _*eventType*_ - An eventType for keepalive.  This element is optional, and if so the first choice is assumed (e.g. _*standard*_ operation).  The options are:
    * http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/service/2.0
@@ -430,7 +405,7 @@ my $ls = new perfSONAR_PS::Client::LS( { instance => "http://localhost:8080/perf
 
 my $key = "some key";
 my $result = $ls->keepaliveRequestLS( { key => $key } );
-if ( $result->{eventType} eq "success.ls.keepalive" ) {
+if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.keepalive" ) {
     print "Success!\n";
     print "eventType:\t" . $result->{eventType} . "\nResponse:\t" . $result->{response} , "\n";
 }
@@ -474,7 +449,7 @@ The returned value from this function is a structured result that contains:
 
  * _*eventType*_ - The returned _*status*_ of the operation, see the LS service documentation for exact values, but in practice using a regex to search for _*success*_ or _*failure*_ works well. 
  * _*response*_ - The readable response from the service, normally gives more insight than the eventType code.  
- * _*key*_ - The returned _*key*_ that can be used to identify the service, this should be remembered.   
+ * _*key*_ - The returned _*key*_ that can be used to identify the service, this should be remembered.  Note that this will only be returned on success.
   
 Some examples on how to call this function:
 
@@ -488,9 +463,9 @@ my %service = (
     accessPoint => "http://localhost:8080/perfSONAR_PS/services/snmpMA"
 );
 my $result = $ls->keyRequestLS( { service => \%service } );
-if ( $result->{eventType} eq "success.ls.keepalive" ) {
+if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.keepalive" ) {
     print "Success!\n";
-    print "eventType:\t" . $result->{eventType} . "\nResponse:\t" . $result->{response} , "\n";
+    print "eventType:\t" . $result->{eventType} . "\nResponse:\t" . $result->{response} , "\nKey:\t" . $result->{key} , "\n";
 }
 else {
     print "Failed to keepalive.\n";
@@ -500,13 +475,14 @@ else {
 
 === queryRequestLS ===
 
-This function passes an XQuery or XPath statement directly to the LS, and returns the results of the query back in a message.  There are several inputs available:
+This function passes a query (normally XQuery or XPath statement but also summaries in the case of the _*gLS*_) directly to the LS, and returns the results of the query back in a message.  There are several inputs available:
 
  * _*query*_ - An XQuery or XPath string.  Do remember to escape necessary characters when enclosed in a string (_*"*_, _*\*_, _*@*_, _*$*_, etc.).  An example:
    {{{
    declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";
    /nmwg:store[@type="LSStore"]/nmwg:data
    }}}
+
  * _*subject*_ - Instead of an XQuery or XPath string a fully formed XML subject can be sent, normally in the form of a _summary_, see also the [http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/gLS/phase_1_color.html gLS design document].  Be sure the appropriate _*eventType*_ is used. An example:
    {{{
       <summary:subject xmlns:summary="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/" id="subject.1">
@@ -540,7 +516,9 @@ This function passes an XQuery or XPath statement directly to the LS, and return
 -->
       </summary:subject>
    }}}
- * _*foramt*_ - Will _*format*_ (e.g. perform escaping to normalize the XML output) on the resulting data.   
+
+ * _*format*_ - Will _*format*_ (e.g. perform escaping to normalize the XML output) on the resulting data.  This is a binary value (0 or 1) with 1 indicating _native_, readable XML.   
+
  * _*eventType*_ - An eventType for registration.  This element is optional, and if so the first choice is assumed (e.g. _*standard*_ query).  Note that not all may be supported by an LS, the first is the safest option.  The options are:
    * http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0
    * http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0
@@ -563,7 +541,7 @@ my $key = "some key";
 my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
 $query .= "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$key."\"]\n";
 my $result = $ls->queryRequestLS( { query => $query, format => 1 } );
-if( $result->{eventType} =~ m/^error/mx ) {
+if( exists $result->{eventType} and $result->{eventType} =~ m/^error/mx ) {
     print "Something went wrong...\n";
     print "eventType:\t" . $result->{eventType} . "\nResponse:\t" . $result->{response} , "\n";
 } 

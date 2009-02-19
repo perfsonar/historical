@@ -17,7 +17,7 @@ use perfSONAR_PS::Client::gLS;
 
 == Functions ==
 
-The following may be used from this library.  Please see the perldoc internal to the library for a complete listing of functionality.
+The following functions may be used from this library.  Please see the perldoc internal to the library for a complete listing of functionality.  Unlisted functions should be viewed as internal to the module.  
 
 == Example Use ==
 
