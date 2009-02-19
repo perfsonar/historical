@@ -97,11 +97,11 @@ which groups I think are best positioned for the specific parts.
     These estimates are given as if this was the number one priority of all people involved. If this is not the case, then we will need to scale back in either scope or timeframe. These are very aggressive estimates.
 
 || 2/23        || Project Start ||
-|| 2/23-3/2    || Defining/ordering hardware ||
+|| 2/23-3/2    || Defining/ordering test hardware ||
 || 3/2-3/13    || Test hardware in AA ||
 || 2/23-3/13   || OS integration and perf-node required software development ||
 || 2/23-3/13   || Central configuration setup developed/tested. (rsync or other) ||
-|| 3/16-4/6    || Deployments of perf-nodes ||
+|| 3/16-4/6    || Order remaining hardware, deployments of perf-nodes ||
 || 3/16-4/13   || Development of database modifications, GUI, and Nagios plugins. ||
 || 4/6-4/13    || Debugging of deployments/real-world data validation ||
 ||             || (Probable flush of all existing data at the end of this period) ||
