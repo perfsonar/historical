@@ -3,7 +3,16 @@
 Measurement and monitoring to support [http://www.cisco.com/en/US/netsol/ns669/networking_solutions_solution_segment_home.html Cisco TelePresence] across the
 greater Internet2 Network.
 
-== Immediate Goal (April SMM timeframe assumed) ==
+ * [CTPWhitePaper#Immediate_Goal Immediate Goal (April SMM timeframe assumed)]
+ * [CTPWhitePaper#Longer_term_Goal Longer-term Goal]
+ * [CTPWhitePaper#Proposed_Solution Proposed Solution (Immediate Goal)]
+   * [CTPWhitePaper#Software_Development Software Development]
+   * [CTPWhitePaper#Hardware_Testing_Deployment_Issues Hardware/Testing/Deployment Issues]
+   * [CTPWhitePaper#Ongoing_Operational_Responsibilities Ongoing Operational Responsibilities]
+ * [CTPWhitePaper#Resources_Required Resources Required]
+ * [CTPWhitePaper#Proposed_Timeline Proposed Timeline]
+
+== Immediate Goal  ==
     Provide validation for the network in support of Video Conferencing.
     Provide a centralized location for an operations group to verify
     the network performance for a specific set of endpoints.
@@ -13,7 +22,7 @@ greater Internet2 Network.
     [http://www.internet2.edu/performance/pS-PS/ perfSONAR] measurement tools
     can be deployed and manged to support specific applications.
 
-== Proposed Solution (Immediate Goal) ==
+== Proposed Solution ==
 
 Deploy performance-nodes to a select set of participants. The performance-nodes
 will be based on the [NPToolkit pS-NPToolkit] but will have the functionality
@@ -45,7 +54,7 @@ unavailable performance-nodes, or insufficient network performance.
 
     * Tools are needed to aid in automatically updating the configuration on each performance-node. (Could shortcut initially using cron/rsync.) For example, if performance-nodes are not given long-term IP addresses from DHCP, each address change will need to propagate to all other performance-nodes.
 
-=== Hardware/Testing/Deployment Issues ===
+=== Hardware Testing Deployment Issues ===
 
     * Ideally located as close, network wise, to the CTS codec and IP phone.
         * Aesthetically pleasing so the device can set in the conference room.
