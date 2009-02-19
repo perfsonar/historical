@@ -10,9 +10,9 @@ etc/daemon_logger.conf
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
 lib/perfSONAR_PS/Client/LS/Remote.pm
-lib/perfSONAR_PS/Client/Topology/XMLDB.pm
 lib/perfSONAR_PS/Client/gLS.pm
 lib/perfSONAR_PS/Common.pm
+lib/perfSONAR_PS/DB/TopologyXMLDB.pm
 lib/perfSONAR_PS/DB/XMLDB.pm
 lib/perfSONAR_PS/Error.pm
 lib/perfSONAR_PS/Error_compat.pm

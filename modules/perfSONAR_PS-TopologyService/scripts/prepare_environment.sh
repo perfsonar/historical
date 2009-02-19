@@ -11,6 +11,6 @@ $MAKEROOT /usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d
 $MAKEROOT mkdir -p /var/log/perfsonar
 $MAKEROOT chown perfsonar:perfsonar /var/log/perfsonar
 
-$MAKEROOT mkdir -p /var/lib/topology_service
-$MAKEROOT chown perfsonar:perfsonar /var/lib/topology_service
-$MAKEROOT cp `dirname $0`/../doc/DB_CONFIG /var/lib/topology_service
+$MAKEROOT mkdir -p /var/lib/perfsonar/topology_service
+$MAKEROOT chown perfsonar:perfsonar /var/lib/perfsonar/topology_service
+$MAKEROOT cp `dirname $0`/../doc/DB_CONFIG /var/lib/perfsonar/topology_service

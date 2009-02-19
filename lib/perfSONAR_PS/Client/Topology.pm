@@ -6,15 +6,16 @@ use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
 
-use fields 'URI_STRING';
+use fields 'URI_STRING', 'LOGGER';
 
 our $VERSION = 0.09;
 
 sub new {
     my ($package, $uri_string) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
 
     my $self = fields::new($package);
+
+    $self->{LOGGER} = get_logger("perfSONAR_PS::Client::Topology::MA");
 
     if (defined $uri_string and $uri_string ne "") { 
         $self->{"URI_STRING"} = $uri_string;
@@ -105,7 +106,6 @@ sub buildChangeRequest {
 
 sub xQuery {
     my ($self, $xquery) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
     my $localContent = "";
     my $error;
     my ($status, $res, $request);
@@ -115,14 +115,14 @@ sub xQuery {
     my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
     if (not defined $host and not defined $port and not defined $endpoint) {
         my $msg = "Specified argument is not a URI";
-        my $logger->error($msg);
+        $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
 
     ($status, $res) = consultArchive($host, $port, $endpoint, $request);
     if ($status != 0) {
         my $msg = "Error consulting archive: $res";
-        $logger->error($msg);
+        $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
 
@@ -146,13 +146,12 @@ sub xQuery {
     }
 
     my $msg = "Response does not contain a topology";
-    $logger->error($msg);
+    $self->{LOGGER}->error($msg);
     return (-1, $msg);
 }
 
 sub getAll {
     my($self) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
     my @results;
     my $error;
     my ($status, $res);
@@ -162,14 +161,14 @@ sub getAll {
     my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
     if (not defined $host and not defined $port and not defined $endpoint) {
         my $msg = "Specified argument is not a URI";
-        my $logger->error($msg);
+        $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
 
     ($status, $res) = consultArchive($host, $port, $endpoint, $request);
     if ($status != 0) {
         my $msg = "Error consulting archive: $res";
-        $logger->error($msg);
+        $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
 
@@ -194,38 +193,37 @@ sub getAll {
     }
 
     my $msg = "Response does not contain a topology";
-    $logger->error($msg);
+    $self->{LOGGER}->error($msg);
     return (-1, $msg);
 }
 
 sub changeTopology {
     my ($self, $type, $topology) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
     my @results;
     my $error;
     my ($status, $res);
 
     my $request = buildChangeRequest($type, $topology);
 
-    $logger->debug("Change Request: ".$request);
+    $self->{LOGGER}->debug("Change Request: ".$request);
 
     my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
     if (not defined $host and not defined $port and not defined $endpoint) {
         my $msg = "Specified argument is not a URI";
-        my $logger->error($msg);
+        $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
 
     ($status, $res) = consultArchive($host, $port, $endpoint, $request);
     if ($status != 0) {
         my $msg = "Error consulting archive: $res";
-        $logger->error($msg);
+        $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
 
     my $topo_msg = $res;
 
-    $logger->debug("Change Response: ".$topo_msg->toString);
+    $self->{LOGGER}->debug("Change Response: ".$topo_msg->toString);
 
     my $find_res;
 
@@ -249,7 +247,7 @@ sub changeTopology {
     }
 
     my $msg = "Response does not contain status";
-    $logger->error($msg);
+    $self->{LOGGER}->error($msg);
     return (-1, $msg);
 }
 

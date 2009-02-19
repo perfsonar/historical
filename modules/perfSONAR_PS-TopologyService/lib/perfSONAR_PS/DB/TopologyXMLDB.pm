@@ -1,4 +1,4 @@
-package perfSONAR_PS::Client::Topology::XMLDB;
+package perfSONAR_PS::DB::TopologyXMLDB;
 
 use strict;
 use warnings;
@@ -10,13 +10,14 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Topology::Common;
 use perfSONAR_PS::Topology::ID;
 
-use fields 'READ_ONLY', 'DB_OPEN', 'DB_NAMESPACES', 'DB_FILE', 'DB_CONTAINER', 'DATADB';
+use fields 'READ_ONLY', 'DB_OPEN', 'DB_NAMESPACES', 'DB_FILE', 'DB_CONTAINER', 'DATADB', 'LOGGER';
 
 our $VERSION = 0.09;
 
 sub new {
     my ($package, $db_container, $db_file, $ns, $read_only) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
+
+    $self->{LOGGER} = get_logger("perfSONAR_PS::DB::TopologyXMLDB");
 
     my $self = fields::new($package);
 
@@ -49,21 +50,20 @@ sub new {
 
 sub open {
     my ($self) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
 
     return (0, "") if ($self->{DB_OPEN} != 0);
 
     $self->{DATADB} = new perfSONAR_PS::DB::XMLDB({  env => $self->{DB_CONTAINER}, cont => $self->{DB_FILE}, ns => $self->{DB_NAMESPACES} });
     if (not defined $self->{DATADB}) {
         my $msg = "Couldn't open specified database";
-        $logger->error($msg);
+        $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
 
 #	my $status = $self->{DATADB}->prep;
 #	if ($status == -1) {
 #		my $msg = "Couldn't open specified database";
-#		$logger->error($msg);
+#		$self->{LOGGER}->error($msg);
 #		return (-1, $msg);
 #	}
 
@@ -71,7 +71,7 @@ sub open {
     my $status = $self->{DATADB}->openDB({ txn => undef, error => \$error });
     if ($status == -1) {
         my $msg = "Couldn't open specified database: $error";
-        $logger->error($msg);
+        $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
 
@@ -82,7 +82,6 @@ sub open {
 
 sub close {
     my ($self) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
 
     return 0 if ($self->{DB_OPEN} == 0);
 
@@ -129,7 +128,6 @@ sub setDBNamespaces {
 
 sub xQuery {
     my($self, $xquery) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
     my $localContent = "";
     my $error;
 
@@ -139,7 +137,7 @@ sub xQuery {
 
     my @queryResults = $self->{DATADB}->query({ query => $xquery, txn => undef, error => \$error });
     if ($error ne "") {
-        $logger->error("Couldn't query database");
+        $self->{LOGGER}->error("Couldn't query database");
         return (-1, "Couldn't query database: $error");
     }
 
@@ -152,7 +150,6 @@ sub xQuery {
 
 sub getAll {
     my($self) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
     my @results;
     my $error;
 
@@ -161,7 +158,7 @@ sub getAll {
     @results = $self->{DATADB}->query({ query => "//*", txn => undef, error => \$error });
     if ($error ne "") {
         my $msg = "Couldn't get list of domains from database: $error";
-        $logger->error($msg);
+        $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
 
@@ -182,93 +179,18 @@ sub getAll {
     };
     if ($@) {
         my $msg = "Couldn't parse resulting database dump: ".$@;
-        $logger->error($msg);
+        $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
 
     return (0, $topology);
 }
 
-sub getSummary {
-    my ($self) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
-    my $error;
-    my (@domain_ids, @network_ids, @path_ids);
-
-    return (-1, "Database not open") if ($self->{DB_OPEN} == 0);
-
-    my ($status, $results) = $self->getAll();
-    if ($status != 0) {
-        return ($status, $results);
-    }
-
-    my @ids = ();
-
-    my $find_res;
-
-    $find_res = find($results, "./*[local-name()='domain']", 0);
-    if ($find_res) {
-        foreach my $node ($find_res->get_nodelist) {
-            my $id = $node->getAttribute("id");
-            my $uri = $node->namespaceURI();
-            my $prefix = $node->prefix;
-
-            my %info = (
-                    type => 'domain',
-                    id => $id,
-                    prefix => $prefix,
-                    uri => $uri,
-                    );
-
-            push @ids, \%info;
-        }
-    }
-
-    $find_res = find($results, "./*[local-name()='network']", 0);
-    if ($find_res) {
-        foreach my $node ($find_res->get_nodelist) {
-            my $id = $node->getAttribute("id");
-            my $uri = $node->namespaceURI();
-            my $prefix = $node->prefix;
-
-            my %info = (
-                    type => 'network',
-                    id => $id,
-                    prefix => $prefix,
-                    uri => $uri,
-                    );
-
-            push @ids, \%info;
-        }
-    }
-
-    $find_res = find($results, "./*[local-name()='path']", 0);
-    if ($find_res) {
-        foreach my $node ($find_res->get_nodelist) {
-            my $id = $node->getAttribute("id");
-            my $uri = $node->namespaceURI();
-            my $prefix = $node->prefix;
-
-            my %info = (
-                    type => 'path',
-                    id => $id,
-                    prefix => $prefix,
-                    uri => $uri,
-                    );
-
-            push @ids, \%info;
-        }
-    }
-
-    return (0, \@ids);
-}
-
 sub changeTopology {
     my ($self, $type, $topology) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
     my ($status, $res);
 
-    $logger->debug("Topology: ".$topology->toString);
+    $self->{LOGGER}->debug("Topology: ".$topology->toString);
 
     return (-1, "Database not open") if ($self->{DB_OPEN} == 0);
 
@@ -285,7 +207,7 @@ sub changeTopology {
 
     if ($type ne "update" and $type ne "replace" and $type ne "add") {
         my $msg = "Invalid topology change specified: $type";
-        $logger->error($msg);
+        $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
 
@@ -302,24 +224,24 @@ sub changeTopology {
         foreach my $domain ($find_res->get_nodelist) {
             my $id = $domain->getAttribute("id");
 
-            $logger->debug("Got a request for domain: $id");
+            $self->{LOGGER}->debug("Got a request for domain: $id");
 
             if (not defined $id or $id eq "") {
                 my $msg = "Domain with no id found";
-                $logger->error($msg);
+                $self->{LOGGER}->error($msg);
                 return (-1, $msg);
             }
 
             if (idIsFQ($id, "domain") == 0) {
                 my $msg = "Domain with non-fully qualified id, $id, is specified";
-                $logger->error($msg);
+                $self->{LOGGER}->error($msg);
                 return (-1, $msg);
             }
 
             my ($status, $res) = validateDomain($domain, \%domain_ids);
             if ($status != 0) {
                 my $msg = "Invalid domain, $id, specified: $res";
-                $logger->error($msg);
+                $self->{LOGGER}->error($msg);
                 return (-1, $msg);
             }
 
@@ -332,7 +254,7 @@ sub changeTopology {
             if ($type eq "update") {
                 if (not defined $old_domain) {
                     my $msg = "Domain $id to update, but not found";
-                    $logger->error($msg);
+                    $self->{LOGGER}->error($msg);
                     return (-1, $msg);
                 }
 
@@ -342,7 +264,7 @@ sub changeTopology {
             } elsif ($type eq "add") {
                 if (defined $old_domain) {
                     my $msg = "Domain $id already exists";
-                    $logger->error($msg);
+                    $self->{LOGGER}->error($msg);
                     return (-1, $msg);
                 }
 
@@ -362,20 +284,20 @@ sub changeTopology {
 
             if (not defined $id or $id eq "") {
                 my $msg = "Node with no id found";
-                $logger->error($msg);
+                $self->{LOGGER}->error($msg);
                 return (-1, $msg);
             }
 
             if (idIsFQ($id, "node") == 0) {
                 my $msg = "Node with non-fully qualified id, $id, is specified at top-level";
-                $logger->error($msg);
+                $self->{LOGGER}->error($msg);
                 return (-1, $msg);
             }
 
             my ($status, $res) = validateNode($node, \%node_ids, "");
             if ($status != 0) {
                 my $msg = "Invalid node , $id, specified: $res";
-                $logger->error($msg);
+                $self->{LOGGER}->error($msg);
                 return (-1, $msg);
             }
 
@@ -392,7 +314,7 @@ sub changeTopology {
             if ($type eq "update") {
                 if (not defined $old_node) {
                     my $msg = "Node $id to update, but not found";
-                    $logger->error($msg);
+                    $self->{LOGGER}->error($msg);
                     return (-1, $msg);
                 }
 
@@ -402,7 +324,7 @@ sub changeTopology {
             } elsif ($type eq "add") {
                 if (defined $old_node) {
                     my $msg = "Node $id already exists";
-                    $logger->error($msg);
+                    $self->{LOGGER}->error($msg);
                     return (-1, $msg);
                 }
 
@@ -430,20 +352,20 @@ sub changeTopology {
 
             if (not defined $id or $id eq "") {
                 my $msg = "Port with no id found";
-                $logger->error($msg);
+                $self->{LOGGER}->error($msg);
                 return (-1, $msg);
             }
 
             if (idIsFQ($id, "port") == 0) {
                 my $msg = "Port with non-fully qualified id, $id, is specified at top-level";
-                $logger->error($msg);
+                $self->{LOGGER}->error($msg);
                 return (-1, $msg);
             }
 
             my ($status, $res) = validatePort($port, \%port_ids, "");
             if ($status != 0) {
                 my $msg = "Invalid port , $id, specified: $res";
-                $logger->error($msg);
+                $self->{LOGGER}->error($msg);
                 return (-1, $msg);
             }
 
@@ -461,7 +383,7 @@ sub changeTopology {
             if ($type eq "update") {
                 if (not defined $old_port) {
                     my $msg = "Port $id to update, but not found";
-                    $logger->error($msg);
+                    $self->{LOGGER}->error($msg);
                     return (-1, $msg);
                 }
 
@@ -471,7 +393,7 @@ sub changeTopology {
             } elsif ($type eq "add") {
                 if (defined $old_port) {
                     my $msg = "Port $id already exists";
-                    $logger->error($msg);
+                    $self->{LOGGER}->error($msg);
                     return (-1, $msg);
                 }
 
@@ -498,20 +420,20 @@ sub changeTopology {
             my $id = $link->getAttribute("id");
             if (not defined $id or $id eq "") {
                 my $msg = "Link with no id found";
-                $logger->error($msg);
+                $self->{LOGGER}->error($msg);
                 return (-1, $msg);
             }
 
             if (idIsFQ($id, "link") == 0) {
                 my $msg = "Link with non-fully qualified id, $id, is specified at top-level";
-                $logger->error($msg);
+                $self->{LOGGER}->error($msg);
                 return (-1, $msg);
             }
 
             my ($status, $res) = validateLink($link, \%link_ids, "");
             if ($status != 0) {
                 my $msg = "Invalid link , $id, specified: $res";
-                $logger->error($msg);
+                $self->{LOGGER}->error($msg);
                 return (-1, $msg);
             }
 
@@ -528,7 +450,7 @@ sub changeTopology {
             if ($type eq "update") {
                 if (not defined $old_link) {
                     my $msg = "Link $id to update, but not found";
-                    $logger->error($msg);
+                    $self->{LOGGER}->error($msg);
                     return (-1, $msg);
                 }
 
@@ -538,7 +460,7 @@ sub changeTopology {
             } elsif ($type eq "add") {
                 if (defined $old_link) {
                     my $msg = "Link $id already exists";
-                    $logger->error($msg);
+                    $self->{LOGGER}->error($msg);
                     return (-1, $msg);
                 }
 
@@ -557,7 +479,7 @@ sub changeTopology {
         }
     }
 
-    $logger->debug("Elements: ".Dumper(\%elements));
+    $self->{LOGGER}->debug("Elements: ".Dumper(\%elements));
 
     my $error;
 
@@ -572,7 +494,7 @@ sub changeTopology {
     foreach my $id (keys %elements) {
         next if (defined $elements{$id}->parentNode->parentNode);
 
-        $logger->debug("Inserting $id");
+        $self->{LOGGER}->debug("Inserting $id");
 
         # This is a hack to force the namespace declaration into the
         # node we're going to insert. A better solution would be to
@@ -584,8 +506,12 @@ sub changeTopology {
         $self->{DATADB}->remove({ name => $id });
 
         if ($self->{DATADB}->insertIntoContainer({ content => $elements{$id}->toString, name => $id, txn => $dbTr, error => \$error }) != 0) {
+            $self->{DATADB}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+            $self->{DATADB}->checkpoint( { error => \$error } );
+            $self->{DATADB}->closeDB( { error => \$error } );
+
             my $msg = "Error updating $id: $error";
-            $logger->error($msg);
+            $self->{LOGGER}->error($msg);
             return (-1, $msg);
         }
     }
@@ -609,14 +535,13 @@ sub changeTopology {
 
 sub lookupElement {
     my ($self, $id, $elements) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
 
-    $logger->debug("Looking up element \"$id\"");
+    $self->{LOGGER}->debug("Looking up element \"$id\"");
 
     my @res = idSplit($id, 1, 0);
     if ($res[0] != 0) {
         my $msg = "Invalid id: $id";
-        $logger->error($msg);
+        $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
 
@@ -640,15 +565,15 @@ sub lookupElement {
     if (not defined $parent_id or not defined $parent) {
         my $error;
         if (not defined $parent_id) {
-            $logger->debug("Parent not found");
+            $self->{LOGGER}->debug("Parent not found");
         } else {
-            $logger->debug("Parent '$parent_id' Not Found");
+            $self->{LOGGER}->debug("Parent '$parent_id' Not Found");
         }
 
         my $doc = $self->{DATADB}->getDocumentByName({ name => $base_id, txn => undef, error => \$error });
         if ($error ne "" or $doc eq "") {
             my $msg = "Element ".$base_id." not found";
-            $logger->error($msg);
+            $self->{LOGGER}->error($msg);
             return (-1, $msg);
         }
 
@@ -660,7 +585,7 @@ sub lookupElement {
 
         return (0, $elm);
     } else {
-        $logger->debug("Parent: $parent_id Found");
+        $self->{LOGGER}->debug("Parent: $parent_id Found");
 
         my $find_res = find($parent, "./*[local-name()='$base_type']", 0);
         if ($find_res) {
@@ -674,7 +599,7 @@ sub lookupElement {
         }
 
         my $msg = "Element ".$base_id." not found";
-        $logger->error($msg);
+        $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
 
@@ -687,7 +612,7 @@ __END__
 
 =head1 NAME
 
-perfSONAR_PS::Client::Topology::XMLDB - A module that provides methods for
+perfSONAR_PS::DB::TopologyXMLDB - A module that provides methods for
 interacting with a Topology MA database directly.
 
 =head1 DESCRIPTION
