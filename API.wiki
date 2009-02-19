@@ -6,14 +6,14 @@
 
 == Introduction ==
 
-The following list available client APIs in the perfSONAR-PS infrastructure.  Each page will contain a pointer to the API library, an explanation of use, and examples for use in client code (normally web based CGI scripts).  A section detailing planned APIs is also given; the availability of these is subject to perfSONAR-PS releases and demand.
+The following is a list of available client APIs in the perfSONAR-PS infrastructure.  Each page will contain a pointer to the API library, an explanation of use, and examples for use in client code (normally web based CGI scripts).  A section detailing planned APIs is also given; the availability of these is subject to perfSONAR-PS releases and demand.
 
 == Available APIs ==
 
  * [APIEcho Echo API]
- * [APIgLS Global Lookup Service (gLS) API]
+ * Global Lookup Service (gLS) API
  * [APILS Lookup Service (LS) API]
- * [APIMA Generic Measurement Archive (MA) API]
+ * Generic Measurement Archive (MA) API
  * Dynamic Circuit Network Information Services (DCN-IS) API
  * PingER API
 
