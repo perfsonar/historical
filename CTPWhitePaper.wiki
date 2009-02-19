@@ -17,7 +17,7 @@ greater Internet2 Network.
     Provide a centralized location for an operations group to verify
     the network performance for a specific set of endpoints.
 
-== Longer-term Goal ==
+== Longer term Goal ==
     Provide an example of how
     [http://www.internet2.edu/performance/pS-PS/ perfSONAR] measurement tools
     can be deployed and manged to support specific applications.
