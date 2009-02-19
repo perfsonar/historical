@@ -16,7 +16,7 @@
  
 == Introduction ==
 
-The LS API was designed to do the heavy lifting with regards to interacting with the Lookup Service (specifically the _hLS_, or _*Home*_ Lookup Service.  There are several messages that this service, and in turn the API, supports:
+The LS API was designed to do the heavy lifting with regards to interacting with the Lookup Service (specifically the _hLS_, or _*Home*_ Lookup Service, although extensions for some _gLS_ operations are supported).  There are several messages that this service, and in turn the API, supports:
 
  * _*LSRegisterRequest*_ - Allows a service to register itself, and internal content, with an LS.
  * _*LSDeregisterRequest*_ - Allows a service to delete itself or selected content from an LS.
@@ -221,7 +221,7 @@ else {
 
 === registerClobberRequestLS ===
 
-Like the previous two calls this function performs a registration task.  The specific purpose of this function is to _*clobber*_, or delete all knowledge of some service including data, and then start over again.  This function requires some specific inputs to work properly:
+Like [APILS#registerRequestLS registerRequestLS] and [APILS#registerUpdateRequestLS registerUpdateRequestLS], this function performs a registration task.  The specific purpose of this function is to _*clobber*_, or delete all knowledge of some service including data, and then start over again.  This function requires some specific inputs to work properly:
 
  * _*key*_ - A required string used to identify the registered service with an LS.  The LS will pass back a value similar to this upon registration, this method only requires the actual value (no surrounding XML):
    {{{
