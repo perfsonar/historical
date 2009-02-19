@@ -1,0 +1,20 @@
+=  March 2, 2009 Conference Call 2:30 pm EST =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+ # Team Updates
+   # Internet2
+   # IU
+   # UDEL
+   # ESNet
+   # FNAL
+ # Circuit Monitoring
+ # Next meeting will March 9. 
+ # Other topics?
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
