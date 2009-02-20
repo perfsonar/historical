@@ -13,7 +13,7 @@ The following is a list of available client APIs in the perfSONAR-PS infrastruct
  * [APIEcho Echo API]
  * Global Lookup Service (gLS) API
  * [APILS Lookup Service (LS) API]
- * Generic Measurement Archive (MA) API
+ * [APIMA Generic Measurement Archive (MA) API]
  * Dynamic Circuit Network Information Services (DCN-IS) API
  * PingER API
 
