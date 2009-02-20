@@ -117,20 +117,12 @@ address, 3) Reset host - completely reformat.
 = Current Zero-Config Booting =
 
 The current Knoppix instance allows for one to do zero configuration and boot
-into a usable system. There are a few caveats with this approach, however.
-
-Once issue is that the system won't register with any of its daemons with the
-global lookup service. This could be changed with the caveat that the gLS would
-end up with entries like "BWCTL Server". The downside to this approach is that,
-due to the size of the hLS database, it would effectively mandate 512M RAM
-for running the disk.
-
-The other issue is that the knoppix user cannot become root, impeding the
-ability to reconfiguration without a reboot. This could be worked around in one
-of two ways, either let knoppix become root without typing a password or let
-knoppix run the configuration utility without a password. Either approach has
-security issues that go along with it. This issue may be obviated by the move
-to Fedora, but I'd have to look further into it.
+into a usable system. However, this system won't register with any of its daemons
+with the global lookup service. This could be changed with the caveat that the
+gLS would end up with entries like "BWCTL Server". The downside to this approach
+is that, due to the size of the hLS database, it would effectively mandate 512M RAM
+for running the disk so we would need some way of informing users if they put the
+disk into a machine with less than that amount of space.
 
 The default configuration for the system is:
 
