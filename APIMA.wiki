@@ -89,10 +89,10 @@ The _!MetadataKeyRequest_ is a message that is used to gauge the availability of
    }}}
    
  * _*eventTypes*_ - This is a required element, and should be supplied as an array reference of strings.  It is used to specify the _eventType_ that is paired with the previously described subject element; it may be any _eventType_ that is recognized by a specific service (check service documentation for availability).  Examples:
-   * perfSONAR-BUOY (BWCTL data) - _*http://ggf.org/ns/nmwg/tools/iperf/2.0*_
-   * perfSONAR-BUOY (OWAMP data) - _*http://ggf.org/ns/nmwg/tools/owamp/2.0*_
-   * SNMP MA (Utilization data) - _*http://ggf.org/ns/nmwg/characteristic/utilization/2.0*_
-   * SNMP MA (Errors data) - _*http://ggf.org/ns/nmwg/characteristic/errors/2.0*_
+   * perfSONAR-BUOY (BWCTL data) - http://ggf.org/ns/nmwg/tools/iperf/2.0*_
+   * perfSONAR-BUOY (OWAMP data) - http://ggf.org/ns/nmwg/tools/owamp/2.0*_
+   * SNMP MA (Utilization data) - http://ggf.org/ns/nmwg/characteristic/utilization/2.0
+   * SNMP MA (Errors data) - http://ggf.org/ns/nmwg/characteristic/errors/2.0
  
  * _*parameters*_ - This optional element is a hash reference consisting of name value pairs; they are paired with the required _subject_ and _eventType_ to form a complete metadata.  This can be used to specify additional details about a measurement, when available.  Example using perfSONAR-BUOY (BWCTL data):
    {{{
@@ -154,7 +154,7 @@ if ( exists $result->{"metadata"} and exists $result->{"data"} ) {
         my $metadata = $parser->parse_string( $m );
         print "metadata: " , $metadata->toString , "\n";
     }
-    print "\n\n"'
+    print "\n\n";
     foreach my $d ( @ { $result->{"data"} } ) {
         my $data = $parser->parse_string( $d );
         my $key = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
@@ -209,11 +209,11 @@ N.B. that this call is not available in all services, check documentation for us
    }}}
    
  * _*eventTypes*_ - This is a required element, and should be supplied as an array reference of strings.  It is used to specify the _eventType_ that is paired with the previously described subject element; it may be any _eventType_ that is recognized by a specific service (check service documentation for availability).  Examples:
-   * perfSONAR-BUOY (BWCTL data) - _*http://ggf.org/ns/nmwg/tools/iperf/2.0*_
-   * perfSONAR-BUOY (OWAMP data) - _*http://ggf.org/ns/nmwg/tools/owamp/2.0*_
-   * SNMP MA (Utilization data) - _*http://ggf.org/ns/nmwg/characteristic/utilization/2.0*_
-   * SNMP MA (Errors data) - _*http://ggf.org/ns/nmwg/characteristic/errors/2.0*_
- 
+   * perfSONAR-BUOY (BWCTL data) - http://ggf.org/ns/nmwg/tools/iperf/2.0*_
+   * perfSONAR-BUOY (OWAMP data) - http://ggf.org/ns/nmwg/tools/owamp/2.0*_
+   * SNMP MA (Utilization data) - http://ggf.org/ns/nmwg/characteristic/utilization/2.0
+   * SNMP MA (Errors data) - http://ggf.org/ns/nmwg/characteristic/errors/2.0
+   
  * _*parameters*_ - This optional element is a hash reference consisting of name value pairs; they are paired with the required _subject_ and _eventType_ to form a complete metadata.  This can be used to specify additional details about a measurement, when available.  Example using perfSONAR-BUOY (BWCTL data):
    {{{
    my %parameters = (
@@ -261,7 +261,7 @@ if ( exists $result->{"metadata"} and exists $result->{"data"} ) {
         my $metadata = $parser->parse_string( $m );
         print "metadata: " , $metadata->toString , "\n";
     }
-    print "\n\n"'
+    print "\n\n";
     foreach my $d ( @ { $result->{"data"} } ) {
         my $data = $parser->parse_string( $d );
         print "data: " , $data->toString , "\n";
@@ -320,10 +320,10 @@ The _!SetupDataRequest_ is different from the [APIMA#metadataKeyRequest metadata
    }}}
    
  * _*eventTypes*_ - This is a required element, and should be supplied as an array reference of strings.  It is used to specify the _eventType_ that is paired with the previously described subject element; it may be any _eventType_ that is recognized by a specific service (check service documentation for availability).  Examples:
-   * perfSONAR-BUOY (BWCTL data) - _*http://ggf.org/ns/nmwg/tools/iperf/2.0*_
-   * perfSONAR-BUOY (OWAMP data) - _*http://ggf.org/ns/nmwg/tools/owamp/2.0*_
-   * SNMP MA (Utilization data) - _*http://ggf.org/ns/nmwg/characteristic/utilization/2.0*_
-   * SNMP MA (Errors data) - _*http://ggf.org/ns/nmwg/characteristic/errors/2.0*_
+   * perfSONAR-BUOY (BWCTL data) - http://ggf.org/ns/nmwg/tools/iperf/2.0*_
+   * perfSONAR-BUOY (OWAMP data) - http://ggf.org/ns/nmwg/tools/owamp/2.0*_
+   * SNMP MA (Utilization data) - http://ggf.org/ns/nmwg/characteristic/utilization/2.0
+   * SNMP MA (Errors data) - http://ggf.org/ns/nmwg/characteristic/errors/2.0
  
  * _*parameters*_ - This optional element is a hash reference consisting of name value pairs; they are paired with the required _subject_ and _eventType_ to form a complete metadata.  This can be used to specify additional details about a measurement, when available.  Example using perfSONAR-BUOY (BWCTL data):
    {{{
