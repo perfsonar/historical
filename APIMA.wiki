@@ -53,7 +53,7 @@ $ma->setInstance( { instance => "http://localhost:8080/perfSONAR_PS/services/snm
 
 === metadataKeyRequest ===
 
-The _MetadataKeyRequest_ is a message that is used to gauge the availability of specific information from a service, and also receive a _key_ that can be used to retrieve information repeatedly.  This API call has several potential useful input parameters:
+The _!MetadataKeyRequest_ is a message that is used to gauge the availability of specific information from a service, and also receive a _key_ that can be used to retrieve information repeatedly.  This API call has several potential useful input parameters:
 
  * _*subject*_ - This required element is raw xml that describes the subject _metadata_ you are looking for from a service.  Check individual service documentation for further examples.  Examples from the perfSONAR-BUOY service (BWCTL data):
    {{{
@@ -274,7 +274,7 @@ else {
 
 === setupDataRequest ===
 
-The _SetupDataRequest_ is different from the [APIMA#metadataKeyRequest metadataKeyRequest] and [APIMA#dataInfoRequest dataInfoRequest] calls: it delivers measurement data from the service.  This service accepts the same arguments as [APIMA#metadataKeyRequest metadataKeyRequest], and allows _keys_ retrieved from this call to be used as subjects to this one.  This API has the following parameters:
+The _!SetupDataRequest_ is different from the [APIMA#metadataKeyRequest metadataKeyRequest] and [APIMA#dataInfoRequest dataInfoRequest] calls: it delivers measurement data from the service.  This service accepts the same arguments as [APIMA#metadataKeyRequest metadataKeyRequest], and allows _keys_ retrieved from this call to be used as subjects to this one.  This API has the following parameters:
 
  * _*subject*_ - This required element is raw xml that describes the subject _metadata_, or key, you are looking for from a service.  Check individual service documentation for further examples.  An Example of a plain key:  
    {{{
