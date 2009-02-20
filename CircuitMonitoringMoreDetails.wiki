@@ -1,11 +1,13 @@
-= Algorithm =
+= Architecture =
+
+[http://packrat.internet2.edu/~aaron/circuit_monitoring_architecture.png]
 
   # The IDC tells the Notification Broker about a new circuit it allocated
   # The Notification Broker alerts an agent who is listening for circuit requests
-  # The agent connects to one or more measurement collectors and tells them what to start monitoring
-  # The measurement collectors start storing the data into a Measurement Archive
+  # The agent connects to one or more performance collectors and tells them which elements to start monitoring
+  # The performance collectors start collecting status and performance data from the routers/switches, and storing them into a measurement archive
   # The measurement archive registers that it has data about the circuit with the Lookup Service
-  # The agent registers a description of its circuit segment with a Topology Service
+  # The agent registers a description of the domain's circuit segment with a Topology Service
   # The Topology Service registers that it has the description of the circuit segment
   # The client takes a circuit segment identifier and asks the Lookup Service which Topology Service has it
   # The client then retrieves the circuit segment descriptor from the Topology Service
