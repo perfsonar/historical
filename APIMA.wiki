@@ -89,8 +89,8 @@ The _!MetadataKeyRequest_ is a message that is used to gauge the availability of
    }}}
    
  * _*eventTypes*_ - This is a required element, and should be supplied as an array reference of strings.  It is used to specify the _eventType_ that is paired with the previously described subject element; it may be any _eventType_ that is recognized by a specific service (check service documentation for availability).  Examples:
-   * perfSONAR-BUOY (BWCTL data) - http://ggf.org/ns/nmwg/tools/iperf/2.0*_
-   * perfSONAR-BUOY (OWAMP data) - http://ggf.org/ns/nmwg/tools/owamp/2.0*_
+   * perfSONAR-BUOY (BWCTL data) - http://ggf.org/ns/nmwg/tools/iperf/2.0
+   * perfSONAR-BUOY (OWAMP data) - http://ggf.org/ns/nmwg/tools/owamp/2.0
    * SNMP MA (Utilization data) - http://ggf.org/ns/nmwg/characteristic/utilization/2.0
    * SNMP MA (Errors data) - http://ggf.org/ns/nmwg/characteristic/errors/2.0
  
@@ -209,8 +209,8 @@ N.B. that this call is not available in all services, check documentation for us
    }}}
    
  * _*eventTypes*_ - This is a required element, and should be supplied as an array reference of strings.  It is used to specify the _eventType_ that is paired with the previously described subject element; it may be any _eventType_ that is recognized by a specific service (check service documentation for availability).  Examples:
-   * perfSONAR-BUOY (BWCTL data) - http://ggf.org/ns/nmwg/tools/iperf/2.0*_
-   * perfSONAR-BUOY (OWAMP data) - http://ggf.org/ns/nmwg/tools/owamp/2.0*_
+   * perfSONAR-BUOY (BWCTL data) - http://ggf.org/ns/nmwg/tools/iperf/2.0
+   * perfSONAR-BUOY (OWAMP data) - http://ggf.org/ns/nmwg/tools/owamp/2.0
    * SNMP MA (Utilization data) - http://ggf.org/ns/nmwg/characteristic/utilization/2.0
    * SNMP MA (Errors data) - http://ggf.org/ns/nmwg/characteristic/errors/2.0
    
@@ -320,8 +320,8 @@ The _!SetupDataRequest_ is different from the [APIMA#metadataKeyRequest metadata
    }}}
    
  * _*eventTypes*_ - This is a required element, and should be supplied as an array reference of strings.  It is used to specify the _eventType_ that is paired with the previously described subject element; it may be any _eventType_ that is recognized by a specific service (check service documentation for availability).  Examples:
-   * perfSONAR-BUOY (BWCTL data) - http://ggf.org/ns/nmwg/tools/iperf/2.0*_
-   * perfSONAR-BUOY (OWAMP data) - http://ggf.org/ns/nmwg/tools/owamp/2.0*_
+   * perfSONAR-BUOY (BWCTL data) - http://ggf.org/ns/nmwg/tools/iperf/2.0
+   * perfSONAR-BUOY (OWAMP data) - http://ggf.org/ns/nmwg/tools/owamp/2.0
    * SNMP MA (Utilization data) - http://ggf.org/ns/nmwg/characteristic/utilization/2.0
    * SNMP MA (Errors data) - http://ggf.org/ns/nmwg/characteristic/errors/2.0
  
@@ -385,7 +385,127 @@ foreach my $dt ( $datum1->get_nodelist ) {
 
 == Example Use ==
 
-TBD
+The following example shows how to retrieve SNMP utilization data from an SNMP MA for a given start time and resolution:
+
+{{{
+#!/usr/bin/perl
+
+use CGI;
+use CGI::Carp qw(fatalsToBrowser);
+use XML::LibXML;
+
+use lib "/home/jason/perfSONAR-PS/lib";
+
+use perfSONAR_PS::Client::MA;
+use perfSONAR_PS::Common qw( extract find );
+
+my $cgi = CGI->new();
+print $cgi->header();
+
+my $service = "http://sc-monitor.internet2.edu:2008/perfSONAR_PS/services/snmpMA";
+
+my $ma = new perfSONAR_PS::Client::MA( { instance => $service } );
+
+my $subject = "<netutil:subject xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\" id=\"s-in-netutil-1\">\n";
+$subject .= "  <nmwgt:interface xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+$subject .= "    <nmwgt:ifName>so-0/1/0.110</nmwgt:ifName>\n";
+$subject .= "    <nmwgt:hostName>core-rtr-2.sc08.org</nmwgt:hostName>\n";
+$subject .= "    <nmwgt:direction>in</nmwgt:direction>\n";
+$subject .= "  </nmwgt:interface>\n";
+$subject .= "</netutil:subject>\n";
+
+my @eventTypes = ("http://ggf.org/ns/nmwg/characteristic/utilization/2.0");
+
+my $end = "1227220000";
+my $result = $ma->setupDataRequest( { 
+    consolidationFunction => "AVERAGE", 
+    resolution => 1800,
+    start => ($end-18000), 
+    end => $end, 
+    subject => $subject, 
+    eventTypes => \@eventTypes } 
+);
+print "<h2>service \"".$service."\"</h2><br>";
+if ( exists $result->{"data"} ) {
+    my $parser = XML::LibXML->new();
+    my $doc = $parser->parse_string( $result->{"data"}->[0] );
+    my $datum = find( $doc->getDocumentElement, "./*[local-name()='datum']", 0 );
+
+    print "<table border=1>";
+    print "<tr><th>time</th><th>value</th></tr>";
+    foreach my $dt ( $datum->get_nodelist ) {
+        print "<tr><td>" . $dt->getAttribute("timeValue") . "</td><td>" . eval( $dt->getAttribute("value") ) . "</td></tr>";
+    }
+    print "</table>";
+}
+else {
+    die "fetch error\n";
+}
+}}}
+
+Using the same basic template, we can achieve a similar result from a perfSONAR-BUOY service:
+
+{{{
+#!/usr/bin/perl
+
+use CGI;
+use CGI::Carp qw(fatalsToBrowser);
+use XML::LibXML;
+
+use lib "/home/jason/perfSONAR-PS/lib";
+
+use perfSONAR_PS::Client::MA;
+use perfSONAR_PS::Common qw( extract find );
+
+my $cgi = CGI->new();
+print $cgi->header();
+
+my $service = "http://ps1.jp.apan.net:8085/perfSONAR_PS/services/perfSONARBUOY";
+
+my $ma = new perfSONAR_PS::Client::MA( { instance => $service } );
+
+my $subject = "<iperf:subject xmlns:iperf= \"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"s-in-iperf-1\">\n";
+$subject .= "  <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+$subject .= "    <nmwgt:src type=\"ipv4\" value=\"203.181.248.70\" />\n";
+$subject .= "    <nmwgt:dst type=\"ipv4\" value=\"203.181.249.197\" />\n";
+$subject .= "  </nmwgt:endPointPair>\n";
+$subject .= "</iperf:subject>\n";
+
+my %parameters = (
+    interval => 2,
+    timeDuration => 60,
+    windowSize => "15m"
+);
+   
+my @eventTypes = ("http://ggf.org/ns/nmwg/tools/iperf/2.0");
+
+my ( $sec, $frac ) = Time::HiRes::gettimeofday;
+
+my $result = $ma->setupDataRequest( { 
+    start => ($sec-86400), 
+    end => $sec, 
+    subject => $subject, 
+    parameters => \%parameters,
+    eventTypes => \@eventTypes } 
+);
+
+print "<h2>service \"".$service."\"</h2><br>";
+if ( exists $result->{"data"} ) {
+    my $parser = XML::LibXML->new();
+    my $doc = $parser->parse_string( $result->{"data"}->[0] );
+    my $datum = find( $doc->getDocumentElement, "./*[local-name()='datum']", 0 );
+
+    print "<table border=1>";
+    print "<tr><th>time</th><th>value</th><th>jitter</th></tr>";
+    foreach my $dt ( $datum->get_nodelist ) {
+        print "<tr><td>" . $dt->getAttribute("timeValue") . "</td><td>" . eval( $dt->getAttribute("throughput") ) . "</td><td>" . $dt->getAttribute("jitter") . "</td></tr>";
+    }
+    print "</table>";
+}
+else {
+    die "fetch error\n";
+}
+}}}
 
 == Last Updated ==
 
