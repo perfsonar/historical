@@ -470,6 +470,15 @@ sub getMachineTime {
     return $readable_time;
 }
 
+sub getMachineTime_TS {
+    my ($self) = @_;
+
+    my $diff = time - $self->{LOCAL_MACHINE_TIME};
+    my $machine_ts = $self->{MACHINE_TIME} + $diff;
+
+    return $machine_ts;
+}
+
 sub convertPMDateTime {
 	my ($self, $date, $time) = @_;
 

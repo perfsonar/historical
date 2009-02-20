@@ -9,7 +9,7 @@ use Data::Dumper;
 use perfSONAR_PS::Utils::ParameterValidation;
 
 use base 'perfSONAR_PS::Utils::TL1::Base';
-use fields 'ETHSBYAID', 'OCNSBYAID', 'OCNSBYNAME', 'READ_ETH', 'READ_OCN', 'READ_PM', 'PMS', 'READ_ALARMS', 'ALARMS';
+use fields 'PMS', 'PM_CACHE_TIME', 'OMS', 'OM_CACHE_TIME', 'ALARMS', 'ALARMS_CACHE_TIME', 'CROSSCONNECTS', 'CROSSCONNECTS_CACHE_TIME', 'ETHERNET_PORTS', 'ETHERNET_PORTS_CACHE_TIME', 'OPTICAL_PORTS', 'OPTICAL_PORTS_CACHE_TIME', 'WAN_PORTS', 'WAN_PORTS_CACHE_TIME';
 
 sub initialize {
     my ($self, @params) = @_;
@@ -28,97 +28,308 @@ sub initialize {
     $parameters->{"prompt"} = "<" if (not $parameters->{"prompt"});
     $parameters->{"port"} = "23" if (not $parameters->{"port"});
 
+    $self->{OPTICAL_PORTS_CACHE_TIME} = 0;
+    $self->{ETHERNET_PORTS_CACHE_TIME} = 0;
+    $self->{WAN_PORTS_CACHE_TIME} = 0;
+    $self->{PM_CACHE_TIME} = 0;
+    $self->{OM_CACHE_TIME} = 0;
+    $self->{CROSSCONNECTS_CACHE_TIME} = 0;
+
     return $self->SUPER::initialize($parameters);
 }
 
-sub getETH {
-    my ($self, $aid) = @_;
-    my $do_reload_stats = 0;
+sub getOCN {
+    my ($self, $facility_name) = @_;
 
-    if (not $self->{READ_ETH}) {
-        $do_reload_stats = 1;
-        $self->{READ_ETH} = 1;
+    if ($self->{OPTICAL_PORTS_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my %ocns = ();
+
+        foreach my $i (3, 12, 48, 192) {
+            my ($successStatus, $results) = $self->send_cmd("RTRV-OC".$i."::ALL:".$self->{CTAG}.";");
+            if ($successStatus != 1) {
+                return (-1, $results);
+            }
+
+            $self->{LOGGER}->debug("Got OC$i line\n");
+
+            foreach my $line (@$results) {
+                $self->{LOGGER}->debug($line."\n");
+
+#   "OC192-1-5-1::TMGREF=Y,DCC=N,,SDTH=6,,,,,ALS=DISABLED,DUSOVERRIDE=DISABLED,EBERTH=3,PORTMODE=SONET,UNEQMODE=STS1,,:IS,DISCD"
+#   "OC192-1-6-1::TMGREF=Y,DCC=N,,SDTH=6,,,,,ALS=DISABLED,DUSOVERRIDE=DISABLED,EBERTH=3,PORTMODE=SONET,UNEQMODE=STS1,,:IS,"
+#   "OC192-1-9-1::TMGREF=Y,DCC=N,,SDTH=6,,,,,ALS=DISABLED,DUSOVERRIDE=DISABLED,EBERTH=3,PORTMODE=SONET,UNEQMODE=STS1,,:IS,DISCD"
+
+                if ($line =~ /"([^:]*:[^:]*:[^:]*:[^"]*)"/) {
+                    $line = $1;
+
+                    my %ocn = ();
+
+                    my @fields = split(':', $line);
+                    my $aid = $fields[0];
+                    my ($pst, $sst) = split(',', $fields[3]);
+
+                    $ocn{facility} = $aid;
+                    $ocn{facility_type} = "oc".$i;
+
+                    foreach my $pair (split(',', $fields[2])) {
+                        next if (not $pair);
+
+                        my ($key, $value) = split('=', $pair);
+
+                        $ocn{lc($key)} = $value;
+                    }
+
+                    $ocn{pst} = $pst;
+                    $ocn{sst} = $sst;
+
+                    $ocns{$aid} = \%ocn;
+                }
+            }
+        }
+
+        $self->{OPTICAL_PORTS} = \%ocns;
+        $self->{OPTICAL_PORTS_CACHE_TIME} = time;
     }
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-        $self->readStats();
+    if (not defined $facility_name) {
+        return (0, $self->{OPTICAL_PORTS});
     }
 
-    if (not defined $aid) {
-        return $self->{ETHSBYAID};
-    }
-
-    return $self->{ETHSBYAID}->{$aid};
+    return (0, $self->{OPTICAL_PORTS}->{$facility_name});
 }
 
-sub getOCN {
-    my ($self, $aid) = @_;
-    my $do_reload_stats = 0;
+sub getETH {
+    my ($self, $facility_name) = @_;
 
-    if (not $self->{READ_OCN}) {
-        $do_reload_stats = 1;
-        $self->{READ_OCN} = 1;
+    if ($self->{ETHERNET_PORTS_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my %eths = ();
+
+        foreach my $type ("ETH", "ETH10G") {
+            my ($successStatus, $results) = $self->send_cmd("RTRV-".$type."::".$type."-1-ALL:".$self->{CTAG}.";");
+            if ($successStatus != 1) {
+                return (-1, $results);
+            }
+
+#   "ETH-1-4-3::AN=ENABLE,ANSTATUS=INPROGRESS,ANETHDPX=UNKNOWN,ANSPEED=UNKNOWN,ANPAUSETX=UNKNOWN,ANPAUSERX=UNKNOWN,ADVETHDPX=UNKNOWN,ADVSPEED=UNKNOWN,ADVFLOWCTRL=UNKNOWN,ETHDPX=FULL,SPEED=1000,FLOWCTRL=ASYM,PAUSETX=ENABLE,PAUSERX=DISABLE,PAUSERXOVERRIDE=ENABLE,MTU=9600,TXCON=ENABLE,PASSCTRL=DISABLE,PAUSETXOVERRIDE=DISABLE,RXIDLE=0,CFPRF=CFPRF-1-4,PHYSADDR=00140D034877:OOS-MA,DISCD"
+#   "ETH-1-4-4::AN=ENABLE,ANSTATUS=INPROGRESS,ANETHDPX=UNKNOWN,ANSPEED=UNKNOWN,ANPAUSETX=UNKNOWN,ANPAUSERX=UNKNOWN,ADVETHDPX=UNKNOWN,ADVSPEED=UNKNOWN,ADVFLOWCTRL=UNKNOWN,ETHDPX=FULL,SPEED=1000,FLOWCTRL=ASYM,PAUSETX=ENABLE,PAUSERX=DISABLE,PAUSERXOVERRIDE=ENABLE,MTU=9600,TXCON=ENABLE,PASSCTRL=DISABLE,PAUSETXOVERRIDE=DISABLE,RXIDLE=0,CFPRF=CFPRF-1-4,PHYSADDR=00140D034878:OOS-MA,DISCD"
+
+            foreach my $line (@$results) {
+                $self->{LOGGER}->debug($line);
+                if ($line =~ /"([^:]*:[^:]*:[^:]*:[^"]*)"/) {
+                    $line = $1;
+
+                my %eth = ();
+
+                my @fields = split(':', $line);
+                my $aid = $fields[0];
+                my ($pst, $sst) = split(',', $fields[3]);
+
+                $eth{facility} = $aid;
+                $eth{facility_type} = "ethernet";
+
+                foreach my $pair (split(',', $fields[2])) {
+                    next if (not $pair);
+
+                    my ($key, $value) = split('=', $pair);
+
+                    $eth{lc($key)} = $value;
+                }
+
+                $eth{pst} = $pst;
+                $eth{sst} = $sst;
+
+                $eths{$aid} = \%eth;
+            }
+            }
+        }
+
+        $self->{ETHERNET_PORTS} = \%eths;
+        $self->{ETHERNET_PORTS_CACHE_TIME} = time;
     }
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-        $self->readStats();
+    if (not defined $facility_name) {
+        return (0, $self->{ETHERNET_PORTS});
     }
 
-    if (not defined $aid) {
-        return $self->{OCNSBYAID};
+    return (0, $self->{ETHERNET_PORTS}->{$facility_name});
+}
+
+sub getWAN {
+    my ($self, $facility_name) = @_;
+
+    if ($self->{OPTICAL_PORTS_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my %wans = ();
+
+        my ($successStatus, $results) = $self->send_cmd("RTRV-WAN::WAN-1-ALL:".$self->{CTAG}.";");
+        if ($successStatus != 1) {
+            return (-1, $results);
+        }
+
+        $self->{LOGGER}->debug("Got OCN Lines\n");
+
+        foreach my $line (@$results) {
+            $self->{LOGGER}->debug($line."\n");
+#   "WAN-1-10-1::MAPPING=GFP-F,FCS=0,CONDTYPE=GFPCMF,GFPRFI=ENABLE,PROVRXUNITS=0,GFPRTDELAY=ENABLE,RATE=NONE,LCAS=DISABLE,VCAT=ENABLE,PROVUNITS=0,ACTUALUNITS=0,LANFCS=ENABLE,RTDELAY=UNKNOWN,MAXVCDEL=0,CURRVCDEL=0,SCRAMBLE=ENABLE,ACTUALRXUNITS=0:OOS-MA,DISCD"
+#   "WAN-1-12-1::MAPPING=GFP-F,FCS=32,CONDTYPE=GFPCMF,GFPRFI=ENABLE,PROVRXUNITS=0,GFPRTDELAY=ENABLE,RATE=NONE,LCAS=DISABLE,VCAT=DISABLE,PROVUNITS=0,ACTUALUNITS=0,LANFCS=ENABLE,RTDELAY=UNKNOWN,MAXVCDEL=0,CURRVCDEL=0,SCRAMBLE=ENABLE,ACTUALRXUNITS=0:OOS-MA,DISCD"
+            if ($line =~ /"([^:]*:[^:]*:[^:]*:[^"]*)"/) {
+                $line = $1;
+                my %wan = ();
+
+                my @fields = split(':', $line);
+                my $aid = $fields[0];
+                my ($pst, $sst) = split(',', $fields[3]);
+
+                $wan{facility} = $aid;
+                $wan{facility_type} = "wan";
+
+                foreach my $pair (split(',', $fields[2])) {
+                    next if (not $pair);
+
+                    my ($key, $value) = split('=', $pair);
+
+                    $wan{lc($key)} = $value;
+                }
+
+                $wan{pst} = $pst;
+                $wan{sst} = $sst;
+
+                $wans{$aid} = \%wan;
+            }
+        }
+
+        $self->{WAN_PORTS} = \%wans;
+        $self->{WAN_PORTS_CACHE_TIME} = time;
     }
 
-    return $self->{OCNSBYAID}->{$aid};
+    if (not defined $facility_name) {
+        return (0, $self->{WAN_PORTS});
+    }
+
+    return (0, $self->{WAN_PORTS}->{$facility_name});
 }
 
 sub getCrossconnect {
-    return;
-#    my ($self, $name) = @_;
-#    my $do_reload_stats = 0;
-#
-#    if (not $self->{READ_CRS}) {
-#        $do_reload_stats = 1;
-#        $self->{READ_CRS} = 1;
-#    }
-#
-#    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-#        $self->readStats();
-#    }
-#
-#    if (not defined $name) {
-#        return $self->{CRSSBYNAME};
-#    }
-#
-#    return $self->{CRSSBYNAME}->{$name};
+    my ($self, $facility_name) = @_;
+
+    if ($self->{CROSSCONNECTS_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my %crss = ();
+
+        my ($successStatus, $results) = $self->send_cmd("RTRV-CRS-ALL:::".$self->{CTAG}.";");
+        if ($successStatus != 1) {
+            return (-1, $results);
+        }
+
+        $self->{LOGGER}->debug("Got CRS Lines\n");
+
+#   "STS3C-1-6-1-37,STS3C-1-1-4-16:2WAY::STS3C:"
+#   "STS24C-1-6-1-169,STS24C-1-1-1-1:2WAY::STS24C:"
+        foreach my $line (@$results) {
+            $self->{LOGGER}->debug($line."\n");
+
+            if ($line =~ /"([^,]*),([^:]*):([^:]*):([^:]*):([^:]*):([^"]*)"/) {
+                my %crs = ();
+
+                $crs{fromendpointname} = $1;
+                $crs{fromendpointtype} = lc($5);
+                $crs{toendpointname} = $2;
+                $crs{toendpointtype} = lc($5);
+                $crs{direction} = $3;
+                $crs{rate} = lc($5);
+
+                if ($4 and $4 =~ /CKTID=([^,])*/) {
+                    $crs{cktid} = $1;
+                }
+
+                $crss{$1."-".$2} = \%crs;
+            }
+        }
+
+        $self->{CROSSCONNECTS} = \%crss;
+        $self->{CROSSCONNECTS_CACHE_TIME} = time;
+    }
+
+    return (0, $self->{CROSSCONNECTS});
 }
 
 sub getAlarms {
-    my ($self) = shift;
-    my %args = @_;
+    my ($self, $alarm_to_match) = @_;
 
-    my $do_reload_stats = 0;
+    if ($self->{ALARMS_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my @alarms = ();
 
-    if (not $self->{READ_ALARMS}) {
-        $do_reload_stats = 1;
-        $self->{READ_ALARMS} = 1;
-    }
+        $self->{LOGGER}->debug("looking up alarms");
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-        $self->readStats();
-    }
+        my ($successStatus, $results) = $self->send_cmd("RTRV-ALM-ALL:::".$self->{CTAG}."::;");
 
-    if (not $self->{ALARMS}) {
-        return undef;
+        $self->{LOGGER}->debug("Results: ".Dumper($results));
+
+        if ($successStatus != 1) {
+            $self->{ALARMS} = undef;
+            return (-1, $results);
+        }
+
+#   "ETH10G-1-10-4,ETH10G:CR,LOS,SA,01-07,07-34-55,NEND,RCV:\"Loss Of Signal\",NONE:0100000295-0008-0673,:YEAR=2006,MODE=NONE"
+        foreach my $line (@{ $results }) {
+        if ($line =~ /"([^,]*),([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^:]*):([^,]*),([^:]*):([^,]*),([^:]*):YEAR=([^,]*),MODE=([^"]*)"/) {
+            my $facility = $1;
+            my $facility_type = $2;
+            my $severity = $3;
+            my $alarmType = $4;
+            my $serviceAffecting = $5;
+            my $date = $6;
+            my $time = $7;
+            my $location = $8;
+            my $direction = $9;
+            my $description = $10;
+            my $something1 = $11;
+            my $alarmId = $12;
+            my $something2 = $13;
+            my $year = $14;
+            my $mode = $15;
+
+            $self->{LOGGER}->debug("DESCRIPTION: '$description'\n");
+            $description =~ s/\\"//g;
+            $self->{LOGGER}->debug("DESCRIPTION: '$description'\n");
+
+            my $timestamp = $self->convertTimeStringToTimestamp($self->convertPMDateTime($date, $time));
+
+            my %alarm = (
+                facility => $facility,
+                facility_type => $facility_type,
+                severity => $severity,
+                alarm_type => $alarmType,
+                alarm_time => $timestamp,
+                alarm_time_local => $self->convertMachineTSToLocalTS($timestamp),
+                description => $description,
+                service_affecting => $serviceAffecting,
+                measurement_time => time,
+                date => $date,
+                time => $time,
+                location => $location,
+                direction => $direction,
+                alarm_id => $alarmId,
+                year => $year,
+                mode => $mode,
+            );
+
+            push @alarms, \%alarm;
+        }
+        }
+
+        $self->{ALARMS} = \@alarms;
+        $self->{ALARMS_CACHE_TIME} = time;
     }
 
     my @ret_alarms = ();
 
     foreach my $alarm (@{ $self->{ALARMS} }) {
         my $matches = 1;
-        foreach my $key (keys %args) {
-            if ($alarm->{$key}) {
-                if ($alarm->{$key} ne $args{$key}) {
-                    $matches = 1;
+        if ($alarm_to_match) {
+            foreach my $key (keys %$alarm_to_match) {
+                if ($alarm->{$key}) {
+                    if ($alarm->{$key} ne $alarm_to_match->{$key}) {
+                        $matches = 1;
+                    }
                 }
             }
         }
@@ -128,10 +339,10 @@ sub getAlarms {
         }
     }
 
-    return \@ret_alarms;
+    return (0, \@ret_alarms);
 }
 
-sub getEvent {
+sub waitEvent {
     my ($self, @args) = @_;
     my $args = validateParams(@args, 
             {
@@ -269,15 +480,40 @@ sub getETH_PM {
 
     my %facility_types = ( "eth" => 1, "eth10g" => 1 );
 
-    return $self->__get_PM($aid, $pm_type, \%facility_types);
-}
+    if ($self->{OM_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my ($status, $res) = $self->readETH_OMs();
+        if ($status != 0) {
+            return ($status, $res);
+        }
 
-sub getSTS_PM {
-    my ($self, $aid, $pm_type) = @_;
+        $self->{OMS} = $res;
+    }
 
-    my %facility_types = ( "sts1" => 1, "sts3c" => 1, "sts12c" => 1, "sts24c" => 1, "sts48c" => 1, "sts192c" );
+    if ($aid and $pm_type) {
+        $self->{LOGGER}->debug("Returning $aid/$pm_type");
+        return (0, $self->{OMS}->{$aid}->{$pm_type});
+    }
 
-    return $self->__get_PM($aid, $pm_type, \%facility_types);
+    my %pm = ();
+    foreach my $curr_aid (keys %{ $self->{OMS} }) {
+        next unless (not $aid or $aid eq $curr_aid);
+
+        foreach my $curr_type (keys %{ $self->{OMS}->{$curr_aid} }) {
+            next unless (not $pm_type or $pm_type eq $curr_type);
+
+            $self->{LOGGER}->debug("Found $curr_type for $aid");
+
+            my $pm = $self->{OMS}->{$curr_aid}->{$curr_type};
+
+            $pm{$curr_aid}->{$curr_type} = $pm;
+        }
+    }
+
+    if ($aid) {
+        return (0, $pm{$aid});
+    } else {
+        return (0, \%pm);
+    }
 }
 
 sub getOCN_PM {
@@ -291,40 +527,28 @@ sub getOCN_PM {
 sub __get_PM {
     my ($self, $aid, $pm_type, $valid_facility_types) = @_;
 
-    my $do_reload_stats = 0;
+    if ($self->{PM_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my ($status, $res) = $self->readPMs();
+        if ($status != 0) {
+            return ($status, $res);
+        }
 
-    my $index = 0;
-    if (not $index) {
-        $index = 0;
-    }
-
-    if (not $self->{READ_PM}->{$index}) {
-        $do_reload_stats = 1;
-        $self->{READ_PM}->{$index} = 1;
-    }
-
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-        $self->readStats();
+        $self->{PMS} = $res;
     }
 
     if ($aid and $pm_type) {
         $self->{LOGGER}->debug("Returning $aid/$pm_type");
-        return $self->{PMS}->{"index$index"}->{$aid}->{$pm_type};
+        return (0, $self->{PMS}->{$aid}->{$pm_type});
     }
 
     my %pm = ();
-    foreach my $curr_aid (keys %{ $self->{PMS}->{"index$index"} }) {
-        $self->{LOGGER}->debug("$curr_aid vs $aid");
+    foreach my $curr_aid (keys %{ $self->{PMS} }) {
         next unless (not $aid or $aid eq $curr_aid);
 
-        $self->{LOGGER}->debug("Found something for $aid");
-
-        foreach my $curr_type (keys %{ $self->{PMS}->{"index$index"}->{$curr_aid} }) {
+        foreach my $curr_type (keys %{ $self->{PMS}->{$curr_aid} }) {
             next unless (not $pm_type or $pm_type eq $curr_type);
 
-            $self->{LOGGER}->debug("Found $curr_type for $aid");
-
-            my $pm = $self->{PMS}->{"index$index"}->{$curr_aid}->{$curr_type};
+            my $pm = $self->{PMS}->{$curr_aid}->{$curr_type};
 
             next unless ($valid_facility_types->{lc($pm->{facility_type})});
 
@@ -333,142 +557,27 @@ sub __get_PM {
     }
 
     if ($aid) {
-        return $pm{$aid};
+        return (0, $pm{$aid});
     } else {
-        return \%pm;
+        return (0, \%pm);
     }
-}
-
-sub readStats {
-    my ($self) = @_;
-
-#    if ($self->{READ_CRS}) {
-#        $self->readCRSs();
-#    }
-
-    if ($self->{READ_OCN}) {
-        $self->readOCNs();
-    }
-
-    if ($self->{READ_ETH}) {
-        $self->readETHs();
-    }
-
-    if ($self->{READ_PM}) {
-        foreach my $index (keys %{ $self->{READ_PM} }) {
-            $self->readPMs($index);
-        }
-    }
-
-    if ($self->{READ_ALARMS}) {
-        $self->readAlarms();
-    }
-
-    $self->{CACHE_TIME} = time;
-
-    return;
-}
-
-sub readETHs {
-    my ($self) = @_;
-
-    my %eths = ();
-
-# "ETH-1-1-4::AN=ENABLE,ANSTATUS=COMPLETED,ANETHDPX=FULL,ANSPEED=1000,ANPAUSETX=DISABLE,ANPAUSERX=DISABLE,ADVETHDPX=FULL,ADVSPEED=1000,ADVFLOWCTRL=ASYM,ETHDPX=FULL,SPEED=1000,FLOWCTRL=ASYM,PAUSETX=ENABLE,PAUSERX=DISABLE,PAUSERXOVERRIDE=ENABLE,MTU=9600,TXCON=ENABLE,PASSCTRL=DISABLE,PAUSETXOVERRIDE=DISABLE,RXIDLE=0,CFPRF=CFPRF-1-4,PHYSADDR=001158FF5354:IS"
-
-    my ($successStatus, $results) = $self->send_cmd("RTRV-ETH::ETH-1-ALL:".$self->{CTAG}.";");
-
-    $self->{LOGGER}->debug("Got ETH line\n");    
-
-    foreach my $line (@$results) {
-        $self->{LOGGER}->debug($line."\n");
-
-        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
-            $self->setMachineTime("$1-$2-$3 $4:$5:$6");
-            next;
-        }
-
-        if ($line =~ /"(ETH[^:]*)/) {
-            my ($aid, $name, $pst, $sst);
-
-            $aid = $1;
-
-            if ($line =~ /.*:([A-Za-z0-9-_&]*),([A-Za-z0-9-_&]*)"/) {
-                $pst = $1;
-                $sst = $2;
-            } elsif ($line =~ /.*:([A-Za-z0-9-_&]*)"/) {
-                $pst = $1;
-            }
-
-            my %status = ( sst => $sst, pst => $pst );
-
-            $eths{$aid} = \%status;
-        }
-    }
-
-    $self->{ETHSBYAID} = \%eths;
-
-    return;
-}
-
-sub readOCNs {
-    my ($self) = @_;
-
-    my %ocns = ();
-    my %ocns_name = ();
-
-    foreach my $i (3, 12, 48, 192) {
-        my ($successStatus, $results) = $self->send_cmd("RTRV-OC".$i."::OC".$i."-1-ALL:".$self->{CTAG}.";");
-
-        $self->{LOGGER}->debug("Got OC$i line\n");    
-
-        foreach my $line (@$results) {
-            $self->{LOGGER}->debug($line."\n");
-
-            if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
-                $self->setMachineTime("$1-$2-$3 $4:$5:$6");
-                next;
-            }
-
-            if ($line =~ /"(OC$i[^:]*)/) {
-                my ($aid, $pst, $sst);
-
-                $aid = $1;
-
-                if ($line =~ /.*:([A-Za-z0-9-_&]*),([A-Za-z0-9-_&]*)"/) {
-                    $pst = $1;
-                    $sst = $2;
-                }
-
-                my %status = ( sst => $sst, pst => $pst );
-
-                $ocns{$aid} = \%status;
-            }
-        }
-    }
-
-    $self->{OCNSBYAID} = \%ocns;
-
-    return;
 }
 
 sub readPMs {
-    my ($self, $index) = @_;
+    my ($self) = @_;
     my %pms = ();
 
-    my ($successStatus, $results) = $self->send_cmd("RTRV-PM-ALL::ALL:".$self->{CTAG}."::,,,,,,,".$index.":;");
+    my ($successStatus, $results);
 
-    $self->{LOGGER}->debug("Got PM line\n");    
+    ($successStatus, $results) = $self->send_cmd("RTRV-PM-ALL::ALL:".$self->{CTAG}.":::;");
+    if ($successStatus != 1) {
+        return (-1, $results);
+    }
 
     foreach my $line (@$results) {
         $self->{LOGGER}->debug($line."\n");
 
 #       "OC192-1-5-1,OC192:OPR-OCH,-3.06,PRTL,NEND,RCV,15-MIN,06-16,15-15,0"
-        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
-            $self->setMachineTime("$1-$2-$3 $4:$5:$6");
-            next;
-        }
-
         if ($line =~ /"([^,]*),([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^",]*),?\d?"/) {
             my $facility = $1;
             my $facility_type = $2;
@@ -490,8 +599,9 @@ sub readPMs {
                 value => $pm_value,
                 time_period => $time_period,
                 time_period_start => $monitoredPeriodStart,
+                measurement_type => "bucket",
                 measurement_time => time,
-                machine_time => $self->getMachineTime(),
+                machine_time => $self->getMachineTime_TS(),
                 date => $monitoring_date,
                 time => $monitoring_time,
                 validity => $validity,
@@ -499,90 +609,53 @@ sub readPMs {
                 direction => $direction,
             );
 
-            $pms{"index$index"}->{$facility}->{$pm_type} = \%pm;
+            $pms{$facility}->{$pm_type} = \%pm;
         }
     }
 
-    $self->{PMS} = \%pms;
-
-    $self->{LOGGER}->debug(Dumper(\%pms));
+    return (0, \%pms);
 }
 
-sub readAlarms {
+sub readETH_OMs {
     my ($self) = @_;
+    my %pms = ();
 
-    my @alarms = ();
-
-    my ($successStatus, $results) = $self->send_cmd("RTRV-ALM-ALL:::".$self->{CTAG}."::;");
-
-    if ($successStatus != 1) {
-        $self->{ALARMS} = undef;
-        return;
-    }
-
-    $self->{LOGGER}->debug("Got ALM line\n");    
-
-    foreach my $line (@$results) {
-        $self->{LOGGER}->debug("LINE: ".$line."\n");
-
-#       "OC192-1-5-1,OC192:OPR-OCH,-3.06,PRTL,NEND,RCV,15-MIN,06-16,15-15,0"
-        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
-            $self->setMachineTime("$1-$2-$3 $4:$5:$6");
-            next;
+    foreach my $type ("ETH", "ETH10G") {
+        my ($successStatus, $results) = $self->send_cmd("RTRV-OM-".$type."::".$type."-1-ALL:".$self->{CTAG}.":::;");
+        if ($successStatus != 1) {
+            return (-1, $results);
         }
 
-#   "ETH10G-1-10-4,ETH10G:CR,LOS,SA,01-07,07-34-55,NEND,RCV:\"Loss Of Signal\",NONE:0100000295-0008-0673,:YEAR=2006,MODE=NONE"
+        foreach my $line (@$results) {
+            $self->{LOGGER}->debug($line."\n");
 
-        if ($line =~ /"([^,]*),([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^:]*):([^,]*),([^:]*):([^,]*),([^:]*):YEAR=([^,]*),MODE=([^"]*)"/) {
-            $self->{LOGGER}->debug("Found a good line\n");
+#   "ETH10G-1-10-1::INFRAMES=104322825591,INFRAMESERR=0,INOCTETS=107554715270446,INDFR=88963,INFRAMESDISCDS=12109,INPAUSEFR=0,INCFR=0,FRTOOSHORTS=0,FCSERR=0,FRTOOLONGS=76854,FRAG=0,JAB=0,SYMBOLERR=0,OUTFRAMES=108023304001,OUTFRAMESERR=163,OUTOCTETS=107341268770788,OUTFRAMESDISCDS=0,OUTPAUSEFR=536,OUTDFR=0,INTERNALMACRXERR=0,INTERNALMACTXERR=0"
 
-            my $facility = $1;
-            my $facility_type = $2;
-            my $severity = $3;
-            my $alarmType = $4;
-            my $serviceAffecting = $5;
-            my $date = $6;
-            my $time = $7;
-            my $location = $8;
-            my $direction = $9;
-            my $description = $10;
-            my $something1 = $11;
-            my $alarmId = $12;
-            my $something2 = $13;
-            my $year = $14;
-            my $mode = $15;
+            if ($line =~ /"([^:]*):([^:]*):([^"]*)"/) {
+                my $facility = $1;
+                my $facility_type = "ethernet";
+                foreach my $pair (split(',', $3)) {
+                    my ($type, $value) = split('=', $pair);
 
-            $self->{LOGGER}->debug("DESCRIPTION: '$description'\n");
-            $description =~ s/\\"//g;
-            $self->{LOGGER}->debug("DESCRIPTION: '$description'\n");
+                    my %pm = (
+                            facility => $facility,
+                            facility_type => $facility_type,
+                            type => $type,
+                            value => $value,
+                            measurement_type => "counter",
+                            measurement_time => time,
+                            machine_time => $self->getMachineTime_TS(),
+                        );
 
-            my $timestamp = $self->convertTimeStringToTimestamp($self->convertPMDateTime($date, $time));
-
-            my %alarm = (
-                facility => $facility,
-                facility_type => $facility_type,
-                severity => $severity,
-                alarm_type => $alarmType,
-                alarm_time => $timestamp,
-                alarm_time_local => $self->convertMachineTSToLocalTS($timestamp),
-                description => $description,
-                service_affecting => $serviceAffecting,
-                measurement_time => time,
-                date => $date,
-                time => $time,
-                location => $location,
-                direction => $direction,
-                alarm_id => $alarmId,
-                year => $year,
-                mode => $mode,
-            );
-
-            push @alarms, \%alarm;
+                    $pms{$facility}->{$type} = \%pm;
+                }
+            }
         }
     }
 
-    $self->{ALARMS} = \@alarms;
+    return (0, \%pms);
 }
+
 
 # Possible monitoring types:
 # CV-S - Coding Violations
@@ -656,39 +729,6 @@ sub readAlarms {
 #   "STS3C-1-6-1-82,STS3C:UAS-P,311,PRTL,NEND,RCV,15-MIN,06-16,15-15,0"
 #   "WAN-1-2-2,WAN:UAS-W,314,PRTL,NEND,RCV,15-MIN,06-16,15-15,0"
 #   "ETH-1-2-2,ETH:UAS-E,314,PRTL,NEND,RCV,15-MIN,06-16,15-15,0"
-
-#sub readCRSs {
-#    my ($self) = @_;
-#
-#    my %crss = ();
-#
-#    my ($successStatus, $results) = $self->send_cmd("RTRV-CRS-ALL:::".$self->{CTAG}.";");
-#
-#    foreach my $line (@$results) {
-#        if ($line =~ /LABEL=\\"([^\\]*)\\"/) {
-#            my ($pst, $sst, $name);
-#            $name = $1;
-#
-#            if ($line =~ /AST=([^,]*)/) {
-#                $pst = $1;
-#            }
-#            if ($line =~ /\".*:.*:.*:(.*)"/) {
-#                $sst = $1;
-#                if ($sst eq "") {
-#                    $sst = "ACTIVE";
-#                }
-#            }
-#
-#            my %status = ( pst => $pst, sst => $sst );
-#
-#            $crss{$name} = \%status;
-#        }
-#    }
-#
-#    $self->{CRSSBYNAME} = \%crss;
-#
-#    return;
-#}
 
 sub login {
     my ($self, @params) = @_;

@@ -49,7 +49,7 @@ sub getVCG {
         my %vcgs = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-VCG::ALL:".$self->{CTAG}.";");
-        if ($successStatus == -1) {
+        if ($successStatus != 1) {
             return;
         }
 
@@ -83,10 +83,10 @@ sub getVCG {
     }
 
     if (not defined $facility_name) {
-        return $self->{VCGSBYNAME};
+        return (0, $self->{VCGSBYNAME});
     }
 
-    return $self->{VCGSBYNAME}->{$facility_name};
+    return (0, $self->{VCGSBYNAME}->{$facility_name});
 }
 
 sub getSNC {
@@ -96,7 +96,7 @@ sub getSNC {
         my %sncs = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-SNC-STSPC::ALL:".$self->{CTAG}.";");
-        if ($successStatus == -1) {
+        if ($successStatus != 1) {
             return;
         }
 
@@ -130,10 +130,10 @@ sub getSNC {
     }
 
     if (not defined $facility_name) {
-        return $self->{SNCSBYNAME};
+        return (0, $self->{SNCSBYNAME});
     }
 
-    return $self->{SNCSBYNAME}->{$facility_name};
+    return (0, $self->{SNCSBYNAME}->{$facility_name});
 }
 
 sub getSTS {
@@ -143,7 +143,7 @@ sub getSTS {
         my %stss = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-STSPC:::".$self->{CTAG}.";");
-        if ($successStatus == -1) {
+        if ($successStatus != 1) {
             return;
         }
 
@@ -177,10 +177,10 @@ sub getSTS {
     }
 
     if (not defined $facility_name) {
-        return $self->{STSSBYNAME};
+        return (0, $self->{STSSBYNAME});
     }
 
-    return $self->{STSSBYNAME}->{$facility_name};
+    return (0, $self->{STSSBYNAME}->{$facility_name});
 }
 
 sub getETH {
@@ -191,7 +191,7 @@ sub getETH {
     }
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-GIGE::$facility_name:".$self->{CTAG}.";");
-    if ($successStatus == -1) {
+    if ($successStatus != 1) {
         return;
     }
 
@@ -221,7 +221,7 @@ sub getETH {
         }
     }
 
-    return $eths{$facility_name};
+    return (0, $eths{$facility_name});
 }
 
 sub getOCN {
@@ -231,8 +231,8 @@ sub getOCN {
         my %ocns = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-OCN::ALL:".$self->{CTAG}.";");
-        if ($successStatus == -1) {
-            return;
+        if ($successStatus != 1) {
+            return (-1, $results);
         }
 
         $self->{LOGGER}->debug("Got OCN Lines\n");
@@ -265,10 +265,10 @@ sub getOCN {
     }
 
     if (not defined $facility_name) {
-        return $self->{OCNSBYAID};
+        return (0, $self->{OCNSBYAID});
     }
 
-    return $self->{OCNSBYAID}->{$facility_name};
+    return (-1, $self->{OCNSBYAID}->{$facility_name});
 }
 
 sub getEFLOW {
@@ -278,8 +278,8 @@ sub getEFLOW {
         my %eflows = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-EFLOW::ALL:".$self->{CTAG}.";");
-        if ($successStatus == -1) {
-            return;
+        if ($successStatus != 1) {
+            return (-1, $results);
         }
 
         $self->{LOGGER}->debug("Got EFLOW Lines\n");
@@ -311,10 +311,10 @@ sub getEFLOW {
     }
 
     if (not defined $facility_name) {
-        return $self->{EFLOWSBYNAME};
+        return (0, $self->{EFLOWSBYNAME});
     }
 
-    return $self->{EFLOWSBYNAME}->{$facility_name};
+    return (0, $self->{EFLOWSBYNAME}->{$facility_name});
 }
 
 sub getGTP {
@@ -324,8 +324,8 @@ sub getGTP {
         my %gtps = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-GTP::ALL:".$self->{CTAG}.";");
-        if ($successStatus == -1) {
-            return;
+        if ($successStatus != 1) {
+            return (-1, $results);
         }
 
         $self->{LOGGER}->debug("Got GTP Lines\n");
@@ -358,10 +358,10 @@ sub getGTP {
     }
 
     if (not defined $facility_name) {
-        return $self->{GTPSBYNAME};
+        return (0, $self->{GTPSBYNAME});
     }
 
-    return $self->{GTPSBYNAME}->{$facility_name};
+    return (0, $self->{GTPSBYNAME}->{$facility_name});
 }
 
 sub getCrossconnect {
@@ -371,8 +371,8 @@ sub getCrossconnect {
         my %crss = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-CRS:::".$self->{CTAG}.";");
-        if ($successStatus == -1) {
-            return;
+        if ($successStatus != 1) {
+            return (-1, $results);
         }
 
         $self->{LOGGER}->debug("Got CRS Lines\n");
@@ -414,10 +414,10 @@ sub getCrossconnect {
     }
 
     if (not defined $facility_name) {
-        return $self->{CRSSBYNAME};
+        return (0, $self->{CRSSBYNAME});
     }
 
-    return $self->{CRSSBYNAME}->{$facility_name};
+    return (0, $self->{CRSSBYNAME}->{$facility_name});
 }
 
 sub getSTS_PM {
@@ -430,8 +430,8 @@ sub getSTS_PM {
         ($successStatus, $results) = $self->send_cmd("RTRV-PM-STSPC::\"$facility_name\":".$self->{CTAG}.";");
     }
 
-    if ($successStatus == -1) {
-        return;
+    if ($successStatus != 1) {
+        return (-1, $results);
     }
 
     my %pm_results = ();
@@ -460,10 +460,12 @@ sub getSTS_PM {
                 facility_type => "sts",
                 type => $monitoredType,
                 value => $monitoredValue,
+                measurement_type => "bucket",
+                measurement_time => time,
+                machine_time => $self->getMachineTime_TS(),
+
                 time_period => $timeperiod,
                 time_period_start => $monitoredPeriodStart,
-                measurement_time => time,
-                machine_time => $self->getMachineTime(),
                 date => $monitordate,
                 time => $monitortime,
                 validity => $validity,
@@ -473,11 +475,11 @@ sub getSTS_PM {
     }
 
     if ($pm_type) {
-        return $pm_results{$facility_name}->{$pm_type};
+        return (0, $pm_results{$facility_name}->{$pm_type});
     } elsif ($facility_name and $facility_name ne "ALL") {
-        return $pm_results{$facility_name};
+        return (0, $pm_results{$facility_name});
     } else {
-        return \%pm_results;
+        return (0, \%pm_results);
     }
 }
 
@@ -498,8 +500,9 @@ sub getETH_PM {
             ($successStatus, $results) = $self->send_cmd("RTRV-PM-GIGE::\"$facility_name\":".$self->{CTAG}."::;");
         }
 
-        if ($successStatus == -1) {
-            return;
+
+        if ($successStatus != 1) {
+            return (-1, $results);
         }
 
         my %pm_results = ();
@@ -520,13 +523,15 @@ sub getETH_PM {
 
                 my %result = (
                         facility => $facility_name,
-                        facility_type => "gige",
+                        facility_type => "ethernet",
                         type => $monitoredType,
                         value => $monitoredValue,
+                        measurement_type => "bucket",
+                        measurement_time => time,
+                        machine_time => $self->getMachineTime_TS(),
+
                         time_period => $timeperiod,
                         time_period_start => $monitoredPeriodStart,
-                        measurement_time => time,
-                        machine_time => $self->getMachineTime(),
                         date => $monitordate,
                         time => $monitortime,
                         validity => $validity,
@@ -547,11 +552,11 @@ sub getETH_PM {
     }
 
     if ($pm_type) {
-        return $self->{COUNTERS}->{eth}->{$facility_name}->{COUNTERS}->{$facility_name}->{$pm_type};
+        return (0, $self->{COUNTERS}->{eth}->{$facility_name}->{COUNTERS}->{$facility_name}->{$pm_type});
     } elsif ($facility_name ne "ALL") {
-        return $self->{COUNTERS}->{eth}->{$facility_name}->{COUNTERS}->{$facility_name};
+        return (0, $self->{COUNTERS}->{eth}->{$facility_name}->{COUNTERS}->{$facility_name});
     } else {
-        return $self->{COUNTERS}->{eth}->{$facility_name}->{COUNTERS};
+        return (0, $self->{COUNTERS}->{eth}->{$facility_name}->{COUNTERS});
     }
 }
 
@@ -566,8 +571,8 @@ sub getEFLOW_PM {
             $self->{COUNTERS}->{eflow}->{$facility_name}->{CACHE_TIME} + $self->{CACHE_DURATION} < time) {
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-PM-EFLOW::\"$facility_name\":".$self->{CTAG}."::;");
-        if ($successStatus == -1) {
-            return;
+        if ($successStatus != 1) {
+            return (-1, $results);
         }
 
         my %pm_results = ();
@@ -591,10 +596,12 @@ sub getEFLOW_PM {
                         facility_type => "eflow",
                         type => $monitoredType,
                         value => $monitoredValue,
+                        measurement_type => "bucket",
+                        measurement_time => time,
+                        machine_time => $self->getMachineTime_TS(),
+
                         time_period => $timeperiod,
                         time_period_start => $monitoredPeriodStart,
-                        measurement_time => time,
-                        machine_time => $self->getMachineTime(),
                         date => $monitordate,
                         time => $monitortime,
                         validity => $validity,
@@ -616,11 +623,11 @@ sub getEFLOW_PM {
     }
 
     if ($pm_type) {
-        return $self->{COUNTERS}->{eflow}->{$facility_name}->{COUNTERS}->{$facility_name}->{$pm_type};
+        return (0, $self->{COUNTERS}->{eflow}->{$facility_name}->{COUNTERS}->{$facility_name}->{$pm_type});
     } elsif ($facility_name ne "ALL") {
-        return $self->{COUNTERS}->{eflow}->{$facility_name}->{COUNTERS}->{$facility_name};
+        return (0, $self->{COUNTERS}->{eflow}->{$facility_name}->{COUNTERS}->{$facility_name});
     } else {
-        return $self->{COUNTERS}->{eflow}->{$facility_name}->{COUNTERS};
+        return (0, $self->{COUNTERS}->{eflow}->{$facility_name}->{COUNTERS});
     }
 }
 
@@ -637,8 +644,8 @@ sub getVCG_PM {
             $self->{COUNTERS}->{vcg}->{$facility_name}->{CACHE_TIME} + $self->{CACHE_DURATION} < time) {
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-PM-VCG::\"$facility_name\":".$self->{CTAG}."::;");
-        if ($successStatus == -1) {
-            return;
+        if ($successStatus != 1) {
+            return (-1, $results);
         }
 
         my %pm_results = ();
@@ -662,10 +669,12 @@ sub getVCG_PM {
                         facility_type => "vcg",
                         type => $monitoredType,
                         value => $monitoredValue,
+                        measurement_type => "bucket",
+                        measurement_time => time,
+                        machine_time => $self->getMachineTime_TS(),
+
                         time_period => $timeperiod,
                         time_period_start => $monitoredPeriodStart,
-                        measurement_time => time,
-                        machine_time => $self->getMachineTime(),
                         date => $monitordate,
                         time => $monitortime,
                         validity => $validity,
@@ -690,11 +699,11 @@ sub getVCG_PM {
 
 
     if ($pm_type) {
-        return $self->{COUNTERS}->{vcg}->{$facility_name}->{COUNTERS}->{$facility_name}->{$pm_type};
+        return (0, $self->{COUNTERS}->{vcg}->{$facility_name}->{COUNTERS}->{$facility_name}->{$pm_type});
     } elsif ($facility_name ne "ALL") {
-        return $self->{COUNTERS}->{vcg}->{$facility_name}->{COUNTERS}->{$facility_name};
+        return (0, $self->{COUNTERS}->{vcg}->{$facility_name}->{COUNTERS}->{$facility_name});
     } else {
-        return $self->{COUNTERS}->{vcg}->{$facility_name}->{COUNTERS};
+        return (0, $self->{COUNTERS}->{vcg}->{$facility_name}->{COUNTERS});
     }
 }
 
@@ -709,8 +718,8 @@ sub getOCN_PM {
             $self->{COUNTERS}->{ocn}->{$facility_name}->{CACHE_TIME} + $self->{CACHE_DURATION} < time) {
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-PM-OCN::$facility_name:".$self->{CTAG}."::;");
-        if ($successStatus == -1) {
-            return;
+        if ($successStatus != 1) {
+            return (-1, $results);
         }
 
         my %pm_results = ();
@@ -738,13 +747,15 @@ sub getOCN_PM {
 
                 my %result = (
                         facility => $facility_name,
-                        facility_type => "oc".$facility_name_type,
+                        facility_type => "optical",
                         type => $monitoredType,
                         value => $monitoredValue,
+                        measurement_type => "bucket",
+                        measurement_time => time,
+                        machine_time => $self->getMachineTime_TS(),
+
                         time_period => $timeperiod,
                         time_period_start => $monitoredPeriodStart,
-                        measurement_time => time,
-                        machine_time => $self->getMachineTime(),
                         date => $monitordate,
                         time => $monitortime,
                         validity => $validity,
@@ -772,11 +783,11 @@ sub getOCN_PM {
 
 
     if ($pm_type) {
-        return $self->{COUNTERS}->{ocn}->{$facility_name}->{COUNTERS}->{$facility_name}->{$pm_type};
+        return (0, $self->{COUNTERS}->{ocn}->{$facility_name}->{COUNTERS}->{$facility_name}->{$pm_type});
     } elsif ($facility_name ne "ALL") {
-        return $self->{COUNTERS}->{ocn}->{$facility_name}->{COUNTERS}->{$facility_name};
+        return (0, $self->{COUNTERS}->{ocn}->{$facility_name}->{COUNTERS}->{$facility_name});
     } else {
-        return $self->{COUNTERS}->{ocn}->{$facility_name}->{COUNTERS};
+        return (0, $self->{COUNTERS}->{ocn}->{$facility_name}->{COUNTERS});
     }
 }
 
@@ -794,7 +805,7 @@ sub getAlarms {
 
         if ($successStatus != 1) {
             $self->{ALARMS} = undef;
-            return;
+            return (-1, $results);
         }
 
         #   "TimingInput_BITS_2,REF:MN,SYNCCLK,NSA,2008-08-28,15:12:03,,:\"LOS on synchronization reference as seen by TM1\","
@@ -859,7 +870,7 @@ sub getAlarms {
         }
     }
 
-    return \@ret_alarms;
+    return (0, \@ret_alarms);
 }
 
 sub waitEvent {
