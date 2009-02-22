@@ -1,6 +1,6 @@
 = Overall Development Plan !StrawMan =
 
-<wiki:toc max_depth="1" />
+<wiki:toc max_depth="2" />
 
 == Motivation ==
 
