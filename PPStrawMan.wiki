@@ -1,5 +1,6 @@
 = Overall Development Plan !StrawMan =
 
+<wiki:comment>Alas, even though google documents it, this toc doesn't seem to work.</wiki:comment>
 <wiki:toc max_depth="2" />
 
 == Motivation ==
@@ -92,4 +93,10 @@ Not as part of any full DCN-SS release, the following components will need to be
 
   * Higher level of phoebus/DCN integration. (IDC controlling pho-gateways - treat them as a L4 switch)
   * DICE-AA integrated AAA supported
-  * Extend 
+  * Extend control-plane down into Layer-1 (VNC)
+  * Multi-dimensional path finding (VNC?)
+    * layers, authorizations, schedules
+  * Modular scheduling component
+    * Allow application scheduling as well (bwctl, video-conference, etc...)
+  * performance-data triggered automated circuit scheduling (FAATE)
+  * Unified control API (SCREEN)
