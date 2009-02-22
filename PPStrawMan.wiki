@@ -1,0 +1,93 @@
+= Overall Development Plan StrawMan =
+
+== Motivation ==
+
+The evolution of computer network technology is quickly transitioning from an environment of packet networks built ontop of stable circuit networks to a much more dynamic hybrid model. (See GENI, DCN, OpenFlow, etc...) The new paradigms will require a different interaction model. The clean model of administrators completely handling traffic engineering issues is going away in support of a model where end users/applications are able to exert more direct influence. This is seen even at the application layer with P2P efforts.
+
+This shift represents both a challenge and an opportunity for Internet2.  For Internet2 to thrive, it must be a leader in this paradigm shift.  This shift provides an opportunity for the Internet2 community to influence the shape of future networking. The challenge is to stay at the front of this paradigm shift without dropping too much of the diverse community off the back.
+
+As both a back-bone provider and a community for U.S. R&E networks, Internet2 must focus its efforts on things that satisfy three primary stakeholders.  First, the community of R&E network providers including peers, connectors, regionals and end site universities/labs/organizations. Second, the community of network users including students, researchers, faculty and staff. Third, the community of network researchers developing the next evolution of network technology.
+
+== High Level Break-down of Priorities ==
+
+Fundementally, different control structures will be required to make this paradigm shift work. End users will need to be able to make more targetted requests for network resources. Much of the traffic engineering that was once the providence of network administrators needs to be automated and made available to end users/applications/peer networks. Of course, network administrators will need to retain enough control to protect the resources as well as to diagnose problems.
+
+In addition to projects to support these two high-level more network usage interested constituents, it is critical for Internet2's future vitality for it to participate in some less immediate focused research. This is not only to support the research community, but represents the only way Internet2 can reasonably evaluate new technologies as they become available.
+
+The following is a break-down of the areas Internet2 should engage in from a top-down priorities perspective (specific projects with resource/milestones to follow):
+
+=== Network Administrator Interfaces to Dynamic-Hybrid Networks ===
+  * Traditional IP routing
+  * DCN-SS
+    # Quickly configure/allocate scheduled circuits
+  * perfSONAR
+    # Share network diagnostic information across administrative boundries
+  * Traditional NOC tools
+    * Measurement/Monitoring tools
+    * Integration of tools such as nagios/ticketing/managment with federated models of AA and data sharing (pS).
+  * Administrator Interfaces
+    * Web-based GUIs
+      * Integrate new control and monitoring interfaces into administrator dash-boards. (Including capacity planning.)
+      * Some focused on the backbone provider, some focused from the connector or even peer network perspective.
+    * Automated administrator interfaces. (e.g. flow-data initiats action)
+  
+=== End-user/Application Interfaces to Dynamic-Hybrid Networks ===
+  * Traditional IP routing
+  * Phoebus
+    * Router-gateways to circuits
+    * Add intellegence to the network at the session layer
+  * User/Application Interfaces
+    * Web-based GUIs
+      * Focused on specific user communities (i.e. LHC, LIGO etc...)
+      * Allow end-users to specifically provision end-to-end packet networks
+      * Allow end-users to determine specifically what infrastructure their traffic traverses and diagnose performance problems.
+    * Automated interfaces
+      * Allow an application to signal the need for more/less resources
+      * Allow an application to receive performance data so it can make decisions on how to utilize the available resources
+
+=== Research Next-Generation Networks ===
+  * GENI
+  * OpenFlow
+
+== Project Breakdown ==
+
+The above priorities can be viewed as features desired from an integrated (but distributed) network system. The pieces of that system along with the current priorities follows:
+
+=== Dynamic Circuits ===
+
+The primary short-term goals for the DCN-SS is to modularize the functionality. This is needed to allow the architecture to survive more interations of network technology evolution. (If the abstraction is sound, specific modules can be updated in support of new evolutions without all modules needing to be updated.)
+
+==== 0.5 Architecture Enhancements ====
+
+  * Modular topology service (perfSONAR model)
+  * Modular AAA (RMI interface)
+  * Notification Broker
+  * Accounting 'hooks'
+
+==== 0.5+ components ====
+
+Not as part of any full DCN-SS release, the following components will need to be developed and released in a limited fashion in support of very specific IDCs. (In support of the Internet2 pilot service and/or specific constituents such as LHC.)
+
+  * Accounting service
+    * In accordance with the buisiness case decided upon by the DCN WG
+  * VO based authorization
+    * Priority to LHC circuits over USLHCNET
+
+==== 0.6 Architecture Enhancements ====
+
+  * Web-servcies interfaces to all modules (To support cross-project reuse.)
+  * Modular path-computation
+  * Integration with perfSONAR for circuit monitoring
+
+|| Date || Milestone ||
+|| March || Release of 0.5 ||
+|| May || Prototype Accounting Service ||
+|| May || Limited VO authorization case (USLHCNET) ||
+|| June || Kick-off of Pilot Service ||
+|| October || Release of 0.6 ||
+
+==== Additional Desired Enhancements ====
+
+  * Higher level of phoebus/DCN integration. (IDC controlling pho-gateways - treat them as a L4 switch)
+  * DICE-AA integrated AAA supported
+  * Extend 
