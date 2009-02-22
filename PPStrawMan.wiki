@@ -1,4 +1,4 @@
-= Overall Development Plan StrawMan =
+= Overall Development Plan !StrawMan =
 
 == Motivation ==
 
