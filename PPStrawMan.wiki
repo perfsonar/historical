@@ -1,8 +1,10 @@
 = Overall Development Plan !StrawMan =
 
+<wiki:toc max_depth="1" />
+
 == Motivation ==
 
-The evolution of computer network technology is quickly transitioning from an environment of packet networks built ontop of stable circuit networks to a much more dynamic hybrid model. (See GENI, DCN, OpenFlow, etc...) The new paradigms will require a different interaction model. The clean model of administrators completely handling traffic engineering issues is going away in support of a model where end users/applications are able to exert more direct influence. This is seen even at the application layer with P2P efforts.
+The evolution of computer network technology is quickly transitioning from an environment of packet networks built ontop of stable circuit networks to a much more dynamic hybrid model. (See GENI, DCN, !OpenFlow, etc...) The new paradigms will require a different interaction model. The clean model of administrators completely handling traffic engineering issues is going away in support of a model where end users/applications are able to exert more direct influence. This is seen even at the application layer with P2P efforts.
 
 This shift represents both a challenge and an opportunity for Internet2.  For Internet2 to thrive, it must be a leader in this paradigm shift.  This shift provides an opportunity for the Internet2 community to influence the shape of future networking. The challenge is to stay at the front of this paradigm shift without dropping too much of the diverse community off the back.
 
@@ -47,7 +49,7 @@ The following is a break-down of the areas Internet2 should engage in from a top
 
 === Research Next-Generation Networks ===
   * GENI
-  * OpenFlow
+  * !OpenFlow
 
 == Project Breakdown ==
 
