@@ -9,11 +9,11 @@ The evolution of computer network technology is quickly transitioning from an en
 
 This shift represents both a challenge and an opportunity for Internet2.  For Internet2 to thrive, it must be a leader in this paradigm shift.  This shift provides an opportunity for the Internet2 community to influence the shape of future networking. The challenge is to stay at the front of this paradigm shift without dropping too much of the diverse community off the back.
 
-As both a back-bone provider and a community for U.S. R&E networks, Internet2 must focus its efforts on things that satisfy three primary stakeholders.  First, the community of R&E network providers including peers, connectors, regionals and end site universities/labs/organizations. Second, the community of network users including students, researchers, faculty and staff. Third, the community of network researchers developing the next evolution of network technology.
+As both a back-bone provider and a community for U.S. R&E networks, Internet2 must focus its efforts on things that satisfy three primary stakeholders: the community of R&E network providers including peers, connectors, regionals and end site universities/labs/organizations; the community of network users including students, researchers, faculty and staff; and the community of network researchers developing the next evolution of network technology.
 
 == High Level Break-down of Priorities ==
 
-Fundementally, different control structures will be required to make this paradigm shift work. End users will need to be able to make more targetted requests for network resources. Much of the traffic engineering that was once the providence of network administrators needs to be automated and made available to end users/applications/peer networks. Of course, network administrators will need to retain enough control to protect the resources as well as to diagnose problems.
+Fundamentally, different control structures will be required to make this paradigm shift work. End users will need to be able to make more targetted requests for network resources. Much of the traffic engineering that was once the providence of network administrators needs to be automated and made available to end users/applications/peer networks. Of course, network administrators will need to retain enough control to protect the resources as well as to diagnose problems.
 
 In addition to projects to support these two high-level more network usage interested constituents, it is critical for Internet2's future vitality for it to participate in some less immediate focused research. This is not only to support the research community, but represents the only way Internet2 can reasonably evaluate new technologies as they become available.
 
