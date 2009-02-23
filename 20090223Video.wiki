@@ -2,12 +2,17 @@
 
 == Agenda/Minutes ==
 
- # Attendees:
+ # Attendees: Martin, Jason, Joe, Aaron, Guilherme
  # Team Updates
    # Internet2
+     * Aaron: tl1 alarm/PM monitoring (pulling out internal topology and determining how to represent it). Testing MySQL to see if it effects OWAMP performance.
+     * Jason: bwctl deployment issues, APAN talk, USATLAS GUI work, Yum repo work, wmap packaging, nagios development, release stuff.
+     * Jeff: Cisoc telepresence whitepaper, project plan.
    # IU
    # UDEL
+     * Martin: Geni proposal pS measurements to protogeni, Welcome Guilherme.
    # ESNet
+     * Joe: L2status monitoring working (really lame still). Working on hardening owamp/bwctl infrastructure.
    # FNAL
  # perfSONAR-PS v0.10 Release Update
    * Goal is to get all services out by March 6 (Date Negotiable - Must factor in time to release NPToolkit after)
