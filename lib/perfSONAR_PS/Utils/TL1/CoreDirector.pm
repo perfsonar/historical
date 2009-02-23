@@ -3,7 +3,6 @@ package perfSONAR_PS::Utils::TL1::CoreDirector;
 use warnings;
 use strict;
 
-use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
 use perfSONAR_PS::Utils::ParameterValidation;
 use Data::Dumper;
@@ -25,7 +24,6 @@ sub initialize {
             });
 
     $parameters->{"type"} = "coredirector";
-    $parameters->{"logger"} = get_logger("perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::CoreDirector");
     $parameters->{"prompt"} = ";" if (not $parameters->{"prompt"});
     $parameters->{"port"} = "10201" if (not $parameters->{"port"});
 

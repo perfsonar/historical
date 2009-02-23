@@ -56,9 +56,7 @@ sub init {
     my ($self) = @_;
     my $logger = get_logger("perfSONAR_PS::Collectors::Base");
 
-    $logger->error("collectMeasurements() function is not implemented");
-
-    return -1;
+    return 0;
 }
 
 sub collectMeasurements {

@@ -6,6 +6,7 @@ use strict;
 use POSIX;
 use Net::Telnet;
 use Data::Dumper;
+use Log::Log4perl qw(get_logger :nowarn);
 
 use Params::Validate qw(:all);
 use perfSONAR_PS::Utils::ParameterValidation;
@@ -16,6 +17,8 @@ sub new {
     my ($class) = @_;
 
     my $self = fields::new($class);
+
+    $self->{LOGGER} = get_logger($class);
 
     return $self;
 }
@@ -32,7 +35,6 @@ sub initialize {
             username => 1,
             password => 1,
             cache_time => 1,
-            logger => 1,
             prompt => 1,
             ctag => 0,
             });
@@ -55,8 +57,6 @@ sub initialize {
 
     $self->{CACHE_TIME} = 0;
     $self->{CACHE_DURATION} = $parameters->{cache_time};
-
-    $self->{LOGGER} = $parameters->{logger};
 
     return $self;
 }
@@ -199,6 +199,17 @@ sub disconnect {
     return;
 }
 
+sub refresh_connection {
+    my ($self) = @_;
+
+   my ($status, $res) = $self->send_cmd("RTRV-HDR:::".$self->{CTAG}.";");
+   if ($status != 0) {
+       return (-1, $status);
+   }
+
+    return (0, "");
+}
+
 sub send_cmd {
     my ($self, $cmd, $is_connecting) = @_;
     
@@ -268,7 +279,7 @@ sub waitMessage {
     $self->{LOGGER}->debug("waitMessage: ".$type);
 
     my $end;
-    if ($args->{timeout}) {
+    if (defined $args->{timeout}) {
         $end = time + $args->{timeout};
     }
 

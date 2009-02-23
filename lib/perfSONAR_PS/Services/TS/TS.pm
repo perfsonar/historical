@@ -30,7 +30,7 @@ use Params::Validate qw(:all);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Topology::Common;
-use perfSONAR_PS::Client::Topology::XMLDB;
+use perfSONAR_PS::DB::TopologyXMLDB;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Utils::ParameterValidation;
 
@@ -81,7 +81,7 @@ sub init {
         my $file = $self->{CONF}->{"topology"}->{"db_file"};
         my %ns = getTopologyNamespaces();
 
-        $self->{CLIENT}= new perfSONAR_PS::Client::Topology::XMLDB($environment, $file, \%ns, $read_only);
+        $self->{CLIENT}= perfSONAR_PS::DB::TopologyXMLDB->new($environment, $file, \%ns, $read_only);
     } else {
         $self->{LOGGER}->error("Invalid database type specified");
         return -1;
@@ -263,7 +263,6 @@ sub buildLSMetadata {
 
 sub buildSummary {
     my ($self) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
     my $error;
     my (@domain_ids, @network_ids, @path_ids);
 
@@ -378,8 +377,6 @@ sub handleEvent {
 
     if ($messageType eq "SetupDataRequest") {
         $self->handleSetupDataRequest($output, $eventType, $md, $d);
-    } elsif ($messageType eq "TopologyChangeRequest") {
-        $self->handleChangeTopologyRequest($output, $eventType, $md, $d);
     } elsif ($messageType eq "QueryRequest") {
         $self->handleQueryRequest($output, $eventType, $md, $d);
     } elsif ($messageType eq "TSAddRequest") {
@@ -518,17 +515,8 @@ sub handleSetupDataRequest {
     segment.
 =cut
 sub handleChangeTopologyRequest {
-    my ($self, $output, $eventType, $m, $d) = @_;
+    my ($self, $output, $changeType, $m, $d) = @_;
     my ($status, $res);
-    my $changeType;
-
-    if ($eventType eq "http://ggf.org/ns/nmwg/topology/change/add/20070809" or $eventType eq "add") {
-        $changeType = "add";
-    } elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/update/20070809" or $eventType eq "update") {
-        $changeType = "update";
-    } elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/replace/20070809" or $eventType eq "replace") {
-        $changeType = "replace";
-    }
 
     my $topology = find($d, "./*[local-name()='topology']", 1);
 

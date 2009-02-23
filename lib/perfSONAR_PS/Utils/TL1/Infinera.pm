@@ -3,7 +3,6 @@ package perfSONAR_PS::Utils::TL1::Infinera;
 use warnings;
 use strict;
 
-use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
 use Data::Dumper;
 
@@ -23,7 +22,6 @@ sub initialize {
             });
 
     $parameters->{"type"} = "ome";
-    $parameters->{"logger"} = get_logger("perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::Infinera");
     $parameters->{"prompt"} = "TL1>>" if (not $parameters->{"prompt"});
     $parameters->{"port"} = "9090" if (not $parameters->{"port"});
 

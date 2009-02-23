@@ -3,7 +3,6 @@ package perfSONAR_PS::Utils::TL1::OME;
 use warnings;
 use strict;
 
-use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
 use Data::Dumper;
 use perfSONAR_PS::Utils::ParameterValidation;
@@ -24,7 +23,6 @@ sub initialize {
             });
 
     $parameters->{"type"} = "ome";
-    $parameters->{"logger"} = get_logger("perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::OME");
     $parameters->{"prompt"} = "<" if (not $parameters->{"prompt"});
     $parameters->{"port"} = "23" if (not $parameters->{"port"});
 
@@ -415,7 +413,7 @@ sub waitAlarm {
             });
 
     my ($status, $lines);
-    if ($args->{timeout} ) {
+    if (defined $args->{timeout} ) {
         ($status, $lines) = $self->waitMessage({ type => "alarm", timeout => $args->{timeout} });
     } else {
         ($status, $lines) = $self->waitMessage({ type => "alarm" });
