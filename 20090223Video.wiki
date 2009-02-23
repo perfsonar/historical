@@ -11,7 +11,7 @@
    # FNAL
  # perfSONAR-PS v0.10 Release Update
    * Goal is to get all services out by March 6 (Date Negotiable - Must factor in time to release NPToolkit after)
-   * See [pSPS20090306Release] for details
+   * See [pSPS20090327Release] for details
    * See [YumRepository] for details on the Yum/APT repository
  # SNMP-MA ESnet new database integration update
  # CHEP
