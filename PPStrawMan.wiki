@@ -62,7 +62,7 @@ The primary short-term goals for the DCN-SS is to modularize the functionality. 
 
 ==== 0.5 Architecture Enhancements ====
 
-  * Modular topology service (perfSONAR model)
+  * Automatic translatio of OSPF-TE to populate topology service 
   * Modular AAA (RMI interface)
   * Notification Broker
   * Accounting 'hooks'
@@ -80,6 +80,7 @@ Not as part of any full DCN-SS release, the following components will need to be
 
   * Web-servcies interfaces to all modules (To support cross-project reuse.)
   * Modular path-computation
+  * Modular path setup and teardown
   * Integration with perfSONAR for circuit monitoring
 
 || Date || Milestone ||
@@ -94,9 +95,10 @@ Not as part of any full DCN-SS release, the following components will need to be
   * Higher level of phoebus/DCN integration. (IDC controlling pho-gateways - treat them as a L4 switch)
   * DICE-AA integrated AAA supported
   * Extend control-plane down into Layer-1 (VNC)
-  * Multi-dimensional path finding (VNC?)
+    * Multi-dimensional path finding (VNC)
     * layers, authorizations, schedules
   * Modular scheduling component
     * Allow application scheduling as well (bwctl, video-conference, etc...)
   * performance-data triggered automated circuit scheduling (FAATE)
   * Unified control API (SCREEN)
+  * IDC integration with OpenFlow
