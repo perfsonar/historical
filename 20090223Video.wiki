@@ -19,7 +19,7 @@
  # GUI followup
    # wmap still on the list
    # gLS related GUIs under development
- # pS-NPToolkit Administrative GUI
+ # [PerformanceNodeAdminInterface pS-NPToolkit Administrative GUI]
  # GSoC
  # Next meeting will March 2. 
  # Other topics?
