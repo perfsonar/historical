@@ -546,6 +546,7 @@ while (1) {
             }
             elsif ( $$info[0] =~ /bwctl/ ) {
                 shift @$info;
+                shift @$info;
 
                 # $$info[2] is now "node"
                 warn "Restart bwctl->$$info[2]:!";
