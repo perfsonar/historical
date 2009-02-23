@@ -2,6 +2,7 @@
 
  # [pSPS20090327Release#Introduction Introduction]
  # [pSPS20090327Release#Release_Team Release Team]
+ # [pSPS20090327Release#Release_Schedule Release Schedule]
  # [pSPS20090327Release#Services_Released_and_Parties_Involved Services Released and Parties Involved]
  # [pSPS20090327Release#Specifics Specifics]
    # [pSPS20090327Release#Code_Reviews Code Reviews]
@@ -23,6 +24,16 @@ This page outlines details regarding the perfSONAR-PS release that began the wee
  * Brian
  * Joe
  * ...
+
+== Release Schedule ==
+
+Release Start: Feb 23, 2009
+
+Code Slush: March 6, 2009
+
+Release: March 27, 2009
+
+http://perfsonar-ps.googlecode.com/svn/wiki/ReleaseManagement/schedule.png
 
 == Services Released and Parties Involved ==
 
