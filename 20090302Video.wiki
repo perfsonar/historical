@@ -2,14 +2,31 @@
 
 == Agenda/Minutes ==
 
- # Attendees:
+ # Attendees: 
  # Team Updates
    # Internet2
    # IU
    # UDEL
    # ESNet
    # FNAL
+ # perfSONAR-PS v0.10 Release Update
+   * See [pSPS20090327Release] for details
+     * Check individual progress.
+   * Code slush is scheduled for March 6!
  # Circuit Monitoring
+   * Discuss the path forward for circuit monitoring including adding additional performance metrics and handling dynamic circuits. Please see:
+     * [CircuitMonitoring]
+     * [CircuitMonitoringMoreDetails]
+ # SNMP-MA ESnet new database integration update
+ # CHEP
+ # LHC/Atlas deployments (status update)
+ # GUI followup
+   # wmap still on the list
+   # gLS related GUIs under development
+ # [PerformanceNodeAdminInterface pS-NPToolkit Administrative GUI]
+   * Any feedback now that everyone has had time to see this?
+ # GSoC
+   * Please send ideas.
  # Next meeting will March 9. 
  # Other topics?
 
