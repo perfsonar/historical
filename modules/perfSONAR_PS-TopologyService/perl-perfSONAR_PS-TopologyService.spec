@@ -43,13 +43,15 @@ install -D -m 755 scripts/%{init_script_1}.new $RPM_BUILD_ROOT/etc/init.d/%{init
 #awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_2} > scripts/%{init_script_2}.new
 #install -D -m 755 scripts/%{init_script_2}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_2}
 
-install -D -m 644 doc/DB_CONFIG $RPM_BUILD_ROOT/var/lib/perfsonar/topology_service/DB_CONFIG
-
 %post
 mkdir -p /var/log/perfsonar
 chown perfsonar:perfsonar /var/log/perfsonar
 
-chown perfsonar:perfsonar /var/lib/perfsonar/topology_service
+mkdir -p /var/lib/perfsonar/topology_service
+if [ ! -f /var/lib/perfsonar/topology_service/DB_CONFIG ]; then
+	%{install_base}/scripts/psCreateTopologyDB --directory /var/lib/perfsonar/topology_service
+fi
+chown -R perfsonar:perfsonar /var/lib/perfsonar
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -62,7 +64,6 @@ rm -rf $RPM_BUILD_ROOT
 %{install_base}/scripts/*
 %{install_base}/lib/*
 /etc/init.d/*
-%config /var/lib/perfsonar/topology_service/*
 
 %changelog
 * Wed Dec 10 2008 aaron@internet2.edu 0.10-1

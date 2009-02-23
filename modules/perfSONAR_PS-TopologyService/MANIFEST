@@ -2,7 +2,6 @@ MANIFEST
 Makefile
 bin/daemon.pl
 doc/Changes
-doc/DB_CONFIG
 doc/LICENSE
 doc/README
 etc/daemon.conf
@@ -33,3 +32,4 @@ perl-perfSONAR_PS-TopologyService.spec
 scripts/install_dependencies.sh
 scripts/prepare_environment.sh
 scripts/topology_service
+scripts/psCreateTopologyDB

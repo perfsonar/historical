@@ -12,5 +12,12 @@ $MAKEROOT mkdir -p /var/log/perfsonar
 $MAKEROOT chown perfsonar:perfsonar /var/log/perfsonar
 
 $MAKEROOT mkdir -p /var/lib/perfsonar/topology_service
+if [ ! -f /var/lib/perfsonar/topology_service/DB_CONFIG ]; then
+	$MAKEROOT `dirname $0`/../scripts/psCreateTopologyDB --directory /var/lib/perfsonar/topology_service
+fi
+$MAKEROOT chown -R perfsonar:perfsonar /var/lib/perfsonar
+
+
+$MAKEROOT mkdir -p /var/lib/perfsonar/topology_service
 $MAKEROOT chown perfsonar:perfsonar /var/lib/perfsonar/topology_service
 $MAKEROOT cp `dirname $0`/../doc/DB_CONFIG /var/lib/perfsonar/topology_service
