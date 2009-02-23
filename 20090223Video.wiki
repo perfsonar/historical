@@ -2,7 +2,7 @@
 
 == Agenda/Minutes ==
 
- # Attendees: Martin, Jason, Joe, Aaron, Guilherme
+ # Attendees: Martin, Jason, Joe, Aaron, Guilherme, Jeff
  # Team Updates
    # Internet2
      * Aaron: tl1 alarm/PM monitoring (pulling out internal topology and determining how to represent it). Testing MySQL to see if it effects OWAMP performance.
@@ -19,13 +19,23 @@
    * See [pSPS20090327Release] for details
    * See [YumRepository] for details on the Yum/APT repository
  # SNMP-MA ESnet new database integration update
+   * Future work.
  # CHEP
  # LHC/Atlas deployments
+   * Metadata keyword issues.
  # GUI followup
    # wmap still on the list
+     * Jason has worked on packaging.
    # gLS related GUIs under development
+     * Making progress.
  # [PerformanceNodeAdminInterface pS-NPToolkit Administrative GUI]
+   * Add ability to see what keywords are available. (Might need to add more information into the summary sets to help indicate the 'weight' of a given keyword.)
+   * Aaron update on use cases, and how we would fulfill them.
+     # diagnostic host - all on domand, no config.
+     # measurement host - long term, hold data, configuration needed.
+     * Came up with a user-interface definition described at the above link. Basically most configuration is done via HTTP interface with absolutely minimal configuration done on command-line TTY.
  # GSoC
+   * Please send ideas - we need to apply in the next two weeks.
  # Next meeting will March 2. 
  # Other topics?
 
