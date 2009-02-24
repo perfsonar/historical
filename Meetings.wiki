@@ -11,7 +11,6 @@ applicable.
 == Past Events ==
 
  * 2009
-
    * [20090223Video] - Video Conference for February 23, 2009
    * [20090217Video] - Video Conference *Issue: v0.10 Release* for February 17, 2009
    * [20090203Meet] - Meeting at Joint Techs, College Station TX
