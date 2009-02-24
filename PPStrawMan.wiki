@@ -157,10 +157,11 @@ In support of the CTP project (*if applicable*). Otherwise, some of these things
 
 ==== pS-NPToolkit 3.1 (last knoppix version) ====
 
-  * Use new versions of owamp/bwctl and pS-PS 3.1+
+  * Use new versions of owamp/bwctl and pS-PS 3.1(+)
   * Minimal-configuration startup for diagnostic
   * All Administration via HTTP
   * Stability and performance enhancements
+  * Community specific operations
 
 ==== pS-PS 3.2 enhancements ====
 
