@@ -149,7 +149,7 @@ The primary short-term goals for perfSONAR development is: to harden and make us
 
 ==== pS-PS 3.1+ enhancements ====
 
-In support of the CTP project, *if we do that*. Otherwise, these things will be postponed and/or cancelled.
+In support of the CTP project (*if applicable*). Otherwise, some of these things will be postponed and/or cancelled.
 
   * Nagios pluggins for threshold alarms on performance data
   * Enhanced CGI script for owamp data (dash-board)
