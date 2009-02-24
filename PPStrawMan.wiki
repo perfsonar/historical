@@ -102,3 +102,83 @@ Not as part of any full DCN-SS release, the following components will need to be
   * performance-data triggered automated circuit scheduling (FAATE)
   * Unified control API (SCREEN)
   * IDC integration with OpenFlow
+  * Develop topological querying interfaces for 'what-if' scenerios.
+    * go around heavily utilized shortest path problems
+  * Develop methods for automated xml-topology generation for intra-domain as well as automated 'abstract topology' generation from that for inter-domain exchanges
+  * Develop Point-to-Multipoint and Mutipoint-to-Multipoint services
+  * Develop mechanisms for ethernet QinQ services on DCN
+  * Develop enhanced GUI or script based config/installation tools for DCN-SS
+  * Develop GUI/Map point-n-click based provisioning system
+
+=== Performance Monitoring (perfSONAR) ===
+
+The primary short-term goals for perfSONAR development is: to harden and make useful GUIs for existing backbone, LHC, and regional related deployments, enable diagnostics of dynamic circuits, and to add the features needed to entise more deployments into regionals, campuses, and labs.
+
+==== pS-PS 3.1 Enhancements ====
+
+  * OWAMP support in perfSONAR-BUOY
+  * gLS/hLS packages
+  * gLS/hLS performance and stability updates
+  * CGI based GUIs
+    * gLS/hLS GUIs
+    * simple data GUIs for owamp/bwctl/pingER/SNMP
+  * Circuit Monitoring (glif version, still E2EMon compatible)
+  * Additions to pS-NPToolkit to enable Zero-Config mode
+  * yum/apt packaging
+
+==== pS-PS 3.1+ enhancements ====
+
+In support of the CTP project, *if we do that*. Otherwise, these things will be postponed and/or cancelled.
+
+  * Nagios pluggins for threshold alarms on performance data
+  * Enhanced CGI script for owamp data (dash-board)
+  * Modified pS-B owamp database backend with support for history of delay-variation
+
+==== pS-NPToolkit 3.1 (last knoppix version) ====
+
+  * Use new versions of owamp/bwctl and pS-PS 3.1+
+  * Minimal-configuration startup for diagnostic
+  * All Administration via HTTP
+  * Stability and performance enhancements
+
+==== pS-PS 3.2 enhancements ====
+
+  * DCN triggered link monitoring
+  * limited AA integration
+
+==== pS-NPToolkit 3.2 ====
+
+  * Fedora-Live based (drop knoppix) to enable ISO building from rpms
+  * Use pS-PS 3.2
+
+==== pS-PS 4.0 ====
+
+  * LS - Topology based service queries (nearest MP problem)
+  * Centralized Configuration Service
+  * GUI enhancements
+    * User community centric - search for problems relating to X
+  
+==== pS-NPDomain 4.0 ====
+
+  * Allow an administrator to control a set of pS-performance nodes
+  * Combination of yum repository and centralized configuration management tools
+
+|| Date || Milestone ||
+|| 27 March || pS-PS 3.1 ||
+|| 27 April || pS-PS 3.1+ ||
+|| May || pS-NPToolkit 3.1 ||
+|| June || pS-PS 3.2 ||
+|| July || pS-NPToolkit 3.2 ||
+|| Jan 09 || pS-PS 4.0 ||
+|| Jan 09 || pS-NPDomain 4.0 ||
+
+==== Additional Desired Enhancements ====
+
+  * pS-Netflow - archive of netflow data
+    * allow queries to search for specific patterns
+    * allow queries for specific summary stats (what ports used, gross traffic flows, IPv4 vs IPv6 etc...)
+  * BGP archive
+    * What would the route have been for a packet at time X at location Y be?
+  * Traceroute MA
+  * More NOC integration
+    * Tickets-MA - tag a ticket as relating to specific topology and coorelate with performance data
