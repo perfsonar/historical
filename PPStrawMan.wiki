@@ -133,7 +133,7 @@ Not as part of any full DCN-SS release, the following components will need to be
 
 === Performance Monitoring (perfSONAR) ===
 
-The primary short-term goals for perfSONAR development is: to harden and make useful GUIs for existing backbone, LHC, and regional related deployments, enable diagnostics of dynamic circuits, and to add the features needed to entise more deployments into regionals, campuses, and labs.
+The primary short-term goals for perfSONAR development is: to harden and make useful GUIs for existing backbone, regional, and community related deployments (i.e. the LHC community), enable diagnostics of dynamic circuits, and to add the features needed to entise additional deployments into regionals, campuses, and labs.
 
 ==== pS-PS 3.1 Enhancements ====
 
