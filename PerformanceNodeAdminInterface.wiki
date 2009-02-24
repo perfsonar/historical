@@ -4,66 +4,86 @@ The first portion of this document describes the interface. The second
 portion provides more details on exactly what currently exists and
 how we transition from the current setup to the described interface.
 
-== Interface description ==
+ *[PerformanceNodeAdminInterface#Interface_Requirements Interface Requirements]
+   *[PerformanceNodeAdminInterface#Modes_of_Operation Modes of Operation]
+     *[PerformanceNodeAdminInterface#Zero-Config_Mode Zero-Config Mode]
+     *[PerformanceNodeAdminInterface#Pre-Config_Mode Pre-Config Mode]
+   *[PerformanceNodeAdminInterface#Rebooting Rebooting]
+ *[PerformanceNodeAdminInterface#Proposed_Changes Proposed Changes]
+   *[PerformanceNodeAdminInterface#Current_Tool_Options Current Tool Options]
+   *[PerformanceNodeAdminInterface#Zero-Config_Boot Zero-Config Boot]
+   *[PerformanceNodeAdminInterface#Web-based_Configuration Web-based Configuration]
+ *[PerformanceNodeAdminInterface#Development_Plan Development Plan]
+   *[PerformanceNodeAdminInterface#Final_Knoppix_Release Final Knoppix Release]
+   *[PerformanceNodeAdminInterface#First_Fedora_Release First Fedora Release]
+   *[PerformanceNodeAdminInterface#Subsequent_Fedora_Releases Subsequent Fedora Releases]
+
+== Interface Requirements ==
 
 For the initial booting of the system:
 
 When the disc is put in, the default behavior will be for the system to boot
 from the disc. There will be a CLI prompt asking the user if they want
 to enable configuration for the performance node. If they do not
-answer in [60] seconds, the system will boot into Zero-Config mode
-(described below).
+answer in [60] seconds, the system will boot into 
+[PerformanceNodeAdminInterface#Zero-Config_Mode Zero-Config Mode].
 
-If the user answers the prompt, then they are prompted for an admin
-passwd for the web-admin GUI. They are also prompted to provide IP
-address information (also given the option to DHCP). After this information
-is entered, the system finishes the boot process. At the end of the boot
-process, the system should print out the URL for accessing the
-admin interface. This will be a well-defined URL on the host, so if the
-user already knows the host name it will not be important. But will be
-useful for someone setting up a diagnotic host on a random network.
-This will put the system in Pre-Config mode (described below).
+If the user makes the choice to enter into configuration (e.g. by addressing the
+on screen _prompt_), there are several immediate questions to answer:
 
-Eventually, Pre-Config mode should be possible using a specfic
-kickstart file that indicates the admin passwd so that physical
-access to the box is not required. However, the admin passwd should
-not be codified on an iso in any way.
+ * Define a password for the Administrative GUI
+ * Network Identification
+   * DHCP
+   * Static Address
+
+The boot process will proceed after these steps, concluding with a printed URL
+that can be used to access the system.  Note that this URL will be related to
+the network identification step - it is provided as service for individuals who
+may be unaware of how to access the newly configured machine.  The final result
+leaves the system in 
+[PerformanceNodeAdminInterface#Pre-Config_Mode Pre-Config Mode].
+
+Eventually, achieving
+[PerformanceNodeAdminInterface#Pre-Config_Mode Pre-Config Mode] should be
+possible through use of a specfic _*kickstart*_ file that indicates the admin
+password; physical access would not be required. The admin password should not
+be codified on an ISO in any way.
 
 The user can now access the web GUI and activate additional
 tools if they want. For example, they could enter organization/admin
-identifying information including 'keywords'. This would make it possible
-to register the host with the IS infrastructure. The 'enable' page for
-publicizing the host could be pre-populated with data retrieved from
-WHOIS using the IP address.
+identifying information including _*keywords*_. This would make it possible
+to register the host with the Information Services (_*IS*_) infrastructure. The
+_enable_ page for publicizing the host could be pre-populated with data
+retrieved from WHOIS using the IP address.
 
 They could also activate regularly scheduled tests. Dependencies among
 tools should be minimized, however the following dependencies do exist:
 
-1) Nothing should be registered to the IS infrastructure unless the
-user enables this in a 'publish existence' page.
-
-2) If publishing is enabled, all active diagnostic tools should be registered
-as available. (Eventually we might allow selective publishing, but for now
-if it is active, lets publish it.)
-
-3) MAs should be published IFF they should have data. (i.e. only if the system is configured to do regular tests, or has an archive of old test data)
-
-4) Regularly scheduled tests should be configurable without enabling publishing.
-This should enable the web CGI scripts for viewing the data locally on the
-system.
+ # Nothing should be registered to the _*IS*_ infrastructure unless the user enables this in a _publish existence_ page.
+ # If publishing is enabled, all active diagnostic tools should be registered as available. (Eventually we might allow selective publishing)
+ # MAs should be published if, and only if, they have available data. (i.e. only if the system is configured to do regular tests, or has an archive of old test data)
+ # Regularly scheduled tests should be configurable without enabling publishing. This should enable the web CGI scripts for viewing the data locally on the system.
 
 After configuring as much, or as little as the user wants through the
 HTTPS admin interface the host is now in Full Config mode.
 
 Remote-Configuration is something we want to enable in the future. Instead
-of specifying an admin passwd to enter Pre-Config mode, the user would
+of specifying an admin password to enter Pre-Config mode, the user would
 be prompted to specify a configuration server. (Alternatively, as mentioned
 before a specific kick-start file could be used to specify this information.
 It might even be reasonable for a specific community to encode this information
 directly into a community targeted ISO.) The host would then contact the
 remote server to fetch configuration information for configuring all services.
 
-=== Zero-Config mode ===
+=== Modes of Operation ===
+
+There are two primary modes of operation: zero configuration and minimal, 
+or _pre_ configuration.  Each mode fits a well defined use case:
+
+ * Zero Configuration - The original spirit of the Live CD was to offer a set of tools that are ready to go _out of the box_.  
+ * Pre-Configuration - Allows the disk to be configured for long term monitoring and measurement.
+
+==== Zero-Config mode ====
 
 Disc is simply put in and the host is ignored. The IP Address is set by DHCP.
 A host that has had no configuration will not register with the Information
@@ -77,10 +97,10 @@ up. An expert user can login as root and manually configure the system. The
 steps for doing this can be as complex as necessary, and only very
 limited support for this mode should be offered in general.
 
-=== Pre-Config mode ===
+==== Pre-Config mode ====
 
 Identical to Zero-Config mode except that the user has specified an
-admin passwd and therefore enabled HTTPS to start, and enabled the
+admin password and therefore enabled HTTPS to start, and enabled the
 web admin GUI.
 
 Host should behave exactly like the Zero-Config host until/unless additional
@@ -93,11 +113,18 @@ identically on reboot.
 
 A Pre-Config and Configured host should present a prompt to allow the user
 to reset the configuration information. It should be possible to do 3 things
-with the CLI in this case: 1) modify the admin passwd, 2) modify the IP
-address, 3) Reset host - completely reformat.
+with the CLI in this case: 
 
-= Plan Forward =
-= Current Tool Options =
+ # modify the admin password
+ # modify the IP address
+ # Reset host - completely reformat.
+
+== Proposed Changes ==
+
+To accomplish the above goals, we are proposing the following developmental and
+administrative changes. 
+
+=== Current Tool Options ===
 
   * configure backing store
   * configure site settings (location, admin, etc)
@@ -114,15 +141,15 @@ address, 3) Reset host - completely reformat.
   * configure perfSONAR-BUOY tests
   * configure SNMP monitoring
 
-= Current Zero-Config Booting =
+=== Zero-Config Boot ===
 
 The current Knoppix instance allows for one to do zero configuration and boot
-into a usable system. However, this system won't register with any of its daemons
-with the global lookup service. This could be changed with the caveat that the
-gLS would end up with entries like "BWCTL Server". The downside to this approach
-is that, due to the size of the hLS database, it would effectively mandate 512M RAM
-for running the disk so we would need some way of informing users if they put the
-disk into a machine with less than that amount of space.
+into a usable system. However, this system won't register with any of its
+daemons with the global lookup service. This could be changed with the caveat
+that the gLS would end up with entries like _*BWCTL Server*_. The downside to
+this approach is that, due to the size of the hLS database, it would effectively
+mandate 512M RAM for running the disk so we would need some way of informing
+users if they put the disk into a machine with less than that amount of space.
 
 The default configuration for the system is:
 
@@ -132,7 +159,7 @@ The default configuration for the system is:
   * OWAMP: Allows for clients to have up to 500M of disk space and 1Mbps bandwidth. If a user hasn't configured a backing store, that 500M limit may be far too high.
   * Networking: obtained via DHCP
 
-= Migrating To A Web-based Configuration =
+=== Web-based Configuration ===
 
 To support a web interface, all of the CLI tools will need to be rewritten. To
 allow both CLI and Web-based configuration would necessitate writing a modular
@@ -161,29 +188,50 @@ it should be be pretty straight-forward to write web interfaces to do the
 configuration. I can't imagine it taking more than a couple hours per
 configuration option.
 
-= Proposed Path Forward =
-== Next Release ==
+== Development Plan ==
+
+Changes in the perfSONAR roadmap will dictate the completion of the following
+tasks.  The only definites are the conversion to a new base operating system
+(Fedora Live CD) and the necessity of packaging tools and administrative glue
+into RPMs.  The following goals take this move into consideration.
+
+=== Final Knoppix Release ===
+
 For the next Knoppix release, we can put together rudimentary web configuration
 GUIs for the following configurables.
 
-  # NTP
-  # BWCTL 
-  # OWAMP
-  # Enabled Services (removing Apache/SSH from the option list).
-  # Site settings (Admin, Keywords, etc).
-    * This web GUI will be a bit more involved as it has to write out NDT and NPAD http files
-    * It will also necessitate restarting the LS, and all services that register with it or rebooting
-  # Static vs. Dynamic IP
-    * This will likely necessitate either restarting the machine or giving the apache user the ability to restart networking along with restarting everything like in the "site settings" are modified
-  # External interface
-    * This will necessitate restarting all the services like for "site settings"
+ # NTP
+ # BWCTL 
+ # OWAMP
+ # Enabled Services (removing Apache/SSH from the option list).
+ # Site settings (Admin, Keywords, etc).
+   * This web GUI will be a bit more involved as it has to write out NDT and NPAD http files
+   * It will also necessitate restarting the LS, and all services that register with it or rebooting
+ # Static vs. Dynamic IP
+   * This will likely necessitate either restarting the machine or giving the apache user the ability to restart networking along with restarting everything like in the _*site settings*_ are modified
+ # External interface
+   * This will necessitate restarting all the services like for _*site settings*_
 
-== First Fedora Release ==
-For the first Fedora-based release, most of the above guis should be easy to transition over, as is.
+=== First Fedora Release ===
 
-== First Fedora Release ==
-For the next Fedora-based release, the whole slew of configuration GUIs should
-be cleaned up, both from a style standpoint and a code modularity standpoint.
-We should also talk to a number of them, and ask, overall, how they use the
-tools, and see if there's a better way we can structure the admin and GUI web
-pages.
+For the first Fedora-based release, most of the above GUIs should be easy to
+transition over, as is.  Time and resources will dictate this decision.  
+
+Additional consideration will be given to converting the existing
+[http://code.google.com/p/perfsonar-ps-cfg/ perfSONAR Configuration GUI] for
+use as a general configuration framework.  
+
+=== Subsequent Fedora Releases ===
+
+Subsequent releases of the Fedora-based Live CD should focus on:
+
+ * Modular GUIs
+ * Stylistic improvements (improve the _look and feel_)
+ 
+Consideration should be given to user feedback, specifically community and
+regional deployments, to help re-structure confusing portions of the
+administrative GUIs.
+
+== Last Updated ==
+
+$Id$
