@@ -1,13 +1,14 @@
 = Configuring perfSONAR performance nodes =
 
-The first portion of this document describes the interface. The second
-portion provides more details on exactly what currently exists and
-how we transition from the current setup to the described interface.
+This document describes the current interface of the Performance Node Live CD
+as well as proposed changes to bring the users of this tool a higher level of 
+comfort during the configuration process.  
 
  * [PerformanceNodeAdminInterface#Interface_Requirements Interface Requirements]
    * [PerformanceNodeAdminInterface#Modes_of_Operation Modes of Operation]
      * [PerformanceNodeAdminInterface#Zero-Config_Mode Zero-Config Mode]
      * [PerformanceNodeAdminInterface#Pre-Config_Mode Pre-Config Mode]
+     * [PerformanceNodeAdminInterface#Full_Config_Mode Full Config Mode]
    * [PerformanceNodeAdminInterface#Rebooting Rebooting]
  * [PerformanceNodeAdminInterface#Proposed_Changes Proposed Changes]
    * [PerformanceNodeAdminInterface#Current_Tool_Options Current Tool Options]
@@ -20,16 +21,15 @@ how we transition from the current setup to the described interface.
 
 == Interface Requirements ==
 
-For the initial booting of the system:
-
-When the disc is put in, the default behavior will be for the system to boot
-from the disc. There will be a CLI prompt asking the user if they want
-to enable configuration for the performance node. If they do not
-answer in [60] seconds, the system will boot into 
-[PerformanceNodeAdminInterface#Zero-Config_Mode Zero-Config Mode].
-
-If the user makes the choice to enter into configuration (e.g. by addressing the
-on screen _prompt_), there are several immediate questions to answer:
+Planned operation of this tool should allow the disk to be easily brought online
+with minimal assistance from the user.  Special consideration must be given to
+_headless_ installs.  Expected behavior on boot is to present the user with a 
+prompt via the Command Line Interface (CLI).  This prompt is basic and should 
+inquire about additional configuration - inactivity for some length of time
+(e.g. 60 seconds) will force the system into
+[PerformanceNodeAdminInterface#Zero-Config_Mode Zero-Config Mode].  If the user
+makes the choice to enter into configuration (e.g. by addressing the on screen
+_prompt_), there are several immediate questions to answer:
 
  * Define a password for the Administrative GUI
  * Network Identification
@@ -41,38 +41,37 @@ that can be used to access the system.  Note that this URL will be related to
 the network identification step - it is provided as service for individuals who
 may be unaware of how to access the newly configured machine.  The final result
 leaves the system in 
-[PerformanceNodeAdminInterface#Pre-Config_Mode Pre-Config Mode].
+[PerformanceNodeAdminInterface#Pre-Config_Mode Pre-Config Mode].  Eventually
+this state could achieved be through use of a specfic _*kickstart*_ file that
+indicates the admin password; physical access would not be required. The admin
+password should not be codified on an ISO in any way.
 
-Eventually, achieving
-[PerformanceNodeAdminInterface#Pre-Config_Mode Pre-Config Mode] should be
-possible through use of a specfic _*kickstart*_ file that indicates the admin
-password; physical access would not be required. The admin password should not
-be codified on an ISO in any way.
+The user may now access the Administrative GUIs and activate additional
+tools and functionalities if desired. For example, they could enter identifying
+information including _*keywords*_; this feature is desirable for communities
+such as USATLAS. This would make it possible to register the host with the
+Information Services (_*IS*_) infrastructure and have them be easily
+recognizable. The _enable_ page for publicizing the host could be pre-populated
+with data retrieved from a query WHOIS, using the network address information.
 
-The user can now access the web GUI and activate additional
-tools if they want. For example, they could enter organization/admin
-identifying information including _*keywords*_. This would make it possible
-to register the host with the Information Services (_*IS*_) infrastructure. The
-_enable_ page for publicizing the host could be pre-populated with data
-retrieved from WHOIS using the IP address.
-
-They could also activate regularly scheduled tests. Dependencies among
-tools should be minimized, however the following dependencies do exist:
+Dependencies among tools should be minimized, however the following
+dependencies do exist:
 
  # Nothing should be registered to the _*IS*_ infrastructure unless the user enables this in a _publish existence_ page.
  # If publishing is enabled, all active diagnostic tools should be registered as available. (Eventually we might allow selective publishing)
  # MAs should be published if, and only if, they have available data. (i.e. only if the system is configured to do regular tests, or has an archive of old test data)
  # Regularly scheduled tests should be configurable without enabling publishing. This should enable the web CGI scripts for viewing the data locally on the system.
 
-After configuring as much, or as little as the user wants through the
-HTTPS admin interface the host is now in Full Config mode.
+After customization and configuration has been completed, the host is now in 
+[PerformanceNodeAdminInterface#Full_Config_Mode Full Config Mode].
 
 Remote-Configuration is something we want to enable in the future. Instead
-of specifying an admin password to enter Pre-Config mode, the user would
-be prompted to specify a configuration server. (Alternatively, as mentioned
+of specifying an admin password to enter
+[PerformanceNodeAdminInterface#Pre-Config_Mode Pre-Config Mode], the user would
+be prompted to specify a configuration server.  Alternatively, as mentioned
 before a specific kick-start file could be used to specify this information.
 It might even be reasonable for a specific community to encode this information
-directly into a community targeted ISO.) The host would then contact the
+directly into a community targeted ISO - the host would then contact the
 remote server to fetch configuration information for configuring all services.
 
 === Modes of Operation ===
@@ -90,7 +89,7 @@ A host that has had no configuration will not register with the Information
 Services in any way. It is assumed to be a temporary diagnostic host.
 owamp/bwctl/ndt/npad will all function but no regular tests will be
 initiated from this host and no data will be collected on it. Therefore,
-no IS or pS MA services will be started.
+no _*IS*_ or perfSONAR Measurement Archive (_*MA*_) services will be started.
 
 Zero-Config mode will present a login prompt on the CLI when completely booted
 up. An expert user can login as root and manually configure the system. The
@@ -99,25 +98,31 @@ limited support for this mode should be offered in general.
 
 ==== Pre-Config mode ====
 
-Identical to Zero-Config mode except that the user has specified an
-admin password and therefore enabled HTTPS to start, and enabled the
-web admin GUI.
+Identical to [PerformanceNodeAdminInterface#Zero-Config_Mode Zero-Config Mode]
+except that the user has specified an admin password and therefore enabled
+HTTPS to start, and enabled the web admin GUI.
 
-Host should behave exactly like the Zero-Config host until/unless additional
-configuration information is entered via the web GUI.
+Host should behave exactly like the
+[PerformanceNodeAdminInterface#Zero-Config_Mode Zero-Config Mode] host
+until/unless additional configuration information is entered via the web GUI.
+
+==== Full Config mode ====
+
+Indicates all services and customizations have been activated.
 
 === Rebooting ===
 
-A Zero-Config mode host has had no information saved to disk, so it behaves
-identically on reboot.
+A [PerformanceNodeAdminInterface#Zero-Config_Mode Zero-Config Mode] host has
+had no information saved to disk, so it behaves identically on reboot.
 
-A Pre-Config and Configured host should present a prompt to allow the user
-to reset the configuration information. It should be possible to do 3 things
-with the CLI in this case: 
+A [PerformanceNodeAdminInterface#Pre-Config_Mode Pre-Config Mode] and
+[PerformanceNodeAdminInterface#Full_Config_Mode Full Config Mode] host should
+present a prompt to allow the user to reset the configuration information. It
+should be possible to do 3 things with the CLI in this case: 
 
  # modify the admin password
  # modify the IP address
- # Reset host - completely reformat.
+ # reset host - completely reformat.
 
 == Proposed Changes ==
 
@@ -164,8 +169,11 @@ The default configuration for the system is:
 To support a web interface, all of the CLI tools will need to be rewritten. To
 allow both CLI and Web-based configuration would necessitate writing a modular
 configuration backend to interact with the various configuration files and
-tools. This is somethign that may be necessary no matter what depending on
-security concerns.
+tools. This is something that may be necessary no matter what depending on
+security concerns.  A related project,
+[http://code.google.com/p/perfsonar-ps-cfg/ perfSONAR Configuration] has 
+addressed some of these needs by providing an an abstraction capable of being
+used by GUI and CLI interfaces.
 
 There are some security concerns with the web-based configuration as well.
 Currently, the www-data user has the ability to write the configuration files
