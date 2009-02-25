@@ -1,0 +1,17 @@
+Config::General
+Data::Dumper
+English
+Exporter
+FindBin
+HTML::Template::Expr
+IO::File
+Log::Log4perl
+Net::Telnet
+POSIX
+Params::Validate
+Scalar::Util
+Time::HiRes
+XML::LibXML
+base
+lib
+warnings
