@@ -191,7 +191,7 @@ In support of the CTP project (*if applicable*). Otherwise, some of these things
 
 ==== pS-PS 3.2 enhancements ====
 
-  * DCN triggered link monitoring
+  * Monitoring of DCN-created circuits
   * limited AA integration
 
 ==== pS-NPToolkit 3.2 ====
