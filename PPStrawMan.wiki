@@ -1,36 +1,6 @@
 = Overall Development Plan !StrawMan =
 
-<wiki:comment>Alas, even though google documents it, this toc doesn't seem to work.</wiki:comment>
-<wiki:toc max_depth="2" />
-
- * [PPStrawMan#Motivation Motivation]
- * [PPStrawMan#High_Level_Break-down_of_Priorities High Level Break-down of Priorities]
-   * [PPStrawMan#Network_Administrator_Interfaces_to_Dynamic-Hybrid_Networks Network Administrator Interfaces to Dynamic-Hybrid Networks]
-   * [PPStrawMan#End-user_and_Application_Interfaces_to_Dynamic-Hybrid_Networks End-user and Application Interfaces to Dynamic-Hybrid Networks]
-   * [PPStrawMan#Research_Next-Generation_Networks Research Next-Generation Networks]
- * [PPStrawMan#Project_Breakdown Project Breakdown]
-   * [PPStrawMan#Dynamic_Circuits Dynamic Circuits]
-     * [PPStrawMan#0.5_Architecture_Enhancements 0.5 Architecture Enhancements]
-     * [PPStrawMan#0.5+_components 0.5+ components]
-     * [PPStrawMan#0.6_Architecture_Enhancements 0.6 Architecture Enhancements]
-   * [PPStrawMan#DCN_Schedule DCN Schedule]
-     * [PPStrawMan#DCN_Additional_Desired_Enhancements DCN Additional Desired Enhancements]
-   * [PPStrawMan#Performance_Monitoring_(perfSONAR) Performance Monitoring (perfSONAR)]
-     * [PPStrawMan#pS-PS_3.1_Enhancements pS-PS 3.1 Enhancements]
-     * [PPStrawMan#pS-PS_3.1+_enhancements pS-PS 3.1+ enhancements]
-     * [PPStrawMan#pS-NPToolkit_3.1_(last_knoppix_version) pS-NPToolkit 3.1 (last knoppix version)]
-     * [PPStrawMan#pS-PS_3.2_enhancements pS-PS 3.2 enhancements]
-     * [PPStrawMan#pS-NPToolkit_3.2 pS-NPToolkit 3.2]
-     * [PPStrawMan#pS-PS_4.0 pS-PS 4.0]
-     * [PPStrawMan#pS-NPDomain_4.0 pS-NPDomain 4.0]
-   * [PPStrawMan#pS_Schedule pS Schedule]
-     * [PPStrawMan#pS_Additional_Desired_Enhancements perfSONAR Additional Desired Enhancements]
-   * [PPStrawMan#Phoebus Phoebus]
-     * [PPStrawMan#Phoebus_1.1_Enhancements Phoebus 1.1 Enhancements]
-     * [PPStrawMan#Phoebus_1G_Pilot_Deployment Phoebus 1G Pilot Deployment]
-     * [PPStrawMan#Phoebus_2.0_Enhancements Phoebus 2.0 Enhancements]
-   * [PPStrawMan#Phoebus_Schedule Phoebus Schedule]
-     * [PPStrawMan#Phoebus_Additional_Desired_Enhancements Phoebus Additional Desired Enhancements]
+<wiki:toc max_depth="6" />
 
 == Motivation ==
 
