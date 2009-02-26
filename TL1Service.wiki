@@ -228,4 +228,4 @@ The datum would be the standard ifevt datum.
 We could hand out raw counters like above, but here it's probably good to start thinking about standardizing the counters returned somewhat. Maybe an event type per counter type, while allowing the generic one which would return all the counters from all facilities making up the element.
 
 ===== Topology =====
-The topology question is still open here since, presumably, it would be useful to be able to break down the logical elements into their actual facilities.
+The topology question is still open here since, presumably, it would be useful to be able to break down the logical elements into their actual facilities. The topology for a sub-network connection would also be somewhat complex since it's a full link with an underlying path, and backup path. To 'properly' describe it, we'd probably need a single collector (or correlator) looking at the whole network. 
