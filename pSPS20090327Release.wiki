@@ -33,7 +33,7 @@ Code Slush: March 6, 2009
 
 Release: March 27, 2009
 
-http://perfsonar-ps.googlecode.com/svn/wiki/ReleaseManagement/schedule.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPS20090327Release/schedule.png
 
 == Services Released and Parties Involved ==
 
