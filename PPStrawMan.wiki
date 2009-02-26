@@ -104,6 +104,8 @@ Not as part of any full DCN-SS release, the following components will need to be
   * Modular path setup and teardown
   * Integration with perfSONAR for circuit monitoring
 
+=== DCN Schedule ===
+
 || Date || Milestone ||
 || March || Release of 0.5 ||
 || May || Prototype Accounting Service ||
@@ -185,25 +187,40 @@ In support of the CTP project (*if applicable*). Otherwise, some of these things
   * Allow an administrator to control a set of pS-performance nodes
   * Combination of yum repository and centralized configuration management tools
 
+=== pS Schedule ===
+
+These dates are very agressive, but do assume approximately the current resources. (With a guess that some small fraction of additional funding will come through from grant submissions.)
+
 || Date || Milestone ||
 || 27 March || pS-PS 3.1 ||
 || 27 April || pS-PS 3.1+ ||
 || May || pS-NPToolkit 3.1 ||
 || June || pS-PS 3.2 ||
 || July || pS-NPToolkit 3.2 ||
-|| Jan 09 || pS-PS 4.0 ||
-|| Jan 09 || pS-NPDomain 4.0 ||
+|| Jan 10 || pS-PS 4.0 ||
+|| Jan 10 || pS-NPDomain 4.0 ||
 
 ==== pS Additional Desired Enhancements ====
 
+  * Integration into end applications (SyNAPSE)
+    # 3 yr, 2 FTE
   * pS-Netflow - archive of netflow data
     * allow queries to search for specific patterns
     * allow queries for specific summary stats (what ports used, gross traffic flows, IPv4 vs IPv6 etc...)
+    # Not funded, no dependencies. 6 mos, 1 FTE.
   * BGP archive
     * What would the route have been for a packet at time X at location Y be?
+    # Not funded, no dependencies. 1 yr, 1 FTE.
   * Traceroute MA
+    # Not funded, lots of available fragments from false-starts. 3 mos, 1 FTE.
   * More NOC integration
     * Tickets-MA - tag a ticket as relating to specific topology and coorelate with performance data
+    * Needs to include GUI work for both TT integration, and data usage. For example, correlating a reported maintence window could flag performance data as suspect.
+    # Not funded, dependent on integration to NOC TT GUIS and Topology services. 2 yrs, 2 FTE.
+  * Global - state of the networks GUIs. Provide ways of seeing an overall picture of perfSONAR deployments and then allowing the user to drill down to specific regions (both geographically, as well as by data types or network technology types - or even application communities). Basically, we need something better than pS-UI as a 'general' user interface. (This does not take the place of the dashboards required for specific application-communities or specific regional deployments but is needed to show the scope of the effort. For example, to sell the ideas to others.)
+    # Not funded, independent. 2 yr, 2 FTE.
+  * perfSONAR interfaces for sharing of ProtoGENI performance and management data. (LAMP)
+    # Not funded, independent. 3 yr, 1 FTE.
 
 == Last Updated ==
 
