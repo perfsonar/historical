@@ -58,7 +58,7 @@ if ( -f $hLSFile ) {
     print "      </tr>\n";
     print "      <tr valign=\"top\">\n";
     print "        <td align=\"center\">\n";
-    print "          <br><br><a name=\"NB\" /><font size=\"+2\" color=\"red\">*</font> <font size=\"-1\">These NDT services are reachable <i>from <b>your</b> computer</i>.  Unreachable hosts could be on private networks, or down for maintenance.</font>\n";  
+    print "          <br><br><a name=\"NB\" /><font size=\"+2\" color=\"red\">*</font> <font size=\"-1\">These NDT services are reachable <i>from <b>this</b> web server</i>.  They may or may not be reachable <i>from <b>your</b> computer</i> due to private network deployments.</font>\n";  
     print "        </td>\n";
     print "      </tr>\n";    
     print "    </table>\n";
