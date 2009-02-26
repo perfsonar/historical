@@ -106,6 +106,8 @@ Not as part of any full DCN-SS release, the following components will need to be
 
 === DCN Schedule ===
 
+These dates are very agressive, but do assume approximately the current resources. (With a guess that some small fraction of additional funding will come through from grant submissions.)
+
 || Date || Milestone ||
 || March || Release of 0.5 ||
 || May || Prototype Accounting Service ||
@@ -116,22 +118,36 @@ Not as part of any full DCN-SS release, the following components will need to be
 ==== DCN Additional Desired Enhancements ====
 
   * Higher level of phoebus/DCN integration. (IDC controlling pho-gateways - treat them as a L4 switch)
+    # 1 yr, 1 FTE
   * DICE-AA integrated AAA supported
+    # 2 yr, 2 FTE
   * Extend control-plane down into Layer-1 (VNC)
     * Multi-dimensional path finding (VNC)
     * layers, authorizations, schedules
+    # 3 yr, 2 FTE
   * Modular scheduling component
     * Allow application scheduling as well (bwctl, video-conference, etc...)
+    # 2 yr, 1 FTE
   * performance-data triggered automated circuit scheduling (FAATE)
-  * Unified control API (SCREEN)
+    # 3 yr, 3 FTE
+  * Unified control-plane API
+    * TP/LS/Pho API merge
+    * Model for how user-level networks can be overlaid
+    # 3 yr, 3 FTE
   * IDC integration with OpenFlow
   * Develop topological querying interfaces for 'what-if' scenerios.
     * go around heavily utilized shortest path problems
+    # 2 yr, 2 FTE
   * Develop methods for automated xml-topology generation for intra-domain as well as automated 'abstract topology' generation from that for inter-domain exchanges
+    # 1 yr, 2 FTE
   * Develop Point-to-Multipoint and Mutipoint-to-Multipoint services
+    # ?
   * Develop mechanisms for ethernet QinQ services on DCN
+    # ?
   * Develop enhanced GUI or script based config/installation tools for DCN-SS
+    # 2 yr, 2 FTE
   * Develop GUI/Map point-n-click based provisioning system
+    # 1 yr, 2 FTE
 
 === Performance Monitoring (perfSONAR) ===
 
@@ -207,20 +223,64 @@ These dates are very agressive, but do assume approximately the current resource
   * pS-Netflow - archive of netflow data
     * allow queries to search for specific patterns
     * allow queries for specific summary stats (what ports used, gross traffic flows, IPv4 vs IPv6 etc...)
-    # Not funded, no dependencies. 6 mos, 1 FTE.
+    # 0.5 yr, 1 FTE.
   * BGP archive
     * What would the route have been for a packet at time X at location Y be?
-    # Not funded, no dependencies. 1 yr, 1 FTE.
+    # 1 yr, 1 FTE.
   * Traceroute MA
-    # Not funded, lots of available fragments from false-starts. 3 mos, 1 FTE.
+    # 0.5 yr, 0.5 FTE.
   * More NOC integration
     * Tickets-MA - tag a ticket as relating to specific topology and coorelate with performance data
     * Needs to include GUI work for both TT integration, and data usage. For example, correlating a reported maintence window could flag performance data as suspect.
-    # Not funded, dependent on integration to NOC TT GUIS and Topology services. 2 yrs, 2 FTE.
+    # 3 yrs, 2 FTE.
+    # Dependent on integration to NOC TT GUIS and Topology services
   * Global - state of the networks GUIs. Provide ways of seeing an overall picture of perfSONAR deployments and then allowing the user to drill down to specific regions (both geographically, as well as by data types or network technology types - or even application communities). Basically, we need something better than pS-UI as a 'general' user interface. (This does not take the place of the dashboards required for specific application-communities or specific regional deployments but is needed to show the scope of the effort. For example, to sell the ideas to others.)
-    # Not funded, independent. 2 yr, 2 FTE.
+    # 2 yr, 2 FTE.
   * perfSONAR interfaces for sharing of ProtoGENI performance and management data. (LAMP)
-    # Not funded, independent. 3 yr, 1 FTE.
+    # 3 yr, 1 FTE.
+  * DICE-AA integrated AAA supported
+    # 2 yr, 2 FTE
+
+=== Phoebus ===
+
+
+The primary short-term goals for phoebus development is: protocol separation of data and control, performance enhancements, and stability and usability enhancements.
+
+==== Phoebus 1.1 Enhancements ====
+
+  * Split of data/control protocols at the gateways
+  * Use pS-gLS infrastructure to find available gateways
+  * Session signaling
+  * Session level framing
+  * Modifications to support 0.5 DCN
+
+==== Phoebus 1G Pilot Deployment ====
+
+  * 1G gateways at all Internet2 backbone router POPs
+  * 1G DCN connections available at each location
+
+==== Phoebus 2.0 Enhancements ====
+
+  * Manage several gateways from a single control-point (IDC integration)
+  * Use Information Services (PathFinding) services to compute paths (depends on phoebus-gateways being registered along with topology)
+  * Support O(10G) flows
+  * Integrate in service monitoring features so multiple gateways can be managed more effectively
+
+=== Phoebus Schedule ===
+
+This schedule assumes that most of the development work is happening at UDel and that Internet2 resources for the UDel contract(s) are relatively stable.
+
+|| Date || Milestone ||
+|| June || Phoebus 1.1 ||
+|| July || Phoebus 1G Pilot ||
+|| February 10 || Phoebus 2.0 ||
+
+==== Phoebus Additional Desired Enhancements ====
+
+  * Native windows client support
+    # 0.5 yr, 0.5 FTE
+  * Native MacOS client support
+    # 0.5 yr, 0.5 FTE
 
 == Last Updated ==
 
