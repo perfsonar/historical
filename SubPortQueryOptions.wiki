@@ -24,10 +24,6 @@ The topology description for this host would look like:
 
 }}}
 
-
-== Possible Query Options ==
-
-=== Keep XPath Style ====
 Using the topology description given above, there doesn't seem to be a way to
 easily and unambiguously query for "vlan 3000 on port eth0" using the metadata
 xpath pattern matching mechanisms we use.
@@ -71,7 +67,44 @@ all the elements contained within it. The open question would be, which element
 did they mean to grab? It would need some way of signifying "i wanted to grab
 element X or elements of type X that match my query". 
 
-One way around that would be to have the client specify an empty element at a given depth to request all the elements at that depth.
+== Possible Query Options ==
+
+=== Merged Metadata Approach ===
+
+The way that the 'interface' subjects get around this issue is that they have a single metadata containing all the relevant elements.
+
+{{{
+<nmwgt:interface>
+  <nmwgt:ipAddress type="ipv4">10.10.11.1</nmwgt:ipAddress>
+  <nmwgt:hostName>dreadnought</nmwgt:hostName>
+  <nmwgt:ifName>eth0</nmwgt:ifName>
+  <nmwgt:ifDescription>gigE</nmwgt:ifDescription>
+  <nmwgt:ifAddress type="ipv4">128.4.133.163</nmwgt:ifAddress>
+  <nmwgt:ifIndex>0</nmwgt:ifIndex>
+  <nmwgt:type>eth0</nmwgt:type>
+</nmwgt:interface>
+}}}
+
+This has the two levels (node and port) merged into one metadata element. This same approach could be tried for the elements listed above:
+
+{{{
+<nmtb:port id="urn:nml:internet2.edu:port_packrat_eth0.3000">
+  <nmtb:name>packrat</nmtb:name> 
+  <nmtb:address type="ipv4">207.75.164.10</nmtb:address> 
+  <nmtb:name>eth0</nmtb:name>
+  <nmtb:vlan>3000</nmtb:vlan>
+</nmtb:port>
+}}}
+
+The downsides to this approach:
+  * Element confusion: This has two 'name' elements, one of which isn't the name of the port. It could get even wierder if addresses were added in since that port would have two addresses (the management address for packrat and the specific interface address).
+  * Namespaces: The above has everything as nmtb (polluting its namespace), we could also selectively have elements be in one topology namespace or the other, though it wouldn't fix the problem above.
+  * Ambiguity: If the query is done as an XPath, a request for the trunk port would also match any vlan ports allocated.
+  * Client Output: The merged port couldn't be returned as is to the client since since the result may not make sense (which name is correct? which capacity is correct?).
+
+=== Modified XPath Style ====
+
+Another way around that would be to have the client specify an empty element at a given depth to request all the elements at that depth.
 
 For example, to return all the trunk ethernet port elements, the client would use:
 
@@ -126,40 +159,7 @@ metadata. (Starting to sound like E2EMon...)
 The downsides to this approach:
 
   * The service needs to know even more about elements since it'll need to go through all the metadata looking for the matching elements. 
-  * Querying is notedly harder since the identifiers given by the user are virtual, so we'll need to map those to the real identifiers in the backend.
-
-=== Merged Metadata Approach ===
-
-The way that the 'interface' subjects get around this issue is that they have a single metadata containing all the relevant elements.
-
-{{{
-<nmwgt:interface>
-  <nmwgt:ipAddress type="ipv4">10.10.11.1</nmwgt:ipAddress>
-  <nmwgt:hostName>dreadnought</nmwgt:hostName>
-  <nmwgt:ifName>eth0</nmwgt:ifName>
-  <nmwgt:ifDescription>gigE</nmwgt:ifDescription>
-  <nmwgt:ifAddress type="ipv4">128.4.133.163</nmwgt:ifAddress>
-  <nmwgt:ifIndex>0</nmwgt:ifIndex>
-  <nmwgt:type>eth0</nmwgt:type>
-</nmwgt:interface>
-}}}
-
-This has the two levels (node and port) merged into one metadata element. This same approach could be tried for the elements listed above:
-
-{{{
-<nmtb:port id="urn:nml:internet2.edu:port_packrat_eth0.3000">
-  <nmtb:name>packrat</nmtb:name> 
-  <nmtb:address type="ipv4">207.75.164.10</nmtb:address> 
-  <nmtb:name>eth0</nmtb:name>
-  <nmtb:vlan>3000</nmtb:vlan>
-</nmtb:port>
-}}}
-
-This strangely has two 'name' elements, one of which doesn't name the port. It could get even wierder if addresses were added in since that port would have two addresses (the management address for packrat and the specific interface address).
-
-If done as an XPath, a request for the trunk port would also match any vlan ports allocated.
-
-We would also need to think about what gets returned to the client since the result may not make sense (which name is correct? which capacity is correct?).
+  * Querying is notedly harder since the identifiers given by the user are not "real" identifiers, so we'll need to map those to the identifiers in the backend.
 
 === Crazy Approach ===
 
