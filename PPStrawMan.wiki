@@ -86,12 +86,12 @@ Not as part of any full DCN-SS release, the following components will need to be
 
 These dates are very agressive, but do assume approximately the current resources. (With a guess that some small fraction of additional funding will come through from grant submissions.)
 
-|| Date || Milestone ||
-|| March || Release of 0.5 ||
-|| May || Prototype Accounting Service ||
-|| May || Limited VO authorization case (USLHCNET) ||
-|| June || Kick-off of Pilot Service ||
-|| October || Release of 0.6 ||
+|| *Date* || *Milestone* ||
+|| _March_ || Release of 0.5 ||
+|| _May_ || Prototype Accounting Service ||
+|| _May_ || Limited VO authorization case (USLHCNET) ||
+|| _June_ || Kick-off of Pilot Service ||
+|| _October_ || Release of 0.6 ||
 
 ==== DCN Additional Desired Enhancements ====
 
@@ -185,14 +185,14 @@ In support of the CTP project (*if applicable*). Otherwise, some of these things
 
 These dates are very aggressive, but do assume approximately the current resources. (With a guess that some small fraction of additional funding will come through from grant submissions.)
 
-|| Date || Milestone ||
-|| 27 March || pS-PS 3.1 ||
-|| 27 April || pS-PS 3.1+ ||
-|| May || pS-NPToolkit 3.1 ||
-|| June || pS-PS 3.2 ||
-|| July || pS-NPToolkit 3.2 ||
-|| Jan 10 || pS-PS 4.0 ||
-|| Jan 10 || pS-NPDomain 4.0 ||
+|| *Date* || *Milestone* ||
+|| _27 March_ || pS-PS 3.1 ||
+|| _27 April_ || pS-PS 3.1+ ||
+|| _May_ || pS-NPToolkit 3.1 ||
+|| _June_ || pS-PS 3.2 ||
+|| _July_ || pS-NPToolkit 3.2 ||
+|| _Jan 10_ || pS-PS 4.0 ||
+|| _Jan 10_ || pS-NPDomain 4.0 ||
 
 ==== pS Additional Desired Enhancements ====
 
@@ -248,10 +248,10 @@ The primary short-term goals for phoebus development is: protocol separation of 
 
 This schedule assumes that most of the development work is happening at UDel and that Internet2 resources for the UDel contract(s) are relatively stable.
 
-|| Date || Milestone ||
-|| June || Phoebus 1.1 ||
-|| July || Phoebus 1G Pilot ||
-|| February 10 || Phoebus 2.0 ||
+|| *Date* || *Milestone* ||
+|| _June_ || Phoebus 1.1 ||
+|| _July_ || Phoebus 1G Pilot ||
+|| _February 10_ || Phoebus 2.0 ||
 
 ==== Phoebus Additional Desired Enhancements ====
 
