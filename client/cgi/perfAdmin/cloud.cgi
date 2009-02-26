@@ -107,6 +107,10 @@ if ( -f $hLSFile ) {
     print "    </script>\n";
 }
 else {
+    print "    <h1 align=\"center\">perfSONAR Information Services - Keyword Status</h1>\n";
+    print "    <br>\n";
+    print "    <center><font size=\"+3\" color=\"red\">Currently Unavailable</font></center>\n";
+    print "    <br><br>\n";
 }
 
 print "  </body>\n";
