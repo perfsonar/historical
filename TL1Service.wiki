@@ -1,0 +1,231 @@
+== Use-Cases ==
+  * End User: Only cares about TL1 queries in so far as they let him see what's happening to his circuit of interest. This would likely be just the performance statistics, and up/down status, but could conceivably include things like alarms. This would tie in and be influenced heavily by however the clients are getting the information to query the circuit elements.
+  * Diagnostic User: Cares about the VLANs allocate on the host along with their performance. Likely cares about any alarms that might affect those VLANs.
+    * Specific-requests:
+      * Would like to see what VLANs are in place
+      * Would like to see how many timeslots are allocated to that VLAN (i.e. its capacity)
+      * Alarms on any of the VLANs interfaces
+      * Higher-order views: tracing paths across multiple hosts
+      * ESLM MTUs
+  * Administrator: Would be interested in the questions that the diagnostic user would, but would also need to be able to see more low-level details, like which components make up a logical component, and what's the status of each of those components.
+
+== Difficulties ==
+  * There's a mixture of topology and metric requests needed for some of these use-cases (what's connected to what being the most basic)
+  * Depending on how the queries are structured, there may be some ambiguity or it may be difficult to do the simple pattern-match queries
+
+== Possible Queries ==
+
+=== Raw Facilities ===
+
+This is by far the easiest and I could likely have a service/collector for these in a week or less (modulo the open topology question). This would likely be only of use to administrators or other people who have deep knowledge of the service (e.g. DRAGON developers).
+
+==== Metadata ====
+==== Generic Facility Subject ====
+{{{
+<nmwg:subject>
+  <tl1:facility>
+    <tl1:hostAddress>mss.chic.net.internet2.edu</tl1:hostAddress>
+    <tl1:facility_name>dcs_eflow_dcs_vcg_35055_in</tl1:facility_name>
+    <tl1:facility_type>eflow</tl1:facility_type>
+  </tl1:facility>
+</nmwg:subject>
+}}}
+
+==== Data ====
+===== Alarms =====
+The event type would be: 
+{{{
+http://ggf.org/ns/nmwg/event/alarm/tl1/1.0
+}}}
+
+The datum would be:
+
+{{{
+<tl1alarm:datum facility="..." facility_type="..." id="..." type="..." severity="..." service_affecting=".." description="..." start_time="..." end_time="..." last_observed="..." time_type="...">
+}}}
+
+===== Facility Status =====
+The event type would be:
+{{{
+http://ggf.org/ns/nmwg/event/status/base/2.0/
+}}}
+
+The datum would be the standard ifevt datum.
+
+===== Counters =====
+There are a large number of counters which are highly-specific to the facility and the vendor. Therefore, it might make sense to have a generic "counters" event type/datum.
+
+{{{
+http://ggf.org/ns/nmwg/characteristic/tl1/1.0
+}}}
+
+The datum would be:
+
+{{{
+<tl1counter:datum timeType=".." timeValue=".." facility="..." counter_name="..." counter_value="..." bucket_start="..." bucket_size="..." />
+}}}
+
+The bucket size may not be necessary, and if the counter is available as a real counter and not a stupid TL1 bucketed counter, bucket_start could be left out.
+
+The other option is to go through all the possible counter types and create an eventType for each. 
+
+===== Topology =====
+The open question is whether topology information is query-able through the TL1 service. To correllate this data would be impossible without getting some information about how the various elements fit together. Whether this sits here, or in some other service is a different story. 
+
+=== Logical Element Queries ====
+A logical element would be something like "vlan 3000 on ethernet port 1-A-1-1" or "comes in as timeslots X-Z on optical port 1-A-2-1, leaves as timeslots A-C on optical port 1-A-3-1".
+
+==== Metadata =====
+===== Subject for a host =====
+
+{{{
+<nmwg:subject>
+  <nmtopo:node>
+    <name>packrat</name>
+    <address>packrat.internet2.edu</address>
+  </nmtopo:node>
+</nmwg:subject>
+}}}
+
+===== Subject for a trunk port =====
+{{{
+<nmwg:subject>
+  <nmtopo:node>
+    <address>hdxc-manlan.net.internet2.edu</address>
+    <ethernet:port>
+      <ethernet:name>ETH-1-2-1</ethernet:name>
+    </ethernet:port>
+  </nmtopo:node>
+</nmwg:subject>
+}}}
+
+===== Subject VLAN port on an Ethernet port =====
+{{{
+<nmwg:subject>
+  <nmtopo:node>
+    <address>hdxc-manlan.net.internet2.edu</address>
+
+    <ethernet:port>
+      <name>ETH-1-2-1</name>
+      <ethernet:port>
+          <vlan>3000</name>
+      </ethernet:port>
+    </ethernet:port>
+  </nmtopo:node>
+</nmwg:subject>
+}}}
+
+There is a bit of ambiguity with this style though, and querying would need to be thought about. If I ask for the trunk, ETH-1-2-1 would return, the trunk as well as all the VLANs, each in a separate metadata. One way around that would be to say that the elements returned are those at the greatest depth. 
+
+This has the benefit of looking similar to how the DCN topologies look, with the big differences being the vlan 3000 port in their parlance would be a 'link', and they don't use multiple namespaces to mask off namespace specific elements (like ethernet vlans vs. sonet timeslots).
+
+This style of subject doesn't look like any of the other ones we have, but might be a useful way to restructure the "interface" subjects:
+
+{{{
+<nmwg:subject>
+  <nmtopo:node>
+    <address>packrat.internet2.edu</address>
+    <nmtopo:port>
+      <name>eth0</name>
+      <capacity>...</capacity>
+      <description>...</description>
+    </nmtopo:port>
+  </nmtopo:node>
+</nmwg:subject>
+}}}
+
+One downside to this approach is that we'll need to think about how to do querying since a simple xpath on the elements for a generic 'node' element request would likely match every port element using the most logical metadata structure. This may be what the user is interested, or it may not be, but there wouldn't be a way to discern what they meant if a specific data type could be valid in both a host-specific form, and in an interface-specific form.
+
+===== Cross-Connect =====
+{{{
+<nmwg:subject>
+  <nmtopo:link>
+    <nmtopo:name>[if the cross-connect is aliased something. though this might not be unique...]</nmtopo:name>
+    <nmtopo:src>
+      <nmtopo:node>
+          <address>mss.newy32aoa.net.internet2.edu</address>
+          <sonet:port>
+            <sonet:name>OC192-1-5-1</sonet:name>
+            <sonet:port>
+              <sonet:timeslots>190-192</sonet:timeslots>
+            </sonet:port>
+          </sonet:port>
+      </nmtopo:node>
+    </nmtopo:src>
+    <nmtopo:dst>
+      <nmtopo:node>
+          <address>mss.newy32aoa.net.internet2.edu</address>
+          <sonet:port>
+            <sonet:name>OC192-1-4-1</sonet:name>
+            <sonet:port>
+              <sonet:timeslots>1-3</sonet:timeslots>
+            </sonet:port>
+          </sonet:port>
+      </nmtopo:node>
+    </nmtopo:dst>
+  </nmtopo:link>
+</nmwg:subject>
+}}}
+
+NOTE: I've not okayed this link style with martin, but it's probably useful to have something akin to this if we're not going to have hierarchical identifiers. This also looks sufficiently like the endPointPair, that would could maybe drop that construct replace it with something like the above.
+
+===== Sub-Network Connection (A connection between switches) =====
+{{{
+<nmwg:subject>
+  <nmtopo:link>
+    <nmtopo:name>[if the SNC is aliased something. though this might not be unique...]</nmtopo:name>
+    <nmtopo:capacity>[not necessary but easy to calculate]</nmtopo:capacity>
+    <nmtopo:src>
+      <nmtopo:node>
+          <address>mss.chic.net.internet2.edu</address>
+          <sonet:port>
+            <sonet:name>OC192-1-2-1</sonet:name>
+            <sonet:port>
+              <sonet:timeslots>4-6</sonet:timeslots>
+            </sonet:port>
+          </sonet:port>
+      </nmtopo:node>
+    </nmtopo:src>
+    <nmtopo:dst>
+      <nmtopo:node>
+          <address>mss.newy32aoa.net.internet2.edu</address>
+          <sonet:port>
+            <sonet:name>OC192-1-4-1</sonet:name>
+            <sonet:port>
+              <sonet:timeslots>1-3</sonet:timeslots>
+            </sonet:port>
+          </sonet:port>
+      </nmtopo:node>
+    </nmtopo:dst>
+  </nmtopo:link>
+</nmwg:subject>
+}}}
+
+==== Data ====
+===== Alarms =====
+The event type would be: 
+{{{
+http://ggf.org/ns/nmwg/event/alarm/tl1/1.0
+}}}
+
+The datum would be:
+
+{{{
+<tl1alarm:datum facility="..." facility_type="..." id="..." type="..." severity="..." service_affecting=".." description="..." start_time="..." end_time="..." last_observed="..." time_type="...">
+}}}
+
+This instance might have alarms for multiple facilities if they are aggregated into this 'element'. The open question is what would get included.  Would it just be the alarms for things actually aggregated, or things that would affect that element? I'm inclined to say no, purely out of the difficulty of figuring out what affects something else, though it's likely that any major error would cause facility-specific alarms, so it wouldn't much matter.  Relatedly, if I ask for the alarms for a cross-connect, do I get back the alarms for both involved elements? I'm inclined to say yes just because it's easy enough to do, and seems logical.
+
+===== Element Status =====
+The event type would be:
+{{{
+http://ggf.org/ns/nmwg/event/status/base/2.0/
+}}}
+
+The datum would be the standard ifevt datum.
+
+===== Counters =====
+We could hand out raw counters like above, but here it's probably good to start thinking about standardizing the counters returned somewhat. Maybe an event type per counter type, while allowing the generic one which would return all the counters from all facilities making up the element.
+
+===== Topology =====
+The topology question is still open here since, presumably, it would be useful to be able to break down the logical elements into their actual facilities.
