@@ -151,7 +151,7 @@ These dates are very agressive, but do assume approximately the current resource
 
 === Performance Monitoring (perfSONAR) ===
 
-The primary short-term goals for perfSONAR development is: to harden and make useful GUIs for existing backbone, regional, and community related deployments (i.e. the LHC community), enable diagnostics of dynamic circuits, and to add the features needed to entise additional deployments into regionals, campuses, and labs.
+The primary short-term goals for perfSONAR development is: to harden and make useful GUIs for existing backbone, regional, and community related deployments (i.e. the LHC community), enable diagnostics of dynamic circuits, and to add the features needed to entice additional deployments into regionals, campuses, and labs.
 
 ==== pS-PS 3.1 Enhancements ====
 
@@ -171,12 +171,12 @@ In support of the CTP project (*if applicable*). Otherwise, some of these things
 
   * Nagios pluggins for threshold alarms on performance data
   * Enhanced CGI script for owamp data (dash-board)
-  * Modified pS-B owamp database backend with support for history of delay-variation
+  * Modified pS-B owamp database back-end with support for history of delay-variation
 
 ==== pS-NPToolkit 3.1 (last knoppix version) ====
 
   * Use new versions of owamp/bwctl and pS-PS 3.1(+)
-  * Minimal-configuration startup for diagnostic
+  * Minimal-configuration start-up for diagnostic
   * All Administration via HTTP
   * Stability and performance enhancements
   * Community specific operations
@@ -205,7 +205,7 @@ In support of the CTP project (*if applicable*). Otherwise, some of these things
 
 === pS Schedule ===
 
-These dates are very agressive, but do assume approximately the current resources. (With a guess that some small fraction of additional funding will come through from grant submissions.)
+These dates are very aggressive, but do assume approximately the current resources. (With a guess that some small fraction of additional funding will come through from grant submissions.)
 
 || Date || Milestone ||
 || 27 March || pS-PS 3.1 ||
@@ -230,10 +230,10 @@ These dates are very agressive, but do assume approximately the current resource
   * Traceroute MA
     # 0.5 yr, 0.5 FTE.
   * More NOC integration
-    * Tickets-MA - tag a ticket as relating to specific topology and coorelate with performance data
-    * Needs to include GUI work for both TT integration, and data usage. For example, correlating a reported maintence window could flag performance data as suspect.
+    * Tickets-MA - tag a ticket as relating to specific topology and correlate with performance data
+    * Needs to include GUI work for both TT integration, and data usage. For example, correlating a reported maintenance window could flag performance data as suspect.
     # 3 yrs, 2 FTE.
-    # Dependent on integration to NOC TT GUIS and Topology services
+    # Dependent on integration to NOC TT GUIs and Topology services
   * Global - state of the networks GUIs. Provide ways of seeing an overall picture of perfSONAR deployments and then allowing the user to drill down to specific regions (both geographically, as well as by data types or network technology types - or even application communities). Basically, we need something better than pS-UI as a 'general' user interface. (This does not take the place of the dashboards required for specific application-communities or specific regional deployments but is needed to show the scope of the effort. For example, to sell the ideas to others.)
     # 2 yr, 2 FTE.
   * perfSONAR interfaces for sharing of ProtoGENI performance and management data. (LAMP)
@@ -262,7 +262,7 @@ The primary short-term goals for phoebus development is: protocol separation of 
 ==== Phoebus 2.0 Enhancements ====
 
   * Manage several gateways from a single control-point (IDC integration)
-  * Use Information Services (PathFinding) services to compute paths (depends on phoebus-gateways being registered along with topology)
+  * Use Information Services (Path-Finding) services to compute paths (depends on phoebus-gateways being registered along with topology)
   * Support O(10G) flows
   * Integrate in service monitoring features so multiple gateways can be managed more effectively
 
@@ -285,4 +285,3 @@ This schedule assumes that most of the development work is happening at UDel and
 == Last Updated ==
 
 $Id$
-
