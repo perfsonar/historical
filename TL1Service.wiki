@@ -52,7 +52,7 @@ http://ggf.org/ns/nmwg/event/status/base/2.0/
 
 The datum would be the standard ifevt datum.
 
-===== Counters =====
+===== Raw Counters =====
 There are a large number of counters which are highly-specific to the facility and the vendor. Therefore, it might make sense to have a generic "counters" event type/datum.
 
 {{{
@@ -68,6 +68,22 @@ The datum would be:
 The bucket size may not be necessary, and if the counter is available as a real counter and not a stupid TL1 bucketed counter, bucket_start could be left out.
 
 The other option is to go through all the possible counter types and create an eventType for each. 
+
+===== Standard Counters =====
+
+Since the above counters might be vendor specific, it would likely make sense to define a set of eventTypes for some of the counters that are standardized or that can be mapped to something standardized. For example, there's a common counter "severely-errored seconds" which is pretty standard across all the TL1 hosts I've tried. 
+
+Event Type:
+{{{
+http://ggf.org/ns/nmwg/characteristic/optical/sesl/1.0
+}}}
+
+Datum:
+{{{
+<tl1counter:datum timeType=".." timeValue=".." value=".." bucketStartTime="..." bucketDuration="..." />
+}}}
+
+Some thought would need to be put into defining what datum types make sense since their could be bucketed and non-bucketed instances of some of these values, and for guage values, the bucketting isn't necessary.
 
 ===== Topology =====
 The open question is whether topology information is query-able through the TL1 service. To correllate this data would be impossible without getting some information about how the various elements fit together. Whether this sits here, or in some other service is a different story. 
@@ -225,7 +241,7 @@ http://ggf.org/ns/nmwg/event/status/base/2.0/
 The datum would be the standard ifevt datum.
 
 ===== Counters =====
-We could hand out raw counters like above, but here it's probably good to start thinking about standardizing the counters returned somewhat. Maybe an event type per counter type, while allowing the generic one which would return all the counters from all facilities making up the element.
+These could use the same counters as the raw facilities. When they asked for raw counters, it would return everything for every facility underlying the element. If they asked for a standard counter, if multiple options were available, a single one would need be selected.
 
 ===== Topology =====
 The topology question is still open here since, presumably, it would be useful to be able to break down the logical elements into their actual facilities. The topology for a sub-network connection would also be somewhat complex since it's a full link with an underlying path, and backup path. To 'properly' describe it, we'd probably need a single collector (or correlator) looking at the whole network. 
