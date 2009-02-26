@@ -79,7 +79,7 @@ my %daemonMap = (
     },
     "list.npad" => {
         "EVENTTYPE" => [
-            "http://ggf.org/ns/nmwg/tools/npad/1.0" => 1,
+            "http://ggf.org/ns/nmwg/tools/npad/1.0"
         ],
         "TYPE" => "NPAD"
     },

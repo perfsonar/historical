@@ -90,13 +90,13 @@ for my $root ( @{ $gls->{ROOTS} } ) {
                         print "\t\t\tReject:\t" , $unt_test , "\n" if $DEBUGFLAG;
                     }
                     else {
-                        $hls{$accessPoint} = $accessPoint."|".$serviceName."|".$serviceType."|".$serviceDescription;
+                        $hls{$accessPoint}{"INFO"} = $accessPoint."|".$serviceName."|".$serviceType."|".$serviceDescription;
                         $matrix1{$root}{$accessPoint} = 1;
                     }
                 }
                 elsif ( $unt_test and &Net::IPv6Addr::is_ipv6( $unt_test ) ) {
                     # do noting (for now)
-                    $hls{$accessPoint} = $accessPoint."|".$serviceName."|".$serviceType."|".$serviceDescription;
+                    $hls{$accessPoint}{"INFO"} = $accessPoint."|".$serviceName."|".$serviceType."|".$serviceDescription;
                     $matrix1{$root}{$accessPoint} = 1;
                 }
                 else {
@@ -105,7 +105,7 @@ for my $root ( @{ $gls->{ROOTS} } ) {
                             print "\t\t\tReject:\t" , $unt_test , "\n" if $DEBUGFLAG;
                         }
                         else {
-                            $hls{$accessPoint} = $accessPoint."|".$serviceName."|".$serviceType."|".$serviceDescription;
+                            $hls{$accessPoint}{"INFO"} = $accessPoint."|".$serviceName."|".$serviceType."|".$serviceDescription;
                             $matrix1{$root}{$accessPoint} = 1;
                         }  
                     }
@@ -164,7 +164,7 @@ foreach my $h ( keys %hls ) {
 
         my $md = find( $doc->getDocumentElement, "./nmwg:store/nmwg:metadata", 0 );
         my $d  = find( $doc->getDocumentElement, "./nmwg:store/nmwg:data",     0 );
-
+        my %keywords = ();
         foreach my $m1 ( $md->get_nodelist ) {
             my $id = $m1->getAttribute("id");
             
@@ -190,6 +190,18 @@ foreach my $h ( keys %hls ) {
                 my $metadataIdRef = $d1->getAttribute("metadataIdRef");
                 next unless $id eq $metadataIdRef;
 
+                # get the keywords
+                my $keywords = find( $d1, "./nmwg:metadata/summary:parameters/nmwg:parameter", 0 );
+                foreach my $k ( $keywords->get_nodelist ) {
+                    my $name = $k->getAttribute("name");
+                    next unless $name eq "keyword";
+                    my $value = extract( $k, 0 );
+                    if ( $value ) {
+                        $keywords{$value} = 1;
+                    }
+                }
+
+                # get the eventTypes
                 my $eventTypes = find( $d1, "./nmwg:metadata/nmwg:eventType", 0 );
                 foreach my $e ( $eventTypes->get_nodelist ) {
                     my $value = extract( $e, 0 );
@@ -227,6 +239,9 @@ foreach my $h ( keys %hls ) {
                 last;
             }
         }
+        
+        # store the keywords
+        $hls{$h}{"KEYWORDS"} = \%keywords;    
     }
     else {
         delete $hls{$h};
@@ -273,7 +288,20 @@ close(FILE2);
 # should we do some verification/validation here?
 open( HLS, ">" . $base . "/list.hls" ) or croak "can't open hls list";
 foreach my $h ( keys %hls ) {
-    print HLS $hls{$h}, "\n";
+    print HLS $hls{$h}{"INFO"};
+    if ( exists $hls{$h}{"KEYWORDS"} and $hls{$h}{"KEYWORDS"} ) {
+        my $counter = 0;
+        foreach my $k ( keys %{ $hls{$h}{"KEYWORDS"} } ) {
+            if( $counter ) {
+                print HLS "," , $k;
+            }
+            else {
+                print HLS "|" , $k;
+            }
+            $counter++;
+        }
+    }
+    print HLS "\n";
 }
 close(HLS);
 
@@ -367,7 +395,7 @@ with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008, Internet2
+Copyright (c) 2008-2009, Internet2
 
 All rights reserved.
 
