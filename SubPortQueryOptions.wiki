@@ -1,0 +1,135 @@
+== Problem Description ==
+
+The interest is being able to query specific sub-ports on a switch.  For
+example, allowing a client to query for vlan 3000 on port so-0/0/0 or a
+port using timeslots 3-6 on optical port 1-A-1-1.
+
+The topology description for this host would look like:
+
+{{{
+<nmtb:node id="urn:nml:internet2.edu:node_packrat">
+  <nmtb:name>packrat</nmtb:name>
+  <nmtb:address type="ipv4">207.75.164.10</nmtb:address>
+</nmtb:node>
+
+<ethernet:port id="urn:nml:internet2.edu:port_packrat_eth0">
+  <ethernet:relation type="parent">urn:nml:internet2.edu:port_packrat_eth0</ethernet:relation>
+  <ethernet:name>eth0</ethernet:name>
+</ethernet:port>
+
+<ethernet:port id="urn:nml:internet2.edu:port_packrat_eth0.3000">
+  <ethernet:relation type="shares">urn:nml:internet2.edu:port_packrat_eth0</ethernet:relation>
+  <ethernet:vlan>3000</ethernet:vlan>
+</ethernet:port>
+
+}}}
+
+
+== Possible Query Options ==
+
+=== Keep XPath Style ====
+Using the topology description given above, there doesn't seem to be a way to
+easily and unambiguously query for "vlan 3000 on port eth0" using the metadata
+xpath pattern matching mechanisms we use.
+
+The only way to even construct that query would require restructuring the
+listed metadata. If we nested the elements, we could again use xpath queries.
+
+{{{
+<nmtb:node id="urn:nml:internet2.edu:node_packrat">
+  <nmtb:name>packrat</nmtb:name>
+  <nmtb:address type="ipv4">207.75.164.10</nmtb:address>
+
+  <ethernet:port id="urn:nml:internet2.edu:port_packrat_eth0">
+    <ethernet:relation type="parent">urn:nml:internet2.edu:port_packrat_eth0</ethernet:relation>
+    <ethernet:name>eth0</ethernet:name>
+    <ethernet:port id="urn:nml:internet2.edu:port_packrat_eth0.3000">
+      <ethernet:relation type="shares">urn:nml:internet2.edu:port_packrat_eth0</ethernet:relation>
+      <ethernet:vlan>3000</ethernet:vlan>
+    </ethernet:port>
+  </ethernet:port>
+</nmtb:node>
+}}}
+
+The xpath would look something like:
+{{{
+//nmtb:node[nmtb:address='207.75.164.10' and ethernet:port/ethernet:name='eth0' and ethernet:port/ethernet:port/ethernet:vlan='3000'];
+}}}
+
+However, this has an ambiguity to it. Say that a given eventType is applicable
+at multiple levels. For example, you can grab TL1 alarms for a given host, or
+just for a given port.
+
+When the host is specified, the xpath would look like:
+
+{{{
+//nmtb:node[nmtb:address='207.75.164.10'];
+}}}
+
+When the metadata database was queried, this would return the node, along with
+all the elements contained within it. The open question would be, which element
+did they mean to grab? It would need some way of signifying "i wanted to grab
+element X or elements of type X that match my query". 
+
+One way around that would be to have the client specify an empty element at a given depth to request all the elements at that depth.
+
+For example, to return all the trunk ethernet port elements, the client would use:
+
+{{{
+<nmtb:node>
+  <nmtb:address>207.75.164.10</nmtb:address>
+  <ethernet:port />
+</nmtb:node>
+}}}
+
+To match all the VLANs, the client would do:
+
+{{{
+<nmtb:node>
+  <nmtb:address>207.75.164.10</nmtb:address>
+  <ethernet:port>
+    <ethernet:port />
+  </ethernet:port>
+</nmtb:node>
+}}}
+
+There are a couple downsides to this approach.
+
+  * The service needs to know more about the metadata it's querying against since it would need to parse the subject to ascertain what level of depth it should be returning.
+  * The metadata output could get rather large if every element was returned with full instances of all its parent elements. The other option is to return every "element" separately, which is what the E2EMon style does.
+  * It moves away from the "relation" style of linking network elements together
+
+=== More complex querying methods ===
+
+Another option would be to allow client queries to include relation elements.
+
+{{{
+<nmtb:node id="1">
+  <nmtb:address>207.75.164.10</nmtb:address>
+</nmtb:node>
+
+<ethernet:port id="2">
+  <ethernet:relation type="parent">1</ethernet:relation>
+</ethernet:port>
+
+<ethernet:port>
+  <ethernet:relation type="shares">2</ethernet:relation>
+</ethernet:port>
+</nmtb:node>
+}}}
+
+This fits better with the keeping the relation elements separate, and in
+theory, we could start doing a single metadata per element, and reducing the
+duplication. Each of those elements above, for instance, could be in its own
+metadata. (Starting to sound like E2EMon...)
+
+The downsides to this approach:
+
+  * The service needs to know even more about elements since it'll need to go through all the metadata looking for the matching elements. 
+  * Querying is notedly harder since the identifiers given by the user are virtual, so we'll need to map those to the real identifiers in the backend.
+
+=== Crazy Approach ===
+
+Punt the issue. Get rid of all the topology elements in the MAs, and only have them in the Topology Services. The client would query the topology service (using any complex query it desires), and then looks up which MAs contain data on the topology identifiers it gets back.
+
+Personally, I like this approach the best. However, this would have substantial inertia problems as the model is notedly different than what we're used to.
