@@ -13,6 +13,14 @@
   * There's a mixture of topology and metric requests needed for some of these use-cases (what's connected to what being the most basic)
   * Depending on how the queries are structured, there may be some ambiguity or it may be difficult to do the simple pattern-match queries
 
+== Measurable Elements ==
+  * Optical Ports
+  * Optical Timeslots (VCGs)
+  * Ethernet Ports
+  * Ethernet VLANs
+  * Cross-Connects
+  * Sub-Network Connections - links between ports on separate machines.
+
 == Possible Queries ==
 
 === Raw Facilities ===
