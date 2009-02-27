@@ -146,9 +146,12 @@ The following is a very loose schedule based on interests of PSU and development
 
 === Feb and March 2009 ===
   
-...
+ 
+Developers will be busy between current time and late March.  
+ 
   
 ==== Internet2 Developers ==== 
+
 
 Developer time will be focused on the release of new tools (perfsonar, owamp, bwctl).
 
@@ -158,7 +161,9 @@ Developer time will be focused on the release of new tools (perfsonar, owamp, bw
 || Early March || Internet2 Repository - public availability ||
 || March, 27 || perfSONAR-PS Release ||
 
+
 ==== Penn State Staff ==== 
+
 
 PSU time can be focused on either testing new releases or deploying existing tools.  
 
@@ -168,12 +173,16 @@ PSU time can be focused on either testing new releases or deploying existing too
 || March || Install BWCTL to Beacons, BWCTL Clients to NOC/IT machines ||
 || Late March || Install OWAMP to Beacons, OWAMP Clients to NOC/IT machines ||
 || Late March || Live CD deployment to selected locations (temporary) ||
-  
+
+
 === April and May 2009 ===
 
-...
+
+Spring activities are centered on several development milestones, testing help would be most appreciated.
+
   
 ==== Internet2 Developers ==== 
+
 
 Developer time will be focused on additional releases (Performance Node) and beta testing.
 
@@ -182,7 +191,9 @@ Developer time will be focused on additional releases (Performance Node) and bet
 || May || Performance Node Live CD Release ||
 || April/May || Possible Coordination for F2F/Training if desired ||
 
+
 ==== Penn State Staff ==== 
+
 
 PSU time can be spent deploying perfSONAR tools and testing new releases.
 
@@ -191,28 +202,35 @@ PSU time can be spent deploying perfSONAR tools and testing new releases.
 || April || perfSONAR-BUOY Deployment using Beacon machines ||
 || Late April/May || Beta Testing of web100/NDT projects - selected live CD locations can be used for this ||
 
+
 === Summer 2009 ===
 
-...
+
+The summer plans are vague for now, this is pending several release cycles and other community coordinated activities.  
+
 
 ==== Internet2 Developers ==== 
 
+
+Developers will be planning releases, and can focus on PSU feedback.
+
 || _*Date*_ || _*Activity*_ ||
-|| June/July || Performance Node (Fedora Based) ||
 || June/July || perfSONAR-PS (planned) ||
-|| July/Aug || GUI development ||
+|| July/Aug || Performance Node (Fedora Based) ||
 || June/July || Performance Node Demonstration (for JTs) ||
+|| July/Aug || GUI development ||
 
-Developers will be planning releases, and can focus on PSU feedback.  
-
+ 
 ==== Penn State Staff ==== 
+
 
 PSU can provide feedback, deploy any remaining tools.   
  
 || _*Date*_ || _*Activity*_ ||
-|| June/July || NDT/web100 full deployment ||
-|| June/July || LS if applicable ||
+|| July || NDT/web100 full deployment ||
+|| July || LS if applicable ||
 || Summer || Review current progress, suggest tool/GUI directions ||
+
 
 == Action Items ==
 
