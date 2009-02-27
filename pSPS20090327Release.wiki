@@ -1,4 +1,4 @@
-= perfSONAR-PS v0.10 Release  =
+= perfSONAR-PS v3.1 Release  =
 
  # [pSPS20090327Release#Introduction Introduction]
  # [pSPS20090327Release#Release_Team Release Team]
@@ -13,7 +13,7 @@
 
 == Introduction ==
 
-This page outlines details regarding the perfSONAR-PS release that began the week of February 16, 2008 and ended on March 27 2009 in the release of v0.10 of perfSONAR-PS.
+This page outlines details regarding the perfSONAR-PS release that began the week of February 23, 2008 and ended on March 27 2009 in the release of v3.1 of perfSONAR-PS.
 
 == Release Team ==
 

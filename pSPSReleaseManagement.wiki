@@ -2,7 +2,7 @@
 
  # [pSPSReleaseManagement#Introduction Introduction]
  # [pSPSReleaseManagement#Frequency Release Frequency]
-   # [pSPSReleaseManagement#March_9_2009 v0.10 Release]
+   # [pSPSReleaseManagement#v3.1_Release v3.1 Release]
  # [pSPSReleaseManagement#Release_Process Release Process]
    # [pSPSReleaseManagement#Dependencies Dependencies]
    # [pSPSReleaseManagement#Revision_Control Revision Control] 
@@ -26,7 +26,7 @@ perfSONAR-PS will be released on a bi-yearly basis to coincide with major activi
 
 These suggestions were based on group feedback from the [20081211Video December 11th Call], dates may be shifted based on priorities of the released software or group members.
 
-=== v0.10 Release ===
+=== v3.1 Release ===
 
 For more information regarding this release, please see the information [pSPS20090327Release page].
 
