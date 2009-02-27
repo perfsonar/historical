@@ -4,7 +4,7 @@
 
 == Introduction ==
 
-The following describes a proposed plan for deployment of [http://www.internet2.edu/performance performance] tools at The Pennsylvania State University.  The proposed roll-out will be conducted in stages to allow for tool development and customer adoption.  Many steps are pending development efforts by Internet2 and project partners.  Feedback about individual items may cause slippage in the schedule or overall way forward.
+The following describes a proposed plan for deployment of [http://www.internet2.edu/performance performance] tools at The Pennsylvania State University.  The proposed roll-out will be conducted in stages to allow for tool development and user adoption.  Many steps are pending development efforts by Internet2 and project partners.  Feedback about individual items may cause slippage in the schedule or overall way forward.
 
 == Tools ==
 
@@ -15,7 +15,7 @@ The following tools are to be considered in the overall performance rollout.  Th
 [http://e2epi.internet2.edu/bwctl/ BWCTL] is a scheduling and policy daemon wrapped around throughput testing tools (e.g. [http://sourceforge.net/projects/iperf Iperf], [http://www.lcp.nrl.navy.mil/nuttcp/ nuttcp]).  Typical use cases for BWCTL:
 
  # Daemons installed at Points of Presence (_*PoPs*_) of a network.
- # Client applications made available to IT/NOC staff and customers
+ # Client applications made available to IT/NOC staff and PSU customers
  # Documentation provided on how and why to use this tool
  # Integration with Monitoring frameworks (e.g. [DeploymentPSU#perfSONAR-BUOY perfSONAR-BUOY])
  
@@ -30,7 +30,7 @@ BWCTL is a lightweight tool and requires only minimal installation and maintenan
 [http://e2epi.internet2.edu/owamp/ OWAMP] is a reference implementation of the [http://www.rfc-editor.org/rfc/rfc4656.txt One Way Ping RFC].  OWAMP consists of a simple client/server paradigm that is able to stream measurements in either direction and interpret the results.  Typical use cases for OWAMP:
 
  # Daemons installed at Points of Presence (_*PoPs*_) of a network.
- # Client applications made available to IT/NOC staff and customers
+ # Client applications made available to IT/NOC staff and PSU customers
  # Documentation provided on how and why to use this tool
  # Integration with Monitoring frameworks (e.g. [DeploymentPSU#perfSONAR-BUOY perfSONAR-BUOY])
 
@@ -53,7 +53,7 @@ Similar to [DeploymentPSU#BWCTL BWCTL], OWAMP is lightweight and requires minima
 Typical use cases for NDT include:
 
  # Web100 and NDT servers installed at at Points of Presence (_*PoPs*_) of a network.
- # CLI tool made available to IT/NOC staff (maybe customers)
+ # CLI tool made available to IT/NOC staff (maybe PSU customers)
  # Appropriate documentation on how to use both the GUI and CLI, proper announcement that tools are available at certain locations.  
  # Availability of [NPToolkit Network Performance Toolkit] CDs to IT/NOC staff to aid in network debugging
 
@@ -146,7 +146,7 @@ The following is a very loose schedule based on interests of PSU and development
 
 === Feb and March 2009 ===
 
-Developer time will be focused on the release of new tools (perfsonar, owamp, bwctl).  Customer time can be focused on either testing new releases or deploying existing tools.  
+Developer time will be focused on the release of new tools (perfsonar, owamp, bwctl).  PSU time can be focused on either testing new releases or deploying existing tools.  
 
 ==== Internet2 Developers ====
 
@@ -167,7 +167,7 @@ Developer time will be focused on the release of new tools (perfsonar, owamp, bw
   
 === April and May 2009 ===
 
-Developer time will be focused on additional releases (Performance Node) and beta testing.  Customer time can be spent deploying perfSONAR tools and testing new releases.
+Developer time will be focused on additional releases (Performance Node) and beta testing.  PSU time can be spent deploying perfSONAR tools and testing new releases.
 
 ==== Internet2 Developers ====
 
@@ -185,7 +185,7 @@ Developer time will be focused on additional releases (Performance Node) and bet
 
 === Summer 2009 ===
 
-Developers will be planning releases, and can focus on customer feedback.  Customers can provide feedback, deploy any remaining tools.  
+Developers will be planning releases, and can focus on PSU feedback.  PSU can provide feedback, deploy any remaining tools.  
 
 ==== Internet2 Developers ====
 
