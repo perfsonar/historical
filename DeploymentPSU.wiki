@@ -80,6 +80,14 @@ SNMP monitoring is lightweight and would require installation in a single locati
 
  # _*SNMP Monitor*_ - One of the aforementioned tools will suffice.  These are normally available via the package manager for a given distribution.  
  # _*perfSONAR SNMP MA*_ - See [DeploymentPSU#SNMP_MA SNMP MA] for more info.
+
+=== Nagios ===
+
+[http://www.nagios.org/ Nagios] is a monitoring system that the Internet2 developers have been considering to perform the task of _monitoring the monitoring_.  Work here is still preliminary, but goals include:
+
+ * Plugins to monitor perfSONAR services (liveness)
+ * Plugins to monitor performance daemons (liveness)
+ * Plugins to graph measurement data over time.
  
 === perfSONAR ===
 
@@ -131,14 +139,6 @@ Deployment involves the installation of finicky software:
 
  # _*dbxml*_ - installed via RPM from Internet2 Repository, deploy to server machine.
  # _*perfSONAR LS*_ - installed via RPM from Internet2 Repository, deploy to server machine.
-
-=== Nagios ===
-
-[http://www.nagios.org/ Nagios] is a monitoring system that the Internet2 developers have been considering to perform the task of _monitoring the monitoring_.  Work here is still preliminary, but goals include:
-
- * Plugins to monitor perfSONAR services (liveness)
- * Plugins to monitor performance daemons (liveness)
- * Plugins to graph measurement data over time.
 
 == Schedule ==
 
