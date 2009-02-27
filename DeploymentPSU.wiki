@@ -148,7 +148,7 @@ The following is a very loose schedule based on interests of PSU and development
 
 Developer time will be focused on the release of new tools (perfsonar, owamp, bwctl).  PSU time can be focused on either testing new releases or deploying existing tools.  
 
-==== Internet2 Developers ====
+ * _*Internet2 Developers*_
 
 || _*Date*_ || _*Activity*_ ||
 || Jan/Feb || OWAMP Release ||
@@ -156,7 +156,7 @@ Developer time will be focused on the release of new tools (perfsonar, owamp, bw
 || Early March || Internet2 Repository - public availability ||
 || March, 27 || perfSONAR-PS Release ||
 
-==== Penn State Staff ==== 
+ * _*Penn State Staff*_
 
 || _*Date*_ || _*Activity*_ ||
 || Early March || Configure Beacons to use Internet2 (and other) Repositories ||
@@ -169,14 +169,14 @@ Developer time will be focused on the release of new tools (perfsonar, owamp, bw
 
 Developer time will be focused on additional releases (Performance Node) and beta testing.  PSU time can be spent deploying perfSONAR tools and testing new releases.
 
-==== Internet2 Developers ====
+ * _*Internet2 Developers*_
 
 || _*Date*_ || _*Activity*_ ||
 || April, 27 || perfSONAR-PS Release (selected services, Nagios support) ||
 || May || Performance Node Live CD Release ||
 || April/May || Possible Coordination for F2F/Training if desired ||
 
-==== Penn State Staff ==== 
+ * _*Penn State Staff*_
 
 || _*Date*_ || _*Activity*_ ||
 || Mid April || Beta Testing of Live CD - Replace existing Live CDs ||
@@ -187,7 +187,7 @@ Developer time will be focused on additional releases (Performance Node) and bet
 
 Developers will be planning releases, and can focus on PSU feedback.  PSU can provide feedback, deploy any remaining tools.  
 
-==== Internet2 Developers ====
+ * _*Internet2 Developers*_
 
 || _*Date*_ || _*Activity*_ ||
 || June/July || Performance Node (Fedora Based) ||
@@ -195,7 +195,7 @@ Developers will be planning releases, and can focus on PSU feedback.  PSU can pr
 || July/Aug || GUI development ||
 || June/July || Performance Node Demonstration (for JTs) ||
  
-==== Penn State Staff ==== 
+ * _*Penn State Staff*_
 
 || _*Date*_ || _*Activity*_ ||
 || June/July || NDT/web100 full deployment ||
