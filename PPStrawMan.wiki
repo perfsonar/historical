@@ -221,7 +221,6 @@ These dates are very aggressive, but do assume approximately the current resourc
 
 === Phoebus ===
 
-
 The primary short-term goals for phoebus development is: protocol separation of data and control, performance enhancements, and stability and usability enhancements.
 
 ==== Phoebus 1.1 Enhancements ====
@@ -260,7 +259,29 @@ This schedule assumes that most of the development work is happening at UDel and
   * Native MacOS client support
     # 0.5 yr, 0.5 FTE
 
+
+=== Research Next Generation Networks ===
+
+The primary short-term goals for...
+
+==== Milestone A ====
+
+  * Geni something something..
+
+==== Milestone B ====
+
+  * Openflow something something...
+
+=== Research Schedule ===
+
+This schedule assumes something.
+
+|| *Date* || *Milestone* ||
+
+==== Additional Research Goals ====
+
+  * Something even more cool
+
 == Last Updated ==
 
 $Id$
-
