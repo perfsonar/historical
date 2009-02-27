@@ -119,9 +119,9 @@ These dates are very agressive, but do assume approximately the current resource
   * Develop methods for automated xml-topology generation for intra-domain as well as automated 'abstract topology' generation from that for inter-domain exchanges
     # 1 yr, 2 FTE
   * Develop Point-to-Multipoint and Mutipoint-to-Multipoint services
-    # ?
+    # 1 yr, 1 FTE
   * Develop mechanisms for ethernet QinQ services on DCN
-    # ?
+    # .5 yr, 1 FTE
   * Develop enhanced GUI or script based config/installation tools for DCN-SS
     # 2 yr, 2 FTE
   * Develop GUI/Map point-n-click based provisioning system
@@ -201,7 +201,7 @@ These dates are very aggressive, but do assume approximately the current resourc
   * pS-Netflow - archive of netflow data
     * allow queries to search for specific patterns
     * allow queries for specific summary stats (what ports used, gross traffic flows, IPv4 vs IPv6 etc...)
-    # 0.5 yr, 1 FTE.
+    # 1 yr, 1 FTE.
   * BGP archive
     * What would the route have been for a packet at time X at location Y be?
     # 1 yr, 1 FTE.
@@ -256,7 +256,7 @@ This schedule assumes that most of the development work is happening at UDel and
 ==== Phoebus Additional Desired Enhancements ====
 
   * Native windows client support
-    # 0.5 yr, 0.5 FTE
+    # 1 yr, 0.5 FTE
   * Native MacOS client support
     # 0.5 yr, 0.5 FTE
 
