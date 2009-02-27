@@ -193,7 +193,7 @@ Developers will be planning releases, and can focus on PSU feedback.  PSU can pr
 || June/July || Performance Node (Fedora Based) ||
 || June/July || perfSONAR-PS (planned) ||
 || July/Aug || GUI development ||
-|| June/July/Aug || Performance Node Demonstration (for JTs) ||
+|| June/July || Performance Node Demonstration (for JTs) ||
  
 ==== Penn State Staff ==== 
 
