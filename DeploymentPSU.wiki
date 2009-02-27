@@ -132,17 +132,85 @@ Deployment involves the installation of finicky software:
  # _*dbxml*_ - installed via RPM from Internet2 Repository, deploy to server machine.
  # _*perfSONAR LS*_ - installed via RPM from Internet2 Repository, deploy to server machine.
 
-== Procedures ==
+=== Nagios ===
 
-TBD
+[http://www.nagios.org/ Nagios] is a monitoring system that the Internet2 developers have been considering to perform the task of _monitoring the monitoring_.  Work here is still preliminary, but goals include:
+
+ * Plugins to monitor perfSONAR services (liveness)
+ * Plugins to monitor performance daemons (liveness)
+ * Plugins to graph measurement data over time.
 
 == Schedule ==
 
-TBD
+The following is a very loose schedule based on interests of PSU and development activities of Internet2.  
+
+=== Feb and March 2009 ===
+
+Developer time will be focused on the release of new tools (perfsonar, owamp, bwctl).  Customer time can be focused on either testing new releases or deploying existing tools.  
+
+==== Internet2 Developers ====
+
+ || _*Date*_ || _*Activity*_ ||
+ || Jan/Feb || OWAMP Release ||
+ || Jan/Feb || BWCTL Release ||  
+ || Early March || Internet2 Repository - public availability ||
+ || March, 27 || perfSONAR-PS Release ||
+
+==== Penn State Staff ==== 
+
+ || _*Date*_ || _*Activity*_ ||
+ || Early March || Configure Beacons to use Internet2 (and other) Repositories ||
+ || Early March || Ensure Beacons are NTP'd and TCP Tune'd ||
+ || March || Install BWCTL to Beacons, BWCTL Clients to NOC/IT machines ||
+ || Late March || Install OWAMP to Beacons, OWAMP Clients to NOC/IT machines ||
+ || Late March || Live CD deployment to selected locations (temporary) ||
+  
+=== April and May 2009 ===
+
+Developer time will be focused on additional releases (Performance Node) and beta testing.  Customer time can be spent deploying perfSONAR tools and testing new releases.
+
+==== Internet2 Developers ====
+
+ || _*Date*_ || _*Activity*_ ||
+ || April, 27 || perfSONAR-PS Release (selected services, Nagios support) ||
+ || May || Performance Node Live CD Release ||
+ || April/May || Possible Coordination for F2F/Training if desired ||
+
+==== Penn State Staff ==== 
+
+ || _*Date*_ || _*Activity*_ ||
+ || Mid April || Beta Testing of Live CD - Replace existing Live CDs ||
+ || April || perfSONAR-BUOY Deployment using Beacon machines ||
+ || Late April/May || Beta Testing of web100/NDT projects - selected live CD locations can be used for this ||
+
+=== Summer 2009 ===
+
+Developers will be planning releases, and can focus on customer feedback.  Customers can provide feedback, deploy any remaining tools.  
+
+==== Internet2 Developers ====
+
+ || _*Date*_ || _*Activity*_ ||
+ || June/July || Performance Node (Fedora Based) ||
+ || June/July || perfSONAR-PS (planned) ||
+ || July/Aug || GUI development ||
+ || June/July/Aug || Performance Node Demonstration (for JTs) ||
+ 
+==== Penn State Staff ==== 
+
+ || _*Date*_ || _*Activity*_ ||
+ || June/July || NDT/web100 full deployment ||
+ || June/July || LS if applicable ||
+ || Summer || Review current progress, suggest tool/GUI directions ||
 
 == Action Items ==
 
-TBD
+ * JZ
+   # Complete deployment of Internet2 Yum/APT Repo
+   # Document Yum/APT Repo procedures
+   # Furnish info to KM for PSU deployment of bwctl/owamp
+ * KM
+   # Deploy Tools
+   # Gather requirements for documentation/remaining tool roll-outs
 
 == Last Modified ==
 
