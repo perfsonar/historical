@@ -3,6 +3,7 @@ package edu.internet2.perfsonar.dcn;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -144,6 +145,7 @@ public class DCNLookupClient{
         this.log = Logger.getLogger(this.getClass());
         this.gLSList = gLSList;
         this.hLSList = null;
+        this.useGlobalLS = true;
         this.tryAllGlobal = false;
         this.retryOnKeyNotFound = false;
         this.psNS = new PSNamespaces();
@@ -167,6 +169,7 @@ public class DCNLookupClient{
         this.log = Logger.getLogger(this.getClass());
         this.gLSList = gLSList;
         this.hLSList = hLSList;
+        this.useGlobalLS = true;
         this.tryAllGlobal = false;
         this.retryOnKeyNotFound = false;
         this.psNS = new PSNamespaces();
@@ -184,10 +187,10 @@ public class DCNLookupClient{
      */
     public String lookupHost(String name) throws PSException{
         long currentTime = System.currentTimeMillis();
-
         DCNHostCacheElement hostCacheElement = this.getHostCache(name);
         if (hostCacheElement != null) {
             if (currentTime <= (hostCacheElement.retrieveTime + this.HOST_CACHE_LENGTH * 1000)) {
+                this.log.debug("Using name cache for " + name);
                 return hostCacheElement.urn;
             }
         }
@@ -198,22 +201,25 @@ public class DCNLookupClient{
 
         DCNDomainCacheElement domainCacheElement = this.getDomainCache(domain);
         if (domainCacheElement != null && currentTime <= (domainCacheElement.retrieveTime + this.DOMAIN_CACHE_LENGTH * 1000)) {
+            this.log.debug("Using domain cache for " + domain);
             hLSMatches = domainCacheElement.hLSs;
         } else {
-            if (this.usesGlobalLS() == false) {
-                hLSMatches = this.getHLSList();
-            }
-
-            if (hLSMatches == null){
+            List<String> hlsMatchList = new ArrayList<String>();
+            String[] glsResults = new String[0];
+            if (this.usesGlobalLS()){
                 String discoveryXQuery = DISC_XQUERY;
                 discoveryXQuery = discoveryXQuery.replaceAll("<!--addrPath-->", "nmtb:domain/nmtb:name");
                 discoveryXQuery = discoveryXQuery.replaceAll("<!--domain-->", domain);
                 discoveryXQuery = discoveryXQuery.replaceAll("<!--type-->", "dns");
                 Element discReqElem = this.createQueryMetaData(discoveryXQuery);
-                hLSMatches = this.discover(this.requestString(discReqElem, null));
+                try{
+                    glsResults = this.discover(this.requestString(discReqElem, null));
+                }catch(Exception e){
+                    this.log.debug(e.getMessage());
+                }
             }
-
-            this.addDomainCache(domain, System.currentTimeMillis(), hLSMatches);
+            
+            hLSMatches = this.getHLSMatches(glsResults);
         }
 
         if (hLSMatches != null) {
@@ -256,7 +262,7 @@ public class DCNLookupClient{
      */
     public Element lookupNode(String addr) throws PSException{
         Element node = null;
-        String[] hLSMatches = this.getHLSList();
+        String[] hLSMatches = new String[0];
 
         String addrPath = "nmtl3:network/nmtl3:subnet/nmtl3:address";
         String type = "nmtl3:port/nmtl3:address";
@@ -268,15 +274,18 @@ public class DCNLookupClient{
             typeAttr = "dns";
             domain = domain.replaceFirst(".+?\\.", "");
         }
-        if(this.usesGlobalLS() || hLSMatches == null){
+        
+        String[] glsResults = new String[0];
+        if (this.usesGlobalLS()){
             String discoveryXQuery = DISC_XQUERY;
             discoveryXQuery = discoveryXQuery.replaceAll("<!--addrPath-->", addrPath);
             discoveryXQuery = discoveryXQuery.replaceAll("<!--domain-->", domain);
             discoveryXQuery = discoveryXQuery.replaceAll("<!--type-->", typeAttr);
             Element discReqElem = this.createQueryMetaData(discoveryXQuery);
-            hLSMatches = this.discover(this.requestString(discReqElem, null));
+            glsResults = this.discover(this.requestString(discReqElem, null));
         }
-
+        hLSMatches = this.getHLSMatches(glsResults);
+        
         String xquery = NODE_XQUERY;
 
         xquery = xquery.replaceAll("<!--addr-->", addr);
@@ -385,9 +394,10 @@ public class DCNLookupClient{
      */
     public Element lookupService(String type, String id, String relation, String where, String xpath) throws PSException{
         this.log.debug("lookupIDC.id=" + id);
-        String[] hLSMatches = this.getHLSList();
+        String[] hLSMatches = new String[0];
         Element datum = null;
-        if(this.usesGlobalLS() || hLSMatches == null){
+        String[] glsResults =new String[0];
+        if(this.usesGlobalLS()){
             String discoveryXQuery = DISC_XQUERY;
             String lookupId = id.replaceAll("urn:ogf:network:domain=", "");
             try{
@@ -400,9 +410,10 @@ public class DCNLookupClient{
             discoveryXQuery = discoveryXQuery.replaceAll("<!--addrPath-->", "nmtb:domain/nmtb:name");
             discoveryXQuery = discoveryXQuery.replaceAll("<!--type-->", "dns");
             Element discReqElem = this.createQueryMetaData(discoveryXQuery);
-            hLSMatches = this.discover(this.requestString(discReqElem, null));
+            glsResults = this.discover(this.requestString(discReqElem, null));
         }
-
+        hLSMatches = this.getHLSMatches(glsResults);
+        
         String idType = "address";
         if(id.startsWith("urn:ogf:network")){
             idType = "idRef";
@@ -852,6 +863,28 @@ public class DCNLookupClient{
         return this.hostCache.get(id);
     }
 
+    private String[] getHLSMatches(String[] glsResults){
+        String[] hLSMatches = new String[0];
+        List<String> hlsMatchList = new ArrayList<String>();
+        for(String gLSResult : glsResults){
+            this.log.debug("adding " + gLSResult);
+            hlsMatchList.add(gLSResult);
+        }
+        //add all home LSs as backup
+        if(this.hLSList != null){
+            for(String hLS : this.hLSList){
+                this.log.debug("adding " + hLS);
+                if(!hlsMatchList.contains(hLS)){
+                    hlsMatchList.add(hLS);
+                }
+            }
+        }
+        if(!hlsMatchList.isEmpty()){
+            hLSMatches = hlsMatchList.toArray(new String[hlsMatchList.size()]);
+        }
+        
+        return hLSMatches;
+    }
     private synchronized void addHostCache(String name, long retrieveTime, String hLS, String urn) {
         if (this.disableCaching)
             return;

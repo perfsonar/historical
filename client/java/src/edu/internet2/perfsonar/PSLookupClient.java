@@ -7,7 +7,6 @@ import java.util.Random;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.jdom.Content;
 import org.jdom.Element;
 
 /**
