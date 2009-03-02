@@ -10,6 +10,7 @@
    # ESNet
    # FNAL
  # perfSONAR-PS v0.10 Release Update
+   * SVN Branching tonight - Update from Aaron.
    * See [pSPS20090327Release] for details
      * Check individual progress.
    * Code slush is scheduled for March 6!
