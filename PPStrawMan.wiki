@@ -162,6 +162,8 @@ In support of the CTP project (*if applicable*). Otherwise, some of these things
 ==== pS-PS 3.2 enhancements ====
 
   * Monitoring of DCN-created circuits
+  * Discovery APIs
+    * Well structured, documented - designed for application programmers
   * limited AA integration
 
 ==== pS-NPToolkit 3.2 ====
