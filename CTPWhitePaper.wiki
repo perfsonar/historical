@@ -90,7 +90,7 @@ which groups I think are best positioned for the specific parts.
     These estimates are given as if this was the number one priority of all people involved. If this is not the case, then we will need to scale back in either scope or timeframe. These are very aggressive estimates.
 
 || 2/23        || Project Start || Responsible || Status ||
-|| 3/2-3/2    || Defining/ordering test hardware || JH/ML || Trying ASUS and ?MacMini ||
+|| 3/2-3/2    || Defining/ordering test hardware || JH/ML || Trying ASUS and !MacMini ||
 || 3/3-3/13    || Test hardware in AA || AB || ||
 || 2/23-3/13   || OS integration and perf-node required software development || AB/JH || ||
 || 2/23-3/13   || Central configuration setup developed/tested. (rsync or other) || AB/JH/DP || ||
