@@ -100,7 +100,10 @@ while ($files_left) {
         while(<DEPENDS>) {
             my $module;
 
-            if (/use base '([a-z_A-Z0-9]*(::[a-z_A-Z0-9]*)*)'/) {
+            if (/use base ['"]([a-z_A-Z0-9]*(::[a-z_A-Z0-9]*)*)['"]/) {
+                $module = $1;
+				$dependencies{"base"} = 1;
+            } elsif (/use aliased ['"]([a-z_A-Z0-9]*(::[a-z_A-Z0-9]*)*)['"]/) {
                 $module = $1;
 				$dependencies{"base"} = 1;
             } elsif (/use ([a-z_A-Z0-9]*(::[a-z_A-Z0-9]*)*)/) {
