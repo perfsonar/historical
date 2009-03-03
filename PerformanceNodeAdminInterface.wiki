@@ -4,20 +4,7 @@ This document describes the current interface of the Performance Node Live CD
 as well as proposed changes to bring the users of this tool a higher level of 
 comfort during the configuration process.  
 
- * [PerformanceNodeAdminInterface#Interface_Requirements Interface Requirements]
-   * [PerformanceNodeAdminInterface#Modes_of_Operation Modes of Operation]
-     * [PerformanceNodeAdminInterface#Zero-Config_Mode Zero-Config Mode]
-     * [PerformanceNodeAdminInterface#Pre-Config_Mode Pre-Config Mode]
-     * [PerformanceNodeAdminInterface#Full_Config_Mode Full Config Mode]
-   * [PerformanceNodeAdminInterface#Rebooting Rebooting]
- * [PerformanceNodeAdminInterface#Proposed_Changes Proposed Changes]
-   * [PerformanceNodeAdminInterface#Current_Tool_Options Current Tool Options]
-   * [PerformanceNodeAdminInterface#Zero-Config_Boot Zero-Config Boot]
-   * [PerformanceNodeAdminInterface#Web-based_Configuration Web-based Configuration]
- * [PerformanceNodeAdminInterface#Development_Plan Development Plan]
-   * [PerformanceNodeAdminInterface#Final_Knoppix_Release Final Knoppix Release]
-   * [PerformanceNodeAdminInterface#First_Fedora_Release First Fedora Release]
-   * [PerformanceNodeAdminInterface#Subsequent_Fedora_Releases Subsequent Fedora Releases]
+<wiki:toc max_depth="6" />
 
 == Interface Requirements ==
 

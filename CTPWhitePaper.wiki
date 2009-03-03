@@ -3,14 +3,7 @@
 Measurement and monitoring to support [http://www.cisco.com/en/US/netsol/ns669/networking_solutions_solution_segment_home.html Cisco TelePresence] across the
 greater Internet2 Network.
 
- * [CTPWhitePaper#Immediate_Goal Immediate Goal (April SMM timeframe assumed)]
- * [CTPWhitePaper#Longer_term_Goal Longer-term Goal]
- * [CTPWhitePaper#Proposed_Solution Proposed Solution (Immediate Goal)]
-   * [CTPWhitePaper#Software_Development_Issues Software Development Issues]
-   * [CTPWhitePaper#Hardware_Testing_Deployment_Issues Hardware/Testing/Deployment Issues]
-   * [CTPWhitePaper#Ongoing_Operational_Responsibilities Ongoing Operational Responsibilities]
- * [CTPWhitePaper#Resources_Required Resources Required]
- * [CTPWhitePaper#Proposed_Timeline Proposed Timeline]
+<wiki:toc max_depth="6" />
 
 == Immediate Goal  ==
     Provide validation for the network in support of Video Conferencing.
@@ -96,15 +89,16 @@ which groups I think are best positioned for the specific parts.
 
     These estimates are given as if this was the number one priority of all people involved. If this is not the case, then we will need to scale back in either scope or timeframe. These are very aggressive estimates.
 
-|| 2/23        || Project Start ||
-|| 2/23-3/2    || Defining/ordering test hardware ||
-|| 3/2-3/13    || Test hardware in AA ||
-|| 2/23-3/13   || OS integration and perf-node required software development ||
-|| 2/23-3/13   || Central configuration setup developed/tested. (rsync or other) ||
-|| 3/16-4/6    || Order remaining hardware, deployments of perf-nodes ||
-|| 3/16-4/13   || Development of database modifications, GUI, and Nagios plugins. ||
-|| 4/6-4/13    || Debugging of deployments/real-world data validation ||
+|| 2/23        || Project Start || Responsible || Status ||
+|| 3/2-3/2    || Defining/ordering test hardware || Trying ASUS and MacMini ||
+|| 3/3-3/13    || Test hardware in AA || AB || ||
+|| 2/23-3/13   || OS integration and perf-node required software development || AB/JH || ||
+|| 2/23-3/13   || Central configuration setup developed/tested. (rsync or other) || AB/JH/DP || ||
+|| 3/16-4/6    || Order remaining hardware, deployments of perf-nodes || JH || ||
+|| 3/2-4/13   || Development of database modifications. || JB || ||
+|| 3/16-4/13   || GUI, and Nagios plugins. || JZ || ||
+|| 4/6-4/13    || Debugging of deployments/real-world data validation || JH/JZ || ||
 ||             || (Probable flush of all existing data at the end of this period) ||
-|| 4/13-4/24   || Iterative development/testing of GUI/nagios alerts ||
+|| 4/13-4/24   || Iterative development/testing of GUI/nagios alerts || JZ/JH/DP || ||
 ||             || (No database mods during this time, only presentation changes.) ||
-|| 4/27        || Ready to show community ||
+|| 4/27        || Ready to show community || all || ||
