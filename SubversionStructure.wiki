@@ -23,6 +23,18 @@ script directories like the service directories. Any files that might be shared 
 
 The relevant files can then symlinked into the service directories. To facilitate this symlinking, there is a script "package_dependencies.pl" which will read the MANIFEST file, and symlink the required modules.
 
+= Benefits To This Structure =
+
+This structure minimizes the amount of service specific files in the common areas. We could have all files live in the common area and be symlinked into the service specific areas, but we'd need to either structure the common area documentation, scripts and other directories into service-specific directories or come up with a naming convention for all files to ensure that there are no collisions.
+
 = Branching/Tagging A Release =
 
 To branch or tag a new release, decide which services are going to be released, and copy those services' service directories, along with the "Shared" directory to the new branch or tag.
+
+= Changes Required =
+
+  # Create a "Shared" directory at the top level and move the lib, scripts and doc into it.
+  # Move the directories out of the "modules" directory and move them to the top-level
+  # Create a 'scripts' directory at the top-level for the scripts to be used on the repository, instead of packaged
+  # Update the package`_``*` scripts to handle the new location of the files and move them to the new location
+  # Clear out the existing 'lib' directories in the service directories and add symlinks to the new locations.
