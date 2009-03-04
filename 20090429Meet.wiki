@@ -2,9 +2,14 @@
 
  * [20090429Meet#Where Where]
  * [20090429Meet#When When]
- * [20090429Meet#Attendees Attendees]
- * [20090429Meet#Agenda Agenda]
- * [20090429Meet#Notes Notes]
+   * [20090429Meet#perfSONAR_Developers perfSONAR Developers] 
+     * [20090429Meet#pS_Attendees Attendees]
+     * [20090429Meet#pS_Agenda Agenda]
+     * [20090429Meet#pS_Notes Notes]
+   * [20090429Meet#IDC_Developers IDC Developers] 
+     * [20090429Meet#IDC_Attendees Attendees]
+     * [20090429Meet#IDC_Agenda Agenda]
+     * [20090429Meet#IDC_Notes Notes] 
  * [20090429Meet#Local_Information Local Information]
    * [20090429Meet#DC_Office DC Office]
    * [20090429Meet#Transportation_(Airports) Transportation (Airports)]
@@ -26,10 +31,24 @@ Fax: (202) 872-6648
 
 == When ==
 
+The meetings will span 3 days:
+
+{{{
 Weds April 29, 2009 - 1PM to 6PM
 Thurs April 30, 2009 - 8AM to 5PM
+Friday May 1, 2009 - 8AM to 5PM
+}}}
 
-== Attendees ==
+The meeting will focus on development activities within and between two groups:
+
+ * [20090429Meet#perfSONAR_Developers perfSONAR Developers] 
+ * [20090429Meet#IDC_Developers IDC Developers] 
+
+=== perfSONAR Developers ===
+
+The perfSONAR developers meeting will focus on pending issues within the perfSONAR-PS framework.  Topics will span the interests of IDC developers as well, and all are encouraged to arrive early to attend and participate. 
+
+==== pS Attendees ====
 
  * Jason Zurawski
  * Jeff Boote
@@ -37,11 +56,31 @@ Thurs April 30, 2009 - 8AM to 5PM
  * Andrew Lake
  * ...
 
-== Agenda ==
+==== pS Agenda ====
 
 TBD
 
-== Notes ==
+==== pS Notes ====
+
+TBD
+
+=== IDC Developers ===
+
+The IDC developers meeting will focus on pending issues within the SDN and DCN projects and the general development of IDC software.  Topics will span topics specific to this group as well issues regarding monitoring.  perfSONAR developers are encouraged to spend the extra day and attend as well. 
+
+==== IDC Attendees ====
+
+ * Jason Zurawski
+ * Jeff Boote
+ * Aaron Brown
+ * Andrew Lake
+ * ...
+
+==== IDC Agenda ====
+
+TBD
+
+==== IDC Notes ====
 
 TBD
 
