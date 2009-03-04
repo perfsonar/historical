@@ -1,6 +1,23 @@
+= Subversion Restructure =
+
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+The following describes a change to the Subversion structure effective immediately with the [pSPS20090327Release 3.1 release].  This change allows for:
+
+ * Easier organization of the _services_ by sectioning each off into a _jailed_ environment.
+ * Easier to add/remove a service
+ * Easier packaging of RPMs
+ * Common elements including scripts and libraries can and should be shared, but this new organization allows for _private_ scripts and libraries that will not clutter the remaining parts of the framework.  
+
+This document describes the new structure and considerations for developers.
+
+== Organization ==
+
 At the top-level of the repository trunk, there are individual directories for each service, and a directory named "Shared".
 
-= The Service Directories =
+=== The Service Directories ===
 
 {{{
 perfSONAR_PS-LS
@@ -16,25 +33,29 @@ Each of those directories has bin, lib, etc, doc and script directories. The con
 
 The lib directory for that package will have all the perfSONAR-PS modules that it depends on. By giving each service its own full lib directory, it removes any shared dependencies between the perfSONAR-PS services. This allows users to upgrade their services independently without having to upgrade the shared dependencies.
 
-= The "Shared" Directory =
+=== The Shared Directory ===
 
 perfSONAR-PS has a large number of modules that are shared across multiple services. To prevent having numerous duplicate copies of these files, there's another top-level directory "Shared". This directory has bin, lib, etc, doc and
 script directories like the service directories. Any files that might be shared between the services will be placed in these directories.
 
 The relevant files can then symlinked into the service directories. To facilitate this symlinking, there is a script "package_dependencies.pl" which will read the MANIFEST file, and symlink the required modules.
 
-= Benefits To This Structure =
+== Benefits To This Structure ==
 
 This structure minimizes the amount of service specific files in the common areas. We could have all files live in the common area and be symlinked into the service specific areas, but we'd need to either structure the common area documentation, scripts and other directories into service-specific directories or come up with a naming convention for all files to ensure that there are no collisions.
 
-= Branching/Tagging A Release =
+== Branching/Tagging A Release ==
 
 To branch or tag a new release, decide which services are going to be released, and copy those services' service directories, along with the "Shared" directory to the new branch or tag.
 
-= Changes Required =
+== Changes Required ==
 
-  # Create a "Shared" directory at the top level and move the lib, scripts and doc into it.
-  # Move the directories out of the "modules" directory and move them to the top-level
-  # Create a 'scripts' directory at the top-level for the scripts to be used on the repository, instead of packaged
-  # Update the package`_``*` scripts to handle the new location of the files and move them to the new location
-  # Clear out the existing 'lib' directories in the service directories and add symlinks to the new locations.
+ # Create a "Shared" directory at the top level and move the lib, scripts and doc into it.
+ # Move the directories out of the "modules" directory and move them to the top-level
+ # Create a 'scripts' directory at the top-level for the scripts to be used on the repository, instead of packaged
+ # Update the package`_``*` scripts to handle the new location of the files and move them to the new location
+ # Clear out the existing 'lib' directories in the service directories and add symlinks to the new locations.
+  
+== Last Modified ==
+
+$Id$
