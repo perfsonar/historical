@@ -137,7 +137,7 @@ Developers are responsible for testing their code:
      * LS Registartion Daemon - _*PENDING*_
  * Aaron
    * Release Tasks
-     * Re-organize and Branch SVN - _*PENDING*_
+     * Re-organize and Branch SVN - <font color=red>_*IN PROGRESS - 3/2*_</font>
    * Development
      * Status - _*PENDING*_
      * Topology - _*PENDING*_
@@ -155,7 +155,7 @@ Developers are responsible for testing their code:
      * Contract a new CD image for NPToolkit, dated image [http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/perfnodelabel.png here] - _*PENDING*_
      * Alert Techwriter/Publication Crew of pending release - _*PENDING*_
    * Development
-     * pSB - _*PENDING*_
+     * pSB - <font color=red>_*IN PROGRESS*_</font>
    * Documentation
      * pSB - _*PENDING*_
    * Code Review
