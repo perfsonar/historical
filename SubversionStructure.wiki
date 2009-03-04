@@ -29,16 +29,61 @@ perfSONAR_PS-LSRegistrationDaemon
 perfSONAR_PS-TopologyService
 }}}
 
-Each of those directories has bin, lib, etc, doc and script directories. The configuration files, documentation init scripts, modules and daemon scripts associated with these services will be placed in this directory. This service directory forms the basis for that service's packages.
+Each of those directories has bin, lib, etc, doc and script directories.  The configuration files, documentation init scripts, modules and daemon scripts associated with these services will be placed in this directory. This service directory forms the basis for that service's packages.
 
 The lib directory for that package will have all the perfSONAR-PS modules that it depends on. By giving each service its own full lib directory, it removes any shared dependencies between the perfSONAR-PS services. This allows users to upgrade their services independently without having to upgrade the shared dependencies.
 
+{{{
+perfSONAR_PS-LS
+  scripts/
+    pS_LS.sh
+  bin/
+    perfsonar-daemon.pl
+    client.pl
+  lib/
+    perfSONAR_PS
+      Services
+        LS
+          gLS.pm
+  etc/
+    daemon.conf
+    requests/
+      LSQueryRequest.xml
+  doc/
+    INSTALL
+    README
+    LICENSE
+  Makefile
+  MANIFEST
+  perfSONAR_PS-LS.spec
+}}}
+
 === The Shared Directory ===
 
-perfSONAR-PS has a large number of modules that are shared across multiple services. To prevent having numerous duplicate copies of these files, there's another top-level directory "Shared". This directory has bin, lib, etc, doc and
+perfSONAR-PS has a large number of modules that are shared across multiple services. To prevent having numerous duplicate copies of these files, there's another top-level directory _*Shared*_. This directory has bin, lib, etc, doc and
 script directories like the service directories. Any files that might be shared between the services will be placed in these directories.
 
-The relevant files can then symlinked into the service directories. To facilitate this symlinking, there is a script "package_dependencies.pl" which will read the MANIFEST file, and symlink the required modules.
+{{{
+perfSONAR_PS-LS
+perfSONAR_PS-PingER
+perfSONAR_PS-perfSONARBUOY
+perfSONAR_PS-SNMP_MA
+perfSONAR_PS-Status
+perfSONAR_PS-LSRegistrationDaemon
+perfSONAR_PS-TopologyService
+Shared
+  lib/
+    perfSONAR_PS/
+      Common.pm
+      Util/
+  bin/
+    perfsonar-daemon.pl
+  etc/
+  scripts/
+  doc/
+}}}
+
+The relevant files can then symlinked into the service directories. To facilitate this symlinking, there is a script _*package_dependencies.pl*_ which will read the MANIFEST file, and symlink the required modules.
 
 == Benefits To This Structure ==
 
@@ -46,11 +91,11 @@ This structure minimizes the amount of service specific files in the common area
 
 == Branching/Tagging A Release ==
 
-To branch or tag a new release, decide which services are going to be released, and copy those services' service directories, along with the "Shared" directory to the new branch or tag.
+To branch or tag a new release, decide which services are going to be released, and copy those services' service directories, along with the _*Shared*_ directory to the new branch or tag.
 
 == Changes Required ==
 
- # Create a "Shared" directory at the top level and move the lib, scripts and doc into it.
+ # Create a _*Shared*_ directory at the top level and move the lib, scripts and doc into it.
  # Move the directories out of the "modules" directory and move them to the top-level
  # Create a 'scripts' directory at the top-level for the scripts to be used on the repository, instead of packaged
  # Update the package`_``*` scripts to handle the new location of the files and move them to the new location
