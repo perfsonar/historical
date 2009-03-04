@@ -1,0 +1,38 @@
+=  March 9, 2009 Conference Call 2:30 pm EST =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+ # Team Updates
+   # Internet2
+   # IU
+   # UDEL
+   # ESNet
+   # FNAL
+ # perfSONAR-PS v0.10 Release Update
+   * See [pSPS20090327Release] for details
+     * Check individual progress.
+     * Code reviews by the 13th.
+   * Code slush status
+ # Circuit Monitoring
+   * Discuss the path forward for circuit monitoring including adding additional performance metrics and handling dynamic circuits. Please see:
+     * [CircuitMonitoring]
+     * [CircuitMonitoringMoreDetails]
+   * Anything we need to discuss here before a joint meeting with IDC developers?
+ # SNMP-MA ESnet new database integration update
+ # CHEP
+   * status - due date is 20th.
+ # LHC/Atlas deployments (status update)
+ # GUI followup
+   # wmap status
+   # gLS related GUIs - status
+ # GSoC
+   * Please send ideas.
+ # Next meeting will March 16. 
+ # Other topics?
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
