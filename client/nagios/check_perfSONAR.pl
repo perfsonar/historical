@@ -26,7 +26,7 @@ use Params::Validate qw(:all);
 
 my $curTime = time();
 my $dirname = q{};
-my $libdir = q{};
+my $libdir  = q{};
 
 my %NAGIOS_API_ECODES = ( 'OK' => 0, 'WARNING' => 1, 'CRITICAL' => 2, 'UNKNOWN' => 3 );
 my $_intDegCount = 0;
@@ -46,61 +46,61 @@ our $DEBUGFLAG;
 our %opts = ();
 our $help_needed;
 
-my $ok = GetOptions (
-    'debug' => \$DEBUGFLAG,
-    'server=s' => \$opts{HOST},
-    'port=s' => \$opts{PORT},
-    'endpoint=s' => \$opts{ENDPOINT},
-    'filter=s' => \$opts{FILTER},
-    'help' => \$help_needed,
-    'interfaceIP=s' => \$opts{INTERFACEIP},
-    'hostname=s' => \$opts{HOSTNAME},
+my $ok = GetOptions(
+    'debug'           => \$DEBUGFLAG,
+    'server=s'        => \$opts{HOST},
+    'port=s'          => \$opts{PORT},
+    'endpoint=s'      => \$opts{ENDPOINT},
+    'filter=s'        => \$opts{FILTER},
+    'help'            => \$help_needed,
+    'interfaceIP=s'   => \$opts{INTERFACEIP},
+    'hostname=s'      => \$opts{HOSTNAME},
     'interfaceName=s' => \$opts{INTERFACENAME},
-    'template=s' => \$opts{TEMPLATE}
+    'template=s'      => \$opts{TEMPLATE}
 );
 
 # help?
-if( not $ok or $help_needed ) {
+if ( not $ok or $help_needed ) {
     print_help();
-    exit(1);    
+    exit( 1 );
 }
 
 # setup logging
 our $level = $INFO;
 
-if ($DEBUGFLAG) {
-    $level = $DEBUG;    
+if ( $DEBUGFLAG ) {
+    $level = $DEBUG;
 }
 
 Log::Log4perl->easy_init( $level );
 my $logger = get_logger( "perfSONAR_PS" );
 
-my $file = q{};
-my $xml = q{};
-my $filter = '/';
-my $host = q{};
-my $port = q{};
-my $endpoint = q{};
-my $interfaceIP = q{};
-my $hostname = q{};
+my $file          = q{};
+my $xml           = q{};
+my $filter        = '/';
+my $host          = q{};
+my $port          = q{};
+my $endpoint      = q{};
+my $interfaceIP   = q{};
+my $hostname      = q{};
 my $interfaceName = q{};
-my $template = q{};
+my $template      = q{};
 
-if( scalar @ARGV == 1 ) {
-    ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $ARGV[0] );
-    unless( $host and $port and $endpoint ) {
+if ( scalar @ARGV == 1 ) {
+    ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $ARGV[0] );
+    unless ( $host and $port and $endpoint ) {
         print_help();
         croak "Argument 1 must be a URL if more than one parameter used.\n";
     }
 }
-elsif( scalar @ARGV == 2 ) {
-    ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $ARGV[0] );
-    unless( $host and $port and $endpoint ) {
+elsif ( scalar @ARGV == 2 ) {
+    ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $ARGV[0] );
+    unless ( $host and $port and $endpoint ) {
         print_help();
         croak "Argument 1 must be a URL if more than one parameter used.\n";
     }
     $file = $ARGV[1];
-} 
+}
 else {
 }
 
@@ -109,32 +109,32 @@ if ( $file and ( not -f $file ) ) {
 }
 
 # find options
-if( exists $opts{HOST} and $opts{HOST} ) {
+if ( exists $opts{HOST} and $opts{HOST} ) {
     $host = $opts{HOST};
 }
-if( exists $opts{PORT} and $opts{PORT} ) {
+if ( exists $opts{PORT} and $opts{PORT} ) {
     $port = $opts{PORT};
 }
-if( exists $opts{ENDPOINT} and $opts{ENDPOINT} ) {
+if ( exists $opts{ENDPOINT} and $opts{ENDPOINT} ) {
     $endpoint = $opts{ENDPOINT};
 }
-if( exists $opts{FILTER} and $opts{FILTER} ) {
+if ( exists $opts{FILTER} and $opts{FILTER} ) {
     $filter = $opts{FILTER};
 }
-if( exists $opts{INTERFACEIP} and $opts{INTERFACEIP} ) {
+if ( exists $opts{INTERFACEIP} and $opts{INTERFACEIP} ) {
     $interfaceIP = $opts{INTERFACEIP};
 }
-if( exists $opts{HOSTNAME} and $opts{HOSTNAME} ) {
+if ( exists $opts{HOSTNAME} and $opts{HOSTNAME} ) {
     $hostname = $opts{HOSTNAME};
 }
-if( exists $opts{INTERFACENAME} and $opts{INTERFACENAME} ) {
+if ( exists $opts{INTERFACENAME} and $opts{INTERFACENAME} ) {
     $interfaceName = $opts{INTERFACENAME};
 }
-if( exists $opts{TEMPLATE} and $opts{TEMPLATE} ) {
+if ( exists $opts{TEMPLATE} and $opts{TEMPLATE} ) {
     $template = $opts{TEMPLATE};
 }
 
-unless( $host and $port and $endpoint ) {
+unless ( $host and $port and $endpoint ) {
     print_help();
     croak "You must specify the host, port and endpoint as either a URI or via the command line switches";
 }
@@ -142,14 +142,15 @@ unless( $host and $port and $endpoint ) {
 # start a transport agent
 my $sender = new perfSONAR_PS::Transport( $host, $port, $endpoint );
 
-if( $file and -f $file ) {
+if ( $file and -f $file ) {
+
     # Read the source XML file
-    $xml = readXML($file);
+    $xml = readXML( $file );
 }
-else{
+else {
 
     #echo request
-    if( $template == 2 ){
+    if ( $template == 2 ) {
 
         $xml = "<nmwg:message type=\"EchoRequest\"\n";
         $xml .= "             id=\"echo.message\"\n";
@@ -170,24 +171,24 @@ else{
         $xml .= "             xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\"\n";
         $xml .= "             xmlns:snmp=\"http://ggf.org/ns/nmwg/tools/snmp/2.0/\"\n";
         $xml .= "             xmlns:nmtm=\"http://ggf.org/ns/nmwg/time/2.0/\">\n";
-  
+
         $xml .= "  <nmwg:metadata id=\"meta\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
         $xml .= "    <netutil:subject xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\" id=\"sub\">\n";
         $xml .= "      <nmwgt:interface xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-        $xml .= "        <nmwgt:ifAddress type=\"ipv4\">".$interfaceIP."</nmwgt:ifAddress>\n";
-        $xml .= "        <nmwgt:hostName>".$hostname."</nmwgt:hostName>\n";
-        $xml .= "        <nmwgt:ifName>".$interfaceName."</nmwgt:ifName>\n";
+        $xml .= "        <nmwgt:ifAddress type=\"ipv4\">" . $interfaceIP . "</nmwgt:ifAddress>\n";
+        $xml .= "        <nmwgt:hostName>" . $hostname . "</nmwgt:hostName>\n";
+        $xml .= "        <nmwgt:ifName>" . $interfaceName . "</nmwgt:ifName>\n";
         $xml .= "        <nmwgt:direction>in</nmwgt:direction>\n";
         $xml .= "      </nmwgt:interface>\n";
         $xml .= "    </netutil:subject>\n";
         $xml .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>\n";
         $xml .= "  </nmwg:metadata>\n";
-  
+
         $xml .= "  <nmwg:metadata id=\"metac\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
         $xml .= "    <select:subject id=\"subc\" metadataIdRef=\"meta\" xmlns:select=\"http://ggf.org/ns/nmwg/ops/select/2.0/\"/>\n";
         $xml .= "    <select:parameters id=\"paramc\" xmlns:select=\"http://ggf.org/ns/nmwg/ops/select/2.0/\">\n";
-        $xml .= "      <nmwg:parameter name=\"startTime\">".($curTime-100)."</nmwg:parameter>\n";
-        $xml .= "      <nmwg:parameter name=\"endTime\">".$curTime."</nmwg:parameter>\n";
+        $xml .= "      <nmwg:parameter name=\"startTime\">" . ( $curTime - 100 ) . "</nmwg:parameter>\n";
+        $xml .= "      <nmwg:parameter name=\"endTime\">" . $curTime . "</nmwg:parameter>\n";
         $xml .= "      <nmwg:parameter name=\"consolidationFunction\">AVERAGE</nmwg:parameter>\n";
         $xml .= "      <nmwg:parameter name=\"resolution\">10</nmwg:parameter>\n";
         $xml .= "    </select:parameters>\n";
@@ -200,18 +201,18 @@ else{
 
 # Make a SOAP envelope, use the XML file as the body.
 my $envelope = &perfSONAR_PS::Common::makeEnvelope( $xml );
-my $error = q{};
+my $error    = q{};
 
 $logger->debug( "Host:\t$host, Port:\t$port, Endpoint:\t$endpoint" );
 my $responseContent = $sender->sendReceive( $envelope, q{}, \$error );
 
-if( $error ) {
-     croak "Error sending request to service: $error";
+if ( $error ) {
+    croak "Error sending request to service: $error";
 }
 
 &extract( { response => $responseContent, find => $filter } );
 
-exit(0);
+exit( 0 );
 
 =head2 extract( { response, find } )
 
@@ -224,27 +225,27 @@ sub extract {
     my $parameters = validateParams( @args, { response => 1, find => 1 } );
     my $xp = q{};
 
-    if( ( UNIVERSAL::can( $parameters->{response}, "isa" ) ? "1" : "0" == 1 ) and ( $xml->isa( 'XML::LibXML' ) ) ) {
+    if ( ( UNIVERSAL::can( $parameters->{response}, "isa" ) ? "1" : "0" == 1 ) and ( $xml->isa( 'XML::LibXML' ) ) ) {
         $xp = $parameters->{response};
-    } 
+    }
     else {
         my $parser = XML::LibXML->new();
-        $xp = $parser->parse_string( $parameters->{response} );  
+        $xp = $parser->parse_string( $parameters->{response} );
     }
 
     my @res = $xp->findnodes( $parameters->{find} );
     foreach my $n ( @res ) {
-        if ( $n->toString() =~ m/success/mx ) { 
+        if ( $n->toString() =~ m/success/mx ) {
         }
-        elsif( $n->toString() =~ m/error/mx ){ 
+        elsif ( $n->toString() =~ m/error/mx ) {
             $_intDegCount++;
         }
     }
 
-    if( $_intDegCount > 0 ) {
+    if ( $_intDegCount > 0 ) {
         print "perfSONAR Request Failed\n";
         exit $NAGIOS_API_ECODES{CRITICAL};
-    } 
+    }
     else {
         print "perfSONAR Request Successful\n";
         exit $NAGIOS_API_ECODES{OK};
@@ -261,7 +262,7 @@ Print a help message
 sub print_help {
     my ( @args ) = @_;
     my $parameters = validateParams( @args, {} );
-    
+
     print "$PROGRAM_NAME: sends an xml request to a perfSONAR server.\n\n";
     print "    ./check_perfSonar.pl URI [--host --port --endpoint] [--template #] [--interfaceIP=xxx.xxx.xxx.xxx --hostname=xxx.yyy.zzz --interfaceName=xo-0/0/0.0] [FILE]\n\n";
     print "        Templates: 1 - Data Request (default)\n";
