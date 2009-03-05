@@ -1,7 +1,11 @@
-=  April 29, 2009 Meeting =
+=  April 29 - May 1, 2009 Meetings =
 
 <wiki:toc max_depth="6" />
 
+== RSVP ==
+
+It is critical that you send a note to Jason (zurawski at internet2 dot edu) if you are planning on attending.  Please indicate if this will be in person (for food purposes) or video (for MCU purposes).  Please let us know as soon as possible. 
+ 
 == Where ==
 
 Post Spring Member Meeting 2009, Washington, DC
@@ -14,17 +18,13 @@ Phone: (202) 872-9119
 Fax: (202) 872-6648 
 }}}
 
-== RSVP ==
-
-Send a note to Jason (zurawski at internet2 dot edu) if you are planning on attending.  Please indicate if this will be in person (for food purposes) or video (for MCU purposes).  Please let us know as soon as possible. 
- 
 == When ==
 
 The meetings will span 3 days:
 
  * _*perfSONAR*_ - Weds April 29, 2009 - 1PM to 6PM
- * _*perfSONAR*_ and _*IDC*_ - Thurs April 30, 2009 - 8AM to 5PM
- * _*IDC*_ - Friday May 1, 2009 - 8AM to 5PM
+ * _*perfSONAR*_ - Thurs April 30, 2009 - 8AM to 5PM
+ * _*perfSONAR*_ and _*IDC*_ (Circuit Monitoring) - Friday May 1, 2009 - 8AM to 5PM
 
 The meeting will focus on development activities within and between two groups:
 
@@ -51,16 +51,19 @@ TBD
 
 TBD
 
-=== IDC Developers ===
+=== pS/IDC Developers ===
 
-The IDC developers meeting will focus on pending issues within the SDN and DCN projects and the general development of IDC software.  Topics will span topics specific to this group as well issues regarding monitoring.  perfSONAR developers are encouraged to spend the extra day and attend as well. 
+This meeting will focus primarily on the topics that related to circuit monitoring. This will touch on global identifiers, topology, technology/layer abstraction and monitoring architecture. We will have phone conferences in the weeks leading up to this to articulate use cases and general architecture. The plan is for the meeting to be used to fully describe that architecture to everyone involved, and break it down into action items for development.
 
-==== IDC Attendees ====
+If IDC developers like, a portion of the day can be set aside for other current topics.
+
+==== pS/IDC Attendees ====
 
  * Jason Zurawski
  * Jeff Boote
  * Aaron Brown
  * Andrew Lake
+ * Tom Lehman
  * ...
 
 ==== IDC Agenda ====
