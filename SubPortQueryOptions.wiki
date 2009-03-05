@@ -1,3 +1,17 @@
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+Current design of metadata elements (in particular network interface descriptions, end point pairs) do not lend to easy separation namely because all necessary knowledge of these topology units are known at creation time.  For instance a layer 3 interface contains:
+
+ * _*Host Name*_ - Name of the host that can be contacted to find this interface
+ * _*Interface Address*_ - address (physical, ip) of this interface
+ * _*IP Address*_ - Management address of the network device for this interface
+ * _*Interface Name*_ - Name of this interface
+ * _*Interface Description*_ - Description of this interface
+
+Most (if not all) of these are known at creation time.  Dynamic components, such as Layer 2 VLANs, almost always involve splicing together information from other components, namely interfaces at higher levels that span multiple domains.  The following work discuses issues in the construction of these formats as well as reconciliation internal to the topology service.  Query format is mentioned in particular, as finding all information is a crucial problem.  
+
 == Problem Description ==
 
 The interest is being able to query specific sub-ports on a switch.  For
@@ -68,6 +82,13 @@ did they mean to grab? It would need some way of signifying "i wanted to grab
 element X or elements of type X that match my query". 
 
 == Possible Query Options ==
+
+There are three possible options to handle query operations:
+
+ * [SubPortQueryOptions#Merged_Metadata_Approach Merged Metadata Approach]
+ * [SubPortQueryOptions#Modified_XPath_Style Modified XPath Style]
+ * [SubPortQueryOptions#More_complex_querying_methods More complex querying methods]
+ * [SubPortQueryOptions#Crazy_Approach Crazy Approach]
 
 === Merged Metadata Approach ===
 
@@ -166,3 +187,7 @@ The downsides to this approach:
 Punt the issue. Get rid of all the topology elements in the MAs, and only have them in the Topology Services. The client would query the topology service (using any complex query it desires), and then looks up which MAs contain data on the topology identifiers it gets back.
 
 Personally, I like this approach the best. However, this would have substantial inertia problems as the model is notedly different than what we're used to.
+
+== Last Modified ==
+
+$Id$
