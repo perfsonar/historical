@@ -1,8 +1,13 @@
+
 <wiki:toc max_depth="6" />
 
 == Introduction ==
 
-Current design of metadata elements (in particular network interface descriptions, end point pairs) do not lend to easy separation namely because all necessary knowledge of these topology units are known at creation time.  For instance a layer 3 interface contains:
+The design and use of the current metadata topology subjects is not easily generalizable beyond its current use-cases. This document describes some of the issues that came up when trying to generalize it to layer2 elements, specifically ports and the vlan ports on those ports.
+
+== Problem Statement ==
+
+The identifying information for a layer3 interface often contains:
 
  * _*Host Name*_ - Name of the host that can be contacted to find this interface
  * _*Interface Address*_ - address (physical, ip) of this interface
@@ -10,9 +15,15 @@ Current design of metadata elements (in particular network interface description
  * _*Interface Name*_ - Name of this interface
  * _*Interface Description*_ - Description of this interface
 
-Most (if not all) of these are known at creation time.  Dynamic components, such as Layer 2 VLANs, almost always involve splicing together information from other components, namely interfaces at higher levels that span multiple domains.  The following work discuses issues in the construction of these formats as well as reconciliation internal to the topology service.  Query format is mentioned in particular, as finding all information is a crucial problem.  
+The current metadata subject approach works for the layer3 interfaces because the natural way to uniquely identify them has two pieces: host address and interface name. However, layer2 elements can consist of a pair (host address, port) or a tuple (host address, port, vlan #).
 
-== Problem Description ==
+In the layer3 interface approach above, the metadata has both uniquely identifying attributes in it: (host name, interface name). There is no way that a 'real' element could be a subset of that element because the subset is either a host name, in which case the types of data available would be different, or its a generic port query (give me every port with name X).
+
+In the layer2 VLAN interface, the user query might be (host name, port name, vlan number) or it might be (host name, port name). Both are valid ways to reference layer2 interfaces, and there's no way to ascertain what the user means when given that query.
+
+The current method also does not fit with the proposed topology schemas. In the schemas, an address element for a given port is that port's address, not the address of the device containing it. The attributes that differentiate "eth0" on machine A and "eth0" on machine B, are the attributes of machine A or machine B, not attributes of either interface. Presumably, the attributes for a given 
+
+== Example of Problem Description ==
 
 The interest is being able to query specific sub-ports on a switch.  For
 example, allowing a client to query for vlan 3000 on port so-0/0/0 or a
