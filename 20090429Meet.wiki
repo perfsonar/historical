@@ -42,6 +42,7 @@ The perfSONAR developers meeting will focus on pending issues within the perfSON
  * Aaron Brown - Internet2
  * Andrew Lake - Internet2
  * Maxim Grigoriev - Fermilab
+ * Chris Tracy - MAX
  * ...
 
 ==== pS Agenda ====
@@ -66,6 +67,7 @@ If IDC developers like, a portion of the day can be set aside for other current 
  * Andrew Lake - Internet2
  * Maxim Grigoriev - Fermilab
  * Tom Lehman - ISI
+ * Chris Tracy - MAX
  * ...
 
 ==== IDC Agenda ====
