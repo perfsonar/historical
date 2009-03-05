@@ -97,6 +97,17 @@ Get off at the *Farragut North* [http://www.wmata.com/rail/station_detail.cfm?st
 
 http://perfsonar-ps.googlecode.com/svn/wiki/20090429Meet/dc_map.png
 
+=== Remote Participation ===
+
+Video access is available, but limited to a small number of participants (4 or 5).  The video information is:
+
+{{{
+IP Address:     192.52.179.246 
+GDS:            0011892028729111
+}}}
+
+Please arrange with Jason to test your connection before the meeting.  
+
 === Transportation (Airports) ===
 
 [http://www.mwaa.com/national/ Reagan National Airport]
@@ -158,7 +169,93 @@ Washington, DC 20005
 
 === Restaurants ===
 
-TBD
+Caribou Coffee‎
+{{{
+1800 M St (Corner of 18th and M - close to office)
+}}}
+
+Starbucks
+{{{
+1734 L St NW (On L between 18th and 17th - close to the office)
+}}}
+
+[http://www.mccormickandschmick.com/main.cfm?action=location&element=initial&locID=38 McCormick and Schmick] - Seafood
+{{{
+Phone: 202-861-2233
+1625 K Street NW ( K Street between 16th and 17th street)
+}}}
+
+[http://www.dailygrill.com/dg18thandm.html Daily Grill] - American
+{{{
+Phone - 202-822-5282
+1200 18th Street NW (M Street and 18th street)
+}}}
+
+[http://www.gbrowns.com Georgia Brown] - Low Country Southern
+{{{
+Phone - 202-393-4499
+950 15th Street NW (corner of 15 th and K Street)
+}}}
+
+[http://www.dccoast.com DC Coas] - Seafood
+{{{
+Phone - 202-216-5988
+1401 K Street (corner of 14 th and K Street)
+}}}
+
+[http://www.bistrobis.com/vidalia/index.asp Vidalia] - Southern
+{{{
+Phone- 202-659-1990
+1990 M Street NW (bet. 19th and 20th streets)
+}}}
+
+[http://www.penangusa.com/location_dc.html Penang] - Malaysian
+{{{
+Phone - 202-822-8770
+1837 M Street NW (corner of M and 19 th Street)
+}}}
+
+[http://www.spezie.com Spezie] - Modern Italian
+{{{
+Phone - 202-467-0777
+1736 L Street NW (between 18th Street and Connecticut Avenue )
+}}}
+
+[http://www.fin-dc.com Fin] - Modern American Seafood
+{{{
+Phone - 202-530-4430
+1200 19th Street NW (between M and N Streets)
+}}}
+
+[http://www.smithandwollensky.com/Washington.asp Smith and Wollensky] - Steakhouse
+{{{
+Phone - 202-466-1100
+1112 19th Street NW (between L and M Streets)
+}}}
+
+[http://www.legalseafoods.com/index.cfm/ac/locations_detail/id/24 Legal Seafood] - Seafood
+{{{
+Phone: 202-496-1111
+2020 K Street NW (between 20th and 21st Streets)
+}}}
+
+[http://www.mackeyspub.com/homedc.html Mackeys Public House] - Irish Pub
+{{{
+Phone 202-331-7667
+1823 L Street NW
+}}}
+
+[http://www.maithai.us/index.html Mai Thai] - Thai
+{{{
+Phone: 202-452-6870
+1200 19th Street. N.W.
+}}}
+
+[http://www.thaiphoon.com/dc/home.html Thai Phoon Restaurant] - Thai
+{{{
+Phone: 202-667-3505
+2011 S Street, N.W. (Past Dupont Circle)
+}}}
 
 == Last Modified ==
 
