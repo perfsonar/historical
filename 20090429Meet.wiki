@@ -37,10 +37,11 @@ The perfSONAR developers meeting will focus on pending issues within the perfSON
 
 ==== pS Attendees ====
 
- * Jason Zurawski
- * Jeff Boote
- * Aaron Brown
- * Andrew Lake
+ * Jason Zurawski - Internet2
+ * Jeff Boote - Internet2
+ * Aaron Brown - Internet2
+ * Andrew Lake - Internet2
+ * Maxim Grigoriev - Fermilab
  * ...
 
 ==== pS Agenda ====
@@ -59,11 +60,12 @@ If IDC developers like, a portion of the day can be set aside for other current 
 
 ==== pS/IDC Attendees ====
 
- * Jason Zurawski
- * Jeff Boote
- * Aaron Brown
- * Andrew Lake
- * Tom Lehman
+ * Jason Zurawski - Internet2
+ * Jeff Boote - Internet2
+ * Aaron Brown - Internet2
+ * Andrew Lake - Internet2
+ * Maxim Grigoriev - Fermilab
+ * Tom Lehman - ISI
  * ...
 
 ==== IDC Agenda ====
@@ -143,28 +145,47 @@ Arlington, Virginia 22202
 
 There are several other hotels available within walking distance of the DC office, prices will vary (check a travel site for best deals - note that the listed prices were captured in late February and will adjust with the local market).  April is the start of tourist season, so prices may begin to be expensive.  Most hotels offer government rates.   
 
-[http://www.thequincy.com/ The Quincy Hotel] - $169 (on the Quincy Web Site){{{
+[http://www.thequincy.com/ The Quincy Hotel] - $169 (on the Quincy Web Site)
+{{{
 Phone: 202-223-4320 or 1-800-424-2970
-Fax: 202-293-49771823 L Street NW (around the corner from the office - between 18th and 19th Streets)Washington, DC 20036}}}[http://www.ichotelsgroup.com/h/d/hi/1/en/hd/wasct?irs=null  Holiday Inn Central] - $189 (on the Holiday Inn Web Site){{{
-Phone: 202-483-2000 or 1-800-248-0016
-Fax: 202-797-10781501 Rhode Island Avenue NW (off of Scott Circle)Washington, DC 20036
+Fax: 202-293-4977
+1823 L Street NW (around the corner from the office - between 18th and 19th Streets)
+Washington, DC 20036
 }}}
-[http://www.hamiltonhoteldc.com/index.html Crowne Plaza Hamilton] - $144{{{
+
+[http://www.ichotelsgroup.com/h/d/hi/1/en/hd/wasct?irs=null  Holiday Inn Central] - $189 (on the Holiday Inn Web Site)
+{{{
+Phone: 202-483-2000 or 1-800-248-0016
+Fax: 202-797-1078
+1501 Rhode Island Avenue NW (off of Scott Circle)
+Washington, DC 20036
+}}}
+
+[http://www.hamiltonhoteldc.com/index.html Crowne Plaza Hamilton] - $144
+{{{
 Phone: 202-682-0111
 Fax: 202-682-9525 
 14th and K Street, NW, 
 Washington, DC 20005 USA
 }}}
-[http://www.starwoodhotels.com/fourpoints/property/overview/index.html?propertyID=1237 Four Points by Sheraton] - $148  {{{
+
+[http://www.starwoodhotels.com/fourpoints/property/overview/index.html?propertyID=1237 Four Points by Sheraton] - $148  
+{{{
 Phone: 202-289-7600
 201 K Street N.W. 
 Washington, DC 20005
-}}}[http://www.marriott.com/hotels/travel/wasrw-renaissance-m-street-hotel Renaissance on M Street] - $159{{{
+}}}
+
+[http://www.marriott.com/hotels/travel/wasrw-renaissance-m-street-hotel Renaissance on M Street] - $159
+{{{
 Phone: 202-775-0800
 Fax: 202-331-9491
 1143 New Hampshire Avenue NW
 Washington, District Of Columbia 20037 USA
-}}}[http://www.starwoodhotels.com/westin/property/overview/index.html?propertyID=1761 Westin Hotel] - $179{{{
+}}}
+
+[http://www.starwoodhotels.com/westin/property/overview/index.html?propertyID=1761 Westin Hotel] - $179
+{{{
 Phone: 202-429-1700
 1400 M Street NW
 Washington, DC 20005
@@ -263,4 +284,3 @@ Phone: 202-667-3505
 == Last Modified ==
 
 $Id$
-
