@@ -1,4 +1,4 @@
-= Subversion Restructure =
+#summary Proposal for restructuring the perfSONAR-PS subversion repository
 
 <wiki:toc max_depth="6" />
 
