@@ -115,11 +115,11 @@ Please arrange with Jason to test your connection before the meeting.
 
 [http://www.mwaa.com/national/ Reagan National Airport]
 
-DCA is located along the Potomac river in Arlington VA.  Due to flight restrictions there are limited cross country flights each day, so finding a variety of arrival departure times is sometimes challenging.  DCA is directly connected to the Washington DC metro system via the *Yellow* and *Blue* lines making it easy to get to Crystal City (for the SMM) and into the city (where the Internet2 Office is located).
+DCA is located along the Potomac river in Arlington VA.  Due to flight restrictions there are limited cross country flights each day, so finding a variety of arrival departure times is sometimes challenging.  DCA is directly connected to the Washington DC metro system via the *Yellow* and *Blue* lines making it easy to get to Crystal City (for the SMM) and into the city (where the Internet2 Office is located).  Allow 20 minutes to travel on the Metro between the DC office and the airport.  Security lines may be long during peak periods (Afternoons) - allow at least 45 minutes for security.
 
 [http://www.mwaa.com/dulles Dulles International Airport]
 
-IAD is located in Chantilly VA, which is fairly far out (and very close to were Jason lives).  There is a wider variety of airlines and schedules available here.  Unfortunately there is limited access to transportation.  The Metro does not extend to IAD (yet) so using the public bus ([http://www.wmata.com/bus/timetables/view.cfm?line=49 Route 5A], drops off at *Rosslyn* [http://www.wmata.com/rail/station_detail.cfm?station_id=41 station] on the *Orange* and *Blue* lines) or a private coach service ([http://www.washfly.com/flyer_bus_about.htm Washington Flyer] picks up/drops off at the *West Falls Church* [http://www.wmata.com/rail/station_detail.cfm?station_id=101 station] on the *Orange Line*) would be necessary.
+IAD is located in Chantilly VA, which is fairly far out (and very close to were Jason lives).  There is a wider variety of airlines and schedules available here.  Unfortunately there is limited access to transportation.  The Metro does not extend to IAD (yet) so using the public bus ([http://www.wmata.com/bus/timetables/view.cfm?line=49 Route 5A], drops off at *Rosslyn* [http://www.wmata.com/rail/station_detail.cfm?station_id=41 station] on the *Orange* and *Blue* lines) or a private coach service ([http://www.washfly.com/flyer_bus_about.htm Washington Flyer] picks up/drops off at the *West Falls Church* [http://www.wmata.com/rail/station_detail.cfm?station_id=101 station] on the *Orange Line*) would be necessary.  It may take upwards of an hour to get from the airport to the DC office.  Security lines may be very long in the mornings and evenings - allow 45 minutes to an hour for security and 10 minutes for transportation to gates (shuttle busses).  
 
 === Transportation (Ground) ===
 
@@ -131,7 +131,7 @@ Taxis are also common, note some are _un-licensed_ and no longer follow the _zon
 
 === Suggested Hotel ===
 
-We recommend staying at the [http://cwp.marriott.com/wasgw/internettwo09/ Crystal Gateway Marriott] when attending these meetings. (Everyone attending the SMM will all ready be here, so this is where most people will already be staying.) This hotel offers a competitive rate compared to hotels in the DC business district.  The information page is [http://cwp.marriott.com/wasgw/internettwo09/ here].  The hotel address is:
+We recommend staying at the [http://cwp.marriott.com/wasgw/internettwo09/ Crystal Gateway Marriott] when attending these meetings. (Everyone attending the SMM will already be there, so this is where most people will already be staying.) This hotel offers a competitive rate compared to hotels in the DC business district.  The information page is [http://cwp.marriott.com/wasgw/internettwo09/ here].  The hotel address is:
 
 {{{
 Crystal Gateway Marriott
