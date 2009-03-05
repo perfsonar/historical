@@ -83,7 +83,7 @@ element X or elements of type X that match my query".
 
 == Possible Query Options ==
 
-There are three possible options to handle query operations:
+There are four possible options to handle query operations:
 
  * [SubPortQueryOptions#Merged_Metadata_Approach Merged Metadata Approach]
  * [SubPortQueryOptions#Modified_XPath_Style Modified XPath Style]
