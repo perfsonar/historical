@@ -31,7 +31,7 @@ The meeting will focus on development activities within and between two groups:
  * [20090429Meet#perfSONAR_Developers perfSONAR Developers] 
  * [20090429Meet#IDC_Developers IDC Developers] 
 
-=== perfSONAR Developers ===
+=== perfSONAR Developers (4/29-30)===
 
 The perfSONAR developers meeting will focus on pending issues within the perfSONAR-PS framework.  Topics will span the interests of IDC developers as well, and all are encouraged to arrive early to attend and participate. 
 
@@ -51,7 +51,7 @@ TBD
 
 TBD
 
-=== pS/IDC Developers ===
+=== pS/IDC Developers (5/1)===
 
 This meeting will focus primarily on the topics that related to circuit monitoring. This will touch on global identifiers, topology, technology/layer abstraction and monitoring architecture. We will have phone conferences in the weeks leading up to this to articulate use cases and general architecture. The plan is for the meeting to be used to fully describe that architecture to everyone involved, and break it down into action items for development.
 
@@ -131,7 +131,7 @@ Taxis are also common, note some are _un-licensed_ and no longer follow the _zon
 
 === Suggested Hotel ===
 
-For individuals attending the Spring Member Meeting, we recommend continuing your stay at the [http://cwp.marriott.com/wasgw/internettwo09/ Crystal Gateway Marriott] when attending these meetings.  This hotel offers a competitive rate compared to hotels in the DC business district.  The information page is [http://cwp.marriott.com/wasgw/internettwo09/ here].  The hotel address is:
+We recommend staying at the [http://cwp.marriott.com/wasgw/internettwo09/ Crystal Gateway Marriott] when attending these meetings. (Everyone attending the SMM will all ready be here, so this is where most people will already be staying.) This hotel offers a competitive rate compared to hotels in the DC business district.  The information page is [http://cwp.marriott.com/wasgw/internettwo09/ here].  The hotel address is:
 
 {{{
 Crystal Gateway Marriott
