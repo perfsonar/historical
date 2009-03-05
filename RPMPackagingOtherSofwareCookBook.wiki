@@ -1,0 +1,42 @@
+#summary Cookbook for building RPMs or other packages of some of the software we distribute
+
+= Red Hat/Fedora Web100 Kernel =
+  * install kernel source rpm
+{{{
+yum-downloader --source kernel
+}}}
+  * download the web100 patch
+  * install kernel source rpm
+  * copy the web100 patch to "SOURCES" directory
+  * edit the web100 patch and get rid of the Makefile section of the patch since the spec file will ignore that anyway.
+  * edit the SPECS/kernel.spec and add appropriate Patch and ApplyPatch lines
+    * Add "Patch4000: web100-2.6.27-2.5.22-200810130047.patch" at the end of all the "Patch" lines.
+    * Add "ApplyPatch web100-2.6.27-2.5.22-200810130047.patch" at the end of all the "ApplyPatch" lines.
+  * Edit the SPECS/kernel.spec and add an appropriate buildid where it's commented out:
+{{{
+%define buildid .web100
+}}}
+  * Add the web100 config to the kernel config in SOURCES/config-generic (you could also add to config-debug if you're compiling a debug kernel).
+    * After all the CONFIG_TCP`_*` lines (mainly CONFIG_TCP_CONG), add the following (these lines are how rich compiled web100 on the NPtoolkit):
+{{{
+CONFIG_WEB100=y
+CONFIG_WEB100_STATS=y
+CONFIG_WEB100_FPERMS=384
+CONFIG_WEB100_GID=0
+CONFIG_WEB100_NET100=y
+CONFIG_WEB100_NETLINK=y
+}}}
+  * Do a test to make sure the config works:
+{{{
+rpmbuild -bp --target=`uname -m` kernel.spec
+}}}
+  * If that works, try doing a compile (Note: this step takes a bit longer than forever):
+{{{
+rpmbuild -bb --with baseonly --without debuginfo --target=`uname -m` kernel.spec
+}}}
+    * Note: Fixing any compile errors is beyond the scope of this document.
+  * If the compile succeeds, you need to build the noarch parts to ensure that "kernel-firmware" is built, since the kernel itself will depend on it.
+{{{
+rpmbuild -bb --with firmware --without doc --target=noarch kernel.spec
+}}}
+    * Note: you may have to hit enter through a config thing (not sure why)
