@@ -1,21 +1,6 @@
 =  April 29, 2009 Meeting =
 
- * [20090429Meet#Where Where]
- * [20090429Meet#When When]
-   * [20090429Meet#perfSONAR_Developers perfSONAR Developers] 
-     * [20090429Meet#pS_Attendees Attendees]
-     * [20090429Meet#pS_Agenda Agenda]
-     * [20090429Meet#pS_Notes Notes]
-   * [20090429Meet#IDC_Developers IDC Developers] 
-     * [20090429Meet#IDC_Attendees Attendees]
-     * [20090429Meet#IDC_Agenda Agenda]
-     * [20090429Meet#IDC_Notes Notes] 
- * [20090429Meet#Local_Information Local Information]
-   * [20090429Meet#DC_Office DC Office]
-   * [20090429Meet#Transportation_(Airports) Transportation (Airports)]
-   * [20090429Meet#Transportation_(Ground) Transportation (Ground)]
-   * [20090429Meet#Hotels Hotels]
-   * [20090429Meet#Restaurants Restaurants]
+<wiki:toc max_depth="6" />
 
 == Where ==
 
@@ -29,15 +14,17 @@ Phone: (202) 872-9119
 Fax: (202) 872-6648 
 }}}
 
+== RSVP ==
+
+Send a note to Jason (zurawski at internet2 dot edu) if you are planning on attending.  Please indicate if this will be in person (for food purposes) or video (for MCU purposes).  Please let us know as soon as possible. 
+ 
 == When ==
 
 The meetings will span 3 days:
 
-{{{
-Weds April 29, 2009 - 1PM to 6PM
-Thurs April 30, 2009 - 8AM to 5PM
-Friday May 1, 2009 - 8AM to 5PM
-}}}
+ * _*perfSONAR*_ - Weds April 29, 2009 - 1PM to 6PM
+ * _*perfSONAR*_ and _*IDC*_ - Thurs April 30, 2009 - 8AM to 5PM
+ * _*IDC*_ - Friday May 1, 2009 - 8AM to 5PM
 
 The meeting will focus on development activities within and between two groups:
 
@@ -90,7 +77,7 @@ Some compiled local information from a _semi-local_.  Will add more over time, r
 
 === DC Office ===
 
-Located in the _Golden Triangle_ neighborhood, borders Dupont/Scott Circle and George Washington.  Not known for great food or restaurants (walk somewhere north or east for the good stuff).  Office Address:
+Located in the _Golden Triangle_ neighborhood, borders Dupont/Scott Circle and George Washington University.  Not known for great food or restaurants (walk somewhere north or east for the good stuff).  Office Address:
 
 {{{
 1150 18th Street, NW
@@ -128,9 +115,9 @@ Shuttle services such as [http://www.washfly.com/flyer_bus_about.htm Washington 
 
 Taxis are also common, note some are _un-licensed_ and no longer follow the _zone_ fare rules.
 
-=== Hotels ===
+=== Suggested Hotel ===
 
-Since some folks will attend the Spring Member Meeting (and this hotel has a much cheaper rate than hotels in the downtown district), we are recommending that people book there and take the Metro to the DC office.  The information page is [http://cwp.marriott.com/wasgw/internettwo09/ here].  The hotel address is:
+For individuals attending the Spring Member Meeting, we recommend continuing your stay at the [http://cwp.marriott.com/wasgw/internettwo09/ Crystal Gateway Marriott] when attending these meetings.  This hotel offers a competitive rate compared to hotels in the DC business district.  The information page is [http://cwp.marriott.com/wasgw/internettwo09/ here].  The hotel address is:
 
 {{{
 Crystal Gateway Marriott
@@ -138,7 +125,9 @@ Crystal Gateway Marriott
 Arlington, Virginia 22202 
 }}}
 
-There are several other hotels available within walking distance of the DC office, prices will vary (check a travel site for best deals).  Note that April is the start of tourist season, so prices may be expensive.  Most hotels offer government rates.  
+=== Alternative Hotels ===
+
+There are several other hotels available within walking distance of the DC office, prices will vary (check a travel site for best deals - note that the listed prices were captured in late February and will adjust with the local market).  April is the start of tourist season, so prices may begin to be expensive.  Most hotels offer government rates.   
 
 [http://www.thequincy.com/ The Quincy Hotel] - $169 (on the Quincy Web Site){{{
 Phone: 202-223-4320 or 1-800-424-2970
