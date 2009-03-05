@@ -2,10 +2,10 @@
 
 <wiki:toc max_depth="6" />
 
-= Introduction =
+== Introduction ==
 The goal of this page is to have a place to store all the cookbook instructions for making RPMs for software that we distribute, but aren't the maintainers of. Any patches or changes we make should be pushed to the maintainers if possible, but for some software, they will not accept the changes.
 
-= Red Hat/Fedora Web100 Kernel =
+== Red Hat/Fedora Web100 Kernel ==
   * install kernel source rpm
 {{{
 yum-downloader --source kernel
@@ -45,3 +45,7 @@ rpmbuild -bb --with baseonly --without debuginfo --target=`uname -m` kernel.spec
 rpmbuild -bb --with firmware --without doc --target=noarch kernel.spec
 }}}
     * Note: you may have to hit enter through a config thing (not sure why)
+
+== Last Modified ==
+
+$Id$
