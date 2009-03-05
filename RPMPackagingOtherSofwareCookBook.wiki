@@ -1,7 +1,9 @@
 #summary Cookbook for building RPMs or other packages of some of the software we distribute
 
-= Table Of Contents =
-<wiki:toc max_depth="2" />
+<wiki:toc max_depth="6" />
+
+= Introduction =
+The goal of this page is to have a place to store all the cookbook instructions for making RPMs for software that we distribute, but aren't the maintainers of. Any patches or changes we make should be pushed to the maintainers if possible, but for some software, they will not accept the changes.
 
 = Red Hat/Fedora Web100 Kernel =
   * install kernel source rpm
