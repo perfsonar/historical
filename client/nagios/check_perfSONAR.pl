@@ -264,7 +264,7 @@ sub print_help {
     my $parameters = validateParams( @args, {} );
 
     print "$PROGRAM_NAME: sends an xml request to a perfSONAR server.\n\n";
-    print "    ./check_perfSonar.pl URI [--host --port --endpoint] [--template #] [--interfaceIP=xxx.xxx.xxx.xxx --hostname=xxx.yyy.zzz --interfaceName=xo-0/0/0.0] [FILE]\n\n";
+    print "    ./check_perfSonar.pl URI [--server --port --endpoint] [--template #] [--interfaceIP=xxx.xxx.xxx.xxx --hostname=xxx.yyy.zzz --interfaceName=xo-0/0/0.0] [FILE]\n\n";
     print "        Templates: 1 - Data Request (default)\n";
     print "                   2 - Echo Request\n\n";
     return;
@@ -274,9 +274,9 @@ __END__
 
 =head1 SYNOPSIS
 
-./check_perfSonar.pl URI [--host --port --endpoint] [--template #] [--interfaceIP=xxx.xxx.xxx.xxx --hostname=xxx.yyy.zzz --interfaceName=xo-0/0/0.0] [FILE]
+./check_perfSonar.pl URI [--server --port --endpoint] [--template #] [--interfaceIP=xxx.xxx.xxx.xxx --hostname=xxx.yyy.zzz --interfaceName=xo-0/0/0.0] [FILE]
 
-  --host = Hostname to contact
+  --server = Hostname to contact
   --port = port of host
   --endpoint = contact point of perfSONAR service
   --template = Template 'type' to use, 1 for setup data request, 2 for echo request
