@@ -647,9 +647,14 @@ Most details TBD, basic outline:
    * Review current gLS design (April timeframe) 
    * Assist student in designing test framework
    * Assist student in framework deployment
+   * review progress of performance/effectiveness
  * AB
    * Review current gLS design (April timeframe) 
    * Think about impact of topology in summarization
  * JB
+   * review progress of performance/effectiveness
    * Review current gLS design (April timeframe) 
- == Last Modified ==$Id$ 
+ * All
+   * Review new algorithm (both effectiveness and performance) before gLS integration
+ == Last Modified ==
+$Id$ 
