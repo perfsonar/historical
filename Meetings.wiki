@@ -6,11 +6,12 @@ applicable.
 
 == Future Events ==
 
-   * [20090302Video] - Video Conference for March 2, 2009
+   * [20090309Video] - Video Conference for March 9, 2009
 
 == Past Events ==
 
  * 2009
+   * [20090302Video] - Video Conference for March 2, 2009
    * [20090223Video] - Video Conference for February 23, 2009
    * [20090217Video] - Video Conference *Issue: v0.10 Release* for February 17, 2009
    * [20090203Meet] - Meeting at Joint Techs, College Station TX
