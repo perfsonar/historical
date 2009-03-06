@@ -72,12 +72,12 @@ This algorithm makes heavy use of the concept of an IPTrie data structure.  A ba
        128.0.0.0/8
        128.0.0.0/7
        128.0.0.0/6
-	   128.0.0.0/5
-	   128.0.0.0/4
-	   128.0.0.0/3
-	   128.0.0.0/2
-	   128.0.0.0/1
-	   0.0.0.0/0
+       128.0.0.0/5
+       128.0.0.0/4
+       128.0.0.0/3
+       128.0.0.0/2
+       128.0.0.0/1
+       0.0.0.0/0
 }}}
  # Next we need to make the IPTrie (e.g. Patricia Trie - we use the [http://search.cpan.org/~cvicente/Net-IPTrie-v0.4/lib/Net/IPTrie.pm Net::IPTrie] module).  Making the Trie consists of:
    # Insert all of the original addresses into the Trie with a /32 prefix.  This does not need to be done in order.
