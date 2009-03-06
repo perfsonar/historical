@@ -16,10 +16,7 @@ This nagios service check performs an Echo or DataRequest for perfSONAR MA servi
 =cut
 
 use Getopt::Long;
-use Log::Log4perl qw(:easy);
 use XML::LibXML;
-use File::Basename;
-use Time::Local;
 use Carp;
 use English qw( -no_match_vars );
 use Params::Validate qw(:all);
@@ -59,21 +56,10 @@ my $ok = GetOptions(
     'template=s'      => \$opts{TEMPLATE}
 );
 
-# help?
 if ( not $ok or $help_needed ) {
     print_help();
     exit( 1 );
 }
-
-# setup logging
-our $level = $INFO;
-
-if ( $DEBUGFLAG ) {
-    $level = $DEBUG;
-}
-
-Log::Log4perl->easy_init( $level );
-my $logger = get_logger( "perfSONAR_PS" );
 
 my $file          = q{};
 my $xml           = q{};
@@ -203,16 +189,13 @@ else {
 my $envelope = &perfSONAR_PS::Common::makeEnvelope( $xml );
 my $error    = q{};
 
-$logger->debug( "Host:\t$host, Port:\t$port, Endpoint:\t$endpoint" );
 my $responseContent = $sender->sendReceive( $envelope, q{}, \$error );
 
-if ( $error ) {
-    croak "Error sending request to service: $error";
-}
+croak "Error sending request to service: $error" if $error;
 
 &extract( { response => $responseContent, find => $filter } );
 
-exit( 0 );
+exit $NAGIOS_API_ECODES{UNKNOWN};
 
 =head2 extract( { response, find } )
 
@@ -286,8 +269,9 @@ __END__
 
 =head1 SEE ALSO
 
-L<Getopt::Long>, L<Log::Log4perl>, L<XML::LibXML>, L<File::Basename>,
-L<Time::Local>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::Common>
+L<Getopt::Long>, L<XML::LibXML>, L<Carp>, L<English>, L<Params::Validate>,
+L<perfSONAR_PS::Transport>, L<perfSONAR_PS::Common>,
+L<perfSONAR_PS::Utils::ParameterValidation>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
