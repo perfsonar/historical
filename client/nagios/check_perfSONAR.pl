@@ -195,6 +195,7 @@ croak "Error sending request to service: $error" if $error;
 
 &extract( { response => $responseContent, find => $filter } );
 
+print "perfSONAR service has returned unexpected response.\n";
 exit $NAGIOS_API_ECODES{UNKNOWN};
 
 =head2 extract( { response, find } )
@@ -216,22 +217,85 @@ sub extract {
         $xp = $parser->parse_string( $parameters->{response} );
     }
 
-    my @res = $xp->findnodes( $parameters->{find} );
-    foreach my $n ( @res ) {
-        if ( $n->toString() =~ m/success/mx ) {
-        }
-        elsif ( $n->toString() =~ m/error/mx ) {
-            $_intDegCount++;
-        }
-    }
-
-    if ( $_intDegCount > 0 ) {
+        # first parse, try to grab the message and puke if we can't find it
+    my $xpc = XML::LibXML::XPathContext->new;
+    $xpc->registerNs( 'nmwg', 'http://ggf.org/ns/nmwg/base/2.0/' );
+    my @message = $xpc->findnodes( '//nmwg:message', $xp->getDocumentElement );
+    unless ( $message[0] ) {
         print "perfSONAR Request Failed\n";
         exit $NAGIOS_API_ECODES{CRITICAL};
     }
+    
+        # evaluation step, we want to handle message types differently
+    my $mType = $message[0]->getAttribute( "type" );
+    if ( $mType eq "EchoResponse" ) {
+            # EchoRequest/EchoResponse case.  Doing this for traditional echo
+            #  only.  Would be nice to extract the datum response from the
+            #  correct md/d pair.  Have some exit conditions if the message
+            #  is not well formed.  
+    
+        my $xpc = XML::LibXML::XPathContext->new;
+        $xpc->registerNs( 'nmwg', 'http://ggf.org/ns/nmwg/base/2.0/' );
+        my @res = $xpc->findnodes( '//nmwg:metadata', $message[0] );     
+
+        my $eT = q{};
+        my $dt = q{};
+        foreach my $n ( @res ) {
+            $eT = $xpc->find( '//nmwg:eventType', $n );
+            my $id = $n->getAttribute( "id" );
+            my $dt = $xpc->find( '//nmwg:data[@metadataIdRef="' . $id . '"]/*[local-name()="datum"]', $message[0] );            
+            next unless $eT and $dt;
+          
+            if ( $eT->get_node(1)->toString() =~ m/success/mx ) {
+                print "perfSONAR service replied \"" . &perfSONAR_PS::Common::extract( $dt->get_node(1), 0 ) . "\"\n";
+                exit $NAGIOS_API_ECODES{OK};                
+            }
+            elsif ( $n->toString() =~ m/error/mx ) {
+                print "perfSONAR service replied \"" . &perfSONAR_PS::Common::extract( $dt->get_node(1), 0 ) . "\"\n";
+                exit $NAGIOS_API_ECODES{CRITICAL};
+            }
+            else {
+                print "perfSONAR service replied \"" . &perfSONAR_PS::Common::extract( $dt->get_node(1), 0 ) . "\"\n";
+                exit $NAGIOS_API_ECODES{UNKNOWN};
+            }
+        }
+        if ( $dt ) {
+            print "perfSONAR service has returned unexpected response \"" . &perfSONAR_PS::Common::extract( $dt->get_node(1), 0 ) . "\"\n";
+        }
+        else {
+            print "perfSONAR service has returned unexpected response.\n";
+        }
+        exit $NAGIOS_API_ECODES{UNKNOWN};
+    }
+    elsif ( $mType eq "SetupDataResponse" ) {
+            # SetupDataRequest/SetupDataResponse case.  Want to do some more
+            #   sophisitcated parsing here to evaluate the results and get a
+            #   more exact message for nagios.  
+            
+        my $xpc = XML::LibXML::XPathContext->new;
+        $xpc->registerNs( 'nmwg', 'http://ggf.org/ns/nmwg/base/2.0/' );
+        my @res = $xpc->findnodes( $parameters->{find}, $message[0] );
+        foreach my $n ( @res ) {
+            if ( $n->toString() =~ m/success/mx ) {
+            }
+            elsif ( $n->toString() =~ m/error/mx ) {
+                $_intDegCount++;
+            }
+        }
+
+        if ( $_intDegCount > 0 ) {
+            print "perfSONAR Request Failed\n";
+            exit $NAGIOS_API_ECODES{CRITICAL};
+        }
+        else {
+            print "perfSONAR Request Successful\n";
+            exit $NAGIOS_API_ECODES{OK};
+        }
+    }
     else {
-        print "perfSONAR Request Successful\n";
-        exit $NAGIOS_API_ECODES{OK};
+        # Catch All.
+        print "perfSONAR response is unreadable.\n";
+        exit $NAGIOS_API_ECODES{UNKNOWN};
     }
     return;
 }
