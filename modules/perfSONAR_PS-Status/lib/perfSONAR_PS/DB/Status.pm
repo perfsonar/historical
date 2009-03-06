@@ -79,20 +79,20 @@ sub get_element_status {
 
         $query .= " order by start_time";
 
-		my $states = $self->{DB_CLIENT}->query({ query => $query });
-		if ($states == -1) {
+		my $statuses = $self->{DB_CLIENT}->query({ query => $query });
+		if ($statuses == -1) {
 			$self->{LOGGER}->error("Couldn't grab information for node ".$element_id);
 			return (-1, "Couldn't grab information for node ".$element_id);
 		}
 
-		foreach my $state_ref (@{ $states }) {
-			my @state = @{ $state_ref };
+		foreach my $status_ref (@{ $statuses }) {
+			my @status = @{ $status_ref };
 			my $new_element;
 
-            $state[0] = $start_time if ($state[0] < $start_time);
-            $state[1] = $end_time if ($state[1] > $end_time);
+            $status[0] = $start_time if ($status[0] < $start_time);
+            $status[1] = $end_time if ($status[1] > $end_time);
 
-			$new_element = new perfSONAR_PS::Status::Link($element_id, $state[0], $state[1], $state[2], $state[3]);
+			$new_element = new perfSONAR_PS::Status::Link($element_id, $status[0], $status[1], $status[2], $status[3]);
 
             if (not defined $elements{$element_id}) {
                 my @newa = ();
@@ -121,26 +121,26 @@ sub update_status {
 	$oper_status = lc($oper_status);
 	$admin_status = lc($admin_status);
 
-	if (!isValidOperState($oper_status)) {
-		return (-1, "Invalid operational state: $oper_status");
+	unless (is_valid_oper_status($oper_status)) {
+		return (-1, "Invalid operational status: $oper_status");
 	}
 
-	if (!isValidAdminState($admin_status)) {
-		return (-1, "Invalid administrative state: $admin_status");
+	unless (is_valid_admin_status($admin_status)) {
+		return (-1, "Invalid administrative status: $admin_status");
 	}
 
     my $query = "select end_time, oper_status, admin_status from ".$self->{STATUS_TABLE}." where id=\'".$element_id."\' order by end_time limit 1";
 
-    my $states = $self->{DB_CLIENT}->query({ query => $query });
-    if ($states == -1) {
+    my $statuses = $self->{DB_CLIENT}->query({ query => $query });
+    if ($statuses == -1) {
         $self->{LOGGER}->error("Couldn't grab information for node ".$element_id);
         return (-1, "Couldn't grab information for node ".$element_id);
     }
 
-    $self->{LOGGER}->debug("Size of: ".scalar(@$states)." -- ".Dumper($states));
+    $self->{LOGGER}->debug("Size of: ".scalar(@$statuses)." -- ".Dumper($statuses));
 
-    if (scalar(@$states) > 0) {
-        $prev_end_time = $states->[0]->[0];
+    if (scalar(@$statuses) > 0) {
+        $prev_end_time = $statuses->[0]->[0];
 
         if ($prev_end_time >= $time) {
             my $msg = "Update in the past for $element_id: most recent data was obtained for ".$prev_end_time;
@@ -149,11 +149,11 @@ sub update_status {
         }
 
         if ($do_update) {
-            if ($states->[0]->[1] ne $oper_status) {
+            if ($statuses->[0]->[1] ne $oper_status) {
                 my $msg = "Oper value differs for $element_id";
                 $self->{LOGGER}->warn($msg);
                 $do_update = 0;
-            } elsif ($states->[0]->[2] ne $admin_status) {
+            } elsif ($statuses->[0]->[2] ne $admin_status) {
                 my $msg = "Admin value differs for $element_id";
                 $self->{LOGGER}->warn($msg);
                 $do_update = 0;
@@ -204,7 +204,7 @@ sub update_status {
 sub get_unique_ids {
 	my ($self) = @_;
 
-	my $elements = $self->{DB_CLIENT}->query({ query => "select distinct id, id_type from ".$self->{STATUS_TABLE} });
+	my $elements = $self->{DB_CLIENT}->query({ query => "select distinct id from ".$self->{STATUS_TABLE} });
 	if ($elements == -1) {
 		$self->{LOGGER}->error("Couldn't grab list of elements");
 		return (-1, "Couldn't grab list of elements");
@@ -214,11 +214,7 @@ sub get_unique_ids {
 	foreach my $element_ref (@{ $elements }) {
 		my @element = @{ $element_ref };
 
-		my %id = ();
-		$id{id} = $element[0];
-		$id{type} = $element[1];
-
-		push @element_ids, \%id;
+		push @element_ids, $element[0];
 	}
 
 	return (0, \@element_ids);

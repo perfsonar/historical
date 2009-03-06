@@ -24,7 +24,7 @@ fashion, as well as allowing for moving away from the E2EMon-style.
 
 use base 'perfSONAR_PS::Services::Base';
 
-use fields 'LS_CLIENT', 'DATA_CLIENT', 'TOPOLOGY_ID_CLIENT', 'LOGGER', 'DOMAIN', 'LINKS', 'NODES', 'METADATADB', 'E2EMON_METADATADB', 'E2EMON_MAPPING', 'XPATH_CONTEXT';
+use fields 'LS_CLIENT', 'DATA_CLIENT', 'LOGGER', 'DOMAIN', 'LINKS', 'NODES', 'METADATADB', 'E2EMON_METADATADB', 'E2EMON_MAPPING', 'XPATH_CONTEXT';
 
 use strict;
 use warnings;
@@ -37,7 +37,6 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::DB::Status;
-use perfSONAR_PS::DB::TopologyID;
 use perfSONAR_PS::Status::Link;
 use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Services::MA::General;
@@ -234,13 +233,6 @@ sub init {
         return -1;
     }
 
-	my $topology_id_client = perfSONAR_PS::DB::TopologyID->new();
-	unless ($topology_id_client->init({ dbistring => $dbi_string, username => $username, password => $password, table_prefix => $table_prefix })) {
-		my $msg = "Problem creating database client";
-        $self->{LOGGER}->error($msg);
-		return -1;
-	}
-
 	my $data_client = perfSONAR_PS::DB::Status->new();
 	unless ($data_client->init({ dbistring => $dbi_string, username => $username, password => $password, table_prefix => $table_prefix})) {
 		my $msg = "Problem creating database client";
@@ -249,15 +241,6 @@ sub init {
 	}
 
     my ($status, $res);
-
-    $self->{TOPOLOGY_ID_CLIENT} = $topology_id_client;
-    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
-    if ( $status != 0 ) {
-        my $msg = "Couldn't open newly created client: $res";
-        $self->{LOGGER}->error( $msg );
-        return -1;
-    }
-    $self->{TOPOLOGY_ID_CLIENT}->closeDB;
 
     $self->{DATA_CLIENT} = $data_client;
     ( $status, $res ) = $self->{DATA_CLIENT}->openDB;
@@ -407,14 +390,14 @@ sub getMetadata_topoid {
     my ( $self ) = @_;
     my ( $status, $res );
 
-    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
+    ( $status, $res ) = $self->{DATA_CLIENT}->openDB;
     if ( $status != 0 ) {
         my $msg = "Couldn't open from database: $res";
         $self->{LOGGER}->error( $msg );
         return;
     }
 
-    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->query_topology_ids({ });
+    ( $status, $res ) = $self->{DATA_CLIENT}->get_unique_ids({ });
     if ( $status != 0 ) {
         my $msg = "Couldn't get identifiers from database: $res";
         $self->{LOGGER}->error( $msg );
@@ -437,7 +420,7 @@ sub getMetadata_topoid {
         $i++;
     }
 
-    $self->{TOPOLOGY_ID_CLIENT}->closeDB;
+    $self->{DATA_CLIENT}->closeDB;
 
     return \@mds;
 }
@@ -699,13 +682,6 @@ sub handleRequest_Metadata {
 
     my ( $status, $res);
 
-    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
-    if ( $status != 0 ) {
-        my $msg = "Couldn't open from database: $res";
-        $self->{LOGGER}->error( $msg );
-        return;
-    }
-
     ( $status, $res ) = $self->{DATA_CLIENT}->openDB;
     if ( $status != 0 ) {
         my $msg = "Couldn't open from database: $res";
@@ -748,7 +724,6 @@ sub handleRequest_Metadata {
         }
     }
 
-    $self->{TOPOLOGY_ID_CLIENT}->closeDB;
     $self->{DATA_CLIENT}->closeDB;
 
     return;
@@ -786,14 +761,6 @@ sub handleRequest_Topoid {
         return;
     }
 
-    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
-    if ( $status != 0 ) {
-        my $msg = "Couldn't open from database: $res";
-        $self->{LOGGER}->error( $msg );
-        return;
-    }
-
-
     my $topo_id = $self->xPathFindValue( $args->{metadata}, "./topoid:subject" );
     $topo_id =~ s/^\s*//g;
     $topo_id =~ s/\s*$//g;
@@ -805,20 +772,7 @@ sub handleRequest_Topoid {
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
     }
 
-    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->query_topology_ids({ topology_id => $topo_id });
-    if ( $status != 0 ) {
-        my $msg = "Error querying database for identifier";
-        $self->{LOGGER}->error( $msg );
-        throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
-    }
-
-    if ( scalar(@{ $res }) == 0) {
-        my $msg = "Database returned 0 results for search";
-        $self->{LOGGER}->error( $msg );
-        throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
-    }
-
-    my $key = $res->[0]->{key};
+    my $key = $topo_id;
 
     my @elements = ( $key );
 
@@ -833,7 +787,6 @@ sub handleRequest_Topoid {
     }
 
     $self->{DATA_CLIENT}->closeDB;
-    $self->{TOPOLOGY_ID_CLIENT}->closeDB;
 
     return;
 }
@@ -870,14 +823,6 @@ sub handleRequest_Key {
         return;
     }
 
-    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
-    if ( $status != 0 ) {
-        my $msg = "Couldn't open from database: $res";
-        $self->{LOGGER}->error( $msg );
-        return;
-    }
-
-
     my ( $elements, $start_time, $end_time ) = $self->parseKey( $args->{key} );
 
     if ( not $start_time ) {
@@ -911,7 +856,6 @@ sub handleRequest_Key {
         $self->handleData( { output => $args->{output}, metadata_id => $args->{metadata_id}, ids => $elements, start_time => $start_time, end_time => $end_time, output_ranges => $args->{output_ranges} } );
     }
 
-    $self->{TOPOLOGY_ID_CLIENT}->closeDB;
     $self->{DATA_CLIENT}->closeDB;
 
     return;
@@ -1042,13 +986,6 @@ sub handleCompatRequest_Metadata {
         return;
     }
 
-    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
-    if ( $status != 0 ) {
-        my $msg = "Couldn't open from database: $res";
-        $self->{LOGGER}->error( $msg );
-        return;
-    }
-
     my $md_results = $self->xPathFind( $self->{E2EMON_METADATADB}, $md_query, 0 );
     if ( $md_results->size() == 0 ) {
         my $msg = "Database returned 0 results for search";
@@ -1095,14 +1032,12 @@ sub handleCompatRequest_Metadata {
         endMetadata( $args->{output} );
 
         if ( $args->{message_type} eq "MetadataKeyRequest" ) {
-            ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->query_topology_ids({ });
+            ( $status, $res ) = $self->{DATA_CLIENT}->get_unique_ids({ });
             if ( $status != 0 ) {
                 my $msg = "Couldn't get identifiers from database: $res";
                 $self->{LOGGER}->error( $msg );
                 return;
             }
-
-            my $resolved_elements = $self->resolve_topology_ids($link->{subelements});
 
             # need to output the data
             #$self->{LOGGER}->debug( "Output: " . Dumper( $link->{"subelements"} ) );
@@ -1111,7 +1046,7 @@ sub handleCompatRequest_Metadata {
             $self->outputKey(
                     {
                     output     => $args->{output},
-                    elements   => $resolved_elements,
+                    elements   => $res,
                     start_time => $args->{start_time},
                     end_time   => $args->{end_time},
                     event_type => $args->{event_type}
@@ -1136,7 +1071,6 @@ sub handleCompatRequest_Metadata {
     }
 
     $self->{DATA_CLIENT}->closeDB;
-    $self->{TOPOLOGY_ID_CLIENT}->closeDB;
 
     return;
 }
@@ -1340,29 +1274,22 @@ sub handleData {
 
     my %elements = ();
 
-    my $resolved_elements = $self->resolve_topology_ids($args->{ids});
-    foreach my $element (@{ $resolved_elements} ) {
-        if ($element =~ /^urn:/) {
-            # we couldn't resolve the link, so make it unknown.
-            my $new_element = perfSONAR_PS::Status::Link->new( $element, $args->{start_time}, $args->{end_time}, "unknown", "unknown" );
-            $elements{$element} = [$new_element];
+    foreach my $element (@{ $args->{ids} ) {
+        my ( $status, $res ) = $self->{DATA_CLIENT}->get_element_status( element_ids => [ $element] , start_time => $args->{start_time}, end_time => $args->{end_time} );
+        if ( $status != 0 ) {
+            my $msg = "Couldn't get information about elements from database: $res";
+            $self->{LOGGER}->error( $msg );
+            throw perfSONAR_PS::Error_compat( "error.common.storage.fetch", $msg );
+        }
+
+        if ($res->{$element}) {
+            $elements{$element} = $res->{$element};
         } else {
-            my ( $status, $res ) = $self->{DATA_CLIENT}->get_element_status( element_ids => [ $element] , start_time => $args->{start_time}, end_time => $args->{end_time} );
-            if ( $status != 0 ) {
-                my $msg = "Couldn't get information about elements from database: $res";
-                $self->{LOGGER}->error( $msg );
-                throw perfSONAR_PS::Error_compat( "error.common.storage.fetch", $msg );
-            }
+            my $msg = "Couldn't get information about element $element from database. Assuming unknown";
 
-            if ($res->{$element}) {
-                $elements{$element} = $res->{$element};
-            } else {
-                my $msg = "Couldn't get information about element $element from database. Assuming unknown";
+            my $new_element = perfSONAR_PS::Status::Link->new( $element, $args->{start_time}, $args->{end_time}, "unknown", "unknown" );
 
-                my $new_element = perfSONAR_PS::Status::Link->new( $element, $args->{start_time}, $args->{end_time}, "unknown", "unknown" );
-
-                $elements{$element} = [$new_element];
-            }
+            $elements{$element} = [$new_element];
         }
     }
 
@@ -1856,21 +1783,11 @@ sub parseCompatCircuitsFile {
 
             my @subelements = keys %subelements;
 
-            my $resolved_elements;
-
-            my ($status, $res) = $self->{TOPOLOGY_ID_CLIENT}->openDB();
-            if ($status != 0) {
-                $resolved_elements = \@subelements;
-            } else {
-                $resolved_elements = $self->resolve_topology_ids(\@subelements);
-            }
-            $self->{TOPOLOGY_ID_CLIENT}->closeDB();
-
             my %new_link = ();
 
             $new_link{"globalName"}  = $global_name;
             $new_link{"name"}        = $local_name;
-            $new_link{"subelements"} = $resolved_elements;
+            $new_link{"subelements"} = \@subelements;
             $new_link{"endpoints"}   = \@endpoints;
             $new_link{"type"}        = $link_type;
 
@@ -1889,28 +1806,6 @@ sub parseCompatCircuitsFile {
     $self->{LOGGER}->debug("Links: ".Dumper(\%links));
 
     return ( 0, $domain, \%links, \%nodes );
-}
-
-sub resolve_topology_ids {
-    my ($self, $ids) = @_;
-
-    my @resolved = ();
-
-    foreach my $id (@{ $ids }) {
-        if ($id !~ /^urn:nml/) {
-            push @resolved, $id;
-            next;
-        }
-
-        my ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->query_topology_ids({ topology_id => $id });
-        if ( $status != 0 or scalar(@{ $res }) == 0) {
-            push @resolved, $id;
-        } else {
-            push @resolved, $res->[0]->{key};
-        }
-    }
-
-    return \@resolved;
 }
 
 =head2 xPathFind ($self, $node, $query, $return_first)

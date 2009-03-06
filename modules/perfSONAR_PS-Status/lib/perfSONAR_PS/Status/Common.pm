@@ -7,7 +7,7 @@ our $VERSION = 0.09;
 
 use base 'Exporter';
 
-our @EXPORT = ('isValidOperState', 'isValidAdminState');
+our @EXPORT = ('is_valid_oper_status', 'is_valid_admin_status', 'get_new_admin_status', 'get_new_oper_status');
 
 my %valid_oper_states = (
         up => '',
@@ -24,16 +24,54 @@ my %valid_admin_states = (
         unknown => '',
         );
 
-sub isValidOperState {
+sub is_valid_oper_status {
     my ($state) = @_;
     return 1 if (defined $valid_oper_states{lc($state)});
     return 0;
 }
 
-sub isValidAdminState {
+sub is_valid_admin_status {
     my ($state) = @_;
     return 1 if (defined $valid_admin_states{lc($state)});
     return 0;
+}
+
+sub get_new_oper_status {
+    my ($old_oper_status, $new_oper_status) = @_;
+
+    if (not $old_oper_status) {
+        return $new_oper_status;
+    }
+
+    if ($old_oper_status eq "unknown" or $new_oper_status eq "unknown") {
+        return "unknown";
+    } elsif ($old_oper_status eq "down" or $new_oper_status eq "down") {
+        return "down";
+    } elsif ($old_oper_status eq "degraded" or $new_oper_status eq "degraded") {
+        return "degraded";
+    } else {
+        return "up";
+    }
+}
+
+sub get_new_admin_status {
+    my ($old_admin_status, $new_admin_status) = @_;
+
+    if (not $old_admin_status) {
+        return $new_admin_status;
+    }
+
+    if ($old_admin_status eq "unknown" or $new_admin_status eq "unknown") {
+        return "unknown";
+    } elsif ($old_admin_status eq "underrepair" or $new_admin_status eq "underrepair") {
+        return "underrepair";
+    } elsif ($old_admin_status eq "troubleshooting" or $new_admin_status eq "troubleshooting") {
+        return "troubleshooting";
+    } elsif ($old_admin_status eq "maintenance" or $new_admin_status eq "maintenance") {
+        return "maintenance";
+    } else {
+        return "normaloperation";
+    }
 }
 
 1;
@@ -64,11 +102,11 @@ between functions.
 The API of perfSONAR_PS::Status::Common offers simple calls to common
 activities in the perfSONAR-PS framework.  
 
-=head2 isValidAdminState($state)
+=head2 is_valid_admin_status($state)
 
 Checks if the given string is a valid administrative state for a link.
 
-=head2 isValidOperState($state)
+=head2 is_valid_oper_status($state)
 
 Checks if the given string is a valid operational state for a link.
 
