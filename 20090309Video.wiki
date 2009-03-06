@@ -14,6 +14,7 @@
      * Check individual progress.
      * Code reviews by the 13th.
    * Code slush status
+   * Take pS-B out of the 3.1 release schedule, and release it one month later (with same version number)
  # Circuit Monitoring
    * Discuss the path forward for circuit monitoring including adding additional performance metrics and handling dynamic circuits. Please see:
      * [CircuitMonitoring]
