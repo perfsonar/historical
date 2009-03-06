@@ -59,7 +59,7 @@ use warnings;
 use version; our $VERSION = '0.09';
 use English qw( -no_match_vars);
 use Log::Log4perl qw(get_logger); 
-use Clone::Fast qw(clone);
+###use Clone::Fast qw(clone);
 use XML::LibXML; 
 use Scalar::Util qw(blessed);
 use Data::Dumper;
@@ -267,37 +267,37 @@ sub  dataID {
 } 
   
 
-=head2 getChain
-
-      accept current metadata and chain this metadata with every reffered metadata,
-      clone it, merge it with chained metadata and return new metadata
-       eventType must be the same or eventTypes->ops->select
-=cut
- 
-sub getChain {
-    my $self = shift;
-    my $currentmd = shift;
-    ## clone this metadata
-    my $newmd = clone( $currentmd );
-    my $idref = $newmd->get_metadataIdRef;
-    ##check if its refered and eventType is the same
-    ##if($newmd->key &&   $newmd->key->id) {
-    ##    ## stop chaining since we found a key
-    ##    return $newmd;
-    ##} 
-    if($idref) {
-        my $checkmd =   $self->getMetadataById($idref);
-        if(($newmd->get_eventType  eq    $checkmd->get_eventType) || ($checkmd->get_eventType eq $self->eventTypes->ops->select)) {
-            # recursion
-            my  $newInChain = $self->getChain($checkmd);
-            # merge according to implementation ( without filtering )
-	    $newmd->merge($newInChain);      
-        } else {
-	    $self->get_LOGGER->error(" Reffered wrong eventType in the chain: " . $checkmd->get_eventType->asString );
-	}
-    }  
-    return $newmd;  
-}
+###=head2 getChain
+###
+###      accept current metadata and chain this metadata with every reffered metadata,
+###      clone it, merge it with chained metadata and return new metadata
+###       eventType must be the same or eventTypes->ops->select
+###=cut
+### 
+###sub getChain {
+###    my $self = shift;
+###    my $currentmd = shift;
+###    ## clone this metadata
+ ###   my $newmd = clone( $currentmd );
+ ###   my $idref = $newmd->get_metadataIdRef;
+###    ##check if its refered and eventType is the same
+######    ##if($newmd->key &&   $newmd->key->id) {
+###    ##    ## stop chaining since we found a key
+###    ##    return $newmd;
+ ###   ##} 
+######    if($idref) {
+###        my $checkmd =   $self->getMetadataById($idref);
+###        if(($newmd->get_eventType  eq    $checkmd->get_eventType) || ($checkmd->get_eventType eq $self->eventTypes->ops->select)) {
+ ###           # recursion
+###            my  $newInChain = $self->getChain($checkmd);
+ ###           # merge according to implementation ( without filtering )
+###	    $newmd->merge($newInChain);      
+###        } else {
+###	    $self->get_LOGGER->error(" Reffered wrong eventType in the chain: " . $checkmd->get_eventType->asString );
+###	}
+###    }  
+###    return $newmd;  
+###}
  
  
 
@@ -360,7 +360,7 @@ sub addResultData  {
 =cut
 
 
-sub addResultResponse( ) {
+sub addResultResponse {
     my ($self, $params)    = @_;
     unless($params && ref($params) eq 'HASH' && $params->{eventType} ) {
         $self->get_LOGGER->error("Parameters missed:  addResultResponse Usage:: addResultResponse(\$params) where \$params is hashref");
