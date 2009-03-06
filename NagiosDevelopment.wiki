@@ -1,0 +1,234 @@
+#summary Information on creating and using Nagios plugins<wiki:toc max_depth="6" />== Introduction ==[http://www.nagios.org/ Nagios] is an enterprise level monitoring framework.  This software was designed to give insight into the operations of network services and offer assistence in the location of potential problems.  From the glossy web pages:
+
+{{{
+It's stable, scalable, supported, and extensible.
+}}}
+
+This document will examine the last portion of this statement: _*extensibility*_ to the arena of perfSONAR services.  Particularly in the development of _plugins_ using the [http://nagios.sourceforge.net/docs/3_0/pluginapi.html nagios plugin api] and existing perfSONAR-PS client code.  
+
+We will discuss construction of plugins as well as installation into an existing nagios instalation.  
+== Plugin Development ==
+
+Nagios plugins can come in two flavors: scripts and executables.  In general we will be most interested in the _scripts_ portion as perfSONAR-PS libraries and APIs are written in perl.  Each plugin must be capable of two tasks for Nagios to accept and parse the output:
+
+    * Exiting with certain return values
+    * Printing status messages to STDOUT
+    
+The return values are enumerated below:
+
+
+|| _*Return Code*_ || _*Service State*_ || _*Host State*_ ||
+|| 0 || OK || UP ||
+|| 1 || WARNING || DOWN/UNREACHABLE ||
+|| 2 || CRITICAL || DOWN/UNREACHABLE ||
+|| 3 || UNKNOWN || DOWN/UNREACHABLE ||
+
+
+The current suggestion is to define these in your perl plugin:
+
+{{{
+my %NAGIOS_API_ECODES = ( 'OK' => 0, 'WARNING' => 1, 'CRITICAL' => 2, 'UNKNOWN' => 3 );
+}}}
+
+To allow for appopriate exit.  The current check_perfSONAR code for nagios can be found [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/nagios/check_perfSONAR.pl here].
+
+== Plugin Installation ===
+
+ # Plugin installation instructions are for a Nagios version 3 system.
+ # Copy plugin script to _*$NAGIOSHOME/libexec*_:
+{{{
+[zurawski@patdev1 nagios]$ pwd
+/usr/local/nagios
+[zurawski@patdev1 nagios]$ ls
+bin  etc  libexec  sbin  share  var
+[zurawski@patdev1 nagios]$ sudo cp /usr/local/perfSONAR-PS/client/nagios/check_perfSONAR.pl ./libexec
+}}}
+ # Make changes to this line in _*check_perfSONAR.pl*_ to the correct path to the perfSONAR-PS libraries:
+{{{
+BEGIN {
+    $libdir = '/usr/local/perfSONAR-PS/lib';
+}
+}}}
+ # Allow the Nagios user access to the libraries, I did this by adding _*nagios*_ to an existing group that can control the perfSONAR-PS space:
+{{{
+[zurawski@patdev1 local]$ pwd
+/usr/local
+[zurawski@patdev1 local]$ ls -als
+total 104
+8 drwxr-xr-x 14 root     root   4096 Mar  5 20:29 .
+8 drwxr-xr-x 16 root     root   4096 Feb  9 16:47 ..
+8 drwxr-xr-x  2 root     root   4096 Feb 18 07:55 bin
+8 drwxr-xr-x  2 root     root   4096 Aug  8  2008 etc
+8 drwxr-xr-x  2 root     root   4096 Aug  8  2008 games
+8 drwxr-xr-x  2 root     root   4096 Aug  8  2008 include
+8 drwxr-xr-x  2 root     root   4096 Aug  8  2008 lib
+8 drwxr-xr-x  2 root     root   4096 Aug  8  2008 lib64
+8 drwxr-xr-x  2 root     root   4096 Aug  8  2008 libexec
+4 drwxrwxr-x  8 nagios   nagios 4096 Feb 17 07:30 nagios
+4 drwxrwxr-x 10 zurawski perf   4096 Mar  5 13:44 perfSONAR-PS
+8 drwxr-xr-x  2 root     root   4096 Aug  8  2008 sbin
+8 drwxr-xr-x  4 root     root   4096 Aug  8  2008 share
+8 drwxr-xr-x  2 root     root   4096 Aug  8  2008 src
+[zurawski@patdev1 local]$ cat /etc/group | grep perf
+perf:x:1515:nagios,zurawski,boote,aaron
+}}}
+ # Test the executable on the command line:
+{{{
+[zurawski@patdev1 libexec]$ pwd
+/usr/local/nagios/libexec
+[zurawski@patdev1 libexec]$ perl ./check_perfSONAR.pl --server=ndb1.internet2.edu --port=9991 --endpoint=perfSONAR_PS/services/gLS --template=2
+perfSONAR service replied "The echo request has passed."
+}}}
+ # The next step is define this as a command.  Navigate to the location of the _*commands.cfg*_ file, this may vary for older installations:
+{{{
+[zurawski@patdev1 objects]$ ls
+commands.cfg       contacts.cfg   printer.cfg  templates.cfg    windows.cfg
+commands.cfg.back  localhost.cfg  switch.cfg   timeperiods.cfg
+}}}
+ # Edit _*commands.cfg*_ to add this command structure:
+{{{
+# 'check-perfSONAR-echo' command definition
+define command{
+        command_name    check-perfSONAR-echo
+        command_line    perl $USER1$/check_perfSONAR.pl --server=$HOSTADDRESS$ --port=$_HOSTPORT$ --endpoint=$_HOSTENDPOINT$ --template=2   
+        }
+}}}
+ # This command can now be used by hosts.  In our setup we have defined a specific location for our host configurations, the _*$NAGIOSHOME/etc/nagios.cfg*_ file has this directive:
+{{{
+cfg_dir=/usr/local/nagios/etc/servers
+}}}
+ # The contents of this directory are a configuration file:
+{{{
+[zurawski@patdev1 servers]$ pwd
+/usr/local/nagios/etc/servers
+[zurawski@patdev1 servers]$ ls
+internet2.cfg
+}}}
+ # A simplified snapshot of this file:
+{{{
+define host{
+    use                     generic-host
+    name                    perf-hosttemplate
+    check_command           check_ping!200.0,20%!600.0,60% -4
+    max_check_attempts      10
+    check_period            24x7
+    notification_interval   120
+    notification_period     24x7
+    notification_options    d,r
+    contact_groups  	admins
+    hostgroups		performance-servers
+    register		0
+    }
+ 
+define host{
+	host_name 	ndb1.internet2.edu
+	address		ndb1.internet2.edu
+	use		perf-hosttemplate
+	}
+	
+define hostgroup{
+        hostgroup_name  performance-servers ; The name of the hostgroup
+        alias           Performance Servers ; Long name of the group
+        members         ndb1.internet2.edu
+}
+
+define service{
+    use                             generic-service         ; Name of service template to use
+    hostgroup_name                  performance-servers
+    service_description             SSH
+    is_volatile                     0
+    check_period                    24x7
+    max_check_attempts              4
+    normal_check_interval           5
+    retry_check_interval            1
+    contact_groups                  admins
+    notification_options            w,u,c,r
+    notification_interval           960
+    notification_period             24x7
+    check_command                   check_ssh
+    notifications_enabled           1
+    }
+}}}
+ # First install some new options to the monitoring host:
+{{{
+define host{
+	host_name 	ndb1.internet2.edu
+	address		ndb1.internet2.edu
+	use		perf-hosttemplate
+	_port		9991
+	_endpoint	perfSONAR_PS/services/gLS
+	}
+
+}}}
+ # Then install a new _service_ to be monitored for this host:
+{{{
+define service{
+    use			        generic-service
+	host_name 		    ndb1.internet2.edu
+    service_description	perfSONAR gLS
+	check_command		check-perfSONAR-echo
+	is_volatile		0
+	check_period		24x7
+	max_check_attempts	4
+	normal_check_interval	5
+	retry_check_interval	1
+	contact_groups		admins
+	notification_options	w,u,c,r
+	notification_interval	960
+	notification_period	24x7
+	notifications_enabled	1
+    }
+}}}
+ # Lastly, compile nagios to check for errors:
+{{{
+[zurawski@patdev1 servers]$ sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+
+Nagios 3.0.6
+Copyright (c) 1999-2008 Ethan Galstad (http://www.nagios.org)
+Last Modified: 12-01-2008
+License: GPL
+
+Reading configuration data...
+
+Running pre-flight check on configuration data...
+
+Checking services...
+	Checked 18 services.
+Checking hosts...
+	Checked 1 hosts.
+Checking host groups...
+	Checked 2 host groups.
+Checking service groups...
+	Checked 0 service groups.
+Checking contacts...
+	Checked 1 contacts.
+Checking contact groups...
+	Checked 1 contact groups.
+Checking service escalations...
+	Checked 0 service escalations.
+Checking service dependencies...
+	Checked 0 service dependencies.
+Checking host escalations...
+	Checked 0 host escalations.
+Checking host dependencies...
+	Checked 0 host dependencies.
+Checking commands...
+	Checked 25 commands.
+Checking time periods...
+	Checked 5 time periods.
+Checking for circular paths between hosts...
+Checking for circular host and service dependencies...
+Checking global event handlers...
+Checking obsessive compulsive processor commands...
+Checking misc settings...
+
+Total Warnings: 0
+Total Errors:   0
+
+Things look okay - No serious problems were detected during the pre-flight check
+}}}
+ # Restart the service, and check your installation for errors:
+{{{
+[zurawski@patdev1 servers]$ sudo /etc/init.d/nagios restart
+}}}
+ == Last Modified ==$Id$ 
