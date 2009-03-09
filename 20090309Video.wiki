@@ -13,6 +13,15 @@
    * See [pSPS20090327Release] for details
      * Check individual progress.
      * Code reviews by the 13th.
+     * Open Bugs
+       * _19_ - _*Aaron/Maxim*_ - PingER GUI gLS pingable hosts    
+       * _73_ - _*Jason*_ - Client::LS Registration Logic Re-arrange    
+       * _79_ - _*Jason*_ - Empty gLS/hLS Messages
+       * _84_ - _*Jason*_ - Exit MA service if no data is present    
+       * _85_ - _*Jason*_ - add verbose logging on errors for ma/ls
+       * _62_ - _*Maxim*_ - pingER-MA requires 'hostname" type attribute in endPointPair    
+       * _66_ - _*Maxim*_ - PingER Collection Errors    
+       * _81_ - _*Maxim*_ - PingER Resolution of IPaddress/Hostnames 
    * Code slush status
    * Take pS-B out of the 3.1 release schedule, and release it one month later (with same version number)
  # Circuit Monitoring
