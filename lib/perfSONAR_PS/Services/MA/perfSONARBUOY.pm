@@ -11,13 +11,15 @@ our $VERSION = 0.10;
 
 =head1 NAME
 
-perfSONAR_PS::Services::MA::perfSONARBUOY - A module that provides methods for
-the perfSONARBUOY MA.  perfSONARBUOY exposes data formerly collected by the 
-AMI framework, including BWCTL and OWAMP data.  This data is stored in a 
-database backend (commonly MySQL).  The webservices interface provided by this
-MA currently exposes iperf data collected via BWCTL and OWAMP data.
+perfSONAR_PS::Services::MA::perfSONARBUOY - perfSONAR-BUOY Measurement Archive
 
 =head1 DESCRIPTION
+
+A module that provides methods for the perfSONARBUOY MA.  perfSONARBUOY exposes
+data formerly collected by the former AMI framework, including BWCTL and
+OWAMP data.  This data is stored in a database backend (commonly MySQL).  The
+webservices interface provided by this MA currently exposes iperf data collected
+via BWCTL and OWAMP data.
 
 This module, in conjunction with other parts of the perfSONAR-PS framework,
 handles specific messages from interested actors in search of BWCTL/OWAMP data.
@@ -112,28 +114,32 @@ sub init {
     }
 
     unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"legacy"} ) {
-        $self->{LOGGER}->error("Setting value for 'legacy' to 0");
+        $self->{LOGGER}->warn("Setting value for 'legacy' to 0");
         $self->{CONF}->{"perfsonarbuoy"}->{"legacy"} = 0;
     }
 
-    if ( exists $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"}
-        and $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} )
+    if ( exists $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} and $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} and -d $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} )
     {
-        if ( defined $self->{DIRECTORY} ) {
+        if ( exists $self->{DIRECTORY} and $self->{DIRECTORY} and -d $self->{DIRECTORY} ) {
             unless ( $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} =~ "^/" ) {
+                $self->{LOGGER}->warn("Setting value for 'owmesn' to \"" . $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} . "\"");                
                 $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"};
             }
         }
+        else {
+            $self->{LOGGER}->fatal("Value for 'owmesh' is not set.");
+            return -1;            
+        }
     }
     else {
-        $self->{LOGGER}->error("Value for 'owmesh' is not set.");
+        $self->{LOGGER}->fatal("Value for 'owmesh' is not set.");
         return -1;
     }
 
     unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"}
         and $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} )
     {
-        $self->{LOGGER}->error("Value for 'metadata_db_type' is not set.");
+        $self->{LOGGER}->fatal("Value for 'metadata_db_type' is not set.");
         return -1;
     }
 
@@ -141,21 +147,28 @@ sub init {
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"}
             and $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} )
         {
-            $self->{LOGGER}->error("Value for 'metadata_db_file' is not set.");
+            $self->{LOGGER}->fatal("Value for 'metadata_db_file' is not set.");
             return -1;
         }
         else {
-            if ( defined $self->{DIRECTORY} ) {
+            if ( exists $self->{DIRECTORY} and $self->{DIRECTORY} and -d $self->{DIRECTORY} ) {
                 unless ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} =~ "^/" ) {
+                    $self->{LOGGER}->warn("Setting value for \"metadata_db_file\" to \"" . $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} . "\"" );
                     $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
                 }
+            }
+            else {
+                $self->{LOGGER}->fatal("Cannot set value for \"metadata_db_type\".");
+                return -1;
             }
         }
     }
     elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        eval { load perfSONAR_PS::DB::XMLDB; };
+        eval { 
+            load perfSONAR_PS::DB::XMLDB; 
+        };
         if ($EVAL_ERROR) {
-            $self->{LOGGER}->error("Couldn't load perfSONAR_PS::DB::XMLDB: $EVAL_ERROR");
+            $self->{LOGGER}->fatal("Couldn't load perfSONAR_PS::DB::XMLDB: $EVAL_ERROR");
             return -1;
         }
 
@@ -171,24 +184,27 @@ sub init {
         {
             if ( defined $self->{DIRECTORY} ) {
                 unless ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} =~ "^/" ) {
+                    $self->{LOGGER}->warn( "Setting the value of \"\" to \"" . $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} . "\"" );
                     $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"};
                 }
             }
             unless ( -d $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} ) {
+                $self->{LOGGER}->warn( "Creating \"" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} . "\" for the \"metadata_db_name\"" );
                 system( "mkdir " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} );
             }
         }
         else {
-            $self->{LOGGER}->error("Value for 'metadata_db_name' is not set.");
+            $self->{LOGGER}->fatal("Value for 'metadata_db_name' is not set.");
             return -1;
         }
     }
     else {
-        $self->{LOGGER}->error("Wrong value for 'metadata_db_type' set.");
+        $self->{LOGGER}->fatal("Wrong value for 'metadata_db_type' set.");
         return -1;
     }
 
     unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} ) {
+        $self->{LOGGER}->warn( "Setting \"enable_registration\" to \"" . $self->{CONF}->{enable_registration} . "\" for legacy reasons." );
         $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} = $self->{CONF}->{enable_registration};
     }
 
@@ -210,6 +226,7 @@ sub init {
             if ( defined $self->{CONF}->{"ls_instance"}
                 and $self->{CONF}->{"ls_instance"} )
             {
+                $self->{LOGGER}->warn( "Setting \"ls_instance\" to \"" . $self->{CONF}->{"ls_instance"} . "\"" );
                 $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
             }
             else {
@@ -223,6 +240,7 @@ sub init {
             if ( defined $self->{CONF}->{"ls_registration_interval"}
                 and $self->{CONF}->{"ls_registration_interval"} )
             {
+                $self->{LOGGER}->warn( "Setting \"ls_registration_interval\" to \"" . $self->{CONF}->{"ls_registration_interval"} . "\"" );
                 $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
             }
             else {
@@ -233,7 +251,7 @@ sub init {
 
         if ( not $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"} ) {
             unless ( $self->{CONF}->{external_address} ) {
-                $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address");
+                $self->{LOGGER}->fatal("With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address");
                 return -1;
             }
             $self->{LOGGER}->info( "Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT} );
@@ -275,13 +293,13 @@ sub init {
     my $error = q{};
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         unless ( $self->createStorage( {} ) == 0 ) {
-            $self->{LOGGER}->error("Couldn't load the store file.");
+            $self->{LOGGER}->fatal("Couldn't load the store file - service cannot start");
             return -1;
         }
         $self->{METADATADB} = new perfSONAR_PS::DB::File( { file => $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} } );
         $self->{METADATADB}->openDB( { error => \$error } );
         unless ( $self->{METADATADB} ) {
-            $self->{LOGGER}->error("Couldn't initialize store file: $error");
+            $self->{LOGGER}->fatal("Couldn't initialize store file: $error");
             return -1;
         }
     }
@@ -289,12 +307,12 @@ sub init {
         my $error      = q{};
         my $metadatadb = $self->prepareDatabases;
         unless ($metadatadb) {
-            $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
+            $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
             return -1;
         }
 
         unless ( $self->createStorage( { metadatadb => $metadatadb } ) == 0 ) {
-            $self->{LOGGER}->error("Couldn't load the XMLDB.");
+            $self->{LOGGER}->fatal("Couldn't load the XMLDB - service cannot start");
             return -1;
         }
 
@@ -302,7 +320,7 @@ sub init {
         $self->{METADATADB} = q{};
     }
     else {
-        $self->{LOGGER}->error("Wrong value for 'metadata_db_type' set.");
+        $self->{LOGGER}->fatal("Wrong value for 'metadata_db_type' set.");
         return -1;
     }
 
@@ -336,17 +354,17 @@ sub createStorage {
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         unless ( exists $parameters->{metadatadb} and $parameters->{metadatadb} ) {
             $parameters->{metadatadb} = $self->prepareDatabases;
-            unless ( $parameters->{metadatadb} ) {
-                $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
+            unless ( exists $parameters->{metadatadb} and $parameters->{metadatadb} ) {
+                $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
                 return -1;
             }
         }
 
         $dbTr = $parameters->{metadatadb}->getTransaction( { error => \$error } );
-        unless ($dbTr) {
+        unless ( $dbTr ) {
             $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
             undef $dbTr;
-            $self->{LOGGER}->error( "Database error: \"" . $error . "\", aborting." );
+            $self->{LOGGER}->fatal( "Database error: \"" . $error . "\", aborting." );
             return -1;
         }
     }
@@ -364,12 +382,12 @@ sub createStorage {
             $fh->close;
         }
         else {
-            $self->{LOGGER}->error("File cannot be written.");
+            $self->{LOGGER}->fatal("File cannot be written.");
             return -1;
         }
     }
     else {
-        $self->{LOGGER}->error("Wrong value for 'metadata_db_type' set.");
+        $self->{LOGGER}->fatal("Wrong value for 'metadata_db_type' set.");
         return -1;
     }
 
@@ -435,7 +453,7 @@ sub createStorage {
             $dbBW->closeDB;
 
             if ( $#{$result_nodesBW} == -1 or $#{$result_meshesBW} == -1 or $#{$result_node_mesh_mapBW} == -1 ) {
-                $self->{LOGGER}->error("BW Database query returned 0 results, aborting.");
+                $self->{LOGGER}->fatal("BW Database query returned 0 results, cannot make store file aborting.");
                 return -1;
             }
         }
@@ -498,7 +516,7 @@ sub createStorage {
             $dbOWP->closeDB;
 
             if ( $#{$result_nodesOWP} == -1 or $#{$result_meshesOWP} == -1 ) {
-                $self->{LOGGER}->error("OWP Database query returned 0 results, aborting.");
+                $self->{LOGGER}->fatal("OWP Database query returned 0 results, cannot make store file, aborting.");
                 return -1;
             }
         }
@@ -566,7 +584,7 @@ sub createStorage {
                             $fh->close;
                         }
                         else {
-                            $self->{LOGGER}->error("File cannot be written.");
+                            $self->{LOGGER}->fatal("File handle not defined, cannot be written.");
                             return -1;
                         }
 
@@ -679,7 +697,7 @@ sub createStorage {
                             $fh->close;
                         }
                         else {
-                            $self->{LOGGER}->error("File cannot be written.");
+                            $self->{LOGGER}->fatal("File handle cannot be written, aborting.");
                             return -1;
                         }
 
@@ -820,7 +838,7 @@ sub createStorage {
                             $fh->close;
                         }
                         else {
-                            $self->{LOGGER}->error("File cannot be written.");
+                            $self->{LOGGER}->fatal("File handle cannot be written, aborting.");
                             return -1;
                         }
 
@@ -840,7 +858,7 @@ sub createStorage {
         if ($errorFlag) {
             $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
             undef $dbTr;
-            $self->{LOGGER}->error( "Database error: \"" . $error . "\", aborting." );
+            $self->{LOGGER}->fatal( "Database error: \"" . $error . "\", aborting." );
             return -1;
         }
         else {
@@ -851,7 +869,7 @@ sub createStorage {
             else {
                 $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
                 undef $dbTr;
-                $self->{LOGGER}->error( "Database error: \"" . $error . "\", aborting." );
+                $self->{LOGGER}->fatal( "Database error: \"" . $error . "\", aborting." );
                 return -1;
             }
         }
@@ -863,12 +881,12 @@ sub createStorage {
             $fh->close;
         }
         else {
-            $self->{LOGGER}->error("File cannot be written.");
+            $self->{LOGGER}->fatal("File handle cannot be written, aborting.");
             return -1;
         }
     }
     else {
-        $self->{LOGGER}->error("Wrong value for 'metadata_db_type' set.");
+        $self->{LOGGER}->fatal("Wrong value for 'metadata_db_type' set.");
         return -1;
     }
     return 0;
@@ -2492,13 +2510,13 @@ L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::Error_compat>,
 L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::SQL>,
 L<perfSONAR_PS::Utils::ParameterValidation>
 
-To join the 'perfSONAR-PS' mailing list, please visit:
+To join the 'perfSONAR Users' mailing list, please visit:
 
-  https://mail.internet2.edu/wws/info/i2-perfsonar
+  https://mail.internet2.edu/wws/info/perfsonar-user
 
 The perfSONAR-PS subversion repository is located at:
 
-  https://svn.internet2.edu/svn/perfSONAR-PS
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
 
 Questions and comments can be directed to the author, or the mailing list.  Bugs,
 feature requests, and improvements can be directed here:
@@ -2520,7 +2538,7 @@ with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2007-2008, Internet2
+Copyright (c) 2007-2009, Internet2
 
 All rights reserved.
 
