@@ -1,8 +1,7 @@
 use Statistics::Descriptive;
 use Log::Log4perl qw(get_logger);
-use Data::Dumper;
-
-
+## empty package to satisfy deps
+package IEPM::PingER::Statistics;
 #######################################################################
 package IEPM::PingER::Statistics::RTT;
 #######################################################################
@@ -11,6 +10,7 @@ our $logger = Log::Log4perl::get_logger("IEPM::PingER::Statistics::RTT");
 
 use strict;
 use warnings;
+use Data::Dumper;
 
 =head1 IEPM::PingER::Statistics::RTT::calculate
 
@@ -43,6 +43,7 @@ our $logger = Log::Log4perl::get_logger("IEPM::PingER::Statistics::IPD");
 
 use strict;
 use warnings;
+use Data::Dumper;
 
 =head1 IEPM::PingER::Statistics::IPD::calculate
 
@@ -85,6 +86,8 @@ package IEPM::PingER::Statistics::Other;
 
 use strict;
 use warnings;
+use Data::Dumper;
+
 our $logger = Log::Log4perl::get_logger("IEPM::PingER::Statistics::Other");
 
 =head1 IEPM::PingER::Statistics::Other::calculate
@@ -149,6 +152,7 @@ package IEPM::PingER::Statistics::Loss;
 #######################################################################
 use strict;
 use warnings;
+use Data::Dumper;
  
 =head1 IEPM::PingER::Statistics::Loss::calculate
 
@@ -180,8 +184,10 @@ sub calculate {
 #######################################################################
 package IEPM::PingER::Statistics::Loss::CLP;
 #######################################################################
+
 use strict;
 use warnings;
+use Data::Dumper;
 
 ###
 # Conditional Loss Probability (CLP) defined in Characterizing End-to-end
