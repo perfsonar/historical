@@ -23,6 +23,8 @@ This page outlines details regarding the perfSONAR-PS release that began the wee
  * Jeff
  * Brian
  * Joe
+ * Guilherme
+ * Marcos
  * ...
 
 == Release Schedule ==
@@ -38,10 +40,10 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPS20090327Release/schedule.png
 == Services Released and Parties Involved ==
 
 || *Service* || *Developer* || *Code Reviewer* || *Documentation Reviewer* ||
-|| Lookup Service || Jason || Jeff || Joe ||
+|| Lookup Service || Jason || Jeff, Macros || Joe,Guilherme ||
 || SNMP Measurement Archive || Jason || Brian || Aaron ||
 || Status Measurement Archive || Aaron || Jason || Maxim ||
-|| perfSONAR-BUOY || Jason || Maxim || Brian ||
+|| perfSONAR-BUOY || Jason || Maxim,Guilherme || Brian,Marcos ||
 || PingER || Maxim || Aaron || Jason ||
 || LS Registration Daemon || Aaron || Joe || Jason ||
 || Topology Service || Aaron || Jason || Jeff ||
@@ -180,6 +182,16 @@ Developers are responsible for testing their code:
      * SNMP - _*PENDING*_
    * Documentation Review
      * pSB - _*PENDING*_
+ * Guilherme
+   * Code Review
+     * perfSONAR-BUOY - _*PENDING*_
+   * Documentation Review
+     * LS - _*PENDING*_
+ * Marcos
+   * Code Review
+     * LS - _*PENDING*_
+   * Documentation Review
+     * perfSONAR-BUOY - _*PENDING*_
    
 == Lessons Learned ==
    
