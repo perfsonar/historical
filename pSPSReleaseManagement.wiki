@@ -8,6 +8,7 @@
    # [pSPSReleaseManagement#Revision_Control Revision Control] 
    # [pSPSReleaseManagement#Schedule Schedule]
    # [pSPSReleaseManagement#Documentation Documentation]
+     # [pSPSReleaseManagement#Perldoc_Format Perldoc Format]
    # [pSPSReleaseManagement#Testing Testing]
    # [pSPSReleaseManagement#Code_Review Code Review]
    # [pSPSReleaseManagement#Issue_Tracker Issue Tracker]
@@ -81,6 +82,98 @@ The release team should be sure to:
  * Ensure the web pages are addressed within a week of the official release
 
 All documentation will be reviewed prior to the release for completeness and correctness.  
+
+==== Perldoc Format ====
+
+The following are requirements for all perfSONAR-PS libraries and scripts:
+
+Header Information, make the obvious changes for:
+
+ * VERSION
+ * NAME
+ * DESCRIPTION
+ * Used libraries
+
+{{{
+package NAME;
+
+use strict;
+use warnings;
+
+our $VERSION = SOME_NUMBER;
+
+=head1 NAME
+
+BRIEF DESC.
+
+=head1 DESCRIPTION
+
+LONGER DESC.
+
+=cut
+
+use Log::Log4perl qw(get_logger);
+
+use perfSONAR_PS::Common;
+}}}
+
+Method/Function Information:
+
+{{{
+=head2 NAME($self, { ARGUMENT => REQUIRED } )
+
+DESCRIPTION
+
+=cut
+}}}
+
+Footer Information, make the obvious changes for:
+
+ * SEE ALSO
+ * AUTHOR
+ * COPYRIGHT
+
+{{{
+__END__
+
+=head1 SEE ALSO
+
+L<Log::Log4perl>
+
+To join the 'perfSONAR Users' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/perfsonar-user
+
+The perfSONAR-PS subversion repository is located at:
+
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
+
+Questions and comments can be directed to the author, or the mailing list.  Bugs,
+feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Jason Zurawski, zurawski@internet2.edu
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework along
+with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2007-2009, Internet2
+
+All rights reserved.
+
+=cut
+}}}
 
 === Testing ===
 
