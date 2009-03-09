@@ -11,6 +11,7 @@
    # [pSPSReleaseManagement#Testing Testing]
    # [pSPSReleaseManagement#Code_Review Code Review]
    # [pSPSReleaseManagement#Issue_Tracker Issue Tracker]
+     # [pSPSReleaseManagement#Labels Labels]
  # [pSPSReleaseManagement#Released_Product Released Product]
 
 == Introduction ==
@@ -112,6 +113,75 @@ The release manager will:
  * Enter new tags to the issue tracker prior to a release
  * Re-classify all bugs as necessary
  * Annoy the developers to fix/close bugs before and after each release
+
+==== Labels ====
+
+perfSONAR-PS will respect the following _classes_ of label in the Google Issue tracker (in addition to several unclassified _tags_:
+
+ * _*Type*_ - What sort of issue report is this?
+ * _*Milestone*_ - Tentative classification for release target.  We reserve _Future_ for unknown status.
+ * _*Priority*_ - Related to milestone designation.
+ * _*OpSys*_ - Operating systems effected.  Normally not relevant to perfSONAR-PS, but available for related projects.
+ * _*Component*_ - Specific component of the framework.  
+
+A breakdown and explanation of each label follows:
+
+ * Type
+   * _*Defect*_ - Report of a software defect
+   * _*Enhancement*_ - Request for enhancement
+   * _*Task*_ - Constructive work item
+   * _*Patch*_ - Source code patch for review
+   * _*Other*_ - Some other kind of issue
+ * Priority
+   * _*Critical*_ - Must resolve in milestone
+   * _*High*_ - Strongly want to resolve in milestone
+   * _*Medium*_ - Normal priority
+   * _*Low*_ - Might slip to later milestone
+ * OpSys
+   * _*All*_ - Affects all operating systems
+   * _*Windows*_ - Affects Windows users
+   * _*Linux*_ - Affects Linux users
+   * _*OSX*_ - Affects Mac OS X users
+ * Milestone
+   * _*Release0.9Beta*_ - perfSONAR-PS September 2007 Release (<font color="red">depreciated</red>) 
+   * _*Release0.9*_ - perfSONAR-PS January 2008 Release (<font color="red">depreciated</red>) 
+   * _*Release1.0*_ - perfSONAR-PS July 2008 Release (<font color="red">depreciated</red>) 
+   * _*Release3.1Beta*_ - perfSONAR-PS March 2009 Release - Special tag for beta testing
+   * _*Release3.1*_ - perfSONAR-PS March 2009 Release
+   * _*Release3.2Beta*_ - perfSONAR-PS Summer 2009 Release - Special tag for beta testing
+   * _*Release3.2*_ - perfSONAR-PS Summer 2009 Release
+   * _*Future*_ - perfSONAR-PS Future Plans
+ * Component
+   * _*Issues*_ - Issues Information Request
+   * _*Wiki*_ - Wiki Information Request
+   * _*Docs*_ - PerfSONAR-PS documentation
+   * _*perfSONAR-PS*_ - General Framework - use when unsure of specific parts are unknown
+   * _*PingER*_ - PingER Measurement Archive and Point
+   * _*SNMP*_ - SNMP Measurement Archive
+   * _*LookupService*_ - Class Lookup Service (<font color="red">depreciated</red>) 
+   * _*HomeLookupService*_ - Home Lookup Service
+   * _*GlobalLookupService*_ - Global Lookup Service
+   * _*TopologyService*_ - Topology Service
+   * _*CircuitStatus*_ - Circuit Status Measurement Archive (<font color="red">depreciated</red>) 
+   * _*StatusService*_ - Status Measurement Archive
+   * _*PerfSONARBUOY*_ - PerfSONAR-BOUY Measurement Archive (<font color="red">depreciated</red>) 
+   * _*PerfSONARBUOYClient*_ - PerfSONAR-BOUY Client Package
+   * _*PerfSONARBUOYServer*_ - PerfSONAR-BOUY Server Package
+   * _*LSRegistrationDaemon*_ - LS Registration Daemon
+   * _*TL1*_ - TL1 Tools
+   * _*GUI*_ - PerfSONAR-PS GUI Tools
+   * _*API*_ - Programmer Interfaces
+   * _*NPToolkit*_ - Network Performance Toolkit (<font color="red">depreciated</red>) 
+   * _*PerformanceNode*_ - Performance Node
+   * _*PerformanceNodeKnoppix*_ - Performance Node - Knoppix Releases
+   * _*PerformanceNodeFedora*_ - Performance Node - Fedora Releases
+ * Misc
+   * _*Security*_ - Security risk to users
+   * _*Performance*_ - Performance issue
+   * _*Usability*_ - Affects program usability
+   * _*Maintainability*_ - Hinders future changes
+   * _*Documentation*_ - Documentation issue
+   * _*Packaging*_ - Issues package construction
 
 == Released Product ==
 

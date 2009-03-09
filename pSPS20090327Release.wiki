@@ -116,15 +116,14 @@ Developers are responsible for testing their code:
  * Jason
    * Release Tasks
      * Prepare [YumRepository YUM] repo - <font color=red>_*IN PROGRESS - 2/17*_</font>
-     * Update Release Documentation - <font color=red>_*IN PROGRESS - 2/17*_</font>
-     * Update Issue Tracker - <font color=red>_*Done - 3/3*_</font>
-     * Assign review tasks into Issue Tracker - <font color=red>_*IN PROGRESS - 3/3*_</font>
+     * Update Release Documentation - <font color=green>_*IN PROGRESS - 3/9*_</font>
+     * Update Issue Tracker - <font color=green>_*Done - 3/3*_</font>
      * Review Code Reviews - _*PENDING*_
      * Review Doc Reviews - _*PENDING*_
    * Development
      * LS - <font color=red>_*IN PROGRESS - 3/2*_</font>
      * SNMP - <font color=red>_*IN PROGRESS - 3/2*_</font>
-     * pSB - _*PENDING*_
+     * pSB - <font color=purple>_*PUSHED OFF - 3/9*_</font>
    * Documentation
      * LS - _*PENDING*_
      * SNMP - _*PENDING*_
