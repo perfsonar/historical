@@ -19,6 +19,7 @@
        * _79_ - _*Jason*_ - Empty gLS/hLS Messages
        * _84_ - _*Jason*_ - Exit MA service if no data is present    
        * _85_ - _*Jason*_ - add verbose logging on errors for ma/ls
+       * _105_ - _*Jason*_ - hLS Summarization of DCN Data 
        * _62_ - _*Maxim*_ - pingER-MA requires 'hostname" type attribute in endPointPair    
        * _66_ - _*Maxim*_ - PingER Collection Errors    
        * _81_ - _*Maxim*_ - PingER Resolution of IPaddress/Hostnames 
