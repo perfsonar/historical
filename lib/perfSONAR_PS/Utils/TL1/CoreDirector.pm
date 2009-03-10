@@ -1009,9 +1009,11 @@ sub login {
 }
 
 sub logout {
-  my ($self) = @_;
+    my ($self) = @_;
 
-  $self->send_cmd("CANC-USER::".$self->{USERNAME}.":".$self->{CTAG}.";");
+    $self->send_cmd("CANC-USER::".$self->{USERNAME}.":".$self->{CTAG}.";");
+
+    return;
 }
 
 1;

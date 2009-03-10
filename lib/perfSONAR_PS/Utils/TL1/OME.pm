@@ -226,6 +226,7 @@ sub getCrossconnect {
 
             if ($line =~ /"([^,]*),([^:]*):([^:]*):([^:]*):([^:]*):([^"]*)"/) {
                 my %crs = ();
+                $crss{$1."-".$2} = \%crs;
 
                 $crs{fromendpointname} = $1;
                 $crs{fromendpointtype} = lc($5);
@@ -237,8 +238,6 @@ sub getCrossconnect {
                 if ($4 and $4 =~ /CKTID=([^,])*/) {
                     $crs{cktid} = $1;
                 }
-
-                $crss{$1."-".$2} = \%crs;
             }
         }
 
@@ -494,10 +493,10 @@ sub getETH_PM {
 
     my %pm = ();
     foreach my $curr_aid (keys %{ $self->{OMS} }) {
-        next unless (not $aid or $aid eq $curr_aid);
+        next if ($aid and $aid ne $curr_aid);
 
         foreach my $curr_type (keys %{ $self->{OMS}->{$curr_aid} }) {
-            next unless (not $pm_type or $pm_type eq $curr_type);
+            next if ($pm_type and $pm_type ne $curr_type);
 
             $self->{LOGGER}->debug("Found $curr_type for $aid");
 
@@ -541,10 +540,10 @@ sub __get_PM {
 
     my %pm = ();
     foreach my $curr_aid (keys %{ $self->{PMS} }) {
-        next unless (not $aid or $aid eq $curr_aid);
+        next if ($aid and $aid ne $curr_aid);
 
         foreach my $curr_type (keys %{ $self->{PMS}->{$curr_aid} }) {
-            next unless (not $pm_type or $pm_type eq $curr_type);
+            next if ($pm_type and $pm_type ne $curr_type);
 
             my $pm = $self->{PMS}->{$curr_aid}->{$curr_type};
 

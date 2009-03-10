@@ -523,10 +523,10 @@ sub getETH_PM {
 
     my %pm = ();
     foreach my $curr_aid (keys %{ $self->{OMS} }) {
-        next unless (not $aid or $aid eq $curr_aid);
+        next if ($aid and $aid ne $curr_aid);
 
         foreach my $curr_type (keys %{ $self->{OMS}->{$curr_aid} }) {
-            next unless (not $pm_type or $pm_type eq $curr_type);
+            next if ($pm_type and $pm_type ne $curr_type);
 
             $self->{LOGGER}->debug("Found $curr_type for $aid");
 
@@ -572,10 +572,10 @@ sub __get_PM {
 
     my %pm = ();
     foreach my $curr_aid (keys %{ $self->{PMS} }) {
-        next unless (not $aid or $aid eq $curr_aid);
+        next if ($aid and $aid ne $curr_aid);
 
         foreach my $curr_type (keys %{ $self->{PMS}->{$curr_aid} }) {
-            next unless (not $pm_type or $pm_type eq $curr_type);
+            next if ($pm_type and $pm_type ne $curr_type);
 
             my $pm = $self->{PMS}->{$curr_aid}->{$curr_type};
 
