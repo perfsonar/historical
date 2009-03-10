@@ -2,6 +2,25 @@ package perfSONAR_PS::DB::TopologyXMLDB;
 
 use strict;
 use warnings;
+
+use fields 'READ_ONLY', 'DB_OPEN', 'DB_NAMESPACES', 'DB_FILE', 'DB_CONTAINER', 'DATADB', 'LOGGER', 'INITIALIZED';
+
+=head1 NAME
+
+perfSONAR_PS::DB::TopologyXMLDB - A module that provides methods for querying
+and modifying a topology database.
+
+=head1 DESCRIPTION
+
+This module provides methods to interact with a topology database. This allows
+querying as well as updating the database. 
+
+interacting with the Sleepycat [Oracle] XML database.  The module is to be
+treated as an object, where each instance of the object represents a direct
+connection to a single database and collection. Each method may then be
+invoked on the object for the specific database.  
+
+=cut
 use Log::Log4perl qw(get_logger);
 use Data::Dumper;
 
@@ -10,40 +29,51 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Topology::Common;
 use perfSONAR_PS::Topology::ID;
 
-use fields 'READ_ONLY', 'DB_OPEN', 'DB_NAMESPACES', 'DB_FILE', 'DB_CONTAINER', 'DATADB', 'LOGGER';
-
 our $VERSION = 0.09;
 
 sub new {
-    my ($package, $db_container, $db_file, $ns, $read_only) = @_;
-
-    $self->{LOGGER} = get_logger("perfSONAR_PS::DB::TopologyXMLDB");
+    my ($class) = @_;
 
     my $self = fields::new($package);
 
+    $self->{LOGGER} = get_logger($class);
+
+    return $self;
+}
+
+sub init {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { directory => 1, file => 1, namespaces => 0, read_only => 0 } );
+
+    my $db_container = $parameters->{directory};
+    my $db_file = $parameters->{file};
+    my $ns = $parameters->{namespaces};
+    my $read_only = $parameters->{read_only};
+
     if ($read_only) {
-        $self->{"READ_ONLY"} = 1;
+        $self->{READ_ONLY} = 1;
     } else {
-        $self->{"READ_ONLY"} = 0;
+        $self->{READ_ONLY} = 0;
     }
 
-    if (defined $db_container and $db_container ne "") {
-        $self->{"DB_CONTAINER"} = $db_container;
+    if ($db_container) {
+        $self->{DB_CONTAINER} = $db_container;
     }
 
-    if (defined $db_file and $db_file ne "") {
-        $self->{"DB_FILE"} = $db_file;
+    if ($db_file) {
+        $self->{DB_FILE} = $db_file;
     }
 
-    if (defined $ns and $ns ne "") {
-        $self->{"DB_NAMESPACES"} = $ns;
+    if ($ns) {
+        $self->{DB_NAMESPACES} = $ns;
     } else {
         my %ns = getTopologyNamespaces();
-        $self->{"DB_NAMESPACES"} = \%ns;
+        $self->{DB_NAMESPACES} = \%ns;
     }
 
-    $self->{"DB_OPEN"} = 0;
-    $self->{"DATADB"} = "";
+    $self->{DB_OPEN} = 0;
+    $self->{DATADB} = "";
+    $self->{INITIALIZED} = 1;
 
     return $self;
 }
@@ -51,21 +81,16 @@ sub new {
 sub open {
     my ($self) = @_;
 
+    return (-1, "Database not initialized") unless ($self->{INITIALIZED});
+
     return (0, "") if ($self->{DB_OPEN} != 0);
 
-    $self->{DATADB} = new perfSONAR_PS::DB::XMLDB({  env => $self->{DB_CONTAINER}, cont => $self->{DB_FILE}, ns => $self->{DB_NAMESPACES} });
-    if (not defined $self->{DATADB}) {
+    $self->{DATADB} = perfSONAR_PS::DB::XMLDB->new({  env => $self->{DB_CONTAINER}, cont => $self->{DB_FILE}, ns => $self->{DB_NAMESPACES} });
+    unless ($self->{DATADB}) {
         my $msg = "Couldn't open specified database";
         $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
-
-#	my $status = $self->{DATADB}->prep;
-#	if ($status == -1) {
-#		my $msg = "Couldn't open specified database";
-#		$self->{LOGGER}->error($msg);
-#		return (-1, $msg);
-#	}
 
     my $error;
     my $status = $self->{DATADB}->openDB({ txn => undef, error => \$error });
@@ -141,7 +166,7 @@ sub xQuery {
         return (-1, "Couldn't query database: $error");
     }
 
-    $localContent .= "<nmtopo:topology xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\">\n";
+    $localContent .= "<nmtopo:topology xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20080828/\">\n";
     $localContent .= join("", @queryResults);
     $localContent .= "</nmtopo:topology>\n";
 
@@ -164,7 +189,7 @@ sub getAll {
 
     my $content = "";
 
-    $content .= "<nmtopo:topology xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\">\n";
+    $content .= "<nmtopo:topology xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20080828/\">\n";
 
     $content .= join("", @results);
 
@@ -706,7 +731,7 @@ programs that can interface via the MA server or directly with the database.
 
     =head1 COPYRIGHT
 
-    Copyright (c) 2004-2007, Internet2 and the University of Delaware
+    Copyright (c) 2004-2009, Internet2 and the University of Delaware
 
     All rights reserved.
 
