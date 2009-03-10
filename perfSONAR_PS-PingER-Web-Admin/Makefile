@@ -10,4 +10,4 @@ dist:
 install:
 	mkdir -p ${PREFIX}
 	tar ch --exclude=etc/* --exclude=*spec --exclude=MANIFEST --exclude=Makefile -T MANIFEST | tar x -C ${PREFIX}
-	for i in `cat MANIFEST | grep ^etc`; do  mkdir -p `dirname $(PREFIX)/$${i}`; if [ -e $(PREFIX)/$${i} ]; then install -m 640 -c $${i} $(PREFIX)/$${i}.new; else install -m 640 -c $${i} $(PREFIX)/$${i}; fi; done
+	for i in `cat MANIFEST | grep ^etc`; do  mkdir -p `dirname $(PREFIX)/$${i}`; if [ -e $(PREFIX)/$${i} ]; then install -m 644 -c $${i} $(PREFIX)/$${i}.new; else install -m 644 -c $${i} $(PREFIX)/$${i}; fi; done

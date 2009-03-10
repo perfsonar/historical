@@ -3,6 +3,7 @@ Makefile
 etc/.htaccess
 etc/GeneralSystem.conf
 etc/logger.conf
+doc/apache.conf
 html/menu.css
 html/mystyle.css
 html/overlib/Mini/overlib_anchor_mini.js
@@ -54,6 +55,9 @@ lib/perfSONAR_PS/PINGERTOPO_DATATYPES/v2_0/nmwg/Topology/Domain/Node/Parameters/
 lib/perfSONAR_PS/PINGERTOPO_DATATYPES/v2_0/pingertopo/Topology.pm
 lib/perfSONAR_PS/PINGERTOPO_DATATYPES/v2_0/pingertopo/Topology/Domain.pm
 lib/perfSONAR_PS/PINGERTOPO_DATATYPES/v2_0/pingertopo/Topology/Domain/Node.pm
+lib/perfSONAR_PS/SONAR_DATATYPES/v2_0/Element.pm
+lib/perfSONAR_PS/SONAR_DATATYPES/v2_0/NSMap.pm
+lib/perfSONAR_PS/SONAR_DATATYPES/v2_0/psservice/Message/Metadata/Subject/Service.pm
 lib/perfSONAR_PS/Transport.pm
 lib/perfSONAR_PS/Utils/DNS.pm
 lib/perfSONAR_PS/Utils/ParameterValidation.pm

@@ -24,9 +24,6 @@
 
      Maxim Grigoriev, maxim_at_fnal_gov   2007-2008        
      Aaron Brown, aaron_at_internet2_edu  2008
-     
-=head1 FUNCTIONS
-
 
 =cut
 
@@ -48,9 +45,6 @@ use Storable qw(freeze thaw);
 use perfSONAR_PS::Client::gLS;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Utils::DNS qw/reverse_dns resolve_address/;
-use perfSONAR_PS::Datatypes::EventTypes;
-
-use aliased  'perfSONAR_PS::SONAR_DATATYPES::v2_0::psservice::Message::Metadata::Subject::Service';
 
 use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::pingertopo::Topology';
 use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::pingertopo::Topology::Domain';
@@ -68,7 +62,79 @@ croak( "Please fix your deployment, basedir is not what pointing to the webadmin
 
 our $CONFIG_FILE    = BASEDIR . '/etc/GeneralSystem.conf';
 our %GENERAL_CONFIG = %{ loadConfig() };
- 
+
+if ( not $GENERAL_CONFIG{LOGGER_CONF} ) {
+    $GENERAL_CONFIG{LOGGER_CONF} = "etc/logger.conf";
+}
+
+if ( $GENERAL_CONFIG{LOGGER_CONF} !~ /^\// ) {
+    $GENERAL_CONFIG{LOGGER_CONF} = BASEDIR . "/" . $GENERAL_CONFIG{LOGGER_CONF};
+}
+
+if ( $GENERAL_CONFIG{what_template}->{header} !~ /^\// ) {
+    $GENERAL_CONFIG{what_template}->{header} = BASEDIR . "/" . $GENERAL_CONFIG{what_template}->{header};
+}
+
+if ( $GENERAL_CONFIG{what_template}->{footer} !~ /^\// ) {
+    $GENERAL_CONFIG{what_template}->{footer} = BASEDIR . "/" . $GENERAL_CONFIG{what_template}->{footer};
+}
+
+if ( $GENERAL_CONFIG{what_template}->{Domains} !~ /^\// ) {
+    $GENERAL_CONFIG{what_template}->{Domains} = BASEDIR . "/" . $GENERAL_CONFIG{what_template}->{Domains};
+}
+
+if ( $GENERAL_CONFIG{what_template}->{Nodes} !~ /^\// ) {
+    $GENERAL_CONFIG{what_template}->{Nodes} = BASEDIR . "/" . $GENERAL_CONFIG{what_template}->{Nodes};
+}
+
+if ( $GENERAL_CONFIG{LANDMARKS} !~ /^\// ) {
+    $GENERAL_CONFIG{LANDMARKS} = BASEDIR . "/" . $GENERAL_CONFIG{LANDMARKS};
+}
+
+if ( $GENERAL_CONFIG{PROJECT} ) {
+    if ( ref( $GENERAL_CONFIG{PROJECT} ) ne "ARRAY" ) {
+        my @arr = ();
+        push @arr, $GENERAL_CONFIG{PROJECT};
+        $GENERAL_CONFIG{PROJECT} = \@arr;
+    }
+}
+
+# XXX: The following are meant for the NPToolkit where projects are defined as
+# 'site_project' instead of PROJECT and the name for the site is 'site_name',
+# not MYDOMAIN. Longer term, a common structure for projects and names should
+# be done.
+
+if ( $GENERAL_CONFIG{site_project} ) {
+    if ( ref( $GENERAL_CONFIG{site_project} ) ne "ARRAY" ) {
+        my @arr = ();
+        push @arr, $GENERAL_CONFIG{site_project};
+        $GENERAL_CONFIG{site_project} = \@arr;
+    }
+}
+
+# move everything from 'site_project' into 'PROJECT'
+if ( $GENERAL_CONFIG{site_project} ) {
+    my %tmp = ();
+
+    if ( $GENERAL_CONFIG{PROJECT} ) {
+        foreach my $project ( @{ $GENERAL_CONFIG{PROJECT} } ) {
+            $tmp{$project} = 1;
+        }
+    }
+
+    foreach my $project ( @{ $GENERAL_CONFIG{site_project} } ) {
+        $tmp{$project} = 1;
+    }
+
+    my @arr = keys %tmp;
+    $GENERAL_CONFIG{PROJECT} = \@arr;
+}
+
+# set "MYDOMAIN" if it doesn't exist but "site_name" does.
+if ( not $GENERAL_CONFIG{MYDOMAIN} and $GENERAL_CONFIG{site_name} ) {
+    $GENERAL_CONFIG{MYDOMAIN} = $GENERAL_CONFIG{site_name};
+}
+
 Log::Log4perl->init( $GENERAL_CONFIG{LOGGER_CONF} );
 my $logger = get_logger("configure");
 
@@ -121,7 +187,6 @@ my $myhtml = $TEMPLATE_HEADER->output() . displayGlobal() . $TEMPLATE_FOOTER->ou
 print $ajax->build_html( $cgi, $myhtml, { '-Expires' => '1d', '-cookie' => $COOKIE } );
 
 =head2 readgLSSites
-
   Reads the set of pingable sites from the gLS and stores it in the global variable $GLS_PROJECTS
 
 =cut
@@ -144,14 +209,16 @@ sub readgLSSites {
             $logger->debug( "Using default gLS hints URL: " . $default_url );
             $gls = perfSONAR_PS::Client::gLS->new( { url => $default_url } );
         }
- 
+
+        my $parser = XML::LibXML->new();
+
         if ( not $gls->{ROOTS} ) {
             $logger->debug("No gLS Roots found!");
         }
         else {
-            $logger->debug("Found gLS roots, looking up 'pinger' tools");
+            $logger->debug("Found gLS roots, looking up 'ping' tools");
 
-            my @eventTypes = ($GENERAL_CONFIG{EVENTTYPE}->tools->pinger);
+            my @eventTypes = ("http://ggf.org/ns/nmwg/tools/ping/1.0");
 
             my @keywords = ();
             $logger->debug( "General Config: " . Dumper( \%GENERAL_CONFIG ) );
@@ -181,8 +248,8 @@ sub readgLSSites {
                 }
 
                 foreach my $s ( @{$result} ) {
-                    
-                    my $service = Service->new({ xml => $s })
+                    my $doc = $parser->parse_string($s);
+
                     my $res;
 
                     my $description = findvalue( $doc->getDocumentElement, ".//*[local-name()='description']", 0 );
@@ -190,7 +257,7 @@ sub readgLSSites {
                     my @dns_names = ();
 
                     my @addrs = ();
-                    my $res = find( $doc->getDocumentElement, ".//*[local-name()='address' and \@type=\"ipv4\"]", 0 );
+                    $res = find( $doc->getDocumentElement, ".//*[local-name()='address' and \@type=\"ipv4\"]", 0 );
                     foreach my $c ( $res->get_nodelist ) {
                         my $contact = extract( $c, 0 );
 
@@ -217,7 +284,7 @@ sub readgLSSites {
                         push @addrs, $contact;
                     }
 
-                    my $res = find( $doc->getDocumentElement, ".//*[local-name()='address' and \@type=\"ipv6\"]", 0 );
+                    $res = find( $doc->getDocumentElement, ".//*[local-name()='address' and \@type=\"ipv6\"]", 0 );
                     foreach my $c ( $res->get_nodelist ) {
                         my $contact = extract( $c, 0 );
                         my $dns_name = reverse_dns($contact);
@@ -230,7 +297,7 @@ sub readgLSSites {
                     my $hostname;
                     my $domain;
                     foreach my $name (@dns_names) {
-                        if ( $name =~ /^([^\.]+)\.(.*)/ ) {
+                        if ( $name =~ /([^.]+).(.*)/ ) {
                             $hostname = $1;
                             $domain   = $2;
 
@@ -257,7 +324,7 @@ sub readgLSSites {
                 my $project_name;
 
                 if ( $keyword =~ /^project:(.*)/ ) {
-                    $project_name = "Project " . $1;
+                    $project_name = $1 . " Community";
                 }
                 else {
                     $project_name = "All";
@@ -333,7 +400,7 @@ sub storeSESSION {
 
 =head2  saveConfigs
 
-  update XML files ( Template for MP and    restart MP daemon)
+  update XML files ( Template for MP and restart MP daemon)
 
 =cut   
 
@@ -350,12 +417,19 @@ sub saveConfigs {
 
     $fd->close;
     move( $tmp_file, $GENERAL_CONFIG{LANDMARKS} ) or $logger->logdie( "Failed to replace:" . $GENERAL_CONFIG{LANDMARKS} . " due - $! " );
-    return displayGlobal(), displayResponse("MP landmarks XML file was Saved"), '&nbsp;';
+    my $res = "PingER landmarks XML file was saved";
+
+    if ($GENERAL_CONFIG{RESTART_SERVICE}) {
+        system("sudo /etc/init.d/PingER.sh restart &> /dev/null");
+        $res = "PingER landmarks XML file was saved, and the PingER service has been restarted.";
+    }
+
+    return displayGlobal(), displayResponse($res), '&nbsp;';
 }
 
 =head2  resetit
 
-   reset  web interface
+   reset  web interface 
 
 =cut
 
@@ -758,19 +832,28 @@ sub updateGlobal {
                 : undef;
             $logger->debug("action=$action - new_urn=$new_urn");
             if ( $act eq 'add' && $new_urn ) {
-	        my $ip_resolved; '255.255.255.255';
                 eval {
-		    ($ip_resolved) = resolve_address($new_name);
-		    $ip_resolved = '255.255.255.255' unless $ip_resolved;
+                    my ($dname) = $urn =~ /\:domain\=([^\:]+)/;
+
+                    my ($ip_resolved) = resolve_address($new_name.".".$dname);
+                    $ip_resolved = "255.255.255.255" if (not $ip_resolved or $ip_resolved eq $new_name.".".$dname);
+
+                    my $ip_type;
+                    if ($ip_resolved =~ /:/) {
+                        $ip_type = "IPv6";
+                    } else {
+                        $ip_type = "IPv4";
+                    }
+
                     $node_obj = Node->new(
                         {
                             id   => $new_urn,
                             name => Name->new( { type => 'string', text => $new_name } ),
-                            hostName => HostName->new( { text => $new_name } ),
+                            hostName => HostName->new( { text => $new_name.".".$dname } ),
                             port     => Port->new(
                                 {
                                     xml => "<nmtl3:port xmlns:nmtl3=\"http://ogf.org/schema/network/topology/l3/20070707/\" id=\"$new_urn:port=255.255.255.255\">
-                      <nmtl3:ipAddress type=\"IPv4\">$ip_resolved</nmtl3:ipAddress>
+                      <nmtl3:ipAddress type=\"$ip_type\">$ip_resolved</nmtl3:ipAddress>
                    </nmtl3:port>"
                                 }
                             ),
@@ -834,15 +917,22 @@ sub updateGlobal {
         my $node_obj = $domain_obj->getNodeById($urn);
         if ( not $node_obj ) {
             eval {
+                my ($dname) = $urn =~ /\:domain\=([^\:]+)/;
+                my $ip_type;
+                if ($ip_type =~ /:/) {
+                    $ip_type = "IPv6";
+                } else {
+                    $ip_type = "IPv4";
+                }
                 $node_obj = Node->new(
                     {
                         id   => $node_urn,
                         name => Name->new( { type => 'string', text => $node_name } ),
-                        hostName => HostName->new( { text => $node_name } ),
+                        hostName => HostName->new( { text => $node_name.".".$dname } ),
                         port     => Port->new(
                             {
                                 xml => "<nmtl3:port xmlns:nmtl3=\"http://ogf.org/schema/network/topology/l3/20070707/\" id=\"$urn\">
-                  <nmtl3:ipAddress type=\"IPv4\">$addr</nmtl3:ipAddress>
+                  <nmtl3:ipAddress type=\"$ip_type\">$addr</nmtl3:ipAddress>
                </nmtl3:port>"
                             }
                         ),
@@ -979,68 +1069,6 @@ sub loadConfig {
     );
     my %GENERAL_CONFIG = $conf_obj->getall;
     $logger->logdie("Problem with parsing config file: $CONFIG_FILE ") unless %GENERAL_CONFIG;
-    if ( not $GENERAL_CONFIG{LOGGER_CONF} ) {
-        $GENERAL_CONFIG{LOGGER_CONF} = "etc/logger.conf";
-    }
-
-    if ( $GENERAL_CONFIG{LOGGER_CONF} !~ /^\// ) {
-	$GENERAL_CONFIG{LOGGER_CONF} = BASEDIR . "/" . $GENERAL_CONFIG{LOGGER_CONF};
-    }
-
-    foreach my $templ (qw/header footer Domains Nodes/) { 
-	if ( $GENERAL_CONFIG{what_template}->{$templ} !~ /^\// ) {
-            $GENERAL_CONFIG{what_template}->{$templ} = BASEDIR . "/" . $GENERAL_CONFIG{what_template}->{$templ};
-	}
-    }
-
-    if ( $GENERAL_CONFIG{LANDMARKS} !~ /^\// ) {
-	$GENERAL_CONFIG{LANDMARKS} = BASEDIR . "/" . $GENERAL_CONFIG{LANDMARKS};
-    }
-
-    if ( $GENERAL_CONFIG{PROJECT} ) {
-	if ( ref( $GENERAL_CONFIG{PROJECT} ) ne "ARRAY" ) {
-            my @arr = ();
-            push @arr, $GENERAL_CONFIG{PROJECT};
-            $GENERAL_CONFIG{PROJECT} = \@arr;
-	}
-    }
-
-    # XXX: The following are meant for the NPToolkit where projects are defined as
-    # 'site_project' instead of PROJECT and the name for the site is 'site_name',
-    # not MYDOMAIN. Longer term, a common structure for projects and names should
-    # be done.
-
-    if ( $GENERAL_CONFIG{site_project} ) {
-	if ( ref( $GENERAL_CONFIG{site_project} ) ne "ARRAY" ) {
-            my @arr = ();
-            push @arr, $GENERAL_CONFIG{site_project};
-            $GENERAL_CONFIG{site_project} = \@arr;
-	}
-    }
-
-    # move everything from 'site_project' into 'PROJECT'
-    if ( $GENERAL_CONFIG{site_project} ) {
-	my %tmp = ();
-
-	if ( $GENERAL_CONFIG{PROJECT} ) {
-            foreach my $project ( @{ $GENERAL_CONFIG{PROJECT} } ) {
-        	$tmp{$project} = 1;
-            }
-	}
-
-	foreach my $project ( @{ $GENERAL_CONFIG{site_project} } ) {
-            $tmp{$project} = 1;
-	}
-
-	my @arr = keys %tmp;
-	$GENERAL_CONFIG{PROJECT} = \@arr;
-    }
-
-    # set "MYDOMAIN" if it doesn't exist but "site_name" does.
-    if ( not $GENERAL_CONFIG{MYDOMAIN} and $GENERAL_CONFIG{site_name} ) {
-	$GENERAL_CONFIG{MYDOMAIN} = $GENERAL_CONFIG{site_name};
-    }   
-    $GENERAL_CONFIG{EVENTTYPE} = perfSONAR_PS::Datatypes::EventTypes->new();
     return \%GENERAL_CONFIG;
 }
 
