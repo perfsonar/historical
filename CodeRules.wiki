@@ -1,4 +1,4 @@
-= perfSONAR-PS Coding Standards =
+#summary Rules of the code for perfSONAR-PS components<wiki:toc max_depth="6" />== Introduction ==
 
 A recent examination of all perl code in the perfSONAR-PS code base has turned
 up many different programming styles in use.  This is a common problem in 
@@ -122,9 +122,9 @@ __END__
 
 L<Log::Log4perl>, L<Params::Validate>, L<perfSONAR_PS::ParameterValidation>
 
-To join the 'perfSONAR-PS' mailing list, please visit:
+To join the 'perfSONAR Users' mailing list, please visit:
 
-  https://mail.internet2.edu/wws/info/i2-perfsonar
+  https://mail.internet2.edu/wws/info/perfsonar-user
 
 The perfSONAR-PS subversion repository is located at:
 
@@ -149,7 +149,7 @@ YOUR LICENCE
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008, YOUR ORG
+Copyright (c) 2009, YOUR ORG
 
 All rights reserved.
 
@@ -186,9 +186,9 @@ __END__
 
 L<strict>
 
-To join the 'perfSONAR-PS' mailing list, please visit:
+To join the 'perfSONAR Users' mailing list, please visit:
 
-  https://mail.internet2.edu/wws/info/i2-perfsonar
+  https://mail.internet2.edu/wws/info/perfsonar-user
 
 The perfSONAR-PS subversion repository is located at:
 
@@ -432,6 +432,32 @@ This is an example of  bad design:
 
 Try to create pass state object instead or create queue object.
 
+== Multi-line Print Statements ==
+
+Multi-line print statements are expensive, particularly when using quotes, e.g.:
+
+{{{
+print "\"first\" thing\n";
+print "\"second\" thing\n";
+}}}
+
+Is less efficient than:
+
+{{{
+print qq{
+"first" thing
+"second" thing
+};
+}}}
+
+Note that:
+
+{{{
+print q{ ... };
+}}}
+
+Works for single quote situations.
+
 == Error Codes/Conditions ==
 
 We must establish single rule which must be supported throughout the API about
@@ -500,7 +526,7 @@ conflicts.
 == Perl Tests ==
 
 Write tests at the same time as your modules are written. Automate tests 
-generation if possible.
+generation if possible.  See also [ReleaseManagement#Testing].
 
 == SVN Rules ==
 
