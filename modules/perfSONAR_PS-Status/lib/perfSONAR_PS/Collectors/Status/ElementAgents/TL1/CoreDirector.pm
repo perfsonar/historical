@@ -1,4 +1,4 @@
-package perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::CoreDirector;
+package perfSONAR_PS::Collectors::Status::ElementAgents::TL1::CoreDirector;
 
 use strict;
 use warnings;
@@ -151,6 +151,8 @@ sub runSNC {
 
 sub runETH {
     my ($self, $aid) = @_;
+
+	return;
 }
 
 sub runOCN {
@@ -300,7 +302,7 @@ sub set_element {
 	if ($parameters->{type} eq "gtp") {
 		if ($parameters->{id_type}) {
 			unless ($parameters->{id_type} eq "name" ) {
-				return undef;
+				return;
 			}
 		}
 
@@ -308,7 +310,7 @@ sub set_element {
 	} elsif ($parameters->{type} eq "eflow") {
 		if ($parameters->{id_type}) {
 			unless ($parameters->{id_type} eq "name" ) {
-				return undef;
+				return;
 			}
 		}
 
@@ -316,7 +318,7 @@ sub set_element {
 	} elsif ($parameters->{type} eq "crossconnect") {
 		if ($parameters->{id_type}) {
 			unless ($parameters->{id_type} eq "name" ) {
-				return undef;
+				return;
 			}
 		}
 
@@ -324,7 +326,7 @@ sub set_element {
 	} elsif ($parameters->{type} eq "snc") {
 		if ($parameters->{id_type}) {
 			unless ($parameters->{id_type} eq "name" ) {
-				return undef;
+				return;
 			}
 		}
 
@@ -332,7 +334,7 @@ sub set_element {
 	} elsif ($parameters->{type} eq "vcg") {
 		if ($parameters->{id_type}) {
 			unless ($parameters->{id_type} eq "name" ) {
-				return undef;
+				return;
 			}
 		}
 
@@ -340,7 +342,7 @@ sub set_element {
 	} elsif ($parameters->{type} eq "sts") {
 		if ($parameters->{id_type}) {
 			unless ($parameters->{id_type} eq "name" ) {
-				return undef;
+				return;
 			}
 		}
 
@@ -348,14 +350,14 @@ sub set_element {
 	} elsif ($parameters->{type} =~ /oc(n|[0-9]+)/) {
 		if ($parameters->{id_type}) {
 			unless ($parameters->{id_type} eq "aid") {
-				return undef;
+				return;
 			}
 		}
 		$self->{ELEMENT_ID_TYPE} = "aid";
 	} elsif ($parameters->{type} =~ /eth/) {
 		if ($parameters->{id_type}) {
 			unless ($parameters->{id_type} eq "aid") {
-				return undef;
+				return;
 			}
 		}
 
@@ -382,3 +384,5 @@ sub element_id_type {
 
     return $self->{ELEMENT_ID_TYPE};
 }
+
+1;

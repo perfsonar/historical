@@ -55,7 +55,7 @@ sub init {
 sub run {
     my ( $self ) = @_;
 
-    die( "Class must be overridden" );
+    croak( "Class must be overridden" );
 }
 
 1;

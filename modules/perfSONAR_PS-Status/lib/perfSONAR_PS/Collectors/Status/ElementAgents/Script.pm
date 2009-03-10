@@ -1,4 +1,4 @@
-package perfSONAR_PS::Collectors::LinkStatus::Agent::Script;
+package perfSONAR_PS::Collectors::Status::ElementAgents::Script;
 
 =head1 NAME
 

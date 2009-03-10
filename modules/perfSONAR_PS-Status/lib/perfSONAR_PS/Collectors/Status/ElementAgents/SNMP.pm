@@ -1,4 +1,4 @@
-package perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP;
+package perfSONAR_PS::Collectors::Status::ElementAgents::SNMP;
 
 =head1 NAME
 

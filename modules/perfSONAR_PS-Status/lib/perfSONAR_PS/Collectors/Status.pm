@@ -927,10 +927,8 @@ sub parse_element_agent {
                     my $value = $oid_ref->[2];
 
                     $self->{LOGGER}->debug("$oid = $type: $value($ifName)");
-                    if ($value eq $ifName) {
-                        if ($oid =~ /1\.3\.6\.1\.2\.1\.31\.1\.1\.1\.1\.(\d+)/x) {
-                            $ifIndex = $1;
-                        }
+                    if ($value eq $ifName and $oid =~ /1\.3\.6\.1\.2\.1\.31\.1\.1\.1\.1\.(\d+)/x) {
+                        $ifIndex = $1;
                     }
                 }
             }
@@ -947,10 +945,8 @@ sub parse_element_agent {
                         my $value = $oid_ref->[2];
 
                         $self->{LOGGER}->debug("$oid = $type: $value($ifName)");
-                        if ($value eq $ifName) {
-                            if ($oid =~ /1\.3\.6\.1\.2\.1\.2\.2\.1\.2\.(\d+)/x) {
-                                $ifIndex = $1;
-                            }
+                        if ($value eq $ifName and $oid =~ /1\.3\.6\.1\.2\.1\.2\.2\.1\.2\.(\d+)/x) {
+                            $ifIndex = $1;
                         }
                     }
                 }

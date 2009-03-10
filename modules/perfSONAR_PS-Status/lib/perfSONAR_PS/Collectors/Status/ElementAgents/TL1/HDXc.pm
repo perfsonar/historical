@@ -1,4 +1,4 @@
-package perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::HDXc;
+package perfSONAR_PS::Collectors::Status::ElementAgents::TL1::HDXc;
 
 
 use strict;
@@ -169,14 +169,14 @@ sub set_element {
 	if ($parameters->{type} =~ /^oc(n|[0-9]+)/ or $parameters->{type} eq "optical") {
 		if ($parameters->{id_type}) {
 			unless ($parameters->{id_type} eq "aid") {
-				return undef;
+				return;
 			}
 		}
 		$self->{ELEMENT_ID_TYPE} = "aid";
 	} elsif ($parameters->{type} =~ /^eth/) {
 		if ($parameters->{id_type}) {
 			unless ($parameters->{id_type} eq "aid") {
-				return undef;
+				return;
 			}
 		}
 
@@ -203,3 +203,5 @@ sub element_id_type {
 
     return $self->{ELEMENT_ID_TYPE};
 }
+
+1;

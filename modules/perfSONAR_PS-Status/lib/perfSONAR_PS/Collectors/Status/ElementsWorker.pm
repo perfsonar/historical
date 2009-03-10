@@ -142,6 +142,8 @@ sub run {
 
         $prev_update_successful = \%new_update_successful;
 	}
+
+	return;
 }
 
 1;

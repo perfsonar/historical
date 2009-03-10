@@ -6,39 +6,9 @@ use warnings;
 use Getopt::Long;
 use DBI;
 
-my $create_elements_table =<<EOQ
-CREATE TABLE IF NOT EXISTS TABLEPREFIXelements (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  nonce INTEGER
-);
-EOQ
-;
-
-my $create_facilities_table =<<EOQ
-CREATE TABLE IF NOT EXISTS TABLEPREFIXfacilities (
-  id INTEGER,
-  host VARCHAR(32) NOT NULL,
-  host_type VARCHAR(15) NOT NULL,
-  facility VARCHAR(32) NOT NULL,
-  facility_type VARCHAR(15) NOT NULL,
-  UNIQUE (id, host, host_type, facility, facility_type)
-);
-EOQ
-;
-
-my $create_topology_ids_table =<<EOQ
-CREATE TABLE IF NOT EXISTS TABLEPREFIXtopology_ids (
-  id INTEGER,
-  topology_id VARCHAR(255),
-  UNIQUE (topology_id)
-);
-EOQ
-;
-
-
 my $sqlite_create_status_table =<<EOQ
 CREATE TABLE IF NOT EXISTS TABLEPREFIXstatus (
-  id INTEGER NOT NULL,
+  id varchar(255) NOT NULL,
   start_time integer not null,
   end_time integer not null,
   oper_status varchar(32) not null,
@@ -49,7 +19,7 @@ EOQ
 
 my $mysql_create_status_table =<<EOQ
 CREATE TABLE IF NOT EXISTS TABLEPREFIXstatus (
-  id INTEGER NOT NULL,
+  id varchar(255) NOT NULL,
   start_time bigint not null,
   end_time bigint not null,
   oper_status varchar(32) not null,
@@ -118,10 +88,6 @@ if (not $DB_PREFIX) {
 	$DB_PREFIX= 'ps_';
 }
 
-$create_elements_table =~ s/TABLEPREFIX/$DB_PREFIX/gm;
-$create_facilities_table =~ s/TABLEPREFIX/$DB_PREFIX/gm;
-$create_topology_ids_table =~ s/TABLEPREFIX/$DB_PREFIX/gm;
-
 if ($DB_TYPE eq "sqlite") {
 	if (not $DB_FILE) {
 		print "Need to specify a database file\n";
@@ -136,12 +102,6 @@ if ($DB_TYPE eq "sqlite") {
 	my ($sth);
 
 	my $dbh = DBI->connect($dbi_string);
-	$sth = $dbh->prepare($create_elements_table) or die "Couldn't prepare statement: " . $dbh->errstr;
-	$sth->execute();
-	$sth = $dbh->prepare($create_facilities_table) or die "Couldn't prepare statement: " . $dbh->errstr;
-	$sth->execute();
-	$sth = $dbh->prepare($create_topology_ids_table) or die "Couldn't prepare statement: " . $dbh->errstr;
-	$sth->execute();
 	$sth = $dbh->prepare($sqlite_create_status_table) or die "Couldn't prepare statement: " . $dbh->errstr;
 	$sth->execute();
 } elsif ($DB_TYPE eq "mysql") {
@@ -165,15 +125,11 @@ if ($DB_TYPE eq "sqlite") {
 
 	$dbi_string .= ":host=".$DB_HOST;
 
-        if ($DB_PORT) {
-            $dbi_string .= ":port=".$DB_PORT;
-        }
+    if ($DB_PORT) {
+        $dbi_string .= ":port=".$DB_PORT;
+    }
 
 	my $dbh = DBI->connect($dbi_string);
-	my $sth1 = $dbh->prepare($create_facilities_table, $DB_USERNAME, $DB_PASSWORD) or die "Couldn't prepare statement: " . $dbh->errstr;
-;
-	$sth1->execute();
 	my $sth2 = $dbh->prepare($mysql_create_status_table, $DB_USERNAME, $DB_PASSWORD) or die "Couldn't prepare statement: " . $dbh->errstr;
-;
 	$sth2->execute();
 }
