@@ -139,7 +139,14 @@ if ( $#{ $s_date_ref } == 0 or $#{ $e_date_ref } == 0 ) {
         # get the testspecid
         $sql = "select tspec_id from ".$e_date_ref->[0][0].sprintf("%02d", $e_date_ref->[0][1])."_TESTSPEC where description='".$name."'";
         my $t_ref = $dbh->selectall_arrayref($sql);
-        my $tspec_id = $t_ref->[0][0] if $t_ref->[0][0];
+        my $tspec_id = "(";      
+        my $counter = 0;
+        foreach my $id ( @{ $t_ref } ) {
+            $tspec_id .= " or " if $counter;
+            $tspec_id .= "tspec_id ='" . $id->[0] . "'";
+            $counter++;
+        }
+        $tspec_id .= ")";
 
         # first do the node info
         foreach my $node ( @nodes ) {
@@ -154,7 +161,9 @@ if ( $#{ $s_date_ref } == 0 or $#{ $e_date_ref } == 0 ) {
         foreach my $r ( @nodes ) {
             foreach my $s ( @nodes ) {
                 next if $r eq $s;
-                $sql = "select * from ".$e_date_ref->[0][0].sprintf("%02d", $e_date_ref->[0][1])."_DATA where tspec_id ='".$tspec_id."' and recv_id='".$node_info{$r}{"ID"}."' and send_id='".$node_info{$s}{"ID"}."' and timestamp > '".time2owptime($startTime)."' and timestamp < '".time2owptime($endTime)."' and timestamp in (select max(timestamp) from ".$e_date_ref->[0][0].sprintf("%02d", $e_date_ref->[0][1])."_DATA where tspec_id ='".$tspec_id."' and recv_id='".$node_info{$r}{"ID"}."' and send_id='".$node_info{$s}{"ID"}."' and timestamp > '".time2owptime($startTime)."' and timestamp < '".time2owptime($endTime)."')";
+                $sql = "select max(timestamp) from ".$e_date_ref->[0][0].sprintf("%02d", $e_date_ref->[0][1])."_DATA where ".$tspec_id." and recv_id='".$node_info{$r}{"ID"}."' and send_id='".$node_info{$s}{"ID"}."' and timestamp > ".time2owptime($startTime)." and timestamp < ".time2owptime($endTime);
+                my $d_ref1 = $dbh->selectall_arrayref($sql);
+	        $sql = "select * from ".$e_date_ref->[0][0].sprintf("%02d", $e_date_ref->[0][1])."_DATA where ".$tspec_id." and recv_id='".$node_info{$r}{"ID"}."' and send_id='".$node_info{$s}{"ID"}."' and timestamp=".$d_ref1->[0][0]; 
                 my $d_ref = $dbh->selectall_arrayref($sql);
                 $res{$r}{$s}{"TIME"} = $d_ref->[0][4] if $d_ref->[0][4];
                 $res{$r}{$s}{"VALUE"} = eval( $d_ref->[0][5] ) if $d_ref->[0][5];
