@@ -1,0 +1,5 @@
+IEPM::PingER::Statistics::RTT,replace,IEPM::PingER::Statistics
+IEPM::PingER::Statistics::IPD,replace,IEPM::PingER::Statistics
+IEPM::PingER::Statistics::Other,replace,IEPM::PingER::Statistics
+IEPM::PingER::Statistics::Loss,replace,IEPM::PingER::Statistics
+IEPM::PingER::Statistics::CLP,replace,IEPM::PingER::Statistics

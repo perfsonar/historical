@@ -1,0 +1,9 @@
+version .10rc2
+* Correction to RPM package file to use older versions of perl.
+
+version .10rc1
+* Integration of 'star' based tests (e.g. central node tests or is tested to by
+  all others) in addition to the 'mesh' style of all to all tests.
+
+version .9
+* Initial Release

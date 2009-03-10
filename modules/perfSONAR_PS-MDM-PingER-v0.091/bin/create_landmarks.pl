@@ -64,7 +64,7 @@ use File::Copy;
 use Pod::Usage;
 use Log::Log4perl qw(:easy);
 use Getopt::Long;
-use Text::CSV_XS;
+use Text::CSV::Simple;
 use perfSONAR_PS::Utils::DNS qw/reverse_dns resolve_address/;
 
 use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::pingertopo::Topology';
@@ -132,9 +132,7 @@ foreach my $opt (keys %all_options) {
 my %dns_cache = ();   
 my %reverse_dns_cache = ();  
 my $num=0;
-my $io_file = IO::File->new($options{file});
-my $csv_obj = Text::CSV_XS->new ();
-while(my $row = $csv_obj->getline($io_file)) {
+foreach my $row (Text::CSV::Simple->new->read_file($options{file})) {
     unless($row->[0] && $row->[1] && ($row->[2] || $row->[3])) {
        $logger->error(" Skipping Malformed row: domain=$row->[0]  node=$row->[1] hostname=$row->[2] ip=$row->[3]");
        next;
@@ -186,7 +184,6 @@ while(my $row = $csv_obj->getline($io_file)) {
     }
     
 }
-$io_file->close();
  
 my $tmp_file = "/tmp/temp_LANDMARKS." . $$;
 my $fd  = new IO::File(">$tmp_file")  or $logger->logdie( "Failed to open file $tmp_file" . $! );
