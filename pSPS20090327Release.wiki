@@ -1,15 +1,4 @@
-= perfSONAR-PS v3.1 Release  =
-
- # [pSPS20090327Release#Introduction Introduction]
- # [pSPS20090327Release#Release_Team Release Team]
- # [pSPS20090327Release#Release_Schedule Release Schedule]
- # [pSPS20090327Release#Services_Released_and_Parties_Involved Services Released and Parties Involved]
- # [pSPS20090327Release#Specifics Specifics]
-   # [pSPS20090327Release#Code_Reviews Code Reviews]
-   # [pSPS20090327Release#Documentation_Reviews Documentation Reviews]
-   # [pSPS20090327Release#Testing Testing]
- # [pSPS20090327Release#Open_Tasks Open Tasks]
- # [pSPS20090327Release#Lessons_Learned Lessons Learned]
+#summary perfSONAR-PS 3.1 Release<wiki:toc max_depth="6" />
 
 == Introduction ==
 

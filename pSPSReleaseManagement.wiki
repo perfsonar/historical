@@ -1,19 +1,4 @@
-= perfSONAR-PS Release Management  =
-
- # [pSPSReleaseManagement#Introduction Introduction]
- # [pSPSReleaseManagement#Frequency Release Frequency]
-   # [pSPSReleaseManagement#v3.1_Release v3.1 Release]
- # [pSPSReleaseManagement#Release_Process Release Process]
-   # [pSPSReleaseManagement#Dependencies Dependencies]
-   # [pSPSReleaseManagement#Revision_Control Revision Control] 
-   # [pSPSReleaseManagement#Schedule Schedule]
-   # [pSPSReleaseManagement#Documentation Documentation]
-     # [pSPSReleaseManagement#Perldoc_Format Perldoc Format]
-   # [pSPSReleaseManagement#Testing Testing]
-   # [pSPSReleaseManagement#Code_Review Code Review]
-   # [pSPSReleaseManagement#Issue_Tracker Issue Tracker]
-     # [pSPSReleaseManagement#Labels Labels]
- # [pSPSReleaseManagement#Released_Product Released Product]
+#summary perfSONAR-PS Release Management<wiki:toc max_depth="6" />
 
 == Introduction ==
 

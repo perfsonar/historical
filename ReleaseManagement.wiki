@@ -1,34 +1,4 @@
-= Release Management Overview =
-
- # [ReleaseManagement#Introduction Introduction]
- # [ReleaseManagement#Project_Preliminaries Project preliminaries]
-   # [ReleaseManagement#Project_Pages Project Pages]
- # [ReleaseManagement#Frequency Release Frequency]
-   # [ReleaseManagement#Bi_Yearly_Release_Cycle Bi Yearly Release Cycle]
-   # [ReleaseManagement#Tri_Yearly_Release_Cycle Tri Yearly Release Cycle]
- # [ReleaseManagement#Release_Process Release Process]
-   # [ReleaseManagement#Dependencies Dependencies]
-   # [ReleaseManagement#Revision_Control Revision Control] 
-   # [ReleaseManagement#Schedule Schedule]
-     # [ReleaseManagement#Pre_Release Pre Release]
-     # [ReleaseManagement#Phase_1 Phase 2]
-     # [ReleaseManagement#Phase_2 Phase 2]
-     # [ReleaseManagement#Post_Release Post Release]
-   # [ReleaseManagement#Documentation Documentation]
-     # [ReleaseManagement#Source_Documentation Source Documentation]
-     # [ReleaseManagement#Release_Documentation Release Documentation]
-     # [ReleaseManagement#Wiki Wiki]
-     # [ReleaseManagement#Public_Relations Public Relations]
-   # [ReleaseManagement#Testing Testing]
-     # [ReleaseManagement#How_to_Test How to Test]
-     # [ReleaseManagement#What_to_Test What to Test]
-     # [ReleaseManagement#When_to_Test When to Test]
-     # [ReleaseManagement#Where_to_Test Where to Test]
-     # [ReleaseManagement#Testing_Recommendations Testing Recommendations]
-   # [ReleaseManagement#Code_Review Code Review]
-   # [ReleaseManagement#Issue_Tracker Issue Tracker]
- # [ReleaseManagement#Released_Product Released Product]
-   # [ReleaseManagement#Limiting_Distribution Limiting Distribution]
+#summary Release Management Overview<wiki:toc max_depth="6" />
   
 == Introduction ==
 
