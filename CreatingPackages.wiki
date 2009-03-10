@@ -93,12 +93,14 @@ The file paths in _*all*_ files need to be the standard perfSONAR-PS ones listed
     * rpmbuild - a package that contains the RPM build tools
  # In your home directory create a directory _*rpmbuild*_, your RPM activities will take place here.  
  # In your home directory create a file _*.rpmmacros*_, it should contain:
-   * %_topdir   /YOUR/HOME/DIR/rpmbuild
-   * %_tmppath  /YOUR/HOME/DIR/rpmbuild/tmp
-   * user: perfSONAR-PS
-   * email: i2-perfsonar@internet2.edu
-   * %_signature    gpg
-   * %_gpg_name perfSONAR-PS
+   {{{
+    %_topdir   /YOUR/HOME/DIR/rpmbuild
+    %_tmppath  /YOUR/HOME/DIR/rpmbuild/tmp
+    user: perfSONAR-PS
+    email: i2-perfsonar@internet2.edu
+    %_signature    gpg
+    %_gpg_name perfSONAR-PS
+}}}
  # Acquire the perfSONAR-PS singing keys (ask a member of the release team for these)
    * Import the key _*gpg --import KEYNAME*_
  # From inside your package, run _*make dist*_ 
