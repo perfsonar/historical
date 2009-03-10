@@ -43,7 +43,7 @@ The following outline some exceptions to the overall release process.  Also see 
 
 === Open Bugs Related to This Release ===
 
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=19 19] - _*Aaron/Maxim*_ - -PingER GUI gLS pingable hosts-
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=19 19] - _*Aaron/Maxim*_ - --PingER GUI gLS pingable hosts--
    * <font color=green>Resolved</font> (original issue addressed)
    * Opened [http://code.google.com/p/perfsonar-ps/issues/detail?id=107 107] to address other concerns (next release)
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=73 73] - _*Jason*_ - Client::LS Registration Logic Re-arrange    
@@ -52,7 +52,7 @@ The following outline some exceptions to the overall release process.  Also see 
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=85 85] - _*Jason*_ - add verbose logging on errors for ma/ls
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=105 105] - _*Jason*_ - hLS Summarization of DCN Data 
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=62 62] - _*Maxim*_ - pingER-MA requires 'hostname" type attribute in endPointPair    
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=66 66] - _*Maxim*_ - -PingER Collection Errors-
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=66 66] - _*Maxim*_ - --PingER Collection Errors--
    * <font color=green>Resolved</font>
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=81 81] - _*Maxim*_ - PingER Resolution of IPaddress/Hostnames 
 
