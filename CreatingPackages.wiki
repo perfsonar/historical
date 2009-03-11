@@ -1,15 +1,4 @@
-= Creating perfSONAR-PS Packages: A How-To for perfSONAR-PS Developers  =
-
- # [CreatingPackages#Introduction Introduction]
- # [CreatingPackages#Instructions Instructions]
-   # [CreatingPackages#Package_Skeleton_and_Preliminaries Package Skeleton and Preliminaries]
-   # [CreatingPackages#Choosing_What_to_Include Choosing What to Include]
-   # [CreatingPackages#Choosing_File_Paths Choosing File Paths]
-   # [CreatingPackages#Finalizing_the_Package Finalizing the Package]
-   # [CreatingPackages#Constructing_the_RPM Constructing the RPM]
-   # [CreatingPackages#Building Building]
-   # [CreatingPackages#Testing Testing]
- # [CreatingPackages#FAQ FAQ]
+#summary Creating perfSONAR-PS Packages: A How-To for perfSONAR-PS Developers<wiki:toc max_depth="6" />
 
 == Introduction ==
 
@@ -23,8 +12,11 @@ Read each section first before proceeding.  These instructions are based on a sk
 
 === Package Skeleton and Preliminaries === 
 
- # The perfSONAR-PS subversion contains a package _skeleton_ to help all developers get started.  It can be found in _*trunk/modules/perfSONAR_PS-Skeleton/*_
- # Using this as a starting point, rename _perfSONAR_PS-Skeleton_ to _perfSONAR_PS-SERVICE_NAME_ (e.g. _*perfSONAR_PS-LSRegistrationDaemon*_)
+ # The perfSONAR-PS subversion contains a package _skeleton_ to help all developers get started.  It can be found in 
+{{{
+trunk/perfSONAR_PS-Skeleton
+}}}
+ # Using this as a starting point, rename _*perfSONAR_PS-Skeleton*_ to _*perfSONAR_PS-SERVICE_NAME*_ (e.g. _*perfSONAR_PS-LSRegistrationDaemon*_)
  # Edit the file named _*Makefile*_
    * Change references of _*skeleton*_ and _*Skeleton*_ as necessary
    * Ensure the rest of the file makes sense
@@ -47,10 +39,13 @@ Read each section first before proceeding.  These instructions are based on a sk
 
  # The first step is to identify the *_service module_*, this is the primary _*pm*_ file that the daemon is aware of.  It should be placed in the _*lib*_ path.  
  # Add this file to the _*MANIFEST*_, be sure to include the entire path name.  
- # Generate the dependencies with _*perl trunk/modules/package_dependencies.pl*_
+ # Generate the dependencies with:
+{{{
+perl trunk/package_dependencies.pl
+}}}
    * This script will create symbolic links in the perfSONAR_PS, OWP and IEPM modules from the root lib directory of the repository and modify the _*MANIFEST*_ to include these files.
    * This script will also create a _*dependencies*_ file containing the other required perl modules (this will be used later)
-   * *NOTE:* If a given module in the root lib is used solely by this package, consider moving it into directly to a service to avoid cluttering the common area.
+     * *NOTE:* If a given module in the root lib is used solely by this package, consider moving it into directly to a service to avoid cluttering the common area.
  # There are basic directories included in the skeleton that can be used to organize package contents:
    * _bin_ - Place service executable files and scripts here.  Examples include the daemon, client applications, web content, etc.
    * _doc_ - Place any and all documentation here.  Man pages as well as installation instructions are candidates. 
@@ -62,7 +57,7 @@ Read each section first before proceeding.  These instructions are based on a sk
 
 === Choosing File Paths ===
 
-The file paths in _*all*_ files need to be the standard perfSONAR-PS ones listed below, or if this is a special case, whatever the decided upon paths are.
+The file paths in _*all*_ files need to be the standard perfSONAR-PS paths listed below, or if this is a special case, whatever the decided upon paths are.
 
   * _Package Locations:_ All packages should be installed in _*/opt/perfsonar_ps/SERVICE_NAME*_. The service name should be in all lower-case.
   * _Log File Locations:_ All log files should be in _*/var/log/perfsonar/SERVICE_NAME*_. The service name should be the same as above.
@@ -70,7 +65,10 @@ The file paths in _*all*_ files need to be the standard perfSONAR-PS ones listed
 
 === Finalizing the Package === 
 
- # Run _*perl trunk/modules/package_findunpackaged.pl*_ to ensure that the _*MANIFEST*_ is correct
+ # Run the following to ensure that the _*MANIFEST*_ is correct:
+{{{
+perl trunk/package_findunpackaged.pl
+}}}
 
 === Constructing the RPM ===
 
@@ -93,13 +91,13 @@ The file paths in _*all*_ files need to be the standard perfSONAR-PS ones listed
     * rpmbuild - a package that contains the RPM build tools
  # In your home directory create a directory _*rpmbuild*_, your RPM activities will take place here.  
  # In your home directory create a file _*.rpmmacros*_, it should contain:
-   {{{
-    %_topdir   /YOUR/HOME/DIR/rpmbuild
-    %_tmppath  /YOUR/HOME/DIR/rpmbuild/tmp
-    user: perfSONAR-PS
-    email: i2-perfsonar@internet2.edu
-    %_signature    gpg
-    %_gpg_name perfSONAR-PS
+{{{
+%_topdir   /YOUR/HOME/DIR/rpmbuild
+%_tmppath  /YOUR/HOME/DIR/rpmbuild/tmp
+user: perfSONAR-PS
+email: i2-perfsonar@internet2.edu
+%_signature    gpg
+%_gpg_name perfSONAR-PS
 }}}
  # Acquire the perfSONAR-PS singing keys (ask a member of the release team for these)
    * Import the key _*gpg --import KEYNAME*_
