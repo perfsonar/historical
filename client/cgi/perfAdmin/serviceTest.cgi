@@ -258,19 +258,19 @@ else {
         foreach my $src ( sort keys %list ) {
             foreach my $dst ( sort keys %{ $list{$src} } ) {
                 if ( exists $list{$src}{$dst}->{"src"} and exists $list{$src}{$dst}->{"dst"} and exists $list{$src}{$dst}->{"key"} ) {
-                    my $display = $list{$src}{$dst}{$type}->{"src"};
+                    my $display = $list{$src}{$dst}->{"src"};
                     $display =~ s/:.*$//;
                     my $iaddr = Socket::inet_aton( $display );
                     my $shost = gethostbyaddr( $iaddr, Socket::AF_INET );
-                    $shost = $list{$src}{$dst}{$type}->{"src"} unless $shost;
+                    $shost = $list{$src}{$dst}->{"src"} unless $shost;
 
-                    $display = $list{$src}{$dst}{$type}->{"dst"};
+                    $display = $list{$src}{$dst}->{"dst"};
                     $display =~ s/:.*$//;
                     $iaddr = Socket::inet_aton( $display );
                     my $dhost = gethostbyaddr( $iaddr, Socket::AF_INET );
-                    $dhost = $list{$src}{$dst}{$type}->{"dst"} unless $dhost;
+                    $dhost = $list{$src}{$dst}->{"dst"} unless $dhost;
                                             
-                    push @pairs, { SADDRESS => $list{$src}{$dst}{$type}->{"src"}, SHOST => $shost, DADDRESS => $list{$src}{$dst}{$type}->{"dst"}, DHOST => $dhost, PROTOCOL => $list{$src}{$dst}{$type}->{"type"}, KEY => $list{$src}{$dst}{$type}->{"key"}, COUNT => $counter, SERVICE => $service };
+                    push @pairs, { SADDRESS => $list{$src}{$dst}->{"src"}, SHOST => $shost, DADDRESS => $list{$src}{$dst}->{"dst"}, DHOST => $dhost, PROTOCOL => $list{$src}{$dst}->{"type"}, KEY => $list{$src}{$dst}->{"key"}, COUNT => $counter, SERVICE => $service };
                     $counter++;
                 }
                 else {
