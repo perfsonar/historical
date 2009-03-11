@@ -65,7 +65,7 @@ while ($files_left) {
         my $type = `file $file`;
 
 		# Skip non-Perl files
-        next unless ($file =~ /\.pm$/ or $file =~ /\.pl$/ or $type =~ /Perl/ or $type =~ /perl/);
+        next unless ($file =~ /\.pm$/ or $file =~ /\.pl$/ or $type =~ /Perl/ or $type =~ /perl/ or $file =~ /\.cgi/);
 
 		if ($file =~ /\.pm$/ and not -f $file) {
 			# auto-link in the library if it's one of ours
@@ -100,15 +100,15 @@ while ($files_left) {
         while(<DEPENDS>) {
             my $module;
 
-            if (/use base ['"]([a-z_A-Z0-9]*(::[a-z_A-Z0-9]*)*)['"]/) {
+            if (/use base *['"]([a-z_A-Z0-9]*(::[a-z_A-Z0-9]*)*)['"]/) {
                 $module = $1;
 				$dependencies{"base"} = 1;
-            } elsif (/use aliased ['"]([a-z_A-Z0-9]*(::[a-z_A-Z0-9]*)*)['"]/) {
+            } elsif (/use *aliased *['"]([a-z_A-Z0-9]*(::[a-z_A-Z0-9]*)*)['"]/) {
                 $module = $1;
 				$dependencies{"aliased"} = 1;
-            } elsif (/use ([a-z_A-Z0-9]*(::[a-z_A-Z0-9]*)*)/) {
+            } elsif (/use *([a-z_A-Z0-9]*(::[a-z_A-Z0-9]*)*)/) {
                 $module = $1;
-            } elsif (/load ([a-z_A-Z0-9]*(::[a-z_A-Z0-9]*)*)/) {
+            } elsif (/load *([a-z_A-Z0-9]*(::[a-z_A-Z0-9]*)*)/) {
 				print "Load Module: $1 -- $2\n";
                 $module = $1;
             }
