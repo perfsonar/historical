@@ -1,7 +1,6 @@
-= CTP White Paper =
+#summary CTP White Paper
 
-Measurement and monitoring to support [http://www.cisco.com/en/US/netsol/ns669/networking_solutions_solution_segment_home.html Cisco TelePresence] across the
-greater Internet2 Network.
+Measurement and monitoring to support [http://www.cisco.com/en/US/netsol/ns669/networking_solutions_solution_segment_home.html Cisco TelePresence] across the greater Internet2 Network.
 
 <wiki:toc max_depth="6" />
 
@@ -18,7 +17,7 @@ greater Internet2 Network.
 == Proposed Solution ==
 
 Deploy performance-nodes to a select set of participants. The performance-nodes
-will be based on the [NPToolkit pS-NPToolkit] but will have specific
+will be similar to the [NPToolkit pS-NPToolkit] but will have specific
 functionality to allow for less hands-on configuration and more centralized
 management.
 
@@ -96,9 +95,10 @@ which groups I think are best positioned for the specific parts.
 || 2/23-3/13   || Central configuration setup developed/tested. (rsync or other) || AB/JH/DP || ||
 || 3/16-4/6    || Order remaining hardware, deployments of perf-nodes || JH || ||
 || 3/2-4/13   || Development of database modifications. || JB || ||
-|| 3/16-4/13   || GUI, and Nagios plugins. || JZ || ||
+|| 3/16-4/13   || GUI, and Nagios plugins. || JZ || Basic Nagios Started ||
 || 4/6-4/13    || Debugging of deployments/real-world data validation || JH/JZ || ||
 ||             || (Probable flush of all existing data at the end of this period) || || ||
 || 4/13-4/24   || Iterative development/testing of GUI/nagios alerts || JZ/JH/DP || ||
 ||             || (No database mods during this time, only presentation changes.) || || ||
 || 4/27        || Ready to show community || all || ||
+
