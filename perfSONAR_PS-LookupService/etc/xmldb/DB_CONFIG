@@ -1,0 +1,9 @@
+set_lock_timeout 5000
+set_txn_timeout 5000
+set_lk_max_lockers 500000
+set_lk_max_locks 500000
+set_lk_max_objects 500000
+set_lk_detect DB_LOCK_MINLOCKS
+set_cachesize 0 33554432 0
+set_flags DB_LOG_AUTOREMOVE
+set_lg_regionmax 2097152
