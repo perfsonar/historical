@@ -1,3 +1,4 @@
+Carp
 Config::General
 Cwd
 DBD::SQLite
@@ -11,6 +12,7 @@ Exporter
 Fcntl
 File::Basename
 Getopt::Long
+HTTP::Daemon
 IO::File
 LWP::Simple
 LWP::UserAgent

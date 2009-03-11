@@ -26,6 +26,11 @@ while(<MANIFEST>) {
 }
 close(MANIFEST);
 
+if (scalar(keys %files) == 0) {
+	print "Error: no files are listed in your MANIFEST, don't know what to scan for dependencies.\n";
+	exit(-1);
+}
+
 if (open(IGNORED_MODULE, "modules.rules")) {
 	my $line = 1;
 	while(<IGNORED_MODULE>) {
@@ -48,6 +53,7 @@ if (open(IGNORED_MODULE, "modules.rules")) {
 			$rule{"new_modules"} = \@new_modules;
 		}
 
+		print "Adding rule: $_\n";
 		$module_rules{$module} = \%rule;
 		$line++;
 	}
@@ -66,6 +72,8 @@ while ($files_left) {
 
 		# Skip non-Perl files
         next unless ($file =~ /\.pm$/ or $file =~ /\.pl$/ or $type =~ /Perl/ or $type =~ /perl/ or $file =~ /\.cgi/);
+
+		print "Checking dependencies for $file\n";
 
 		if ($file =~ /\.pm$/ and not -f $file) {
 			# auto-link in the library if it's one of ours
@@ -158,6 +166,7 @@ while ($files_left) {
 					}
 					$link_path .= "/".$module.".pm";
 					$link_path =~ s/::/\//g;
+					print "Linking $link_path -> $module_path\n";
 					symlink($link_path, $module_path);
 				} else {
 					$dependencies{$module} = 1;
@@ -183,6 +192,7 @@ close(MANIFEST);
 
 open(DEPENDS, ">dependencies");
 foreach my $depend (sort keys %dependencies) {
+	print "Adding dependency $depend\n";
     print DEPENDS $depend."\n";
 }
 close(DEPENDS);

@@ -1,1 +1,1 @@
-../../../../lib/perfSONAR_PS/Common.pm
+../../../Shared/lib/perfSONAR_PS/Common.pm
