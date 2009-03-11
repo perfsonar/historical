@@ -19,13 +19,13 @@ A listing of the nodes from all meetings and conference calls can be found in [M
 Ongoing work can be viewed from our anonymous SVN repository: 
 http://anonsvn.internet2.edu/svn/perfSONAR-PS. 
 
+ * [API] documentation is now available. 
  * The [NPToolkit] is nearing the first official release, download yours today!.
- * Installing perfSONAR-PS from SVN or CPAN for the first time? Maybe we can offer [FAQ some help].
  * [http://code.google.com/p/perfsonar-ps/issues/list Request new features] to the perfSONAR-PS framework.
-
+ 
 == For developers ==
 
- * perfSONAR-PS is entering into a [pSPS20090306Release release phase].  
+ * perfSONAR-PS is entering into a [pSPS20090327Release release phase].  
  * Take a [CodeTour tour] of the services, installation procedures, and source code.
  * Please adhere to the [CodeRules coding guidelines].
 
