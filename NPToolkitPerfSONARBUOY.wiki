@@ -1,17 +1,15 @@
-= perfSONAR Network Performance Toolkit perfSONAR-BUOY Configuration =
+#summary perfSONAR Network Performance Toolkit perfSONAR-BUOY Configuration
 
-== TOC ==
-
- * [NPToolkitPerfSONARBUOY#Step_1 Load Admin Page]
- * [NPToolkitPerfSONARBUOY#Step_2 Configure Test Type]
- * [NPToolkitPerfSONARBUOY#Step_3 Test Options]
- * [NPToolkitPerfSONARBUOY#Step_4 Select Test Options]
- * [NPToolkitPerfSONARBUOY#Step_5 Save Values]
- * [NPToolkitPerfSONARBUOY#Step_6 Test Service]
+ # [NPToolkitPerfSONARBUOY#Load_Admin_Page Load Admin Page]
+ # [NPToolkitPerfSONARBUOY#Configure_Test_Type Configure Test Type]
+ # [NPToolkitPerfSONARBUOY#Test_Options Test Options]
+ # [NPToolkitPerfSONARBUOY#Select_Test_Options Select Test Options]
+ # [NPToolkitPerfSONARBUOY#Save_Values Save Values]
+ # [NPToolkitPerfSONARBUOY#Test_Service Test Service]
 
 perfSONAR-BUOY is not configured to run by default: it requires knowledge of current and reachable BWCTL and OWAMP servers.  The above steps should be followd in order and will result in a configured service.
 
-== Step 1 ==
+== Load Admin Page ==
 
 After your machine is booted, visit the configuration web page (this can be done locally if you have console access to the freshly booted machine, or remotely): https://HOST_OR_ADDRESS/admin/perfsonarbuoy/.  This should bring up a screen similar to this: 
 
@@ -21,11 +19,11 @@ After logging in the default configuration screen will be this:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB1.png
 
-== Step 2 ==
+== Configure Test Type ==
 
 For now, only two choices work: *_BWCTL IPv4_* or *_BWCTL IPv6_* on the left side. Click on one of these (will illustrate with IPv4).
 
-== Step 3 ==
+== Test Options ==
 
 A screen similar to this will appear:
 
@@ -39,7 +37,7 @@ The length of this screen will vary depending on how many BWCTL test instances a
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB6.png
  
-== Step 4 ==
+== Select Test Options ==
 
 Under _Select IPv4 BWCTL Instances to Include in Measurements_, choose BWCTL instances to test with. These are separated into groups that are associated with the LHC project, as well as other registered BWCTL test points. _Enter test Description_ is optional, but helpful to enter. Finally select a test type (note currently we only support one test at a time).
 
@@ -52,15 +50,15 @@ More test options will be available in future releases.  The following image dem
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB4.png
 
-== Step 5 ==
+== Save Values ==
 
 Press _Save_ and wait for the browser to display a message indicating success.  The following image shows a _successful_ configuration (note that selections may not appear due to browser caching):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB5.png
 
-== Step 6 ==
+== Test Service ==
 
-Finally from either the NPToolkit or some other machine, visit a perfSONAR testing instance described in [NPToolkitQuickStart#Service_Test Disk Verification - Service Test].  Due to the frequency of tests you have chosen, there may be a small lag when the results become available.
+Finally from either the NPToolkit or some other machine, visit a perfSONAR testing instance described in [NPToolkitQuickStart#Disk_Verification Disk Verification - Service Test].  Due to the frequency of tests you have chosen, there may be a small lag when the results become available.
 
 == Last Updated ==
 
