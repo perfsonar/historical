@@ -1,5 +1,8 @@
 #!/usr/bin/perl -w -I ../lib
 
+use strict;
+use warnings;
+
 =head1 NAME
 
 dump.pl - Dumps the contents of an XMLDB.
@@ -15,38 +18,38 @@ elements.
 
 =cut
 
-use strict;
-use warnings;
 use Getopt::Long;
 use perfSONAR_PS::DB::XMLDB;
 
 my $DEBUG = '';
-my $HELP = '';
-my %opts = ();
-GetOptions('verbose' => \$DEBUG,
-           'help' => \$HELP,
-           'type=s' => \$opts{TYPE}, 
-           'environment=s' => \$opts{ENV}, 
-           'container=s' => \$opts{CONT});
+my $HELP  = '';
+my %opts  = ();
+GetOptions(
+    'verbose'       => \$DEBUG,
+    'help'          => \$HELP,
+    'type=s'        => \$opts{TYPE},
+    'environment=s' => \$opts{ENV},
+    'container=s'   => \$opts{CONT}
+);
 
-if(!(defined $opts{ENV} and $opts{CONT}) or $HELP) {
-  print "$0: Loads into the specified container in the XML DB environment the contents of the store file.\n";
-  print "$0 [--verbose --help --environment=/path/to/env/xmldb --container=container.dbxml --type=(LSStore|LSStore-control|LSStore-summary)]\n";
-  exit(1);
+if ( !( defined $opts{ENV} and $opts{CONT} ) or $HELP ) {
+    print "$0: Loads into the specified container in the XML DB environment the contents of the store file.\n";
+    print "$0 [--verbose --help --environment=/path/to/env/xmldb --container=container.dbxml --type=(LSStore|LSStore-control|LSStore-summary)]\n";
+    exit( 1 );
 }
 
-my $XMLDBENV = "./xmldb/";
-my $XMLDBCONT = "lsstore.dbxml";
+my $XMLDBENV  = "/var/lib/perfsonar/lookup_service/xmldb";
+my $XMLDBCONT = "glsstore.dbxml";
 my $XMLDBTYPE = "LSStore";
-if(defined $opts{ENV}) {
-  $XMLDBENV = $opts{ENV};
+if ( defined $opts{ENV} ) {
+    $XMLDBENV = $opts{ENV};
 }
-if(defined $opts{CONT}) {
-  $XMLDBCONT = $opts{CONT};
+if ( defined $opts{CONT} ) {
+    $XMLDBCONT = $opts{CONT};
 }
 
-if(defined $opts{TYPE}) {
-  $XMLDBTYPE = $opts{TYPE};
+if ( defined $opts{TYPE} ) {
+    $XMLDBTYPE = $opts{TYPE};
 }
 
 my %ns = (
@@ -59,7 +62,7 @@ my %ns = (
     netutil       => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
     neterr        => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
     netdisc       => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/",
-    snmp          => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",   
+    snmp          => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
     select        => "http://ggf.org/ns/nmwg/ops/select/2.0/",
     average       => "http://ggf.org/ns/nmwg/ops/average/2.0/",
     perfsonar     => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
@@ -73,7 +76,7 @@ my %ns = (
     traceroute    => "http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
     tracepath     => "http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
     ping          => "http://ggf.org/ns/nmwg/tools/ping/2.0/",
-    summary       => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/",        
+    summary       => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/",
     ctrlplane     => "http://ogf.org/schema/network/topology/ctrlPlane/20070707/",
     CtrlPlane     => "http://ogf.org/schema/network/topology/ctrlPlane/20070626/",
     ctrlplane_oct => "http://ogf.org/schema/network/topology/ctrlPlane/20071023/",
@@ -87,69 +90,74 @@ my %ns = (
     nmtopo        => "http://ogf.org/schema/network/topology/base/20070828/",
     nmtb          => "http://ogf.org/schema/network/topology/base/20070828/",
     sonet         => "http://ogf.org/schema/network/topology/sonet/20070828/",
-    transport     => "http://ogf.org/schema/network/topology/transport/20070828/"  
+    transport     => "http://ogf.org/schema/network/topology/transport/20070828/"
 );
 
-my $error = q{};
-my $metadatadb = new perfSONAR_PS::DB::XMLDB({
-  env => $XMLDBENV, 
-  cont => $XMLDBCONT,
-  ns => \%ns
-});
-unless($metadatadb->openDB({ txn => q{}, error => \$error }) == 0) {
-  print "There was an error opening \"".$XMLDBENV."/".$XMLDBCONT."\": ".$error;
-  exit(1);
+my $error      = q{};
+my $metadatadb = new perfSONAR_PS::DB::XMLDB(
+    {
+        env  => $XMLDBENV,
+        cont => $XMLDBCONT,
+        ns   => \%ns
+    }
+);
+unless ( $metadatadb->openDB( { txn => q{}, error => \$error } ) == 0 ) {
+    print "There was an error opening \"" . $XMLDBENV . "/" . $XMLDBCONT . "\": " . $error;
+    exit( 1 );
 }
 
-my $query = " /nmwg:store[\@type=\"".$XMLDBTYPE."\"]/nmwg:metadata";   
+my $query = " /nmwg:store[\@type=\"" . $XMLDBTYPE . "\"]/nmwg:metadata";
 $query =~ s/\s+\// collection('$XMLDBCONT')\//gmx;
-print "QUERY:\t" , $query , "\n" if $DEBUG;
+print "QUERY:\t", $query, "\n" if $DEBUG;
 
-my @resultsString = $metadatadb->query({ query => $query, txn => q{}, error => \$error });
+my @resultsString = $metadatadb->query( { query => $query, txn => q{}, error => \$error } );
 
 my $len = $#resultsString;
-for my $x (0..$len) {
-  print $resultsString[$x] , "\n";
+for my $x ( 0 .. $len ) {
+    print $resultsString[$x], "\n";
 }
-unless($#resultsString > -1) {
-  print "Nothing returned for search.\n";        
-}   
+unless ( $#resultsString > -1 ) {
+    print "Nothing returned for search.\n";
+}
 
-$query = "/nmwg:store[\@type=\"".$XMLDBTYPE."\"]/nmwg:data";   
+$query = "/nmwg:store[\@type=\"" . $XMLDBTYPE . "\"]/nmwg:data";
 $query =~ s/\s+\// collection('$XMLDBCONT')\//gmx;
-print "QUERY:\t" , $query , "\n" if $DEBUG;  
+print "QUERY:\t", $query, "\n" if $DEBUG;
 
-@resultsString = $metadatadb->query({ query => $query, txn => q{}, error => \$error });
+@resultsString = $metadatadb->query( { query => $query, txn => q{}, error => \$error } );
 
 $len = $#resultsString;
-for my $y (0..$len) {
-  print $resultsString[$y] , "\n";
+for my $y ( 0 .. $len ) {
+    print $resultsString[$y], "\n";
 }
-unless($#resultsString > -1) {
-  print "Nothing returned for search.\n";        
-}   
+unless ( $#resultsString > -1 ) {
+    print "Nothing returned for search.\n";
+}
 
 $metadatadb->closeDB;
 
-exit(1);
+exit( 1 );
 
 =head1 SEE ALSO
 
-L<strict>, L<warnings>, L<Getopt::Long>, L<perfSONAR_PS::DB::XMLDB>
+L<use Getopt::Long>, L<perfSONAR_PS::DB::XMLDB>
 
-To join the 'perfSONAR-PS' mailing list, please visit:
+To join the 'perfSONAR Users' mailing list, please visit:
 
-https://mail.internet2.edu/wws/info/i2-perfsonar
+  https://mail.internet2.edu/wws/info/perfsonar-user
 
 The perfSONAR-PS subversion repository is located at:
 
-https://svn.internet2.edu/svn/perfSONAR-PS
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
 
 Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 
@@ -157,14 +165,14 @@ Jason Zurawski, zurawski@internet2.edu
 
 =head1 LICENSE
 
-You should have received a copy of the Internet2 Intellectual Property Framework along
-with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2008, Internet2 and the University of Delaware
+Copyright (c) 2004-2009, Internet2 and the University of Delaware
 
 All rights reserved.
 
 =cut
-
