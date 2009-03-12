@@ -72,7 +72,8 @@ The file paths in _*all*_ files need to be the standard perfSONAR-PS paths liste
 perl trunk/package_findunpackaged.pl
 }}}
 
-=== Constructing the RPM ===
+=== RPM Packages ===
+==== Constructing the RPM ====
 
  # Change the name of the _*.spec*_ file to mimic the name of the directory.  
  # Edit the _*.spec*_ file:
@@ -85,7 +86,7 @@ perl trunk/package_findunpackaged.pl
      * Authors
      * Special scripts or instructions regarding system use (usernames, groups)
 
-=== Building === 
+==== Building ====
 
  # To build RPMs start with a Redhat based system (e.g. Fedora, CentOS, RHEL, White Box, Scientific)
  # Install the following packages:
@@ -111,11 +112,62 @@ email: i2-perfsonar@internet2.edu
    * _*/YOUR/HOME/rpmbuild/RPMS*_
    * _*/YOUR/HOME/rpmbuild/SRPMS*_
 
-=== Preparing The User Environment ===
+=== Tarball Packages ===
 
-To allow distribution of these services as tarballs, you should include a script to do everything that the RPM does (creating paths, adding users, creating databases, etc). Your documentation should then tell users to run this script when they do a tarball install. 
+To allow distribution of these services as tarballs, you should include scripts to do everything that the RPM does (creating paths, adding users, creating databases, etc). Your documentation should then tell users to run these script when they do a tarball install. 
 
-An following example is from the Topology Service. The script has only been tested on Linux machines, so if you use these scripts, you should look into making them more cross-platform.
+==== Install Dependencies ====
+
+This method will vary wildly depending on the machine on which the tool is installed, and what dependencies need to be installed. It could download, compile and install rrdtool, use freebsd ports to install tools, use CPAN to install dependencies, or any myriad of things.
+
+The following simple example just installs the dependencies from CPAN. It could probably be smarter and check the error codes from CPAN, and exit on error, but doesn't currently. This script is "scripts/install_dependencies.sh" from the perfSONAR_PS-LSRegistrationDaemon package.
+
+{{{
+#!/bin/bash
+
+MAKEROOT=""
+if [[ $EUID -ne 0 ]];
+    MAKEROOT="sudo "
+fi
+
+$MAKEROOT cpan base
+$MAKEROOT cpan Config::General
+$MAKEROOT cpan constant
+$MAKEROOT cpan Digest::MD5
+$MAKEROOT cpan English
+$MAKEROOT cpan Exporter
+$MAKEROOT cpan Fcntl
+$MAKEROOT cpan fields
+$MAKEROOT cpan File::Basename
+$MAKEROOT cpan Getopt::Long
+$MAKEROOT cpan IO::File
+$MAKEROOT cpan IO::Socket
+$MAKEROOT cpan IO::Socket::INET
+$MAKEROOT cpan IO::Socket::INET6
+$MAKEROOT cpan lib
+$MAKEROOT cpan Log::Log4perl
+$MAKEROOT cpan LWP::Simple
+$MAKEROOT cpan LWP::UserAgent
+$MAKEROOT cpan NetAddr::IP
+$MAKEROOT cpan Net::DNS
+$MAKEROOT cpan Net::Ping
+$MAKEROOT cpan Net::Ping::External
+$MAKEROOT cpan Params::Validate
+$MAKEROOT cpan POSIX
+$MAKEROOT cpan Regexp::Common
+$MAKEROOT cpan Socket
+$MAKEROOT cpan Socket6
+$MAKEROOT cpan strict
+$MAKEROOT cpan Time::HiRes
+$MAKEROOT cpan warnings
+$MAKEROOT cpan XML::LibXML
+}}}
+
+==== Preparing The User Environment ====
+
+This step prepares the environment for the package. This include making sure that the correct users are added, that the paths exist and that the files are owned by the appropriate files. Aspects of preparation may be highly dependent on which OS the script is being run on, so an eye should be placed toward cross-platform compatibility.
+
+The following example is from the Topology Service. The script would likely only work on Linux machines so that needs to be fixed. This script is "scripts/prepare_environment.sh" in the perfSONAR_PS-TopologyService package.
 
 {{{
 #!/bin/bash
@@ -139,7 +191,6 @@ $MAKEROOT chown -R perfsonar:perfsonar /var/lib/perfsonar
 
 $MAKEROOT mkdir -p /var/lib/perfsonar/topology_service
 $MAKEROOT chown perfsonar:perfsonar /var/lib/perfsonar/topology_service
-$MAKEROOT cp `dirname $0`/../doc/DB_CONFIG /var/lib/perfsonar/topology_service
 }}}
     
 === Testing ===
