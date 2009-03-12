@@ -613,7 +613,7 @@ TBD
 
 Must be in Perl.  We will not be supporting the Java implementation directly.  The subsequent perl version can be translated by external programmers.
 
-===Class IpTrie===
+=== Class IpTrie.pm ===
 
 {{{
 package IpTrie;
@@ -883,7 +883,7 @@ sub printDotNode {
 	1;
 }}}  
 
-===Class IpTrieNode.pl===
+=== Class IpTrieNode.pm ===
 
 {{{
 package IpTrieNode;
@@ -994,7 +994,7 @@ my $self = shift;
 1;
 }}}
 
-===Class Trie.pm===
+=== Class Trie.pm ===
 
 {{{
 package Trie;
@@ -1310,7 +1310,7 @@ sub<String> listSummaryNodes() {
 1;
 }}}
 
-===Class TrieNode.pm===
+=== Class TrieNode.pm ===
 
 {{{
 package TrieNode;
@@ -1803,15 +1803,16 @@ sub printDotNode(TrieNode node, long position, long currentKey) {
 1;
 }}}
 
-===Test Script test.pl===
+=== Test Script test.pl ===
 
 This script tests the proposed implementation.  It should be executed as:
 
-perl test.pl inputIPfile
+    `perl test.pl inputIPfile`
 
 where _inputIPfile_ is a text file containing some IP numbers for which the summarization is to be calculated.  The script outputs two files:
 
-inputIPfile_-summary.txt_ and inputIPfile_-summary.dot_
+    `inputIPfile_-summary.txt_`     and
+    `inputIPfile_-summary.dot_`
 
 where the _txt_ file contains the summarizing nodes, and the _dot_ file contains an input file to be used with [http://www.graphviz.org/ Graphviz] tool.
 
