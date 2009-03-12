@@ -607,7 +607,60 @@ Jason will provide the means to get _*lots*_ of datasets to test with.
 
 === Proposed Algorithm ===
 
-TBD
+Proposed Algorithm
+
+The proposed algorithm works as follows.
+
+Given a list of IP numbers, create a [http://en.wikipedia.org/wiki/Patricia_tree Patricia Tree] (or simply [http://en.wikipedia.org/wiki/Trie Trie]) and iterate over the list, inserting each IP number into the trie.  The trie data structure will automatically create inner nodes which correspond to the (candidate) summarization nodes, or CIDR classes.
+
+When a node is created into the trie, two values are calculated and attached to the node:  the _coverage_ and the _childCount_.
+
+The _childCount_ is the number of descendants below a node.  Or, in other words, the number of nodes within the subtrees deriving from that node.  Every time a node is added to the trie, its ancestors also have this value updated.
+
+The _coverage_ is a measure of the density of number of desdendants of the node over the maximum possible number of hosts below the node.  The idea here is that, if below a node, there can exist a maximum of 32 hosts, but actually there exists only one, then the density of hosts below that node is low.  If there can exist a maximum of 32 hosts, and there are actually 32 hosts below the node, then the density is high (or maximal in this case).  The number of maximum hosts below a node is calculated as:
+
+    `$self->{coverage} =  $self->{childCount} / (2**(MAX_KEY_LENGTH - $self->{mask}));`
+	
+where MAX_KEY_LENGTH is typically 32, the _mask_ is the CIDR class (number after the / in the IP number), and _childCount_ is the number of desdendants (calculated as above).  The meaning of this equation is:  MAX_KEY_LENGTH - `mask` yields the number of bits available, in the range of IP addresses, to be assigned to hosts.  Raising 2 to this power results in the equivalent number of hosts available within this range of IP addresses.  Dividing the actual number of desdendants by the number of (maximum) available hosts yields the density, or coverage.  This coverage value is also updated as new nodes are added to the trie.
+
+Once created, recurse down the trie, starting from the root node (the root node should be the looser, or larger, summarization IP number; in a worst case, it would be 0.0.0.0/0).  At each internal node, evaluate whether the trie should continue to be recursed down, or whether it should be pruned, and the corresponding node is then marked as a summarization node.  The decision of whether to mark a summarization node is done in the method _markIpTrie1_, shown below:
+
+
+{{{
+sub markIpTrie1 {
+	my $self = shift;
+	my ($summaryArrayListref, $node) = @_;
+	
+	my @summaryArrayList = @$summaryArrayListref;
+	
+	my $c0n = $node->{childZero};
+	my $c1n = $node->{childOne};
+		
+		if(!(defined $c0n)) {
+			
+			$node->setSummaryMember();
+			push(@summaryArrayList, $node);
+		
+		}elsif(defined $c0n &&
+				($c0n->{mask} - $node->{mask} > 8) || 
+				($c1n->{mask} - $node->{mask} > 8) || 
+				($node->{coverage} < 0.000001) ) {
+					
+			@summaryArrayList = $self->markIpTrie1(\@summaryArrayList, $c0n);
+			@summaryArrayList = $self->markIpTrie1(\@summaryArrayList, $c1n);
+		}
+		else {
+			$node->setSummaryMember();
+			push(@summaryArrayList, $node);
+		}
+		
+		return @summaryArrayList;
+	}
+	
+}}}
+
+Basically, both children of a node are evaluated.  If either children displays (continued)... TBD
+
 
 === Proposed Implementation ===
 
