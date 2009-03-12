@@ -16,7 +16,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:		perl(Config::General)
 Requires:		perl(Data::UUID)
-Requires:		perl(Data::Validate)
+Requires:		perl(Data::Validate::IP)
 Requires:		perl(Digest::MD5)
 Requires:		perl(English)
 Requires:		perl(Error)
