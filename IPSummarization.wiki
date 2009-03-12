@@ -994,7 +994,7 @@ my $self = shift;
 1;
 }}}
 
-=== Class !Trie.pm ===
+=== Class Trie.pm ===
 
 {{{
 package Trie;
@@ -1803,7 +1803,7 @@ sub printDotNode(TrieNode node, long position, long currentKey) {
 1;
 }}}
 
-=== Test Script !test.pl ===
+=== Test Script test.pl ===
 
 This script tests the proposed implementation.  It should be executed as:
 
