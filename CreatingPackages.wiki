@@ -110,10 +110,6 @@ email: i2-perfsonar@internet2.edu
  # The finished RPM will be placed in:
    * _*/YOUR/HOME/rpmbuild/RPMS*_
    * _*/YOUR/HOME/rpmbuild/SRPMS*_
-    
-=== Testing ===
-
-Depending on which system used to build and test the RPM package, testing it on other flavors is a good idea.  For example, a Fedora 10 system contains many different paths and libraries than a CentOS 5 system. The package produced should work on any Linux system. If the constructed package does not appear to work on all flavors, note these in the release documentation.  If one or more external packages are required on a certain flavor, either provide those packages needed or make a note where the end user can get that package.
 
 === Preparing The User Environment ===
 
@@ -145,6 +141,10 @@ $MAKEROOT mkdir -p /var/lib/perfsonar/topology_service
 $MAKEROOT chown perfsonar:perfsonar /var/lib/perfsonar/topology_service
 $MAKEROOT cp `dirname $0`/../doc/DB_CONFIG /var/lib/perfsonar/topology_service
 }}}
+    
+=== Testing ===
+
+Depending on which system used to build and test the RPM package, testing it on other flavors is a good idea.  For example, a Fedora 10 system contains many different paths and libraries than a CentOS 5 system. The package produced should work on any Linux system. If the constructed package does not appear to work on all flavors, note these in the release documentation.  If one or more external packages are required on a certain flavor, either provide those packages needed or make a note where the end user can get that package.
 
 == FAQ ==
 
