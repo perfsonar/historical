@@ -4,7 +4,6 @@ bin/client.pl
 bin/configureDaemon.pl
 bin/daemon.pl
 bin/databaseDump.pl
-dependencies
 doc/Changes
 doc/INSTALL
 doc/LICENSE
