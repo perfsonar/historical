@@ -163,28 +163,28 @@ sub init
 		return -1;
 	}	
  
-        #my $s = IO::Socket::INET->new(Proto => 'tcp');
-        #my @ret_interfaces = ();
-        #my @interfaces = $s->if_list;
-        #foreach my $if (@interfaces) {
-        #    my $if_flags = $s->if_flags($if);
-        #    next if ($if_flags & IO::Interface::IFF_LOOPBACK);
-        #    next if (not ($if_flags & IO::Interface::IFF_RUNNING));
-        #    push @ret_interfaces, $s->if_addr($if);
-        #}
-        #unless( scalar(@ret_interfaces) ) {
-	#	$self->error( " No interfaces ???");
-	#	return -1;
-	#}	
-       # my $iaddr = Socket::inet_aton( $ret_interfaces[0] );
-        my $host = hostname();
-        my $addr = inet_ntoa(scalar(gethostbyname($host)) || 'localhost');
-        $self->source($host);
-	#$self->source( gethostbyaddr($iaddr, Socket::AF_INET) );
+        my $s = IO::Socket::INET->new(Proto => 'tcp');
+        my @ret_interfaces = ();
+        my @interfaces = $s->if_list;
+        foreach my $if (@interfaces) {
+            my $if_flags = $s->if_flags($if);
+            next if ($if_flags & IO::Interface::IFF_LOOPBACK);
+            next if (not ($if_flags & IO::Interface::IFF_RUNNING));
+            push @ret_interfaces, $s->if_addr($if);
+        }
+        unless( scalar(@ret_interfaces) ) {
+               $self->error( " No interfaces ???");
+               return -1;
+        }      
+        my $iaddr = Socket::inet_aton( $ret_interfaces[0] );
+        #my $host = hostname();
+        #my $addr = inet_ntoa(scalar(gethostbyname($host)) || 'localhost');
+        #$self->source($host);
+	$self->source( gethostbyaddr($iaddr, Socket::AF_INET) );
 
 	# TODO: check to make sure we pick up correct ip
-	# $self->sourceIp( $ret_interfaces[0] );
-        $self->sourceIp($addr);
+	 $self->sourceIp( $ret_interfaces[0] );
+        # $self->sourceIp($addr);
 	
 	
 # XXX - JZ 7/10
