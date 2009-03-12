@@ -275,7 +275,7 @@ Before release each service must go through a code review from a developer or de
  * Documentation completeness/sensibility
  * Use of external modules/libraries
  * Construction of adequate test cases
- * Final [http://perltidy.sourceforge.net/ perltidy] and [http://search.cpan.org/dist/Perl-Critic/bin/perlcritic perlcritic] evaluation
+ * Final [Perltidy] and [Perlcritic] evaluation
 
 === Issue Tracker ===
 

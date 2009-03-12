@@ -1,0 +1,42 @@
+#summary Using Perltidy in perfSONAR-PS<wiki:toc max_depth="6" />
+  
+== Introduction ==
+
+[http://perltidy.sourceforge.net/ Perltidy] is a Perl script which indents and reformats Perl scripts to make them easier to read.
+
+== Use ==
+
+The tool may be used in this manner, using the [Perltidy#Sample_File profile document] pictured below
+
+{{{
+perltidy -pro=trunk/Share/doc/perltidyrc MODULE.pm > MODULE.pm.tidy
+mv MODULE.pm.tidy MODULE.pm
+}}}
+
+== Sample File ==
+
+The following is the perltidy file recommended for use in the perfSONAR-PS environment.  
+
+{{{
+# PBP .perltidyrc file
+
+-l=300   # Max line width is 78 cols
+-i=4    # Indent level is 4 cols
+-ci=4   # Continuation indent is 4 cols
+-st     # Output to STDOUT
+-se     # Errors to STDERR
+-vt=0   # Maximal vertical tightness
+-cti=0  # No extra indentation for closing brackets
+-pt=0   # Low parenthesis tightness
+-bt=1   # Medium brace tightness
+-sbt=1  # Medium square bracket tightness
+-bbt=1  # Medium block brace tightness
+-nsfs   # No space before semicolons
+-nolq   # Don't outdent long quoted strings
+-wbb="% + - * / x != == >= <= =~ !~ < > | & >= < = **= += *= &= <<= && += -= /= |= >>= ||= .= %= ^= x="
+        # Break before all operators
+}}}
+
+== Last Updated ==
+
+$Id$
