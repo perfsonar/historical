@@ -1,9 +1,11 @@
 Config::General
+Cwd
 Data::UUID
 Data::Validate::IP
 Digest::MD5
 English
 Error
+Exporter
 File::Basename
 File::Temp
 File::stat
@@ -23,3 +25,4 @@ Params::Validate
 Sys::Hostname
 Time::HiRes
 XML::LibXML
+base
