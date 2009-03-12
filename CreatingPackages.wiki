@@ -124,7 +124,7 @@ To allow distribution of these services as tarballs, you should include scripts 
 
 This method will vary wildly depending on the machine on which the tool is installed, and what dependencies need to be installed. It could download, compile and install rrdtool, use freebsd ports to install tools, use CPAN to install dependencies, or any myriad of things.
 
-The following simple example just installs the dependencies from CPAN. It could probably be smarter and check the error codes from CPAN, and exit on error, but doesn't currently. This script is "scripts/install_dependencies.sh" from the perfSONAR_PS-LSRegistrationDaemon package.
+The following simple example just installs the dependencies from CPAN. It could probably be smarter and check the error codes from CPAN, and exit on error, but doesn't currently. This script is *_scripts/install_dependencies.sh_* from the *_perfSONAR_PS-LSRegistrationDaemon_* package.
 
 {{{
 #!/bin/bash
@@ -171,7 +171,7 @@ $MAKEROOT cpan XML::LibXML
 
 This step prepares the environment for the package. This include making sure that the correct users are added, that the paths exist and that the files are owned by the appropriate files. Aspects of preparation may be highly dependent on which OS the script is being run on, so an eye should be placed toward cross-platform compatibility.
 
-The following example is from the Topology Service. The script would likely only work on Linux machines so that needs to be fixed. This script is "scripts/prepare_environment.sh" in the perfSONAR_PS-TopologyService package.
+The following example is from the Topology Service. The script would likely only work on Linux machines so that needs to be fixed. This script is *_scripts/prepare_environment.sh_* in the *_perfSONAR_PS-TopologyService_* package.
 
 {{{
 #!/bin/bash
@@ -199,11 +199,11 @@ $MAKEROOT chown perfsonar:perfsonar /var/lib/perfsonar/topology_service
 
 ==== Building The Tarball ====
 
-Add the script(s) constructed above to the MANIFEST. Running "make dist" will then build the appropriate package.
+Add the script(s) constructed above to the MANIFEST. Running *_make dist_* will then build the appropriate package.
 
 ==== Testing ====
 
-Since this is the fallback option, you should make sure that the "prepare environment" and "install dependencies" scripts run on as many types of hosts as possible. If possible, detecting known good systems and warning users who run it on other systems would be good.
+Since this is the fallback option, you should make sure that the *_prepare environment_* and *_install dependencies_* scripts run on as many types of hosts as possible. If possible, detecting known good systems and warning users who run it on other systems would be good.
 
 The systems tested on should be noted in the documentation where you tell users to run the scripts. The documentation should inform them exactly what is happening as well, or inform them which files they can read if they'd like to try the steps manually.
 
