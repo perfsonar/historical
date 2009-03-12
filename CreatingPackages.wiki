@@ -112,6 +112,10 @@ email: i2-perfsonar@internet2.edu
    * _*/YOUR/HOME/rpmbuild/RPMS*_
    * _*/YOUR/HOME/rpmbuild/SRPMS*_
 
+=== Testing ===
+
+Depending on which system used to build and test the RPM package, testing it on other flavors is a good idea.  For example, a Fedora 10 system may contain different paths and libraries than a CentOS 5 system. The package produced should work on any Linux system. If the constructed package does not appear to work on all flavors, note these in the release documentation.  If one or more external packages are required on a certain flavor, either provide those packages needed or make a note where the end user can get that package.
+
 === Tarball Packages ===
 
 To allow distribution of these services as tarballs, you should include scripts to do everything that the RPM does (creating paths, adding users, creating databases, etc). Your documentation should then tell users to run these script when they do a tarball install. 
@@ -192,10 +196,18 @@ $MAKEROOT chown -R perfsonar:perfsonar /var/lib/perfsonar
 $MAKEROOT mkdir -p /var/lib/perfsonar/topology_service
 $MAKEROOT chown perfsonar:perfsonar /var/lib/perfsonar/topology_service
 }}}
-    
-=== Testing ===
 
-Depending on which system used to build and test the RPM package, testing it on other flavors is a good idea.  For example, a Fedora 10 system contains many different paths and libraries than a CentOS 5 system. The package produced should work on any Linux system. If the constructed package does not appear to work on all flavors, note these in the release documentation.  If one or more external packages are required on a certain flavor, either provide those packages needed or make a note where the end user can get that package.
+==== Building The Tarball ====
+
+Add the script(s) constructed above to the MANIFEST. Running "make dist" will then build the appropriate package.
+
+==== Testing ====
+
+Since this is the fallback option, you should make sure that the "prepare environment" and "install dependencies" scripts run on as many types of hosts as possible. If possible, detecting known good systems and warning users who run it on other systems would be good.
+
+The systems tested on should be noted in the documentation where you tell users to run the scripts. The documentation should inform them exactly what is happening as well, or inform them which files they can read if they'd like to try the steps manually.
+
+It would be good to include a list of steps that would need to be taken to allow them to run the service from wherever they untarred it.
 
 == FAQ ==
 
