@@ -223,13 +223,12 @@ use constant  DATA => {
                  'seqNums'     =>    16,
 }; 
  
- 
- 
 
 =head2 soi_host( $param )
 
 'select or insert host': wrapper method to look for the table host for the row with 
    $param = { ip_name => '',    ip_number  => ''}
+   Also, it will update current hostname if it was set the same as IP before.
 
 returns 
 
@@ -248,15 +247,18 @@ sub soi_host {
 	    $self->ERRORMSG("soi_host  requires single HASH ref parameter with ip_name and ip_number set");
 	    return -1;
 	} 
-	my $query = $self->getFromTable({query=>  [ 'ip_name' => { 'eq' =>  $param->{ip_name} },
-					             'ip_number' => { 'eq' =>  $param->{ip_number} }], 
+	my $query = $self->getFromTable({query =>  [  'or' => 
+	                                                 ['ip_name' => $param->{ip_name},
+							  'ip_number' => $param->{ip_number}
+							 ]
+						   ], 
 					 table => 'host', 
 					 validate => HOST, 
 					 index => 'ip_name',
 					 limit => 1
 					});
 	if(!ref($query) && $query < 0) {
-	    self->ERRORMSG("soi_host  failed for ip_name=$param->{ip_name}  ip_number=$param->{ip_number} ");
+	    $self->ERRORMSG("soi_host  failed for ip_name=$param->{ip_name}  ip_number=$param->{ip_number} ");
 	    return $query;
 	}
 	# insert if not there
@@ -267,6 +269,33 @@ sub soi_host {
 				      });
 	     # return ip_name if everything is OK or result code
 	     $id>0?return $param->{ip_name}:return $id;		      
+	} else {
+	    my ($ip_name, $row) = each %{$query};
+	    my $new_name = qr/$param->{ip_name}/;
+	    my $new_number = qr/$param->{ip_number}/;
+	    $self->LOGGER->debug( "found host:  $row->{ip_name} with address $row->{ip_number} ");
+	    if(!$row->{ip_name} || $row->{ip_name} !~ $new_name) {
+	        $self->LOGGER->debug( " Corrected hostname:  $row->{ip_name} => $param->{ip_name} ");
+	        unless( $self->updateTable({ set => {ip_name => $param->{ip_name}}, 
+	                                     table =>  'host',					 
+				             where => ['ip_number' => {eq => $row->{ip_number}}],
+					     validate => HOST,
+				 }) == 0) {
+	         
+		    return -1;			 
+	        }  
+	    } elsif(!$row->{ip_number} || $row->{ip_number} !~ $new_number) {
+	        $self->LOGGER->debug( " Corrected IP: $row->{ip_number} =>$param->{ip_number} ");
+	        unless( $self->updateTable({ set => {ip_number => $param->{ip_number}}, 
+	                                     table =>  'host',					 
+				             where => ['ip_name' => {eq => $row->{ip_name}}],
+					     validate => HOST,
+				 }) == 0) {
+	         
+		    return -1;			 
+	        } 
+	    } 
+	
 	} 
 	$self->LOGGER->debug( "found host ". $param->{ip_name} . "/ " .  $param->{ip_number} );
 	return   (keys  %{$query})[0];  	

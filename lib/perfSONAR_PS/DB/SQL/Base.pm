@@ -255,8 +255,9 @@ sub  getFromTable {
 				         columns => { $param->{table} => \@array_of_columns},
 					 limit => ($param->{limit}?$param->{limit}:'1000000'), ## i am pretty sure that 1 mil of records is more than enough
 				      };
-	$param_to->{group_by}  = $param->{group_by} if $param->{group_by};			      
-         my $sql_query =  build_select( $param_to );
+	 $param_to->{group_by}  = $param->{group_by} if $param->{group_by};	
+	 ###$self->LOGGER->debug(" param_to ::: " , Dumper $param_to );
+         my $sql_query =  build_select(  $param_to  );
 	 $self->LOGGER->debug("  SQL:: $sql_query ");			      
 	 $self->openDB  if !($self->alive == 0);
 	 

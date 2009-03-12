@@ -141,24 +141,24 @@ sub build_select {
         if($do_bind)
         {
           ($sql, $bind) =
-            build_select(%{$args}, 
+            build_select({%{$args}, 
                          where_only => 1,
                          query => $query,
                          logic => uc $query_arg->[$i],
                          table_map => $table_map,
-                         set => $set);
+                         set => $set});
 
           push(@bind, @$bind);
         }
         else
         {
           $sql =
-            build_select( %{$args}, 
+            build_select({%{$args}, 
                          where_only => 1,
                          query => $query,
                          logic => uc $query_arg->[$i],
                          table_map => $table_map,
-                         set => $set);
+                         set => $set});
         }
 
         if($pretty)
