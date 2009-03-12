@@ -3347,7 +3347,7 @@ sub lsQueryRequest {
                         # gather eventTypes
                         if ( exists $store{"eventType"} ) {
                             my $l_eventTypes = find( $map{$id}{"metadata"}, "./nmwg:metadata/nmwg:eventType", 0 );
-                            my $l_supportedEventTypes = find( $map{$id}{"metadata"}, "./nmwg:metadata/nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
+                            my $l_supportedEventTypes = find( $map{$id}{"metadata"}, "./nmwg:metadata/*[local-name()='parameters']/nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
                             foreach my $e ( $l_eventTypes->get_nodelist ) {
                                 my $value = extract( $e, 0 );
                                 next unless $value;
