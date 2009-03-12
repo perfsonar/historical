@@ -53,5 +53,7 @@ lib/perfSONAR_PS/Transport.pm
 lib/perfSONAR_PS/Utils/NetLogger.pm
 lib/perfSONAR_PS/Utils/ParameterValidation.pm
 lib/perfSONAR_PS/XML/Document.pm
+scripts/install_dependencies.sh
 scripts/lookup_service
+scripts/prepare_environment.sh
 scripts/psCreateLookupDB
