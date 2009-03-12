@@ -1,7 +1,7 @@
 Config::General
 Cwd
 Data::UUID
-Data::Validate::IP
+Data::Validate
 Digest::MD5
 English
 Error
