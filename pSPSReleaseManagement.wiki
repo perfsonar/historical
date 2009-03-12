@@ -4,6 +4,98 @@
 
 The perfSONAR-PS release process is based heavily on the [ReleaseManagement generic] process.  This page recommends actions for the perfSONAR-PS group only.  Content subject to change, so please review frequently.
 
+== Roadmap ==
+
+*LAST REVISED* <font color=red>March 11, 2009</font>
+
+|| *Date* || *Milestone* ||
+|| _27 March_ || [pSPSReleaseManagement#pSPS_Version_3.1 pSPS Version 3.1] ||
+|| _27 April_ || [pSPSReleaseManagement#pSPS_Version_3.1+ pSPS Version 3.1+] ||
+|| _May_ || [pSPSReleaseManagement#PN_Version_3.1 PN Version 3.1] ||
+|| _June_ || [pSPSReleaseManagement#pSPS_Version_3.2 pSPS Version 3.2] ||
+|| _July_ || [pSPSReleaseManagement#PN_Version_3.2 PN Version 3.2] ||
+|| _Jan 10_ || [pSPSReleaseManagement#pSPS_Version_4.0 pSPS Version 4.0] ||
+|| _Jan 10_ || [pSPSReleaseManagement#PN_Version_4.0 PN Version 4.0] ||
+
+=== perfSONAR-PS ===
+
+The following section details perfSONAR-PS specific enhancements for the future.  
+
+==== pSPS Version 3.1 ====
+  
+  * RPM Packages for all current perfSONAR-PS services
+  * gLS/hLS performance and stability updates
+  * CGI based GUIs
+    * gLS/hLS GUIs
+    * Simple data GUIs for OWAMP/BWCTL/PingER/SNMP
+  * Circuit monitoring (glif version, still E2EMon compatible)
+  * Yum/APT repository
+
+==== pSPS Version 3.1+ ====
+
+  * OWAMP support in perfSONAR-BUOY
+  * Nagios pluggins
+    * Liveness
+    * Threshold of performance data
+  * Enhanced CGI script for OWAMP data (dash-board)
+  * Modified pS-B OWAMP database back-end with support for history of delay-variation
+
+==== pSPS Version 3.2 ====
+
+  * Monitoring of DCN-created circuits
+  * Programmatic APIs
+    * gLS, MA, Specific MAs, MP, specific MPs
+    * Well structured
+    * Documented
+    * Designed for Application Programmers
+  * Limited AA integration
+
+==== pSPS Version 4.0 ====
+
+  * LS - Topology based service queries (nearest MP problem)
+  * Centralized Configuration Service
+  * GUI enhancements
+    * User community centric - search for problems relating to X
+
+==== pSPS Version Future ====
+
+  * Integration into end applications
+  * pS-Netflow - archive of netflow data
+    * allow queries to search for specific patterns
+    * allow queries for specific summary stats (what ports used, gross traffic flows, IPv4 vs IPv6 etc...)
+  * BGP archive
+    * What would the route have been for a packet at time X at location Y be?
+  * Traceroute MA
+  * More NOC integration
+    * Tickets-MA - tag a ticket as relating to specific topology and correlate with performance data
+    * Needs to include GUI work for both TT integration, and data usage. For example, correlating a reported maintenance window could flag performance data as suspect.
+  * Global - state of the networks GUIs. Provide ways of seeing an overall picture of perfSONAR deployments and then allowing the user to drill down to specific regions (both geographically, as well as by data types or network technology types - or even application communities).
+  * perfSONAR interfaces for sharing of ProtoGENI performance and management data. (LAMP)
+  * DICE-AA integrated AAA supported
+
+=== Performance Node ===
+
+The following section details Performance Node specific enhancements for the future. 
+
+==== PN Version 3.1 ====
+
+  * Additions to pS-NPToolkit to enable Zero-Config mode
+  * Use new versions of OWAMP/BWCTL and [pSPSReleaseManagement#pSPS_Version_3.1+ pSPS Version 3.1+]
+  * Minimal-configuration start-up for diagnostic
+  * All Administration via HTTP
+  * Stability and performance enhancements
+  * Community specific operations
+
+==== PN Version 3.2 ====
+
+  * Fedora-Live based to enable ISO building from rpms
+  * Use [pSPSReleaseManagement#pSPS_Version_3.2 pSPS Version 3.2]
+
+==== PN Version 4.0 ====
+
+  * Allow an administrator to control a set of pS-performance nodes
+  * Combination of yum repository and centralized configuration management tools
+
 == Release Frequency ==
 
 perfSONAR-PS will be released on a bi-yearly basis to coincide with major activities of group members.  We are currently aiming to release:
