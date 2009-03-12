@@ -1,4 +1,10 @@
-#summary IP Summarization Algorithm in Perl<wiki:toc max_depth="6" />== Introduction ==The effective and efficient summarization of the IPv4 (and eventually IPv6) address space is paramount for the Information services of perfSONAR.  The current algorithm has been the mainstay since advent of the gLS, and may take liberties with the final output:
+#summary IP Summarization Algorithm in Perl
+
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+The effective and efficient summarization of the IPv4 (and eventually IPv6) address space is paramount for the Information services of perfSONAR.  The current algorithm has been the mainstay since advent of the gLS, and may take liberties with the final output:
 
  * Summarization is not as _tight_ as possible.  For instance given several addresses that share an A class subnet (e.g. 192.168.0.56, 192.168.48.98, 192.168.48.197) a larger than required CIDR recommendation is made: 192.0.0.0/8.  
  * Multiple ranges may confuse the overall output.  If two primary ranges are seen, 192.168.0.0/16 and 10.10.0.0/16, the recommendation may be returned that is even greater, e.g. 0.0.0.0/0.
@@ -605,7 +611,1209 @@ TBD
 
 === Proposed Implementation ===
 
-Must be in Perl.  We will not be supporting the Java implementation directly.  The subsequent perl version can be translated by external programmers.  
+Must be in Perl.  We will not be supporting the Java implementation directly.  The subsequent perl version can be translated by external programmers.
+
+===Class IpTrie===
+
+{{{
+package IpTrie;
+
+use strict;
+use warnings;
+
+use constant MAX_KEY_LENGTH => 32;
+
+sub new {
+	shift;
+	my ( $t ) = @_;
+
+	my $self = {};
+	$self->{trie} = $t;
+	$self->{nodeList} = ();
+	$self->{root} = undef;
+	
+	bless($self);
+	
+	$self->updateNodelist();
+	if ($self->{root}->{childCount} != $self->{trie}->getCount()) {
+			print "Trie count != root IpTrieNode count";
+			exit(-1);
+	}
+	
+	return $self;
+}
+
+	
+# this method walks the base Trie and fills in IpTrieNodes
+sub updateNodelist {
+	my $self = shift;
+	$self->{nodeList} = ();
+	my $startPosition = MAX_KEY_LENGTH;
+	my $startKey = 0;
+	$self->{root} = IpTrieNode->new($self->{trie}->getRootNode(), $startPosition, $startKey);
+	push(@{$self->{nodeList}}, $self->{root});
+	$self->walkTree($self->{root}, $startPosition, $startKey);
+}
+	
+#walk the tree from node down
+sub walkTree {
+	my $self = shift;
+	my ( $node, $position, $currentKey ) = @_;
+		
+	my $tnode = $node->{trieNode};
+	my $c0 = $tnode->getChildZero();
+	my $c1 = $tnode->getChildOne();
+		
+	if (defined $c0) {
+    	my $c0Key = $c0->getKey() << ($position - $c0->getKeyLength());
+    	my $c0Position = $position - $c0->getKeyLength();
+    	$c0Key = $c0Key | $currentKey;
+    	my $c0ipTrieNode = IpTrieNode->new($c0, $c0Position, $c0Key);
+    	push(@{$self->{nodeList}}, $c0ipTrieNode);
+    	$node->setChildZero($c0ipTrieNode);
+    	$c0ipTrieNode->setParent($node);
+    	$self->walkTree($c0ipTrieNode, $c0Position, $c0Key);
+
+    }
+    if ( defined $c1) {
+    	my $c1Key = $c1->getKey() << ($position - $c1->getKeyLength());
+    	my $c1Position = $position - $c1->getKeyLength();
+    	$c1Key = $c1Key | $currentKey;
+    	my $c1ipTrieNode = IpTrieNode->new($c1, $c1Position, $c1Key);
+    	push(@{$self->{nodeList}}, $c1ipTrieNode);
+    	$node->setChildOne($c1ipTrieNode);
+    	$c1ipTrieNode->setParent($node);
+    	$self->walkTree($c1ipTrieNode, $c1Position, $c1Key);
+    }
+
+}
+	
+sub getNodes {
+	my $self = shift;
+	return $self->{nodelist};
+}
+	
+sub getInternalNodes {
+	my $self = shift;
+	my @alitn = ();
+	for my $node ( @{$self->{nodelist}} ) {
+		if (defined $node->{childZero}) {
+			push(@alitn, $node);
+		}
+	}
+	return @alitn;
+}
+	
+sub getSummaryNodes {
+	my $self = shift;
+	my @alitn = ();
+	
+	for my $node ( @{$self->{nodelist}} ) {
+			# evaluate what to return
+			# here we say if the data pointer is null, but it 
+			# has one child with data, then it is on the summary front
+			
+			# hackage for the root $node, which might have a null child
+			# no other $node does
+			next if (!(defined $node->{childOne} and defined $node->{childZero}));
+			
+			if (!(defined $node->{trieNode}->getData()) &&
+				(defined $node->{childZero}->{trieNode}->getData() ||
+				 defined $node->{childOne}->{trieNode}->getData()) ) {
+					push(@alitn, $node);
+			}
+		}
+		return @alitn;
+}
+	
+sub getSummaryNodesSummaryFront {
+	my $self = shift;
+	my @alitn = ();
+	
+	for my $node ( @{$self->{nodelist}} ) {
+			# evaluate what to return
+			# here we say if the data pointer is null, but it 
+			# has one child with data, then it is on the summary front
+			
+			# hackage for the root $node, which might have a null child
+			# no other $node does
+			next if (!(defined $node->{childOne} and defined $node->{childZero}));
+			
+			if (!(defined $node->{trieNode}->getData()) &&
+				(defined $node->{childZero}->{trieNode}->getData() ||
+				 defined $node->{childOne}->{trieNode}->getData() ) ) {
+					push(@alitn, $node);
+			}
+		}
+		
+	my @alitn2 = ();
+	for my $node ( @alitn ) {
+			if( ($node->{mask} - $node->{parent}->{mask}) > 2) {
+				push(@alitn2, $node);
+			}
+		}
+		
+		#sanity check
+		my $sum = 0;
+		for my $node ( @alitn2 ) {
+			print $node->{addrString}." ".$node->{childCount};
+			$sum += $node->{childCount};
+		}
+		
+		if ($sum != $self->{trie}->getCount()) {
+			print "sum, nodeCount ".$sum." ".$self->{trie}->getCount();
+			print "Heuristic failed!";
+			@alitn2 = ();
+		}
+		return @alitn2;
+	}	
+	
+sub getSummary {
+	my $self = shift;
+		my @alitn = ();
+		if (defined $self->{root}->{childZero}) {
+			@alitn = $self->markIpTrie1(\@alitn, $self->{root}->{childZero});
+		}
+		if (defined $self->{root}->{childOne}) {
+			@alitn = $self->markIpTrie1(\@alitn, $self->{root}->{childOne});
+		}
+		
+		#sanity check
+		my $sum = 0;
+		for my $node ( @alitn ) {
+			$sum += $node->{childCount};
+			if ($node->{mask} == 32){ $sum++ };
+		}
+		
+		if ($sum != $self->{trie}->getCount()) {
+			print "Summarization failed! (covered ".$sum."prefixes out of ".$self->{trie}->getCount().")";
+			@alitn = ();
+		}
+		
+		return @alitn;
+	}
+	
+	# this will walk the tree and evaluate whether to continue recursing down
+	# the tree or add itself to the summary list and prune the subtree.
+	# 
+	# approach #1
+	#
+sub markIpTrie1 {
+	my $self = shift;
+	my ($summaryArrayListref, $node) = @_;
+	
+	my @summaryArrayList = @$summaryArrayListref;
+	
+	my $c0n = $node->{childZero};
+	my $c1n = $node->{childOne};
+		
+		if(!(defined $c0n)) {
+			
+			$node->setSummaryMember();
+			push(@summaryArrayList, $node);
+		
+		}elsif(defined $c0n &&
+				($c0n->{mask} - $node->{mask} > 8) || 
+				($c1n->{mask} - $node->{mask} > 8) || 
+				($node->{coverage} < 0.000001) ) {
+					
+			@summaryArrayList = $self->markIpTrie1(\@summaryArrayList, $c0n);
+			@summaryArrayList = $self->markIpTrie1(\@summaryArrayList, $c1n);
+		}
+		else {
+			$node->setSummaryMember();
+			push(@summaryArrayList, $node);
+		}
+		
+		return @summaryArrayList;
+	}
+
+sub printDot {
+	my $self = shift;
+	my ($fileName) = @_;
+	my $file;
+	
+	open ($file, "> ".$fileName) or die $!;
+
+    print $file "digraph g {\n";
+    $self->printDotNode($file, $self->{root});
+    print $file "}\n";
+
+    close $file;
+}
+	
+sub printDotNode {
+	my $self = shift;
+	my ($file, $node) = @_;
+		
+	my $coverageString = sprintf("%.6f", $node->{coverage});
+		
+	my $nodeString = "\"".$node->{addrString}."\" [";
+		
+	if($node->{summaryMember}) {
+			$nodeString .= "style=filled,fillcolor=lightslategray,";
+		}
+	elsif($node->{isInternal}) {
+		$nodeString .= "style=filled,";
+	}
+		
+	$nodeString .= "shape=record,label=\"<f0>".$node->{addrString}
+		. "|<f1>" . $node->{childCount}
+		. "|<f2>" . $coverageString
+		. "\"]";
+	print $file $nodeString."\n";
+	
+		if (defined $node->{childZero}) {
+			my $edgeZeroString = "\"".$node->{addrString}."\" -> \""
+			. $node->{childZero}->{addrString}."\"";
+			$edgeZeroString .= "[label=".($node->{childZero}->{mask} - $node->{mask})."];";
+			print $file $edgeZeroString."\n";
+			$self->printDotNode($file, $node->{childZero});
+		}
+		
+		if (defined $node->{childOne}) {
+			my $edgeOneString = "\"".$node->{addrString}."\" -> \""
+			. $node->{childOne}->{addrString}."\"";
+			$edgeOneString .= "[label=".($node->{childOne}->{mask} - $node->{mask})."];";
+			print $file $edgeOneString."\n";
+			$self->printDotNode($file, $node->{childOne});
+		}
+	}
+
+	1;
+}}}  
+
+===Class IpTrieNode.pl===
+
+{{{
+package IpTrieNode;
+
+use strict;
+use warnings;
+
+use constant MAX_KEY_LENGTH => 32;
+
+sub longToIP {
+	shift;
+	my ($ipInLong) = @_;
+
+    my $ipAddress = "";
+    my @ipArrayInLong;
+    my $num;
+
+    for (my $i = 0; $i < 4; $i++) {
+
+      my $factor = (256 ** (4 - $i - 1));
+      $num = $ipInLong / $factor;
+      $num =~ s/\.[0-9]*//;
+      $ipInLong = $ipInLong - ($num * $factor);
+      if ($num > 255) {
+          print "Invalid CONVERSION";
+      }
+      
+      $ipArrayInLong[$i] = $num;
+           $ipAddress .= $ipArrayInLong[$i];
+            if ($i != 3) {
+                $ipAddress .= ".";
+            }
+        }
+        return $ipAddress;
+    }
+    
+sub new {
+	shift;
+	my ( $tnode, $position, $currentKey ) = @_;
+
+	my $self = {};
+	$self->{mask} = MAX_KEY_LENGTH - $position;
+	$self->{ipAddress} = undef;
+	$self->{key} = $currentKey;
+	$self->{keyString} = IpTrieNode->longToIP($self->{key});
+	$self->{addrString} = $self->{keyString}."/".$self->{mask};
+	$self->{trieNode} = $tnode;
+	$self->{parent} = undef;
+	$self->{childZero} = undef;
+	$self->{childOne} = undef;
+	$self->{childCount} = $tnode->getChildCount();
+	$self->{summaryMember} = 0;
+	$self->{isInternal} = undef;
+	$self->{coverage} = undef;
+
+	if ($self->{mask} == MAX_KEY_LENGTH) { 
+		$self->{coverage} = 1.0;
+	}
+	else {
+			$self->{coverage} =  $self->{childCount} / (2**(MAX_KEY_LENGTH - $self->{mask}));
+		}
+		if(!(defined $tnode->getData())) {
+			$self->{isInternal} = 1;
+		}
+		else {
+			$self->{isInternal} = 0;
+		}
+
+	bless($self);
+	return $self;
+}
+
+	
+sub setSummaryMember {
+	my $self = shift;
+	$self->{summaryMember} = 1;	
+}
+	
+sub isSummaryMember {
+	my $self = shift;
+	return $self->{summaryMember};
+}
+	
+sub setParent {
+	my $self = shift;
+	my ($newParent) = @_;
+	
+	$self->{parent} = $newParent;
+	return $self;
+}
+	
+sub setChildZero {
+	my $self = shift;
+	my ($newChild) = @_;
+	
+	$self->{childZero} = $newChild;
+	return $self;
+}
+	
+sub setChildOne {
+my $self = shift;
+	my ($newChild) = @_;
+	
+	$self->{childOne} = $newChild;
+	return $self;
+}
+
+1;
+}}}
+
+===Class Trie.pm===
+
+{{{
+package Trie;
+
+use strict;
+use warnings;
+
+use constant MAX_KEY_LENGTH => 32;
+
+    
+sub new {
+	shift;
+	my ( $rootnode ) = @_;
+
+	my $self = {};
+	$self->{nodeCount} = undef;
+	$self->{keyList} = ();
+	$self->{rootNode} = $rootnode;
+
+	bless($self);
+	return $self;
+}
+
+sub getKeyList {
+	my $self = shift;
+    return $self->{keyList};
+}
+
+sub getRootNode {
+	my $self = shift;
+    return $self->{rootNode};
+}
+    
+sub firstDigit {
+	shift;
+	my ( $key, $keyLength ) = @_;
+	return ( $key >> ( $keyLength - 1 ) ) & 1;
+}
+
+sub Add {
+	my $self = shift;
+	my ( $key, $keyLength, $data ) = @_;
+       
+    $self->{nodeCount}++;
+    $self->{rootNode}->incrementChildCount();
+        
+        if (Trie->firstDigit($key, $keyLength) == 1) {
+            if (defined $self->{rootNode}->getChildOne()) {
+                $self->{rootNode}->getChildOne()->Add($key, $keyLength, $data);
+            }
+            else {
+                $self->{rootNode}->setChildOne(TrieNode->new($key, $keyLength));
+                $self->{rootNode}->getChildOne()->setData($data);
+            }
+        } else {
+            if (defined $self->{rootNode}->getChildZero()) {
+                $self->{rootNode}->getChildZero()->Add($key, $keyLength, $data);
+            }
+            else {
+                $self->{rootNode}->setChildZero(TrieNode->new($key, $keyLength));
+                $self->{rootNode}->getChildZero()->setData($data);
+            }
+        }
+        return $self;
+    }
+
+sub FindExactMatch {
+	my $self = shift;
+	my ( $key, $keyLength ) = @_;
+	
+        if (Trie->firstDigit($key, $keyLength) == 1){
+        	if(defined $self->{rootNode}->getChildOne() 
+            	&& $self->{rootNode}->getChildOne()->FindExactMatch($key, $keyLength)){
+  				return 1;          		
+            }else{
+            	return 0;
+            }
+        }
+        else{
+            if(defined $self->{rootNode}->getChildZero() 
+            	&& $self->{rootNode}->getChildZero()->FindExactMatch($key, $keyLength)){
+  				return 1;          		
+            }else{
+            	return 0;
+            }
+        }
+    }
+
+sub Merge {
+	my $self = shift;
+	my ( $trie ) = @_;
+	
+    my @keys = $trie->GetKeys();
+    for my $key (@keys){
+            $self->Add($key, MAX_KEY_LENGTH, undef);
+	}
+        return $self;
+}
+
+sub GetKeys() {
+	my $self = shift;
+	
+	unless(@_){
+		#no parameters version
+		my $key = 0;
+        my $position = MAX_KEY_LENGTH;
+        my @keys = ();
+
+        if (defined $self->{rootNode}->getChildZero()){
+            @keys = $self->GetKeys(\@keys, $self->{rootNode}->getChildZero(), $key, $position);
+        }
+        if (defined $self->{rootNode}->getChildOne()){
+            @keys = $self->GetKeys(\@keys, $self->{rootNode}->getChildOne(), $key, $position);
+        }
+        return @keys;
+	}
+        
+    #version with parameters
+    my ($keysref, $node, $key, $position ) = @_;
+    my @keys = @$keysref;
+    
+    $key = $key | ($node->getKey() << ($position - $node->getKeyLength()));
+
+        if (defined $node->getChildZero()){
+        	@keys = $self->GetKeys(\@keys, $node.getChildZero(), $key, $position - $node->getKeyLength());
+        }
+           
+        if (defined $node->getChildOne()){
+            @keys = $self->GetKeys(\@keys, $node.getChildOne(), $key, $position - $node->getKeyLength());
+        }
+        for (my $i = 0; $i < $node->getValueCount(); $i++) {
+            push(@keys, $key);
+        }
+        return @keys;
+    }
+
+    #returns the best match of keys for the given inputs
+sub FindBestMatch {
+	my $self = shift;
+	my ( $key, $keyLength ) = @_;
+       
+        #implements the best match by digging all the way to the leaf based on the $key difference.
+        if (Trie->firstDigit($key, $keyLength) == 1) {
+            if (defined $self->{rootNode}->getChildOne()){
+                return $self->{rootNode}->getChildOne()->FindBestMatch($key, $keyLength);
+            }
+            else{
+                return undef;
+            }
+        } elsif (!(defined $self->{rootNode}->getChildZero())){
+        	return undef;
+        }
+        return $self->{rootNode}->getChildZero()->FindBestMatch($key, $keyLength);
+    }
+
+sub Equals {
+	my $self = shift;
+	my ( $trie ) = @_;
+	
+        if (defined $trie) {
+            if ($self->getCount() == $trie->getCount()) {
+                my @list1 = $self->GetKeys();
+                my @list2 = $trie->GetKeys();
+
+                for (my $i = 0; $i < $self->{nodeCount}; $i++) {
+                    if (!($list1[$i] == $list2[$i])){
+                        return 0;
+                    }
+                }
+                return 1;
+            }
+        }
+        return 0;
+}
+
+sub getCount {
+	my $self = shift;
+        return $self->{nodeCount};
+    }
+
+sub Remove {
+	my $self = shift;
+	
+	#version with 2 parameters
+	if($#_ == 2){
+		my ( $key, $keyLength ) = @_;
+    	my $root;
+
+		if(Trie->firstDigit($key, $keyLength) == 1){
+			$root = $self->{rootNode}->getChildOne();
+		}else{
+			$root =  $self->{rootNode}->getChildZero();
+		}
+
+   		if ($self->Remove($root, $key, $keyLength, 0)) {
+            $self->{nodeCount}--;
+            return 1;
+        }
+        return 0;
+    }
+    #version with 4 parameters
+    else{
+    	my ( $node, $key, $keyLength, $currentKeyLength ) = @_;
+    	
+    	my $success;
+        my $child;
+
+        $currentKeyLength += $node->getKeyLength();
+
+        if ($currentKeyLength == $keyLength && $node->getKey() == ($key & 1)) {
+            # by setting node.m_valueCount to -1, we indicate that it can be deleted
+            if ($node->getValueCount() > 1){
+                $node->setValueCount($node->getValueCount() - 1);
+            }
+            else {
+                if (!(defined $node->getChildZero() or defined $node->getChildOne())){
+                    $node->setValueCount($node->getValueCount() - 1);
+                }else{
+                    $node->setValueCount(0);
+                }
+            }
+            return 1;
+        } elsif (Trie->firstDigit($key, $keyLength - $currentKeyLength) == 1){
+            $child = $node->getChildOne();
+        } else {
+            $child = $node->getChildZero();
+        }
+
+        $success = ((defined $child) && $self->Remove($child, $key, $keyLength, $currentKeyLength));
+
+        if ($success) {
+            # check if we need to delete nodes as we go back along the path
+            # the node is safe to be deleted if its valueCount = -1
+
+            if ($child->getValueCount() < 0) {
+                if ($child->getKey() == 1){
+                	$node->setChildOne(undef);
+                }
+                else{
+                    $node->setChildZero(undef);
+                }
+                if ($node->getValueCount() == 0 && !(defined $node->getChildZero() or $node->getChildOne())){
+                	$node->setValueCount(-1);
+                }
+            }
+        }
+        return $success;
+    }
+}
+
+=cut
+
+sub mostDominantKeyList {
+
+        TrieNode childOne = $self->{rootNode}->getChildOne();
+        TrieNode childZero = $self->{rootNode}->getChildZero();
+
+        if (childOne != null) {
+            mostDominantKeyList(childOne, childOne.getKey(), Constants.MAX_KEY_LENGTH);
+        }
+        if (childZero != null) {
+            mostDominantKeyList(childZero, childZero.getKey(), Constants.MAX_KEY_LENGTH);
+        }
+    }
+
+    private void mostDominantKeyList(TrieNode node, long $key, long position) {
+
+        TrieNode childZero = $node->getChildZero();
+        TrieNode childOne = $node->getChildOne();
+
+        $key = $key | ($node->getKey() << (position - $node->getKeyLength()));
+        position = position - $node->getKeyLength();
+        if (childZero != null) {
+            mostDominantKeyList(childZero, $key, position);
+        }
+        if (childOne != null) {
+            mostDominantKeyList(childOne, $key, position);
+        }
+        if (($node->getChildOne() != null) && ($node->getChildZero() != null))
+            keyList.add(TrieNode->new($key, position));
+    }
+    
+sub printDot(String fileName) throws FileNotFoundException {
+    	FileOutputStream file = new FileOutputStream(fileName);
+    	PrintStream p = new PrintStream(file);
+    	long position = Constants.MAX_KEY_LENGTH;
+    	long currentKey = 0;
+    	p.println("digraph g {");
+    	$self->{rootNode}->printDotNode(p, rootNode, position, currentKey);
+    	p.println("}");
+    	p.close();
+    }
+    
+sub<String> listInternalNodes() {
+    	long position = Constants.MAX_KEY_LENGTH;
+    	long currentKey = 0;
+    	ArrayList<String> listOfNodes = new ArrayList<String>();
+    	$self->{rootNode}->listInternalNodes(listOfNodes, position, currentKey);
+    	return listOfNodes;
+    }
+    
+sub<String> listSummaryNodes() {
+    	long position = Constants.MAX_KEY_LENGTH;
+    	long currentKey = 0;
+    	ArrayList<String> listOfNodes = new ArrayList<String>();
+    	$self->{rootNode}->listSummaryNodes(listOfNodes, position, currentKey);
+    	return listOfNodes;
+    }
+}
+
+=cut
+
+1;
+}}}
+
+===Class TrieNode.pm===
+
+{{{
+package TrieNode;
+
+use strict;
+use warnings;
+
+sub new {
+	shift;
+	my ( $key, $keyLength, $valueCount ) = @_;
+
+	my $self = {};
+	$self->{key}       = $key;
+	$self->{keyLength} = $keyLength;
+
+	if ($valueCount) {
+		$self->{valueCount} = $valueCount;
+	}
+	else {
+		$self->{valueCount} = 1;
+		$self->{childCount} = 0;
+	}
+
+	$self->{data}      = undef;
+	$self->{childZero} = undef;
+	$self->{childOne}  = undef;
+
+	bless($self);
+	return $self;
+}
+
+sub incrementChildCount {
+	my $self = shift;
+	$self->{childCount}++;
+}
+
+sub getChildCount {
+	my $self = shift;
+	return $self->{childCount};
+}
+
+sub getChildZero {
+	my $self = shift;
+	return $self->{childZero};
+}
+
+sub setChildZero {
+	my $self = shift;
+	if (@_) { $self->{childZero} = shift }
+}
+
+sub getChildOne {
+	my $self = shift;
+	return $self->{childOne};
+}
+
+sub setChildOne {
+	my $self = shift;
+	if (@_) { $self->{childOne} = shift }
+}
+
+sub getKey {
+	my $self = shift;
+	return $self->{key};
+}
+
+sub getKeyLength {
+	my $self = shift;
+	return $self->{keyLength};
+}
+
+sub firstDigit {
+	shift;
+	my ( $key, $keyLength ) = @_;
+	return ( $key >> ( $keyLength - 1 ) ) & 1;
+}
+
+sub getCommonPart {
+	shift;
+	my ( $keyA, $keyLengthA, $keyB, $keyLengthB ) = @_;
+
+	# truncate the keys so they are the same size (discard low bits)
+	if ( $keyLengthA > $keyLengthB ) {
+		$keyA >>= $keyLengthA - $keyLengthB;
+		$keyLengthA = $keyLengthB;
+	}
+	else {
+		$keyB >>= $keyLengthB - $keyLengthA;
+	}
+
+	my $diff  = $keyA ^ $keyB;
+	my $count = 0;
+	while ( $diff != 0 ) {
+		$diff >>= 1;
+		$count++;
+	}
+
+	my $keyCommon       = $keyA >> $count;
+	my $keyLengthCommon = $keyLengthA - $count;
+
+	return ( $keyCommon, $keyLengthCommon );
+}
+
+sub Equals {
+	my $self = shift;
+	my ($node) = @_;
+
+	return $node
+	  && ( $self->{key} == $node->{key}
+		&& $self->{keyLength} == $node->{keyLength} );
+}
+
+sub isKey {
+	my $self = shift;
+	return $self->{valueCount} > 0;
+}
+
+sub getValueCount {
+	my $self = shift;
+	return $self->{valueCount};
+}
+
+sub setValueCount {
+	my $self = shift;
+	my ($value) = @_;
+
+	if ( ref($value) == 'SCALAR' ) {
+		$self->{valueCount} = $value;
+	}
+	else {
+		$self->{data} = $value;
+	}
+}
+
+sub getData {
+	my $self = shift;
+	return $self->{data};
+}
+
+sub setData {
+	my $self = shift;
+	if (@_) { $self->{data} = shift }
+}
+
+sub Add {
+	my $self = shift;
+	my ( $key, $keyLength, $data ) = @_;
+
+	if ( $key == $self->{key} && $keyLength == $self->{keyLength} ) {
+		$self->{valueCount}++;
+	}
+	else {
+		my $keyDiff;
+		my $keyLengthDiff;
+		my $newNode;
+
+		my @commonKeyAndKeyLength =
+		  TrieNode->getCommonPart( $key, $keyLength, $self->{key}, $self->{keyLength} );
+
+		my $keyCommon       = $commonKeyAndKeyLength[0];
+		my $keyLengthCommon = $commonKeyAndKeyLength[1];
+
+		$self->{childCount}++;
+
+		$keyLengthDiff = $self->{keyLength} - $keyLengthCommon;
+		$keyDiff       = $self->{key} - ( $keyCommon << $keyLengthDiff );
+
+		if ( $keyLengthDiff > 0 ) {
+			$newNode = TrieNode->new( $keyDiff, $keyLengthDiff );
+			$newNode->{valueCount} = $self->{valueCount};
+			$newNode->{childZero}  = $self->{childZero};
+			$newNode->{childOne}   = $self->{childOne};
+			$newNode->{data}       = $self->{data};
+			$newNode->{childCount} = $self->{childCount} - 1;
+
+			# update this node to hold common part
+			$self->{key}        = $keyCommon;
+			$self->{keyLength}  = $keyLengthCommon;
+			$self->{valueCount} = 0;
+			$self->{data}       = undef;
+
+			# and set the new node as child of this node
+			if ( TrieNode->firstDigit( $keyDiff, $keyLengthDiff ) == 1 ) {
+				$self->{childZero} = undef;
+				$self->{childOne}  = $newNode;
+			}
+			else {
+				$self->{childZero} = $newNode;
+				$self->{childOne}  = undef;
+			}
+
+			if (!(defined $newNode->{childOne} or defined $newNode->{childZero})) {
+				$self->{childCount}++;
+				if ( $newNode->{childCount} > 1 ) {
+					print "confusion";
+				}
+				$newNode->{childCount} = 0;
+			}
+		}    
+
+		# process diff with the new key, if any
+		if ( $keyLength > $keyLengthCommon ) {
+
+				# get diff with the new key
+			$keyLengthDiff = $keyLength - $keyLengthCommon;
+			$keyDiff       = $key - ( $keyCommon << $keyLengthDiff );
+			
+			if ( TrieNode->firstDigit( $keyDiff, $keyLengthDiff ) == 1 ) {
+				if ( defined $self->{childOne} ) {
+					$self->{childOne}->Add( $keyDiff, $keyLengthDiff, $data );
+				}
+				else {
+					$self->{childOne} =  TrieNode->new( $keyDiff, $keyLengthDiff );
+					$self->{childOne}->setData($data);
+				}
+			}
+			else {
+				if ( defined $self->{childZero} ) {
+					$self->{childZero}->Add( $keyDiff, $keyLengthDiff, $data );
+				}
+				else {
+					$self->{childZero} =  TrieNode->new( $keyDiff, $keyLengthDiff );
+					$self->{childZero}->setData($data);
+				}
+			}
+		}
+		else {
+			$self->{valueCount} = 1;
+
+			#$self->{data} = $data; //XXX
+		}
+	}
+	return $self;
+}
+
+sub FindExactMatch {
+	my $self = shift;
+	my ( $key, $keyLength ) = @_;
+
+	my $matchStatus;
+	my $keyCommon;
+	my $keyLengthCommon;
+
+	if ( $keyLength < $self->{keyLength} ) {
+		$matchStatus = 0;
+		return $matchStatus;
+	}
+	elsif ( $key == $self->{key} && $keyLength == $self->{keyLength} ) {
+		$matchStatus = 1;
+		return $matchStatus;
+	}
+	else {
+		my @keyFields = TrieNode->getCommonPart( 
+			$key, $keyLength, $self->{key}, $self->{keyLength} );
+		
+		$keyCommon       = $keyFields[0];
+		$keyLengthCommon = $keyFields[1];
+		my $keyLengthDiff = $keyLength - $keyLengthCommon;
+		my $keyDiff       = $key - ( $keyCommon << $keyLengthDiff );
+		if ( TrieNode->firstDigit( $keyDiff, $keyLengthDiff ) == 1 ) {
+			if ( defined $self->{childOne} ){
+			  return $self->{childOne}->FindExactMatch( $keyDiff, $keyLengthDiff );
+			}else {
+				$matchStatus = 0;
+				return $matchStatus;
+			}
+		}
+		else {
+			if ( defined $self->{childZero} ){
+			  return $self->{childZero}->FindExactMatch( $keyDiff, $keyLengthDiff );
+			}else {
+				$matchStatus = 0;
+				return $matchStatus;
+			}
+		}
+	}
+}
+
+sub FindBestMatch {
+	my $self = shift;
+	my ( $key, $keyLength ) = @_;
+
+# note : we don't need to worry about a node being a terminator since at the end, we will either have
+# - an exact match of the key, so the node will be a terminator
+# - the last possible node on the path matching the key which can't be anything but a leaf, hence a terminator
+
+	if ( $keyLength < $self->{keyLength}
+		|| ( $key == $self->{key} && $keyLength == $self->{keyLength} ) ){
+		
+		return $self;
+	}
+	else {
+		my @keyFields = TrieNode->getCommonPart( 
+				$key, $keyLength, $self->{key}, $self->{keyLength} );
+		
+		my $keyCommon       = $keyFields[0];
+		my $keyLengthCommon = $keyFields[1];
+
+		my $keyLengthDiff = $keyLength - $keyLengthCommon;
+		my $keyDiff       = $key - ( $keyCommon << $keyLengthDiff );
+
+		if ( TrieNode->firstDigit( $keyDiff, $keyLengthDiff ) == 1 ) {
+			if ( defined $self->{childOne} ) {
+				return $self->{childOne}->FindBestMatch( $keyDiff, $keyLengthDiff );
+			}
+			else {
+				return $self;
+			}
+		}
+		else {
+			if ( defined $self->{childZero} ) {
+				return $self->{childZero}->FindBestMatch( $keyDiff, $keyLengthDiff );
+			}
+			else {
+				return $self;
+			}
+		}
+	}
+}
+
+sub Clone {
+	my $self = shift;
+	
+	my $clone = TrieNode->new( $self->{key}, $self->{keyLength}, $self->{valueCount} );
+	if ( defined $self->{childZero} ) {
+		$clone->{childZero} = $self->{childZero}->Clone();
+	}
+	if ( defined $self->{childOne} ) {
+		$clone->{childOne} = $self->{childOne}->Clone();
+	}
+
+	return $clone;
+}
+
+
+=cut
+
+Not used?
+
+sub printDotNode(TrieNode node, long position, long currentKey) {
+    	TrieNode c0 = node.getChildZero();
+    	TrieNode c1 = node.getChildOne();
+    	long key = node.getKey();
+    	long mask = Constants.MAX_KEY_LENGTH - position;
+    	String keyString;
+    	String addrString;
+    	
+    	if (key == -1) {
+    		addrString = keyString = "\"" + "0.0.0.0/0" + "\"";
+    		currentKey = 0;
+    		p.println(addrString + " [shape=record,label=\"<f0>0.0.0.0/0|<f1>" 
+    				+ node.getChildCount()
+    				+ "\"];" + " // COUNT: " + node.getChildCount());
+    	}
+    	else {
+    		key = currentKey;
+    		keyString = helper.longToIP(key);
+    		String unquotedAddrString = keyString + "/" + mask;
+    		addrString = "\"" + keyString + "/" + mask + "\"";
+    		if (node.getData() == null) {
+    			//p.println(addrString + " [style=filled];" + " // COUNT: " + node.getChildCount());
+    			p.println(addrString + " [style=filled,shape=record,label=\"<f0>" + unquotedAddrString
+    					+ "|<f1>" + node.getChildCount() + "\"]"
+    					+ "; // COUNT: " + node.getChildCount());
+    		}
+    		else {
+    			//p.println(addrString + "; // COUNT: " + node.getChildCount());
+    			p.println(addrString + " [shape=record,label=\"<f0>" + unquotedAddrString
+    					+ "|<f1>" + node.getChildCount() + "\"]"
+    					+ "; // COUNT: " + node.getChildCount());
+    		}
+    	}
+    	
+    	if (c0 != null) {
+    		long c0Key = c0.getKey() << (position - c0.getKeyLength());
+    		long c0Position = position - c0.getKeyLength();
+    		long c0Mask = Constants.MAX_KEY_LENGTH - c0Position;
+    		c0Key = c0Key | currentKey;
+    		p.println(addrString + " -> \"" 
+    				+ helper.longToIP(c0Key) + "/" + c0Mask
+    				+ "\"" + "[label=" + (c0Mask - mask)  
+    				+ "];" + "// kl: " + c0.getKeyLength() + " pos: " + position);
+    		printDotNode(p, c0, c0Position, c0Key);	
+    	}
+    	if (c1 != null) {
+    		long c1Key = c1.getKey() << (position - c1.getKeyLength());
+    		long c1Position = position - c1.getKeyLength();
+    		long c1Mask = Constants.MAX_KEY_LENGTH - c1Position;
+    		c1Key = c1Key | currentKey;
+    		p.println(addrString + " -> \"" 
+    				+ helper.longToIP(c1Key) + "/" + c1Mask
+    				+ "\"" + "[label=" + (c1Mask - mask)
+    				+ "];"  + "// kl: " + c1.getKeyLength() + " pos: " + position);
+    		printDotNode(p, c1, c1Position, c1Key);
+    	}
+    }
+    
+    public ArrayList<String> listInternalNodes(ArrayList<String> listOfNodes, long position, long currentKey) {
+    	TrieNode c0 = $self->{getChildZero();
+    	TrieNode c1 = $self->{getChildOne();
+    	long key = $self->{getKey();
+    	long mask = Constants.MAX_KEY_LENGTH - position;
+    	String keyString;
+    	String addrString;
+    	TrieNode node = this;
+    	
+    	if (key == -1) {
+    		addrString = keyString = "0.0.0.0/0";
+    		currentKey = 0;
+    	}
+    	else {
+    		key = currentKey;
+    		keyString = helper.longToIP(key);
+    		addrString = keyString + "/" + mask;
+    		if (node.getData() == null) {
+    			listOfNodes.add(addrString);
+    		}
+    	}
+    	if (c0 != null) {
+    		long c0Key = c0.getKey() << (position - c0.getKeyLength());
+    		long c0Position = position - c0.getKeyLength();
+    		//long c0Mask = Constants.MAX_KEY_LENGTH - c0Position;
+    		c0Key = c0Key | currentKey;
+    		c0.listInternalNodes(listOfNodes, c0Position, c0Key);
+    	}
+    	if (c1 != null) {
+    		long c1Key = c1.getKey() << (position - c1.getKeyLength());
+    		long c1Position = position - c1.getKeyLength();
+    		//long c1Mask = Constants.MAX_KEY_LENGTH - c1Position;
+    		c1Key = c1Key | currentKey;
+    		c1.listInternalNodes(listOfNodes, c1Position, c1Key);
+    	}
+
+    	return listOfNodes;
+    }
+    
+    /**
+     * 
+     * This method returns all the nodes which are necessary to summarize all inputs.
+     * 
+     * @param listOfNodes
+     * @param position
+     * @param currentKey
+     * @return
+     */
+    public ArrayList<String> listSummaryNodes(ArrayList<String> listOfNodes, long position, long currentKey) {
+    	TrieNode c0 = $self->{getChildZero();
+    	TrieNode c1 = $self->{getChildOne();
+    	long key = $self->{getKey();
+    	long mask = Constants.MAX_KEY_LENGTH - position;
+    	String keyString;
+    	String addrString;
+    	TrieNode node = this;
+    	
+    	if (key == -1) {
+    		addrString = keyString = "0.0.0.0/0";
+    		currentKey = 0;
+    	}
+    	else {
+    		key = currentKey;
+    		keyString = helper.longToIP(key);
+    		addrString = keyString + "/" + mask;
+    		if (node.getData() == null &&
+    				 ( c0.getData() != null ||
+    				c1.getData() != null )) {
+    			listOfNodes.add(addrString);
+    		}
+    	}
+    	if (c0 != null) {
+    		long c0Key = c0.getKey() << (position - c0.getKeyLength());
+    		long c0Position = position - c0.getKeyLength();
+    		//long c0Mask = Constants.MAX_KEY_LENGTH - c0Position;
+    		c0Key = c0Key | currentKey;
+    		c0.listSummaryNodes(listOfNodes, c0Position, c0Key);
+    	}
+    	if (c1 != null) {
+    		long c1Key = c1.getKey() << (position - c1.getKeyLength());
+    		long c1Position = position - c1.getKeyLength();
+    		//long c1Mask = Constants.MAX_KEY_LENGTH - c1Position;
+    		c1Key = c1Key | currentKey;
+    		c1.listSummaryNodes(listOfNodes, c1Position, c1Key);
+    	}
+
+    	return listOfNodes;
+    }
+}
+
+=cut
+
+1;
+}}}
+
+===Test Script test.pl===
+
+This script tests the proposed implementation.  It should be executed as:
+
+perl test.pl inputIPfile
+
+where _inputIPfile_ is a text file containing some IP numbers for which the summarization is to be calculated.  The script outputs two files:
+
+inputIPfile_-summary.txt_ and inputIPfile_-summary.dot_
+
+where the _txt_ file contains the summarizing nodes, and the _dot_ file contains an input file to be used with [http://www.graphviz.org/ Graphviz] tool.
 
 == Project Management ==
 
