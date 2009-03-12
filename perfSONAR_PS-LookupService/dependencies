@@ -1,13 +1,9 @@
-Carp
 Config::General
-Cwd
 Data::UUID
 Data::Validate::IP
 Digest::MD5
 English
 Error
-Exporter
-Fcntl
 File::Basename
 File::Temp
 File::stat
@@ -23,10 +19,7 @@ Net::CIDR
 Net::IPTrie
 Net::IPv6Addr
 Net::Ping
-POSIX
 Params::Validate
-Sleepycat::DbXml
 Sys::Hostname
 Time::HiRes
 XML::LibXML
-base
