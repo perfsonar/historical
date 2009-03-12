@@ -1,4 +1,6 @@
-#summary Creating perfSONAR-PS Packages: A How-To for perfSONAR-PS Developers<wiki:toc max_depth="6" />
+#summary Creating perfSONAR-PS Packages: A How-To for perfSONAR-PS Developers
+
+<wiki:toc max_depth="6" />
 
 == Introduction ==
 
@@ -112,6 +114,37 @@ email: i2-perfsonar@internet2.edu
 === Testing ===
 
 Depending on which system used to build and test the RPM package, testing it on other flavors is a good idea.  For example, a Fedora 10 system contains many different paths and libraries than a CentOS 5 system. The package produced should work on any Linux system. If the constructed package does not appear to work on all flavors, note these in the release documentation.  If one or more external packages are required on a certain flavor, either provide those packages needed or make a note where the end user can get that package.
+
+=== Preparing The User Environment ===
+
+To allow distribution of these services as tarballs, you should include a script to do everything that the RPM does (creating paths, adding users, creating databases, etc). Your documentation should then tell users to run this script when they do a tarball install. 
+
+An following example is from the Topology Service. The script has only been tested on Linux machines, so if you use these scripts, you should look into making them more cross-platform.
+
+{{{
+#!/bin/bash
+
+MAKEROOT=""
+if [[ $EUID -ne 0 ]]; then
+    MAKEROOT="sudo "
+fi
+
+$MAKEROOT /usr/sbin/groupadd perfsonar 2> /dev/null || :
+$MAKEROOT /usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+
+$MAKEROOT mkdir -p /var/log/perfsonar
+$MAKEROOT chown perfsonar:perfsonar /var/log/perfsonar
+
+$MAKEROOT mkdir -p /var/lib/perfsonar/topology_service
+if [ ! -f /var/lib/perfsonar/topology_service/DB_CONFIG ]; then
+    $MAKEROOT `dirname $0`/../scripts/psCreateTopologyDB --directory /var/lib/perfsonar/topology_service
+fi
+$MAKEROOT chown -R perfsonar:perfsonar /var/lib/perfsonar
+
+$MAKEROOT mkdir -p /var/lib/perfsonar/topology_service
+$MAKEROOT chown perfsonar:perfsonar /var/lib/perfsonar/topology_service
+$MAKEROOT cp `dirname $0`/../doc/DB_CONFIG /var/lib/perfsonar/topology_service
+}}}
 
 == FAQ ==
 
