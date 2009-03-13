@@ -49,6 +49,7 @@ The perfSONAR developers meeting will focus on pending issues within the perfSON
  # Joe Meztger - ESnet <font color=red>TENATIVE</font> 
  # Jon Dugan - ESnet <font color=red>TENATIVE</font> 
  # TBD - ESnet <font color=red>TENATIVE</font> 
+ # Chin Guok - ESnet <font color=red>TENATIVE</font> 
  * ...
 
 ==== pS Agenda ====
@@ -80,6 +81,7 @@ If IDC developers like, a portion of the day can be set aside for other current 
  # Joe Meztger - ESnet <font color=red>TENATIVE</font> 
  # Jon Dugan - ESnet <font color=red>TENATIVE</font> 
  # TBD - ESnet <font color=red>TENATIVE</font> 
+ # Chin Guok - ESnet
  * ...
 
 ==== IDC Agenda ====
