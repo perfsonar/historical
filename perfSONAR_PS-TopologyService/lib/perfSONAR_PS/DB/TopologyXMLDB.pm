@@ -528,7 +528,7 @@ sub changeTopology {
         $elements{$id}->unbindNode;
         $elements{$id}->setNamespace($elements{$id}->namespaceURI(), $elements{$id}->prefix, 1);
 
-        $self->{DATADB}->remove({ name => $id });
+        $self->{DATADB}->remove({ name => $id, txn => $dbTr });
 
         if ($self->{DATADB}->insertIntoContainer({ content => $elements{$id}->toString, name => $id, txn => $dbTr, error => \$error }) != 0) {
             $self->{DATADB}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
