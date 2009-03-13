@@ -37,15 +37,18 @@ The perfSONAR developers meeting will focus on pending issues within the perfSON
 
 ==== pS Attendees ====
 
- * Jason Zurawski - Internet2
- * Jeff Boote - Internet2
- * Aaron Brown - Internet2
- * Andrew Lake - Internet2
- * Maxim Grigoriev - Fermilab
- * Chris Tracy - MAX
- * Tom Lehman - ISI
- * Chaniotakis Evangelos - ESnet
- * Brian Tierney - ESnet
+ # Jason Zurawski - Internet2
+ # Jeff Boote - Internet2
+ # Aaron Brown - Internet2
+ # Andrew Lake - Internet2
+ # Maxim Grigoriev - Fermilab
+ # Chris Tracy - MAX
+ # Tom Lehman - ISI
+ # Chaniotakis Evangelos - ESnet
+ # Brian Tierney - ESnet
+ # Joe Meztger - ESnet <font color=red>TENATIVE</font> 
+ # Jon Dugan - ESnet <font color=red>TENATIVE</font> 
+ # TBD - ESnet <font color=red>TENATIVE</font> 
  * ...
 
 ==== pS Agenda ====
@@ -64,16 +67,19 @@ If IDC developers like, a portion of the day can be set aside for other current 
 
 ==== pS/IDC Attendees ====
 
- * Jason Zurawski - Internet2
- * Jeff Boote - Internet2
- * Aaron Brown - Internet2
- * Andrew Lake - Internet2
- * Maxim Grigoriev - Fermilab
- * Tom Lehman - ISI
- * Xi Yang - ISI
- * Chris Tracy - MAX
- * Chaniotakis Evangelos - ESnet
- * Brian Tierney - ESnet
+ # Jason Zurawski - Internet2
+ # Jeff Boote - Internet2
+ # Aaron Brown - Internet2
+ # Andrew Lake - Internet2
+ # Maxim Grigoriev - Fermilab
+ # Tom Lehman - ISI
+ # Xi Yang - ISI
+ # Chris Tracy - MAX
+ # Chaniotakis Evangelos - ESnet
+ # Brian Tierney - ESnet
+ # Joe Meztger - ESnet <font color=red>TENATIVE</font> 
+ # Jon Dugan - ESnet <font color=red>TENATIVE</font> 
+ # TBD - ESnet <font color=red>TENATIVE</font> 
  * ...
 
 ==== IDC Agenda ====
