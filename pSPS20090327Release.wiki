@@ -2,7 +2,7 @@
 
 == Introduction ==
 
-This page outlines details regarding the perfSONAR-PS release that began the week of February 23, 2008 and ended on March 27 2009 in the release of v3.1 of perfSONAR-PS.
+This page outlines details regarding the perfSONAR-PS release that began the week of February 23, 2008 and ended on April 3 2009 in the release of v3.1 of perfSONAR-PS.
 
 == Release Team ==
 
@@ -22,9 +22,11 @@ Release Start: Feb 23, 2009
 
 Code Slush: March 6, 2009
 
-Code Slush: March 13, 2009
+Code Freeze: March 20, 2009
 
-Release: March 27, 2009
+RC Phase, Beta Tests: March 27, 2009
+
+Release: April 3, 2009
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPS20090327Release/schedule.png
 
@@ -49,18 +51,24 @@ The following outline some exceptions to the overall release process.  Also see 
    * Resolved (original issue addressed)
    * Opened [http://code.google.com/p/perfsonar-ps/issues/detail?id=107 107] to address other concerns (next release)
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=73 73] - _*Jason*_ - Client::LS Registration Logic Re-arrange    
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=79 79] - _*Jason*_ - Empty gLS/hLS Messages
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=79 79] - _*Jason*_ - ~~Empty gLS/hLS Messages~~
+   * Resloved
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=84 84] - _*Jason*_ - ~~Exit MA service if no data is present ~~   
    * Resolved
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=85 85] - _*Jason*_ - ~~add verbose logging on errors for ma/ls~~
    * Resolved to original spec
    * Opened [http://code.google.com/p/perfsonar-ps/issues/detail?id=108 108] to address other concerns (next release)
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=105 105] - _*Jason*_ - hLS Summarization of DCN Data 
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=109 109] - _*Jason*_ - ~~gLS Discovery of IP Addresses~~
+   * Resolved
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=110 110] - _*Jason*_ - ~~perfSONAR-BUOY Data Query Error~~
+   * Resolved 
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=62 62] - _*Maxim*_ - ~~pingER-MA requires 'hostname" type attribute in endPointPair~~
    * Resolved
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=66 66] - _*Maxim*_ - ~~PingER Collection Errors~~
    * Resolved
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=81 81] - _*Maxim*_ - PingER Resolution of IPaddress/Hostnames 
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=81 81] - _*Maxim*_ - ~~PingER Resolution of IPaddress/Hostnames~~
+   * Resolved 
 
 === Code Reviews ===
 
