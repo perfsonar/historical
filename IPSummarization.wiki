@@ -659,7 +659,8 @@ sub markIpTrie1 {
 
 Basically, both children of a node are evaluated for the following conditions:
 
-    _!ChildMask_ - _!NodeMask_ > 8 *or*
+    _!ChildMask_ - _!NodeMask_ > 8  *or*
+
     _Node Coverage_ < 0.000001 (i.e., low density)
 
 If either is satisfied, then the program will recurse down the subtrees below the current node and perform the same tests on the descendants.  If none of the conditions is satisfied, then the current node is marked as a summarization node and the subtrees below this node will not be further analyzed.
