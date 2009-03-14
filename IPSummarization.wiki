@@ -657,7 +657,20 @@ sub markIpTrie1 {
 	
 }}}
 
-Basically, both children of a node are evaluated.  If either children displays (continued)... TBD
+Basically, both children of a node are evaluated for the following conditions:
+
+    _ChildMask_ - _NodeMask_ > 8 *or*
+    _Node Coverage_ < 0.000001 (i.e., low density)
+
+If either is satisfied, then the program will recurse down the subtrees below the current node and perform the same tests on the descendants.  If none of the conditions is satisfied, then the current node is marked as a summarization node and the subtrees below this node will not be further analyzed.
+
+The heuristic used for this decision is based on the _distance_ between an internal node and its children, and the coverage or density.  The _distance_ value expresses the number of CIDR classes between the current node and its child; basically, it conveys the notion whether the current node represents a too large subnet to be considered for summarization.  For example, consider that the current node has a mask of 20 and its child has a mask of 32.  Then the current node represents a subclass of 4096 hosts (12 bits), so there's a possibility of having a substantial amount of nodes below the current node.  The algorithm then decides to recurse down the subtree.  Conversely, if the distance is short, then the current node may already comprise sufficient information to be selected as a summarization node.
+
+The reasoning for the coverage or density tries to gather whether there exists already a relevant number of descendants for the current node; if there is, then it may be convenient to select the current node as a summarization node.
+
+==== Subsequent Work ====
+
+The algorithm is to be further optimized to allow for tuning of its heuristics, and to possibly incorporate the notion of weight of the subtrees.
 
 
 === Proposed Implementation ===
