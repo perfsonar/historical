@@ -16,7 +16,7 @@
      * Brian: Working with Joe to integrate Jon's SNMP database backend. Also working on pS-B deployments. Debugging distributed services is hard, we should do as much as we can to make that better.
    # FNAL
      * Maxim: CHEP paper, took PAM paper for much content. (Due March 20) Still needs deployment information. MDM of pingER-PS. Looking at pingER-PS GUI. Would like numbers on current and planned deployments. Paper should end up about 10 pages.
- # perfSONAR-PS v0.10 Release Update
+ # perfSONAR-PS v3.1 Release Update
    * See [pSPS20090327Release] for details
      * Check individual progress.
      * Code reviews by the 13th.
