@@ -3503,7 +3503,7 @@ Most details TBD, basic outline:
 === Actions ===
 
  * JZ 
-   * Gather Datasets
+   * Gather Datasets - <font color=green>_*DONE*_ - 3/13</font>
    * Assist student in any and all tasks
    * gLS Integration
    * Final report on tasks
@@ -3513,10 +3513,10 @@ Most details TBD, basic outline:
    * Assist in researching proper algorithms
    * review progress of performance/effectiveness
  * Student
-   * Review existing design of algorithm and source code
-   * Propose changes to algorithm
-   * Implement changes (several prototypes) in source code
-   * Experimentation on data sets
+   * Review existing design of algorithm and source code - <font color=green>_*DONE*_</font>
+   * Propose changes to algorithm - <font color=green>_*DONE*_</font>
+   * Implement changes (several prototypes) in source code - <font color=red>_*IN PROGRESS*_</font>
+   * Experimentation on data sets - <font color=red>_*IN PROGRESS*_</font>
    * Evaluation of results (correctness, speed, effectiveness)
    * Final source code review
    * Assist Jason in gLS integration
@@ -3535,5 +3535,8 @@ Most details TBD, basic outline:
    * Review current gLS design (April timeframe) 
  * All
    * Review new algorithm (both effectiveness and performance) before gLS integration
+
  == Last Modified ==
-$Id$ 
+
+$Id$
+
