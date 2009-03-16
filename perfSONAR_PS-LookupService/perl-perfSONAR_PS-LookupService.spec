@@ -91,13 +91,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %preun
 if [ $1 -eq 0 ]; then
-    /sbin/chkconfig --del bwctld
-    /sbin/service lookup_service lookup_service
-fi
-
-%postun
-/usr/sbin/userdel bwctl || :
-if [ $1 -ge 1 ]; then
+    /sbin/chkconfig --del lookup_service
     /sbin/service lookup_service stop
 fi
 
