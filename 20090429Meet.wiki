@@ -46,10 +46,13 @@ The perfSONAR developers meeting will focus on pending issues within the perfSON
  # Tom Lehman - ISI
  # Chaniotakis Evangelos - ESnet
  # Brian Tierney - ESnet
- # Joe Meztger - ESnet <font color=red>TENATIVE</font> 
- # Jon Dugan - ESnet <font color=red>TENATIVE</font> 
- # TBD - ESnet <font color=red>TENATIVE</font> 
- # Chin Guok - ESnet <font color=red>TENATIVE</font> 
+ # Joe Meztger - ESnet <font color=red>_*TENATIVE*_</font> 
+ # Jon Dugan - ESnet <font color=red>_*TENATIVE*_</font> 
+ # TBD - ESnet <font color=red>_*TENATIVE*_</font>  
+ # Chin Guok - ESnet <font color=red>_*TENATIVE*_</font> 
+ # Martin Swany - UDel
+ # Student 1 - UDel <font color=red>_*TENATIVE*_</font> 
+ # Student 2 - UDel <font color=red>_*TENATIVE*_</font> 
  * ...
 
 ==== pS Agenda ====
@@ -78,10 +81,13 @@ If IDC developers like, a portion of the day can be set aside for other current 
  # Chris Tracy - MAX
  # Chaniotakis Evangelos - ESnet
  # Brian Tierney - ESnet
- # Joe Meztger - ESnet <font color=red>TENATIVE</font> 
- # Jon Dugan - ESnet <font color=red>TENATIVE</font> 
- # TBD - ESnet <font color=red>TENATIVE</font> 
+ # Joe Meztger - ESnet <font color=red>_*TENATIVE*_</font> 
+ # Jon Dugan - ESnet <font color=red>_*TENATIVE*_</font> 
+ # TBD - ESnet <font color=red>_*TENATIVE*_</font> 
  # Chin Guok - ESnet
+ # Martin Swany - UDel
+ # Student 1 - UDel <font color=red>_*TENATIVE*_</font> 
+ # Student 2 - UDel <font color=red>_*TENATIVE*_</font> 
  * ...
 
 ==== IDC Agenda ====
