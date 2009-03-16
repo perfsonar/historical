@@ -333,7 +333,7 @@ Version 2.3.11 of this software comes pre-loaded, but does not need to be _start
      * _*nuttcp_port*_ - Port range (e.g. 5006-5010) to run the nuttcp _receiver_.
      * _*thrulay_port*_ - Port range (e.g. 5011-5015) to run the thurlay _receiver_.
      * _*peer_port*_ - Port range (e.g. 10100-10200) to run the _server_ processes of the above tests.  
-   * Note that some simple calculations can be used to determine how many ports are expected for a _*full*_ schedule of tests.  For example in assuming a completely packed schedule of 10 second long tests, there are a maximum of 6 tests per minute available. The default reuse timer inside of BWCTL is 60 second long. So, the bare minimum number of ports to make this work would be 7. This also assumes the kernel closes the socket connection immediately upon termination of the test (this may not always be the case). So, just to be safe it is recommended that the final number use double this range: specify 14 ports.
+   * Note that some simple calculations can be used to determine how many ports are expected for a _*full*_ schedule of tests.  For example in assuming a completely packed schedule of 10 second long tests, there are a maximum of 6 tests per minute available. BWCTL cycles through the port range one-by-one, assigning each scheduled test the next open port in line. The iperf/nuttcp/thrulay applications may leave sockets open for a while after the test has finished. If a test tries to use the same port as was used by a previous test, and that test's socket is still open, the newer test will fail. By default, Linux allows these sockets to stay open for up to a minute. So, to ensure that no tests fail, for 6 tests, the minimum number of ports to make this work would be 7. However, due to environmental factors, it is best to use a number higher than this. Since port ranges are reasonably easy to open, it is recommended that the final number use double the range: 14 ports.
 
  * *Q: I'd like to PXE boot the NPToolkit. Is that possible?*
  * *A:* Not currently, but this is a consideration of future releases.
@@ -345,7 +345,8 @@ Version 2.3.11 of this software comes pre-loaded, but does not need to be _start
  * *A:* 
    * This question can be confusing to answer for new users.  The goal is to associate some _loosely coupled_ labels to the data that the perfSONAR NPToolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music.  Some examples of valid answers are:
      * *Internet2* - The data made available somehow connects the Internet2 backbone
-     * *LHC* (*CMS*, *ATLAS*, etc.) – The system is part of the LHC perfSONAR instracture.       * The USATLAS community has requested that peer sites use the following as the Communities of Interest string:  _*LHC USATLAS*_     
+     * *LHC* (*CMS*, *ATLAS*, etc.) – The system is part of the LHC perfSONAR instracture.
+       * The USATLAS community has requested that peer sites use the following as the Communities of Interest string:  _*LHC USATLAS*_     
      * *eVLBI* - The disk is a part of the larger telescope community
      * *MAX* - A connector of member of the MAX gigapop
    * Use as many community names as necessary to properly categorize the data from the installation. 
