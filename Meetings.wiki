@@ -6,15 +6,16 @@ applicable.
 
 == Future Events ==
    * [20090429Meet] - Meeting after SMM in DC April 29 - May 1, 2009
-   * [20090316Video] - Video Conference for March 16, 2009
+   * [20090323Video] - Video Conference *Issue: v3.1 Release* for March 23, 2009
 
 == Past Events ==
 
  * 2009
+   * [20090316Video] - Video Conference for March 16, 2009
    * [20090309Video] - Video Conference for March 9, 2009
    * [20090302Video] - Video Conference for March 2, 2009
    * [20090223Video] - Video Conference for February 23, 2009
-   * [20090217Video] - Video Conference *Issue: v0.10 Release* for February 17, 2009
+   * [20090217Video] - Video Conference *Issue: v3.1 Release* for February 17, 2009
    * [20090203Meet] - Meeting at Joint Techs, College Station TX
    * [20090126Video] - Video Conference *Issue: Release Mgmt* for January 26, 2009
    * [20090112Video] - Video Conference for January 12, 2009
