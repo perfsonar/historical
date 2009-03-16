@@ -41,7 +41,7 @@ Requires:		perl(Time::HiRes)
 Requires:		perl(XML::LibXML)
 #Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:       perl
-# something for dbxml
+Requires:       dbxml
 
 %description
 The perfSONAR-PS Lookup Service can function in one of two roles: global root or home lookup service.  Please read the documentation for instructions.  
