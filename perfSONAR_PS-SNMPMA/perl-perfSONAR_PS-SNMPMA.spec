@@ -49,7 +49,7 @@ chown perfsonar:perfsonar /var/log/perfsonar
 mkdir -p /var/lib/perfsonar/snmp_ma
 if [ ! -f /var/lib/perfsonar/snmp_ma/store.xml ];
 then
-	touch /var/lib/perfsonar/snmp_ma/store.xml
+	%{install_base}/scripts/makeStore.pl /var/lib/perfsonar/snmp_ma 1
 fi
 chown -R perfsonar:perfsonar /var/lib/perfsonar
 

@@ -12,10 +12,11 @@ $MAKEROOT /usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d
 $MAKEROOT mkdir -p /var/log/perfsonar
 $MAKEROOT chown perfsonar:perfsonar /var/log/perfsonar
 
-$MAKEROOT mkdir -p /var/lib/perfsonar/lookup_service/xmldb
-if [ ! -f /var/lib/perfsonar/lookup_service/xmldb/DB_CONFIG ];
+
+$MAKEROOT mkdir -p /var/lib/perfsonar/snmp_ma
+if [ ! -f /var/lib/perfsonar/snmp_ma/store.xml ];
 then
-    $MAKEROOT `dirname $0`/../scripts/psCreateLookupDB --directory /var/lib/perfsonar/lookup_service/xmldb
+    $MAKEROOT `dirname $0`/../scripts/makeStore.pl /var/lib/perfsonar/snmp_ma 1
 fi
 
-$MAKEROOT chown -R perfsonar:perfsonar /var/lib/perfsonar/lookup_service
+$MAKEROOT chown -R perfsonar:perfsonar /var/lib/perfsonar/snmp_ma
