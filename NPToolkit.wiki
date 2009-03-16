@@ -327,14 +327,15 @@ Version 2.3.11 of this software comes pre-loaded, but does not need to be _start
        * open port tcp/22
 
  * *Q: How many ports will BWCTL need to operate effectively behind a firewall?*
- * *A:* BWCTL has several settings defined in the _*bwctld.conf*_ file that dictate which ports it may use for testing.  It is recommended that several ports be specified to allow for multiple test opportunities for the BWCTL scheduler, otherwise tests will not be completed in a timely fashion.  It is also important not to overlap these ports to prevent contention from the tools.  The configuration options are:
+ * *A:* 
+   * BWCTL has several settings defined in the _*bwctld.conf*_ file that dictate which ports it may use for testing.  It is recommended that several ports be specified to allow for multiple test opportunities for the BWCTL scheduler, otherwise tests will not be completed in a timely fashion.  It is also important not to overlap these ports to prevent contention from the tools.  The configuration options are:
 
-   * _*iperf_port*_ - Port range (e.g. 5001-5005) to run the iperf _receiver_.
-   * _*nuttcp_port*_ - Port range (e.g. 5006-5010) to run the nuttcp _receiver_.
-   * _*thrulay_port*_ - Port range (e.g. 5011-5015) to run the thurlay _receiver_.
-   * _*peer_port*_ - Port range (e.g. 10100-10200) to run the _server_ processes of the above tests.  
+     * _*iperf_port*_ - Port range (e.g. 5001-5005) to run the iperf _receiver_.
+     * _*nuttcp_port*_ - Port range (e.g. 5006-5010) to run the nuttcp _receiver_.
+     * _*thrulay_port*_ - Port range (e.g. 5011-5015) to run the thurlay _receiver_.
+     * _*peer_port*_ - Port range (e.g. 10100-10200) to run the _server_ processes of the above tests.  
 
-Note that some simple calculations can be used to determine how many ports are expected for a _*full*_ schedule of tests.  For example in assuming a completely packed schedule of 10 second long tests, there are a maximum of 6 tests per minute available. The default reuse timer inside of BWCTL is 60 second long. So, the bare minimum number of ports to make this work would be 7. This also assumes the kernel closes the socket connection immediately upon termination of the test (this may not always be the case). So, just to be safe it is recommended that the final number use double this range: specify 14 ports.
+   * Note that some simple calculations can be used to determine how many ports are expected for a _*full*_ schedule of tests.  For example in assuming a completely packed schedule of 10 second long tests, there are a maximum of 6 tests per minute available. The default reuse timer inside of BWCTL is 60 second long. So, the bare minimum number of ports to make this work would be 7. This also assumes the kernel closes the socket connection immediately upon termination of the test (this may not always be the case). So, just to be safe it is recommended that the final number use double this range: specify 14 ports.
 
  * *Q: I'd like to PXE boot the NPToolkit. Is that possible?*
  * *A:* Not currently, but this is a consideration of future releases.
