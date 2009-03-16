@@ -3,6 +3,7 @@ Makefile
 bin/client.pl
 bin/configureDaemon.pl
 bin/daemon.pl
+bin/loadStoreFile.pl
 dependencies
 doc/Changes
 doc/INSTALL
@@ -10,10 +11,8 @@ doc/LICENSE
 doc/README
 etc/daemon.conf
 etc/daemon_logger.conf
-etc/localhost.rrd
 etc/requests/MetadataKeyRequest.xml
 etc/requests/SetupDataRequest.xml
-etc/store.xml
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
 lib/perfSONAR_PS/Client/LS/Remote.pm
@@ -39,5 +38,6 @@ lib/perfSONAR_PS/XML/Document.pm
 modules.rules
 perl-perfSONAR_PS-SNMPMA.spec
 scripts/install_dependencies.sh
+scripts/makeStore.pl
 scripts/prepare_environment.sh
 scripts/snmp_ma
