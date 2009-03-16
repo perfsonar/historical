@@ -5,7 +5,7 @@ face to face meetings are available here.  Please use the MeetingTemplate when
 applicable.
 
 == Future Events ==
-
+   * [20090429Meet] - Meeting after SMM in DC April 29 - May 1, 2009
    * [20090316Video] - Video Conference for March 16, 2009
 
 == Past Events ==
