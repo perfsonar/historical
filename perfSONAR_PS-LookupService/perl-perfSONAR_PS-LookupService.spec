@@ -75,6 +75,8 @@ if [ ! -f /var/lib/perfsonar/lookup_service/xmldb/DB_CONFIG ]; then
 fi
 chown -R perfsonar:perfsonar /var/lib/perfsonar
 
+/sbin/chkconfig --add lookup_service
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -86,6 +88,18 @@ rm -rf $RPM_BUILD_ROOT
 %{install_base}/scripts/*
 %{install_base}/lib/*
 /etc/init.d/*
+
+%preun
+if [ $1 -eq 0 ]; then
+    /sbin/chkconfig --del bwctld
+    /sbin/service lookup_service lookup_service
+fi
+
+%postun
+/usr/sbin/userdel bwctl || :
+if [ $1 -ge 1 ]; then
+    /sbin/service lookup_service stop
+fi
 
 %changelog
 * Thu Mar 12 2009 zurawski@internet2.edu 3.1-1
