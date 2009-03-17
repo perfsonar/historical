@@ -1,0 +1,118 @@
+#summary Clearing house for ideas for defining topological relationships
+
+= Introduction =
+
+The purpose of this page is to put together the topology relationships that will be presented to the IDC and NML groups.
+
+= Relationships =
+  * child  - This element has logical elements contained with it. This could be nodes inside a domain, or VLAN ports over a physical port.
+  * parent - This element is contained completely within the element pointed to.
+  * peer - For bidirectional links, each unidirectional link points has a peer relation. For layer2 VLAN ports, it can point to the other VLAN ports that share the underlying physical port. 
+  * composed-of - This logical element is constructed out of the specified elements.
+  * composes - This element is used to construct a higher-order logical element.
+  * send-link - The link element which this port sends over.
+  * receive-link - The link element which this port receives over.
+  * source-port - The near end of a link
+  * destination-port - The far end of a link
+
+= Example =
+A circuit comes into the internet2.edu domain on host A, interface eth0, vlan 3000, and leaves from host A, interface eth1, vlan 3001.
+
+domain: internet2.edu
+  * child: hostA
+  * child: dcs_link_downstream
+  * child: dcs_link_upstream
+
+link: dcs_link_downstream
+  * composed-of: `*_`hostA`_`eth0`_`vlan3000, hostA`_`eth0`_`vlan3000`_`to`_`hostA`_`eth1`_`vlan3001, hostA`_`eth1`_`vlan3001`_`to`_*`
+  * peer: hostA`_`eth1`_`vlan3000`_`to`_`hostA`_`eth0`_`vlan3000
+
+link: dcs_link_upstream
+  * composed-of: `*_`to`_`hostA`_`eth1`_`vlan3001, hostA`_`eth1`_`vlan3001`_`to`_`hostA`_`eth0`_`vlan3000, hostA`_`eth0`_`vlan3000`_`to`_*`
+  * peer: hostA`_`eth0`_`vlan3000`_`to`_`hostA`_`eth1`_`vlan3001
+
+node: hostA
+  * parent: internet2.edu
+  * child: hostA`_`eth0
+  * child: hostA`_`eth1
+
+port: hostA`_`eth0
+  * send-link: hostA`_`eth0`_`link`_`to`_*`
+  * receive-link: `*_`to`_`hostA`_`eth0`_`link
+  * parent: hostA
+  * child: hostA`_`eth0`_`vlan3000
+
+link: hostA`_`eth0`_`link`_`to`_*`
+  * source-port: hostA`_`eth0
+  * destination-port: `*`
+
+link: `*_`to`_`hostA`_`eth0`_`link
+  * source-port: `*`
+  * destination-port: hostA`_`eth0
+
+port: hostA`_`eth0`_`vlan3000
+  * send-link: hostA`_`eth0.3000`_`link`_`to`_*`
+  * receive-link: `*_`to`_`hostA`_`eth0.3000`_`link
+  * parent: hostA`_`eth0
+
+link: hostA`_`eth0.3000`_`link`_`to`_*`
+  * source-port: hostA`_`eth0.3000
+  * destination-port: `*`
+  * peer: `*_`to`_`hostA`_`eth0.3000`_`link
+  * parent: hostA`_`eth0`_`link`_`to`_*`
+  * composes: dcs_link_upstream
+
+link: `*_`to`_`hostA`_`eth0.3000`_`link
+  * source-port: `*`
+  * destination-port: hostA`_`eth0.3000
+  * peer: hostA`_`eth0.3000`_`link`_`to`_*`
+  * parent: `*_`to`_`hostA`_`eth0`_`link
+  * composes: dcs_link_downstream
+
+link: hostA`_`eth0.3000`_`link`_`to`_`hostA`_`eth1.3001`_`link
+  * destination-port: hostA`_`eth1.3001
+  * source-port: hostA`_`eth0.3000
+  * parent: hostA
+  * peer: hostA`_`eth1.3001`_`link`_`to`_`hostA`_`eth0.3000`_`link
+  * composes: dcs_link_downstream
+
+link: hostA`_`eth1.3001`_`link`_`to`_`hostA`_`eth0.3000`_`link
+  * source-port: hostA`_`eth1.3001
+  * destination-port: hostA`_`eth0.3000
+  * parent: hostA
+  * peer: hostA`_`eth1.3001`_`link`_`to`_`hostA`_`eth0.3000`_`link
+  * composes: dcs_link_upstream
+
+
+port: hostA`_`eth1
+  * send-link: hostA`_`eth0`_`link`_`to`_*`
+  * receive-link: `*_`to`_`hostA`_`eth0`_`link
+  * parent: hostA
+  * child: hostA`_`eth0`_`vlan3001
+
+link: hostA`_`eth1`_`link`_`to`_*`
+  * source-port: hostA`_`eth1
+  * destination-port: `*`
+
+link: `*_`to`_`hostA`_`eth1`_`link
+  * source-port: `*`
+  * destination-port: hostA`_`eth1
+
+port: hostA`_`eth1`_`vlan3001
+  * send-link: hostA`_`eth1.3001`_`link`_`to`_*`
+  * receive-link: `*_`to`_`hostA`_`eth1.3001`_`link
+  * parent: hostA`_`eth1
+
+link: hostA`_`eth1.3001`_`link`_`to`_*`
+  * source-port: hostA`_`eth1.3001
+  * destination-port: `*`
+  * peer: `*_`to`_`hostA`_`eth1.3001`_`link
+  * parent: hostA`_`eth1`_`link`_`to`_*`
+  * composes: dcs_link_downstream
+
+link: `*_`to`_`hostA`_`eth1.3001`_`link
+  * source-port: `*`
+  * destination-port: hostA`_`eth1.3001
+  * peer: hostA`_`eth1.3001`_`link`_`to`_*`
+  * parent: `*_`to`_`hostA`_`eth1`_`link
+  * composes: dcs_link_upstream
