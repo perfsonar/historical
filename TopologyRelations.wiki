@@ -1,10 +1,12 @@
 #summary Clearing house for ideas for defining topological relationships
 
-= Introduction =
+<wiki:toc depth="6" />
+
+== Introduction ==
 
 The purpose of this page is to put together the topology relationships that will be presented to the IDC and NML groups.
 
-= Relationships =
+== Relationships ==
   * child  - This element has logical elements contained with it. This could be nodes inside a domain, or VLAN ports over a physical port.
   * parent - This element is contained completely within the element pointed to.
   * peer - For bidirectional links, each unidirectional link points has a peer relation. For layer2 VLAN ports, it can point to the other VLAN ports that share the underlying physical port. 
@@ -15,7 +17,11 @@ The purpose of this page is to put together the topology relationships that will
   * source-port - The near end of a link
   * destination-port - The far end of a link
 
-= Example =
+== Other Discussed Relations ==
+  * uses - This relationship is analogous to the "composed-of" relation.
+  * shares - This relationship is somewhat handled by the 'parent' relationship in the example below. The example is a VLAN link over a trunk segment. It does not have 'all' of the trunk, just a subset of it.
+
+== Example ==
 A circuit comes into the internet2.edu domain on host A, interface eth0, vlan 3000, and leaves from host A, interface eth1, vlan 3001.
 
 domain: internet2.edu
