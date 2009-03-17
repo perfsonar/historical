@@ -38,7 +38,7 @@ Requires:		perl(Net::Ping)
 Requires:		perl(Params::Validate)
 Requires:		perl(Sys::Hostname)
 Requires:		perl(Time::HiRes)
-Requires:		perl(XML::LibXML)
+Requires:		perl(XML::LibXML) >= 1.60
 #Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:       perl
 Requires:       dbxml

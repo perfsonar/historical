@@ -11,6 +11,7 @@ doc/LICENSE
 doc/README
 etc/daemon.conf
 etc/daemon_logger.conf
+etc/requests/EchoRequest.xml
 etc/requests/MetadataKeyRequest.xml
 etc/requests/SetupDataRequest.xml
 lib/perfSONAR_PS/Client/Echo.pm
@@ -29,6 +30,7 @@ lib/perfSONAR_PS/Request.pm
 lib/perfSONAR_PS/RequestHandler.pm
 lib/perfSONAR_PS/Services/Base.pm
 lib/perfSONAR_PS/Services/Echo.pm
+lib/perfSONAR_PS/Services/LS/General.pm
 lib/perfSONAR_PS/Services/MA/General.pm
 lib/perfSONAR_PS/Services/MA/SNMP.pm
 lib/perfSONAR_PS/Transport.pm

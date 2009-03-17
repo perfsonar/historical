@@ -65,7 +65,7 @@ Requires:		perl(URI::Escape)
 Requires:		perl(URI::Heuristic)
 Requires:		perl(URI::URL)
 Requires:		perl(XML::DOM)
-Requires:		perl(XML::LibXML)
+Requires:		perl(XML::LibXML) >= 1.60
 Requires:		perl(XML::LibXML::Common)
 Requires:		perl(XML::NamespaceSupport)
 Requires:		perl(XML::RegExp)

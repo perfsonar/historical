@@ -11,6 +11,7 @@ doc/LICENSE
 doc/README
 etc/daemon.conf
 etc/daemon_logger.conf
+etc/requests/EchoRequest.xml
 etc/requests/gLS/LSDeregisterRequest.xml
 etc/requests/gLS/LSDiscoveryRequest.xml
 etc/requests/gLS/LSKeepaliveRequest.xml
