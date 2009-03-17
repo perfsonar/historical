@@ -554,7 +554,7 @@ sub registerLS {
             undef $dbTr;
             $database->checkpoint( { error => \$error } );
             $database->closeDB( { error => \$error } );
-            $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
+            $self->{LOGGER}->error( "Could not start database transaction, database responded with \"" . $error . "\"." );
         }
 
         my %mapping = ();
@@ -673,7 +673,7 @@ sub registerLS {
             undef $dbTr;
             $database->checkpoint( { error => \$error } );
             $database->closeDB( { error => \$error } );
-            $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
+            $self->{LOGGER}->error( "Could not start database transaction, database responded with \"" . $error . "\"." );
         }
 
         # build up our list of data to send off
@@ -702,7 +702,7 @@ sub registerLS {
             return -1;
         }
 
-        # limit how many gLS instanaces we register with (pick the 3 closest)
+        # limit how many gLS instances we register with (pick the 3 closest)
 
         my $regCounter = 0;
         my $len        = $#{ $gls->{ROOTS} };
@@ -792,7 +792,7 @@ sub summarizeLS {
         undef $dbTr;
         $metadatadb->checkpoint( { error => \$error } );
         $metadatadb->closeDB( { error => \$error } );
-        $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
+        $self->{LOGGER}->error( "Could not start database transaction, database responded with \"" . $error . "\"." );
     }
 
     # Get a list of registered services.  The loop will look at the
@@ -849,7 +849,7 @@ sub summarizeLS {
         return 0;
     }
 
-    # Summarization proceedures:
+    # Summarization procedures:
     #
     # 1) Look at each service first to get the useful info out of there
     # 2) Look at each Data element from each service next
@@ -1285,7 +1285,7 @@ sub summarizeLS {
         undef $dbTr;
         $summarydb->checkpoint( { error => \$error } );
         $summarydb->closeDB( { error => \$error } );
-        $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
+        $self->{LOGGER}->error( "Could not start database transaction, database responded with \"" . $error . "\"." );
     }
 
     # Go through the master of list of services, lets deal with the service
@@ -1689,7 +1689,7 @@ sub ipSummarization {
         @list = Net::CIDR::addr2cidr( $host ) if $host;
         foreach my $range ( @list ) {
 
-            # we want to ingore the wildcard addresses
+            # we want to ignore the wildcard addresses
             next if $range =~ m/^0\./;
 
             $tally{$range}++ if defined $tally{$range};
@@ -1921,7 +1921,7 @@ sub cleanLS {
 
 =head2 cleanLSAux($self, { database, time })
 
-Auxilary function to clean a specific container in the database.
+Auxiliary function to clean a specific container in the database.
 
 =cut
 
@@ -1943,7 +1943,7 @@ sub cleanLSAux {
         undef $dbTr;
         $database->checkpoint( { error => \$error } );
         $database->closeDB( { error => \$error } );
-        $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
+        $self->{LOGGER}->error( "Could not start database transaction, database responded with \"" . $error . "\"." );
     }
 
     my $parser = XML::LibXML->new();
@@ -2092,7 +2092,7 @@ sub cleanLSAux {
 
 =head2 handleMessageParameters($self, $msgParams)
 
-Looks in the mesage for any parameters and sets appropriate variables if
+Looks in the message for any parameters and sets appropriate variables if
 applicable.
 
 =cut
@@ -2258,12 +2258,12 @@ sub lsRegisterRequest {
     if ( exists $self->{"CONF"}->{"gls"}->{"root"} and $self->{"CONF"}->{"gls"}->{"root"} ) {
         if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/summary/2.0" ) {
 
-            # comes from an hLS to a gLS, this is authoratative
+            # comes from an hLS to a gLS, this is authoritative
             $auth = 1;
         }
         elsif ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
 
-            # comes from an gLS to a gLS, this is NOT authoratative
+            # comes from an gLS to a gLS, this is NOT authoritative
             $auth = 0;
         }
         else {
@@ -2291,7 +2291,7 @@ sub lsRegisterRequest {
 
         # hLS should have no eventType, or the service registration eventType.
         # Everything else is rejected, and these previous two interactions are
-        # authoratative.
+        # authoritative.
 
         if ( $eventType ) {
             unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/service/2.0" ) {
@@ -2321,7 +2321,7 @@ sub lsRegisterRequest {
     unless ( $dbTr ) {
         $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
-        my $msg = "Cound not start database transaction, database responded with \"" . $error . "\".";
+        my $msg = "Could not start database transaction, database responded with \"" . $error . "\".";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
         return -1;
@@ -2359,7 +2359,7 @@ sub lsRegisterRequest {
         }
         else {
 
-            # still the clobber case, but 'node' is acceptable here as well (will be more in the future, ugh...
+            # still the clobber case, but 'node' is acceptable here as well (will be more in the future, ugh...)
 
             my $node = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='node']", 1 );
             if ( $node ) {
@@ -2412,7 +2412,7 @@ sub lsRegisterRequestUpdateNew {
 
     # XXX 9/2/08 - jason
     #
-    # I dont think we want to go fumbling around here, but to get a 'valid' hashed
+    # I don't think we want to go fumbling around here, but to get a 'valid' hashed
     # key we should focus on 'known' elements instead of the entire metadata block.
     # e.g. if we just hashed the md block, a single character space would cause a
     # new hashed key to be formed (which sucks).
@@ -2443,7 +2443,7 @@ sub lsRegisterRequestUpdateNew {
         $parameters->{errorFlag}++ if $parameters->{error};
         if ( lc( $resultsString[0] ) eq "yes" ) {
 
-            # if this is a synch message, AND we already have some authoratative
+            # if this is a synch message, AND we already have some authoritative
             # registration of the data (e.g. it was directly registered) we
             # don't want to touch it.
             $update = 0;
@@ -2570,7 +2570,7 @@ sub lsRegisterRequestUpdate {
         $parameters->{errorFlag}++ if $parameters->{error};
         if ( lc( $resultsString[0] ) eq "yes" ) {
 
-            # if this is a synch message, AND we already have some authoratative
+            # if this is a synch message, AND we already have some authoritative
             # registration of the data (e.g. it was directly registered) we
             # don't want to touch it.
             $update = 0;
@@ -2686,7 +2686,7 @@ sub lsRegisterRequestNew {
 
     # XXX 9/2/08 - jason
     #
-    # I dont think we want to go fumbling around here, but to get a 'valid' hashed
+    # I don't think we want to go fumbling around here, but to get a 'valid' hashed
     # key we should focus on 'known' elements instead of the entire metadata block.
     # e.g. if we just hashed the md block, a single character space would cause a
     # new hashed key to be formed (which sucks).
@@ -2729,7 +2729,7 @@ sub lsRegisterRequestNew {
         $parameters->{errorFlag}++ if $parameters->{error};
         if ( lc( $resultsString[0] ) eq "yes" ) {
 
-            # if this is a synch message, AND we already have some authoratative
+            # if this is a synch message, AND we already have some authoritative
             # registration of the data (e.g. it was directly registered) we
             # don't want to touch it.
             $update = 0;
@@ -2902,7 +2902,7 @@ sub lsDeregisterRequest {
     unless ( $dbTr ) {
         $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
-        my $msg = "Cound not start database transaction, database responded with \"" . $error . "\".";
+        my $msg = "Could not start database transaction, database responded with \"" . $error . "\".";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
         return -1;
@@ -3060,7 +3060,7 @@ sub lsKeepaliveRequest {
     unless ( $dbTr ) {
         $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
-        my $msg = "Cound not start database transaction, database responded with \"" . $error . "\".";
+        my $msg = "Could not start database transaction, database responded with \"" . $error . "\".";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
         return -1;
@@ -3293,7 +3293,7 @@ sub lsQueryRequest {
         unless ( $dbTr ) {
             $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
             undef $dbTr;
-            my $msg = "Cound not start database transaction, database responded with \"" . $error . "\".";
+            my $msg = "Could not start database transaction, database responded with \"" . $error . "\".";
             $self->{LOGGER}->error( $msg );
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
             return -1;
@@ -3405,7 +3405,7 @@ sub lsQueryRequest {
                             }
                         }
                         
-                        # we have a mactch, get the contact service.
+                        # we have a match, get the contact service.
                         my $flag = 1;
                         foreach my $key ( keys %store ) {
                             $flag = $store{$key};
@@ -3466,7 +3466,7 @@ sub lsQueryRequest {
             undef $dbTr;
             $database->checkpoint( { error => \$error } );
             $database->closeDB( { error => \$error } );
-            my $msg = "Cound not start database transaction, database responded with \"" . $error . "\".";
+            my $msg = "Could not start database transaction, database responded with \"" . $error . "\".";
             $self->{LOGGER}->error( $msg );
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
             return -1;
@@ -3582,7 +3582,7 @@ sub lsKeyRequest {
             undef $dbTr;
             $database->checkpoint( { error => \$error } );
             $database->closeDB( { error => \$error } );
-            my $msg = "Cound not start database transaction, database responded with \"" . $error . "\".";
+            my $msg = "Could not start database transaction, database responded with \"" . $error . "\".";
             $self->{LOGGER}->error( $msg );
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
             return -1;
