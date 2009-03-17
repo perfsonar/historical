@@ -12,11 +12,11 @@
          * Guilherme
          * Brian
          * Joe
+         * Marcos - gLS.pm, databaseDump.pl 
        * _*MISSING*_
          * Jason
          * Aaron
          * Jeff
-         * Marcos - Stalled on Jason
      * Documentation Reviews
        * Developers Finish (3/27)
        * Reviews Due (4/3)
