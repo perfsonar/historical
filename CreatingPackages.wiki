@@ -87,6 +87,44 @@ perl trunk/package_findunpackaged.pl
      * Authors
      * Special scripts or instructions regarding system use (usernames, groups)
 
+=== Spec Tricks ===
+
+The spec file has several behaviours that annoying at a minimum.  Here are some things to note as you develop the spec file:
+
+ * If the specfile complains that you have not handled certain files in the package (e.g. if you package the actual specfile or the dependencies) you may still allow the rpm to build correctly using this directive:
+{{{
+%define _unpackaged_files_terminate_build      0
+}}}
+ * There are dynamic tricks to locate the perl version - these fail depending on your build and target system.  It is safer to use a simple require:
+{{{
+#Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+Requires:       perl
+}}}
+ * XML::LibXML is old on RHEL and CentOS systems.  We have a custom built version, and the spec file should ensure that only _new_ libs are used.  Also note that 1.6 is not the same as 1.60:
+{{{
+Requires:		perl(XML::LibXML) >= 1.60
+}}}
+ * Run _*chkconfig*_ for services in the _post_ section:
+{{{
+%post
+
+# ... other stuff ...
+
+/sbin/chkconfig --add XXX
+}}}
+ * Be sure to uninstall the _*chkconfig*_ items when needed:
+{{{
+%preun
+if [ $1 -eq 0 ]; then
+    /sbin/chkconfig --del XXX
+    /sbin/service XXX stop
+fi
+}}}
+ * To disable RPM checking for dependencies (e.g. searching all perl and lib files for _*use*_ statements, etc.) use the following line.  Do note that you should check (and double check) that everything required is manually specified:
+{{{
+Autoreq: 0 
+}}}
+
 === Building ===
 
  # To build RPMs start with a Redhat based system (e.g. Fedora, CentOS, RHEL, White Box, Scientific)
