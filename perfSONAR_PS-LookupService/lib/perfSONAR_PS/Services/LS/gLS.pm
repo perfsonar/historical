@@ -1895,18 +1895,25 @@ in the TTL for the data will be removed.
 
 sub cleanLS {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { error => 0 } );
+    my $parameters = validateParams( @args, { error => 0, noclean => 0 } );
 
     return 0 if $self->{CONF}->{"gls"}->{"maintenance_interval"} == 0;
 
     my $error     = q{};
     my $errorFlag = 0;
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
+    my $status = q{};
 
-    my $status = $self->cleanLSAux( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"}, time => $sec } );
-    unless ( $status == 0 ) {
-        $self->{LOGGER}->error( "Database \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\" could not be cleaned." );
-        return -1;
+
+    if ( exists $parameters->{noclean} and $parameters->{noclean} ) {
+        $self->{LOGGER}->info( "Skipping main database cleaning." );   
+    }
+    else {
+        $status = $self->cleanLSAux( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"}, time => $sec } );
+        unless ( $status == 0 ) {
+            $self->{LOGGER}->error( "Database \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\" could not be cleaned." );
+            return -1;
+        }
     }
 
     $status = $self->cleanLSAux( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"}, time => $sec } );
