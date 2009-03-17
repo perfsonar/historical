@@ -25,11 +25,11 @@ domain: internet2.edu
 
 link: dcs_link_downstream
   * composed-of: `*_`hostA`_`eth0`_`vlan3000, hostA`_`eth0`_`vlan3000`_`to`_`hostA`_`eth1`_`vlan3001, hostA`_`eth1`_`vlan3001`_`to`_*`
-  * peer: hostA`_`eth1`_`vlan3000`_`to`_`hostA`_`eth0`_`vlan3000
+  * peer: dcs_link_upstream
 
 link: dcs_link_upstream
   * composed-of: `*_`to`_`hostA`_`eth1`_`vlan3001, hostA`_`eth1`_`vlan3001`_`to`_`hostA`_`eth0`_`vlan3000, hostA`_`eth0`_`vlan3000`_`to`_*`
-  * peer: hostA`_`eth0`_`vlan3000`_`to`_`hostA`_`eth1`_`vlan3001
+  * peer: dcs_link_downstream
 
 node: hostA
   * parent: internet2.edu
