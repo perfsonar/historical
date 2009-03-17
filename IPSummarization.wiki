@@ -3513,8 +3513,8 @@ Most details TBD, basic outline:
    * Assist in researching proper algorithms
    * review progress of performance/effectiveness
  * Student
-   * Review existing design of algorithm and source code - <font color=green>_*Done - 3/xx*_</font>
-   * Propose changes to algorithm - <font color=green>_*Done - 3/xx*_</font>
+   * Review existing design of algorithm and source code - <font color=green>_*Done - 3/10*_</font>
+   * Propose changes to algorithm - <font color=green>_*Done - 3/13*_</font>
    * Implement changes (several prototypes) in source code - <font color=red>_*IN PROGRESS - 3/xx*_</font>
    * Experimentation on data sets - <font color=red>_*IN PROGRESS - 3/xx*_</font>
    * Evaluation of results (correctness, speed, effectiveness)
@@ -3539,4 +3539,3 @@ Most details TBD, basic outline:
  == Last Modified ==
 
 $Id$
-
