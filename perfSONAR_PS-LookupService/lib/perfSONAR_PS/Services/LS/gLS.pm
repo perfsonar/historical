@@ -242,7 +242,7 @@ sub init {
             $self->{CONF}->{"ls_registration_interval"} = 3600;
         }
     }
-    $self->{LOGGER}->info( "Setting 'gls->ls_registration_interval' to ".$self->{CONF}->{"gls"}->{"ls_registration_interval"} );
+    $self->{LOGGER}->info( "Setting 'gls->ls_registration_interval' to " . $self->{CONF}->{"gls"}->{"ls_registration_interval"} );
 
     unless ( exists $self->{CONF}->{"gls"}->{"maintenance_interval"} ) {
         $self->{LOGGER}->info( "Configuration value 'maintenance_interval' not searching for other values..." );
@@ -490,11 +490,11 @@ amount of time and do it again.
 sub registerLS {
     my ( $self, $sleep_time ) = validateParamsPos( @_, 1, { type => SCALARREF }, );
 
-    my $error = q{};
+    my $error     = q{};
     my $errorFlag = 0;
     my $eventType = q{};
-    my $database = q{};
-    my $dbTr = q{};
+    my $database  = q{};
+    my $dbTr      = q{};
     if ( exists $self->{CONF}->{"root_hints_file"} and $self->{CONF}->{"root_hints_file"} and -f $self->{CONF}->{"root_hints_file"} ) {
         my $hintsStats = stat( $self->{CONF}->{"root_hints_file"} );    # Is the cache file older than the data TTL?
                                                                         # update once an hour
@@ -536,8 +536,9 @@ sub registerLS {
         $self->{LOGGER}->error( "No gLS Root services to contact, exiting." );
         return -1;
     }
-    
+
     if ( exists $self->{CONF}->{"gls"}->{root} and $self->{CONF}->{"gls"}->{root} ) {
+
         # if we are a root, we are 'synchronizing'
 
         $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0";
@@ -562,18 +563,18 @@ sub registerLS {
         $errorFlag++ if $error;
         my $len = $#controlMD;
         for my $x ( 0 .. $len ) {
-            my $parser        = XML::LibXML->new();
-            my $doc           = $parser->parse_string( $controlMD[$x] );
-          
+            my $parser = XML::LibXML->new();
+            my $doc    = $parser->parse_string( $controlMD[$x] );
+
             my $auth = extract( find( $doc->getDocumentElement, "./nmwg:parameters/nmwg:parameter[\@name=\"authoritative\"]", 1 ), 1 );
             next if lc( $auth ) eq "no";
             my $mdid = $doc->getDocumentElement->getAttribute( "metadataIdRef" );
-          
+
             my @serviceList = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"" . $mdid . "\"]", txn => $dbTr, error => \$error } );
             $errorFlag++ if $error;
             next unless $#serviceList == 0 and $serviceList[0];
 
-            my $doc2           = $parser->parse_string( $serviceList[0] );
+            my $doc2         = $parser->parse_string( $serviceList[0] );
             my $contactPoint = extract( find( $doc2->getDocumentElement, "./*[local-name()='subject']//*[local-name()='accessPoint']", 1 ), 0 );
             my $contactName  = q{};
             my $contactType  = q{};
@@ -584,16 +585,16 @@ sub registerLS {
                 next unless $contactPoint or $contactName or $contactType;
             }
             my $serviceKey = md5_hex( $contactPoint . $contactName . $contactType );
-           
-            my $service       = find( $doc2->getDocumentElement, "./*[local-name()=\"subject\"]", 1 );
+
+            my $service = find( $doc2->getDocumentElement, "./*[local-name()=\"subject\"]", 1 );
             my @metadataArray = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdid . "\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
 
             if ( $#metadataArray <= -1 ) {
                 push @metadataArray, $self->makeSummary( { key => $serviceKey, addresses => q{}, domains => q{}, eventTypes => q{}, keywords => q{} } );
             }
-          
-            $mapping{ $mdid }{"content"} = \@metadataArray;
-            $mapping{ $mdid }{"service"} = $service->toString;
+
+            $mapping{$mdid}{"content"} = \@metadataArray;
+            $mapping{$mdid}{"service"} = $service->toString;
         }
 
         unless ( $self->closeDatabase( { db => $database, dbTr => $dbTr, error => $errorFlag } ) == 0 ) {
@@ -610,8 +611,8 @@ sub registerLS {
             foreach my $root ( @{ $gls->{ROOTS} } ) {
                 $self->{LOGGER}->debug( "gLS synchronization to root \"" . $root . "\"." );
 
-                my $ls     = perfSONAR_PS::Client::LS->new( { instance   => $root } );
-                my $result = $ls->keyRequestLS(             { servicexml => $mapping{$m}{"service"} } );               
+                my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
+                my $result = $ls->keyRequestLS( { servicexml => $mapping{$m}{"service"} } );
                 if ( $result and exists $result->{key} and $result->{key} ) {
                     my $key = $result->{key};
                     $result = $ls->registerClobberRequestLS( { key => $key, eventType => $eventType, servicexml => $mapping{$m}{"service"}, data => $mapping{$m}{"content"} } );
@@ -621,14 +622,14 @@ sub registerLS {
                         $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
                         $self->{LOGGER}->debug( $msg );
                     }
-                    else {  
+                    else {
                         my $msg = "Error in LS Registration to \"" . $root . "\"";
                         $msg .= ", eventType: " . $result->{eventType} if $result and exists $result->{eventType} and $result->{eventType};
                         $msg .= ", response: " . $result->{response}   if $result and exists $result->{response}  and $result->{response};
                         $self->{LOGGER}->error( $msg );
                     }
                 }
-                elsif( $result ) {
+                elsif ( $result ) {
                     $result = $ls->registerRequestLS( { eventType => $eventType, servicexml => $mapping{$m}{"service"}, data => $mapping{$m}{"content"} } );
                     if ( $result and exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                         my $msg = "Success from LS \"" . $root . "\"";
@@ -650,6 +651,7 @@ sub registerLS {
         }
     }
     else {
+
         # if we are not a root, send our summary to a root
 
         my %service = (
@@ -689,7 +691,7 @@ sub registerLS {
 
                 my @temp = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $resultsString[$x] . "\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
                 $errorFlag++ if $error;
-                
+
                 foreach my $t ( @temp ) {
                     push @metadataArray, $t if $t;
                 }
@@ -731,7 +733,7 @@ sub registerLS {
                     $self->{LOGGER}->error( $msg );
                 }
             }
-            elsif( $result ) {
+            elsif ( $result ) {
                 $result = $ls->registerRequestLS( { eventType => $eventType, service => \%service, data => \@metadataArray } );
                 if ( $result and exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                     my $msg = "Success from LS \"" . $root . "\"";
@@ -752,9 +754,9 @@ sub registerLS {
             }
         }
     }
-    
+
     $self->{LOGGER}->info( "registerLS Complete." );
-    
+
     return 0;
 }
 
@@ -841,7 +843,7 @@ sub summarizeLS {
         $self->{LOGGER}->error( "Error: \"" . $error . "\"" ) if $error;
         return -1;
     }
-    
+
     # We can skip summarization if we are an empty DB.
     unless ( $numServices > -1 ) {
         undef %map;
@@ -1301,7 +1303,7 @@ sub summarizeLS {
             my @addLen = keys( %{ $serviceSummaryMap{$serviceKey}{"addresses"} } );
             $list1 = $self->ipSummarization( { addresses => $serviceSummaryMap{$serviceKey}{"addresses"} } ) if $#addLen > -1;
         }
-        
+
         my $serviceSummary = $self->makeSummary( { key => $serviceKey, addresses => $list1, domains => $serviceSummaryMap{$serviceKey}{"domains"}, eventTypes => $serviceSummaryMap{$serviceKey}{"eventTypes"}, keywords => $serviceSummaryMap{$serviceKey}{"keywords"} } );
 
         unless ( exists $self->{STATE}->{"messageKeys"}->{$serviceKey} and $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
@@ -1419,7 +1421,7 @@ sub summarizeLS {
         $summarydb->remove( { name => $deleteData[$y], txn => $dbTr, error => \$error } );
         $errorFlag++ if $error;
     }
-    
+
     my $cleanHash = md5_hex( $totalSummary );
     my $success = $summarydb->queryByName( { name => $mdKey . "/" . $cleanHash, txn => $dbTr, error => \$error } );
     $errorFlag++ if $error;
@@ -1904,9 +1906,8 @@ sub cleanLS {
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
     my $status = q{};
 
-
     if ( exists $parameters->{noclean} and $parameters->{noclean} ) {
-        $self->{LOGGER}->info( "Skipping main database cleaning." );   
+        $self->{LOGGER}->info( "Skipping main database cleaning." );
     }
     else {
         $status = $self->cleanLSAux( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"}, time => $sec } );
@@ -1938,7 +1939,7 @@ sub cleanLSAux {
 
     my $error     = q{};
     my $errorFlag = 0;
-    my $database = $self->prepareDatabase( { container => $parameters->{container} } );
+    my $database  = $self->prepareDatabase( { container => $parameters->{container} } );
     unless ( $database ) {
         $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $parameters->{container} . "\": " . $error );
         return -1;
@@ -2134,8 +2135,6 @@ sub handleMessageParameters {
     }
     return $parameters->{msgParams};
 }
-
-
 
 =head2 handleMessage($self, $doc, $messageType, $message, $request)
 
@@ -2446,7 +2445,8 @@ sub lsRegisterRequestUpdateNew {
 
     my $update = 1;
     if ( exists $parameters->{eventType} and $parameters->{eventType} and $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
-        my @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]/nmwg:parameters/nmwg:parameter[\@name=\"authoritative\"]/text()", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
+        my @resultsString
+            = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]/nmwg:parameters/nmwg:parameter[\@name=\"authoritative\"]/text()", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
         $parameters->{errorFlag}++ if $parameters->{error};
         if ( lc( $resultsString[0] ) eq "yes" ) {
 
@@ -2520,7 +2520,7 @@ sub lsRegisterRequestUpdateNew {
                     my $insRes = $parameters->{database}->insertIntoContainer(
                         { content => createLSData( { type => "LSStore", dataId => $mdKeyStorage . "/" . $cleanHash, metadataId => $mdKeyStorage, data => $d_content->toString } ), name => $mdKeyStorage . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$parameters->{error} } );
                     $parameters->{errorFlag}++ if $parameters->{error};
-                    $dCount++                  if $insRes == 0;
+                    $dCount++ if $insRes == 0;
                 }
             }
         }
@@ -2633,7 +2633,7 @@ sub lsRegisterRequestUpdate {
                         }
                     );
                     $parameters->{errorFlag}++ if $parameters->{error};
-                    $dCount++                  if $insRes == 0;
+                    $dCount++ if $insRes == 0;
                 }
             }
         }
@@ -2810,7 +2810,7 @@ sub lsRegisterRequestNew {
                     my $insRes = $parameters->{database}
                         ->insertIntoContainer( { content => createLSData( { type => "LSStore", dataId => $mdKey . "/" . $cleanHash, metadataId => $mdKey, data => $d_content->toString } ), name => $mdKey . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$parameters->{error} } );
                     $parameters->{errorFlag}++ if $parameters->{error};
-                    $dCount++                  if $insRes == 0;
+                    $dCount++ if $insRes == 0;
                 }
             }
         }
@@ -3223,12 +3223,13 @@ sub lsQueryRequest {
             }
         }
 
-        # add what we find to the query (if we found anything).  
+        # add what we find to the query (if we found anything).
         my $flag = 0;
         my $temp = $sent->{"eventType"};
-        foreach my $et ( keys %{ $temp } ) {
+        foreach my $et ( keys %{$temp} ) {
             $queryStructure->{"eventType"} .= " or" if $flag;
-            $queryStructure->{"eventType"} .= "(./*[local-name()='metadata']/*[local-name()='eventType' and text()='".$et."'] or ./*[local-name()='metadata']/*[local-name()='parameters']/*[local-name()='parameter' and ( \@name='eventType' or \@name='supportedEventType' ) and \@value='".$et."'])"; 
+            $queryStructure->{"eventType"}
+                .= "(./*[local-name()='metadata']/*[local-name()='eventType' and text()='" . $et . "'] or ./*[local-name()='metadata']/*[local-name()='parameters']/*[local-name()='parameter' and ( \@name='eventType' or \@name='supportedEventType' ) and \@value='" . $et . "'])";
             $flag++;
         }
 
@@ -3242,9 +3243,9 @@ sub lsQueryRequest {
 
         $flag = 0;
         $temp = $sent->{"domain"};
-        foreach my $d ( keys %{ $temp } ) {
+        foreach my $d ( keys %{$temp} ) {
             $queryStructure->{"domain"} .= " or" if $flag;
-            $queryStructure->{"domain"} .= "(./*[local-name()='metadata']/*[local-name()='subject']/*[local-name()='domain']/*[local-name()='name' and text()='". $d ."'])"; 
+            $queryStructure->{"domain"} .= "(./*[local-name()='metadata']/*[local-name()='subject']/*[local-name()='domain']/*[local-name()='name' and text()='" . $d . "'])";
             $flag++;
         }
 
@@ -3257,18 +3258,18 @@ sub lsQueryRequest {
                 $sent->{"keyword"}->{$value} = 1;
             }
         }
-        
+
         $flag = 0;
         $temp = $sent->{"keyword"};
-        foreach my $k ( keys %{ $temp } ) {
+        foreach my $k ( keys %{$temp} ) {
             $queryStructure->{"keyword"} .= " or" if $flag;
-            $queryStructure->{"keyword"} .= "(./*[local-name()='metadata']/*[local-name()='parameters']/*[local-name()='parameter' and \@value='". $k ."'])"; 
+            $queryStructure->{"keyword"} .= "(./*[local-name()='metadata']/*[local-name()='parameters']/*[local-name()='parameter' and \@value='" . $k . "'])";
             $flag++;
         }
-        
-        my $first = 1;
+
+        my $first   = 1;
         my $counter = 0;
-        foreach my $type ( keys %{ $queryStructure } ) {
+        foreach my $type ( keys %{$queryStructure} ) {
             if ( $queryStructure->{$type} and $first ) {
                 $queryString .= "[";
                 $first--;
@@ -3280,14 +3281,14 @@ sub lsQueryRequest {
         $queryString .= "]" if not $first;
 
         # this is the odd duck, we can't use it for the query, but we will use
-        #   it later on.       
+        #   it later on.
         my $l_addresses = find( $subject, "./nmtb:address", 0 );
         foreach my $address ( $l_addresses->get_nodelist ) {
             my $ad = extract( $address, 0 );
             next unless $ad;
             $sent->{"address"}->{$ad} = 1;
         }
-        
+
         my $database = $self->prepareDatabase( { container => $dbContainer } );
         unless ( $database ) {
             my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $dbContainer . "\": " . $error;
@@ -3411,7 +3412,7 @@ sub lsQueryRequest {
                                 $store{"keyword"}++ if $sent->{"keyword"}->{$value};
                             }
                         }
-                        
+
                         # we have a match, get the contact service.
                         my $flag = 1;
                         foreach my $key ( keys %store ) {
