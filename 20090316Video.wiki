@@ -53,6 +53,7 @@
        * _105_ - _*Jason*_ - hLS Summarization of DCN Data 
        * _109_ - _*Jason*_ - ~~gLS Discovery of IP Addresses~~
        * _110_ - _*Jason*_ - ~~perfSONAR-BUOY Data Query Error~~
+       * _112_ - _*Jason*_ - supportedEventType Examples for SNMP/pSB
        * _62_ - _*Maxim*_ - ~~pingER-MA requires 'hostname" type attribute in endPointPair~~   
        * _66_ - _*Maxim*_ - ~~PingER Collection Errors~~   
        * _81_ - _*Maxim*_ - ~~PingER Resolution of IPaddress/Hostnames~~
