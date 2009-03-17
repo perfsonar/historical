@@ -4,8 +4,10 @@ use strict;
 use warnings;
 use File::Basename;
 
+my $path_to_root = dirname($0);
+
 # This is the path relative to the module's directory where the trunk "lib" is located.
-my $PATH_TO_PSLIB = "../Shared/lib";
+my $PATH_TO_PSLIB = "$path_to_root/Shared/lib";
 
 # The module rules listed here allow you to either replace a found dependency
 # with a new set of dependencies or append more dependencies when a given one
