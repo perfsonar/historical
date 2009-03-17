@@ -5,48 +5,48 @@
 %define init_script_2 perfsonar-status-collector
 
 Name:           perl-perfSONAR_PS-Status
-Version:        0.10
+Version:        3.1
 Release:        1%{?dist}
-Summary:        perfSONAR_PS Lookup Service Registration Daemon
+Summary:        perfSONAR-PS Status Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-Status/
 Source0:        perfSONAR_PS-Status.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
-Requires:        perl(Carp)
-Requires:        perl(Config::General)
-Requires:        perl(Cwd)
-Requires:        perl(DBD::SQLite)
-Requires:        perl(DBI)
-Requires:        perl(Data::Dumper)
-Requires:        perl(Data::UUID)
-Requires:        perl(Digest::MD5)
-Requires:        perl(English)
-Requires:        perl(Error)
-Requires:        perl(Exporter)
-Requires:        perl(Fcntl)
-Requires:        perl(File::Basename)
-Requires:        perl(Getopt::Long)
-Requires:        perl(HTTP::Daemon)
-Requires:        perl(IO::File)
-Requires:        perl(LWP::Simple)
-Requires:        perl(LWP::UserAgent)
-Requires:        perl(Log::Log4perl)
-Requires:        perl(Module::Load)
-Requires:        perl(Net::Ping)
-Requires:        perl(Net::SNMP)
-Requires:        perl(Net::Telnet)
-Requires:        perl(POSIX)
-Requires:        perl(Params::Validate)
-Requires:        perl(Time::HiRes)
-Requires:        perl(XML::LibXML) >= 1.61
-Requires:        perl(base)
-Requires:        perl(warnings)
-Requires:        perl
+Requires:       perl(Carp)
+Requires:       perl(Config::General)
+Requires:       perl(Cwd)
+Requires:       perl(DBD::SQLite)
+Requires:       perl(DBI)
+Requires:       perl(Data::Dumper)
+Requires:       perl(Data::UUID)
+Requires:       perl(Digest::MD5)
+Requires:       perl(English)
+Requires:       perl(Error)
+Requires:       perl(Exporter)
+Requires:       perl(Fcntl)
+Requires:       perl(File::Basename)
+Requires:       perl(Getopt::Long)
+Requires:       perl(HTTP::Daemon)
+Requires:       perl(IO::File)
+Requires:       perl(LWP::Simple)
+Requires:       perl(LWP::UserAgent)
+Requires:       perl(Log::Log4perl)
+Requires:       perl(Module::Load)
+Requires:       perl(Net::Ping)
+Requires:       perl(Net::SNMP)
+Requires:       perl(Net::Telnet)
+Requires:       perl(POSIX)
+Requires:       perl(Params::Validate)
+Requires:       perl(Time::HiRes)
+Requires:       perl(XML::LibXML) >= 1.61
+Requires:       perl(base)
+Requires:       perl(warnings)
+Requires:       perl
 
 %description
-XXX ADD A DESCRIPTION OF THE PACKAGE XXX
+The perfSONAR-PS Status Service is capable of storing the historical 'status' of network devices.  This service comes packaged with a collector that is capable of gathering this information via methods such as SNMP or custom scripts.  The data is stored in MySQL capable databases.  
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
@@ -89,11 +89,12 @@ chown perfsonar:perfsonar /var/log/perfsonar
 mkdir -p /var/lib/perfsonar
 chown perfsonar:perfsonar /var/lib/perfsonar
 
-if [ ! -f /var/lib/perfsonar/status.db ]; then
+if [ ! -f /var/lib/perfsonar/status.db ];
+then
 	%{install_base}/scripts/psCreateStatusDB --type sqlite --file /var/lib/perfsonar/status.db
 	chown perfsonar:perfsonar /var/lib/perfsonar/status.db
 fi
 
 %changelog
-* Wed Dec 10 2008 aaron@internet2.edu 0.10-1
+* Wed Dec 10 2008 aaron@internet2.edu 3.1-1
 - Initial service oriented spec file
