@@ -14,7 +14,8 @@ $MAKEROOT chown perfsonar:perfsonar /var/log/perfsonar
 $MAKEROOT mkdir -p /var/lib/perfsonar
 $MAKEROOT chown perfsonar:perfsonar /var/lib/perfsonar
 
-if [ ! -f /var/lib/perfsonar/status.db ]; then
+if [ ! -f /var/lib/perfsonar/status.db ];
+then
 	$MAKEROOT `dirname $0`/psCreateStatusDB --type sqlite --file /var/lib/perfsonar/status.db
 	$MAKEROOT chown perfsonar:perfsonar /var/lib/perfsonar/status.db
 fi
