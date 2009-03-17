@@ -75,7 +75,7 @@ The following outline some exceptions to the overall release process.  Also see 
 
 === Code Reviews ===
 
-The code _review_ can be a lot more in depth than just reading in suggesting.  Most corrections can be done directly to the code base to save time in the process.  Reviewers are encouraged to run [http://perltidy.sourceforge.net/ perltidy] and [http://search.cpan.org/dist/Perl-Critic/bin/perlcritic perlcritic] at the end of the review.  
+The code _review_ can be a lot more in depth than just reading in suggesting.  Most corrections can be done directly to the code base to save time in the process.  Reviewers are encouraged to run [Perltidy] and [Perlcritic] at the end of the review.  
 
 Things to think about as you review:
 
@@ -148,9 +148,9 @@ Developers are responsible for testing their code:
      * SNMP - <font color=red>_*IN PROGRESS - 3/2*_</font>
      * pSB - <font color=purple>_*PUSHED OFF - 3/9*_</font>
    * Documentation
-     * LS - _*PENDING*_
-     * SNMP - _*PENDING*_
-     * PSB - _*PENDING*_
+     * LS - <font color=red>_*IN PROGRESS - 3/16*_</font>
+     * SNMP - <font color=red>_*IN PROGRESS - 3/16*_</font>
+     * PSB - <font color=red>_*IN PROGRESS - 3/16*_</font>
    * Code Review
      * Status  - _*PENDING*_
      * Topology - _*PENDING*_
@@ -187,7 +187,7 @@ Developers are responsible for testing their code:
      * Topology - _*PENDING*_
  * Maxim
    * Development
-     * PingER - _*PENDING*_
+     * PingER - <font color=green>_*DONE - 3/13*_</font>
    * Documentation
      * PingER - _*PENDING*_
    * Code Review
@@ -196,22 +196,22 @@ Developers are responsible for testing their code:
      * Status - _*PENDING*_
  * Joe
    * Code Review
-     * LS Registration Daemon - _*PENDING*_
+     * LS Registration Daemon - <font color=green>_*DONE - 3/16*_</font>
    * Documentation Review
      * LS - _*PENDING*_
  * Brian
    * Code Review
-     * SNMP - _*PENDING*_
+     * SNMP - <font color=green>_*DONE - 3/16*_</font>
    * Documentation Review
      * pSB - _*PENDING*_
  * Guilherme
    * Code Review
-     * perfSONAR-BUOY - _*PENDING*_
+     * perfSONAR-BUOY - <font color=green>_*DONE - 3/16*_</font>
    * Documentation Review
      * LS - _*PENDING*_
  * Marcos
    * Code Review
-     * LS - _*PENDING*_
+     * LS - <font color=red>_*IN PROGRESS - 3/16*_</font>
    * Documentation Review
      * perfSONAR-BUOY - _*PENDING*_
    
