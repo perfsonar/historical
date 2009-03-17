@@ -558,6 +558,12 @@ sub changeTopology {
     return (0, "");
 }
 
+=head2 lookupElement ($self, $id, \%elements)
+Takes an identifier and looks up the identifier in the database. The $elements
+hash is used as a cache, and the found element is placed in there with its
+identifier as the key. If the identifier is already found in the elements
+cache, that element is returned.
+=cut
 sub lookupElement {
     my ($self, $id, $elements) = @_;
 
