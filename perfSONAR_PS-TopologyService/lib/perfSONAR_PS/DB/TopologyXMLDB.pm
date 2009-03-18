@@ -26,8 +26,8 @@ use Data::Dumper;
 
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::Common;
-use perfSONAR_PS::Topology::Common;
-use perfSONAR_PS::Topology::ID;
+use perfSONAR_PS::Topology::Common qw( normalizeTopology, validateDomain, validateNode, validatePort, validateLink, getTopologyNamespaces );
+use perfSONAR_PS::Topology::ID qw( idConstruct, idIsFQ, idAddLevel, idRemoveLevel, idBaseLevel, idEncode, idDecode, idSplit, idCompare, idMatch, idIsAmbiguous );
 
 our $VERSION = 0.09;
 
