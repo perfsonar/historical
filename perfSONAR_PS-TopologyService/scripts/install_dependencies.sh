@@ -1,7 +1,8 @@
 #!/bin/bash
 
 MAKEROOT=""
-if [[ $EUID -ne 0 ]]; then
+if [[ $EUID -ne 0 ]];
+then
     MAKEROOT="sudo "
 fi
 

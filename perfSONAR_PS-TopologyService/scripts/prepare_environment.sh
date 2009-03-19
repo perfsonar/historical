@@ -1,7 +1,8 @@
 #!/bin/bash
 
 MAKEROOT=""
-if [[ $EUID -ne 0 ]]; then
+if [[ $EUID -ne 0 ]];
+then
     MAKEROOT="sudo "
 fi
 
@@ -12,7 +13,8 @@ $MAKEROOT mkdir -p /var/log/perfsonar
 $MAKEROOT chown perfsonar:perfsonar /var/log/perfsonar
 
 $MAKEROOT mkdir -p /var/lib/perfsonar/topology_service
-if [ ! -f /var/lib/perfsonar/topology_service/DB_CONFIG ]; then
+if [ ! -f /var/lib/perfsonar/topology_service/DB_CONFIG ];
+then
 	$MAKEROOT `dirname $0`/../scripts/psCreateTopologyDB --directory /var/lib/perfsonar/topology_service
 fi
 $MAKEROOT chown -R perfsonar:perfsonar /var/lib/perfsonar
