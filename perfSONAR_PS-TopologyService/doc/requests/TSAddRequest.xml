@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
 <nmwg:message type="TSAddRequest" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
 <nmwg:metadata id="meta0">
   <nmwg:eventType>http://ggf.org/ns/nmwg/topology/20070809</nmwg:eventType>
