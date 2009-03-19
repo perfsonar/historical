@@ -37,8 +37,8 @@
          * Brian
          * Joe
          * Marcos
-       * _*MISSING*_
          * Jason
+       * _*MISSING*_
          * Aaron
          * Jeff
      * Documentation Reviews
@@ -87,7 +87,7 @@
    * Close bugs
    * ~~Finish packaging~~
    * Finish documentation
-   * Code Reviews
+   * ~~Code Reviews~~
    * Doc Reviews
    * Read CHEP - Give Maxim Feedback
  * Aaron
@@ -95,11 +95,11 @@
    * Send email regarding circuits for feedback
    * ~~Finish packaging~~
    * Finish documentation
-   * Code Reviews
+   * ~~Code Reviews~~
    * Doc Reviews
    * Read CHEP - Give Maxim Feedback
  * Jeff
-   * DICE Meeting - Report to Group
+   * ~~DICE Meeting~~ - Report to Group
    * Code Reviews
    * Doc Reviews
    * Read CHEP - Give Maxim Feedback
