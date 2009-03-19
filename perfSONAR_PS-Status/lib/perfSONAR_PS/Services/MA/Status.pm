@@ -1274,7 +1274,7 @@ sub handleData {
 
     my %elements = ();
 
-    foreach my $element (@{ $args->{ids} ) {
+    foreach my $element (@{ $args->{ids} } ) {
         my ( $status, $res ) = $self->{DATA_CLIENT}->get_element_status( element_ids => [ $element] , start_time => $args->{start_time}, end_time => $args->{end_time} );
         if ( $status != 0 ) {
             my $msg = "Couldn't get information about elements from database: $res";

@@ -2,26 +2,43 @@ package perfSONAR_PS::Collectors::Status::DeviceAgents::OME;
 
 use strict;
 use warnings;
+
+our $VERSION = 3.1;
+
+=head1 NAME
+
+perfSONAR_PS::Collectors::Status::DeviceAgents::OME
+
+=head1 DESCRIPTION
+
+TBD
+
+=cut
+
 use Params::Validate qw(:all);
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Utils::TL1::OME;
 use perfSONAR_PS::Utils::ParameterValidation;
 use Data::Dumper;
 
-our $VERSION = 0.09;
-
 use base 'perfSONAR_PS::Collectors::Status::DeviceAgents::Base';
 
 use fields 'AGENT', 'OPTICAL_FACILITIES', 'ETHERNET_FACILITIES', 'WAN_FACILITIES', 'CHECK_ALL_OPTICAL_PORTS', 'CHECK_ALL_ETHERNET_PORTS', 'CHECK_ALL_WAN_PORTS';
 
 my %state_mapping = (
-		"is" => { "oper_status" => "up", "admin_status" => "normaloperation" },
-		"is-anr" => { "oper_status" => "degraded", "admin_status" => "normaloperation" },
-		"oos-ma" => { "oper_status" => "down", "admin_status" => "maintenance" },
-		"oos-au" => { "oper_status" => "down", "admin_status" => "normaloperation" },
-		"oos-auma" => { "oper_status" => "down", "admin_status" => "maintenance" },
-		"oos-maanr" => { "oper_status" => "down", "admin_status" => "maintenance" },
-		);
+    "is"        => { "oper_status" => "up",       "admin_status" => "normaloperation" },
+    "is-anr"    => { "oper_status" => "degraded", "admin_status" => "normaloperation" },
+    "oos-ma"    => { "oper_status" => "down",     "admin_status" => "maintenance" },
+    "oos-au"    => { "oper_status" => "down",     "admin_status" => "normaloperation" },
+    "oos-auma"  => { "oper_status" => "down",     "admin_status" => "maintenance" },
+    "oos-maanr" => { "oper_status" => "down",     "admin_status" => "maintenance" },
+);
+
+=head2 init( $self, { data_client, polling_interval, address, port, username, password, check_all_optical_ports, check_all_ethernet_ports, check_all_wan_ports, check_all_crossconnects, facilities, identifier_pattern } )
+
+TBD
+
+=cut
 
 sub init {
     my ( $self, @params ) = @_;
@@ -51,11 +68,11 @@ sub init {
 
     $self->{CHECK_ALL_OPTICAL_PORTS}  = $args->{check_all_optical_ports};
     $self->{CHECK_ALL_ETHERNET_PORTS} = $args->{check_all_ethernet_ports};
-    $self->{CHECK_ALL_WAN_PORTS} = $args->{check_all_wan_ports};
+    $self->{CHECK_ALL_WAN_PORTS}      = $args->{check_all_wan_ports};
 
-    $self->{OPTICAL_FACILITIES}     = ();
-    $self->{ETHERNET_FACILITIES}    = ();
-    $self->{WAN_FACILITIES}    = ();
+    $self->{OPTICAL_FACILITIES}  = ();
+    $self->{ETHERNET_FACILITIES} = ();
+    $self->{WAN_FACILITIES}      = ();
 
     if ( $args->{facilities} ) {
         foreach my $facility ( @{ $args->{facilities} } ) {
@@ -108,189 +125,251 @@ sub init {
     return 0;
 }
 
+=head2 check_facilities( $self )
+
+TBD
+
+=cut
+
 sub check_facilities {
     my ( $self ) = @_;
 
-	my @facilities = ();
+    my @facilities = ();
 
-	my $optical_ports;
-	my $ethernet_ports;
-	my $wan_ports;
+    my $optical_ports;
+    my $ethernet_ports;
+    my $wan_ports;
 
-	if ( $self->{CHECK_ALL_OPTICAL_PORTS} or scalar( keys %{ $self->{OPTICAL_FACILITIES} } ) > 0 ) {
-		my ($status, $res) = $self->{AGENT}->getOCN();
-		if ($status == 0) {
-			$optical_ports = $res;
-		}
-	}
+    if ( $self->{CHECK_ALL_OPTICAL_PORTS} or scalar( keys %{ $self->{OPTICAL_FACILITIES} } ) > 0 ) {
+        my ( $status, $res ) = $self->{AGENT}->getOCN();
+        if ( $status == 0 ) {
+            $optical_ports = $res;
+        }
+    }
 
-	if ( $self->{CHECK_ALL_ETHERNET_PORTS} or scalar( keys %{ $self->{ETHERNET_FACILITIES} } ) > 0 ) {
-		my ($status, $res) = $self->{AGENT}->getETH();
-		if ($status == 0) {
-			$ethernet_ports = $res;
-		}
-	}
+    if ( $self->{CHECK_ALL_ETHERNET_PORTS} or scalar( keys %{ $self->{ETHERNET_FACILITIES} } ) > 0 ) {
+        my ( $status, $res ) = $self->{AGENT}->getETH();
+        if ( $status == 0 ) {
+            $ethernet_ports = $res;
+        }
+    }
 
-	if ( $self->{CHECK_ALL_WAN_PORTS} or scalar( keys %{ $self->{WAN_FACILITIES} } ) > 0 ) {
-		my ($status, $res) = $self->{AGENT}->getWAN();
-		if ($status == 0) {
-			$wan_ports = $res;
-		}
-	}
+    if ( $self->{CHECK_ALL_WAN_PORTS} or scalar( keys %{ $self->{WAN_FACILITIES} } ) > 0 ) {
+        my ( $status, $res ) = $self->{AGENT}->getWAN();
+        if ( $status == 0 ) {
+            $wan_ports = $res;
+        }
+    }
 
-	if ( $optical_ports ) {
-		my @facility_names;
-		if ( $self->{CHECK_ALL_OPTICAL_PORTS} ) {
-			@facility_names = keys %{$optical_ports};
-		}
-		else {
-			@facility_names = keys %{ $self->{OPTICAL_FACILITIES} };
-		}
+    if ( $optical_ports ) {
+        my @facility_names;
+        if ( $self->{CHECK_ALL_OPTICAL_PORTS} ) {
+            @facility_names = keys %{$optical_ports};
+        }
+        else {
+            @facility_names = keys %{ $self->{OPTICAL_FACILITIES} };
+        }
 
-		foreach my $name ( @facility_names ) {
-			my $port = $optical_ports->{$name};
+        foreach my $name ( @facility_names ) {
+            my $port = $optical_ports->{$name};
 
-			next unless ($port);
+            next unless ( $port );
 
-			my $oper_status;
-			my $admin_status;
+            my $oper_status;
+            my $admin_status;
 
-			unless ( $port->{pst} and $state_mapping{ lc( $port->{pst} ) } ) {
-				$oper_status = "unknown";
-				$admin_status = "unknown";
-			}
-			else {
-				$oper_status = $state_mapping{ lc( $port->{pst} ) }->{"oper_status"};
-				$admin_status = $state_mapping{ lc( $port->{pst} ) }->{"admin_status"};
-			}
+            unless ( $port->{pst} and $state_mapping{ lc( $port->{pst} ) } ) {
+                $oper_status  = "unknown";
+                $admin_status = "unknown";
+            }
+            else {
+                $oper_status  = $state_mapping{ lc( $port->{pst} ) }->{"oper_status"};
+                $admin_status = $state_mapping{ lc( $port->{pst} ) }->{"admin_status"};
+            }
 
-			my ( $id );
-			if ( $self->{OPTICAL_FACILITIES}->{$name} ) {
-				$id           = $self->{OPTICAL_FACILITIES}->{$name}->{id}           if ( $self->{OPTICAL_FACILITIES}->{$name}->{id} );
-				$admin_status = $self->{OPTICAL_FACILITIES}->{$name}->{admin_status} if ( $self->{OPTICAL_FACILITIES}->{$name}->{admin_status} );
-				$oper_status  = $self->{OPTICAL_FACILITIES}->{$name}->{oper_status}  if ( $self->{OPTICAL_FACILITIES}->{$name}->{oper_status} );
-			}
+            my ( $id );
+            if ( $self->{OPTICAL_FACILITIES}->{$name} ) {
+                $id           = $self->{OPTICAL_FACILITIES}->{$name}->{id}           if ( $self->{OPTICAL_FACILITIES}->{$name}->{id} );
+                $admin_status = $self->{OPTICAL_FACILITIES}->{$name}->{admin_status} if ( $self->{OPTICAL_FACILITIES}->{$name}->{admin_status} );
+                $oper_status  = $self->{OPTICAL_FACILITIES}->{$name}->{oper_status}  if ( $self->{OPTICAL_FACILITIES}->{$name}->{oper_status} );
+            }
 
-			my %facility = (
-					id           => $id,
-					name         => $name,
-					type         => "optical",
-					oper_status  => $oper_status,
-					admin_status => $admin_status,
-					);
+            my %facility = (
+                id           => $id,
+                name         => $name,
+                type         => "optical",
+                oper_status  => $oper_status,
+                admin_status => $admin_status,
+            );
 
-			push @facilities, \%facility;
-		}
-	}
+            push @facilities, \%facility;
+        }
+    }
 
-	if ( $ethernet_ports ) {
-		my @facility_names;
-		if ( $self->{CHECK_ALL_ETHERNET_PORTS} ) {
-			@facility_names = keys %{$ethernet_ports};
-		}
-		else {
-			@facility_names = keys %{ $self->{ETHERNET_FACILITIES} };
-		}
+    if ( $ethernet_ports ) {
+        my @facility_names;
+        if ( $self->{CHECK_ALL_ETHERNET_PORTS} ) {
+            @facility_names = keys %{$ethernet_ports};
+        }
+        else {
+            @facility_names = keys %{ $self->{ETHERNET_FACILITIES} };
+        }
 
-		foreach my $name ( @facility_names ) {
-			my $port = $ethernet_ports->{$name};
+        foreach my $name ( @facility_names ) {
+            my $port = $ethernet_ports->{$name};
 
-			next unless ($port);
+            next unless ( $port );
 
-			my $oper_status;
-			my $admin_status;
+            my $oper_status;
+            my $admin_status;
 
-			unless ( $port->{pst} and $state_mapping{ lc( $port->{pst} ) } ) {
-				$oper_status = "unknown";
-				$admin_status = "unknown";
-			}
-			else {
-				$oper_status = $state_mapping{ lc( $port->{pst} ) }->{"oper_status"};
-				$admin_status = $state_mapping{ lc( $port->{pst} ) }->{"admin_status"};
-			}
+            unless ( $port->{pst} and $state_mapping{ lc( $port->{pst} ) } ) {
+                $oper_status  = "unknown";
+                $admin_status = "unknown";
+            }
+            else {
+                $oper_status  = $state_mapping{ lc( $port->{pst} ) }->{"oper_status"};
+                $admin_status = $state_mapping{ lc( $port->{pst} ) }->{"admin_status"};
+            }
 
-			my ( $id );
-			if ( $self->{ETHERNET_FACILITIES}->{$name} ) {
-				$id           = $self->{ETHERNET_FACILITIES}->{$name}->{id}           if ( $self->{ETHERNET_FACILITIES}->{$name}->{id} );
-				$admin_status = $self->{ETHERNET_FACILITIES}->{$name}->{admin_status} if ( $self->{ETHERNET_FACILITIES}->{$name}->{admin_status} );
-				$oper_status  = $self->{ETHERNET_FACILITIES}->{$name}->{oper_status}  if ( $self->{ETHERNET_FACILITIES}->{$name}->{oper_status} );
-			}
+            my ( $id );
+            if ( $self->{ETHERNET_FACILITIES}->{$name} ) {
+                $id           = $self->{ETHERNET_FACILITIES}->{$name}->{id}           if ( $self->{ETHERNET_FACILITIES}->{$name}->{id} );
+                $admin_status = $self->{ETHERNET_FACILITIES}->{$name}->{admin_status} if ( $self->{ETHERNET_FACILITIES}->{$name}->{admin_status} );
+                $oper_status  = $self->{ETHERNET_FACILITIES}->{$name}->{oper_status}  if ( $self->{ETHERNET_FACILITIES}->{$name}->{oper_status} );
+            }
 
-			my %facility = (
-					id           => $id,
-					name         => $name,
-					type         => "ethernet",
-					oper_status  => $oper_status,
-					admin_status => $admin_status,
-					);
+            my %facility = (
+                id           => $id,
+                name         => $name,
+                type         => "ethernet",
+                oper_status  => $oper_status,
+                admin_status => $admin_status,
+            );
 
-			push @facilities, \%facility;
-		}
-	}
+            push @facilities, \%facility;
+        }
+    }
 
-	if ( $wan_ports ) {
-		my @facility_names;
-		if ( $self->{CHECK_ALL_WAN_PORTS} ) {
-			@facility_names = keys %{$wan_ports};
-		}
-		else {
-			@facility_names = keys %{ $self->{WAN_FACILITIES} };
-		}
+    if ( $wan_ports ) {
+        my @facility_names;
+        if ( $self->{CHECK_ALL_WAN_PORTS} ) {
+            @facility_names = keys %{$wan_ports};
+        }
+        else {
+            @facility_names = keys %{ $self->{WAN_FACILITIES} };
+        }
 
-		foreach my $name ( @facility_names ) {
-			my $port = $wan_ports->{$name};
+        foreach my $name ( @facility_names ) {
+            my $port = $wan_ports->{$name};
 
-			next unless ($port);
+            next unless ( $port );
 
-			my $oper_status;
-			my $admin_status;
+            my $oper_status;
+            my $admin_status;
 
-			unless ( $port->{pst} and $state_mapping{ lc( $port->{pst} ) } ) {
-				$oper_status = "unknown";
-				$admin_status = "unknown";
-			}
-			else {
-				$oper_status = $state_mapping{ lc( $port->{pst} ) }->{"oper_status"};
-				$admin_status = $state_mapping{ lc( $port->{pst} ) }->{"admin_status"};
-			}
+            unless ( $port->{pst} and $state_mapping{ lc( $port->{pst} ) } ) {
+                $oper_status  = "unknown";
+                $admin_status = "unknown";
+            }
+            else {
+                $oper_status  = $state_mapping{ lc( $port->{pst} ) }->{"oper_status"};
+                $admin_status = $state_mapping{ lc( $port->{pst} ) }->{"admin_status"};
+            }
 
-			my ( $id );
-			if ( $self->{WAN_FACILITIES}->{$name} ) {
-				$id           = $self->{WAN_FACILITIES}->{$name}->{id}           if ( $self->{WAN_FACILITIES}->{$name}->{id} );
-				$admin_status = $self->{WAN_FACILITIES}->{$name}->{admin_status} if ( $self->{WAN_FACILITIES}->{$name}->{admin_status} );
-				$oper_status  = $self->{WAN_FACILITIES}->{$name}->{oper_status}  if ( $self->{WAN_FACILITIES}->{$name}->{oper_status} );
-			}
+            my ( $id );
+            if ( $self->{WAN_FACILITIES}->{$name} ) {
+                $id           = $self->{WAN_FACILITIES}->{$name}->{id}           if ( $self->{WAN_FACILITIES}->{$name}->{id} );
+                $admin_status = $self->{WAN_FACILITIES}->{$name}->{admin_status} if ( $self->{WAN_FACILITIES}->{$name}->{admin_status} );
+                $oper_status  = $self->{WAN_FACILITIES}->{$name}->{oper_status}  if ( $self->{WAN_FACILITIES}->{$name}->{oper_status} );
+            }
 
-			my %facility = (
-					id           => $id,
-					name         => $name,
-					type         => "ethernet",
-					oper_status  => $oper_status,
-					admin_status => $admin_status,
-					);
+            my %facility = (
+                id           => $id,
+                name         => $name,
+                type         => "ethernet",
+                oper_status  => $oper_status,
+                admin_status => $admin_status,
+            );
 
-			push @facilities, \%facility;
-		}
-	}
+            push @facilities, \%facility;
+        }
+    }
 
-    return (0, \@facilities);
+    return ( 0, \@facilities );
 }
+
+=head2 connect( $self )
+
+TBD
+
+=cut
 
 sub connect {
-	my ($self) = @_;
+    my ( $self ) = @_;
 
-	if ( $self->{AGENT}->connect( { inhibitMessages => 1 } ) == -1 ) {
-		$self->{LOGGER}->error( "Could not connect to host" );
-		return 0;
-	}
+    if ( $self->{AGENT}->connect( { inhibitMessages => 1 } ) == -1 ) {
+        $self->{LOGGER}->error( "Could not connect to host" );
+        return 0;
+    }
 
-	return 1;
+    return 1;
 }
 
-sub disconnect {
-	my ($self) = @_;
+=head2 disconnect($self)
 
-	return $self->{AGENT}->disconnect();
+TBD
+
+=cut
+
+sub disconnect {
+    my ( $self ) = @_;
+
+    return $self->{AGENT}->disconnect();
 }
 
 1;
+
+__END__
+
+=head1 SEE ALSO
+
+L<Params::Validate>, L<Log::Log4perl>, L<perfSONAR_PS::Utils::TL1::OME>,
+L<perfSONAR_PS::Utils::ParameterValidation>, L<Data::Dumper>
+
+To join the 'perfSONAR Users' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/perfsonar-user
+
+The perfSONAR-PS subversion repository is located at:
+
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
+
+=head1 VERSION
+
+$Id:$
+
+=head1 AUTHOR
+
+Aaron Brown, aaron@internet2.edu
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2004-2009, Internet2 and the University of Delaware
+
+All rights reserved.
+
+=cut
+
+# vim: expandtab shiftwidth=4 tabstop=4

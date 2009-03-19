@@ -1,31 +1,40 @@
 package perfSONAR_PS::Collectors::Status::DeviceAgents::SNMP;
 
+use strict;
+use warnings;
+
+our $VERSION = 3.1;
+
 =head1 NAME
 
-perfSONAR_PS::Collectors::Status::SNMP - This module polls a router using SNMP
-for the operational and administrative status of its interface names. 
+perfSONAR_PS::Collectors::Status::SNMP
 
 =head1 DESCRIPTION
 
-This worker will periodically poll the router using SNMP. It will grab the
-interface names, operation status and administrative status. It will then store
-this information into a status database.
+This module polls a router using SNMP for the operational and administrative
+status of its interface names.  This worker will periodically poll the router
+using SNMP. It will grab the interface names, operation status and
+administrative status. It will then store this information into a status
+database.
 
 =head1 API
+
 =cut
 
-use strict;
-use warnings;
 use Log::Log4perl qw(get_logger);
 use Data::Dumper;
 use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Utils::SNMPWalk;
 
-our $VERSION = 0.09;
-
 use base 'perfSONAR_PS::Collectors::Status::Base';
 
 use fields 'ADDRESS', 'PORT', 'COMMUNITY', 'VERSION', 'CHECK_ALL_INTERFACES', 'INTERFACES';
+
+=head2 init( $self, { data_client, polling_interval, address, port, community, version, check_all_interfaces, interfaces, identifier_pattern } )
+
+TBD
+
+=cut
 
 sub init {
     my ( $self, @args ) = @_;
@@ -90,12 +99,18 @@ sub init {
     return 0;
 }
 
+=head2 check_facilities( $self )
+
+TBD
+
+=cut
+
 sub check_facilities {
-	my ( $self ) = @_;
+    my ( $self ) = @_;
 
-	my @facilities_to_update = ();
+    my @facilities_to_update = ();
 
-	my ( $status, $res );
+    my ( $status, $res );
 
     my ( $ifNameLines, $ifOperStatusLines, $ifAdminStatusLines );
 
@@ -103,7 +118,7 @@ sub check_facilities {
     if ( $status != 0 ) {
         my $msg = "Couldn't look up list of ifNames: $res";
         $self->{LOGGER}->error( $msg );
-        return (-1, $msg);
+        return ( -1, $msg );
     }
 
     $ifNameLines = $res;
@@ -112,7 +127,7 @@ sub check_facilities {
     if ( $status != 0 ) {
         my $msg = "Couldn't look up list of ifOperStatus: $res";
         $self->{LOGGER}->error( $msg );
-        return (-1, $msg);
+        return ( -1, $msg );
     }
 
     $ifOperStatusLines = $res;
@@ -129,7 +144,7 @@ sub check_facilities {
     my %ifOperStatuses  = ();
     my %ifAdminStatuses = ();
 
-# create the ifIndex mapping
+    # create the ifIndex mapping
     foreach my $oid_ref ( @{$ifNameLines} ) {
         my $oid   = $oid_ref->[0];
         my $type  = $oid_ref->[1];
@@ -201,57 +216,70 @@ sub check_facilities {
     }
 
     foreach my $ifName ( @interfaces ) {
-        my ($id, $oper_status, $admin_status);
+        my ( $id, $oper_status, $admin_status );
 
-        if ( $self->{INTERFACES}->{ $ifName } ) {
-            $id           = $self->{INTERFACES}->{ $ifName }->{id}           if ( $self->{INTERFACES}->{ $ifName }->{id} );
-            $admin_status = $self->{INTERFACES}->{ $ifName }->{admin_status} if ( $self->{INTERFACES}->{ $ifName }->{admin_status} );
-            $oper_status  = $self->{INTERFACES}->{ $ifName }->{oper_status}  if ( $self->{INTERFACES}->{ $ifName }->{oper_status} );
+        if ( $self->{INTERFACES}->{$ifName} ) {
+            $id           = $self->{INTERFACES}->{$ifName}->{id}           if ( $self->{INTERFACES}->{$ifName}->{id} );
+            $admin_status = $self->{INTERFACES}->{$ifName}->{admin_status} if ( $self->{INTERFACES}->{$ifName}->{admin_status} );
+            $oper_status  = $self->{INTERFACES}->{$ifName}->{oper_status}  if ( $self->{INTERFACES}->{$ifName}->{oper_status} );
         }
 
         my %facility = (
-                    id => $id,
-                    name => $ifName,
-                    type => "interface",
-                    oper_status => $ifOperStatuses{$ifName},
-                    admin_status => $ifAdminStatuses{$ifName},
-                        );
+            id           => $id,
+            name         => $ifName,
+            type         => "interface",
+            oper_status  => $ifOperStatuses{$ifName},
+            admin_status => $ifAdminStatuses{$ifName},
+        );
 
         push @facilities_to_update, \%facility;
     }
 
-    return (0, \@facilities_to_update);
+    return ( 0, \@facilities_to_update );
 }
+
+=head2 connect( $self )
+
+TBD
+
+=cut
 
 sub connect {
-	my ($self) = @_;
+    my ( $self ) = @_;
 
-	return 1;
+    return 1;
 }
+
+=head2 disconnect( $self )
+
+TBD
+
+=cut
 
 sub disconnect {
-	my ($self) = @_;
+    my ( $self ) = @_;
 
-	return;
+    return;
 }
-
 
 1;
 
 __END__
 
-To join the 'perfSONAR-PS' mailing list, please visit:
+=head1 SEE ALSO
 
-https://mail.internet2.edu/wws/info/i2-perfsonar
+To join the 'perfSONAR Users' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/perfsonar-user
 
 The perfSONAR-PS subversion repository is located at:
 
-https://svn.internet2.edu/svn/perfSONAR-PS
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
 
-Questions and comments can be directed to the author, or the mailing list.  Bugs,
-feature requests, and improvements can be directed here:
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
 
-https://bugs.internet2.edu/jira/browse/PSPS
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 
@@ -263,14 +291,16 @@ Aaron Brown, aaron@internet2.edu
 
 =head1 LICENSE
 
-You should have received a copy of the Internet2 Intellectual Property Framework along
-with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2008, Internet2 and the University of Delaware
+Copyright (c) 2004-2009, Internet2 and the University of Delaware
 
 All rights reserved.
 
 =cut
+
 # vim: expandtab shiftwidth=4 tabstop=4

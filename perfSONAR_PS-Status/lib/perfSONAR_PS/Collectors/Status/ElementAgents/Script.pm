@@ -1,50 +1,59 @@
 package perfSONAR_PS::Collectors::Status::ElementAgents::Script;
 
+use strict;
+use warnings;
+
+our $VERSION = 3.1;
+
 =head1 NAME
 
-perfSONAR_PS::Collectors::LinkStatus::Agent::Script - This module provides an
-agent for the Link Status Collector that gets status information by executing a
-script.
+perfSONAR_PS::Collectors::LinkStatus::Agent::Script
 
 =head1 DESCRIPTION
 
-This agent will run a script that should print out the link status information
-in the format: "timestamp,measurement_value".
+This module provides an agent for the Link Status Collector that gets status
+information by executing a script.  This agent will run a script that should
+print out the link status information in the format: 
+
+"timestamp,measurement_value".
 
 =head1 API
+
 =cut
 
-use strict;
-use warnings;
 use Log::Log4perl qw(get_logger);
 
-our $VERSION = 0.09;
-
-use fields 'TYPE', 'SCRIPT','PARAMETERS';
+use fields 'TYPE', 'SCRIPT', 'PARAMETERS';
 
 =head2 new ($self, $status_type, $script, $parameters)
-    Creates a new Script Agent of the specified type and with the specified
-    script and script parameters.
+
+Creates a new Script Agent of the specified type and with the specified script
+and script parameters.
+
 =cut
+
 sub new {
-    my ($class, $type, $script, $parameters) = @_;
+    my ( $class, $type, $script, $parameters ) = @_;
 
-    my $self = fields::new($class);
+    my $self = fields::new( $class );
 
-    $self->{"TYPE"} = $type;
-    $self->{"SCRIPT"} = $script;
+    $self->{"TYPE"}       = $type;
+    $self->{"SCRIPT"}     = $script;
     $self->{"PARAMETERS"} = $parameters;
 
     return $self;
 }
 
 =head2 type ($self, $type)
-    Gets/sets the status type of this agent: admin or oper.
-=cut
-sub type {
-    my ($self, $type) = @_;
 
-    if ($type) {
+Gets/sets the status type of this agent: admin or oper.
+
+=cut
+
+sub type {
+    my ( $self, $type ) = @_;
+
+    if ( $type ) {
         $self->{TYPE} = $type;
     }
 
@@ -52,12 +61,15 @@ sub type {
 }
 
 =head2 script ($self, $script)
-    Gets/sets the script to be run
-=cut
-sub script {
-    my ($self, $script) = @_;
 
-    if ($script) {
+Gets/sets the script to be run
+
+=cut
+
+sub script {
+    my ( $self, $script ) = @_;
+
+    if ( $script ) {
         $self->{SCRIPT} = $script;
     }
 
@@ -65,12 +77,15 @@ sub script {
 }
 
 =head2 parameters ($self, $parameters)
-    Sets the parameters that are passed to the script
-=cut
-sub parameters {
-    my ($self, $parameters) = @_;
 
-    if ($parameters) {
+Sets the parameters that are passed to the script
+
+=cut
+
+sub parameters {
+    my ( $self, $parameters ) = @_;
+
+    if ( $parameters ) {
         $self->{PARAMETERS} = $parameters;
     }
 
@@ -78,60 +93,64 @@ sub parameters {
 }
 
 =head2 run ($self)
-    This function is called by the collector daemon. It executes the script
-    adding the status type ('admin' or 'oper') and any parameters specified as
-    parameters to the script.
+
+This function is called by the collector daemon. It executes the script adding
+the status type ('admin' or 'oper') and any parameters specified as parameters
+to the script.
+
 =cut
+
 sub run {
-    my ($self) = @_;
-    my $logger = get_logger("perfSONAR_PS::Collectors::LinkStatus::Agent::Script");
+    my ( $self ) = @_;
+    my $logger = get_logger( "perfSONAR_PS::Collectors::LinkStatus::Agent::Script" );
 
     my $cmd = $self->{SCRIPT} . " " . $self->{TYPE};
 
-    if (defined $self->{PARAMETERS}) {
+    if ( defined $self->{PARAMETERS} ) {
         $cmd .= " " . $self->{PARAMETERS};
     }
 
-    $logger->debug("Command to run: $cmd");
+    $logger->debug( "Command to run: $cmd" );
 
-    open my $SCRIPT, "-|", $cmd or return (-1, "Couldn't execute cmd: $cmd");
+    open my $SCRIPT, "-|", $cmd or return ( -1, "Couldn't execute cmd: $cmd" );
     my @lines = <$SCRIPT>;
-    close($SCRIPT);
+    close( $SCRIPT );
 
-    if ($#lines < 0) {
+    if ( $#lines < 0 ) {
         my $msg = "script returned no output";
-        return (-1, $msg);
+        return ( -1, $msg );
     }
 
-    if ($#lines > 0) {
+    if ( $#lines > 0 ) {
         my $msg = "script returned invalid output: more than one line";
-        return (-1, $msg);
+        return ( -1, $msg );
     }
 
-    $logger->debug("Command returned \"$lines[0]\"");
+    $logger->debug( "Command returned \"$lines[0]\"" );
 
-    chomp($lines[0]);
-    my @fields = split(',', $lines[0]);
+    chomp( $lines[0] );
+    my @fields = split( ',', $lines[0] );
 
-    if (scalar(@fields) == 0) {
+    if ( scalar( @fields ) == 0 ) {
         my $msg = "script returned invalid output: does not contain measurement time";
-        return (-1, $msg);
+        return ( -1, $msg );
     }
 
-    if (scalar(@fields) == 1) {
+    if ( scalar( @fields ) == 1 ) {
         my $msg = "script returned invalid output: does not contain link status";
-        return (-1, $msg);
+        return ( -1, $msg );
     }
 
-    if ($self->{TYPE} eq "oper/admin" and scalar(@fields) == 2) {
+    if ( $self->{TYPE} eq "oper/admin" and scalar( @fields ) == 2 ) {
         my $msg = "script returned invalid output: does not contain link admin status";
-        return (-1, $msg);
+        return ( -1, $msg );
     }
 
-    if ($self->{TYPE} eq "oper/admin") {
-        return (0, $fields[0], lc($fields[1]), lc($fields[2]));
-    } else {
-        return (0, $fields[0], lc($fields[1]));
+    if ( $self->{TYPE} eq "oper/admin" ) {
+        return ( 0, $fields[0], lc( $fields[1] ), lc( $fields[2] ) );
+    }
+    else {
+        return ( 0, $fields[0], lc( $fields[1] ) );
     }
 }
 
@@ -139,18 +158,20 @@ sub run {
 
 __END__
 
-To join the 'perfSONAR-PS' mailing list, please visit:
+=head1 SEE ALSO
 
-https://mail.internet2.edu/wws/info/i2-perfsonar
+To join the 'perfSONAR Users' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/perfsonar-user
 
 The perfSONAR-PS subversion repository is located at:
 
-https://svn.internet2.edu/svn/perfSONAR-PS
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
 
-Questions and comments can be directed to the author, or the mailing list.  Bugs,
-feature requests, and improvements can be directed here:
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
 
-https://bugs.internet2.edu/jira/browse/PSPS
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 
@@ -162,14 +183,16 @@ Aaron Brown, aaron@internet2.edu
 
 =head1 LICENSE
 
-You should have received a copy of the Internet2 Intellectual Property Framework along
-with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2008, Internet2 and the University of Delaware
+Copyright (c) 2004-2009, Internet2 and the University of Delaware
 
 All rights reserved.
 
 =cut
+
 # vim: expandtab shiftwidth=4 tabstop=4
