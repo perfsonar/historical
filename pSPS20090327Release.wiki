@@ -152,8 +152,9 @@ Developers are responsible for testing their code:
      * SNMP - <font color=red>_*IN PROGRESS - 3/16*_</font>
      * PSB - <font color=red>_*IN PROGRESS - 3/16*_</font>
    * Code Review
-     * Status  - _*PENDING*_
-     * Topology - _*PENDING*_
+     * Status  - <font color=red>_*IN PROGRESS - 3/13*_</font>
+     * Topology - <font color=red>_*IN PROGRESS - 3/13*_</font>
+     * Shared/lib - <font color=green>_*DONE - 3/19*_</font>
    * Documentation Review
      * PingER - _*PENDING*_
      * LS Registartion Daemon - _*PENDING*_
@@ -170,7 +171,7 @@ Developers are responsible for testing their code:
      * Topology - _*PENDING*_
      * LS Registration Daemon - _*PENDING*_
    * Code Review
-     * PingER - _*PENDING*_
+     * PingER - <font color=red>_*IN PROGRESS - 3/17*_</font>
    * Documentation Review
      * SNMP - _*PENDING*_
  * Jeff
@@ -191,7 +192,7 @@ Developers are responsible for testing their code:
    * Documentation
      * PingER - _*PENDING*_
    * Code Review
-     * pSB - <font color=red>_*IN PROGRESS - 3/9*_</font>
+     * pSB - <font color=purple>_*PUSHED OFF*_</font>
    * Documentation Review
      * Status - _*PENDING*_
  * Joe

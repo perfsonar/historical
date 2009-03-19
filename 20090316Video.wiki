@@ -36,11 +36,11 @@
          * Guilherme
          * Brian
          * Joe
+         * Marcos
        * _*MISSING*_
          * Jason
          * Aaron
          * Jeff
-         * Marcos - Stalled on Jason
      * Documentation Reviews
        * Developers Finish (3/27)
        * Reviews Due (4/3)
@@ -83,9 +83,9 @@
 === ACTIONS ===
 
  * Jason
-   * Get Marcos info on code reviews
+   * ~~Get Marcos info on code reviews~~
    * Close bugs
-   * Finish packaging
+   * ~~Finish packaging~~
    * Finish documentation
    * Code Reviews
    * Doc Reviews
@@ -93,7 +93,7 @@
  * Aaron
    * Address Martin/Jason/Jeff feedback on circuits
    * Send email regarding circuits for feedback
-   * Finish packaging
+   * ~~Finish packaging~~
    * Finish documentation
    * Code Reviews
    * Doc Reviews
@@ -105,7 +105,7 @@
    * Read CHEP - Give Maxim Feedback
  * Marcos
    * IP Summarization
-   * Code Reviews
+   * ~~Code Reviews~~
    * Doc Reviews
    * Read CHEP - Give Maxim Feedback
  * Martin
