@@ -61,7 +61,12 @@ The perfSONAR developers meeting will focus on pending issues within the perfSON
 
 ==== pS Agenda ====
 
-TBD
+  * Broad issues found during code review
+    * We need to move away from default localhost access points. If we don't know it, the daemon or service should construct one like we do on the NPToolkit or not register if it can't.
+    * We need to standardize how configuration is done a bit so that people don't need to create helper functions to handle configuration. Something like what the OWP Configuration modules maybe.
+    * We should probably remove the need for services to do their own LS registration. They should just be able to provide a "getMetadata" function or similar, and let the base class or the daemon handle the rest.
+    * We should take a look at all the Scheduler software, and see about creating a metascheduler of some kind, and an MP that can interface with it.
+    * We should either always use Class::Accessor and Class::Fields or we shouldn't use them at all. A hodge-podge isn't good.
 
 ==== pS Notes ====
 
