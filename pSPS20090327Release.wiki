@@ -138,83 +138,83 @@ Developers are responsible for testing their code:
 
  * Jason
    * Release Tasks
-     * Prepare [YumRepository YUM] repo - <font color=red>_*IN PROGRESS - 2/17*_</font>
+     * Prepare [YumRepository YUM] repo - <font color=yellow>_*IN PROGRESS - 2/17*_</font>
      * Update Release Documentation - <font color=green>_*DONE - 3/9*_</font>
      * Update Issue Tracker - <font color=green>_*DONE - 3/3*_</font>
-     * Review Code Reviews - <font color=red>_*IN PROGRESS - 3/9*_</font>
-     * Review Doc Reviews - _*PENDING*_
+     * Review Code Reviews - <font color=yellow>_*IN PROGRESS - 3/9*_</font>
+     * Review Doc Reviews - <font color=red>_*PENDING*_ - </font>
    * Development
-     * LS - <font color=red>_*IN PROGRESS - 3/2*_</font>
-     * SNMP - <font color=red>_*IN PROGRESS - 3/2*_</font>
+     * LS - <font color=yellow>_*IN PROGRESS - 3/2*_</font>
+     * SNMP - <font color=yellow>_*IN PROGRESS - 3/2*_</font>
      * pSB - <font color=purple>_*PUSHED OFF - 3/9*_</font>
    * Documentation
-     * LS - <font color=red>_*IN PROGRESS - 3/16*_</font>
-     * SNMP - <font color=red>_*IN PROGRESS - 3/16*_</font>
-     * PSB - <font color=red>_*IN PROGRESS - 3/16*_</font>
+     * LS - <font color=yellow>_*IN PROGRESS - 3/16*_</font>
+     * SNMP - <font color=yellow>_*IN PROGRESS - 3/16*_</font>
+     * PSB - <font color=purple>_*PUSHED OFF - 3/9*_</font>
    * Code Review
      * Status  - <font color=green>_*DONE - 3/19*_</font>
      * Topology - <font color=green>_*DONE - 3/19*_</font>
      * Shared/lib - <font color=green>_*DONE - 3/19*_</font>
    * Documentation Review
-     * PingER - _*PENDING*_
-     * LS Registartion Daemon - _*PENDING*_
+     * PingER - <font color=red>_*PENDING*_- </font>
+     * LS Registartion Daemon - <font color=red>_*PENDING*_</font>
  * Aaron
    * Release Tasks
      * Branch SVN - <font color=green>_*Done - 3/2*_</font>
      * Re-organize and SVN (see [SubversionStructure]) - <font color=green>_*Done - 3/10*_</font>
    * Development
-     * Status - _*PENDING*_
-     * Topology - _*PENDING*_
-     * LS Registration Daemon - _*PENDING*_
+     * Status - <font color=red>_*PENDING*_ - </font>
+     * Topology - <font color=red>_*PENDING*_ - </font>
+     * LS Registration Daemon - <font color=red>_*PENDING*_ - </font>
    * Documentation
-     * Status - _*PENDING*_
-     * Topology - _*PENDING*_
-     * LS Registration Daemon - _*PENDING*_
+     * Status - <font color=red>_*PENDING*_ - </font>
+     * Topology - <font color=red>_*PENDING*_ - </font>
+     * LS Registration Daemon -<font color=red> _*PENDING*_ - </font>
    * Code Review
      * PingER - <font color=green>_*DONE - 3/19*_</font>
    * Documentation Review
-     * SNMP - _*PENDING*_
+     * SNMP - <font color=red>_*PENDING*_ - </font>
  * Jeff
    * Release Tasks
-     * Contract a new CD image for NPToolkit, dated image [http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/perfnodelabel.png here] - _*PENDING*_
-     * Alert Techwriter/Publication Crew of pending release - _*PENDING*_
+     * Contract a new CD image for NPToolkit, dated image [http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/perfnodelabel.png here] - <font color=red>_*PENDING*_ - </font>
+     * Alert Techwriter/Publication Crew of pending release - <font color=red>_*PENDING*_ - </font>
    * Development
-     * pSB - <font color=red>_*IN PROGRESS*_</font>
+     * pSB - <font color=yellow>_*IN PROGRESS*_ - </font>
    * Documentation
-     * pSB - _*PENDING*_
+     * pSB - <font color=yellow>_*IN PROGRESS*_ - </font>
    * Code Review
-     * LS - _*PENDING*_
+     * LS - <font color=purple>_*PUSHED OFF - 3/19*_</font>
    * Documentation Review
-     * Topology - _*PENDING*_
+     * Topology -<font color=red> _*PENDING*_ - </font>
  * Maxim
    * Development
      * PingER - <font color=green>_*DONE - 3/13*_</font>
    * Documentation
-     * PingER - _*PENDING*_
+     * PingER - <font color=red>_*PENDING*_ - </font>
    * Code Review
-     * pSB - <font color=purple>_*PUSHED OFF*_</font>
+     * pSB - <font color=purple>_*PUSHED OFF*_ - </font>
    * Documentation Review
-     * Status - _*PENDING*_
+     * Status -<font color=red> _*PENDING*_ - </font>
  * Joe
    * Code Review
      * LS Registration Daemon - <font color=green>_*DONE - 3/16*_</font>
    * Documentation Review
-     * LS - _*PENDING*_
+     * LS - <font color=red>_*PENDING*_ - </font>
  * Brian
    * Code Review
      * SNMP - <font color=green>_*DONE - 3/16*_</font>
    * Documentation Review
-     * pSB - _*PENDING*_
+     * pSB - <font color=red>_*PENDING*_ - </font>
  * Guilherme
    * Code Review
      * perfSONAR-BUOY - <font color=green>_*DONE - 3/16*_</font>
    * Documentation Review
-     * LS - _*PENDING*_
+     * LS - <font color=red>_*PENDING*_ - </font>
  * Marcos
    * Code Review
      * LS - <font color=green>_*DONE - 3/16*_</font>
    * Documentation Review
-     * perfSONAR-BUOY - _*PENDING*_
+     * perfSONAR-BUOY - <font color=red>_*PENDING*_ - </font>
    
 == Lessons Learned ==
    
