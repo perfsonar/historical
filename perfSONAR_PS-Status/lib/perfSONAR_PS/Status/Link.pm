@@ -3,101 +3,181 @@ package perfSONAR_PS::Status::Link;
 use strict;
 use warnings;
 
-our $VERSION = 0.09;
+our $VERSION = 3.1;
+
+=head1 NAME
+
+perfSONAR_PS::Status::Link
+
+=head1 DESCRIPTION
+
+A module that provides an object with an interface for link status information.
+This module is to be treated as an object representing the status of a link for
+a certain range of time.
+
+=head1 API
+
+=cut
 
 use fields 'ID', 'START_TIME', 'END_TIME', 'OPER_STATUS', 'ADMIN_STATUS';
 
+=head2 new ($package, $link_id, $start_time, $end_time, $oper_status, $admin_status)
+
+Creates a new instance of a link object with the specified values (None of
+which is required, they can all be set later).
+
+=cut
+
 sub new {
-    my ($package, $link_id, $start_time, $end_time, $oper_status, $admin_status) = @_;
+    my ( $package, $link_id, $start_time, $end_time, $oper_status, $admin_status ) = @_;
 
-    my $self = fields::new($package);
+    my $self = fields::new( $package );
 
-    if (defined $link_id and $link_id ne "") {
+    if ( defined $link_id and $link_id ) {
         $self->{ID} = $link_id;
     }
-
-    if (defined $start_time and $start_time ne "") {
+    if ( defined $start_time and $start_time ) {
         $self->{START_TIME} = $start_time;
     }
-    if (defined $end_time and $end_time ne "") {
+    if ( defined $end_time and $end_time ) {
         $self->{END_TIME} = $end_time;
     }
-    if (defined $oper_status and $oper_status ne "") {
+    if ( defined $oper_status and $oper_status ) {
         $self->{OPER_STATUS} = $oper_status;
     }
-    if (defined $admin_status and $admin_status ne "") {
+    if ( defined $admin_status and $admin_status ) {
         $self->{ADMIN_STATUS} = $admin_status;
     }
 
     return $self;
 }
 
-sub setID {
-    my ($self, $id) = @_;
+=head2 setID ($self, $id)
 
-    $self->{ID} = $id;
+Sets the identifier for this link.
+
+=cut
+
+sub setID {
+    my ( $self, $id ) = @_;
+
+    $self->{ID} = $id if defined $id;
 
     return;
 }
+
+=head2 setStartTime ($self, $starttime)
+
+Sets the start time of the range over which this link had the specified status
+
+=cut
 
 sub setStartTime {
-    my ($self, $starttime) = @_;
+    my ( $self, $starttime ) = @_;
 
-    $self->{START_TIME} = $starttime;
+    $self->{START_TIME} = $starttime if defined $starttime;
 
     return;
 }
+
+=head2 setEndTime ($self, $endtime)
+
+Sets the end time of the range over which this link had the specified status
+
+=cut
 
 sub setEndTime {
-    my ($self, $endtime) = @_;
+    my ( $self, $endtime ) = @_;
 
-    $self->{END_TIME} = $endtime;
+    $self->{END_TIME} = $endtime if defined $endtime;
 
     return;
 }
+
+=head2 setOperStatus ($self, $oper_status)
+
+Sets the operational status of this link over the range of time specified
+
+=cut
 
 sub setOperStatus {
-    my ($self, $oper_status) = @_;
+    my ( $self, $oper_status ) = @_;
 
-    $self->{OPER_STATUS} = $oper_status;
+    $self->{OPER_STATUS} = $oper_status if defined $oper_status;
 
     return;
 }
+
+=head2 setAdminStatus ($self, $admin_status)
+
+Sets the administrative status of this link over the range of time specified
+
+=cut
 
 sub setAdminStatus {
-    my ($self, $admin_status) = @_;
+    my ( $self, $admin_status ) = @_;
 
-    $self->{ADMIN_STATUS} = $admin_status;
+    $self->{ADMIN_STATUS} = $admin_status if defined $admin_status;
 
     return;
 }
 
+=head2 getID ($self)
+
+Gets the identifier for this link
+
+=cut
+
 sub getID {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return $self->{ID};
 }
 
+=head2 getStartTime ($self)
+
+Gets the start time of the range over which this link had the specified status
+
+=cut
+
 sub getStartTime {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return $self->{START_TIME};
 }
 
+=head2 getEndTime ($self)
+
+Gets the end time of the range over which this link had the specified status
+
+=cut
+
 sub getEndTime {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return $self->{END_TIME};
 }
 
+=head2 getOperStatus ($self)
+
+Gets the operational status of this link
+
+=cut
+
 sub getOperStatus {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return $self->{OPER_STATUS};
 }
 
+=head2 getAdminStatus ($self)
+
+Gets the administrative status of this link
+
+=cut
+
 sub getAdminStatus {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return $self->{ADMIN_STATUS};
 }
@@ -105,77 +185,40 @@ sub getAdminStatus {
 1;
 
 __END__
-=head1 NAME
 
-perfSONAR_PS::Status::Link - A module that provides an object with an interface
-for link status information.
+=head1 SEE ALSO
 
-=head1 DESCRIPTION
+To join the 'perfSONAR Users' mailing list, please visit:
 
-This module is to be treated as an object representing the status of a link for
-a certain range of time.
+  https://mail.internet2.edu/wws/info/perfsonar-user
 
-=head1 SYNOPSIS
+The perfSONAR-PS subversion repository is located at:
 
-=head1 DETAILS
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
 
-=head1 API
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
 
-=head2 new ($package, $link_id, $start_time, $end_time, $oper_status, $admin_status)
+  http://code.google.com/p/perfsonar-ps/issues/list
 
-Creates a new instance of a link object with the specified values (None of
-which is required, they can all be set later).
+=head1 VERSION
 
-=head2 setID ($self, $id)
+$Id$
 
-Sets the identifier for this link.
+=head1 AUTHOR
 
-=head2 setStartTime ($self, $starttime)
-
-Sets the start time of the range over which this link had the specified status
-
-=head2 setEndTime ($self, $endtime)
-
-Sets the end time of the range over which this link had the specified status
-
-=head2 setOperStatus ($self, $oper_status)
-
-Sets the operational status of this link over the range of time specified
-
-=head2 setAdminStatus ($self, $admin_status)
-
-Sets the administrative status of this link over the range of time specified
-
-=head2 getID ($self)
-
-Gets the identifier for this link
-
-=head2 getStartTime ($self)
-
-Gets the start time of the range over which this link had the specified status
-
-=head2 getEndTime ($self)
-
-Gets the end time of the range over which this link had the specified status
-
-=head2 getOperStatus ($self)
-
-Gets the operational status of this link
-
-=head2 getAdminStatus ($self)
-
-Gets the administrative status of this link
+Aaron Brown, aaron@internet2.edu
 
 =head1 LICENSE
- 
-You should have received a copy of the Internet2 Intellectual Property Framework along
-with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
- 
-Copyright (c) 2004-2008, Internet2 and the University of Delaware
+
+Copyright (c) 2007-2009, Internet2
 
 All rights reserved.
 
 =cut
-# vim: expandtab shiftwidth=4 tabstop=4

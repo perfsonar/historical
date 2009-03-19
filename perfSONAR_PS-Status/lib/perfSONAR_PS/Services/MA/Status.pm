@@ -1,33 +1,40 @@
 package perfSONAR_PS::Services::MA::Status;
 
+use strict;
+use warnings;
+
+our $VERSION = 3.1;
+
 =head1 NAME
 
-perfSONAR_PS::Services::MA::Status - A module that provides methods for a
-an L2 Status Measurement Archive. The service can be used to make Link Status
-Data available to individuals via webservice interface.
+perfSONAR_PS::Services::MA::Status
 
 =head1 DESCRIPTION
+
+A module that provides methods for a an L2 Status Measurement Archive. The
+service can be used to make Link Status Data available to individuals via
+webservice interface.
 
 This module, in conjunction with other parts of the perfSONAR-PS framework,
 handles specific messages from interested actors in search of link status data.
 
 There are two major message types that this service can act upon:
- - SetupDataRequest               - Given either metadata or a key regarding a specific
-                                      measurement, retrieve data values.
- - MetadataKeyRequest     - Given some metadata about a specific measurement, 
-                            request a re-playable 'key' to faster access
-                            underlying data.
+
+ - SetupDataRequest    - Given either metadata or a key regarding a specific
+                         measurement, retrieve data values.
+ - MetadataKeyRequest  - Given some metadata about a specific measurement, 
+                         request a re-playable 'key' to faster access
+                         underlying data.
 
 The module is capable of handling link status data in an E2EMon compatible
 fashion, as well as allowing for moving away from the E2EMon-style.
+
 =cut
 
 use base 'perfSONAR_PS::Services::Base';
 
 use fields 'LS_CLIENT', 'DATA_CLIENT', 'LOGGER', 'DOMAIN', 'LINKS', 'NODES', 'METADATADB', 'E2EMON_METADATADB', 'E2EMON_MAPPING', 'XPATH_CONTEXT';
 
-use strict;
-use warnings;
 use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
 use Data::Dumper;
@@ -41,30 +48,27 @@ use perfSONAR_PS::Status::Link;
 use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Services::MA::General;
 
-our $VERSION = 0.09;
-
 # Any of the XPath queries used in this module will use one of the following namespaces.
 my %status_namespaces = (
-    nmwg   => "http://ggf.org/ns/nmwg/base/2.0/",
-    select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
-    nmtopo => "http://ogf.org/schema/network/topology/base/20070828/",
-    topoid => "http://ogf.org/schema/network/topology/id/20070828/",
-    ifevt  => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
-    nmtl2  => "http://ggf.org/ns/nmwg/topology/l2/3.0/",
+    nmwg      => "http://ggf.org/ns/nmwg/base/2.0/",
+    select    => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+    nmtopo    => "http://ogf.org/schema/network/topology/base/20070828/",
+    topoid    => "http://ogf.org/schema/network/topology/id/20070828/",
+    ifevt     => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
+    nmtl2     => "http://ggf.org/ns/nmwg/topology/l2/3.0/",
     nmwgtopo3 => "http://ggf.org/ns/nmwg/topology/base/3.0/",
 );
 
 =head1 API
 
-The offered API is not meant for external use as many of the functions are
-relied upon by internal aspects of the perfSONAR-PS framework.
-
 =head2 init($self, $handler)
-    Called at startup by the daemon when this particular module is loaded into
-    the perfSONAR-PS deployment. Checks the configuration file for the
-    necessary items and fills in others when needed. Finally the message
-    handler loads the appropriate message types and eventTypes for this module.
-    Any other 'pre-startup' tasks should be placed in this function.
+
+Called at startup by the daemon when this particular module is loaded into the
+perfSONAR-PS deployment. Checks the configuration file for the necessary items
+and fills in others when needed. Finally the message handler loads the
+appropriate message types and eventTypes for this module. Any other
+'pre-startup' tasks should be placed in this function.
+
 =cut
 
 sub init {
@@ -83,7 +87,7 @@ sub init {
         $self->{LOGGER}->warn( "gLS Hints file not set, using default at \"http://www.perfsonar.net/gls.root.hints\"." );
     }
 
-    unless ( defined $self->{CONF}->{"status"}->{"enable_registration"} ) {
+    unless ( exists $self->{CONF}->{"status"}->{"enable_registration"} ) {
         $self->{LOGGER}->warn( "Disabling LS registration" );
         $self->{CONF}->{"status"}->{"enable_registration"} = 0;
     }
@@ -92,7 +96,7 @@ sub init {
         unless ( exists $self->{CONF}->{"status"}->{"ls_instance"}
             and $self->{CONF}->{"status"}->{"ls_instance"} )
         {
-            if ( defined $self->{CONF}->{"ls_instance"}
+            if ( exists $self->{CONF}->{"ls_instance"}
                 and $self->{CONF}->{"ls_instance"} )
             {
                 $self->{CONF}->{"status"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
@@ -105,7 +109,7 @@ sub init {
         unless ( exists $self->{CONF}->{"status"}->{"ls_registration_interval"}
             and $self->{CONF}->{"status"}->{"ls_registration_interval"} )
         {
-            if ( defined $self->{CONF}->{"ls_registration_interval"}
+            if ( exists $self->{CONF}->{"ls_registration_interval"}
                 and $self->{CONF}->{"ls_registration_interval"} )
             {
                 $self->{CONF}->{"status"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
@@ -182,25 +186,25 @@ sub init {
         $self->{LS_CLIENT} = perfSONAR_PS::Client::LS::Remote->new( \@ls_array, \%ls_conf, \@hints_array );
     }
 
-    if ( not defined $self->{CONF}->{"status"}->{"db_type"} or $self->{CONF}->{"status"}->{"db_type"} eq q{} ) {
+    if ( not exists $self->{CONF}->{"status"}->{"db_type"} or $self->{CONF}->{"status"}->{"db_type"} eq q{} ) {
         $self->{LOGGER}->error( "No database type specified" );
         return -1;
     }
 
-    my ($dbi_string, $username, $password, $table_prefix);
-    $username = $self->{CONF}->{"status"}->{"db_username"};
-    $password = $self->{CONF}->{"status"}->{"db_password"};
+    my ( $dbi_string, $username, $password, $table_prefix );
+    $username     = $self->{CONF}->{"status"}->{"db_username"};
+    $password     = $self->{CONF}->{"status"}->{"db_password"};
     $table_prefix = $self->{CONF}->{"status"}->{"db_prefix"};
 
     if ( lc( $self->{CONF}->{"status"}->{"db_type"} ) eq "sqlite" ) {
-        if ( not defined $self->{CONF}->{"status"}->{"db_file"} or $self->{CONF}->{"status"}->{"db_file"} eq q{} ) {
+        if ( not exists $self->{CONF}->{"status"}->{"db_file"} or $self->{CONF}->{"status"}->{"db_file"} eq q{} ) {
             $self->{LOGGER}->error( "You specified a SQLite Database, but then did not specify a database file(db_file)" );
             return -1;
         }
 
         my $file = $self->{CONF}->{"status"}->{"db_file"};
-        if ( defined $self->{DIRECTORY} ) {
-            if ( !( $file =~ "^/" ) ) {
+        if ( exists $self->{DIRECTORY} and $self->{DIRECTORY} ) {
+            unless ( $file =~ "^/" ) {
                 $file = $self->{DIRECTORY} . "/" . $file;
             }
         }
@@ -210,21 +214,21 @@ sub init {
     elsif ( lc( $self->{CONF}->{"status"}->{"db_type"} ) eq "mysql" ) {
         $dbi_string = "dbi:mysql";
 
-        if ( not defined $self->{CONF}->{"status"}->{"db_name"} or $self->{CONF}->{"status"}->{"db_name"} eq q{} ) {
+        if ( not exists $self->{CONF}->{"status"}->{"db_name"} or $self->{CONF}->{"status"}->{"db_name"} eq q{} ) {
             $self->{LOGGER}->error( "You specified a MySQL Database, but did not specify the database (db_name)" );
             return -1;
         }
 
         $dbi_string .= ":" . $self->{CONF}->{"status"}->{"db_name"};
 
-        if ( not defined $self->{CONF}->{"status"}->{"db_host"} or $self->{CONF}->{"status"}->{"db_host"} eq q{} ) {
+        if ( not exists $self->{CONF}->{"status"}->{"db_host"} or $self->{CONF}->{"status"}->{"db_host"} eq q{} ) {
             $self->{LOGGER}->error( "You specified a MySQL Database, but did not specify the database host (db_host)" );
             return -1;
         }
 
         $dbi_string .= ":" . $self->{CONF}->{"status"}->{"db_host"};
 
-        if ( defined $self->{CONF}->{"status"}->{"db_port"} and $self->{CONF}->{"status"}->{"db_port"} ne q{} ) {
+        if ( exists $self->{CONF}->{"status"}->{"db_port"} and $self->{CONF}->{"status"}->{"db_port"} ne q{} ) {
             $dbi_string .= ":" . $self->{CONF}->{"status"}->{"db_port"};
         }
     }
@@ -233,14 +237,14 @@ sub init {
         return -1;
     }
 
-	my $data_client = perfSONAR_PS::DB::Status->new();
-	unless ($data_client->init({ dbistring => $dbi_string, username => $username, password => $password, table_prefix => $table_prefix})) {
-		my $msg = "Problem creating database client";
-        $self->{LOGGER}->error($msg);
-		return -1;
-	}
+    my $data_client = perfSONAR_PS::DB::Status->new();
+    unless ( $data_client->init( { dbistring => $dbi_string, username => $username, password => $password, table_prefix => $table_prefix } ) ) {
+        my $msg = "Problem creating database client";
+        $self->{LOGGER}->error( $msg );
+        return -1;
+    }
 
-    my ($status, $res);
+    my ( $status, $res );
 
     $self->{DATA_CLIENT} = $data_client;
     ( $status, $res ) = $self->{DATA_CLIENT}->openDB;
@@ -254,7 +258,7 @@ sub init {
     if ( lc( $self->{CONF}->{"status"}->{"enable_e2emon_compatibility"} ) ) {
         if ( $self->{CONF}->{"status"}->{"e2emon_definitions_file"} ) {
             my $file = $self->{CONF}->{"status"}->{"e2emon_definitions_file"};
-            if ( defined $self->{DIRECTORY} ) {
+            if ( exists $self->{DIRECTORY} and $self->{DIRECTORY} ) {
                 if ( $file !~ "^/" ) {
                     $file = $self->{DIRECTORY} . "/" . $file;
                 }
@@ -296,7 +300,7 @@ sub init {
     }
     elsif ( $self->{CONF}->{"status"}->{"metadata_db_type"} eq "file" ) {
         my $file = $self->{CONF}->{"status"}->{"metadata_db_file"};
-        if ( defined $self->{DIRECTORY} ) {
+        if ( exists $self->{DIRECTORY} and $self->{DIRECTORY} ) {
             if ( $file !~ "^/" ) {
                 $file = $self->{DIRECTORY} . "/" . $file;
             }
@@ -324,10 +328,12 @@ sub init {
 }
 
 =head2 needLS($self)
-    This particular service (Status MA) should register with a lookup service. This
-    function simply returns the value set in the configuration file (either yes
-    or no, depending on user preference) to let other parts of the framework know
-    if LS registration is required.
+
+This particular service (Status MA) should register with a lookup service. This
+function simply returns the value set in the configuration file (either yes
+or no, depending on user preference) to let other parts of the framework know if
+LS registration is required.
+
 =cut
 
 sub needLS {
@@ -337,10 +343,12 @@ sub needLS {
 }
 
 =head2 registerLS($self $sleep_time)
-    Given the service information (specified in configuration) and the contents
-    of our metadata database, this function contacts the specified LS, and register
-    the metadata. The $sleep_time ref can be set to specify how long before the
-    perfSONAR-PS daemon should call the function again.
+
+Given the service information (specified in configuration) and the contents of
+our metadata database, this function contacts the specified LS, and register the
+metadata. The $sleep_time ref can be set to specify how long before the
+perfSONAR-PS daemon should call the function again.
+
 =cut
 
 sub registerLS {
@@ -397,7 +405,7 @@ sub getMetadata_topoid {
         return;
     }
 
-    ( $status, $res ) = $self->{DATA_CLIENT}->get_unique_ids({ });
+    ( $status, $res ) = $self->{DATA_CLIENT}->get_unique_ids( {} );
     if ( $status != 0 ) {
         my $msg = "Couldn't get identifiers from database: $res";
         $self->{LOGGER}->error( $msg );
@@ -447,10 +455,10 @@ sub getMetadata_compat {
         foreach my $endpoint ( @{ $link->{"endpoints"} } ) {
 
             # Skip if it's an external host
-            next if ( not defined $self->{NODES}->{ $endpoint->{name} } );
+            next unless exists $self->{NODES}->{ $endpoint->{name} };
 
             # Skip if we've already output the node
-            next if ( defined $output_endpoints{ $endpoint->{name} } );
+            next if exists $output_endpoints{ $endpoint->{name} };
 
             my $output = perfSONAR_PS::XML::Document->new();
 
@@ -542,11 +550,12 @@ sub handleEvent {
 
 =head2 handleNormalEvent ( $self, { output => 1, messageId => 1, messageType => 1, messageParameters => 1, eventType => 1, subject => 1, filterChain => 1, data => 1, rawRequest => 1, doOutputMetadata  => 1 } )
 
-    This function is called by the daemon whenever there is a metadata/data
-    pair for this instance to handle. This function resolves the select filter
-    chain, and then checks which type of "subject" it has. It can be one of a
-    key, a topological identifier subject or a "normal" subject. The function
-    then dispatches the request to the appropriate function.
+This function is called by the daemon whenever there is a metadata/data pair for
+this instance to handle. This function resolves the select filter chain, and
+then checks which type of "subject" it has. It can be one of a key, a
+topological identifier subject or a "normal" subject. The function then
+dispatches the request to the appropriate function.
+
 =cut
 
 sub handleNormalEvent {
@@ -567,15 +576,15 @@ sub handleNormalEvent {
         }
     );
 
-    my $output             = $args->{"output"};
-    my $messageId          = $args->{"messageId"};
-    my $messageType        = $args->{"messageType"};
-    my $message_args = $args->{"messageParameters"};
-    my $eventType          = $args->{"eventType"};
-    my $d                  = $args->{"data"};
-    my $raw_request        = $args->{"rawRequest"};
-    my @subjects           = @{ $args->{"subject"} };
-    my $doOutputMetadata   = $args->{doOutputMetadata};
+    my $output           = $args->{"output"};
+    my $messageId        = $args->{"messageId"};
+    my $messageType      = $args->{"messageType"};
+    my $message_args     = $args->{"messageParameters"};
+    my $eventType        = $args->{"eventType"};
+    my $d                = $args->{"data"};
+    my $raw_request      = $args->{"rawRequest"};
+    my @subjects         = @{ $args->{"subject"} };
+    my $doOutputMetadata = $args->{doOutputMetadata};
 
     my $md = $subjects[0];
 
@@ -639,11 +648,13 @@ sub handleNormalEvent {
 }
 
 =head2 handleRequest_Metadata ($self, { output=> 1, metadata => 1, metadata_id => 1, message_type => 1, start_time => 1, end_time => 1 })
-    This function handles requests that comes in with a subject metadata. It
-    then matches the given metadata against the metadata database, and then
-    outputs each matching metadata and then either outputs the key directly in
-    the case of a MetadataKeyRequest or calls a function to handle querying and
-    outputting the data.
+
+This function handles requests that comes in with a subject metadata. It then
+matches the given metadata against the metadata database, and then outputs each
+matching metadata and then either outputs the key directly in the case of a
+MetadataKeyRequest or calls a function to handle querying and outputting the
+data.
+
 =cut
 
 sub handleRequest_Metadata {
@@ -680,7 +691,7 @@ sub handleRequest_Metadata {
         $mds{$curr_md_id} = $md;
     }
 
-    my ( $status, $res);
+    my ( $status, $res );
 
     ( $status, $res ) = $self->{DATA_CLIENT}->openDB;
     if ( $status != 0 ) {
@@ -712,7 +723,8 @@ sub handleRequest_Metadata {
         }
 
         if ( $args->{message_type} eq "MetadataKeyRequest" ) {
-#            $self->{LOGGER}->debug( "Output: " . Dumper( \@elements ) );
+
+            #            $self->{LOGGER}->debug( "Output: " . Dumper( \@elements ) );
 
             # need to output the data
             startData( $args->{output}, "data." . genuid(), $new_md_id );
@@ -730,11 +742,13 @@ sub handleRequest_Metadata {
 }
 
 =head2 handleRequest_Topoid ($self, { output=> 1, metadata => 1, metadata_id => 1, message_type => 1, start_time => 1, end_time => 1 })
-    This function handles requests that comes in with a topology id subject
-    metadata. It then queries the database to see if that identifier exists,
-    and then returns that identifier.  If so, it outputs the key in the case of
-    a MetadataKeyRequest or calls a function to handle querying and outputting
-    the data.
+
+This function handles requests that comes in with a topology id subject
+metadata. It then queries the database to see if that identifier exists, and
+then returns that identifier.  If so, it outputs the key in the case of a
+MetadataKeyRequest or calls a function to handle querying and outputting the
+data.
+
 =cut
 
 sub handleRequest_Topoid {
@@ -764,9 +778,9 @@ sub handleRequest_Topoid {
     my $topo_id = $self->xPathFindValue( $args->{metadata}, "./topoid:subject" );
     $topo_id =~ s/^\s*//g;
     $topo_id =~ s/\s*$//g;
-    $topo_id = unescapeString($topo_id);
+    $topo_id = unescapeString( $topo_id );
 
-    if (not $topo_id) {
+    unless ( $topo_id ) {
         my $msg = "Database returned 0 results for search";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
@@ -777,6 +791,7 @@ sub handleRequest_Topoid {
     my @elements = ( $key );
 
     if ( $args->{message_type} eq "MetadataKeyRequest" ) {
+
         # need to output the key
         startData( $args->{output}, "data." . genuid(), $args->{metadata_id} );
         $self->outputKey( { output => $args->{output}, elements => \@elements, start_time => $args->{start_time}, end_time => $args->{end_time}, event_type => $args->{event_type} } );
@@ -792,10 +807,12 @@ sub handleRequest_Topoid {
 }
 
 =head2 handleRequest_Key ($self, { output=> 1, key => 1, metadata_id => 1, message_type => 1, start_time => 1, end_time => 1, output_metadata => 1 })
-    This function handles requests that comes in with a key. It parses the key 
-    and then either outputs a new key directly in the case of a
-    MetadataKeyRequest or calls a function to handle querying and outputting
-    the data for a SetupDataRequest.
+
+This function handles requests that comes in with a key. It parses the key and
+then either outputs a new key directly in the case of a MetadataKeyRequest or
+calls a function to handle querying and outputting the data for a
+SetupDataRequest.
+
 =cut
 
 sub handleRequest_Key {
@@ -825,7 +842,7 @@ sub handleRequest_Key {
 
     my ( $elements, $start_time, $end_time ) = $self->parseKey( $args->{key} );
 
-    if ( not $start_time ) {
+    unless ( $start_time ) {
         $start_time = $args->{start_time};
     }
 
@@ -833,7 +850,7 @@ sub handleRequest_Key {
         $start_time = $args->{start_time};
     }
 
-    if ( not $end_time ) {
+    unless ( $end_time ) {
         $end_time = $args->{end_time};
     }
 
@@ -863,11 +880,11 @@ sub handleRequest_Key {
 
 =head2 handleNormalEvent ( $self, { output => 1, messageId => 1, messageType => 1, messageParameters => 1, eventType => 1, subject => 1, filterChain => 1, data => 1, rawRequest => 1, doOutputMetadata  => 1 } )
 
-    This function is called whenever there is an E2EMon metadata/data pair for
-    this instance to handle. This function resolves the select filter chain,
-    and then checks which type of "subject" it has, either a key or a "normal"
-    subject. The function then dispatches the request to the appropriate
-    function.
+This function is called whenever there is an E2EMon metadata/data pair for this
+instance to handle. This function resolves the select filter chain, and then
+checks which type of "subject" it has, either a key or a "normal" subject. The
+function then dispatches the request to the appropriate function.
+
 =cut
 
 sub handleCompatEvent {
@@ -888,15 +905,15 @@ sub handleCompatEvent {
         }
     );
 
-    my $output             = $args->{"output"};
-    my $messageId          = $args->{"messageId"};
-    my $messageType        = $args->{"messageType"};
-    my $message_args = $args->{"messageParameters"};
-    my $eventType          = $args->{"eventType"};
-    my $d                  = $args->{"data"};
-    my $raw_request        = $args->{"rawRequest"};
-    my @subjects           = @{ $args->{"subject"} };
-    my $doOutputMetadata   = $args->{doOutputMetadata};
+    my $output           = $args->{"output"};
+    my $messageId        = $args->{"messageId"};
+    my $messageType      = $args->{"messageType"};
+    my $message_args     = $args->{"messageParameters"};
+    my $eventType        = $args->{"eventType"};
+    my $d                = $args->{"data"};
+    my $raw_request      = $args->{"rawRequest"};
+    my @subjects         = @{ $args->{"subject"} };
+    my $doOutputMetadata = $args->{doOutputMetadata};
 
     my $md = $subjects[0];
 
@@ -945,11 +962,13 @@ sub handleCompatEvent {
 }
 
 =head2 handleCompatRequest_Metadata ($self, { output=> 1, metadata => 1, metadata_id => 1, message_type => 1, start_time => 1, end_time => 1 })
-    This function handles E2EMon requests that comes in with a subject
-    metadata. It then matches the given metadata against the metadata database,
-    and then outputs each matching link and node and then either outputs the
-    key directly in the case of a MetadataKeyRequest or calls a function to
-    handle querying and outputting the data.
+
+This function handles E2EMon requests that comes in with a subject metadata. It
+then matches the given metadata against the metadata database, and then outputs
+each matching link and node and then either outputs the key directly in the case
+of a MetadataKeyRequest or calls a function to handle querying and outputting
+the data.
+
 =cut
 
 sub handleCompatRequest_Metadata {
@@ -1002,17 +1021,17 @@ sub handleCompatRequest_Metadata {
     foreach my $md ( $md_results->get_nodelist ) {
         my $curr_md_id = $md->getAttribute( "id" );
 
-        next if ( not $self->{E2EMON_MAPPING}->{$curr_md_id} );
+        next unless $self->{E2EMON_MAPPING}->{$curr_md_id};
         my $link = $self->{LINKS}->{ $self->{E2EMON_MAPPING}->{$curr_md_id} };
-        next if ( not $link );
+        next unless $link;
 
         foreach my $endpoint ( @{ $link->{"endpoints"} } ) {
 
             # Skip if it's an external host
-            next if ( not defined $self->{NODES}->{ $endpoint->{name} } );
+            next unless exists $self->{NODES}->{ $endpoint->{name} };
 
             # Skip if we've already output the node
-            next if ( defined $output_endpoints{ $endpoint->{name} } );
+            next if exists $output_endpoints{ $endpoint->{name} };
 
             startMetadata( $args->{output}, "metadata." . genuid(), q{}, undef );
             $args->{output}->startElement( prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub-" . $endpoint->{name} } );
@@ -1032,7 +1051,7 @@ sub handleCompatRequest_Metadata {
         endMetadata( $args->{output} );
 
         if ( $args->{message_type} eq "MetadataKeyRequest" ) {
-            ( $status, $res ) = $self->{DATA_CLIENT}->get_unique_ids({ });
+            ( $status, $res ) = $self->{DATA_CLIENT}->get_unique_ids( {} );
             if ( $status != 0 ) {
                 my $msg = "Couldn't get identifiers from database: $res";
                 $self->{LOGGER}->error( $msg );
@@ -1044,17 +1063,18 @@ sub handleCompatRequest_Metadata {
 
             startData( $args->{output}, "data." . genuid(), $mdId );
             $self->outputKey(
-                    {
+                {
                     output     => $args->{output},
                     elements   => $res,
                     start_time => $args->{start_time},
                     end_time   => $args->{end_time},
                     event_type => $args->{event_type}
-                    }
-                    );
+                }
+            );
             endData( $args->{output} );
         }
         else {
+
             #$self->{LOGGER}->debug( "Link to handle: " . Dumper( $link ) );
 
             $self->handleData(
@@ -1076,10 +1096,12 @@ sub handleCompatRequest_Metadata {
 }
 
 =head2 resolveSelectChain ($self, $filterChain)
-    This function takes the filter chain and tries to resolve it down to a
-    single time period. It only searches for chains with "startTime", "endTime"
-    or a specific time. This specific time can be "now" in which case the
-    returned startTime and endTime are 'undef'.
+
+This function takes the filter chain and tries to resolve it down to a single
+time period. It only searches for chains with "startTime", "endTime" or a
+specific time. This specific time can be "now" in which case the returned
+startTime and endTime are 'undef'.
+
 =cut
 
 sub resolveSelectChain {
@@ -1099,7 +1121,7 @@ sub resolveSelectChain {
 
         my $select_args = $self->xPathFind( $filter, './select:args', 1 );
 
-        if ( not $select_args ) {
+        unless ( $select_args ) {
             $self->{LOGGER}->debug( "Didn't find any select args" );
             next;
         }
@@ -1164,23 +1186,25 @@ sub resolveSelectChain {
 }
 
 =head2 parseKey ($self, $key)
-    Parses the nmwg keys that are generated and handed off to the users. The
-    "eventType" is added so that the daemon knows which module to dispatch the
-    key to.
+
+Parses the nmwg keys that are generated and handed off to the users. The
+"eventType" is added so that the daemon knows which module to dispatch the key
+to.
+
 =cut
 
 sub parseKey {
     my ( $self, $key ) = @_;
 
     my $key_params = $self->xPathFind( $key, "./nmwg:args", 1 );
-    if ( not $key_params ) {
+    unless ( $key_params ) {
         my $msg = "Invalid key";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.subject", $msg );
     }
 
     my $find_res = $self->xPathFind( $key_params, './nmwg:parameter[@name="maKey"]', 0 );
-    if ( not $find_res ) {
+    unless ( $find_res ) {
         my $msg = "Invalid key";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.subject", $msg );
@@ -1201,8 +1225,10 @@ sub parseKey {
 }
 
 =head2 createKey ($self, { output => 1, elements => 1, start_time => 0, end_time => 0, event_type => 0 })
-    Outputs a key to the specified XML output module with the specified
-    elements, start time, end time and event type.
+
+Outputs a key to the specified XML output module with the specified elements,
+start time, end time and event type.
+
 =cut
 
 sub outputKey {
@@ -1233,15 +1259,16 @@ sub outputKey {
 }
 
 =head2 handleData ( $self, { output => 1, metadata_id => 1, ids => 1, data_id => 0, start_time => 0, end_time => 0, output_ranges => 0, } )
-    Queries the backend database for the specified elemenets. The data returned
-    comes back as time ranges.  It then calls a function to return only those
-    ranges where data exists for all the elements. It then goes through those
-    common ranges and calculates the status of the combined element. It then
-    outputs that data to the specified XML output object. The output_ranges
-    parameter is used to ameliorate a difference between the ranged data that
-    the database contains, and the single point values E2EMon expects. If
-    ranges are not being output, it will output a single datum for the final
-    time for a period.
+
+Queries the backend database for the specified elemenets. The data returned
+comes back as time ranges.  It then calls a function to return only those ranges
+where data exists for all the elements. It then goes through those common ranges
+and calculates the status of the combined element. It then outputs that data to
+the specified XML output object. The output_ranges parameter is used to
+ameliorate a difference between the ranged data that the database contains, and
+the single point values E2EMon expects. If ranges are not being output, it will
+output a single datum for the final time for a period.
+
 =cut
 
 sub handleData {
@@ -1268,23 +1295,24 @@ sub handleData {
         $is_now = 1;
     }
 
-    if ( not $args->{data_id} ) {
+    unless ( $args->{data_id} ) {
         $args->{data_id} = "data." . genuid();
     }
 
     my %elements = ();
 
-    foreach my $element (@{ $args->{ids} } ) {
-        my ( $status, $res ) = $self->{DATA_CLIENT}->get_element_status( element_ids => [ $element] , start_time => $args->{start_time}, end_time => $args->{end_time} );
+    foreach my $element ( @{ $args->{ids} } ) {
+        my ( $status, $res ) = $self->{DATA_CLIENT}->get_element_status( element_ids => [$element], start_time => $args->{start_time}, end_time => $args->{end_time} );
         if ( $status != 0 ) {
             my $msg = "Couldn't get information about elements from database: $res";
             $self->{LOGGER}->error( $msg );
             throw perfSONAR_PS::Error_compat( "error.common.storage.fetch", $msg );
         }
 
-        if ($res->{$element}) {
+        if ( $res->{$element} ) {
             $elements{$element} = $res->{$element};
-        } else {
+        }
+        else {
             my $msg = "Couldn't get information about element $element from database. Assuming unknown";
 
             my $new_element = perfSONAR_PS::Status::Link->new( $element, $args->{start_time}, $args->{end_time}, "unknown", "unknown" );
@@ -1318,12 +1346,14 @@ sub handleData {
         if ( $first ) {
             @periods = @curr_periods;
             $first   = 0;
-#            $self->{LOGGER}->debug( "Periods: " . Dumper( \@periods ) );
+
+            #            $self->{LOGGER}->debug( "Periods: " . Dumper( \@periods ) );
             next;
         }
 
         @periods = $self->find_overlap( \@curr_periods, \@periods );
-#        $self->{LOGGER}->debug( "Periods: " . Dumper( \@periods ) );
+
+        #        $self->{LOGGER}->debug( "Periods: " . Dumper( \@periods ) );
     }
 
     if ( $is_now ) {
@@ -1335,7 +1365,7 @@ sub handleData {
         @periods = @tmp;
     }
 
-#    $self->{LOGGER}->debug( "Periods: " . Dumper( \@periods ) );
+    #    $self->{LOGGER}->debug( "Periods: " . Dumper( \@periods ) );
 
     startData( $args->{output}, $args->{data_id}, $args->{metadata_id}, undef );
     foreach my $period ( @periods ) {
@@ -1375,7 +1405,7 @@ sub handleData {
             }
         }
 
-#        $self->{LOGGER}->debug( "Period: " . Dumper( $period ) );
+        #        $self->{LOGGER}->debug( "Period: " . Dumper( $period ) );
 
         # if we can output the range, just output one datum with the range
         if ( $args->{output_ranges} ) {
@@ -1416,12 +1446,14 @@ sub handleData {
 }
 
 =head2 find_overlap ( $self, $array1, $array2 ) 
-    This function takes two arrays containing hashes with elements
-    "start_time", "end_time", "oper_status" and "admin_status". The arrays must be
-    sorted. The function will then go through and construct a new set of time
-    periods corresponding to the overlap between the two arrays. The returned
-    array will have a hash for each time period, and this hash will have the
-    combined oper_status and admin_status for both arrays.
+
+This function takes two arrays containing hashes with elements "start_time",
+"end_time", "oper_status" and "admin_status". The arrays must be sorted. The
+function will then go through and construct a new set of time periods
+corresponding to the overlap between the two arrays. The returned array will
+have a hash for each time period, and this hash will have the combined
+oper_status and admin_status for both arrays.
+
 =cut
 
 sub find_overlap {
@@ -1485,8 +1517,10 @@ sub find_overlap {
 }
 
 =head2 outputCompatNodeElement ( $self, $output, $node )
-    Outputs the specified node to the specified XML Output Object in the E2EMon
-    compatible format.
+
+Outputs the specified node to the specified XML Output Object in the E2EMon
+compatible format.
+
 =cut
 
 sub outputCompatNodeElement {
@@ -1495,19 +1529,19 @@ sub outputCompatNodeElement {
     $output->startElement( prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { id => $node->{"name"} } );
     $output->createElement( prefix => "nmwgtopo3", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => "TopologyPoint" );
     $output->createElement( prefix => "nmwgtopo3", tag => "name", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => $node->{"name"} );
-    if ( defined $node->{"city"} and $node->{"city"} ne q{} ) {
+    if ( exists $node->{"city"} and $node->{"city"} ne q{} ) {
         $output->createElement( prefix => "nmwgtopo3", tag => "city", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"city"} );
     }
-    if ( defined $node->{"country"} and $node->{"country"} ne q{} ) {
+    if ( exists $node->{"country"} and $node->{"country"} ne q{} ) {
         $output->createElement( prefix => "nmwgtopo3", tag => "country", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"country"} );
     }
-    if ( defined $node->{"latitude"} and $node->{"latitude"} ne q{} ) {
+    if ( exists $node->{"latitude"} and $node->{"latitude"} ne q{} ) {
         $output->createElement( prefix => "nmwgtopo3", tag => "latitude", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"latitude"} );
     }
-    if ( defined $node->{"longitude"} and $node->{"longitude"} ne q{} ) {
+    if ( exists $node->{"longitude"} and $node->{"longitude"} ne q{} ) {
         $output->createElement( prefix => "nmwgtopo3", tag => "longitude", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"longitude"} );
     }
-    if ( defined $node->{"institution"} and $node->{"institution"} ne q{} ) {
+    if ( exists $node->{"institution"} and $node->{"institution"} ne q{} ) {
         $output->createElement( prefix => "nmwgtopo3", tag => "institution", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/",, content => $node->{"institution"} );
     }
     $output->endElement( "node" );
@@ -1516,8 +1550,10 @@ sub outputCompatNodeElement {
 }
 
 =head2 outputCompatLinkElement ( $self, $output, $link )
-    Outputs the specified link to the specified XML Output Object in the E2EMon
-    compatible format.
+ 
+Outputs the specified link to the specified XML Output Object in the E2EMon
+compatible format.
+
 =cut
 
 sub outputCompatLinkElement {
@@ -1526,7 +1562,7 @@ sub outputCompatLinkElement {
     $output->startElement( prefix => "nmtl2", tag => "link", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/" );
     $output->createElement( prefix => "nmtl2", tag => "name",       namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"name"} );
     $output->createElement( prefix => "nmtl2", tag => "globalName", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"globalName"} );
-    $output->createElement( prefix => "nmtl2", tag => "type",       namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content    => $link->{"type"} );
+    $output->createElement( prefix => "nmtl2", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content => $link->{"type"} );
     foreach my $endpoint ( @{ $link->{"endpoints"} } ) {
         $output->startElement( prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $endpoint->{"name"} } );
         $output->createElement( prefix => "nmwgtopo3", tag => "role", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $endpoint->{"type"} );
@@ -1538,13 +1574,14 @@ sub outputCompatLinkElement {
 }
 
 =head2 constructE2EMonMetadataDB ( $self, $links, $nodes )
-    Takes the links and nodes produced by parseCompatCircuitsFile, and
-    constructs the E2EMon Metadata DB file. Due to how the E2EMon protocol
-    allows for querying the database, this metadata database does not look like
-    what is returned when you query for the entire database. It does not have
-    any nodes at the top-level, only links. Each link, instead of having the
-    pointers to the nodes as in the response metadata, has the node element
-    inside it.
+
+Takes the links and nodes produced by parseCompatCircuitsFile, and constructs
+the E2EMon Metadata DB file. Due to how the E2EMon protocol allows for querying
+the database, this metadata database does not look like what is returned when
+you query for the entire database. It does not have any nodes at the top-level,
+only links. Each link, instead of having the pointers to the nodes as in the 
+response metadata, has the node element inside it.
+
 =cut
 
 sub constructE2EMonMetadataDB {
@@ -1565,7 +1602,7 @@ sub constructE2EMonMetadataDB {
         $comparison_metadatadb->startElement( prefix => "nmtl2", tag => "link", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/" );
         $comparison_metadatadb->createElement( prefix => "nmtl2", tag => "name",       namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"name"} );
         $comparison_metadatadb->createElement( prefix => "nmtl2", tag => "globalName", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"globalName"} );
-        $comparison_metadatadb->createElement( prefix => "nmtl2", tag => "type",       namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content    => $link->{"type"} );
+        $comparison_metadatadb->createElement( prefix => "nmtl2", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content => $link->{"type"} );
         foreach my $endpoint ( @{ $link->{"endpoints"} } ) {
             if ( not $nodes->{ $endpoint->{"name"} } ) {
                 $comparison_metadatadb->startElement( prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $endpoint->{"name"} } );
@@ -1598,8 +1635,10 @@ sub constructE2EMonMetadataDB {
 }
 
 =head2 parseCompatCircuitsFile ( $self, $file)
-    Parses the E2EMon circuits file and returns the domain as a string, and the
-    links and nodes as hashes.
+
+Parses the E2EMon circuits file and returns the domain as a string, and the
+links and nodes as hashes.
+
 =cut
 
 sub parseCompatCircuitsFile {
@@ -1611,7 +1650,7 @@ sub parseCompatCircuitsFile {
     my $parser = XML::LibXML->new();
     my $doc;
     eval { $doc = $parser->parse_file( $file ); };
-    if ( $@ or not defined $doc ) {
+    if ( $EVAL_ERROR or not defined $doc ) {
         my $msg = "Couldn't parse links file $file: $@";
         $self->{LOGGER}->error( $msg );
         return ( -1, $msg );
@@ -1621,7 +1660,7 @@ sub parseCompatCircuitsFile {
 
     # Grab the domain field
     my $domain = findvalue( $conf, "domain" );
-    if ( not defined $domain ) {
+    unless ( $domain ) {
         my $msg = "No domain specified in configuration";
         $self->{LOGGER}->error( $msg );
         return ( -1, $msg );
@@ -1652,7 +1691,7 @@ sub parseCompatCircuitsFile {
             $node_name =~ s/[^a-zA-Z0-9_-]//g;
             $node_name = uc( $node_name );
 
-            if ( defined $nodes{$node_name} ) {
+            if ( exists $nodes{$node_name} ) {
                 my $msg = "Multiple endpoints have the name \"$node_name\"";
                 $self->{LOGGER}->error( $msg );
                 return ( -1, $msg );
@@ -1675,144 +1714,146 @@ sub parseCompatCircuitsFile {
     }
 
     # Grab the set of links
-    foreach my $type ("link", "circuit") {
-    $find_res = find( $conf, "./*[local-name()='$type']", 0 );
-    if ( $find_res ) {
-        foreach my $link ( $find_res->get_nodelist ) {
-            my $global_name = findvalue( $link, "globalName" );
-            my $local_name  = findvalue( $link, "localName" );
-            my $link_type;
+    foreach my $type ( "link", "circuit" ) {
+        $find_res = find( $conf, "./*[local-name()='$type']", 0 );
+        if ( $find_res ) {
+            foreach my $link ( $find_res->get_nodelist ) {
+                my $global_name = findvalue( $link, "globalName" );
+                my $local_name  = findvalue( $link, "localName" );
+                my $link_type;
 
-            if ( not defined $global_name or $global_name eq q{} ) {
-                my $msg = "Circuit has no global name";
-                $self->{LOGGER}->error( $msg );
-                return ( -1, $msg );
-            }
-
-            if ( not defined $local_name or $local_name eq q{} ) {
-                $local_name = $global_name;
-            }
-
-            my %subelements = ();
-
-            $find_res = find( $link, "./*[local-name()='elementID']", 0 );
-            if ( $find_res ) {
-                foreach my $topo_id ( $find_res->get_nodelist ) {
-                    my $id = $topo_id->textContent;
-
-                    if ( defined $subelements{$id} ) {
-                        my $msg = "Segment $id appears multiple times in link $global_name";
-                        $self->{LOGGER}->error( $msg );
-                        return ( -1, $msg );
-                    }
-
-                    $subelements{$id} = q{};
+                if ( not defined $global_name or $global_name eq q{} ) {
+                    my $msg = "Circuit has no global name";
+                    $self->{LOGGER}->error( $msg );
+                    return ( -1, $msg );
                 }
-            }
 
-            if ( scalar( keys %subelements ) == 0 ) {
-                my $msg = "No elements for link $global_name";
-                $self->{LOGGER}->error( $msg );
-                return ( -1, $msg );
-            }
-
-            my @endpoints = ();
-
-            my $num_endpoints = 0;
-
-            my $prev_domain;
-
-            $find_res = find( $link, "./*[local-name()='endpoint']", 0 );
-            if ( $find_res ) {
-                foreach my $endpoint ( $find_res->get_nodelist ) {
-                    my $node_type = $endpoint->getAttribute( "type" );
-                    my $node_name = $endpoint->getAttribute( "name" );
-
-                    if ( not defined $node_type or $node_type eq q{} ) {
-                        my $msg = "Node with unspecified type found";
-                        $self->{LOGGER}->error( $msg );
-                        return ( -1, $msg );
-                    }
-
-                    if ( not defined $node_name or $node_name eq q{} ) {
-                        my $msg = "Endpint needs to specify a node name";
-                        $self->{LOGGER}->error( $msg );
-                        return ( -1, $msg );
-                    }
-
-                    if ( $node_name !~ /-/ ) {
-                        $node_name = $domain . "-" . $node_name;
-                    }
-
-                    $node_name =~ s/[^a-zA-Z0-9_-]//g;
-                    $node_name = uc( $node_name );
-
-                    if ( lc( $node_type ) ne "demarcpoint" and lc( $node_type ) ne "endpoint" ) {
-                        my $msg = "Node found with invalid type $node_type. Must be \"DemarcPoint\" or \"EndPoint\"";
-                        $self->{LOGGER}->error( $msg );
-                        return ( -1, $msg );
-                    }
-
-                    my ( $domain, @junk ) = split( /-/, $node_name );
-                    if ( not defined $prev_domain ) {
-                        $prev_domain = $domain;
-                    }
-                    elsif ( $domain eq $prev_domain ) {
-                        $link_type = "DOMAIN_Link";
-                    }
-                    else {
-                        $link_type = "ID_LinkPartialInfo";
-                    }
-
-                    my %new_endpoint = ();
-
-                    $new_endpoint{"type"} = $node_type;
-                    $new_endpoint{"name"} = $node_name;
-
-                    push @endpoints, \%new_endpoint;
-
-                    $num_endpoints++;
+                if ( not defined $local_name or $local_name eq q{} ) {
+                    $local_name = $global_name;
                 }
-            }
 
-            if ( $num_endpoints != 2 ) {
-                my $msg = "Invalid number of endpoints, $num_endpoints, must be 2";
-                $self->{LOGGER}->error( $msg );
-                return ( -1, $msg );
-            }
+                my %subelements = ();
 
-            my @subelements = keys %subelements;
+                $find_res = find( $link, "./*[local-name()='elementID']", 0 );
+                if ( $find_res ) {
+                    foreach my $topo_id ( $find_res->get_nodelist ) {
+                        my $id = $topo_id->textContent;
 
-            my %new_link = ();
+                        if ( exists $subelements{$id} ) {
+                            my $msg = "Segment $id appears multiple times in link $global_name";
+                            $self->{LOGGER}->error( $msg );
+                            return ( -1, $msg );
+                        }
 
-            $new_link{"globalName"}  = $global_name;
-            $new_link{"name"}        = $local_name;
-            $new_link{"subelements"} = \@subelements;
-            $new_link{"endpoints"}   = \@endpoints;
-            $new_link{"type"}        = $link_type;
+                        $subelements{$id} = q{};
+                    }
+                }
 
-            if ( defined $links{$local_name} ) {
-                my $msg = "Error: existing link of name $local_name";
-                $self->{LOGGER}->error( $msg );
-                return ( -1, $msg );
-            }
-            else {
-                $links{$local_name} = \%new_link;
+                if ( scalar( keys %subelements ) == 0 ) {
+                    my $msg = "No elements for link $global_name";
+                    $self->{LOGGER}->error( $msg );
+                    return ( -1, $msg );
+                }
+
+                my @endpoints = ();
+
+                my $num_endpoints = 0;
+
+                my $prev_domain;
+
+                $find_res = find( $link, "./*[local-name()='endpoint']", 0 );
+                if ( $find_res ) {
+                    foreach my $endpoint ( $find_res->get_nodelist ) {
+                        my $node_type = $endpoint->getAttribute( "type" );
+                        my $node_name = $endpoint->getAttribute( "name" );
+
+                        if ( not defined $node_type or $node_type eq q{} ) {
+                            my $msg = "Node with unspecified type found";
+                            $self->{LOGGER}->error( $msg );
+                            return ( -1, $msg );
+                        }
+
+                        if ( not defined $node_name or $node_name eq q{} ) {
+                            my $msg = "Endpint needs to specify a node name";
+                            $self->{LOGGER}->error( $msg );
+                            return ( -1, $msg );
+                        }
+
+                        if ( $node_name !~ /-/ ) {
+                            $node_name = $domain . "-" . $node_name;
+                        }
+
+                        $node_name =~ s/[^a-zA-Z0-9_-]//g;
+                        $node_name = uc( $node_name );
+
+                        if ( lc( $node_type ) ne "demarcpoint" and lc( $node_type ) ne "endpoint" ) {
+                            my $msg = "Node found with invalid type $node_type. Must be \"DemarcPoint\" or \"EndPoint\"";
+                            $self->{LOGGER}->error( $msg );
+                            return ( -1, $msg );
+                        }
+
+                        my ( $domain, @junk ) = split( /-/, $node_name );
+                        if ( not defined $prev_domain ) {
+                            $prev_domain = $domain;
+                        }
+                        elsif ( $domain eq $prev_domain ) {
+                            $link_type = "DOMAIN_Link";
+                        }
+                        else {
+                            $link_type = "ID_LinkPartialInfo";
+                        }
+
+                        my %new_endpoint = ();
+
+                        $new_endpoint{"type"} = $node_type;
+                        $new_endpoint{"name"} = $node_name;
+
+                        push @endpoints, \%new_endpoint;
+
+                        $num_endpoints++;
+                    }
+                }
+
+                if ( $num_endpoints != 2 ) {
+                    my $msg = "Invalid number of endpoints, $num_endpoints, must be 2";
+                    $self->{LOGGER}->error( $msg );
+                    return ( -1, $msg );
+                }
+
+                my @subelements = keys %subelements;
+
+                my %new_link = ();
+
+                $new_link{"globalName"}  = $global_name;
+                $new_link{"name"}        = $local_name;
+                $new_link{"subelements"} = \@subelements;
+                $new_link{"endpoints"}   = \@endpoints;
+                $new_link{"type"}        = $link_type;
+
+                if ( exists $links{$local_name} ) {
+                    my $msg = "Error: existing link of name $local_name";
+                    $self->{LOGGER}->error( $msg );
+                    return ( -1, $msg );
+                }
+                else {
+                    $links{$local_name} = \%new_link;
+                }
             }
         }
     }
-    }
 
-    $self->{LOGGER}->debug("Links: ".Dumper(\%links));
+    $self->{LOGGER}->debug( "Links: " . Dumper( \%links ) );
 
     return ( 0, $domain, \%links, \%nodes );
 }
 
 =head2 xPathFind ($self, $node, $query, $return_first)
-    Does the find for this module. It uses the XPath context containing all the
-    namespaces that this module knows about. This context is created when the
-    module is initialized. If the "$return_first" is set to true, it returns
-    the first node of the list.
+
+Does the find for this module. It uses the XPath context containing all the
+namespaces that this module knows about. This context is created when the module
+is initialized. If the "$return_first" is set to true, it returns the first node
+of the list.
+
 =cut
 
 sub xPathFind {
@@ -1833,8 +1874,10 @@ sub xPathFind {
 }
 
 =head2 xPathFindValue ($self, $node, $query)
-    This function is analogous to the xPathFind function above. Unlike the
-    above, this function returns the text content of the nodes found.
+
+This function is analogous to the xPathFind function above. Unlike the above,
+this function returns the text content of the nodes found.
+
 =cut
 
 sub xPathFindValue {
@@ -1844,8 +1887,7 @@ sub xPathFindValue {
 
     $found_node = $self->xPathFind( $node, $xpath, 1 );
 
-    return if ( not defined $found_node );
-
+    return unless $found_node;
     return $found_node->textContent;
 }
 
@@ -1855,19 +1897,24 @@ __END__
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::Common>,L<perfSONAR_PS::Messages>,L<perfSONAR_PS::Client::LS::Remote>,
-L<perfSONAR_PS::DB::Status>,L<perfSONAR_PS::Utils::ParameterValidation>,
-L<perfSONAR_PS::Services::MA::General>,
+L<Log::Log4perl>, L<Params::Validate>, L<Data::Dumper>, L<English>,
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>,
+L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::DB::Status>,
+L<perfSONAR_PS::Status::Link>, L<perfSONAR_PS::Utils::ParameterValidation>,
+L<perfSONAR_PS::Services::MA::General>
 
-To join the 'perfSONAR-PS' mailing list, please visit:
+To join the 'perfSONAR Users' mailing list, please visit:
 
-https://mail.internet2.edu/wws/info/i2-perfsonar
+  https://mail.internet2.edu/wws/info/perfsonar-user
 
 The perfSONAR-PS subversion repository is located at:
 
-https://svn.internet2.edu/svn/perfSONAR-PS
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
 
 Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 
@@ -1879,12 +1926,13 @@ Aaron Brown, aaron@internet2.edu
 
 =head1 LICENSE
  
-You should have received a copy of the Internet2 Intellectual Property Framework along
-with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
  
-Copyright (c) 2004-2008, Internet2 and the University of Delaware
+Copyright (c) 2004-2009, Internet2 and the University of Delaware
 
 All rights reserved.
 
