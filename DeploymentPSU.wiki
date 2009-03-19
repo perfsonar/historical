@@ -80,14 +80,6 @@ SNMP monitoring is lightweight and would require installation in a single locati
 
  # _*SNMP Monitor*_ - One of the aforementioned tools will suffice.  These are normally available via the package manager for a given distribution.  
  # _*perfSONAR SNMP MA*_ - See [DeploymentPSU#SNMP_MA SNMP MA] for more info.
-
-=== Nagios ===
-
-[http://www.nagios.org/ Nagios] is a monitoring system that the Internet2 developers have been considering to perform the task of _monitoring the monitoring_.  Work here is still preliminary, but goals include:
-
- * Plugins to monitor perfSONAR services (liveness)
- * Plugins to monitor performance daemons (liveness)
- * Plugins to graph measurement data over time.
  
 === perfSONAR ===
 
@@ -144,11 +136,11 @@ Deployment involves the installation of finicky software:
 
 The following is a very loose schedule based on interests of PSU and development activities of Internet2.  
 
-=== Feb and March 2009 ===
+=== March and April 2009 ===
   
  
-Developers will be busy between current time and late March.  
- 
+Developers will be busy between current time and mid April in preparation of a perfSONAR-PS release.  
+
   
 ==== Internet2 Developers ==== 
 
@@ -158,8 +150,8 @@ Developer time will be focused on the release of new tools (perfsonar, owamp, bw
 || _*Date*_ || _*Activity*_ ||
 || Jan/Feb || OWAMP Release ||
 || Jan/Feb || BWCTL Release ||  
-|| Early March || Internet2 Repository - public availability ||
-|| March, 27 || perfSONAR-PS Release ||
+|| LAte March || Internet2 Repository - public availability ||
+|| April, 2 || perfSONAR-PS Release ||
 
 
 ==== Penn State Staff ==== 
@@ -168,14 +160,18 @@ Developer time will be focused on the release of new tools (perfsonar, owamp, bw
 PSU time can be focused on either testing new releases or deploying existing tools.  
 
 || _*Date*_ || _*Activity*_ ||
-|| Early March || Configure Beacons to use Internet2 (and other) Repositories ||
-|| Early March || Ensure Beacons are NTP'd and TCP Tune'd ||
-|| March || Install BWCTL to Beacons, BWCTL Clients to NOC/IT machines ||
-|| Late March || Install OWAMP to Beacons, OWAMP Clients to NOC/IT machines ||
-|| Late March || Live CD deployment to selected locations (temporary) ||
+|| Late March/Early April || Configure Lab Beacons to use Internet2 (and other) Repositories ||
+|| Late March/Early April || Ensure Lab Beacons are NTP'd and TCP Tune'd ||
+|| Late March/Early April || Install BWCTL to Lab Beacons - In House Testing ||
+|| Late March/Early April || Install OWAMP to Lab Beacons - In House Testing ||
+|| April || Configure Production Beacons to use Internet2 (and other) Repositories ||
+|| April || Ensure Production Beacons are NTP'd and TCP Tune'd ||
+|| April || Install BWCTL to Production Beacons / Clients to NOC/IT machines ||
+|| April || Install OWAMP to Production Beacons / Clients to NOC/IT machines ||
+|| April || Live CD deployment to selected locations (temporary NDT Solution) ||
 
 
-=== April and May 2009 ===
+=== May and June 2009 ===
 
 
 Spring activities are centered on several development milestones, testing help would be most appreciated.
@@ -198,9 +194,11 @@ Developer time will be focused on additional releases (Performance Node) and bet
 PSU time can be spent deploying perfSONAR tools and testing new releases.
 
 || _*Date*_ || _*Activity*_ ||
-|| Mid April || Beta Testing of Live CD - Replace existing Live CDs ||
-|| April || perfSONAR-BUOY Deployment using Beacon machines ||
-|| Late April/May || Beta Testing of web100/NDT projects - selected live CD locations can be used for this ||
+|| Late April/Early May || Beta Testing of Live CD - Replace existing Live CDs ||
+|| Late April/Early May || perfSONAR-BUOY Deployment using Lab Beacon machines ||
+|| Late April/Early May || Beta Testing of web100/NDT projects on Lab Machines ||
+||  May/Early June || perfSONAR-BUOY Deployment using Production Beacon machines ||
+||  May/Early June || web100/NDT Deployment on Lab Machines||
 
 
 === Summer 2009 ===
