@@ -157,7 +157,7 @@ Developers are responsible for testing their code:
      * Shared/lib - <font color=green>_*DONE - 3/19*_</font>
    * Documentation Review
      * PingER - <font color=red>_*PENDING*_- </font>
-     * LS Registartion Daemon - <font color=red>_*PENDING*_</font>
+     * LS Registartion Daemon - <font color=red>_*PENDING*_- </font>
  * Aaron
    * Release Tasks
      * Branch SVN - <font color=green>_*Done - 3/2*_</font>
