@@ -5,7 +5,7 @@
 # %define init_script_2 ls_registration_daemon
 
 Name:           perl-perfSONAR_PS-TopologyService
-Version:        0.10
+Version:        3.1
 Release:        1%{?dist}
 Summary:        perfSONAR_PS Lookup Service Registration Daemon
 License:        distributable, see LICENSE
@@ -19,7 +19,7 @@ BuildArch:      noarch
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 %description
-XXX ADD A DESCRIPTION OF THE PACKAGE XXX
+The perfSONAR-PS Topology Service delivers stored topology information when queried.
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
@@ -48,7 +48,8 @@ mkdir -p /var/log/perfsonar
 chown perfsonar:perfsonar /var/log/perfsonar
 
 mkdir -p /var/lib/perfsonar/topology_service
-if [ ! -f /var/lib/perfsonar/topology_service/DB_CONFIG ]; then
+if [ ! -f /var/lib/perfsonar/topology_service/DB_CONFIG ];
+then
 	%{install_base}/scripts/psCreateTopologyDB --directory /var/lib/perfsonar/topology_service
 fi
 chown -R perfsonar:perfsonar /var/lib/perfsonar
@@ -66,5 +67,5 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/*
 
 %changelog
-* Wed Dec 10 2008 aaron@internet2.edu 0.10-1
+* Wed Dec 10 2008 aaron@internet2.edu 3.1-1
 - Initial service oriented spec file
