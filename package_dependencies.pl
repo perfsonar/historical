@@ -70,7 +70,7 @@ while ($files_left) {
     foreach my $file (keys %files) {
         $checked{$file} = 1;
 
-        my $type = `file $file`;
+        my $type = `file -b $file`;
 
 		# Skip non-Perl files
         next unless ($file =~ /\.pm$/ or $file =~ /\.pl$/ or $type =~ /Perl/ or $type =~ /perl/ or $file =~ /\.cgi/);
