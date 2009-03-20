@@ -44,7 +44,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::DB::Status;
-use perfSONAR_PS::Status::Link;
+use perfSONAR_PS::Status::Element;
 use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Services::MA::General;
 
@@ -1315,7 +1315,7 @@ sub handleData {
         else {
             my $msg = "Couldn't get information about element $element from database. Assuming unknown";
 
-            my $new_element = perfSONAR_PS::Status::Link->new( $element, $args->{start_time}, $args->{end_time}, "unknown", "unknown" );
+            my $new_element = perfSONAR_PS::Status::Element->new( $element, $args->{start_time}, $args->{end_time}, "unknown", "unknown" );
 
             $elements{$element} = [$new_element];
         }
@@ -1900,7 +1900,7 @@ __END__
 L<Log::Log4perl>, L<Params::Validate>, L<Data::Dumper>, L<English>,
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>,
 L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::DB::Status>,
-L<perfSONAR_PS::Status::Link>, L<perfSONAR_PS::Utils::ParameterValidation>,
+L<perfSONAR_PS::Status::Element>, L<perfSONAR_PS::Utils::ParameterValidation>,
 L<perfSONAR_PS::Services::MA::General>
 
 To join the 'perfSONAR Users' mailing list, please visit:

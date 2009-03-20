@@ -11,7 +11,10 @@ perfSONAR_PS::Collectors::Status::DeviceAgents::CoreDirector
 
 =head1 DESCRIPTION
 
-TBD
+This module polls a Ciena CoreDirector using TL1 for the operational and administrative
+status of its facilities. It will grab the operational and administrative status of all the
+facilities it's been configured to handle and store that information into a
+status database.
 
 =cut
 
@@ -155,7 +158,9 @@ sub init {
 
 =head2 check_facilities( $self )
 
-TBD
+A function which is called by the Base class to check on the status of
+faciltiies. The function checks all the facilities identified, and returns an
+array of hashes describing each facility and its status.
 
 =cut
 
@@ -530,7 +535,10 @@ sub check_facilities {
 
 =head2 checkVCG( $self, $vcg_name )
 
-TBD
+An internal function used to query the status of a specific Virtual
+Concatentation Group (VCG). It is used when a user has configured the service
+to check all VCGs as well as if the user has configured the service to check on
+EFLOWs or VLANs.
 
 =cut
 
@@ -572,7 +580,9 @@ sub checkVCG {
 
 =head2 checkETH( $self, $eth_aid )
 
-TBD
+An internal function used to query the status of a specific Ethernet port.  It
+is used when a user has configured the service to check an Ethernet port as
+well as if the user has configured the service to check on EFLOWs or VLANs.
 
 =cut
 
@@ -604,7 +614,8 @@ sub checkETH {
 
 =head2 connect( $self )
 
-TBD
+A function called by the Base class to connect to the device. It calls this
+before calling the "check_facilities" function.
 
 =cut
 
@@ -621,7 +632,8 @@ sub connect {
 
 =head2 disconnect( $self )
 
-TBD
+A function called by the Base class to disconnect fom the device. It calls this
+after calling the "check_facilities" function.
 
 =cut
 

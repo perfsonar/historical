@@ -26,7 +26,7 @@ Prints out a help message.
 sub usage {
     print "$0: Initialize a Topology Service database\n";
     print "  --directory: The directory to hold the database\n";
-	return;
+    return;
 }
 
 my $db_config = <<EOC

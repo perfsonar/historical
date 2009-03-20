@@ -11,7 +11,10 @@ perfSONAR_PS::Collectors::Status::DeviceAgents::HDXc
 
 =head1 DESCRIPTION
 
-TBD
+This module polls an HDXc using TL1 for the operational and administrative
+status of its facilities. It will grab the operational and administrative
+status of all the facilities it's been configured to handle and store that
+information into a status database.
 
 =cut
 
@@ -123,7 +126,9 @@ sub init {
 
 =head2 check_facilities( $self )
 
-TBD
+A function which is called by the Base class to check on the status of
+faciltiies. The function checks all the ports identified, and returns an array
+of hashes describing each facility and its status.
 
 =cut
 
@@ -279,7 +284,8 @@ sub check_facilities {
 
 =head2 connect( $self )
 
-TBD
+A function called by the Base class to connect to the device. It calls this
+before calling the "check_facilities" function.
 
 =cut
 
@@ -296,7 +302,8 @@ sub connect {
 
 =head2 disconnect( $self )
 
-TBD
+A function called by the Base class to disconnect fom the device. It calls this
+after calling the "check_facilities" function.
 
 =cut
 

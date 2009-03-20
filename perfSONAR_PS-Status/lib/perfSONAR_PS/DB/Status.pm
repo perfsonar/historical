@@ -11,7 +11,10 @@ perfSONAR_PS::DB::Status
 
 =head1 DESCRIPTION
 
-TBD
+A module that provides methods for storing and retrieving element status
+information. The module is to be treated as an object, where each instance of
+the object represents a direct connection to a single database and collection.
+Each method may then be invoked on the object for the specific database.  
 
 =cut
 
@@ -21,13 +24,14 @@ use perfSONAR_PS::Utils::ParameterValidation;
 use Data::Dumper;
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::Status::Common;
+use perfSONAR_PS::Status::Element;
 use English qw( -no_match_vars );
 
 use fields 'DB_CLIENT', 'LOGGER', 'USERNAME', 'PASSWORD', 'DBISTRING', 'STATUS_TABLE';
 
 =head2 new( $class )
 
-TBD
+Create a new object.
 
 =cut
 
@@ -41,7 +45,10 @@ sub new {
 
 =head2 init( $self, { dbistring => 1, username => 0, password => 0, table_prefix => 0 })
 
-TBD
+Initializes the database object. The dbistring is required as is a standard
+dbistring. The username and password are optional but must be specified if the
+database needs to be logged into. The table_prefix can be used to set what
+prefix the status table has; it defaults to "ps_" if unspecified.
 
 =cut
 
@@ -60,12 +67,12 @@ sub init {
 
     $self->{DB_CLIENT} = perfSONAR_PS::DB::SQL->new( { name => $self->{DBISTRING}, user => $self->{USERNAME}, pass => $self->{PASSWORD} } );
 
-    return 1;
+    return 0;
 }
 
 =head2 openDB($self)
 
-TBD
+Opens the dabatase.
 
 =cut
 
@@ -78,7 +85,7 @@ sub openDB {
 
 =head2 closeDB($self)
 
-TBD
+Closes the database.
 
 =cut
 
@@ -91,7 +98,9 @@ sub closeDB {
 
 =head2 get_element_status( $self, { element_ids => 1, start_time => 0, end_time => 0 })
 
-TBD
+A function to retrieves the status of one or more elements. It returns them as
+a hash with the keys being the element id and the value being an array of one
+or more perfSONAR_PS::Status::Element objects.
 
 =cut
 
@@ -133,7 +142,7 @@ sub get_element_status {
             $status[0] = $start_time if ( $status[0] < $start_time );
             $status[1] = $end_time   if ( $status[1] > $end_time );
 
-            $new_element = new perfSONAR_PS::Status::Link( $element_id, $status[0], $status[1], $status[2], $status[3] );
+            $new_element = perfSONAR_PS::Status::Element->new( $element_id, $status[0], $status[1], $status[2], $status[3] );
 
             if ( not defined $elements{$element_id} ) {
                 my @newa = ();
@@ -149,7 +158,12 @@ sub get_element_status {
 
 =head2 update_status( $self, { element_id => 1, time => 1, oper_status => 1, admin_status => 1, do_update => 0 })
 
-TBD
+A function to add new status information into the database. element_id is the
+identifier for the element. time is a unix timestamp describing when the status
+was measured. oper_status and admin_status are the operational and
+administrative status of the element. do_update is an optional parameter which
+can be used to specify that the database should create a range between this
+time with the previous measurement if they're the same.
 
 =cut
 
@@ -250,7 +264,7 @@ sub update_status {
 
 =head2 get_unique_ids($self)
 
-TBD
+A function to return the list of unique element ids in the database.
 
 =cut
 
@@ -282,6 +296,7 @@ __END__
 L<Params::Validate>, L<Log::Log4perl>,
 L<perfSONAR_PS::Utils::ParameterValidation>, L<Data::Dumper>,
 L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::Status::Common>, L<English>
+L<perfSONAR_PS::Status::Element>
 
 To join the 'perfSONAR Users' mailing list, please visit:
 

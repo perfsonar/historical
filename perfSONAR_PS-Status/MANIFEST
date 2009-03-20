@@ -15,7 +15,6 @@ lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
 lib/perfSONAR_PS/Client/LS/Remote.pm
 lib/perfSONAR_PS/Client/gLS.pm
-lib/perfSONAR_PS/Collectors/Base.pm
 lib/perfSONAR_PS/Collectors/Status.pm
 lib/perfSONAR_PS/Collectors/Status/Base.pm
 lib/perfSONAR_PS/Collectors/Status/DeviceAgents/Base.pm
@@ -42,7 +41,7 @@ lib/perfSONAR_PS/Services/Echo.pm
 lib/perfSONAR_PS/Services/MA/General.pm
 lib/perfSONAR_PS/Services/MA/Status.pm
 lib/perfSONAR_PS/Status/Common.pm
-lib/perfSONAR_PS/Status/Link.pm
+lib/perfSONAR_PS/Status/Element.pm
 lib/perfSONAR_PS/Time.pm
 lib/perfSONAR_PS/Transport.pm
 lib/perfSONAR_PS/Utils/Daemon.pm

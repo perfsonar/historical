@@ -101,7 +101,10 @@ sub init {
 
 =head2 check_facilities( $self )
 
-TBD
+A function which is called by the Base class to check on the status of
+interfaces. The function checks all the facilities identified, and returns an
+array of hashes describing each facility and its operational and administrative
+status.
 
 =cut
 
@@ -240,7 +243,8 @@ sub check_facilities {
 
 =head2 connect( $self )
 
-TBD
+A function called by the Base class to connect to the device. Since SNMP is a
+stateless protocol, this is a stub function.
 
 =cut
 
@@ -252,7 +256,8 @@ sub connect {
 
 =head2 disconnect( $self )
 
-TBD
+A function called by the Base class to disconnect fom the device. Since SNMP is
+a stateless protocol, this is a stub function.
 
 =cut
 

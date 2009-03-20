@@ -24,14 +24,14 @@ use base 'Exporter';
 
 our @EXPORT = qw( is_valid_oper_status is_valid_admin_status get_new_admin_status get_new_oper_status );
 
-my %valid_oper_states = (
+my %valid_oper_statuses = (
     up       => q{},
     down     => q{},
     degraded => q{},
     unknown  => q{},
 );
 
-my %valid_admin_states = (
+my %valid_admin_statuses = (
     normaloperation => q{},
     maintenance     => q{},
     troubleshooting => q{},
@@ -39,33 +39,35 @@ my %valid_admin_states = (
     unknown         => q{},
 );
 
-=head2 is_valid_oper_status($state)
+=head2 is_valid_oper_status($status)
 
-Checks if the given string is a valid operational state for a link.
+Checks if the given string is a valid operational status for a link.
 
 =cut
 
 sub is_valid_oper_status {
-    my ( $state ) = @_;
-    return 1 if ( defined $valid_oper_states{ lc( $state ) } );
+    my ( $status ) = @_;
+    return 1 if ( defined $valid_oper_statuses{ lc( $status ) } );
     return 0;
 }
 
-=head2 is_valid_admin_status($state)
+=head2 is_valid_admin_status($status)
 
-Checks if the given string is a valid administrative state for a link.
+Checks if the given string is a valid administrative status for a link.
 
 =cut
 
 sub is_valid_admin_status {
-    my ( $state ) = @_;
-    return 1 if ( exists $valid_admin_states{ lc( $state ) } );
+    my ( $status ) = @_;
+    return 1 if ( exists $valid_admin_statuses{ lc( $status ) } );
     return 0;
 }
 
 =head2 get_new_oper_status($old_oper_status, $new_oper_status)
 
-TBD
+A helper function that takes two operational status strings and returns the
+combined operational status. If this is used in a loop, the
+$old_oper_status variable should start off undefined.
 
 =cut
 
@@ -92,7 +94,9 @@ sub get_new_oper_status {
 
 =head2 get_new_admin_status($old_admin_status, $new_admin_status)
 
-TBD
+A helper function that takes two administrative status strings and returns the
+combined administrative status. If this is used in a loop, the
+$old_admin_status variable should start off undefined.
 
 =cut
 

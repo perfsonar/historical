@@ -19,8 +19,14 @@ use Getopt::Long;
 use DBI;
 use Carp;
 
+=head2 usage()
+
+A function to print out the command-line options understood by this script.
+
+=cut
+
 sub usage {
-    print "$0: Initialize a Link Status database\n";
+    print "$0: Initialize a Status database\n";
     print "  --type: The database type: 'sqlite' or 'mysql'\n";
     print "  --prefix: The prefix of the tables to create. defaults to 'ps_'\n";
     print "  If SQLite is chosen, you can use these arguments\n";

@@ -22,8 +22,6 @@ foreach my $file (@files) {
 
 		my $output;
 
-		print "grep -B 5 '^sub ' $file\n";
-
 		my @lines = ();
 		open(GREP, "-|", "grep -B 5 '^sub ' $file");
 		while(<GREP>) {

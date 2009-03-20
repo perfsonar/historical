@@ -418,8 +418,9 @@ sub handleEvent {
     }
     elsif ( $messageType eq "TSReplaceRequest" ) {
         $self->handleChangeTopologyRequest( $output, "replace", $md, $d );
-#    } elsif ($messageType eq "TSRemoveRequest") {
-#        $self->handleChangeTopologyRequest($output, "remove", $m, $d);
+
+        #    } elsif ($messageType eq "TSRemoveRequest") {
+        #        $self->handleChangeTopologyRequest($output, "remove", $m, $d);
     }
 
     return;
