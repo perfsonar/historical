@@ -1,65 +1,6 @@
-#
-#   run this script as:
-#   mysql -u root -p'mysql_root_password' < create_pingerMA_MySQL.sql 
-#
-#
-#
-#
-create  database if not exists pingerMA;
-grant all privileges on pingerMA.* to 'pinger'@'localhost' identified by 'CHANGEME_NOW';
-flush privileges;
-
-use pingerMA;
-drop  table if exists beacons;
-drop  table if exists address; 
-drop  table if exists regions; 
-drop  table if exists contacts; 
-drop  table if exists host; 
+drop  table if exists host;
 drop  table if exists metaData; 
-drop  table if exists data; 
-
-CREATE  TABLE   beacons (
-  ip_name varchar(52) NOT NULL,
-  alias    varchar(20),   
-  address_id   int,   
-  website  varchar(100),
-  dataurl  varchar(100),
-  traceurl  varchar(100),
-  longitude  float,
-  latitude  float,
-  contact_id int, 
-  updated timestamp,
-  FOREIGN KEY ( contact_id) references contacts ( contact_id), 
-  FOREIGN KEY ( address_id) references address  (  address_id), 
-  PRIMARY KEY (ip_name)); 
-#
-#   the full address of the site , could be couple of sites per address
-#
-CREATE  TABLE  address (
-  address_id  int AUTO_INCREMENT,
-  institution  varchar(100),
-  address_line varchar(200),
-  city  varchar(50),
-  country  varchar(50),
-  region_id  smallint,
-  FOREIGN KEY ( region_id) references  regions( region_id), 
-  PRIMARY KEY (address_id));
-
-#
-#   each site can be assigned to some region of the world( Asia, Europe, North_America etc)
-#
-CREATE TABLE   regions (
-  region_id  smallint AUTO_INCREMENT,
-  name varchar(20),
-  PRIMARY KEY (region_id));
-#
-#   each site can have multiple contact names and addresses
-#
-CREATE TABLE contacts (
-  contact_id int AUTO_INCREMENT,
-  person varchar(100),
-  email varchar(100),
-  PRIMARY KEY (contact_id));
+drop  table if exists data;
 # 
 # ------------------------------------The part above is for beacons and pinger website ( means administering tasks)--
 #

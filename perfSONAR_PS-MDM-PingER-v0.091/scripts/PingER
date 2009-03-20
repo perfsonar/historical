@@ -14,7 +14,7 @@ VARDIR=/var/run/PingER
 SERVICE=perfsonar-daemon.pl
 CONFIGBIN=psConfigureDaemon
 
-COLLECTORCONF=${CONFDIR}/pinger.conf
+COLLECTORCONF=${CONFDIR}/perfSONAR_pinger.conf
 LOGGERCONF=${CONFDIR}/logger.conf
 PIDDIR=${VARDIR}
 PIDFILE=pinger.pid
