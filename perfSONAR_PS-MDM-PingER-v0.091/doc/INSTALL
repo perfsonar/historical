@@ -35,56 +35,58 @@
 6) Edit Files (each is annotated with locations and instructions):
 
  
-  b) /etc/PingER/pinger.conf
-
-     This configuration file controls the perfSONAR web service
-
-  c) /etc/PingER/logger.conf
-
-     This file controls logging
-
-7) Create the database schema:
-
-
-         MySQl instructions:
-          -------------------
-          Edit MySQL startup script  /opt/perfsonar_ps/PingER/scripts/create_pingerMA_MySQL.sql.
-          Replace  CHANGEME_NOW  with any meaninfull password you'd like for Db pinger
-          user. This is just a DB user, not the actual system's user. You dont need to create
-          extra account.
-	  
-
-        Run:
- 
-         mysql -u root -p'mysql_root_password' <  /opt/perfsonar_ps/PingER/scripts/create_pingerMA_MySQL.sql 
-
-
-         SQLite instructions:
-         -------------------
- 
-
-        Run:
- 
-       sqlite3 /var/lib/PingER/pingerMA.db  <  /opt/perfsonar_ps/PingER/scripts/create_pingerMA_SQLite.sql 
-
-8)  Run config script:
-
-     /etc/init.d/rc.service config
-      
-      and answer all questions or accept defaults about desired location of the service/port/description etc...
+  Run configuration script:
+  ----------------------------
+   /opt/perfsonar_ps/PingER/bin/psConfigureDaemon
+  
+   and answer all questions or accept defaults about desired location of 
+   the service/port/description etc...
+   This script will attempt to create the MA database.
 
 	 
+   Check logging config file: 
+     
+      /etc/PingER/logger.conf
+    
+     
 9) Start the web service:
 
-	/etc/init.d/rc.service start
+	/etc/init.d/PingER start
 	
 	create symlinks to allow automated start/stop at the boot/shutdown time:
 	
-        ln -s /etc/init.d/rc.service /etc/rc2.d/S99pinger-ps
-        ln -s /etc/init.d/rc.service /etc/rc6.d/K02pinger-ps
-        ln -s /etc/init.d/rc.service /etc/rc0.d/K02pinger-ps
+        ln -s /etc/init.d/PingER  /etc/rc2.d/S99pinger-ps
+        ln -s /etc/init.d/PingEr  /etc/rc6.d/K02pinger-ps
+        ln -s /etc/init.d/PingER  /etc/rc0.d/K02pinger-ps
 
 10) Test the web service:
 
     /opt/perfsonar_ps/PingER/client/bin/pinger_client.pl
+    
+    it will print  something like this:
+    
+[netadmin@lhcopnmon1-mgm client]$ ./pinger_client.pl 
+Metadata: src=lhcopnmon1-mgm.fnal.gov dst=tier2.ucsd.edu  packetSize=1000
+Metadata Key(s): 8 :
+Metadata: src=lhcopnmon1.fnal.gov dst=cithep130.ultralight.org  packetSize=1000
+Metadata Key(s): 22 :
+Metadata: src=lhcopnmon1.fnal.gov dst=tier2.ihepa.ufl.edu  packetSize=1000
+Metadata Key(s): 21 :
+Metadata: src=lhcopnmon1-mgm.fnal.gov dst=pinger.fnal.gov  packetSize=1000
+Metadata Key(s): 1 :
+Metadata: src=lhcopnmon1.fnal.gov dst=phedex.rcac.purdue.edu  packetSize=1000
+Metadata Key(s): 15 :
+Metadata: src=lhcopnmon1-mgm.fnal.gov dst=www.cmsaf.mit.edu  packetSize=1000
+Metadata Key(s): 9 :
+Metadata: src=lhcopnmon1.fnal.gov dst=t2.unl.edu  packetSize=1000
+ 
+ ...
+ 
+ 
+ If it reported some errors then re-run your config  script.
+ If you think there is a bug then send bug report to the perfSONAR-PS mailing list.
+ See more information at:
+ 
+ http://code.google.com/p/perfsonar-ps/wiki/NPToolkit
+ 
     
