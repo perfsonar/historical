@@ -2,8 +2,8 @@ MANIFEST
 Makefile
 bin/create_landmarks.pl
 bin/perfsonar-daemon.pl
+bin/pinger_ConfigureDaemon
 bin/pinger_client.pl
-bin/psConfigureDaemon
 doc/INSTALL
 doc/LICENSE
 doc/README
@@ -97,6 +97,7 @@ lib/perfSONAR_PS/PINGER_DATATYPES/v2_0/select/Message/Metadata/Subject.pm
 lib/perfSONAR_PS/Request.pm
 lib/perfSONAR_PS/RequestHandler.pm
 lib/perfSONAR_PS/Services/Base.pm
+lib/perfSONAR_PS/Services/Echo.pm
 lib/perfSONAR_PS/Services/MA/General.pm
 lib/perfSONAR_PS/Services/MA/PingER.pm
 lib/perfSONAR_PS/Services/MP/Agent/Base.pm
@@ -111,6 +112,7 @@ lib/perfSONAR_PS/Transport.pm
 lib/perfSONAR_PS/Utils/DNS.pm
 lib/perfSONAR_PS/Utils/NetLogger.pm
 lib/perfSONAR_PS/Utils/ParameterValidation.pm
+lib/perfSONAR_PS/Utils/PingStats.pm
 lib/perfSONAR_PS/XML/Document.pm
 perl-perfSONAR_PS-MDM-PingER.spec
 scripts/create_pingerMA_MySQL.sql

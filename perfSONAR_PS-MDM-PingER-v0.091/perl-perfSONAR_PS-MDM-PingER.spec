@@ -61,8 +61,10 @@ Requires:   	perl(Term::ReadKey)
 Requires:   	perl(Time::HiRes)
 Requires:   	perl(XML::LibXML)
 Requires:	perl-DBD-MySQL
+Requires:	perl-DBD-SQLite
 Requires:	mysql-server
 Requires:       libdbi-dbd-mysql
+###Requires:       libdbi-dbd-sqlite
 
 %description
 The perfSONAR_PS PingER MA/MP allows one to make ICMP ping data available in SQL databases using the perfSONAR 
