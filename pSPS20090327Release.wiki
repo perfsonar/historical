@@ -217,9 +217,73 @@ Developers are responsible for testing their code:
      * perfSONAR-BUOY - <font color=red>_*PENDING*_ - </font>
    
 == Lessons Learned ==
+
+Lessons learned during the release and review process.  
+
+ * Start and end code reviews earlier
+ * Same for doc reviews
+ * Testing (unit tests - tests harness) should be ready pre-release
+ * Keep your documentation up to date 
+      
+=== Code Review Reviews ===
+
+This is a _*review of the reviews*_ so we can start to identify weak points in our development process and try to make things easier in the future.  
+
+==== Packaging ====
+
+Developers need to take care when preparing their packages, specifically:
+
+ * _*doc/*_ - Should contain:
+   * Changes - Changes (update each time)
+   * INSTALL - Installation Instructions
+   * LICENSE - should be uniform and up to date
+   * README - Other goodies not in INSTALL
+ * _*lib/*_ - If you are the only one using an item in Shared/lib, move it to your package. Otherwise symlink
+ * _*bin/*_ - Same as lib
+ * Keep your spec up to date, including the version and description.
+ * Use scripts to automate the process where required (this is what _*scripts/*_ is for)
+ * Uniform locations (and names) for:
+   * init scripts
+   * logging locations
+   * persistent file locations (e.g. xmldb, hints file, store file)
+ * _*Client/Request Messages*_ - Should be in every package.  Make messages to test the service as well as serve as examples.  Verbosity is encouraged.
+ 
+==== Code Rules ====
+
+We have [CodeRules rules] in place, we need to enforce and add to this list when applicable.  
+
+ * _*Use of perltidy*_ - Should use this *FREQUENTLY*, as in any time code is added.  It takes a moment to do before check-in.
+ * _*Use of perlcritic*_ - Should use this *FREQUENTLY* as well, especially before a release (which was not the case everywhere).
+ * _*Code Documentation*_ - We are not spending enough time entering and caring about this as a group.  I spent a lot of time re-arranging old documentation to fit the rules of the code, and even more time entering templates so the developers in question could fill the information in.  
+   * A change for next time - document inputs and outputs of each function
+ * _*Parameters*_ - Right after the prior release of pS-PS we decided to start converting to the method of passing parameters in the rules of the code (validation - named parameters).  So far new code for the most part is following these rules, and some legacy code has been completed but we are far from complete in trying to remove all old methods.  This needs to be a top priority after this release and before the next.  I will be assigning some folks to handle the transition via the issue tracker. 
+ * _*It/Unless Structure*_ - Need to be consistent about one liners.  Should use Unless instead of If/not (easier to read and understand)
+ * _*Spelling*_ - It does count, and Jason is normally the worst offender
+ 
+==== Design ====
+
+ * _*Architecture (daemon design)*_ - The ability to re-source files (stores, configs) should be done live instead of at start.  This is an outstanding issue for next dev cycle.  
+ * _*Architecture (daemon design)*_ - explicit exit of programs with proper codes - needs to be uniform
+ * _*Utilities*_ - Need some good framework utilities for:
+   * IP verification (structure and liveness)
+   * IPV6 (same)
+   * Hostnames
+   * other common tasks (errors, logging: we need something more formal than current offerings)
+ * _*Architecture (functions)*_ - Function length is an issue - should make an effort to subdivide at the functional level very soon.
+ * _*Complexity*_ - Some functions do a lot of things (no matter if they are long or short).  We should also make an effort to split functions into single task entities.  
+ * _*Config Styles*_ - We use several (e.g. homemade like OWP, standard like Config General, and sometimes homemade and ill-defined).  We need to settle on one, and use common methods of access.
+  
+==== Functionality ====
+
+ * _*Use of Time*_ - Should standardize when applicable.  For instance specify all in minutes instead of sometimes in seconds, minutes, hours, days, etc.  Failing this *label* very well. 
+ * _*Logging*_ - We need to define some rules of when to use each level of logging and where it is appropriate in the code (e.g. avoid double logging and under logging)
+ * _*Error Logging*_ - Use of Netlogger when applicable.  Also want to start including more context when available (e.g. SNMP MA should throw errors locally about specific RRD files it has a problem with, but not over the WS message) 
+ * _*Unit Tests*_ - Time was short so not a lot was done on this front, a major portion of the next release should be devoted to testing and profiling.
+
+=== Documentation Review Reviews ===
    
-_*Pending*_
-   
+_*PENDING*_   
+      
 == Last Updated ==
 
 $Id$
