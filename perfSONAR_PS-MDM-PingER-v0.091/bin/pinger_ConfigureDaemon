@@ -50,10 +50,10 @@ unless ($file) {
 my $tmp;
 our $default_hostname = hostname();
 our $hostname         = 'localhost';
-our $db_name          = q{};
+our $db_name          = q{pingerMA};
 our $db_port          = q{};
-our $db_username      = 'dbuser';
-our $db_password      = 'dbpass';
+our $db_username      = 'pinger';
+our $db_password      = 'pinger_pass';
 
 my %config = ();
 if ( -f $file ) {
@@ -82,10 +82,10 @@ if ( defined $config{"port"} ) {
 
 while (1) {
     my $input;
-    print "1) Set global values\n";
-    print "2) Add/Edit endpoint\n";
-    print "3) Enable/Disable port/endpoint\n";
-    print "4) Save configuration\n";
+    print "1) Set global values for the PingER MA/MP\n";
+    print "2) Add/Edit PingER endpoint\n";
+    print "3) Enable/Disable PingER  port/endpoint\n";
+    print "4) Save PingER configuration\n";
     print "5) Exit\n";
     $input = &ask( "? ", q{}, undef, '[12345]' );
 
@@ -204,7 +204,7 @@ while (1) {
         }
 
         do {
-            $input = &ask( "Enter endpoint in form 'port/endpoint_path' (e.g. 8080/perfSONAR_PS/services/SERVICE_NAME) or select from a number from the above ", q{}, undef, '^(\d+[\/].*|\d+)$' );
+            $input = &ask( "Enter endpoint in form 'port/endpoint_path' (e.g. 8075/perfSONAR_PS/services/pingerma) or select from a number from the above ", q{8075/perfSONAR_PS/services/pingerma}, undef, '^(\d+[\/].*|\d+)$' );
             if ( $input =~ /^\d+$/mx ) {
                 $input = $endpoints[$input];
             }
@@ -234,28 +234,7 @@ while (1) {
         my $valid_module = 0;
         my $module       = $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"};
         if ( defined $module ) {
-            if ( $module eq "perfSONAR_PS::Services::MA::SNMP" ) {
-                $module = "snmp";
-            }
-            elsif ( $module eq "perfSONAR_PS::Services::MA::Status" ) {
-                $module = "status";
-            }
-            elsif ( $module eq "perfSONAR_PS::Services::MA::CircuitStatus" ) {
-                $module = "circuitstatus";
-            }
-            elsif ( $module eq "perfSONAR_PS::Services::TS::TS" ) {
-                $module = "topology";
-            }
-            elsif ( $module eq "perfSONAR_PS::Services::LS::LS" ) {
-                $module = "ls";
-            }
-            elsif ( $module eq "perfSONAR_PS::Services::LS::gLS" ) {
-                $module = "gls";
-            }
-            elsif ( $module eq "perfSONAR_PS::Services::MA::perfSONARBUOY" ) {
-                $module = "perfsonarbuoy";
-            }
-            elsif ( $module eq "perfSONAR_PS::Services::MA::PingER" ) {
+            if ( $module eq "perfSONAR_PS::Services::MA::PingER" ) {
                 $module = "pingerma";
             }
             elsif ( $module eq "perfSONAR_PS::Services::MP::PingER" ) {
@@ -265,58 +244,23 @@ while (1) {
 
         my %opts;
         do {
-            $module = &ask( "Enter endpoint module [snmp,ls,gls,perfsonarbuoy,pingerma,pingermp,status,circuitstatus,topology] ", q{}, $module, q{} );
+            $module = &ask( "Enter endpoint module [pingerma,pingermp] ", q{}, $module, q{} );
             $module = lc($module);
 
-            if (   $module eq "snmp"
-                or $module eq "status"
-                or $module eq "ls"
-                or $module eq "gls"
-                or $module eq "circuitstatus"
-                or $module eq "topology"
-                or $module eq "perfsonarbuoy"
-                or $module eq "pingerma"
+            if ( $module eq "pingerma"
                 or $module eq "pingermp" )
             {
                 $valid_module = 1;
             }
         } while ( $valid_module == 0 );
-
+      
         unless ($hostname) {
             $hostname = &ask( "Enter the external host or IP for this machine ", $hostname, $default_hostname, '.+' );
         }
 
         my $accesspoint = &ask( "Enter the accesspoint for this service ", "http://$hostname:$port$endpoint", undef, '^http' );
 
-        if ( $module eq "snmp" ) {
-            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::SNMP";
-            config_snmp_ma( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
-        }
-        elsif ( $module eq "status" ) {
-            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::Status";
-            config_status_ma( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
-        }
-        elsif ( $module eq "circuitstatus" ) {
-            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::CircuitStatus";
-            config_circuitstatus_ma( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
-        }
-        elsif ( $module eq "topology" ) {
-            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::TS::TS";
-            config_topology_ma( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
-        }
-        elsif ( $module eq "ls" ) {
-            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::LS::LS";
-            config_ls( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
-        }
-        elsif ( $module eq "gls" ) {
-            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::LS::gLS";
-            config_gls( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
-        }
-        elsif ( $module eq "perfsonarbuoy" ) {
-            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::perfSONARBUOY";
-            config_perfsonarbuoy_ma( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
-        }
-        elsif ( $module eq "pingerma" ) {
+        if ( $module eq "pingerma" ) {
             $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"}       = "perfSONAR_PS::Services::MA::PingER";
             $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"service_type"} = "MA";
             config_pinger( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config, "pingerma" );
@@ -328,294 +272,7 @@ while (1) {
         }
     }
 }
-
-sub config_gls {
-    my ( $config, $accesspoint, $def_config ) = @_;
-
-    $config->{"gls"} = () unless exists $config->{"gls"};
-
-    $config->{"gls"}->{"root"}                     = "0";
-    $config->{"gls"}->{"enable_registration"}      = 1;
-    $config->{"gls"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", $config{"ls_registration_interval"}, $config->{"gls"}->{"ls_registration_interval"}, '^\d+$' );
-    $config->{"gls"}->{"ls_ttl"}                   = &ask( "Enter default TTL for registered data [in minutes] ", "60", $config->{"gls"}->{"ls_ttl"}, '\d+' );
-    $config->{"gls"}->{"metadata_db_name"}         = &ask( "Enter the directory of the XML database ", $confdir . "/ls-xmldb", $config->{"gls"}->{"metadata_db_name"}, '^\/' );
-    $config->{"gls"}->{"metadata_db_name"} .= "/" unless $config->{"gls"}->{"metadata_db_name"} =~ m/\/$/;
-    unless ( -d $config->{"gls"}->{"metadata_db_name"} ) {
-        system( "mkdir " . $config->{"gls"}->{"metadata_db_name"} );
-    }
-
-    if ( not -e $config->{"gls"}->{"metadata_db_name"} . "DB_CONFIG" ) {
-        my $RUN = q{};
-        open( $RUN, "perl " . $dirname . "makeDBConfig.pl |" );
-        my @result = <$RUN>;
-        close($RUN);
-        if ( $result[0] ) {
-            system( "mv " . $result[0] . " " . $config->{"gls"}->{"metadata_db_name"} . "DB_CONFIG" );
-        }
-        else {
-            return -1;
-        }
-    }
-
-    $config->{"gls"}->{"metadata_db_file"}         = "glsstore.dbxml";
-    $config->{"gls"}->{"metadata_summary_db_file"} = "glsstore-summary.dbxml";
-
-    $config->{"gls"}->{"maintenance_interval"} = &ask( "Enter the time between LS maintenance (summarization, cleaning) [in minutes] ", "30", $config->{"gls"}->{"maintenance_interval"}, '^\d+$' );
-
-    $config->{"gls"}->{"service_name"}        = &ask( "Enter a name for this service ", "Lookup Service", $config->{"gls"}->{"service_name"},        '.+' );
-    $config->{"gls"}->{"service_type"}        = &ask( "Enter the service type ",        "LS",             $config->{"gls"}->{"service_type"},        '.+' );
-    $config->{"gls"}->{"service_description"} = &ask( "Enter a service description ",   "Lookup Service", $config->{"gls"}->{"service_description"}, '.+' );
-    $config->{"gls"}->{"service_accesspoint"} = &ask( "Enter the service's URI ",       $accesspoint,     $config->{"gls"}->{"service_accesspoint"}, '^http:\/\/' );
-    return;
-}
-
-sub config_ls {
-    my ( $config, $accesspoint, $def_config ) = @_;
-
-    $config->{"ls"} = () unless exists $config->{"ls"};
-
-    $config->{"ls"}->{"enable_registration"} = 1;
-    $config->{"ls"}->{"ls_ttl"}              = &ask( "Enter default TTL for registered data [in minutes] ", "60", $config->{"ls"}->{"ls_ttl"}, '\d+' );
-    $config->{"ls"}->{"metadata_db_name"}    = &ask( "Enter the directory of the XML database ", $confdir . "/ls-xmldb", $config->{"ls"}->{"metadata_db_name"}, '^\/' );
-    $config->{"ls"}->{"metadata_db_name"} .= "/" unless $config->{"ls"}->{"metadata_db_name"} =~ m/\/$/;
-    unless ( -d $config->{"ls"}->{"metadata_db_name"} ) {
-        system( "mkdir " . $config->{"ls"}->{"metadata_db_name"} );
-    }
-
-    unless ( -e $config->{"ls"}->{"metadata_db_name"} . "DB_CONFIG" ) {
-        my $RUN = q{};
-        open( $RUN, "perl " . $dirname . "makeDBConfig.pl |" );
-        my @result = <$RUN>;
-        close($RUN);
-        if ( $result[0] ) {
-            system( "mv " . $result[0] . " " . $config->{"ls"}->{"metadata_db_name"} . "DB_CONFIG" );
-        }
-        else {
-            return -1;
-        }
-    }
-
-    $config->{"ls"}->{"metadata_db_file"} = "lsstore.dbxml";
-
-    $config->{"ls"}->{"maintenance_interval"} = &ask( "Enter the time between LS maintenance (cleaning) [in minutes] ", "30", $config->{"ls"}->{"maintenance_interval"}, '^\d+$' );
-
-    $config->{"ls"}->{"service_name"}        = &ask( "Enter a name for this service ", "Lookup Service", $config->{"ls"}->{"service_name"},        '.+' );
-    $config->{"ls"}->{"service_type"}        = &ask( "Enter the service type ",        "LS",             $config->{"ls"}->{"service_type"},        '.+' );
-    $config->{"ls"}->{"service_description"} = &ask( "Enter a service description ",   "Lookup Service", $config->{"ls"}->{"service_description"}, '.+' );
-    $config->{"ls"}->{"service_accesspoint"} = &ask( "Enter the service's URI ",       $accesspoint,     $config->{"ls"}->{"service_accesspoint"}, '^http:\/\/' );
-
-    return;
-}
-
-sub config_perfsonarbuoy_ma {
-    my ( $config, $accesspoint, $def_config ) = @_;
-
-    my $amiconfdir = $confdir;
-    $config->{"perfsonarbuoy"} = () unless exists $config->{"perfsonarbuoy"};
-
-    $config->{"perfsonarbuoy"}->{"owmesh"} = &ask( "Enter the directory *LOCATION* of the 'owmesh.conf' file: ", $amiconfdir, $config->{"perfsonarbuoy"}->{"owmesh"}, '.+' );
-    $amiconfdir                            = $config->{"perfsonarbuoy"}->{"owmesh"};
-    $config->{"perfsonarbuoy"}->{"legacy"} = "0";
-
-    $config->{"perfsonarbuoy"}->{"metadata_db_type"} = &ask( "Enter the database type to read from (file or xmldb) ", "file", $config->{"perfsonarbuoy"}->{"metadata_db_type"}, '(file|xmldb)' );
-
-    if ( $config->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
-        delete $config->{"perfsonarbuoy"}->{"metadata_db_file"} if $config->{"perfsonarbuoy"}->{"metadata_db_file"} and $config->{"perfsonarbuoy"}->{"metadata_db_file"} =~ m/dbxml$/mx;
-        $config->{"perfsonarbuoy"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML file ", $amiconfdir . "/psb-store.xml", $config->{"perfsonarbuoy"}->{"metadata_db_file"}, '\.xml$' );
-    }
-    elsif ( $config->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $config->{"perfsonarbuoy"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $amiconfdir . "/psb-xmldb", $config->{"perfsonarbuoy"}->{"metadata_db_name"}, '.+' );
-        $config->{"perfsonarbuoy"}->{"metadata_db_name"} .= "/" unless $config->{"perfsonarbuoy"}->{"metadata_db_name"} =~ m/\/$/;
-        unless ( -d $config->{"perfsonarbuoy"}->{"metadata_db_name"} ) {
-            system( "mkdir " . $config->{"perfsonarbuoy"}->{"metadata_db_name"} );
-        }
-
-        unless ( -e $config->{"perfsonarbuoy"}->{"metadata_db_name"} . "DB_CONFIG" ) {
-            my $RUN = q{};
-            open( $RUN, "perl " . $dirname . "makeDBConfig.pl |" );
-            my @result = <$RUN>;
-            close($RUN);
-            if ( $result[0] ) {
-                system( "mv " . $result[0] . " " . $config->{"perfsonarbuoy"}->{"metadata_db_name"} . "DB_CONFIG" );
-            }
-            else {
-                return -1;
-            }
-        }
-
-        delete $config->{"perfsonarbuoy"}->{"metadata_db_file"} if $config->{"perfsonarbuoy"}->{"metadata_db_file"} and $config->{"perfsonarbuoy"}->{"metadata_db_file"} =~ m/\.xml$/mx;
-        $config->{"perfsonarbuoy"}->{"metadata_db_file"} = "psbstore.dbxml";
-    }
-
-    $config->{"perfsonarbuoy"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes)", "0", $config->{"perfsonarbuoy"}->{"enable_registration"}, '^[01]$' );
-    my $registration_interval = $def_config->{"ls_registration_interval"};
-    $registration_interval = $config->{"perfsonarbuoy"}->{"ls_registration_interval"} if exists $config->{"perfsonarbuoy"}->{"ls_registration_interval"};
-    my $ls_instance = $def_config->{"ls_instance"};
-    $ls_instance = $config->{"perfsonarbuoy"}->{"ls_instance"} if exists $config->{"perfsonarbuoy"}->{"ls_instance"};
-    if ( $config->{"perfsonarbuoy"}->{"enable_registration"} eq "1" ) {
-        $config->{"perfsonarbuoy"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", "30", $registration_interval, '^\d+$' );
-        $config->{"perfsonarbuoy"}->{"ls_instance"} = &ask( "URL of an LS to register with ", q{}, $ls_instance, '^http:\/\/' );
-    }
-    else {
-        $config->{"perfsonarbuoy"}->{"ls_instance"}              = $ls_instance           if $ls_instance;
-        $config->{"perfsonarbuoy"}->{"ls_registration_interval"} = $registration_interval if $registration_interval;
-    }
-
-    $config->{"perfsonarbuoy"}->{"service_name"} = &ask( "Enter a name for this service ", "perfSONARBUOY MA", $config->{"perfsonarbuoy"}->{"service_name"}, '.+' );
-
-    $config->{"perfsonarbuoy"}->{"service_type"} = &ask( "Enter the service type ", "MA", $config->{"perfsonarbuoy"}->{"service_type"}, '.+' );
-
-    $config->{"perfsonarbuoy"}->{"service_description"} = &ask( "Enter a service description ", "perfSONARBUOY MA", $config->{"perfsonarbuoy"}->{"service_description"}, '.+' );
-
-    $config->{"perfsonarbuoy"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"perfsonarbuoy"}->{"service_accesspoint"}, '^http:\/\/' );
-
-    return;
-}
-
-sub config_snmp_ma {
-    my ( $config, $accesspoint, $def_config ) = @_;
-
-    $config->{"snmp"} = () unless exists $config->{"snmp"};
-
-    my $rrdtool = q{};
-    my $RRDTOOL = q{};
-    if ( open( $RRDTOOL, "which rrdtool |" ) ) {
-        $rrdtool = <$RRDTOOL>;
-        $rrdtool =~ s/rrdtool:\s+//mx if $rrdtool;
-        $rrdtool =~ s/\n//gmx         if $rrdtool;
-        close($RRDTOOL);
-    }
-
-    if ( open( $RRDTOOL, "whereis rrdtool |" ) ) {
-        $rrdtool = <$RRDTOOL>;
-        $rrdtool =~ s/rrdtool:\s+//mx if $rrdtool;
-        $rrdtool =~ s/\n//gmx         if $rrdtool;
-        close($RRDTOOL);
-    }
-
-    unless ($rrdtool) {
-        print "RRDTool binary not found, please install RRDTool.\n";
-        return -1;
-    }
-
-    my @rrd = split( / /, $rrdtool );
-    $config->{"snmp"}->{"rrdtool"} = &ask( "Enter the location of the RRD binary ", $rrd[0], $config->{"snmp"}->{"rrdtool"}, '.+' );
-
-    $config->{"snmp"}->{"default_resolution"} = &ask( "Enter the default resolution of RRD queries ", "300", $config->{"snmp"}->{"default_resolution"}, '^\d+$' );
-
-    my $makeStore = 0;
-    my @result    = ();
-    my $external  = &ask( "Use external monitoring source [e.g. cacti, cricket, mrtg, etc.] for metadata creation? (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
-    if ($external) {
-        $config->{"snmp"}->{"metadata_db_external"} = &ask( "Enter external monitoring source (none | cacti | cricket | mrtg ) ", "none", $config->{"snmp"}->{"metadata_db_external"}, '^(none|cacti|mrtg|cricket)$' );
-        if ( exists $config->{"snmp"}->{"metadata_db_external"} and $config->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
-            $config->{"snmp"}->{"metadata_db_external_source"} = &ask( "Enter cacti configuration file location (/path/to/file) ", "/etc/cacti/cactid.conf", $config->{"snmp"}->{"metadata_db_external_source"}, '\.conf$' );
-        }
-        elsif ( exists $config->{"snmp"}->{"metadata_db_external"} and $config->{"snmp"}->{"metadata_db_external"} eq "cricket" ) {
-
-            my $suggest = $ENV{CRICKET_HOME};
-            $suggest = "/home/cricket" unless $suggest;
-            $config->{"snmp"}->{"metadata_db_external_cricket_home"} = &ask( "Enter cricket home directory (/path/to/cricket) ", $suggest, $config->{"snmp"}->{"metadata_db_external_cricket_home"}, '.+' );
-            
-            $config->{"snmp"}->{"metadata_db_external_cricket_cricket"} = &ask( "Enter cricket install directory (/path/to/cricket/cricket) ", $config->{"snmp"}->{"metadata_db_external_cricket_home"}."/cricket", $config->{"snmp"}->{"metadata_db_external_cricket_cricket"}, '.+' );
-
-            $config->{"snmp"}->{"metadata_db_external_cricket_data"} = &ask( "Enter cricket data directory (/path/to/cricket/data) ", $config->{"snmp"}->{"metadata_db_external_cricket_home"}."/cricket-data", $config->{"snmp"}->{"metadata_db_external_cricket_data"}, '.+' );
-
-            $config->{"snmp"}->{"metadata_db_external_cricket_config"} = &ask( "Enter cricket config directory (/path/to/cricket/config) ", $config->{"snmp"}->{"metadata_db_external_cricket_home"}."/cricket-config", $config->{"snmp"}->{"metadata_db_external_cricket_config"}, '.+' );
-        }   
-    }
-    else {
-        $config->{"snmp"}->{"metadata_db_external"}        = "none";
-        $config->{"snmp"}->{"metadata_db_external_source"} = "";
-        my $makeStore = &ask( "Automatically generate a 'test' metadata database (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
-        if ($makeStore) {
-            my $RUN = q{};
-            open( $RUN, "perl " . $dirname . "makeStore.pl " . $confdir . " |" );
-            @result = <$RUN>;
-            close($RUN);
-            unless ( $result[0] ) {
-                return -1;
-            }
-        }
-    }
-
-    $config->{"snmp"}->{"metadata_db_type"} = &ask( "Enter the internal database type to read from (file or xmldb) ", "file", $config->{"snmp"}->{"metadata_db_type"}, '(file|xmldb)' );
-
-    if ( $config->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        delete $config->{"snmp"}->{"metadata_db_file"} if $config->{"snmp"}->{"metadata_db_file"} and $config->{"snmp"}->{"metadata_db_file"} =~ m/dbxml$/mx;
-        $config->{"snmp"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML file ", $confdir . "/snmp-store.xml", $config->{"snmp"}->{"metadata_db_file"}, '\.xml$' );
-        if ( $result[0] ) {
-            if ( -f $config->{"snmp"}->{"metadata_db_file"} ) {
-                system( "mv " . $config->{"snmp"}->{"metadata_db_file"} . " " . $config->{"snmp"}->{"metadata_db_file"} . "~" );
-            }
-            system( "mv " . $result[0] . " " . $config->{"snmp"}->{"metadata_db_file"} );
-        }
-        delete $config->{"snmp"}->{"db_autoload"}               if $config->{"snmp"}->{"db_autoload"};
-        delete $config->{"snmp"}->{"autoload_metadata_db_file"} if $config->{"snmp"}->{"autoload_metadata_db_file"};
-        delete $config->{"snmp"}->{"metadata_db_name"}          if $config->{"snmp"}->{"metadata_db_name"};
-    }
-    elsif ( $config->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $config->{"snmp"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/snmp-xmldb", $config->{"snmp"}->{"metadata_db_name"}, '.+' );
-        $config->{"snmp"}->{"metadata_db_name"} .= "/" unless $config->{"snmp"}->{"metadata_db_name"} =~ m/\/$/;
-        unless ( -d $config->{"snmp"}->{"metadata_db_name"} ) {
-            system( "mkdir " . $config->{"snmp"}->{"metadata_db_name"} );
-        }
-
-        unless ( -e $config->{"snmp"}->{"metadata_db_name"} . "DB_CONFIG" ) {
-            my $RUN = q{};
-            open( $RUN, "perl " . $dirname . "makeDBConfig.pl |" );
-            my @result = <$RUN>;
-            close($RUN);
-            if ( $result[0] ) {
-                system( "mv " . $result[0] . " " . $config->{"snmp"}->{"metadata_db_name"} . "DB_CONFIG" );
-            }
-            else {
-                return -1;
-            }
-        }
-
-        delete $config->{"snmp"}->{"metadata_db_file"} if $config->{"snmp"}->{"metadata_db_file"} and $config->{"snmp"}->{"metadata_db_file"} =~ m/\.xml$/mx;
-        $config->{"snmp"}->{"metadata_db_file"} = "snmpstore.dbxml";
-        if ( $result[0] ) {
-            $config->{"snmp"}->{"db_autoload"} = 1;
-            $config->{"snmp"}->{"autoload_metadata_db_file"} = &ask( "Enter the filename of the base XML file to load ", $confdir . "/snmp-store.xml", $config->{"snmp"}->{"autoload_metadata_db_file"}, '\.xml$' );
-            if ( -f $config->{"snmp"}->{"autoload_metadata_db_file"} ) {
-                system( "mv " . $config->{"snmp"}->{"autoload_metadata_db_file"} . " " . $config->{"snmp"}->{"autoload_metadata_db_file"} . "~" );
-            }
-            system( "mv " . $result[0] . " " . $config->{"snmp"}->{"autoload_metadata_db_file"} );
-        }
-        else {
-            $config->{"snmp"}->{"db_autoload"} = &ask( "Would you like to auto-load the database [non-destructive] ? (0 for no, 1 for yes) ", "1", $config->{"snmp"}->{"db_autoload"}, '^[01]$' );
-            if ( $config->{"snmp"}->{"db_autoload"} eq "1" ) {
-                $config->{"snmp"}->{"autoload_metadata_db_file"} = &ask( "Enter the filename of the base XML file to load ", $confdir . "/store.xml", $config->{"snmp"}->{"autoload_metadata_db_file"}, '\.xml$' );
-            }
-        }
-    }
-
-    $config->{"snmp"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes)", "0", $config->{"snmp"}->{"enable_registration"}, '^[01]$' );
-    my $registration_interval = $def_config->{"ls_registration_interval"};
-    $registration_interval = $config->{"snmp"}->{"ls_registration_interval"} if exists $config->{"snmp"}->{"ls_registration_interval"};
-    my $ls_instance = $def_config->{"ls_instance"};
-    $ls_instance = $config->{"snmp"}->{"ls_instance"} if exists $config->{"snmp"}->{"ls_instance"};
-    if ( $config->{"snmp"}->{"enable_registration"} eq "1" ) {
-        $config->{"snmp"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", "30", $registration_interval, '^\d+$' );
-        $config->{"snmp"}->{"ls_instance"} = &ask( "URL of an LS to register with ", q{}, $ls_instance, '^http:\/\/' );
-    }
-    else {
-        $config->{"snmp"}->{"ls_instance"}              = $ls_instance           if $ls_instance;
-        $config->{"snmp"}->{"ls_registration_interval"} = $registration_interval if $registration_interval;
-    }
-
-    $config->{"snmp"}->{"service_name"} = &ask( "Enter a name for this service ", "SNMP MA", $config->{"snmp"}->{"service_name"}, '.+' );
-
-    $config->{"snmp"}->{"service_type"} = &ask( "Enter the service type ", "MA", $config->{"snmp"}->{"service_type"}, '.+' );
-
-    $config->{"snmp"}->{"service_description"} = &ask( "Enter a service description ", "SNMP MA", $config->{"snmp"}->{"service_description"}, '.+' );
-
-    $config->{"snmp"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"snmp"}->{"service_accesspoint"}, '^http:\/\/' );
-
-    return;
-}
+ 
 
 sub config_pinger {
     my ( $config, $accesspoint, $def_config, $modulename ) = @_;
@@ -646,13 +303,19 @@ sub config_pinger {
 	}	
     }
     elsif ( $config->{$modulename}->{"db_type"} eq "mysql" ) {
-        $config->{$modulename}->{db_name} = &ask( "Enter the name of the MySQL database ",                                $db_name,          $config->{$modulename}->{"db_name"}, '.+' );
-        $config->{$modulename}->{db_host} = &ask( "Enter the host for the MySQL database ",                               $default_hostname, $config->{$modulename}->{"db_host"}, '.+' );
-        $tmp                                = &ask( "Enter the port for the MySQL database (leave blank for the default) ", $db_port,          $config->{$modulename}->{"db_port"}, '^\d*$' );
-        $config->{$modulename}->{db_port} = $tmp if ( $tmp ne "" );
-        $tmp = &ask( "Enter the username for the MySQL database (leave blank for default) ", $db_username, $config->{$modulename}->{"db_username"}, '' );
+        $config->{$modulename}->{db_name}   = &ask( "Enter the name of the MySQL database ",
+	                                            $config->{pingerma}->{db_name} || $config->{pingermp}->{db_name} || $db_name,
+	                                            $config->{$modulename}->{db_name}, '.+' );
+        $config->{$modulename}->{db_host}   = 'localhost';
+        $tmp                                = &ask( "Enter the port for the MySQL database (leave blank for the default) ", $db_port, $config->{$modulename}->{db_port}, '^\d*$' );
+        $config->{$modulename}->{db_port}   = $tmp if ( $tmp ne "" );
+        $tmp                                = &ask( "Enter the username for the MySQL database (leave blank for default) ", 
+	                                            $config->{pingerma}->{db_username} ||  $config->{pingermp}->{db_username} || $db_username, 
+	                                            $config->{$modulename}->{db_username}, '' );
         $config->{$modulename}->{db_username} = $tmp if ( $tmp ne "" );
-        $tmp = &ask( "Enter the password for the MySQL database (leave blank for default) ", $db_password, $config->{$modulename}->{"db_password"}, '' );
+        $tmp                                = &ask( "Enter the password for the MySQL database (leave blank for default) ",
+	                                            $config->{pingerma}->{db_password} || $config->{pingermp}->{db_password} || $db_password, 
+						    $config->{$modulename}->{"db_password"}, '' );
         $config->{$modulename}->{db_password} = $tmp if ( $tmp ne "" );
 	ReadMode 'noecho';
 	my $root_pass = &ask( "Enter the 'root' password for the MySQL database  ",  '',undef, '' );
@@ -663,12 +326,14 @@ sub config_pinger {
 	    require DBI;
 
 	    system("mysql -u root -p'$root_pass' -e 'create  database if not exists  $config->{$modulename}->{db_name}'");
-	    system("mysql -u root ->{db_username} -p'$root_pass' -e 'grant all privileges  $config->{$modulename}->{db_name}.* to 
-	            '$config->{$modulename}->{db_username}'@'localhost' identified by '$config->{$modulename}->{db_password}'");
-	    system("mysql -u root ->{db_username} -p'$root_pass' -e 'flush privileges'");
-	    system("mysql -u $config->{$modulename}->{db_username} -p'$config->{$modulename}->{db_password}' $config->{$modulename}->{db_name} < $dirname/../scripts/create_pingerMA_MySQL.sql");
-	 
-	    my $dbh = DBI->connect("dbi:mysql:database=$config->{$modulename}->{db_name}",  $config->{$modulename}->{db_username}, $config->{$modulename}->{db_password}, 
+	    print " DB created = $config->{$modulename}->{db_name} ...\n";
+	    system("mysql -u root -p'$root_pass' -e  \"grant all privileges on $config->{$modulename}->{db_name}.* to '$config->{$modulename}->{db_username}'\@'$config->{$modulename}->{db_host}' identified by '$config->{$modulename}->{db_password}'\"");
+	    print " DB privileges set for $config->{$modulename}->{db_username}\@$config->{$modulename}->{db_host}...\n";
+	    system("mysql -u root -p'$root_pass' -e 'flush privileges'");
+	    print " DB privileges flushed...\n";
+	    system("mysql -u $config->{$modulename}->{db_username} -p'$config->{$modulename}->{db_password}' -h $config->{$modulename}->{db_host} -D $config->{$modulename}->{db_name} < $dirname/../scripts/create_pingerMA_MySQL.sql");
+	    print " DB tables created ...\n";
+	    my $dbh = DBI->connect("dbi:mysql:host=$config->{$modulename}->{db_host};database=$config->{$modulename}->{db_name}",  $config->{$modulename}->{db_username}, $config->{$modulename}->{db_password}, 
 	                            { AutoCommit => 1,
                                       RaiseError => 1 });
 	    $dbh->do("INSERT into host (ip_name, ip_number, comments) values ('test_name', '1.0.0.1', 'test')");
@@ -704,144 +369,7 @@ sub config_pinger {
     $config->{$modulename}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{$modulename}->{"service_accesspoint"}, '^http:\/\/' );
 
 }
-
-sub config_status_ma {
-    my ( $config, $accesspoint, $def_config ) = @_;
-
-    $config->{"status"} = () unless exists $config->{"status"};
-    $config->{"status"}->{"read_only"} = &ask( "Is this service read-only  (0 for no, 1 for yes) ", "0", $config->{"status"}->{"read_only"}, '^[01]$' );
-
-    $config->{"status"}->{"db_type"} = &ask( "Enter the database type to read from ", "sqlite|mysql", $config->{"status"}->{"db_type"}, '(sqlite|mysql)' );
-
-    if ( $config->{"status"}->{"db_type"} eq "sqlite" ) {
-        $config->{"status"}->{"db_file"} = &ask( "Enter the filename of the SQLite database ", "status.db", $config->{"status"}->{"db_file"}, '.+' );
-        $tmp = &ask( "Enter the table in the database to use ", "link_status", $config->{"status"}->{"db_table"}, '.+' );
-        $config->{"status"}->{"db_table"} = $tmp if ($tmp);
-    }
-    elsif ( $config->{"status"}->{"db_type"} eq "mysql" ) {
-        $config->{"status"}->{"db_name"} = &ask( "Enter the name of the MySQL database ",                               q{},         $config->{"status"}->{"db_name"}, '.+' );
-        $config->{"status"}->{"db_host"} = &ask( "Enter the host for the MySQL database ",                              "localhost", $config->{"status"}->{"db_host"}, '.+' );
-        $tmp                             = &ask( "Enter the port for the MySQL database (leave blank for the default)", q{},         $config->{"status"}->{"db_port"}, '^\d*$' );
-        $config->{"status"}->{"db_port"} = $tmp if ($tmp);
-        $tmp = &ask( "Enter the username for the MySQL database (leave blank for none) ", q{}, $config->{"status"}->{"db_username"}, q{} );
-        $config->{"status"}->{"db_username"} = $tmp if ($tmp);
-        $tmp = &ask( "Enter the password for the MySQL database (leave blank for none) ", q{}, $config->{"status"}->{"db_password"}, q{} );
-        $config->{"status"}->{"db_password"} = $tmp if ($tmp);
-        $tmp = &ask( "Enter the table in the database to use (leave blank for the default) ", "link_status", $config->{"status"}->{"db_table"}, q{} );
-        $config->{"status"}->{"db_table"} = $tmp if ($tmp);
-    }
-
-    $config->{"status"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes) ", "0", $config->{"status"}->{"enable_registration"}, '^[01]$' );
-
-    if ( $config->{"status"}->{"enable_registration"} eq "1" ) {
-        my $registration_interval = $def_config->{"ls_registration_interval"};
-        $registration_interval = $config->{"status"}->{"ls_registration_interval"} if ( defined $config->{"status"}->{"ls_registration_interval"} );
-        $config->{"status"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", "30", $registration_interval, '^\d+$' );
-
-        my $ls_instance = $def_config->{"ls_instance"};
-        $ls_instance = $config->{"status"}->{"ls_instance"} if ( defined $config->{"status"}->{"ls_instance"} );
-        $config->{"status"}->{"ls_instance"} = &ask( "URL of an LS to register with ", q{}, $ls_instance, '^http:\/\/' );
-
-        $config->{"status"}->{"service_name"} = &ask( "Enter a name for this service ", "Link Status MA", $config->{"status"}->{"service_name"}, '.+' );
-
-        $config->{"status"}->{"service_type"} = &ask( "Enter the service type ", "MA", $config->{"status"}->{"service_type"}, '.+' );
-
-        $config->{"status"}->{"service_description"} = &ask( "Enter a service description ", "Link Status MA", $config->{"status"}->{"service_description"}, '.+' );
-
-        $config->{"status"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"status"}->{"service_accesspoint"}, '^http:\/\/' );
-    }
-    return;
-}
-
-sub config_circuitstatus_ma {
-    my ( $config, $accesspoint, $def_config ) = @_;
-
-    $config->{"circuitstatus"} = () unless exists $config->{"circuitstatus"};
-    $config->{"circuitstatus"}->{"circuits_file_type"} = "file";
-
-    $config->{"circuitstatus"}->{"circuits_file"} = &ask( "Enter the file to get link information from ", q{}, $config->{"circuitstatus"}->{"circuits_file"}, '.+' );
-
-    $config->{"circuitstatus"}->{"status_ma_type"} = &ask( "Enter the MA to get status information from ", "sqlite|mysql", $config->{"circuitstatus"}->{"status_ma_type"}, '(sqlite|mysql|ma|ls)' );
-
-    if ( $config->{"circuitstatus"}->{"status_ma_type"} eq "ma" ) {
-        $config->{"circuitstatus"}->{"status_ma_uri"} = &ask( "Enter the URI of the Status MA ", q{}, $config->{"circuitstatus"}->{"status_ma_uri"}, '^http' );
-    }
-    elsif ( $config->{"circuitstatus"}->{"status_ma_type"} eq "ls" ) {
-        my $ls = $def_config->{"ls_instance"};
-        $ls = $config->{"circuitstatus"}->{"ls_instance"} if ( defined $config->{"circuitstatus"}->{"ls_instance"} );
-        $config->{"circuitstatus"}->{"ls_instance"} = &ask( "Enter the URI of the LS to get MA information from ", q{}, $ls, '^http' );
-    }
-    elsif ( $config->{"circuitstatus"}->{"status_ma_type"} eq "sqlite" ) {
-        $config->{"circuitstatus"}->{"status_ma_name"}  = &ask( "Enter the filename of the SQLite database ", q{},           $config->{"status"}->{"status_ma_name"},  '.+' );
-        $config->{"circuitstatus"}->{"status_ma_table"} = &ask( "Enter the table in the database to use ",    "link_status", $config->{"status"}->{"status_ma_table"}, '.+' );
-    }
-    elsif ( $config->{"circuitstatus"}->{"status_ma_type"} eq "mysql" ) {
-        $config->{"status"}->{"status_ma_name"} = &ask( "Enter the name of the MySQL database ",                               q{},         $config->{"status"}->{"status_ma_name"}, '.+' );
-        $config->{"status"}->{"status_ma_host"} = &ask( "Enter the host for the MySQL database ",                              "localhost", $config->{"status"}->{"status_ma_host"}, '.+' );
-        $tmp                                    = &ask( "Enter the port for the MySQL database (leave blank for the default)", q{},         $config->{"status"}->{"status_ma_port"}, '^\d*$' );
-        $config->{"status"}->{"status_ma_port"} = $tmp if ($tmp);
-        $tmp = &ask( "Enter the username for the MySQL database (leave blank for none) ", q{}, $config->{"status"}->{"status_ma_username"}, q{} );
-        $config->{"status"}->{"status_ma_username"} = $tmp if ($tmp);
-        $tmp = &ask( "Enter the password for the MySQL database (leave blank for none) ", q{}, $config->{"status"}->{"status_ma_password"}, q{} );
-        $config->{"status"}->{"status_ma_password"} = $tmp if ($tmp);
-        $config->{"circuitstatus"}->{"status_ma_table"} = &ask( "Enter the table in the database to use ", "link_status", $config->{"status"}->{"status_ma_table"}, '.+' );
-    }
-
-    $config->{"circuitstatus"}->{"topology_ma_type"} = &ask( "Enter the MA to get Topology information from ", "sqlite|mysql", $config->{"circuitstatus"}->{"topology_ma_type"}, '(xml|ma|none)' );
-
-    $config->{"circuitstatus"}->{"topology_ma_type"} = lc( $config->{"circuitstatus"}->{"topology_ma_type"} );
-
-    if ( $config->{"circuitstatus"}->{"topology_ma_type"} eq "xml" ) {
-        $config->{"topology"}->{"topology_ma_name"} = &ask( "Enter the directory of the XML database ", q{}, $config->{"topology"}->{"topology_ma_name"}, '.+' );
-        $config->{"topology"}->{"topology_ma_file"} = &ask( "Enter the filename of the XML database ",  q{}, $config->{"topology"}->{"topology_ma_file"}, '.+' );
-    }
-    elsif ( $config->{"circuitstatus"}->{"topology_ma_type"} eq "ma" ) {
-        $config->{"circuitstatus"}->{"topology_ma_uri"} = &ask( "Enter the URI of the Status MA ", q{}, $config->{"circuitstatus"}->{"topology_ma_uri"}, '^http' );
-    }
-
-    $config->{"circuitstatus"}->{"cache_length"} = &ask( "Enter length of time to cache 'current' results ", q{}, $config->{"circuitstatus"}->{"cache_length"}, '^\d+$' );
-    if ( $config->{"circuitstatus"}->{"cache_length"} > 0 ) {
-        $config->{"circuitstatus"}->{"cache_file"} = &ask( "Enter file to cache 'current' results in ", q{}, $config->{"circuitstatus"}->{"cache_file"}, '.+' );
-    }
-
-    $config->{"circuitstatus"}->{"max_recent_age"} = &ask( "Enter age in seconds at which a result is considered stale ", q{}, $config->{"circuitstatus"}->{"max_recent_age"}, '^\d+$' );
-    return;
-}
-
-sub config_topology_ma {
-    my ( $config, $accesspoint, $def_config ) = @_;
-
-    $config->{"topology"} = () unless exists $config->{"topology"};
-    $config->{"topology"}->{"db_type"} = "xml";
-
-    $config->{"topology"}->{"read_only"} = &ask( "Is this service read-only (0 for no, 1 for yes) ", "1", $config->{"topology"}->{"read_only"}, '^[01]$' );
-
-    $config->{"topology"}->{"db_environment"} = &ask( "Enter the directory of the XML database ", q{}, $config->{"topology"}->{"db_environment"}, '.+' );
-
-    $config->{"topology"}->{"db_file"} = &ask( "Enter the filename of the XML database ", q{}, $config->{"topology"}->{"db_file"}, '.+' );
-
-    $config->{"topology"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes) ", "0", $config->{"topology"}->{"enable_registration"}, '^[01]$' );
-
-    if ( $config->{"topology"}->{"enable_registration"} eq "1" ) {
-        my $registration_interval = $def_config->{"ls_registration_interval"};
-        $registration_interval = $config->{"topology"}->{"ls_registration_interval"} if ( defined $config->{"topology"}->{"ls_registration_interval"} );
-        $config->{"topology"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", "30", $registration_interval, '^\d+$' );
-
-        my $ls_instance = $def_config->{"ls_instance"};
-        $ls_instance = $config->{"topology"}->{"ls_instance"} if ( defined $config->{"topology"}->{"ls_instance"} );
-        $config->{"topology"}->{"ls_instance"} = &ask( "URL of an LS to register with ", q{}, $ls_instance, '^http:\/\/' );
-
-        $config->{"topology"}->{"service_name"} = &ask( "Enter a name for this service ", "Topology MA", $config->{"topology"}->{"service_name"}, '.+' );
-
-        $config->{"topology"}->{"service_type"} = &ask( "Enter the service type ", "MA", $config->{"topology"}->{"service_type"}, '.+' );
-
-        $config->{"topology"}->{"service_description"} = &ask( "Enter a service description ", "Topology MA", $config->{"topology"}->{"service_description"}, '.+' );
-
-        $config->{"topology"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"topology"}->{"service_accesspoint"}, '^http:\/\/' );
-    }
-    return;
-}
-
+ 
 sub ask {
     my ( $prompt, $value, $prev_value, $regex ) = @_;
 
@@ -989,6 +517,7 @@ $Id$
 
 Jason Zurawski, zurawski@internet2.edu
 Aaron Brown, aaron@internet2.edu
+Maxim Grigoriev, maxim_at_fnal_dot_gov
 
 =head1 LICENSE
 
