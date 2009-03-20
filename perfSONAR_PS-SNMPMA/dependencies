@@ -18,6 +18,8 @@ Module::Load
 Net::Ping
 Params::Validate
 RRDp
+Sleepycat::DbXml
+Socket
 Sys::Hostname
 Time::HiRes
 XML::LibXML
