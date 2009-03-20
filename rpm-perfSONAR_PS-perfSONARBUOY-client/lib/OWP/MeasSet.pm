@@ -1,5 +1,5 @@
 #
-#      $Id: MeasSet.pm 2115 2008-07-21 06:04:28Z boote $
+#      $Id$
 #
 #########################################################################
 #									#
@@ -64,7 +64,7 @@ use FindBin;
 use OWP::Conf;
 use OWP::Helper;
 
-$MeasSet::REVISION = '$Id: MeasSet.pm 2115 2008-07-21 06:04:28Z boote $';
+$MeasSet::REVISION = '$Id$';
 $MeasSet::VERSION='1.0';
 
 sub new {

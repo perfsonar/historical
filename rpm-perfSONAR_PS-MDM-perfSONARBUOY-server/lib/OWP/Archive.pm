@@ -1,5 +1,5 @@
 #
-#      $Id: Archive.pm 1262 2003-08-05 14:38:08Z boote $
+#      $Id$
 #
 #########################################################################
 #									#
@@ -33,7 +33,7 @@ use OWP::Utils;
 use File::Path;
 use DBI;
 
-$Archive::REVISION = '$Id: Archive.pm 1262 2003-08-05 14:38:08Z boote $';
+$Archive::REVISION = '$Id$';
 $Archive::VERSION='1.0';
 
 sub new {

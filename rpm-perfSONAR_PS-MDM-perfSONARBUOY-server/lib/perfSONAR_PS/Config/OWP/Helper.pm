@@ -1,5 +1,5 @@
 #
-#      $Id: Helper.pm 2224 2008-09-18 11:26:50Z zurawski $
+#      $Id$
 #
 #########################################################################
 #									#
@@ -33,7 +33,7 @@ use vars qw(@ISA @EXPORT $VERSION);
 @ISA = qw(Exporter);
 @EXPORT = qw(owpverify_args print_hash split_addr);
 
-$perfSONAR_PS::Config::OWP::REVISION = '$Id: Helper.pm 2224 2008-09-18 11:26:50Z zurawski $';
+$perfSONAR_PS::Config::OWP::REVISION = '$Id$';
 $VERSION = '1.0';
 
 sub owpverify_args{

@@ -1209,7 +1209,7 @@ feature requests, and improvements can be directed here:
 
 =head1 VERSION
 
-$Id: gLS.pm 2276 2008-10-09 18:08:14Z zurawski $
+$Id$
 
 =head1 AUTHOR
 

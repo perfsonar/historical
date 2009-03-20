@@ -934,7 +934,7 @@ feature requests, and improvements can be directed here:
 
 =head1 VERSION
 
-$Id: Remote.pm 2177 2008-08-27 17:13:19Z zurawski $
+$Id$
 
 =head1 AUTHOR
 

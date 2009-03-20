@@ -1,5 +1,5 @@
 #
-#      $Id: OWP.pm 2224 2008-09-18 11:26:50Z zurawski $
+#      $Id$
 #
 #########################################################################
 #									#
@@ -41,7 +41,7 @@ use perfSONAR_PS::Config::OWP::Utils;
 @ISA = qw(Exporter);
 @EXPORT = qw(daemonize setids);
 
-$perfSONAR_PS::Config::OWP::REVISION = '$Id: OWP.pm 2224 2008-09-18 11:26:50Z zurawski $';
+$perfSONAR_PS::Config::OWP::REVISION = '$Id$';
 $VERSION = '1.0';
 
 sub setids{

@@ -820,7 +820,7 @@ feature requests, and improvements can be directed here:
 
 =head1 VERSION
 
-$Id: LS.pm 2331 2008-11-07 03:48:46Z zurawski $
+$Id$
 
 =head1 AUTHOR
 

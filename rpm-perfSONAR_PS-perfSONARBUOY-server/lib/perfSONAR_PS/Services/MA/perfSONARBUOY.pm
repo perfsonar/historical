@@ -2507,7 +2507,7 @@ feature requests, and improvements can be directed here:
 
 =head1 VERSION
 
-$Id: perfSONARBUOY.pm 2371 2008-12-01 15:51:38Z zurawski $
+$Id$
 
 =head1 AUTHOR
 

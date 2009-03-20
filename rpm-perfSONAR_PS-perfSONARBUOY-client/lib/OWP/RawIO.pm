@@ -1,5 +1,5 @@
 #
-#      $Id: RawIO.pm 1803 2007-08-02 17:52:24Z boote $
+#      $Id$
 #
 #########################################################################
 #									#
@@ -37,7 +37,7 @@ use FindBin;
 @ISA = qw(Exporter);
 @EXPORT = qw(sys_readline sys_writeline);
 
-$RawIO::REVISION = '$Id: RawIO.pm 1803 2007-08-02 17:52:24Z boote $';
+$RawIO::REVISION = '$Id$';
 $VERSION = $RawIO::VERSION='1.0';
 
 sub sys_readline{

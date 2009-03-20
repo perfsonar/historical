@@ -656,7 +656,7 @@ Bugs, feature requests, and improvements can be directed here:
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 

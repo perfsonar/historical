@@ -1107,7 +1107,7 @@ feature requests, and improvements can be directed here:
 
 =head1 VERSION
 
-$Id: bwmaster.pl 2390 2008-12-17 16:48:16Z boote $
+$Id$
 
 =head1 AUTHOR
 

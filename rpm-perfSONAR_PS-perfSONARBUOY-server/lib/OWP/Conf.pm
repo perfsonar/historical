@@ -1,5 +1,5 @@
 #
-#      $Id: Conf.pm 2150 2008-08-15 17:08:26Z boote $
+#      $Id$
 #
 #########################################################################
 #									#
@@ -63,7 +63,7 @@ use strict;
 use FindBin;
 use OWP::Helper;
 
-$Conf::REVISION = '$Id: Conf.pm 2150 2008-08-15 17:08:26Z boote $';
+$Conf::REVISION = '$Id$';
 $Conf::VERSION='1.0';
 
 # Eventually set using $sysconfig autoconf variable.

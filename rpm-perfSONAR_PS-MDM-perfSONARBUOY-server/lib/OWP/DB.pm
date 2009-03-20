@@ -1,5 +1,5 @@
 #
-#      $Id: DB.pm 2115 2008-07-21 06:04:28Z boote $
+#      $Id$
 #
 #########################################################################
 #									#
@@ -31,7 +31,7 @@ use Term::ReadKey;
 @ISA = qw(Exporter);
 @EXPORT = qw(init_db);
 
-$DB::REVISION = '$Id: DB.pm 2115 2008-07-21 06:04:28Z boote $';
+$DB::REVISION = '$Id$';
 $VERSION = $DB::VERSION='1.0';
 
 sub init_db {

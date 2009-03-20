@@ -1,5 +1,5 @@
 #
-#      $Id: Conf.pm 2227 2008-09-18 17:05:18Z zurawski $
+#      $Id$
 #
 #########################################################################
 #									#
@@ -63,7 +63,7 @@ use strict;
 use FindBin;
 use perfSONAR_PS::Config::OWP::Helper;
 
-$perfSONAR_PS::Config::OWP::Conf::REVISION = '$Id: Conf.pm 2227 2008-09-18 17:05:18Z zurawski $';
+$perfSONAR_PS::Config::OWP::Conf::REVISION = '$Id$';
 $perfSONAR_PS::Config::OWP::Conf::VERSION='1.0';
 
 # Eventually set using $sysconfig autoconf variable.

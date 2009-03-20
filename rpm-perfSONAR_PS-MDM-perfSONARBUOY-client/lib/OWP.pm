@@ -1,5 +1,5 @@
 #
-#      $Id: OWP.pm 2087 2008-07-13 23:41:13Z boote $
+#      $Id$
 #
 #########################################################################
 #									#
@@ -41,7 +41,7 @@ use OWP::Utils;
 @ISA = qw(Exporter);
 @EXPORT = qw(daemonize setids);
 
-$OWP::REVISION = '$Id: OWP.pm 2087 2008-07-13 23:41:13Z boote $';
+$OWP::REVISION = '$Id$';
 $VERSION = '1.0';
 
 sub setids{

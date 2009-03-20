@@ -399,7 +399,7 @@ Bugs, feature requests, and improvements can be directed here:
 
 =head1 VERSION
 
-$Id: perfSONARBOUY.pm 1059 2008-03-07 02:30:34Z zurawski $
+$Id$
 
 =head1 AUTHOR
 

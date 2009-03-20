@@ -759,7 +759,7 @@ Bugs, feature requests, and improvements can be directed here:
 
 =head1 VERSION
 
-$Id: General.pm 2216 2008-09-16 13:45:24Z zurawski $
+$Id$
 
 =head1 AUTHOR
 

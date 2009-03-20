@@ -1,5 +1,5 @@
 #
-#      $Id: Utils.pm 2224 2008-09-18 11:26:50Z zurawski $
+#      $Id$
 #
 #########################################################################
 #									#
@@ -30,7 +30,7 @@ use POSIX;
 @ISA = qw(Exporter);
 @EXPORT = qw(time2owptime owptimeadd owpgmtime owptimegm owpgmstring owplocaltime owplocalstring owptrange owptime2time owptstampi owpi2owp owptstampdnum pldatetime owptstamppldatetime owptime2exacttime owpexactgmstring);
 
-$perfSONAR_PS::Config::OWP::Utils::REVISION = '$Id: Utils.pm 2224 2008-09-18 11:26:50Z zurawski $';
+$perfSONAR_PS::Config::OWP::Utils::REVISION = '$Id$';
 $VERSION = $perfSONAR_PS::Config::OWP::Utils::VERSION='1.0';
 
 use constant JAN_1970 => 0x83aa7e80; # offset in seconds

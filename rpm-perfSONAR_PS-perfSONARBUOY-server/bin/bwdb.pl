@@ -129,7 +129,7 @@ feature requests, and improvements can be directed here:
 
 =head1 VERSION
 
-$Id: bwdb.pl 2115 2008-07-21 06:04:28Z boote $
+$Id$
 
 =head1 AUTHOR
 

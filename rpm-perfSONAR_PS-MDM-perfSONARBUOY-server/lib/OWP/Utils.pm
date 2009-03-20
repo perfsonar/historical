@@ -1,5 +1,5 @@
 #
-#      $Id: Utils.pm 1807 2008-03-04 13:41:36Z zurawski $
+#      $Id$
 #
 #########################################################################
 #									#
@@ -30,7 +30,7 @@ use POSIX;
 @ISA = qw(Exporter);
 @EXPORT = qw(time2owptime owptimeadd owpgmtime owptimegm owpgmstring owplocaltime owplocalstring owptrange owptime2time owptstampi owpi2owp owptstampdnum pldatetime owptstamppldatetime owptime2exacttime owpexactgmstring);
 
-$Utils::REVISION = '$Id: Utils.pm 1807 2008-03-04 13:41:36Z zurawski $';
+$Utils::REVISION = '$Id$';
 $VERSION = $Utils::VERSION='1.0';
 
 use constant JAN_1970 => 0x83aa7e80; # offset in seconds
