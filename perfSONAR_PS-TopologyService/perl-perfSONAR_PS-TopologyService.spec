@@ -1,12 +1,12 @@
-%define install_base / opt / perfsonar_ps / topology_service
+%define install_base /opt/perfsonar_ps/topology_service
 
-    # init scripts must be located in the 'scripts' directory
-    %define init_script_1 topology_service
+# init scripts must be located in the 'scripts' directory
+%define init_script_1 topology_service
+# %define init_script_2 ls_registration_daemon
 
-    # %define init_script_2 ls_registration_daemon
-
-    Name : perl-perfSONAR_PS-TopologyService Version : 3.1 Release : 1 %{
-    ?dist}
+Name:           perl-perfSONAR_PS-TopologyService
+Version:        3.1
+Release:        1%{?dist}
 Summary:        perfSONAR_PS Topology Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -83,7 +83,7 @@ chown -R perfsonar:perfsonar /var/lib/perfsonar
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(0644,perfsonar,perfsonar,-)
+%defattr(0644,perfsonar,perfsonar,0755)
 %doc %{install_base}/doc/*
 %config %{install_base}/etc/*
 %attr(0755,perfsonar,perfsonar) %{install_base}/bin/*

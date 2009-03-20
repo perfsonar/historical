@@ -31,7 +31,7 @@ use lib "$Bin/../lib";
 
 use perfSONAR_PS::DB::TopologyXMLDB;
 use perfSONAR_PS::Client::Topology;
-use perfSONAR_PS::Topology::Common;
+use perfSONAR_PS::Topology::Common qw(normalizeTopology getTopologyNamespaces);
 use perfSONAR_PS::Topology::ID;
 use Log::Log4perl qw(:easy);
 use Getopt::Long;
@@ -100,7 +100,7 @@ my $doc    = $parser->parse_file( $input_file );
 # The MA will normalize it for us, if we're not sending to the MA, we need to
 # normalize unless the user has requested the normalized topology.
 if ( ( not exists $opts{URI} ) or $opts{URI} eq q{} or exists $opts{OUTPUT_FILE} ) {
-    ( $status, $res ) = topologyNormalize( $doc->documentElement() );
+    ( $status, $res ) = normalizeTopology( $doc->documentElement() );
     if ( $status != 0 ) {
         $logger->debug( "Error normalizing topology: $res" );
         exit( -1 );

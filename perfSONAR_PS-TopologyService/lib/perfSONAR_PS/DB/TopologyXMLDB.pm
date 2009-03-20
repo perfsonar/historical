@@ -30,6 +30,7 @@ use English qw( -no_match_vars );
 
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::Common;
+use perfSONAR_PS::Utils::ParameterValidation qw( validateParams );
 use perfSONAR_PS::Topology::Common qw( normalizeTopology validateDomain validateNode validatePort validateLink getTopologyNamespaces );
 use perfSONAR_PS::Topology::ID qw( idConstruct idIsFQ idAddLevel idRemoveLevel idBaseLevel idEncode idDecode idSplit idCompare idMatch idIsAmbiguous );
 
