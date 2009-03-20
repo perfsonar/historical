@@ -65,7 +65,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * Resolved
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=110 110] - _*Jason*_ - ~~perfSONAR-BUOY Data Query Error~~
    * Resolved 
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=112 112] - _*Jason*_ - supportedEventType Examples for SNMP/pSB 
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=112 112] - _*Jason*_ - ~~supportedEventType Examples for SNMP/pSB~~ 
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=116 116] - _*Jason*_ - ~~Migrate getRRDData to SNMP.pm~~
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=62 62] - _*Maxim*_ - ~~pingER-MA requires 'hostname" type attribute in endPointPair~~
    * Resolved
