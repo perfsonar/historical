@@ -11,7 +11,8 @@ perfSONAR_PS::Collectors::Status::ElementsWorker
 
 =head1 DESCRIPTION
 
-TBD
+A worker module for the Status collector that can be used to poll a group of
+elements, and store the results into a database.
 
 =cut
 

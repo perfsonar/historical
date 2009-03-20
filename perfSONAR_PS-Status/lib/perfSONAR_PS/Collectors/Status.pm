@@ -37,14 +37,14 @@ use perfSONAR_PS::Collectors::Status::ElementAgents::Script;
 
 use fields 'CHILDREN', 'WORKERS', 'CONF', 'DIRECTORY', 'LOGGER';
 
-=head2 new( $class, $conf, $directory )
+=head2 new( $class )
 
 TBD
 
 =cut
 
 sub new {
-    my ( $class, $conf, $directory ) = @_;
+    my ( $class ) = @_;
 
     my $self = fields::new( $class );
 
@@ -55,9 +55,12 @@ sub new {
     return $self;
 }
 
-=head2 init( $self, { conf, directory_offset } )
+=head2 init( $self, { \%conf, $directory_offset } )
 
-TBD
+A function to initializes the status collector. $conf is a hash from a
+Config::General.  Directory offset is the path to the configuration file. Any
+paths from to files used by the Status collector will be offset to this
+directory if they are relative paths.
 
 =cut
 
@@ -71,6 +74,7 @@ sub init {
         }
     );
 
+	# Creates the database client object that will be used by all the status collector agents
     my ( $status, $res ) = $self->create_database_client( { config => $args->{conf}, directory_offset => $args->{directory_offset} } );
     if ( $status != 0 ) {
         return ( $status, $res );
@@ -98,7 +102,8 @@ sub init {
 
 =head2 run( $self )
 
-TBD
+A function called by the collector daemon script. It forks off the collector
+agents and executes them.
 
 =cut
 
@@ -128,7 +133,7 @@ sub run {
 
 =head2 quit($self)
 
-Kills all the children for this process off. 
+Kills all the collector agents for this process off, and then exits.
 
 =cut
 
@@ -159,7 +164,9 @@ sub quit {
 
 =head2 create_workers( $self, { conf, directory_offset, database_client } )
 
-TBD
+A function that reads the configuration and returns worker agents for each of
+the elements to be monitored. It calls two function to create the different
+types of workers: device workers and element workers. 
 
 =cut
 
@@ -209,7 +216,9 @@ sub create_workers {
 
 =head2 create_device_workers( $self, { config, database_client, directory_offset } )
 
-TBD
+A function to read and allocate worker agents for each configured device. It
+reads through the configured devices and calls the specific function for
+parsing the device.
 
 =cut
 
@@ -258,7 +267,8 @@ sub create_device_workers {
 
 =head2 create_database_client( $self, { config, directory_offset } )
 
-TBD
+A function to read the database configuration from the config and create a
+database client.
 
 =cut
 
@@ -337,7 +347,8 @@ sub create_database_client {
 
 =head2 create_switch_worker( $self, { database_client, config, directory_offset } )
 
-TBD
+A function which parses the device type and calls the parsing function for each
+element type.
 
 =cut
 
@@ -371,7 +382,8 @@ sub create_switch_worker {
 
 =head2 create_switch_worker_tl1( $self, { database_client, config, directory_offset } )
 
-TBD
+A function which reads the type of TL1 device and passes it to the appropriate
+parsing function.
 
 =cut
 
@@ -411,7 +423,8 @@ sub create_switch_worker_tl1 {
 
 =head2 create_switch_worker_snmp( $self,  { database_client, config, directory_offset } )
 
-TBD
+A function that parses the attributes of an SNMP device and creates a worker
+that will query that device.
 
 =cut
 
@@ -486,7 +499,8 @@ sub create_switch_worker_snmp {
 
 =head2 create_switch_worker_coredirector( $self, { database_client, config, directory_offset } )
 
-TBD
+A function that parses the attributes of a CoreDirector device and creates a worker
+that will query that device.
 
 =cut
 
@@ -588,7 +602,8 @@ sub create_switch_worker_coredirector {
 
 =head2 create_switch_worker_ome( $self,  { database_client, config, directory_offset } )
 
-TBD
+A function that parses the attributes of a OME6500 device and creates a worker
+that will query that device.
 
 =cut
 
@@ -682,7 +697,8 @@ sub create_switch_worker_ome {
 
 =head2 create_switch_worker_hdxc( $self, { database_client, config, directory_offset } )
 
-TBD
+A function that parses the attributes of a HDXc device and creates a worker
+that will query that device.
 
 =cut
 
@@ -776,7 +792,10 @@ sub create_switch_worker_hdxc {
 
 =head2 create_element_workers( $self, { database_client, elements_file, directory_offset } )
 
-TBD
+A function which parses a file containing descriptions of individual elements
+to monitor. These elements can be monitored using a combination of scripts,
+SNMP interfaces or constant values. It iterates through the element
+descriptions in the file and calls a function to parse each element.
 
 =cut
 
@@ -841,7 +860,8 @@ sub create_element_workers {
 
 =head2 parse_element( $self, { xml_desc, directory_offset } )
 
-TBD
+A function to parse an XML representation of an element and create an hash
+representation of that element.
 
 =cut
 
@@ -906,7 +926,10 @@ sub parse_element {
 
 =head2 parse_element_agent( $self, { xml_desc, snmp_clients, directory_offset } )
 
-TBD
+A function which parses an XML representation of an agent. An agent can be
+monitor by running a script, querying an SNMP interface or simply returning a
+constant value. For an SNMP device, this routine will query for the ifIndex if
+it is not specified.
 
 =cut
 

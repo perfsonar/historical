@@ -141,21 +141,21 @@ sub check_facilities {
     my $wan_ports;
 
     if ( $self->{CHECK_ALL_OPTICAL_PORTS} or scalar( keys %{ $self->{OPTICAL_FACILITIES} } ) > 0 ) {
-        my ( $status, $res ) = $self->{AGENT}->getOCN();
+        my ( $status, $res ) = $self->{AGENT}->get_optical_facilities();
         if ( $status == 0 ) {
             $optical_ports = $res;
         }
     }
 
     if ( $self->{CHECK_ALL_ETHERNET_PORTS} or scalar( keys %{ $self->{ETHERNET_FACILITIES} } ) > 0 ) {
-        my ( $status, $res ) = $self->{AGENT}->getETH();
+        my ( $status, $res ) = $self->{AGENT}->get_ethernet_facilities();
         if ( $status == 0 ) {
             $ethernet_ports = $res;
         }
     }
 
     if ( $self->{CHECK_ALL_WAN_PORTS} or scalar( keys %{ $self->{WAN_FACILITIES} } ) > 0 ) {
-        my ( $status, $res ) = $self->{AGENT}->getWAN();
+        my ( $status, $res ) = $self->{AGENT}->get_wan_facilities();
         if ( $status == 0 ) {
             $wan_ports = $res;
         }

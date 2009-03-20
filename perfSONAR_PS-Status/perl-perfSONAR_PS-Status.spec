@@ -74,13 +74,13 @@ install -m 755 scripts/%{init_script_2}.new $RPM_BUILD_ROOT/etc/init.d/%{init_sc
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(-,perfsonar,perfsonar,-)
+%defattr(0644,perfsonar,perfsonar,-)
 %doc %{install_base}/doc/*
 %config %{install_base}/etc/*
-%{install_base}/bin/*
-%{install_base}/scripts/*
+%attr(0755,perfsonar,perfsonar) %{install_base}/bin/*
+%attr(0755,perfsonar,perfsonar) %{install_base}/scripts/*
 %{install_base}/lib/*
-/etc/init.d/*
+%attr(0755,perfsonar,perfsonar) /etc/init.d/*
 
 %post
 mkdir -p /var/log/perfsonar
@@ -94,6 +94,16 @@ then
 	%{install_base}/scripts/psCreateStatusDB --type sqlite --file /var/lib/perfsonar/status.db
 	chown perfsonar:perfsonar /var/lib/perfsonar/status.db
 fi
+
+/sbin/chkconfig --add %{init_script_1}
+/sbin/chkconfig --add %{init_script_2}
+
+%preun
+/etc/init.d/%{init_script_1} stop
+/sbin/chkconfig --del %{init_script_1}
+
+/etc/init.d/%{init_script_2} stop
+/sbin/chkconfig --del %{init_script_2}
 
 %changelog
 * Wed Dec 10 2008 aaron@internet2.edu 3.1-1

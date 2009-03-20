@@ -29,8 +29,8 @@ use Cwd;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use perfSONAR_PS::Client::Topology::XMLDB;
-use perfSONAR_PS::Client::Topology::MA;
+use perfSONAR_PS::DB::TopologyXMLDB;
+use perfSONAR_PS::Client::Topology;
 use perfSONAR_PS::Topology::Common;
 use perfSONAR_PS::Topology::ID;
 use Log::Log4perl qw(:easy);
@@ -123,14 +123,15 @@ foreach my $namespace ( @namespaces ) {
 
 my $client;
 if ( exists $opts{URI} and $opts{URI} ) {
-    $client = new perfSONAR_PS::Client::Topology::MA( $opts{URI} );
+    $client = new perfSONAR_PS::Client::Topology( $opts{URI} );
 }
 else {
     if ( not -d $opts{DB_DIR} ) {
         mkdir( $opts{DB_DIR} );
     }
 
-    $client = new perfSONAR_PS::Client::Topology::XMLDB( $opts{DB_DIR}, $opts{DB_FILE}, \%ns );
+    $client = new perfSONAR_PS::DB::TopologyXMLDB( $opts{DB_DIR}, $opts{DB_FILE}, \%ns );
+    $client->init( { directory => $opts{DB_DIR}, file => $opts{DB_FILE}, namespaces => \%ns } );
 }
 
 ( $status, $res ) = $client->open;

@@ -133,7 +133,7 @@ sub check_facilities {
     my @facilities_to_update = ();
 
     if ( $self->{CHECK_ALL_OPTICAL_PORTS} or scalar( keys %{ $self->{OPTICAL_FACILITIES} } ) > 0 ) {
-        my $opticals = $self->{AGENT}->getOCN();
+        my $opticals = $self->{AGENT}->get_optical_facilities();
         my @facility_names;
         if ( $self->{CHECK_ALL_OPTICAL_PORTS} ) {
             @facility_names = keys %{$opticals};
@@ -179,14 +179,14 @@ sub check_facilities {
     if ( $self->{CHECK_ALL_ETHERNET_PORTS} or scalar( keys %{ $self->{ETHERNET_FACILITIES} } ) > 0 ) {
         my @ports_to_check = ();
         if ( $self->{CHECK_ALL_ETHERNET_PORTS} ) {
-            my $ports = $self->{AGENT}->getETH();
+            my $ports = $self->{AGENT}->get_ethernet_facilities();
             foreach my $ethernet_key ( keys %{$ports} ) {
                 push @ports_to_check, $ports->{$ethernet_key};
             }
         }
         else {
             foreach my $ethernet_aid ( keys %{ $self->{ETHERNET_FACILITIES} } ) {
-                my $port = $self->{AGENT}->getETH( $ethernet_aid );
+                my $port = $self->{AGENT}->get_ethernet_facilities( $ethernet_aid );
                 if ( $port ) {
                     push @ports_to_check, $port;
                 }
@@ -228,14 +228,14 @@ sub check_facilities {
     if ( $self->{CHECK_ALL_WAN_PORTS} or scalar( keys %{ $self->{WAN_FACILITIES} } ) > 0 ) {
         my @ports_to_check = ();
         if ( $self->{CHECK_ALL_WAN_PORTS} ) {
-            my $ports = $self->{AGENT}->getETH();
+            my $ports = $self->{AGENT}->get_wan_facilities();
             foreach my $ethernet_key ( keys %{$ports} ) {
                 push @ports_to_check, $ports->{$ethernet_key};
             }
         }
         else {
             foreach my $ethernet_aid ( keys %{ $self->{WAN_FACILITIES} } ) {
-                my $port = $self->{AGENT}->getETH( $ethernet_aid );
+                my $port = $self->{AGENT}->get_wan_facilities( $ethernet_aid );
                 if ( $port ) {
                     push @ports_to_check, $port;
                 }

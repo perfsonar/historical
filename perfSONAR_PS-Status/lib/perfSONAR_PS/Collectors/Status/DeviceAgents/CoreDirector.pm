@@ -170,7 +170,7 @@ sub check_facilities {
 
         # we grab all the cross-connects and then pare down the data set to just those of interest
         my $crss;
-        ( $status, $crss ) = $self->{AGENT}->getCrossconnect();
+        ( $status, $crss ) = $self->{AGENT}->get_crossconnect();
         if ( $status == 0 ) {
             my @facility_names;
             if ( $self->{CHECK_ALL_CROSSCONNECTS} ) {
@@ -232,7 +232,7 @@ sub check_facilities {
 
     if ( $self->{CHECK_ALL_VCGS} or scalar( keys %{ $self->{VCG_FACILITIES} } ) > 0 ) {
         my $vcgs;
-        ( $status, $vcgs ) = $self->{AGENT}->getVCG();
+        ( $status, $vcgs ) = $self->{AGENT}->get_vcgs();
         if ( $status == 0 ) {
             my @facility_names;
             if ( $self->{CHECK_ALL_VCGS} ) {
@@ -269,7 +269,7 @@ sub check_facilities {
     if ( $self->{CHECK_ALL_OPTICAL_PORTS} or scalar( keys %{ $self->{OPTICAL_FACILITIES} } ) > 0 ) {
         my $opticals;
 
-        ( $status, $opticals ) = $self->{AGENT}->getOCN();
+        ( $status, $opticals ) = $self->{AGENT}->get_optical_facilities();
         if ( $status == 0 ) {
             my @facility_names;
             if ( $self->{CHECK_ALL_OPTICAL_PORTS} ) {
@@ -316,7 +316,7 @@ sub check_facilities {
 
     if ( $self->{CHECK_ALL_EFLOWS} or scalar( keys %{ $self->{EFLOW_FACILITIES} } ) > 0 ) {
         my $eflows;
-        ( $status, $eflows ) = $self->{AGENT}->getEFLOW();
+        ( $status, $eflows ) = $self->{AGENT}->get_eflows();
         if ( $status == 0 ) {
             my @facility_names;
             if ( $self->{CHECK_ALL_EFLOWS} ) {
@@ -387,7 +387,7 @@ sub check_facilities {
     }
 
     if ( $self->{CHECK_ALL_VLANS} or scalar( keys %{ $self->{VLAN_FACILITIES} } ) > 0 ) {
-        my ( $status, $eflows ) = $self->{AGENT}->getEFLOW();
+        my ( $status, $eflows ) = $self->{AGENT}->get_eflows();
 
         if ( $status == 0 ) {
             my %vlan_elements = ();
@@ -476,7 +476,7 @@ sub check_facilities {
         my @ports_to_check = ();
         if ( $self->{CHECK_ALL_ETHERNET_PORTS} ) {
             my $ports;
-            ( $status, $ports ) = $self->{AGENT}->getETH();
+            ( $status, $ports ) = $self->{AGENT}->get_ethernet_facilities();
             if ( $status == 0 ) {
                 foreach my $ethernet_key ( keys %{$ports} ) {
                     push @ports_to_check, $ports->{$ethernet_key};
@@ -486,7 +486,7 @@ sub check_facilities {
         else {
             foreach my $ethernet_aid ( keys %{ $self->{ETHERNET_FACILITIES} } ) {
                 my $port;
-                ( $status, $port ) = $self->{AGENT}->getETH( $ethernet_aid );
+                ( $status, $port ) = $self->{AGENT}->get_ethernet_facilities( $ethernet_aid );
                 if ( $status == 0 && $port ) {
                     push @ports_to_check, $port;
                 }
@@ -538,7 +538,7 @@ sub checkVCG {
     my ( $self, $vcg_name ) = @_;
 
     my ( $status, $vcgs );
-    ( $status, $vcgs ) = $self->{AGENT}->getVCG();
+    ( $status, $vcgs ) = $self->{AGENT}->get_vcgs();
     if ( $status == -1 or not $vcgs ) {
         my $msg = "Couldn't look up VCG";
         $self->{LOGGER}->error( $msg );
@@ -580,7 +580,7 @@ sub checkETH {
     my ( $self, $eth_aid ) = @_;
 
     my ( $status, $port );
-    ( $status, $port ) = $self->{AGENT}->getETH( $eth_aid );
+    ( $status, $port ) = $self->{AGENT}->get_ethernet_facilities( $eth_aid );
     if ( $status == -1 or not $port ) {
         my $msg = "Couldn't look up Ethernet Port";
         $self->{LOGGER}->error( $msg );
