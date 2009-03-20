@@ -278,8 +278,9 @@ We have [CodeRules rules] in place, we need to enforce and add to this list when
 
  * _*Use of Time*_ - Should standardize when applicable.  For instance specify all in minutes instead of sometimes in seconds, minutes, hours, days, etc.  Failing this *label* very well. 
  * _*Logging*_ - We need to define some rules of when to use each level of logging and where it is appropriate in the code (e.g. avoid double logging and under logging)
- * _*Error Logging*_ - Use of Netlogger when applicable.  Also want to start including more context when available (e.g. SNMP MA should throw errors locally about specific RRD files it has a problem with, but not over the WS message) 
+ * _*Error Logging*_ - Use of Netlogger when applicable.  Also want to start including more context when available (e.g. SNMP MA should throw errors locally about specific RRD files it has a problem with, but not over the WS message. bwctl should mention the peer address when errors with that connection happen. etc...) 
  * _*Unit Tests*_ - Time was short so not a lot was done on this front, a major portion of the next release should be devoted to testing and profiling.
+ * _*Error Status*_ - How do we want to return error status? return codes, exception handling? We should harmonize as much as possible.
 
 === Documentation Review Reviews ===
    
