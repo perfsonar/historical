@@ -90,13 +90,13 @@ if ( not $LOGGER_CONF ) {
 
     my $output_level = $INFO;
     $output_level = $DEBUG if $DEBUG;
-    
+
     my %logger_opts = (
         level  => $output_level,
         layout => '%d (%P) %p> %F{1}:%L %M - %m%n',
     );
     $logger_opts{file} = $LOGOUTPUT if $LOGOUTPUT;
- 
+
     Log::Log4perl->easy_init( \%logger_opts );
     $logger = get_logger( "perfSONAR_PS" );
 }
@@ -105,7 +105,7 @@ else {
 
     my $output_level = $INFO;
     $output_level = $DEBUG if $DEBUG;
-    
+
     Log::Log4perl->init( $LOGGER_CONF );
     $logger = get_logger( "perfSONAR_PS" );
     $logger->level( $output_level );

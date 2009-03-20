@@ -557,9 +557,9 @@ sub setSession {
     my $logger = get_logger( "perfSONAR_PS::Collectors::LinkStatus::SNMPAgent" );
 
     if (    ( exists $self->{COMMUNITY} and $self->{COMMUNITY} )
-        and ( exists $self->{VERSION} and $self->{VERSION}     )
-        and ( exists $self->{HOST}    and $self->{HOST}        )
-        and ( exists $self->{PORT}    and $self->{PORT}        ) )
+        and ( exists $self->{VERSION} and $self->{VERSION} )
+        and ( exists $self->{HOST}    and $self->{HOST} )
+        and ( exists $self->{PORT}    and $self->{PORT} ) )
     {
 
         ( $self->{SESSION}, $self->{ERROR} ) = Net::SNMP->session(

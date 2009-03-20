@@ -74,7 +74,7 @@ sub init {
         }
     );
 
-	# Creates the database client object that will be used by all the status collector agents
+    # Creates the database client object that will be used by all the status collector agents
     my ( $status, $res ) = $self->create_database_client( { config => $args->{conf}, directory_offset => $args->{directory_offset} } );
     if ( $status != 0 ) {
         return ( $status, $res );

@@ -17,7 +17,7 @@ Creates the DB_CONFIG file for Oracle XML databases.
 
 use Getopt::Long;
 
-=head2 usage()
+=head2 usage
 
 Prints out a help message.
 
@@ -26,6 +26,7 @@ Prints out a help message.
 sub usage {
     print "$0: Initialize a Topology Service database\n";
     print "  --directory: The directory to hold the database\n";
+	return;
 }
 
 my $db_config = <<EOC

@@ -40,13 +40,13 @@ my %opts;
 my $help_needed;
 my $DEBUGFLAG;
 
-=head2 usage()
+=head2 usage
 
-Prints out a help message.
+Prints out a help message displaying the available options.
 
 =cut
 
-sub usage() {
+sub usage {
     print "$0: loads a topology into a database replacing the existing topology elements.\n";
     print "    [--debug] [--help] [--output=NORMALIZED_TOPOLOGY_FILE] [--db_dir=DATABASE_DIRECTORY] [--db_filename=DATABASE_FILENAME] [--uri=REMOTE_TOPOLOGY_ARCHIVE] INPUT_FILE\n";
     return;

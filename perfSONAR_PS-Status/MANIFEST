@@ -26,9 +26,6 @@ lib/perfSONAR_PS/Collectors/Status/DeviceAgents/SNMP.pm
 lib/perfSONAR_PS/Collectors/Status/ElementAgents/Constant.pm
 lib/perfSONAR_PS/Collectors/Status/ElementAgents/SNMP.pm
 lib/perfSONAR_PS/Collectors/Status/ElementAgents/Script.pm
-lib/perfSONAR_PS/Collectors/Status/ElementAgents/TL1/CoreDirector.pm
-lib/perfSONAR_PS/Collectors/Status/ElementAgents/TL1/HDXc.pm
-lib/perfSONAR_PS/Collectors/Status/ElementAgents/TL1/OME.pm
 lib/perfSONAR_PS/Collectors/Status/ElementsWorker.pm
 lib/perfSONAR_PS/Common.pm
 lib/perfSONAR_PS/DB/File.pm

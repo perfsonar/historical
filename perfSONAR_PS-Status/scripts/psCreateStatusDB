@@ -138,7 +138,7 @@ elsif ( $DB_TYPE eq "mysql" ) {
 
     $dbi_string .= ":host=" . $DB_HOST;
     $dbi_string .= ":port=" . $DB_PORT if $DB_PORT;
-    
+
     my $dbh = DBI->connect( $dbi_string );
     my $sth2 = $dbh->prepare( $mysql_create_status_table, $DB_USERNAME, $DB_PASSWORD ) or croak "Couldn't prepare statement: " . $dbh->errstr;
     $sth2->execute();

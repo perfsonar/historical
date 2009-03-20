@@ -1562,7 +1562,7 @@ sub outputCompatLinkElement {
     $output->startElement( prefix => "nmtl2", tag => "link", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/" );
     $output->createElement( prefix => "nmtl2", tag => "name",       namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"name"} );
     $output->createElement( prefix => "nmtl2", tag => "globalName", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"globalName"} );
-    $output->createElement( prefix => "nmtl2", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content => $link->{"type"} );
+    $output->createElement( prefix => "nmtl2", tag => "type",       namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content    => $link->{"type"} );
     foreach my $endpoint ( @{ $link->{"endpoints"} } ) {
         $output->startElement( prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $endpoint->{"name"} } );
         $output->createElement( prefix => "nmwgtopo3", tag => "role", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $endpoint->{"type"} );
@@ -1602,7 +1602,7 @@ sub constructE2EMonMetadataDB {
         $comparison_metadatadb->startElement( prefix => "nmtl2", tag => "link", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/" );
         $comparison_metadatadb->createElement( prefix => "nmtl2", tag => "name",       namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"name"} );
         $comparison_metadatadb->createElement( prefix => "nmtl2", tag => "globalName", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"globalName"} );
-        $comparison_metadatadb->createElement( prefix => "nmtl2", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content => $link->{"type"} );
+        $comparison_metadatadb->createElement( prefix => "nmtl2", tag => "type",       namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content    => $link->{"type"} );
         foreach my $endpoint ( @{ $link->{"endpoints"} } ) {
             if ( not $nodes->{ $endpoint->{"name"} } ) {
                 $comparison_metadatadb->startElement( prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $endpoint->{"name"} } );

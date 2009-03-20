@@ -359,7 +359,7 @@ sub check_facilities {
                         last;
                     }
 
-                    $oper_status  = get_new_oper_status( $oper_status,   $new_oper_status );
+                    $oper_status = get_new_oper_status( $oper_status, $new_oper_status );
                     $admin_status = get_new_admin_status( $admin_status, $new_admin_status );
                 }
 
@@ -444,7 +444,7 @@ sub check_facilities {
                             last;
                         }
 
-                        $oper_status  = get_new_oper_status( $oper_status,   $new_oper_status );
+                        $oper_status = get_new_oper_status( $oper_status, $new_oper_status );
                         $admin_status = get_new_admin_status( $admin_status, $new_admin_status );
                     }
                 }
