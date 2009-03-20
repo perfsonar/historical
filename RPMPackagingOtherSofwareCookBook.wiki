@@ -5,6 +5,64 @@
 == Introduction ==
 The goal of this page is to have a place to store all the cookbook instructions for making RPMs for software that we distribute, but aren't the maintainers of. Any patches or changes we make should be pushed to the maintainers if possible, but for some software, they will not accept the changes.
 
+== CPAN Packages ==
+
+[http://cpanspec.sourceforge.net/ Cpanspec] is a tool that reads the contents of CPAN packages and generates an RPM spec file.  This file is then used with the source to create an RPM for distribution.
+
+=== Use ===
+
+The tool may be used as such:
+
+ # Download the CPAN package, I will use Net-IPTrie for this example:
+{{{
+wget -c http://search.cpan.org/CPAN/authors/id/C/CV/CVICENTE/Net-IPTrie-v0.4.tar.gz
+}}}
+ # Run cpanspec on the package:
+{{{ 
+cpanspec --packager="Jason Zurawski" --old Net-IPTrie-v0.4.tar.gz
+}}}
+ # Copy the package to the RPM build environment
+{{{
+cp Net-IPTrie-v0.4.tar.gz ~/rpmbuild/SOURCES/
+}}}
+ # Build the RPM:
+{{{
+rpmbuild -ba --sign perl-Net-IPTrie.spec
+}}}
+ # If succesfull, copy the resulting Spec File into svn and commit:
+{{{
+cp perl-Net-IPTrie.spec branches/RELEASE-_3.1/Shared/spec
+svn add perl-Net-IPTrie.spec
+svn commit
+}}}
+ # 
+
+=== Spec Format ===
+
+The automatically generated spec file makes some interesting decissions, here are some notes on customizations that may make things easier:
+
+ * Add this:
+{{{
+Requires:       perl
+}}}
+ * Delete the _*BuildRequires*_ lines, these are not necessary but are helpful if you are going for absolute compatibility.  
+ * Alter the Build/Install Path.  There are several reasons for this, namely to ensure that the installed modules end up in the perl @INC by default.  If left to the auto selection, the result will be deep in the _*vendor*_ area, and may get glossed over on some machines due to versions.
+   * Set the build string (Module::Build) to:
+{{{
+%{__perl} Build.PL install_base=/usr
+}}} 
+   * Set the build string (Make::Maker) to:
+{{{
+%{__perl} Makefile.PL INSTALL_BASE=/usr
+}}}
+   * Change the install path (after _*%files*_, _*%defattr*_, and _*%doc*_):
+{{{
+%files
+%defattr(-,root,root,-)
+%doc README
+/usr/*
+}}} 
+
 == Red Hat/Fedora Web100 Kernel ==
   * install kernel source rpm
 {{{
