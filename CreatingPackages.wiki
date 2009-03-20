@@ -79,7 +79,7 @@ perl ../package_tidy.pl
 {{{
 perl ../package_critique.pl
 }}}
-# Run the following to check if any functions are missing documentation. Before doing a release, no functions should be undocumented.
+ # Run the following to check if any functions are missing documentation. Before doing a release, all functions should be documented.
 {{{
 perl ../package_findundocumented.pl
 }}}
