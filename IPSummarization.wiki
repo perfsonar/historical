@@ -3532,6 +3532,55 @@ Summarization nodes:
 
 Comments:  bugs are noticeable in the first IP numbers.  The summarization nodes are the same as the Java code, nevertheless.
 
+==== ESNET ====
+
+===== Original Perl =====
+
+TBD (problems with requirements in package installation)
+
+===== Java =====
+
+Summarization nodes:
+
+10.0.0.4/32
+10.10.10.1/32
+10.31.20.2/32
+18.201.0.118/32
+62.40.124.230/32
+62.40.125.64/27
+117.103.111.157/32
+128.0.0.0/4
+147.155.254.1/32
+150.99.198.218/32
+150.99.199.62/32
+172.16.32.0/30
+192.0.0.0/5
+204.134.149.2/32
+207.231.240.0/20
+211.79.48.173/32
+
+===== new Perl =====
+
+Summarization nodes:
+
+10.6e-005.0.0/32
+10.10.10.1/32
+10.31.20.2/32
+18.201.0.118/32
+62.40.124.230/32
+62.40.125.64/27
+117.103.111.157/32
+128.0.0.0/4
+147.155.254.1/32
+150.99.198.218/32
+150.99.199.62/32
+172.16.32.0/30
+192.0.0.0/5
+204.134.149.2/32
+207.231.240.0/20
+211.79.48.173/32
+
+Comments:  bugs are noticeable in the first IP number.  The summarization nodes are the same as the Java code, nevertheless.
 
 == Project Management ==
 
