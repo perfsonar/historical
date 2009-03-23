@@ -85,15 +85,15 @@
 
  * Jason
    * ~~Get Marcos info on code reviews~~
-   * Close bugs
+   * ~~Close bugs~~
    * ~~Finish packaging~~
    * Finish documentation
    * ~~Code Reviews~~
    * Doc Reviews
    * Read CHEP - Give Maxim Feedback
  * Aaron
-   * Address Martin/Jason/Jeff feedback on circuits
-   * Send email regarding circuits for feedback
+   * ~~Address Martin/Jason/Jeff feedback on circuits~~
+   * ~~Send email regarding circuits for feedback~~
    * ~~Finish packaging~~
    * Finish documentation
    * ~~Code Reviews~~
@@ -101,7 +101,7 @@
    * Read CHEP - Give Maxim Feedback
  * Jeff
    * ~~DICE Meeting~~ - Report to Group
-   * Code Reviews
+   * ~~Code Reviews~~
    * Doc Reviews
    * Read CHEP - Give Maxim Feedback
  * Marcos

@@ -16,7 +16,6 @@ This page outlines details regarding the perfSONAR-PS release that began the wee
  * Joe
  * Guilherme
  * Marcos
- * ...
 
 == Release Schedule ==
 
@@ -24,7 +23,7 @@ Release Start: Feb 23, 2009
 
 Code Slush: March 6, 2009
 
-Code Freeze: March 20, 2009
+Code Freeze: March 23, 2009
 
 RC Phase, Beta Tests: March 27, 2009
 
@@ -52,7 +51,8 @@ The following outline some exceptions to the overall release process.  Also see 
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=19 19] - _*Aaron/Maxim*_ - ~~PingER GUI gLS pingable hosts~~
    * Resolved (original issue addressed)
    * Opened [http://code.google.com/p/perfsonar-ps/issues/detail?id=107 107] to address other concerns (next release)
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=73 73] - _*Jason*_ - Client::LS Registration Logic Re-arrange    
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=73 73] - _*Jason*_ - ~~Client::LS Registration Logic Re-arrange~~
+   * Original issue addressed, but held over for re-design before next release.
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=79 79] - _*Jason*_ - ~~Empty gLS/hLS Messages~~
    * Resloved
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=84 84] - _*Jason*_ - ~~Exit MA service if no data is present ~~   
@@ -60,7 +60,8 @@ The following outline some exceptions to the overall release process.  Also see 
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=85 85] - _*Jason*_ - ~~add verbose logging on errors for ma/ls~~
    * Resolved to original spec
    * Opened [http://code.google.com/p/perfsonar-ps/issues/detail?id=108 108] to address other concerns (next release)
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=105 105] - _*Jason*_ - hLS Summarization of DCN Data 
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=105 105] - _*Jason*_ - ~~hLS Summarization of DCN Data~~
+   * Held over for next release
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=109 109] - _*Jason*_ - ~~gLS Discovery of IP Addresses~~
    * Resolved
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=110 110] - _*Jason*_ - ~~perfSONAR-BUOY Data Query Error~~
@@ -142,11 +143,11 @@ Developers are responsible for testing their code:
      * Prepare [YumRepository YUM] repo - <font color=yellow>_*IN PROGRESS - 2/17*_</font>
      * Update Release Documentation - <font color=green>_*DONE - 3/9*_</font>
      * Update Issue Tracker - <font color=green>_*DONE - 3/3*_</font>
-     * Review Code Reviews - <font color=yellow>_*IN PROGRESS - 3/9*_</font>
+     * Review Code Reviews - <font color=green>_*DONE - 3/20*_</font>
      * Review Doc Reviews - <font color=red>_*PENDING*_ - </font>
    * Development
-     * LS - <font color=yellow>_*IN PROGRESS - 3/2*_</font>
-     * SNMP - <font color=yellow>_*IN PROGRESS - 3/2*_</font>
+     * LS - <font color=green>_*DONE - 3/23*_</font>
+     * SNMP - <font color=green>_*DONE - 3/23*_</font>
      * pSB - <font color=purple>_*PUSHED OFF - 3/9*_</font>
    * Documentation
      * LS - <font color=yellow>_*IN PROGRESS - 3/16*_</font>
@@ -164,13 +165,13 @@ Developers are responsible for testing their code:
      * Branch SVN - <font color=green>_*Done - 3/2*_</font>
      * Re-organize and SVN (see [SubversionStructure]) - <font color=green>_*Done - 3/10*_</font>
    * Development
-     * Status - <font color=red>_*PENDING*_ - </font>
-     * Topology - <font color=red>_*PENDING*_ - </font>
-     * LS Registration Daemon - <font color=red>_*PENDING*_ - </font>
+     * Status - <font color=green>_*DONE*_ - 3/23</font>
+     * Topology - <font color=green>_*DONE*_ - 3/23</font>
+     * LS Registration Daemon - <font color=green>_*DONE*_ - 3/23</font>
    * Documentation
-     * Status - <font color=red>_*PENDING*_ - </font>
-     * Topology - <font color=red>_*PENDING*_ - </font>
-     * LS Registration Daemon -<font color=red> _*PENDING*_ - </font>
+     * Status - <font color=yellow>_*IN PROGRESS*_ - 3/23</font>
+     * Topology - <font color=yellow>_*IN PROGRESS*_ - 3/23</font>
+     * LS Registration Daemon -<font color=yellow> _*IN PROGRESS*_ - 3/23</font>
    * Code Review
      * PingER - <font color=green>_*DONE - 3/19*_</font>
    * Documentation Review
@@ -191,7 +192,7 @@ Developers are responsible for testing their code:
    * Development
      * PingER - <font color=green>_*DONE - 3/13*_</font>
    * Documentation
-     * PingER - <font color=red>_*PENDING*_ - </font>
+     * PingER - <font color=yellow>_*IN PROGRESS*_ - 3/23</font>
    * Code Review
      * pSB - <font color=purple>_*PUSHED OFF*_ - </font>
    * Documentation Review
