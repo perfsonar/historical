@@ -76,7 +76,7 @@ monitoring-remote- host-pair for the way we use it).
 Due to the volume of data that can be collected by PingER, perfSONAR-PS PingER
 can be configured to utilize SQLite, MySQL or Postgres storage backends.
 
-perfSONAR-PS PingER is composed of two distinct components:
+perfSONAR-PS PingER is composed of two distinctive (kind of) components:
 
 1) Measurement Archive (MA): Which allows communication via XML document based
 Remote Procedure Call (XML) the data archive of PingER data.
@@ -89,66 +89,7 @@ derived statistics from Pings.
 Installation
 ------------------------------------------------------------------------------
 
-TODO
-
-Database creation
-
-A database backend will need to be installed before running PingER. Depending
-upon the size of your installation, you can choose to either use a file based
-database backend using SQLite, or a fully fledged database bakend using MySQL
-or Postgres.
-
-
-MySQL/Postgres: Suitable for large installations with a large number of hosts
-to be pinged or is expecting a large volume of data requests for PingER data.
-
-The default installation uses a SQLite database for storage.
-
-Scripts are provided to create the relevant database:
-
-scripts/create_pingerMA_SQLite.sql
-scripts/create_pingerMA_MySQL.sql
-
-For example, in order to install a SQLite based database, enter the following
-in a terminal prompt:
-
-  $ sqlite3 <path to database file> < util/create_pingerMA_SQLite.sql
-
-The database type, and database name must then be entered into the pinger.conf
-file as defined below. For MySQL and Postgres installations, you may also
-specify the hostname, port number, username and passwords for the database.
-
-If installing PingER from CPAN or trying to use 'make test', there are 
-problems with the test suite.  Please ignore the errors and continue/force the 
-install.
-
-------------------------------------------------------------------------------
-Configuration 
-------------------------------------------------------------------------------
-All config files are under 'etc' directory.
-
-1) pinger.conf: daemon configuration of MP and MA services. This file
-specifies the relevant perfSONAR specific services of PingER such as the port
-number, endpoints and registration service descriptions that the PingER MA and
-MP should use.  Use util/psConfigureDaemon to make a configuration file.
-
-2) pinger-landmarks.xml: A XML configuration file of the hosts to perform
-measurements to. This also contains the specification of the tests and
-measurement frequencies in which to perform the tests.  The actual name of the
-landmarks file is specified in pinger.conf.  Sample landmarks files are 
-included.
-
-
-------------------------------------------------------------------------------
-Starting PingER
-------------------------------------------------------------------------------
-
-To start the PingER suite   run:
-
-  $ perfsonar-daemon.pl --config=etc/pinger.conf --verbose
-
-This will parse the pinger.conf file and initiate the PingER services as
-defined for the MA and MP.
+See INSTALL file for more details.
 
 
 

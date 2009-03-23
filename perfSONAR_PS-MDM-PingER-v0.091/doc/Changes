@@ -1,3 +1,6 @@
+version 3.1
+* refactored service
+
 version .10rc2
 * Correction to RPM package file to use older versions of perl.
 
