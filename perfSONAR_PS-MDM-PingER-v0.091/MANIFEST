@@ -10,7 +10,6 @@ doc/README
 doc/landmarks_example.csv
 etc/logger.conf
 etc/pinger.conf
-lib/IEPM/PingER/Statistics.pm
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
 lib/perfSONAR_PS/Client/LS/Remote.pm
@@ -114,7 +113,7 @@ lib/perfSONAR_PS/Utils/NetLogger.pm
 lib/perfSONAR_PS/Utils/ParameterValidation.pm
 lib/perfSONAR_PS/Utils/PingStats.pm
 lib/perfSONAR_PS/XML/Document.pm
-perl-perfSONAR_PS-MDM-PingER.spec
+perl-perfSONAR_PS-PingER-server.spec
 scripts/create_pingerMA_MySQL.sql
 scripts/create_pingerMA_SQLite.sql
-scripts/rc.service
+scripts/PingER

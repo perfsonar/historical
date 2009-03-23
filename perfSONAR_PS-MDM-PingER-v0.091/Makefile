@@ -1,4 +1,4 @@
-PACKAGE=perfSONAR_PS-MDM-PingER
+PACKAGE=perfSONAR_PS-PingER-server
 ROOTPATH=/opt/perfsonar_ps/PingER
 
 dist:
