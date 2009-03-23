@@ -211,6 +211,13 @@ sub init {
             }
         }
 
+        unless ( exists $self->{CONF}->{"snmp"}->{"ls_registration_number"}
+            and $self->{CONF}->{"snmp"}->{"ls_registration_number"} )
+        {
+            $self->{LOGGER}->warn( "Setting registration number to 2 hosts (e.g. will not register to anymore than 2 LS instances) " );
+            $self->{CONF}->{"snmp"}->{"ls_registration_number"} = 2;
+        }
+
         unless ( exists $self->{CONF}->{"snmp"}->{"ls_registration_interval"}
             and $self->{CONF}->{"snmp"}->{"ls_registration_interval"} )
         {
@@ -367,7 +374,7 @@ sub init {
         my $error      = q{};
         my $metadatadb = $self->prepareDatabases;
         unless ( $metadatadb ) {
-            $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
+            $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"snmp"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"snmp"}->{"metadata_db_file"} . "\": " . $error );
             return -1;
         }
 
@@ -410,7 +417,7 @@ sub prepareDatabases {
     my $error = q{};
     my $metadatadb = new perfSONAR_PS::DB::XMLDB( { env => $self->{CONF}->{"snmp"}->{"metadata_db_name"}, cont => $self->{CONF}->{"snmp"}->{"metadata_db_file"}, ns => \%ma_namespaces, } );
     unless ( $metadatadb->openDB( { txn => q{}, error => \$error } ) == 0 ) {
-        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
+        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "There was an error opening \"" . $self->{CONF}->{"snmp"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"snmp"}->{"metadata_db_file"} . "\": " . $error );
         return;
     }
     return $metadatadb;
@@ -610,7 +617,7 @@ sub registerLS {
         push @hints_array, $h if $h;
     }
 
-    if ( !defined $self->{LS_CLIENT} ) {
+    unless ( exists $self->{LS_CLIENT} and $self->{LS_CLIENT} ) {
         my %ls_conf = (
             SERVICE_TYPE        => $self->{CONF}->{"snmp"}->{"service_type"},
             SERVICE_NAME        => $self->{CONF}->{"snmp"}->{"service_name"},
