@@ -3582,6 +3582,54 @@ Summarization nodes:
 
 Comments:  bugs are noticeable in the first IP number.  The summarization nodes are the same as the Java code, nevertheless.
 
+==== FCCN ====
+
+===== Original Perl =====
+
+TBD (problems with requirements in package installation)
+
+===== Java =====
+
+Summarization nodes:
+
+62.40.124.186/32
+193.136.0.0/15
+194.210.30.1/32
+194.210.63.253/32
+
+===== new Perl =====
+
+Summarization nodes:
+
+62.40.124.186/32
+193.136.0.0/15
+194.210.30.1/32
+194.210.63.253/32
+
+Comments:  same results as Java code.
+
+==== GARR ====
+
+===== Original Perl =====
+
+TBD (problems with requirements in package installation)
+
+===== Java =====
+
+Summarization nodes:
+
+10.1.2.3/32
+193.206.128.0/20
+
+===== new Perl =====
+
+Summarization nodes:
+
+10.1.2.3/32
+193.206.128.0/20
+
+Comments:  same results as Java code.
+
 == Project Management ==
 
 Most details TBD, basic outline:
