@@ -3488,6 +3488,51 @@ where _inputIPfile_ is a text file containing some IP numbers for which the summ
 
 where the _txt_ file contains the summarizing nodes, and the _dot_ file contains an input file to be used with [http://www.graphviz.org/ Graphviz] tool.
 
+=== Experimentation Results ===
+
+Three implementations are being initially tested on the test sets:  the original Perl code from Jason Zurawsky; the Java code from Martin Swany; and the new Perl code, as a direct translation of the Java code.
+
+The results are below.
+
+==== APAN ====
+
+===== Original Perl =====
+
+TBD (problems with requirements in package installation)
+
+===== Java =====
+
+Summarization nodes:
+
+10.0.0.4/32
+45.0.0.1/32
+117.103.111.133/32
+133.69.37.1/32
+140.221.251.2/32
+163.220.127.238/32
+172.24.61.30/32
+172.24.100.210/32
+192.203.116.144/28
+202.0.0.0/7
+
+===== new Perl =====
+
+Summarization nodes:
+
+10.6e-005.0.0/32
+45.1e-005.0.0/32
+117.103.111.133/32
+133.69.37.1/32
+140.221.251.2/32
+163.220.127.238/32
+172.24.61.30/32
+172.24.100.210/32
+192.203.116.144/28
+202.0.0.0/7
+
+Comments:  bugs are noticeable in the first IP numbers.  The summarization nodes are the same as the Java code, nevertheless.
+
+
 == Project Management ==
 
 Most details TBD, basic outline:
