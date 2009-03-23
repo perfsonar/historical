@@ -79,6 +79,13 @@ then
 fi
 chown -R perfsonar:perfsonar /var/lib/perfsonar
 
+/sbin/chkconfig --add %{init_script_1}
+#/sbin/chkconfig --add %{init_script_2}
+
+%preun
+/etc/init.d/%{init_script_1} stop
+/sbin/chkconfig --del %{init_script_1}
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 

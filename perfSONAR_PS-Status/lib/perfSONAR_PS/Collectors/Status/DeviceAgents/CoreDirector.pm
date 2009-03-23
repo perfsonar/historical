@@ -175,7 +175,7 @@ sub check_facilities {
 
         # we grab all the cross-connects and then pare down the data set to just those of interest
         my $crss;
-        ( $status, $crss ) = $self->{AGENT}->get_crossconnect();
+        ( $status, $crss ) = $self->{AGENT}->get_crossconnects();
         if ( $status == 0 ) {
             my @facility_names;
             if ( $self->{CHECK_ALL_CROSSCONNECTS} ) {
@@ -622,7 +622,7 @@ before calling the "check_facilities" function.
 sub connect {
     my ( $self ) = @_;
 
-    if ( $self->{AGENT}->connect( { inhibitMessages => 1 } ) == -1 ) {
+    if ( $self->{AGENT}->connect( { inhibit_messages => 1 } ) == -1 ) {
         $self->{LOGGER}->error( "Could not connect to host" );
         return 0;
     }

@@ -315,7 +315,7 @@ before calling the "check_facilities" function.
 sub connect {
     my ( $self ) = @_;
 
-    if ( $self->{AGENT}->connect( { inhibitMessages => 1 } ) == -1 ) {
+    if ( $self->{AGENT}->connect( { inhibit_messages => 1 } ) == -1 ) {
         $self->{LOGGER}->error( "Could not connect to host" );
         return 0;
     }

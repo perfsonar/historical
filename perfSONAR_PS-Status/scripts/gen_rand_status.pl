@@ -35,17 +35,24 @@ my $state;
 if ( $type eq "admin" ) {
     my $n = int( rand( $#admin_states + 1 ) );
     $state = $admin_states[$n];
+	print time() . "," . $state;
 }
 elsif ( $type eq "oper" ) {
     my $n = int( rand( $#oper_states + 1 ) );
     $state = $oper_states[$n];
+	print time() . "," . $state;
+}
+elsif ( $type eq "oper/admin" or $type eq "admin/oper" ) {
+    my $n = int( rand( $#oper_states + 1 ) );
+    my $oper_state = $oper_states[$n];
+    my $m = int( rand( $#admin_states + 1 ) );
+    my $admin_state = $admin_states[$m];
+	print time() . "," . $oper_state.",".$admin_state;
 }
 else {
     $state = "unknown";
+	print time() . "," . $state;
 }
-
-$msg = time() . "," . $state;
-print $msg;
 
 __END__
 

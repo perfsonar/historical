@@ -229,7 +229,7 @@ sub xQuery {
         return ( -1, "Couldn't query database: $error" );
     }
 
-    $localContent .= "<nmtopo:topology xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20080828/\">\n";
+    $localContent .= "<nmtopo:topology xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\">\n";
     $localContent .= join( "", @queryResults );
     $localContent .= "</nmtopo:topology>\n";
 
@@ -259,7 +259,7 @@ sub getAll {
     }
 
     my $content = q{};
-    $content .= "<nmtopo:topology xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20080828/\">\n";
+    $content .= "<nmtopo:topology xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\">\n";
     $content .= join( "", @results );
     $content .= "</nmtopo:topology>";
 

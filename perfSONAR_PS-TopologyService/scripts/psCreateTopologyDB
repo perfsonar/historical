@@ -11,7 +11,8 @@ psCreateTopologyDB
 
 =head1 DESCRIPTION
 
-Creates the DB_CONFIG file for Oracle XML databases.
+Initializes a Topology Database. Currently, it does so by creating the
+DB_CONFIG file for Oracle XML databases.
 
 =cut
 

@@ -190,7 +190,7 @@ sub update_status {
         return ( -1, "Invalid administrative status: $admin_status" );
     }
 
-    my $query = "select end_time, oper_status, admin_status from " . $self->{STATUS_TABLE} . " where id=\'" . $element_id . "\' order by end_time limit 1";
+    my $query = "select end_time, oper_status, admin_status from " . $self->{STATUS_TABLE} . " where id=\'" . $element_id . "\' order by end_time desc limit 1";
 
     my $statuses = $self->{DB_CLIENT}->query( { query => $query } );
     if ( $statuses == -1 ) {

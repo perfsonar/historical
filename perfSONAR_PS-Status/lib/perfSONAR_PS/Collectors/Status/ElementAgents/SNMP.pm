@@ -45,7 +45,7 @@ sub new {
 
     my $self = fields::new( $class );
 
-    if ( defied $agent and $agent ) {
+    if ( defined $agent and $agent ) {
         $self->{"AGENT"} = $agent;
     }
     else {
@@ -228,7 +228,7 @@ sub run {
 
 # ================ Internal Package perfSONAR_PS::Collectors::LinkStatus::SNMPAgent ================
 
-package perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP::Host;
+package perfSONAR_PS::Collectors::Status::ElementAgents::SNMP::Host;
 
 use strict;
 use warnings;

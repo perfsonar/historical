@@ -51,7 +51,7 @@ sub init {
 
     $self->{POLLING_INTERVAL} = $args->{polling_interval};
     unless ( $self->{POLLING_INTERVAL} ) {
-        $self->{LOGGER}->warn( "No polling interval set for SNMP worker. Setting to 60 seconds" );
+        $self->{LOGGER}->warn( "No polling interval set for Elements worker. Setting to 60 seconds" );
         $self->{POLLING_INTERVAL} = 60;
     }
 

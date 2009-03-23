@@ -26,7 +26,7 @@ use Data::Dumper;
 use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Utils::SNMPWalk;
 
-use base 'perfSONAR_PS::Collectors::Status::Base';
+use base 'perfSONAR_PS::Collectors::Status::DeviceAgents::Base';
 
 use fields 'ADDRESS', 'PORT', 'COMMUNITY', 'VERSION', 'CHECK_ALL_INTERFACES', 'INTERFACES';
 

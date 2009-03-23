@@ -18,10 +18,12 @@ TBD
 use POSIX ":sys_wait_h";
 use English qw( -no_match_vars );
 use Log::Log4perl qw(get_logger :levels);
+use Data::Dumper;
 
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Utils::ParameterValidation;
+use perfSONAR_PS::Utils::SNMPWalk;
 
 use perfSONAR_PS::DB::Status;
 
@@ -188,7 +190,7 @@ sub create_workers {
     my @workers = ();
 
     if ( $config->{elements_file} ) {
-        my ( $status, $res ) = $self->create_element_workers( { elements_file => $config->{elements_file}, directory_offset => $args->{directory_offset}, database_client => $database_client } );
+        my ( $status, $res ) = $self->parse_elements_file( { elements_file => $config->{elements_file}, directory_offset => $args->{directory_offset}, database_client => $database_client } );
         if ( $status == -1 ) {
             return ( $status, $res );
         }
@@ -198,7 +200,16 @@ sub create_workers {
         }
     }
 
-    my ( $status, $res ) = $self->create_device_workers( { config => $config, directory_offset => $args->{directory_offset}, database_client => $database_client } );
+    my ( $status, $res ) = $self->create_element_workers( { config => $config, directory_offset => $args->{directory_offset}, database_client => $database_client } );
+    if ( $status == -1 ) {
+        return ( $status, $res );
+    }
+
+    foreach my $worker ( @$res ) {
+        push @workers, $worker;
+    }
+
+    ( $status, $res ) = $self->create_device_workers( { config => $config, directory_offset => $args->{directory_offset}, database_client => $database_client } );
     if ( $status == -1 ) {
         return ( $status, $res );
     }
@@ -337,7 +348,7 @@ sub create_database_client {
     $prefix = $config->{db_prefix};
 
     my $data_client = perfSONAR_PS::DB::Status->new();
-    unless ( $data_client->init( { dbistring => $dbistring, username => $username, password => $password, table_prefix => $prefix } ) ) {
+    if ( $data_client->init( { dbistring => $dbistring, username => $username, password => $password, table_prefix => $prefix } ) ) {
         my $msg = "Problem creating database client";
         return ( -1, $msg );
     }
@@ -476,7 +487,7 @@ sub create_switch_worker_snmp {
         }
     }
 
-    my $worker = perfSONAR_PS::Collectors::Status::SNMP->new();
+    my $worker = perfSONAR_PS::Collectors::Status::DeviceAgents::SNMP->new();
     my $status = $worker->init(
         {
             data_client          => $database_client,
@@ -644,6 +655,7 @@ sub create_switch_worker_ome {
 
     my $check_all_optical_ports  = $config->{check_all_optical_ports};
     my $check_all_ethernet_ports = $config->{check_all_ethernet_ports};
+    my $check_all_wan_ports = $config->{check_all_wan_ports};
 
     my $identifier_pattern = $config->{identifier_pattern};
     my $polling_interval   = $config->{polling_interval};
@@ -681,6 +693,7 @@ sub create_switch_worker_ome {
 
             check_all_optical_ports  => $check_all_optical_ports,
             check_all_ethernet_ports => $check_all_ethernet_ports,
+            check_all_wan_ports => $check_all_wan_ports,
 
             polling_interval   => $polling_interval,
             identifier_pattern => $identifier_pattern,
@@ -738,7 +751,7 @@ sub create_switch_worker_hdxc {
     my $password = $config->{password};
 
     my $check_all_optical_ports  = $config->{check_all_optical_ports};
-    my $check_all_ethernet_ports = $config->{check_all_ethernet_ports};
+#    my $check_all_ethernet_ports = $config->{check_all_ethernet_ports};
 
     my $identifier_pattern = $config->{identifier_pattern};
     my $polling_interval   = $config->{polling_interval};
@@ -775,7 +788,7 @@ sub create_switch_worker_hdxc {
             password => $password,
 
             check_all_optical_ports  => $check_all_optical_ports,
-            check_all_ethernet_ports => $check_all_ethernet_ports,
+#            check_all_ethernet_ports => $check_all_ethernet_ports,
 
             polling_interval   => $polling_interval,
             identifier_pattern => $identifier_pattern,
@@ -790,16 +803,346 @@ sub create_switch_worker_hdxc {
     return ( 0, $worker );
 }
 
-=head2 create_element_workers( $self, { database_client, elements_file, directory_offset } )
+=head2 create_element_workers( $self, { config, database_client, directory_offset } )
 
-A function which parses a file containing descriptions of individual elements
-to monitor. These elements can be monitored using a combination of scripts,
-SNMP interfaces or constant values. It iterates through the element
-descriptions in the file and calls a function to parse each element.
+A function to read and allocate worker agents for each configured element. It
+reads through the configured elements and calls the specific function for
+parsing the element.
 
 =cut
 
 sub create_element_workers {
+    my ( $self, @args ) = @_;
+    my $args = validateParams(
+        @args,
+        {
+            config           => 1,
+            database_client  => 1,
+            directory_offset => 0,
+        }
+    );
+
+    my $config           = $args->{config};
+    my $directory_offset = $args->{directory_offset};
+    my $database_client  = $args->{database_client};
+
+    my @elements = ();
+
+    if ( $config->{"element"} ) {
+        if ( ref( $config->{"element"} ) ne "ARRAY" ) {
+            my @tmp = ();
+            push @tmp, $config->{"element"};
+            $config->{"element"} = \@tmp;
+        }
+
+		my %snmp_clients = ();
+        foreach my $element ( @{ $config->{"element"} } ) {
+            my $element_config = mergeHash( $config, $element, () );
+
+            my ( $status, $res ) = $self->create_element_agents( { config => $element_config, directory_offset => $args->{directory_offset}, snmp_clients => \%snmp_clients } );
+            if ( $status != 0 ) {
+                return ( -1, $res );
+            }
+
+            push @elements, $res;
+        }
+    }
+
+    my $worker = perfSONAR_PS::Collectors::Status::ElementsWorker->new();
+    my $status = $worker->init(
+        data_client      => $args->{database_client},
+        polling_interval => $args->{polling_interval},
+        elements         => \@elements,
+    );
+    if ( $status != 0 ) {
+        return ( -1, "Couldn't initialize Elements worker" );
+    }
+
+	my @workers = ();
+	push @workers, $worker;
+
+    return ( 0, \@workers );
+}
+
+=head2 create_element_agent( $self, { config, \%snmp_clients } )
+
+A function to allocate an agent for measuring the specified element. $config is
+a reference to a hash describing the element. \%snmp_clients is a reference to
+a hash which will be filled in with SNMP clients. This is used to enable bulk
+SNMP grabs if users configure multiple elements on a single SNMP device.
+
+=cut
+
+sub create_element_agents {
+    my ( $self, @args ) = @_;
+    my $args = validateParams(
+        @args,
+        {
+            config           => 1,
+			directory_offset => 1,
+            snmp_clients     => 1,
+        }
+    );
+
+	my $config = $args->{config};
+
+	# the raw SNMP clients are aggregated so that if individuals use SNMP
+	# clients, we can use bulk pulls to grab the stats and cache them.
+
+	unless ($config->{id}) {
+        my $msg = "No ids associated with specified element";
+        $self->{LOGGER}->error( $msg );
+        return ( -1, $msg );
+	}
+
+	unless ($config->{agent}) {
+        my $msg = "No agents associated with specified element";
+        $self->{LOGGER}->error( $msg );
+        return ( -1, $msg );
+	}
+
+	if (ref($config->{id}) ne "ARRAY") {
+		my @tmp = ();
+		push @tmp, $config->{id};
+		$config->{id} = \@tmp;
+	}
+
+	if (ref($config->{agent}) ne "ARRAY") {
+		$self->{LOGGER}->debug("Converting to array: ".ref($config->{agent}));
+
+		my @tmp = ();
+		push @tmp, $config->{agent};
+		$config->{agent} = \@tmp;
+	}
+
+	my @ids = ();
+	foreach my $id (@{ $config->{id} }) {
+		push @ids, $id;
+	}
+
+    my @agents = ();
+
+	$self->{LOGGER}->debug(Dumper($config));
+    foreach my $agent ( @{ $config->{agent} } ) {
+        my ( $status, $res );
+
+		$self->{LOGGER}->debug(Dumper($agent));
+        ( $status, $res ) = $self->create_element_agent( { config => $agent, directory_offset => $args->{directory_offset}, snmp_clients => $args->{snmp_clients} } );
+        if ( $status != 0 ) {
+            my $msg = "Problem parsing operational status agent for element: $res";
+            $self->{LOGGER}->error( $msg );
+            return ( -1, $msg );
+        }
+
+        push @agents, $res;
+    }
+
+    my %element = ();
+    $element{ids}    = \@ids;
+    $element{agents} = \@agents;
+
+    return ( 0, \%element );
+}
+
+=head2 parse_element_agent( $self, { config, snmp_clients, directory_offset } )
+
+A function which parses an agent configuration, and creates an appropriate
+Agent object. An agent can monitor by running a script, querying an SNMP
+interface or simply returning a constant value. For an SNMP device, this
+routine will query for the ifIndex if it is not specified.
+
+=cut
+
+sub create_element_agent {
+    my ( $self, @args ) = @_;
+    my $args = validateParams(
+        @args,
+        {
+            config           => 1,
+            snmp_clients     => 1,
+            directory_offset => 1,
+        }
+    );
+
+    my $agent = $args->{config};
+
+    my $new_agent;
+
+	$self->{LOGGER}->debug(Dumper($agent));
+
+    my $status_type = $agent->{status_type};
+    if ( not $status_type ) {
+        my $msg = "Agent does not contain a status_type attribute stating which status (operational or administrative) it returns";
+        $self->{LOGGER}->error( $msg );
+        return ( -1, $msg );
+    }
+
+    if ( $status_type ne "oper" and $status_type ne "operational" and $status_type ne "admin" and $status_type ne "administrative" and $status_type ne "oper/admin" and $status_type ne "admin/oper" ) {
+        my $msg = "Agent's stated status_type is neither 'oper' nor 'admin'";
+        $self->{LOGGER}->error( $msg );
+        return ( -1, $msg );
+    }
+
+    my $type = $agent->{type};
+    unless ( $type ) {
+        my $msg = "Agent has no type information";
+        $self->{LOGGER}->debug( $msg );
+        return ( -1, $msg );
+    }
+
+    if ( $type eq "script" ) {
+        my $script_name = $agent->{script_name};
+        unless ( $script_name ) {
+            my $msg = "Agent of type 'script' has no script name defined";
+            $self->{LOGGER}->debug( $msg );
+            return ( -1, $msg );
+        }
+
+        if ( $script_name !~ "^/" ) {
+            $script_name = $args->{directory_offset} . "/" . $script_name;
+        }
+
+        unless ( -x $script_name ) {
+            my $msg = "Agent of type 'script' has non-executable script: \"$script_name\"";
+            $self->{LOGGER}->debug( $msg );
+            return ( -1, $msg );
+        }
+
+        my $script_params = $agent->{"script_parameters"};
+
+        $new_agent = perfSONAR_PS::Collectors::Status::ElementAgents::Script->new( $status_type, $script_name, $script_params );
+    }
+    elsif ( $type eq "constant" ) {
+        my $value = $agent->{constant};
+        unless ( $value ) {
+            my $msg = "Agent of type 'constant' has no value defined";
+            $self->{LOGGER}->debug( $msg );
+            return ( -1, $msg );
+        }
+
+        $new_agent = perfSONAR_PS::Collectors::Status::ElementAgents::Constant->new( $status_type, $value );
+    }
+    elsif ( $type eq "snmp" ) {
+        my $oid = $agent->{oid};
+        unless ( $oid ) {
+            if ( $status_type eq "oper" ) {
+                $oid = "1.3.6.1.2.1.2.2.1.8";
+            }
+            elsif ( $status_type eq "admin" ) {
+                $oid = "1.3.6.1.2.1.2.2.1.7";
+            } else {
+	            my $msg = "Agent of type 'snmp' must be of type 'oper' or 'admin'";
+	            $self->{LOGGER}->debug( $msg );
+	            return ( -1, $msg );
+			}
+        }
+
+        my $address = $agent->{address};
+        unless ( $address ) {
+            my $msg = "Agent of type 'SNMP' has no address";
+            $self->{LOGGER}->error( $msg );
+            return ( -1, $msg );
+        }
+
+        my $ifName  = $agent->{ifName};
+        my $ifIndex = $agent->{ifIndex};
+
+        unless ( $ifIndex or $ifName ) {
+            my $msg = "Agent of type 'SNMP' has no name or index specified";
+            $self->{LOGGER}->error( $msg );
+            return ( -1, $msg );
+        }
+
+        my $version = $agent->{version};
+        unless ( $version ) {
+            my $msg = "Agent of type 'SNMP' has no snmp version";
+            $self->{LOGGER}->error( $msg );
+            return ( -1, $msg );
+        }
+
+        my $community = $agent->{community};
+        unless ( $community ) {
+            my $msg = "Agent of type 'SNMP' has no community string";
+            $self->{LOGGER}->error( $msg );
+            return ( -1, $msg );
+        }
+
+        unless ( $ifIndex ) {
+            $self->{LOGGER}->debug( "Looking up $ifName from $address" );
+
+            my ( $status, $res ) = snmpwalk( $address, undef, "1.3.6.1.2.1.31.1.1.1.1", $community, $version );
+            if ( $status != 0 ) {
+                my $msg = "Error occurred while looking up ifIndex for specified ifName $ifName in ifName table: $res";
+                $self->{LOGGER}->warn( $msg );
+            }
+            else {
+                foreach my $oid_ref ( @{$res} ) {
+                    my $oid   = $oid_ref->[0];
+                    my $type  = $oid_ref->[1];
+                    my $value = $oid_ref->[2];
+
+                    $self->{LOGGER}->debug( "$oid = $type: $value($ifName)" );
+                    if ( $value eq $ifName and $oid =~ /1\.3\.6\.1\.2\.1\.31\.1\.1\.1\.1\.(\d+)/x ) {
+                        $ifIndex = $1;
+                    }
+                }
+            }
+
+            unless ( $ifIndex ) {
+                my ( $status, $res ) = snmpwalk( $address, undef, "1.3.6.1.2.1.2.2.1.2", $community, $version );
+                if ( $status != 0 ) {
+                    my $msg = "Error occurred while looking up ifIndex for ifName $ifName in ifDescr table: $res";
+                    $self->{LOGGER}->warn( $msg );
+                }
+                else {
+                    foreach my $oid_ref ( @{$res} ) {
+                        my $oid   = $oid_ref->[0];
+                        my $type  = $oid_ref->[1];
+                        my $value = $oid_ref->[2];
+
+                        $self->{LOGGER}->debug( "$oid = $type: $value($ifName)" );
+                        if ( $value eq $ifName and $oid =~ /1\.3\.6\.1\.2\.1\.2\.2\.1\.2\.(\d+)/x ) {
+                            $ifIndex = $1;
+                        }
+                    }
+                }
+            }
+
+            unless ( $ifIndex ) {
+				my $msg = "Didn't find ifName $ifName in host $address";
+                $self->{LOGGER}->error( $msg );
+                return ( -1, $msg );
+            }
+        }
+
+        unless ( $args->{snmp_clients}->{$address} ) {
+            $args->{snmp_clients}->{$address} = perfSONAR_PS::Collectors::Status::ElementAgents::SNMP::Host->new( $address, q{}, $version, $community, q{} );
+        }
+
+        my $host_agent = $args->{snmp_clients}->{$address};
+
+        $new_agent = perfSONAR_PS::Collectors::Status::ElementAgents::SNMP->new( $status_type, $address, $ifIndex, $version, $community, $oid, $host_agent );
+    }
+    else {
+        my $msg = "Unknown agent type: \"$type\"";
+        $self->{LOGGER}->error( $msg );
+        return ( -1, $msg );
+    }
+
+    return ( 0, $new_agent );
+}
+
+=head2 parse_elements_file ( $self, { database_client, elements_file, directory_offset } )
+
+A function which parses a file containing descriptions of individual elements
+to monitor. This is included for backwards compatibility purposes. These
+elements can be monitored using a combination of scripts, SNMP interfaces or
+constant values. It iterates through the element descriptions in the file and
+calls a function to parse each element.
+
+=cut
+
+sub parse_elements_file {
     my ( $self, @args ) = @_;
     my $args = validateParams(
         @args,
@@ -823,7 +1166,7 @@ sub create_element_workers {
     my %defined_elements = ();
     my @elements         = ();
     foreach my $element ( $elements_config->getElementsByTagName( "element" ) ) {
-        my ( $status, $res ) = $self->parse_element( { xml_desc => $element, directory_offset => $args->{directory_offset} } );
+        my ( $status, $res ) = $self->parse_elements_file_element( { xml_desc => $element, directory_offset => $args->{directory_offset} } );
         if ( $status != 0 ) {
             my $msg = "Failure parsing element: $res";
             $self->{LOGGER}->error( $msg );
@@ -865,7 +1208,7 @@ representation of that element.
 
 =cut
 
-sub parse_element {
+sub parse_elements_file_element {
     my ( $self, @args ) = @_;
     my $args = validateParams(
         @args,
@@ -877,9 +1220,8 @@ sub parse_element {
 
     my $element_desc = $args->{xml_desc};
 
-    # the raw TL1 and SNMP clients are aggregated so that if individuals use
-    # multiple TL1 or SNMP clients, we can use bulk pulls to grab the stats and
-    # cache them.
+	# the raw SNMP clients are aggregated so that if individuals use SNMP
+	# clients, we can use bulk pulls to grab the stats and cache them.
     my %snmp_clients = ();
 
     my @ids = ();
@@ -901,7 +1243,7 @@ sub parse_element {
     foreach my $agent ( $element_desc->getElementsByTagName( "agent" ) ) {
         my ( $status, $res );
 
-        ( $status, $res ) = $self->parse_element_agent( { xml_desc => $agent, directory_offset => $args->{directory_offset}, snmp_clients => \%snmp_clients } );
+        ( $status, $res ) = $self->parse_elements_file_element_agent( { xml_desc => $agent, directory_offset => $args->{directory_offset}, snmp_clients => \%snmp_clients } );
         if ( $status != 0 ) {
             my $msg = "Problem parsing operational status agent for element: $res";
             $self->{LOGGER}->error( $msg );
@@ -933,7 +1275,7 @@ it is not specified.
 
 =cut
 
-sub parse_element_agent {
+sub parse_elements_file_element_agent {
     my ( $self, @args ) = @_;
     my $args = validateParams(
         @args,
@@ -988,7 +1330,7 @@ sub parse_element_agent {
 
         my $script_params = $agent->findvalue( "script_parameters" );
 
-        $new_agent = perfSONAR_PS::Collectors::LinkStatus::Agent::Script->new( $status_type, $script_name, $script_params );
+        $new_agent = perfSONAR_PS::Collectors::Status::ElementAgents::Script->new( $status_type, $script_name, $script_params );
     }
     elsif ( $type eq "constant" ) {
         my $value = $agent->findvalue( "constant" );
@@ -998,7 +1340,7 @@ sub parse_element_agent {
             return ( -1, $msg );
         }
 
-        $new_agent = perfSONAR_PS::Collectors::LinkStatus::Agent::Constant->new( $status_type, $value );
+        $new_agent = perfSONAR_PS::Collectors::Status::ElementAgents::Constant->new( $status_type, $value );
     }
     elsif ( $type eq "snmp" ) {
         my $oid = $agent->findvalue( "oid" );
@@ -1090,12 +1432,12 @@ sub parse_element_agent {
         }
 
         unless ( $args->{snmp_clients}->{$hostname} ) {
-            $args->{snmp_clients}->{$hostname} = perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP::Host->new( $hostname, q{}, $version, $community, q{} );
+            $args->{snmp_clients}->{$hostname} = perfSONAR_PS::Collectors::Status::ElementAgents::SNMP::Host->new( $hostname, q{}, $version, $community, q{} );
         }
 
         my $host_agent = $args->{snmp_clients}->{$hostname};
 
-        $new_agent = perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP->new( $status_type, $hostname, $ifIndex, $version, $community, $oid, $host_agent );
+        $new_agent = perfSONAR_PS::Collectors::Status::ElementAgents::SNMP->new( $status_type, $hostname, $ifIndex, $version, $community, $oid, $host_agent );
     }
     else {
         my $msg = "Unknown agent type: \"$type\"";

@@ -238,7 +238,7 @@ sub init {
     }
 
     my $data_client = perfSONAR_PS::DB::Status->new();
-    unless ( $data_client->init( { dbistring => $dbi_string, username => $username, password => $password, table_prefix => $table_prefix } ) ) {
+    if ( $data_client->init( { dbistring => $dbi_string, username => $username, password => $password, table_prefix => $table_prefix } ) ) {
         my $msg = "Problem creating database client";
         $self->{LOGGER}->error( $msg );
         return -1;

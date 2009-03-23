@@ -30,7 +30,7 @@ use fields 'AGENT', 'OPTICAL_FACILITIES', 'ETHERNET_FACILITIES', 'WAN_FACILITIES
 
 my %state_mapping = (
     "is"  => { "oper_status" => "up",   "admin_status" => "normaloperation" },
-    "oss" => { "oper_status" => "down", "admin_status" => "normaloperation" },
+    "oos" => { "oper_status" => "down", "admin_status" => "normaloperation" },
 );
 
 =head2 init( $self, { data_client, polling_interval, address, port, username, password, check_all_optical_ports, check_all_ethernet_ports, check_all_wan_ports, check_all_crossconnects, facilities, identifier_pattern } )
@@ -292,7 +292,7 @@ before calling the "check_facilities" function.
 sub connect {
     my ( $self ) = @_;
 
-    if ( $self->{AGENT}->connect( { inhibitMessages => 1 } ) == -1 ) {
+    if ( $self->{AGENT}->connect( { inhibit_messages => 1 } ) == -1 ) {
         $self->{LOGGER}->error( "Could not connect to host" );
         return 0;
     }
