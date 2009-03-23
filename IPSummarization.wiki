@@ -3494,13 +3494,13 @@ Three implementations are being initially tested on the test sets:  the original
 
 The results are below.
 
-==== APAN ====
+==== set APAN ====
 
-===== Original Perl =====
+*Original Perl*
 
 TBD (problems with requirements in package installation)
 
-===== Java =====
+*Java*
 
 Summarization nodes:
 
@@ -3515,7 +3515,7 @@ Summarization nodes:
 192.203.116.144/28
 202.0.0.0/7
 
-===== new Perl =====
+*new Perl*
 
 Summarization nodes:
 
@@ -3532,13 +3532,13 @@ Summarization nodes:
 
 Comments:  bugs are noticeable in the first IP numbers.  The summarization nodes are the same as the Java code, nevertheless.
 
-==== ESNET ====
+==== set ESNET ====
 
-===== Original Perl =====
+*Original Perl*
 
 TBD (problems with requirements in package installation)
 
-===== Java =====
+*Java*
 
 Summarization nodes:
 
@@ -3559,7 +3559,7 @@ Summarization nodes:
 207.231.240.0/20
 211.79.48.173/32
 
-===== new Perl =====
+*new Perl*
 
 Summarization nodes:
 
@@ -3582,13 +3582,13 @@ Summarization nodes:
 
 Comments:  bugs are noticeable in the first IP number.  The summarization nodes are the same as the Java code, nevertheless.
 
-==== FCCN ====
+==== set FCCN ====
 
-===== Original Perl =====
+*Original Perl*
 
 TBD (problems with requirements in package installation)
 
-===== Java =====
+*Java*
 
 Summarization nodes:
 
@@ -3597,7 +3597,7 @@ Summarization nodes:
 194.210.30.1/32
 194.210.63.253/32
 
-===== new Perl =====
+*new Perl*
 
 Summarization nodes:
 
@@ -3608,20 +3608,20 @@ Summarization nodes:
 
 Comments:  same results as Java code.
 
-==== GARR ====
+==== set GARR ====
 
-===== Original Perl =====
+*Original Perl*
 
 TBD (problems with requirements in package installation)
 
-===== Java =====
+*Java*
 
 Summarization nodes:
 
 10.1.2.3/32
 193.206.128.0/20
 
-===== new Perl =====
+*new Perl*
 
 Summarization nodes:
 
