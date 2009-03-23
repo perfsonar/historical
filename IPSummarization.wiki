@@ -2278,6 +2278,8 @@ The reasoning for the coverage or density tries to gather whether there exists a
 
 The algorithm is to be further optimized to allow for tuning of its heuristics, and to possibly incorporate the notion of weight of the subtrees.
 
+The algorithm for [http://en.wikipedia.org/wiki/Cut_(graph_theory) Minimum Cut] might also be a candidate for the summarization issue, and shall be further investigated.
+
 
 === Proposed Implementation ===
 
