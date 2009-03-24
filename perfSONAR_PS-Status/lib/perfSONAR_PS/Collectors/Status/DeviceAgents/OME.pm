@@ -38,7 +38,7 @@ my %state_mapping = (
     "oos-maanr" => { "oper_status" => "down",     "admin_status" => "maintenance" },
 );
 
-=head2 init( $self, { data_client, polling_interval, address, port, username, password, check_all_optical_ports, check_all_ethernet_ports, check_all_wan_ports, check_all_crossconnects, facilities, identifier_pattern } )
+=head2 init( $self, { data_client, polling_interval, address, port, username, password, check_all_optical_ports, check_all_ethernet_ports, check_all_wan_ports, facilities, identifier_pattern } )
 
 TBD
 
@@ -59,7 +59,6 @@ sub init {
             check_all_optical_ports  => 0,
             check_all_ethernet_ports => 0,
             check_all_wan_ports      => 0,
-            check_all_crossconnects  => 0,
             facilities               => 0,
             identifier_pattern       => 0,
         }
