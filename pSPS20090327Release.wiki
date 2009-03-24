@@ -192,7 +192,7 @@ Developers are responsible for testing their code:
    * Development
      * PingER - <font color=green>_*DONE - 3/13*_</font>
    * Documentation
-     * PingER - <font color=yellow>_*IN PROGRESS*_ - 3/23</font>
+     * PingER - <font color=green>_*DONE*_ - 3/23</font>
    * Code Review
      * pSB - <font color=purple>_*PUSHED OFF*_ - </font>
    * Documentation Review
