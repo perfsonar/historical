@@ -655,7 +655,7 @@ sub create_switch_worker_ome {
 
     my $check_all_optical_ports  = $config->{check_all_optical_ports};
     my $check_all_ethernet_ports = $config->{check_all_ethernet_ports};
-    my $check_all_wan_ports = $config->{check_all_wan_ports};
+    my $check_all_wan_ports      = $config->{check_all_wan_ports};
 
     my $identifier_pattern = $config->{identifier_pattern};
     my $polling_interval   = $config->{polling_interval};
@@ -693,7 +693,7 @@ sub create_switch_worker_ome {
 
             check_all_optical_ports  => $check_all_optical_ports,
             check_all_ethernet_ports => $check_all_ethernet_ports,
-            check_all_wan_ports => $check_all_wan_ports,
+            check_all_wan_ports      => $check_all_wan_ports,
 
             polling_interval   => $polling_interval,
             identifier_pattern => $identifier_pattern,
@@ -750,8 +750,9 @@ sub create_switch_worker_hdxc {
     my $username = $config->{username};
     my $password = $config->{password};
 
-    my $check_all_optical_ports  = $config->{check_all_optical_ports};
-#    my $check_all_ethernet_ports = $config->{check_all_ethernet_ports};
+    my $check_all_optical_ports = $config->{check_all_optical_ports};
+
+    #    my $check_all_ethernet_ports = $config->{check_all_ethernet_ports};
 
     my $identifier_pattern = $config->{identifier_pattern};
     my $polling_interval   = $config->{polling_interval};
@@ -787,8 +788,9 @@ sub create_switch_worker_hdxc {
             username => $username,
             password => $password,
 
-            check_all_optical_ports  => $check_all_optical_ports,
-#            check_all_ethernet_ports => $check_all_ethernet_ports,
+            check_all_optical_ports => $check_all_optical_ports,
+
+            #            check_all_ethernet_ports => $check_all_ethernet_ports,
 
             polling_interval   => $polling_interval,
             identifier_pattern => $identifier_pattern,
@@ -835,7 +837,7 @@ sub create_element_workers {
             $config->{"element"} = \@tmp;
         }
 
-		my %snmp_clients = ();
+        my %snmp_clients = ();
         foreach my $element ( @{ $config->{"element"} } ) {
             my $element_config = mergeHash( $config, $element, () );
 
@@ -858,8 +860,8 @@ sub create_element_workers {
         return ( -1, "Couldn't initialize Elements worker" );
     }
 
-	my @workers = ();
-	push @workers, $worker;
+    my @workers = ();
+    push @workers, $worker;
 
     return ( 0, \@workers );
 }
@@ -879,54 +881,54 @@ sub create_element_agents {
         @args,
         {
             config           => 1,
-			directory_offset => 1,
+            directory_offset => 1,
             snmp_clients     => 1,
         }
     );
 
-	my $config = $args->{config};
+    my $config = $args->{config};
 
-	# the raw SNMP clients are aggregated so that if individuals use SNMP
-	# clients, we can use bulk pulls to grab the stats and cache them.
+    # the raw SNMP clients are aggregated so that if individuals use SNMP
+    # clients, we can use bulk pulls to grab the stats and cache them.
 
-	unless ($config->{id}) {
+    unless ( $config->{id} ) {
         my $msg = "No ids associated with specified element";
         $self->{LOGGER}->error( $msg );
         return ( -1, $msg );
-	}
+    }
 
-	unless ($config->{agent}) {
+    unless ( $config->{agent} ) {
         my $msg = "No agents associated with specified element";
         $self->{LOGGER}->error( $msg );
         return ( -1, $msg );
-	}
+    }
 
-	if (ref($config->{id}) ne "ARRAY") {
-		my @tmp = ();
-		push @tmp, $config->{id};
-		$config->{id} = \@tmp;
-	}
+    if ( ref( $config->{id} ) ne "ARRAY" ) {
+        my @tmp = ();
+        push @tmp, $config->{id};
+        $config->{id} = \@tmp;
+    }
 
-	if (ref($config->{agent}) ne "ARRAY") {
-		$self->{LOGGER}->debug("Converting to array: ".ref($config->{agent}));
+    if ( ref( $config->{agent} ) ne "ARRAY" ) {
+        $self->{LOGGER}->debug( "Converting to array: " . ref( $config->{agent} ) );
 
-		my @tmp = ();
-		push @tmp, $config->{agent};
-		$config->{agent} = \@tmp;
-	}
+        my @tmp = ();
+        push @tmp, $config->{agent};
+        $config->{agent} = \@tmp;
+    }
 
-	my @ids = ();
-	foreach my $id (@{ $config->{id} }) {
-		push @ids, $id;
-	}
+    my @ids = ();
+    foreach my $id ( @{ $config->{id} } ) {
+        push @ids, $id;
+    }
 
     my @agents = ();
 
-	$self->{LOGGER}->debug(Dumper($config));
+    $self->{LOGGER}->debug( Dumper( $config ) );
     foreach my $agent ( @{ $config->{agent} } ) {
         my ( $status, $res );
 
-		$self->{LOGGER}->debug(Dumper($agent));
+        $self->{LOGGER}->debug( Dumper( $agent ) );
         ( $status, $res ) = $self->create_element_agent( { config => $agent, directory_offset => $args->{directory_offset}, snmp_clients => $args->{snmp_clients} } );
         if ( $status != 0 ) {
             my $msg = "Problem parsing operational status agent for element: $res";
@@ -968,7 +970,7 @@ sub create_element_agent {
 
     my $new_agent;
 
-	$self->{LOGGER}->debug(Dumper($agent));
+    $self->{LOGGER}->debug( Dumper( $agent ) );
 
     my $status_type = $agent->{status_type};
     if ( not $status_type ) {
@@ -1030,11 +1032,12 @@ sub create_element_agent {
             }
             elsif ( $status_type eq "admin" ) {
                 $oid = "1.3.6.1.2.1.2.2.1.7";
-            } else {
-	            my $msg = "Agent of type 'snmp' must be of type 'oper' or 'admin'";
-	            $self->{LOGGER}->debug( $msg );
-	            return ( -1, $msg );
-			}
+            }
+            else {
+                my $msg = "Agent of type 'snmp' must be of type 'oper' or 'admin'";
+                $self->{LOGGER}->debug( $msg );
+                return ( -1, $msg );
+            }
         }
 
         my $address = $agent->{address};
@@ -1109,7 +1112,7 @@ sub create_element_agent {
             }
 
             unless ( $ifIndex ) {
-				my $msg = "Didn't find ifName $ifName in host $address";
+                my $msg = "Didn't find ifName $ifName in host $address";
                 $self->{LOGGER}->error( $msg );
                 return ( -1, $msg );
             }
@@ -1220,8 +1223,8 @@ sub parse_elements_file_element {
 
     my $element_desc = $args->{xml_desc};
 
-	# the raw SNMP clients are aggregated so that if individuals use SNMP
-	# clients, we can use bulk pulls to grab the stats and cache them.
+    # the raw SNMP clients are aggregated so that if individuals use SNMP
+    # clients, we can use bulk pulls to grab the stats and cache them.
     my %snmp_clients = ();
 
     my @ids = ();

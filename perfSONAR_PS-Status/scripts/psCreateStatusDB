@@ -16,6 +16,7 @@ Creates the database for the status service.
 =cut
 
 use Getopt::Long;
+use Config::General;
 use DBI;
 use Carp;
 
@@ -27,6 +28,7 @@ A function to print out the command-line options understood by this script.
 
 sub usage {
     print "$0: Initialize a Status database\n";
+    print "  --config: The database.conf file containing all the parameters\n";
     print "  --type: The database type: 'sqlite' or 'mysql'\n";
     print "  --prefix: The prefix of the tables to create. defaults to 'ps_'\n";
     print "  If SQLite is chosen, you can use these arguments\n";
@@ -41,7 +43,7 @@ sub usage {
 }
 
 my $sqlite_create_status_table = <<EOQ
-CREATE TABLE IF NOT EXISTS TABLEPREFIXstatus (
+CREATE TABLE IF NOT EXISTS TABLEPREFIX_status (
   id varchar(255) NOT NULL,
   start_time integer not null,
   end_time integer not null,
@@ -52,7 +54,7 @@ EOQ
     ;
 
 my $mysql_create_status_table = <<EOQ
-CREATE TABLE IF NOT EXISTS TABLEPREFIXstatus (
+CREATE TABLE IF NOT EXISTS TABLEPREFIX_status (
   id varchar(255) NOT NULL,
   start_time bigint not null,
   end_time bigint not null,
@@ -80,6 +82,7 @@ my $DB_PASSWORD;
 my ( $status, $res, $res2 );
 
 $status = GetOptions(
+    'config=s'   => \$CONFIG_FILE,
     'type=s'     => \$DB_TYPE,
     'prefix=s'   => \$DB_PREFIX,
     'file=s'     => \$DB_FILE,
@@ -89,6 +92,21 @@ $status = GetOptions(
     'username=s' => \$DB_USERNAME,
     'password=s' => \$DB_PASSWORD,
 );
+
+if ( $CONFIG_FILE ) {
+    my $config = new Config::General( $CONFIG_FILE );
+    my %conf   = $config->getall;
+
+    $DB_TYPE   = $conf{db_type}   if ( $conf{db_type} );
+    $DB_PREFIX = $conf{db_prefix} if ( $conf{db_prefix} );
+
+    $DB_FILE = $conf{db_file} if ( $conf{db_file} );
+
+    $DB_HOST     = $conf{db_host}     if ( $conf{db_host} );
+    $DB_PORT     = $conf{db_port}     if ( $conf{db_port} );
+    $DB_USERNAME = $conf{db_username} if ( $conf{db_username} );
+    $DB_PASSWORD = $conf{db_password} if ( $conf{db_password} );
+}
 
 unless ( $DB_TYPE ) {
     print "No database type specified\n";
@@ -104,7 +122,7 @@ if ( $DB_TYPE ne "sqlite" and $DB_TYPE ne "mysql" ) {
     exit( -1 );
 }
 
-$DB_PREFIX = 'ps_' unless $DB_PREFIX;
+$DB_PREFIX = 'ps' unless $DB_PREFIX;
 
 if ( $DB_TYPE eq "sqlite" ) {
     unless ( $DB_FILE ) {
@@ -135,14 +153,7 @@ elsif ( $DB_TYPE eq "mysql" ) {
     $mysql_create_status_table =~ s/TABLEPREFIX/$DB_PREFIX/gm;
 
     $dbi_string .= ":database=" . $DB_NAME;
-
-    unless ( $DB_HOST ) {
-        print "Need to specify the database host\n";
-        usage();
-        exit( -1 );
-    }
-
-    $dbi_string .= ":host=" . $DB_HOST;
+    $dbi_string .= ":host=" . $DB_HOST if $DB_HOST;
     $dbi_string .= ":port=" . $DB_PORT if $DB_PORT;
 
     my $dbh = DBI->connect( $dbi_string );

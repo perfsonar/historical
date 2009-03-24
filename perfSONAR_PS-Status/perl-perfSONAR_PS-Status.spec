@@ -91,7 +91,7 @@ chown perfsonar:perfsonar /var/lib/perfsonar
 
 if [ ! -f /var/lib/perfsonar/status.db ];
 then
-	%{install_base}/scripts/psCreateStatusDB --type sqlite --file /var/lib/perfsonar/status.db
+	%{install_base}/scripts/psCreateStatusDB --config %{install_base}/etc/database.conf
 	chown perfsonar:perfsonar /var/lib/perfsonar/status.db
 fi
 

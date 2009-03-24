@@ -7,12 +7,12 @@ our $VERSION = 3.1;
 
 =head1 NAME
 
-genLinkStatus.pl
+gen_rand_status.pl
 
 =head1 DESCRIPTION
 
 This is a sample script to show how status information about a given link should
-be output. It simply randomly selects a state based on the type of status being
+be output. It randomly selects a status based on the type of status being
 checked.
 
 The first paramter will always exist and will be the type of status being looked
@@ -20,38 +20,42 @@ up: 'admin' or 'oper'
 
 A real script might consult an SNMP MA or consult the router via the CLI
 
-The script should output something like: timestamp,[state]
-     
+If the script is an 'admin' or 'oper' script, the output should look like: timestamp,[status]
+If the script is an 'oper/admin' script, the output should look like: timestamp,[oper status],[admin status] 
+
 =cut
 
 my $type = shift;
 
-my @oper_states = ( "up", "down", "degraded", );
+unless ( $type ) {
+    print time() . ",unknown";
+    exit( -1 );
+}
 
-my @admin_states = ( "normaloperation", "maintenance", "troubleshooting", "underrepair", );
+my @oper_statuses = ( "up", "down", "degraded", );
 
-my $state;
+my @admin_statuses = ( "normaloperation", "maintenance", "troubleshooting", "underrepair", );
 
 if ( $type eq "admin" ) {
-    my $n = int( rand( $#admin_states + 1 ) );
-    $state = $admin_states[$n];
-	print time() . "," . $state;
+    my $n      = int( rand( $#admin_statuses + 1 ) );
+    my $status = $admin_statuses[$n];
+    print time() . "," . $status;
 }
 elsif ( $type eq "oper" ) {
-    my $n = int( rand( $#oper_states + 1 ) );
-    $state = $oper_states[$n];
-	print time() . "," . $state;
+    my $n      = int( rand( $#oper_statuses + 1 ) );
+    my $status = $oper_statuses[$n];
+    print time() . "," . $status;
 }
 elsif ( $type eq "oper/admin" or $type eq "admin/oper" ) {
-    my $n = int( rand( $#oper_states + 1 ) );
-    my $oper_state = $oper_states[$n];
-    my $m = int( rand( $#admin_states + 1 ) );
-    my $admin_state = $admin_states[$m];
-	print time() . "," . $oper_state.",".$admin_state;
+    my $n            = int( rand( $#oper_statuses + 1 ) );
+    my $oper_status  = $oper_statuses[$n];
+    my $m            = int( rand( $#admin_statuses + 1 ) );
+    my $admin_status = $admin_statuses[$m];
+    print time() . "," . $oper_status . "," . $admin_status;
 }
 else {
-    $state = "unknown";
-	print time() . "," . $state;
+    my $status = "unknown";
+    print time() . "," . $status;
 }
 
 __END__
