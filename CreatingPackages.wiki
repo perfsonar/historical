@@ -31,7 +31,8 @@ trunk/perfSONAR_PS-Skeleton
 || _doc/_ || Documentation related to the released package ||
 || _doc/Changes_ || Change log for the service; update this for each release ||
 || _doc/LICENSE_ || File containing license information ||
-|| _doc/README_ || Installation instructions or other notes ||
+|| _doc/README_ || Package notes that would be read immediatly ||
+|| _doc/INSTALL_ || Installation instructions ||
 || _etc/_ || Configuration files, templates, or other non-executable additions to this package ||
 || _lib/_ || Library files (modules) ||
 || _perl-perfSONAR_PS-Skeleton.spec_ || Instructions for building the RPM ||
@@ -127,7 +128,8 @@ Requires:		perl(XML::LibXML) >= 1.60
  * Be sure to uninstall the _*chkconfig*_ items when needed:
 {{{
 %preun
-if [ $1 -eq 0 ]; then
+if [ $1 -eq 0 ];
+then
     /sbin/chkconfig --del XXX
     /sbin/service XXX stop
 fi
@@ -153,7 +155,7 @@ email: i2-perfsonar@internet2.edu
 %_signature    gpg
 %_gpg_name perfSONAR-PS
 }}}
- # Acquire the perfSONAR-PS singing keys (ask a member of the release team for these)
+ # Acquire the perfSONAR-PS singing keys (*_ask a member of the release team for these*_)
    * Import the key _*gpg --import KEYNAME*_
  # From inside your package, run _*make dist*_ 
  # The result of the previous step should be a _*tar.gz*_ package.  Copy this to _*/YOUR/HOME/rpmbuild/SOURCES*_
@@ -187,6 +189,7 @@ The following simple example just installs the dependencies from CPAN. It could 
 
 MAKEROOT=""
 if [[ $EUID -ne 0 ]];
+then
     MAKEROOT="sudo "
 fi
 
@@ -206,7 +209,8 @@ The following example is from the Topology Service. The script would likely only
 #!/bin/bash
 
 MAKEROOT=""
-if [[ $EUID -ne 0 ]]; then
+if [[ $EUID -ne 0 ]];
+then
     MAKEROOT="sudo "
 fi
 
@@ -241,10 +245,6 @@ It would be good to include a list of steps that would need to be taken to allow
 == Packaging Dependencies ==
 
 There is a [RPMPackagingOtherSofwareCookBook page of instructions] devoted to packaging the myriad bits of software on which a service might depend.
-
-== FAQ ==
-
-None Currently.
 
 == Last Updated ==
 

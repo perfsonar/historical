@@ -1,8 +1,9 @@
-#summary Cookbook for building RPMs or other packages of some of the software we distribute
+#summary Cookbook for building RPMs or other packages
 
 <wiki:toc max_depth="6" />
 
 == Introduction ==
+
 The goal of this page is to have a place to store all the cookbook instructions for making RPMs for software that we distribute, but aren't the maintainers of. Any patches or changes we make should be pushed to the maintainers if possible, but for some software, they will not accept the changes.
 
 == CPAN Packages ==
@@ -64,6 +65,7 @@ Requires:       perl
 }}} 
 
 == Red Hat/Fedora Web100 Kernel ==
+
   * install kernel source rpm
 {{{
 yum-downloader --source kernel
