@@ -41,9 +41,10 @@ example:
 {{{
 =head2 functionName( args )
 
-        this function is a ....
-        accepts parameters:
-        returns:
+This function is a ....
+accepts parameters:
+returns:
+
 =cut
 
 sub functionName {
@@ -74,6 +75,8 @@ perfSONAR_PS::NAME
 =head1 DESCRIPTION
 
 description
+
+=head1 API
 
 =cut
 
@@ -150,70 +153,6 @@ YOUR LICENCE
 =head1 COPYRIGHT
 
 Copyright (c) 2009, YOUR ORG
-
-All rights reserved.
-
-=cut
-}}}
-
-The same can be said for scripts:
-
-{{{
-#!/usr/bin/perl -w
-
-use strict;
-use warnings;
-
-use version;
-our $VERSION = qv("XXX");
-
-=head1 NAME
-
-description
-
-=head1 DESCRIPTION
-
-description
-
-=cut
-
-# Script guts
-
-
-__END__
-
-=head1 SEE ALSO
-
-L<strict>
-
-To join the 'perfSONAR Users' mailing list, please visit:
-
-  https://mail.internet2.edu/wws/info/perfsonar-user
-
-The perfSONAR-PS subversion repository is located at:
-
-  http://anonsvn.internet2.edu/svn/perfSONAR-PS
-
-Questions and comments can be directed to the author, or the mailing list.
-Bugs, feature requests, and improvements can be directed here:
-
-  http://code.google.com/p/perfsonar-ps/issues/list
-
-=head1 VERSION
-
-VERSION info or SVN ID string
-
-=head1 AUTHOR
-
-John Q Author, jqa@asdf.org
-
-=head1 LICENSE
-
-YOUR LICENCE
-
-=head1 COPYRIGHT
-
-Copyright (c) 2008, YOUR ORG
 
 All rights reserved.
 
@@ -530,7 +469,7 @@ generation if possible.  See also [ReleaseManagement#Testing].
 
 == SVN Rules ==
 
-Trunk is place for  tested modules, _*ONLY*_.
+Trunk is place for tested modules, _*ONLY*_.
 
 == Last Updated ==
 
