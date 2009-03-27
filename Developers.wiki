@@ -176,9 +176,9 @@ Each Bug report main contain certain items:
      * _Linux_ - Affects Linux users
      * _OSX_ - Affects Mac OS X users
    * _*Milestone*_ 
-     * _Release0.9Beta_ - perfSONAR-PS September 2007 Release (<font color="red">depreciated</red>) 
-     * _Release0.9_ - perfSONAR-PS January 2008 Release (<font color="red">depreciated</red>) 
-     * _Release1.0_ - perfSONAR-PS July 2008 Release (<font color="red">depreciated</red>) 
+     * _Release0.9Beta_ - perfSONAR-PS September 2007 Release (<font color="red">depreciated</font>) 
+     * _Release0.9_ - perfSONAR-PS January 2008 Release (<font color="red">depreciated</font>) 
+     * _Release1.0_ - perfSONAR-PS July 2008 Release (<font color="red">depreciated</font>) 
      * _Release3.1Beta_ - perfSONAR-PS March 2009 Release - Special tag for beta testing
      * _Release3.1_ - perfSONAR-PS March 2009 Release
      * _Release3.2Beta_ - perfSONAR-PS Summer 2009 Release - Special tag for beta testing
@@ -191,20 +191,20 @@ Each Bug report main contain certain items:
      * _perfSONAR-PS_ - General Framework - use when unsure of specific parts are unknown
      * _PingER_ - PingER Measurement Archive and Point
      * _SNMP_ - SNMP Measurement Archive
-     * _LookupService_ - Class Lookup Service (<font color="red">depreciated</red>) 
+     * _LookupService_ - Class Lookup Service (<font color="red">depreciated</font>) 
      * _HomeLookupService_ - Home Lookup Service
      * _GlobalLookupService_ - Global Lookup Service
      * _TopologyService_ - Topology Service
-     * _CircuitStatus_ - Circuit Status Measurement Archive (<font color="red">depreciated</red>) 
+     * _CircuitStatus_ - Circuit Status Measurement Archive (<font color="red">depreciated</font>) 
      * _StatusService_ - Status Measurement Archive
-     * _PerfSONARBUOY_ - PerfSONAR-BOUY Measurement Archive (<font color="red">depreciated</red>) 
+     * _PerfSONARBUOY_ - PerfSONAR-BOUY Measurement Archive (<font color="red">depreciated</font>) 
      * _PerfSONARBUOYClient_ - PerfSONAR-BOUY Client Package
      * _PerfSONARBUOYServer_ - PerfSONAR-BOUY Server Package
      * _LSRegistrationDaemon_ - LS Registration Daemon
      * _TL1_ - TL1 Tools
      * _GUI_ - PerfSONAR-PS GUI Tools
      * _API_ - Programmer Interfaces
-     * _NPToolkit_ - Network Performance Toolkit (<font color="red">depreciated</red>) 
+     * _NPToolkit_ - Network Performance Toolkit (<font color="red">depreciated</font>) 
      * _PerformanceNode_ - Performance Node
      * _PerformanceNodeKnoppix_ - Performance Node - Knoppix Releases
      * _PerformanceNodeFedora_ - Performance Node - Fedora Releases
