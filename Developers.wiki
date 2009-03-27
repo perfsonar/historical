@@ -1,0 +1,166 @@
+#summary Guide for New Developers of perfSONAR-PS tools
+
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+Starting development for a new software project can be intimidating.  The following guide was created to point out the basics of both the tangible and intangible elements of developing software for the perfSONAR-PS infrastructure.  
+
+== What Is perfSONAR-PS ==
+
+perfSONAR-PS is a set of independent software services that implement the [http://www.perfsonar.net/ perfSONAR] protocols for network performance monitoring. perfSONAR-PS services are designed to be compatible with all other perfSONAR software that implements the perfSONAR protocols. perfSONAR-PS is able to federate between deployments, particularly those that span multiple domains, making the job of solving end-to-end performance problems on paths crossing several networks much easier to address.
+
+The perfSONAR-PS services provide Web Services (WS) based interfaces into already deployed network monitoring infrastructures and act as an intermediate layer, between the performance measurement tools and the diagnostic or visualization applications. The targeted audience for these services is network Network Operation Centers (NOCs) at Universities and Regional networks, however these services are broadly useful to the general public at large. 
+
+=== Service Examples ===
+
+TBD
+
+=== Use Cases ===
+
+TBD
+
+=== Future Plans ===
+
+TBD
+
+== Development Tools ==
+
+The development of perfSONAR-PS involves several tools that are meant to make the jobs of developers easier particularly for managing the source code, communication, and tasks to be done.  The following sections offer an introduction to each important item.
+
+=== Subversion ===
+
+The main perfSONAR-PS subversion repository is located in Ann Arbor Michigan:
+
+ * [http://anonsvn.internet2.edu/svn/perfSONAR-PS/] - Read only access to the source code
+ * [https://svn.internet2.edu/svn/perfSONAR-PS/] - Read/Write access for approved developers
+
+Subversion resources can be found [http://svnbook.red-bean.com/en/1.5/svn-book.html here], but a quick guide to useful commands follows:
+
+ * Checking out (do initially)
+{{{
+bash$ svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk perfSONAR-PS
+}}}
+ * Updating working copy (do frequently)
+{{{
+bash$ svn update
+At revision 7.
+}}}
+ * Checking status (do to check the status of items in your local copy)
+{{{
+bash$ svn status
+?      newFile
+M      mirrors-Internet2
+}}}
+ * Adding
+{{{
+bash$ svn add newFile
+A      newFile
+}}}
+ * Deleting
+{{{
+bash$ svn rm RPM-GPG-KEY-Internet2 
+D     RPM-GPG-KEY-Internet2
+}}}
+ * Committing
+{{{
+bash$ svn commit
+A    trunk/newFile
+M    trunk/mirrors-Internet2
+D    trunk/RPM-GPG-KEY-Internet2
+}}}
+ 
+==== Repo Organization ====
+
+TBD
+
+==== Code Organization ====
+ 
+TBD
+ 
+=== Wiki ===
+
+The perfSONAR-PS wiki is located on [http://code.google.com Google Code].  Specifically the wiki can accessed in one of two ways:
+
+ * Wiki listing - [http://code.google.com/p/perfsonar-ps/w/list]
+ * Wiki _Home_ - [http://code.google.com/p/perfsonar-ps/w/Home]
+
+Access to the wiki is controlled via [https://www.google.com/accounts/ManageAccount Google Accounts], if you have one please see one of the project leaders (listed on the [http://code.google.com/p/perfsonar-ps/ home] page) to add you to the project.  
+
+==== Editing ====
+
+The wiki can be edited in two ways:
+
+ * Web interface
+ * Checkout via subversion:
+{{{
+svn checkout https://perfsonar-ps.googlecode.com/svn perfSONAR-PS-Google --username YOURNAME
+}}}
+   * Note that a password is required, you may find it [http://code.google.com/hosting/settings here] (note you must be logged in to view your personal password
+
+When editing the wiki be sure to follow:
+
+ * Formatting rules:
+{{{
+#summary ENTER A SUMMARY HERE
+
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+... content ...
+
+=== Other Headers ===
+
+... content ....
+
+== Last Updated ==
+
+$Id$
+}}}
+ * Always enter a log entry (either through the web form or the svn commit script) to each addition.  
+
+=== Issue Tracker ===
+
+TBD
+
+=== Mailing Lists ===
+
+TBD
+
+== Development Practices ==
+
+TBD
+
+=== Release Process ===
+
+TBD
+
+=== Code Rules ===
+
+TBD
+
+== Project Development ==
+
+TBD
+
+=== Services ===
+
+TBD
+
+=== GUIs ===
+
+TBD
+
+=== Packaging ===
+
+TBD
+
+=== Testing ===
+
+TBD
+
+== Last Updated ==
+
+$Id$
+
