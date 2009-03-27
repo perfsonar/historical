@@ -4,6 +4,7 @@ version 3.1
     - Support for Cacti and Cricket data sets
     - Enhancements to increase RRD and XML access performance
     - New message type to retrieve RRD information (e.g. resolutions, times)
+    - Updated examples
   * Bugfixes
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=44
       - SNMP MA does not seems to handle rrd fetch errors   	  

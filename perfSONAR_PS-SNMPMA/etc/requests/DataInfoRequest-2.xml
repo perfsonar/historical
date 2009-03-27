@@ -11,6 +11,7 @@
     <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
                   messageIdRef="DataInfoRequest1" id="message.4621557" 
                   type="DataInfoResponse">
+
       <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.5551555" metadataIdRef="m-in-netutil-1">
         <nmwg:key id="key1">
           <nmwg:parameters id="params.0">

@@ -1,4 +1,4 @@
-			          perfSONAR SNMP MA Service
+			              perfSONAR SNMP MA Service
 
 --------------------------------------------------------------------------------
 
@@ -106,7 +106,7 @@ Testing:
 
 The service comes with a client application and several test messages that can
 be used to test functionality.  There are many messages provided as examples, 
-to test the service there are for that are recommended:
+to test the service there are four that are recommended:
 
   etc/requests/EchoRequest.xml
   etc/requests/MetadataKeyRequest-1.xml 
@@ -125,14 +125,14 @@ These four will test the major functions of this service. To test:
   3) Compare the results of the test with the comments in each file.  Note there
      may be some differences (e.g. id values, key values).  
      
-  4) If everything looks ok, return logging to normal and restart service via
+  4) If everything looks OK, return logging to normal and restart service via
      the init system.  
 
 Maintenance:
 ------------
 
 Subscribe to the user mailing lists if you are seeking help on some problem
-related to this software.  Announements regarding availability of new releases
+related to this software.  Announcements regarding availability of new releases
 will also be sent to these locations
 
   perfSONAR Users Group - https://mail.internet2.edu/wws/info/perfsonar-user
