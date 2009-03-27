@@ -15,7 +15,7 @@ This document describes the new structure and considerations for developers.
 
 == Organization ==
 
-At the top-level of the repository trunk, there are individual directories for each service, and a directory named "Shared".
+At the top-level of the repository trunk, there are individual directories for each service, and a directory named _*Shared*_.
 
 === The Service Directories ===
 
@@ -53,6 +53,7 @@ perfSONAR_PS-LS
     INSTALL
     README
     LICENSE
+    Changes
   Makefile
   MANIFEST
   perfSONAR_PS-LS.spec
@@ -85,7 +86,7 @@ Shared
 
 The relevant files can then symlinked into the service directories. To facilitate this symlinking, there is a script _*package_dependencies.pl*_ which will read the MANIFEST file, and symlink the required modules.
 
-== Benefits To This Structure ==
+== Benefits ==
 
 This structure minimizes the amount of service specific files in the common areas. We could have all files live in the common area and be symlinked into the service specific areas, but we'd need to either structure the common area documentation, scripts and other directories into service-specific directories or come up with a naming convention for all files to ensure that there are no collisions.
 
