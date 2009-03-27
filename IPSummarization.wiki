@@ -601,6 +601,19 @@ This work should be done primarily by the student, with help from:
  * Jeff - Current Algorithm/Resources
  * Aaron - Topology Considerations
 
+=== IS WG Thoughts ===
+
+Originally proposed by Brian:
+
+{{{
+As this solution is so completely IPV4 specific, I'm wondering if this is the
+right path to continue down.What about using AS numbers instead?That would work for both V4 and V6 addresses. Clearly there would be a lot of
+other issues to work out, such as how to handle multiple hLS's within a AS
+domain, but maybe this is worth more thought? 
+}}}
+
+This is worth pursuing by the student after the work on the initial algorithm.  
+
 === Proposed Data Sets ===
 
 The following data sets were gathered from perfSONAR services in March 2009.
@@ -2220,11 +2233,11 @@ When a node is created into the trie, two values are calculated and attached to 
 
 The _childCount_ is the number of descendants below a node.  Or, in other words, the number of nodes within the subtrees deriving from that node.  Every time a node is added to the trie, its ancestors also have this value updated.
 
-The _coverage_ is a measure of the density of number of desdendants of the node over the maximum possible number of hosts below the node.  The idea here is that, if below a node, there can exist a maximum of 32 hosts, but actually there exists only one, then the density of hosts below that node is low.  If there can exist a maximum of 32 hosts, and there are actually 32 hosts below the node, then the density is high (or maximal in this case).  The number of maximum hosts below a node is calculated as:
+The _coverage_ is a measure of the density of number of descendants of the node over the maximum possible number of hosts below the node.  The idea here is that, if below a node, there can exist a maximum of 32 hosts, but actually there exists only one, then the density of hosts below that node is low.  If there can exist a maximum of 32 hosts, and there are actually 32 hosts below the node, then the density is high (or maximal in this case).  The number of maximum hosts below a node is calculated as:
 
     `$self->{coverage} =  $self->{childCount} / (2**(MAX_KEY_LENGTH - $self->{mask}));`
 	
-where MAX_KEY_LENGTH is typically 32, the _mask_ is the CIDR class (number after the / in the IP number), and _childCount_ is the number of desdendants (calculated as above).  The meaning of this equation is:  MAX_KEY_LENGTH - _mask_ yields the number of bits available, in the range of IP addresses, to be assigned to hosts.  Raising 2 to this power results in the equivalent number of hosts available within this range of IP addresses.  Dividing the actual number of desdendants by the number of (maximum) available hosts yields the density, or coverage.  This coverage value is also updated as new nodes are added to the trie.
+where MAX_KEY_LENGTH is typically 32, the _mask_ is the CIDR class (number after the / in the IP number), and _childCount_ is the number of descendants (calculated as above).  The meaning of this equation is:  MAX_KEY_LENGTH - _mask_ yields the number of bits available, in the range of IP addresses, to be assigned to hosts.  Raising 2 to this power results in the equivalent number of hosts available within this range of IP addresses.  Dividing the actual number of descendants by the number of (maximum) available hosts yields the density, or coverage.  This coverage value is also updated as new nodes are added to the trie.
 
 Once created, recurse down the trie, starting from the root node (the root node should be the looser, or larger, summarization IP number; in a worst case, it would be 0.0.0.0/0).  At each internal node, evaluate whether the trie should continue to be recursed down, or whether it should be pruned, and the corresponding node is then marked as a summarization node.  The decision of whether to mark a summarization node is done in the method _markIpTrie1_, shown below:
 
@@ -3479,26 +3492,41 @@ sub printDotNode(TrieNode node, long position, long currentKey) {
 
 This script tests the proposed implementation.  It should be executed as:
 
-    `perl test.pl inputIPfile`
+{{{
+    perl test.pl inputIPfile
+}}}
 
 where _inputIPfile_ is a text file containing some IP numbers for which the summarization is to be calculated.  The script outputs two files:
 
-    `inputIPfile_`-summary.txt_     and
-    `inputIPfile_`-summary.dot_
+{{{
+    inputIPfile-summary.txt_
+}}}
+
+and
+ 
+{{{
+    inputIPfile-summary.dot_
+}}}
 
 where the _txt_ file contains the summarizing nodes, and the _dot_ file contains an input file to be used with [http://www.graphviz.org/ Graphviz] tool.
 
 === Experimentation Results ===
 
-Three implementations are being initially tested on the test sets:  the original Perl code from Jason Zurawsky; the Java code from Martin Swany; and the new Perl code, as a direct translation of the Java code.
-
-The results are below.
+Three implementations are being initially tested on the test sets:  the original Perl code from Jason; the Java code from Martin; and the new Perl code, as a direct translation of the Java code.  The results are below.
 
 ==== set APAN ====
 
 *Original Perl*
 
-TBD (problems with requirements in package installation)
+Summarization nodes:
+
+{{{
+128.0.0.0/4
+160.0.0.0/4
+192.203.116.144/28
+202.0.0.0/8
+203.176.0.0/13
+}}}
 
 *Java*
 
@@ -3540,7 +3568,18 @@ Comments:  bugs are noticeable in the first IP numbers.  The summarization nodes
 
 *Original Perl*
 
-TBD (problems with requirements in package installation)
+Summarization nodes:
+
+{{{
+10.0.0.0/11
+62.40.124.0/23
+192.0.0.0/3
+172.16.32.0/30
+144.0.0.0/5
+136.0.0.0/6
+128.115.190.0/25
+134.0.0.0/8
+}}}
 
 *Java*
 
@@ -3594,7 +3633,22 @@ Comments:  bugs are noticeable in the first IP number.  The summarization nodes 
 
 *Original Perl*
 
-TBD (problems with requirements in package installation)
+Summarization nodes:
+
+{{{
+194.210.0.0/18
+193.137.0.0/18
+193.136.1.32/28
+193.136.4.0/24
+193.136.5.0/28
+193.136.249.128/26
+193.136.252.2/31
+193.136.255.252/30
+193.136.1.176/28
+193.136.1.220/30
+193.136.249.0/26
+193.136.249.64/26
+}}}
 
 *Java*
 
@@ -3624,7 +3678,85 @@ Comments:  same results as Java code.
 
 *Original Perl*
 
-TBD (problems with requirements in package installation)
+Summarization nodes:
+
+{{{
+193.206.128.0/23
+193.206.130.0/23
+193.206.132.0/25
+193.206.132.128/25
+193.206.136.0/25
+193.206.136.128/25
+193.206.137.0/25
+193.206.137.128/25
+193.206.140.0/24
+193.206.142.128/25
+193.206.143.120/30
+193.206.143.124/30
+193.206.143.188/30
+193.206.143.252/30
+193.206.134.88/30
+193.206.134.180/30
+193.206.134.188/30
+193.206.141.32/30
+193.206.141.64/30
+193.206.141.88/30
+193.206.134.4/30
+193.206.134.20/30
+193.206.134.24/30
+193.206.134.52/30
+193.206.134.60/30
+193.206.134.120/30
+193.206.134.136/30
+193.206.134.140/30
+193.206.134.152/30
+193.206.134.156/30
+193.206.134.204/30
+193.206.134.244/30
+193.206.141.4/30
+193.206.141.104/30
+193.206.141.108/30
+193.206.141.100/30
+193.206.141.96/30
+193.206.134.12/30
+193.206.134.8/30
+193.206.134.32/30
+193.206.134.36/30
+193.206.134.40/30
+193.206.134.44/30
+193.206.134.64/30
+193.206.134.68/30
+193.206.134.72/30
+193.206.134.76/30
+193.206.134.112/30
+193.206.134.116/30
+193.206.134.104/30
+193.206.134.108/30
+193.206.134.100/30
+193.206.134.96/30
+193.206.134.192/30
+193.206.134.196/30
+193.206.134.208/30
+193.206.134.212/30
+193.206.134.216/30
+193.206.134.220/30
+193.206.134.224/30
+193.206.134.228/30
+193.206.134.232/30
+193.206.134.236/30
+193.206.134.248/30
+193.206.134.252/30
+193.206.141.12/30
+193.206.141.8/30
+193.206.141.16/30
+193.206.141.20/30
+193.206.141.24/30
+193.206.141.28/30
+193.206.141.48/30
+193.206.141.52/30
+193.206.141.56/30
+193.206.141.60/30
+}}}
 
 *Java*
 
@@ -3646,6 +3778,190 @@ Summarization nodes:
 
 Comments:  same results as Java code.
 
+==== set Geant2 ====
+
+*Original Perl*
+
+Summarization nodes:
+
+{{{
+128.0.0.0/3
+192.0.0.0/3
+62.40.112.0/25
+62.40.124.0/24
+62.40.125.0/25
+62.40.114.16/29
+62.40.114.32/28
+62.40.114.48/28
+62.40.114.0/29
+62.40.114.8/29
+}}}
+
+*Java*
+
+Summarization nodes:
+
+{{{
+      TBD
+}}}
+
+*new Perl*
+
+Summarization nodes:
+
+{{{
+      TBD
+}}}
+
+==== set Internet2 ====
+
+*Original Perl*
+
+Summarization nodes:
+
+{{{
+10.254.254.0/28
+64.0.0.0/2
+164.113.238.128/25
+128.0.0.0/5
+144.0.0.0/5
+156.110.203.0/29
+200.0.0.0/6
+208.0.0.0/7
+211.79.48.128/26
+216.249.136.128/25
+216.27.100.48/28
+140.0.0.0/6
+192.128.0.0/9
+137.128.0.0/9
+138.18.0.0/16
+199.109.0.0/20
+204.238.76.0/29
+192.0.0.0/11
+192.32.0.0/12
+192.122.183.0/26
+192.80.0.0/12
+198.9.200.0/22
+198.86.0.0/18
+198.96.0.0/11
+199.18.156.128/29
+199.18.156.240/29
+205.189.32.64/26
+206.196.176.0/22
+206.220.0.0/14
+207.192.0.0/10
+207.72.112.32/29
+198.49.182.4/30
+205.213.118.0/28
+198.32.0.0/17
+198.32.128.0/17
+205.213.119.24/29
+205.213.119.8/29
+}}}
+
+*Java*
+
+Summarization nodes:
+
+{{{
+      TBD
+}}}
+
+*new Perl*
+
+Summarization nodes:
+
+{{{
+      TBD
+}}}
+
+==== set Indiana University ====
+
+*Original Perl*
+
+Summarization nodes:
+
+{{{
+72.0.0.0/10
+144.0.0.0/5
+192.0.0.0/4
+}}}
+
+*Java*
+
+Summarization nodes:
+
+{{{
+      TBD
+}}}
+
+*new Perl*
+
+Summarization nodes:
+
+{{{
+      TBD
+}}}
+
+
+==== set PIONIER ====
+
+*Original Perl*
+
+Summarization nodes:
+
+{{{
+150.254.128.0/17
+212.191.0.0/16
+}}}
+
+*Java*
+
+Summarization nodes:
+
+{{{
+      TBD
+}}}
+
+*new Perl*
+
+Summarization nodes:
+
+{{{
+      TBD
+}}}
+
+==== set SWITCH ====
+
+*Original Perl*
+
+Summarization nodes:
+
+{{{
+62.40.124.0/25
+64.212.0.0/15
+128.0.0.0/6
+213.240.0.0/12
+192.65.184.0/23
+194.0.0.0/8
+}}}
+
+*Java*
+
+Summarization nodes:
+
+{{{
+      TBD
+}}}
+
+*new Perl*
+
+Summarization nodes:
+
+{{{
+      TBD
+}}}
+
 == Project Management ==
 
 Most details TBD, basic outline:
@@ -3653,8 +3969,8 @@ Most details TBD, basic outline:
 
 || _*Dates*_ || _*Task*_ || _*People*_ ||
 || Weekly || Conference Call - Discuss progress || Jason, Martin, Student (Jeff) || 
-|| March 9th - 13th || Evaluate, Learn Current Alg - Identify Failure Points || Student (Martin, Jason) || 
-|| March 16th - 20th || Propose Changes (in writing), Experiment on Hypothesis (in code), Publish Results (in writing) || Student (Martin, Jason) || 
+|| March 9th - 13th || ~~Evaluate, Learn Current Alg - Identify Failure Points || Student (Martin, Jason)~~ || 
+|| March 16th - 20th || ~~Propose Changes (in writing), Experiment on Hypothesis (in code), Publish Results (in writing) || Student (Martin, Jason)~~ || 
 || March 23rd - 27th || Finalize Code in prototype, integration into gLS || Student, Jason (Martin) || 
 || March 30th - April 10th || Planet Lab Beta Testing - Construct Testbed? || Student, Brian T, Jason (Jeff, Martin) || 
 || Late April || Slack time, Member Meeting, Beta Release of New Code || All || 
@@ -3677,7 +3993,7 @@ Most details TBD, basic outline:
    * Propose changes to algorithm - <font color=green>_*Done - 3/13*_</font>
    * Implement changes (several prototypes) in source code - <font color=red>_*IN PROGRESS - 3/xx*_</font>
    * Experimentation on data sets - <font color=red>_*IN PROGRESS - 3/xx*_</font>
-   * Evaluation of results (correctness, speed, effectiveness)
+   * Evaluation of results (correctness, speed, effectiveness) - <font color=red>_*IN PROGRESS - 3/23*_</font>
    * Final source code review
    * Assist Jason in gLS integration
    * Assist Brian/Jason in test framework design, installation, testing
