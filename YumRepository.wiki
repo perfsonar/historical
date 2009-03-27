@@ -1,41 +1,31 @@
-= Yum and APT Repository Information  =
+#summary perfSONAR-PS 3.1 Release
 
- # [YumRepository#Introduction Introduction]
- # [YumRepository#Get_A_Base_Server Get A Base Server]
- # [YumRepository#Create_Repo Create Repo]
- # [YumRepository#Create_Repo_Package Create Repo Package]
-   # [YumRepository#Makefile Makefile]
-   # [YumRepository#Spec_File Spec File]
-   # [YumRepository#Yum_Mirrors Yum Mirrors]
-   # [YumRepository#Yum_Repo Yum Repo]
-   # [YumRepository#APT_List APT List]
-   # [YumRepository#GPG_Key GPG Key]
- # [YumRepository#Other_Considerations Other Considerations]
-   # [YumRepository#Flavors_and_Achitectures Flavors and Achitectures]
-   # [YumRepository#SVN_as_Repo_Backing_Store SVN as Repo Backing Store]
-   # [YumRepository#Mirrors Mirrors]
-   # [YumRepository#Contributions_From_Others Contributions From Others]
- # [YumRepository#Sources Sources]
+<wiki:toc max_depth="6" />
 
 == Introduction ==
 
 The following are some notes on the creation and support of package repositories (e.g. Yum based and APT based) for perfSONAR-PS software and Performance Node _kickstart_ locations.
 
-== Get A Base Server ==
+== Architecture ==
 
- * Currently asking TSG for a vhost - preferably _software.internet2.edu_.
-   * 20g ish (more?) of space
-   * normal main memory
-   * normal connectivity
-   * normal CPU
- * Partition out the space for different groups
-   * perfSONAR-PS
-   * Performance Node
-   * Others?
- 
-== Create Repo ==
+The hardware and software aspects of this setup will be discussed here.  
 
-Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
+=== Hardware ===
+
+Internet2 will be maintaining a special hardware setup to facilitate reliability and availability:
+
+ * cvs3.internet2.edu
+   * Hosts subversion repository
+   * Developers may request accounts for write access
+   * Offers read only access to repo when a a user is unauthenticated
+ * software.interent2.edu
+   * Hosted on Internet2 main web server
+   * Downloads the subversion repository and re-creates the repository metadata every 4 hours
+   * May serve as the master to mirror from
+
+=== Software ===
+
+Refer to the main server on _*http://software.internet2.edu/rpms*_.  Basic setup:
 
  * If not already installed, install packages for _*createrepo*_, and _*genbasedir*_.  These packages have tools designed to make Yum and APT repos.
  * Go to web hosted directory:
@@ -44,7 +34,7 @@ Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
    }}}
  * Checkout svn repository:
    {{{
-     zurawski@latrobe:/var/www/default$ svn checkout https://svn.internet2.edu/svn/software/trunk rpms
+     zurawski@latrobe:/var/www/default$ svn checkout https://cvs3.internet2.edu/svn/software/trunk rpms
    }}}
  * Run _*createrepo*_ (N.B: don't run this on or in the _*RPMS*_ directory):
    {{{
@@ -73,6 +63,7 @@ Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
      /var/www/default/rpms/i386/main/RPMS/owamp-server-3.1-2.i386.rpm
      /var/www/default/rpms/i386/main/RPMS/owamp-client-3.1-2.i386.rpm
    }}}
+ * Repeat this for other architectures.  
  * Run _*genbasedir*_:
    {{{
      zurawski@latrobe:/var/www/default/rpms# genbasedir /var/www/default/rpms/i386
@@ -109,10 +100,11 @@ Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
      /var/www/default/rpms/i386/main/RPMS/owamp-server-3.1-2.i386.rpm
      /var/www/default/rpms/i386/main/RPMS/owamp-client-3.1-1.i386.rpm
    }}}  
+ * Repeat this for other architectures.  
 
-== Create Repo Package ==
+== Package Generation ==
 
-The following package was created and coverted into an RPM (availabe in the repo [http://dc211.internet2.edu/rpms/i386/main/RPMS/Internet2-repo-0.1-1.noarch.rpm here]) to allow for easy installation and configration of Yum and APT systems.  The package contains repository information as well as the GPG key used to sign the tools.  The package is build using the _*rpmbuild*_ package.
+The following package was created and coverted into an RPM (availabe in the repo [http://software.internet2.edu/rpms/i386/main/RPMS/Internet2-repo-0.1-2.noarch.rpm here]) to allow for easy installation and configration of Yum and APT systems.  The package contains repository information as well as the GPG key used to sign the tools.  The package is build using the _*rpmbuild*_ package.
 
 {{{
 [zurawski@fedora ~]$ mkdir Internet2-repo
@@ -153,7 +145,7 @@ dist:
 Summary:    Internet2 Repository file and package configuration
 Name:       Internet2-repo
 Version:    0.1
-Release:    1
+Release:    2
 License:    distributable, see http://www.internet2.edu/membership/ip.html
 Group:      System Environment/Base
 URL:        http://software.internet2.edu
@@ -202,6 +194,9 @@ rpm -q gpg-pubkey-9d7b9686-4947b567 &>/dev/null || rpm --import $RPM_BUILD_ROOT/
 %endif
 
 %changelog
+* Thu Mar 26 2009 Jason Zurawski <zurawski@internet2.edu> - 0.0.1-2
+- Adding new repo information.
+
 * Thu Feb 12 2009 Jason Zurawski <zurawski@internet2.edu> - 0.0.1-1
 - Initial package.
 }}}
@@ -210,8 +205,8 @@ rpm -q gpg-pubkey-9d7b9686-4947b567 &>/dev/null || rpm --import $RPM_BUILD_ROOT/
 
 {{{
 [zurawski@fedora Internet2-repo]$ cat etc/mirrors-Internet2 
-http://dc211.internet2.edu/rpms/$ARCH/main/
-#http://software.internet2.edu/rpm/$ARCH/main/
+#http://dc211.internet2.edu/rpms/$ARCH/main/
+http://software.internet2.edu/rpms/$ARCH/main/
 }}}
 
 === Yum Repo ===
@@ -222,8 +217,8 @@ http://dc211.internet2.edu/rpms/$ARCH/main/
 # URL: http://software.internet2.edu
 [Internet2]
 name = Internet2 RPM Repository - software.internet2.edu - main
-#baseurl = http://dc211.internet2.edu/rpms/$basearch/main
-mirrorlist = http://dc211.internet2.edu/rpms/mirrors-Internet2
+#baseurl = http://software.internet2.edu/rpms/$basearch/main
+mirrorlist = http://software.internet2.edu/rpms/mirrors-Internet2
 #mirrorlist = file:///etc/yum.repos.d/mirrors-Internet2
 enabled = 1
 protect = 0
@@ -237,8 +232,8 @@ gpgcheck = 1
 [zurawski@fedora Internet2-repo]$ cat etc/Internet2.list 
 # Name: Internet2 RPM Repository
 # URL: http://software.internet2.edu/
-#rpm http://dc211.internet2.edu/rpms/$(ARCH) main
-repomd http://dc211.internet2.edu/rpms/$(ARCH) main
+#rpm http://software.internet2.edu/rpms/$(ARCH) main
+repomd http://software.internet2.edu/rpms/$(ARCH) main
 }}}
 
 === GPG Key ===
@@ -277,18 +272,10 @@ aeEuX+OFqn9csEs=
 -----END PGP PUBLIC KEY BLOCK-----
 }}}
 
-== Other Considerations ==
-
-Things to think about.
-
-=== Flavors and Achitectures ===
-
-Above example assumed _generic_ architecture (_i386_) and no flavor (e.g. Fedora, CentOS, RHEL).  This is the approach we should take, as long as we ensure the build RPMs work on the major flavors and versions.
-
-=== Mirrors ===
-
-We would like others (Regionals/Campuses) to act as mirrors for our content - solution we pick should allow this.
- 
 == Last Updated ==
 
 $Id$
+
+
+
+
