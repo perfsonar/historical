@@ -25,7 +25,7 @@ Internet2 will be maintaining a special hardware setup to facilitate reliability
 
 === Software ===
 
-Refer to the main server on _http://software.internet2.edu/rpms_.  Basic setup:
+Refer to the main server on http://software.internet2.edu/rpms.  Basic setup:
 
  * If not already installed, install packages for _*createrepo*_, and _*genbasedir*_.  These packages have tools designed to make Yum and APT repos.
  * Go to web hosted directory:
