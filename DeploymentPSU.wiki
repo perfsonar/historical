@@ -148,10 +148,10 @@ Developers will be busy between current time and mid April in preparation of a p
 Developer time will be focused on the release of new tools (perfsonar, owamp, bwctl).
 
 || _*Date*_ || _*Activity*_ ||
-|| Jan/Feb || OWAMP Release ||
-|| Jan/Feb || BWCTL Release ||  
-|| LAte March || Internet2 Repository - public availability ||
-|| April, 2 || perfSONAR-PS Release ||
+|| Jan/Feb || ~~OWAMP Release~~ ||
+|| Jan/Feb || ~~BWCTL Release~~ ||  
+|| Late March || ~~Internet2 Repository - public availability~~ ||
+|| April, 3 || perfSONAR-PS Release ||
 
 
 ==== Penn State Staff ==== 
@@ -184,6 +184,7 @@ Developer time will be focused on additional releases (Performance Node) and bet
 
 || _*Date*_ || _*Activity*_ ||
 || April, 27 || perfSONAR-PS Release (selected services, Nagios support) ||
+|| May || Early releases of Web100, NDT tools ||
 || May || Performance Node Live CD Release ||
 || April/May || Possible Coordination for F2F/Training if desired ||
 
@@ -233,9 +234,9 @@ PSU can provide feedback, deploy any remaining tools.
 == Action Items ==
 
  * JZ
-   # Complete deployment of Internet2 Yum/APT Repo
-   # Document Yum/APT Repo procedures
-   # Furnish info to KM for PSU deployment of bwctl/owamp
+   # ~~Complete deployment of Internet2 Yum/APT Repo~~
+   # ~~Document Yum/APT Repo procedures~~
+   # ~~Furnish info to KM for PSU deployment of bwctl/owamp~~
  * KM
    # Deploy Tools
    # Gather requirements for documentation/remaining tool roll-outs
