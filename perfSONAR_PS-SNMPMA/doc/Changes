@@ -1,3 +1,16 @@
 version 3.1
-* Initial RPM release.
+  * Initial RPM release.
+  * The following development changes where added since the last release (0.9)
+    - Support for Cacti and Cricket data sets
+    - Enhancements to increase RRD and XML access performance
+    - New message type to retrieve RRD information (e.g. resolutions, times)
+  * Bugfixes
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=44
+      - SNMP MA does not seems to handle rrd fetch errors   	  
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=84
+      - Exit MA service if no data is present 	 
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=112
+      - supportedEventType Examples for SNMP/pSB 	 
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=116
+      - migrate getRRDData to SNMP MA 
 

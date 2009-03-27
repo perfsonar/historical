@@ -1,2 +1,160 @@
-			   perfSONAR SNMP MA Service
+			          perfSONAR SNMP MA Service
 
+--------------------------------------------------------------------------------
+
+About:
+------
+
+The perfSONAR-PS SNMP based Measurement Archive (SNMP MA) is able to expose data
+collected via variables from the Simple Network Management Protocol (SNMP)
+protocol found on networked devices and stored in Round Robin Databases (RRD)
+archives. The measurements are collected through external means, normally
+through software such as MRTG, CACTI, or Cricket, and is commonly stored in RRD
+archives. External access to commonly requested data items, remains challening
+due to physical and political boundaries.
+
+The SNMP MA provides a simple interface that is cable of exposing these files
+after basic configuration for consumption by perfSONAR client applications and
+services alike. The Web Service front end provides a uniform method of access
+using the perfSONAR XML protocols and delivers the data in an unambiguous
+manner, thus eliminating the mystery associated with the backend storage. 
+
+Installation:
+-------------
+
+Please read the INSTALL file for instructions
+  
+Configuration:
+--------------
+
+The SNMP MA comes with a base configuration via the installation procedure.
+This is meant to allow for immediate testing as well as serve as a guide for
+customizing the service.  
+
+There are several files that may be adjusted manually to configure this service
+for a specific use case:
+
+  - etc/daemon.conf: 
+  
+    Contains information that identifies the service uniquely and allows it to
+    run in a given environment.  There are several options that should be
+    changed:  
+   
+      rrdtool                  - location of the rrdtool binary
+      service_accesspoint      - Change the "hostname" from localhost
+      service_description      - Identifying information about the service
+      service_name             - Service Name (short)  
+
+    There are also several options that may be changed for a configuration:
+
+      port                     - Port the service listens on
+      endpoint                 - Endpoint to contact the service
+      default_resolution       - Raise higher or lower depending on RRD files
+      metadata_db_external     - Used with external tools (Cacti/Cricket)
+      ls_registration_interval - Length of time (minutes) between contacting LS 
+      enable_registration      - Turn on or off LS registration
+    
+    The rest of the items are normally not to be adjusted.  See also the service
+    wiki page for more information:
+    
+      http://code.google.com/p/perfsonar-ps/wiki/SNMPMA
+    
+  - etc/daemon_logger.conf:
+
+    Contains information related to logging, there are three modes:
+    
+      Log::Dispatch::Screen     - Log messages to screen (useful for debugging)
+      Log::Dispatch::Syslog     - Log messages to syslog facility
+      Log::Dispatch::FileRotate - Log messages to specified file
+
+    The rest of the items are normally not to be adjusted.  See also the service
+    wiki page for more information:
+    
+      http://code.google.com/p/perfsonar-ps/wiki/SNMPMA
+
+  - /var/lib/perfsonar/snmp_ma/store.xml: 
+
+    This file represents the "explanation" of the data that is being offered by
+    the service.  It is written in XML and is configured for a "localhost"
+    environment with a single empty RRD file.  This file may be modified by hand
+    to add new existing RPMs from other services or use of an external service
+    such as Cacti or Cricket may be enabled to prevent manual editing. 
+
+    See the wiki page for more information:
+    
+      http://code.google.com/p/perfsonar-ps/wiki/SNMPMA
+
+Starting/Stopping:
+------------------
+
+The service comes with init scripts that may be used to start and stop
+operation:
+
+  /etc/init.d/snmp_ma start
+  /etc/init.d/snmp_ma stop
+  /etc/init.d/snmp_ma restart
+
+The service can also be run in a manual fashion (useful for debugging):
+
+  perl bin/daemon.pl --verbose --conf=etc/daemon.conf --logger=etc/daemon_logger.conf
+  
+Before doing this, be sure to edit "etc/daemon_logger.conf" to enable "Screen"
+debugging.
+
+Testing:
+--------
+
+The service comes with a client application and several test messages that can
+be used to test functionality.  There are many messages provided as examples, 
+to test the service there are for that are recommended:
+
+  etc/requests/EchoRequest.xml
+  etc/requests/MetadataKeyRequest-1.xml 
+  etc/requests/DataInfoRequest-1.xml 
+  etc/requests/SetupDataRequest-1.xml
+
+These four will test the major functions of this service. To test:
+
+  1) Ensure the service is started, it helps if you have configured logging to
+     use the "Screen" so you may monitor the service's activities.
+
+  2) Run the client:
+  
+     perl bin/client.pl URL FILENAME
+  
+  3) Compare the results of the test with the comments in each file.  Note there
+     may be some differences (e.g. id values, key values).  
+     
+  4) If everything looks ok, return logging to normal and restart service via
+     the init system.  
+
+Maintenance:
+------------
+
+Subscribe to the user mailing lists if you are seeking help on some problem
+related to this software.  Announements regarding availability of new releases
+will also be sent to these locations
+
+  perfSONAR Users Group - https://mail.internet2.edu/wws/info/perfsonar-user
+  perfSONAR Announcements - https://mail.internet2.edu/wws/info/perfsonar-announce
+
+  Performance Node Users - https://mail.internet2.edu/wws/info/performance-node-users
+  Performance Node Announcements - https://mail.internet2.edu/wws/info/performance-node-announce
+
+Also if you are using package management software and have installed the
+Internet2 software repository, a typical upgrade should download new releases:
+
+  yum update
+
+or
+
+  apt-get dist-upgrade
+  
+Finally, check the following websites for news of software releases:
+
+  http://software.internet2.edu
+  http://www.internet2.edu/performance
+
+--------------------------------------------------------------------------------
+
+Fri Mar 27 08:55:59 EDT 2009
