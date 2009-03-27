@@ -1,4 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+Name:    LSKeyRequest
+Purpose: Retrieve Keys for Registered Services
+Outcome: 
+	Not Registered
+		gLS/hLS - return error stating key not registered
+	Registered
+		gLS/hLS - return valid key
+-->
+
 <nmwg:message type="LSKeyRequest"
               id="msg1"
               xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"

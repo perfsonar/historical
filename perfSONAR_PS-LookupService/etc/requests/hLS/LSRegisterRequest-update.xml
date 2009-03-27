@@ -1,4 +1,16 @@
 <?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+Name:    LSRegisterRequest
+Purpose: Update an existing registration (e.g. 'clobber')
+Outcome: 
+    Registered
+        clobber data, add new items
+    Not Registered
+        error
+
+-->
+
 <nmwg:message type="LSRegisterRequest"
               id="msg1"
               xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"

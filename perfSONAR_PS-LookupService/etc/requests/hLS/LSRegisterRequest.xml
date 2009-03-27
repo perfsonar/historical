@@ -1,4 +1,16 @@
 <?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+Name:    LSRegisterRequest
+Purpose: Registere new information
+Outcome: 
+    Not registered:
+        accept the new registration
+    Registered:
+        warn of registration
+
+-->
+
 <nmwg:message type="LSRegisterRequest"
               id="msg1"
               xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"

@@ -1,4 +1,16 @@
 <?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+Name:    LSRegisterRequest
+Purpose: Using an already registered key, add to dataset
+Outcome: 
+    Registered:
+        add new information
+    Not Registered:
+        Error
+
+-->
+
 <nmwg:message type="LSRegisterRequest"
               id="msg1"
               xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"

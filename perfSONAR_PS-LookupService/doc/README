@@ -1,2 +1,149 @@
-			   perfSONAR Lookup Service
+			              perfSONAR Lookup Service
 
+--------------------------------------------------------------------------------
+
+About:
+------
+
+The perfSONAR-PS Lookup Service (LS) addresses the always challenging problem of
+resource registration and discovery for the perfSONAR framework. Service
+instances that manage datasets are only useful when they can be contacted by
+consumers. Consumers can only function when there is data available. To manage
+these problems in a dynamic environment such as perfSONAR, it is necessary to
+register, maintain, and query for the services that may contain interesting
+data.
+
+The perfSONAR-PS LS relies on an XML database, Oracle DB XML, to store service
+registration information in a native manner. Using the power of the XPath and
+XQuery standards it is then possible for client applications and services alike
+to query for information in a uniform and powerful manner. All perfSONAR
+services are capable of registering information with an LS instantiation, thus
+deploying this service within your framework is paramount. 
+
+Installation:
+-------------
+
+Please read the INSTALL file for instructions
+  
+Configuration:
+--------------
+
+The LS comes with a base configuration via the installation procedure.  This is
+meant to allow for immediate testing as well as serve as a guide for customizing
+the service.  
+
+There are several files that may be adjusted manually to configure this service
+for a specific use case:
+
+  - etc/daemon.conf: 
+  
+    Contains information that identifies the service uniquely and allows it to
+    run in a given environment.  There are several options that should be
+    changed:  
+   
+      service_accesspoint      - Change the "hostname" from localhost
+      service_description      - Identifying information about the service
+      service_name             - Service Name (short)  
+
+    There are also several options that may be changed for a configuration:
+
+      port                     - Port the service listens on
+      endpoint                 - Endpoint to contact the service
+      ls_ttl                   - How long data can remain before being cleaned
+                                 Currently set to 5760 minutes (4 days)
+      ls_registration_interval - How often to contact gLS, 180 minute (3hr)
+      maintenance_interval     - How often to summarize the internal data, 
+                                 currently 120 minutes (2 hours)
+    
+    The rest of the items are normally not to be adjusted.  See also the service
+    wiki page for more information:
+    
+      http://code.google.com/p/perfsonar-ps/wiki/LS
+    
+  - etc/daemon_logger.conf:
+
+    Contains information related to logging, there are three modes:
+    
+      Log::Dispatch::Screen     - Log messages to screen (useful for debugging)
+      Log::Dispatch::Syslog     - Log messages to syslog facility
+      Log::Dispatch::FileRotate - Log messages to specified file
+
+    The rest of the items are normally not to be adjusted.  See also the service
+    wiki page for more information:
+    
+      http://code.google.com/p/perfsonar-ps/wiki/LS
+
+
+
+Starting/Stopping:
+------------------
+
+The service comes with init scripts that may be used to start and stop
+operation:
+
+  /etc/init.d/lookup_service start
+  /etc/init.d/lookup_service stop
+  /etc/init.d/lookup_service restart
+
+The service can also be run in a manual fashion (useful for debugging):
+
+  perl bin/daemon.pl --verbose --conf=etc/daemon.conf --logger=etc/daemon_logger.conf
+  
+Before doing this, be sure to edit "etc/daemon_logger.conf" to enable "Screen"
+debugging.
+
+Testing:
+--------
+
+The service comes with a client application and several test messages that can
+be used to test functionality.  There are many messages provided as examples, 
+to test the service there are 2 that are recommended:
+
+  etc/requests/EchoRequest.xml
+  etc/requests/hLS/LSQueryRequest.xml
+
+These four will test the major functions of this service. To test:
+
+  1) Ensure the service is started, it helps if you have configured logging to
+     use the "Screen" so you may monitor the service's activities.
+
+  2) Run the client:
+  
+     perl bin/client.pl URL FILENAME
+  
+  3) Compare the results of the test with the comments in each file.  Note there
+     may be some differences (e.g. id values, key values).  
+     
+  4) If everything looks OK, return logging to normal and restart service via
+     the init system.  
+
+Maintenance:
+------------
+
+Subscribe to the user mailing lists if you are seeking help on some problem
+related to this software.  Announcements regarding availability of new releases
+will also be sent to these locations
+
+  perfSONAR Users Group - https://mail.internet2.edu/wws/info/perfsonar-user
+  perfSONAR Announcements - https://mail.internet2.edu/wws/info/perfsonar-announce
+
+  Performance Node Users - https://mail.internet2.edu/wws/info/performance-node-users
+  Performance Node Announcements - https://mail.internet2.edu/wws/info/performance-node-announce
+
+Also if you are using package management software and have installed the
+Internet2 software repository, a typical upgrade should download new releases:
+
+  yum update
+
+or
+
+  apt-get dist-upgrade
+  
+Finally, check the following websites for news of software releases:
+
+  http://software.internet2.edu
+  http://www.internet2.edu/performance
+
+--------------------------------------------------------------------------------
+
+Fri Mar 27 08:55:59 EDT 2009

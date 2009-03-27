@@ -1,4 +1,16 @@
 <?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+Name:    LSKeyRequest
+Purpose: Request a key for a given service element
+Outcome: 
+    Registered:
+        Return a valid key
+    Not registered:
+        Error message
+
+-->
+
 <nmwg:message type="LSKeyRequest"
               id="msg1"
               xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"

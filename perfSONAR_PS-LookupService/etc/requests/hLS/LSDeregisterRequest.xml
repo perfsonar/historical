@@ -1,4 +1,16 @@
 <?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+Name:    LSDeregiterRequest
+Purpose: De-register existing data
+Outcome: 
+    Registered:
+        Deregister all or portions of the data (data element specific)
+    Not Registered:
+        Error message
+
+-->
+
 <nmwg:message type="LSDeregisterRequest"
         id="msg1"
               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"

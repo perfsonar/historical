@@ -1,4 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+Name:    LSQueryRequest
+Purpose: Query for a sepcified XPath
+Outcome: 
+    Results if successful, an error message if not
+
+-->
+
 <nmwg:message type="LSQueryRequest"
               id="msg1"
               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"

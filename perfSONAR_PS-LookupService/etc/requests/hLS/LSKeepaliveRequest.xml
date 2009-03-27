@@ -1,4 +1,14 @@
 <?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+Name:    LSKeepaliveRequest
+Purpose: Renew the registration for the supplied keys
+Outcome: 
+    Registered:     Update the timestamp for the key
+    Not Registered: Error message
+
+-->
+
 <nmwg:message type="LSKeepaliveRequest"
         id="msg1"
         xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
