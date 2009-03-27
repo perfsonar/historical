@@ -99,11 +99,20 @@ fi
 /sbin/chkconfig --add %{init_script_2}
 
 %preun
-/etc/init.d/%{init_script_1} stop
-/sbin/chkconfig --del %{init_script_1}
+if [ "$1" = "0" ]; then
+    # Totally removing the service
+    /etc/init.d/%{init_script_1} stop
+    /sbin/chkconfig --del %{init_script_1}
+    /etc/init.d/%{init_script_2} stop
+    /sbin/chkconfig --del %{init_script_2}
+fi
 
-/etc/init.d/%{init_script_2} stop
-/sbin/chkconfig --del %{init_script_2}
+%postun
+if [ "$1" != "0" ]; then
+    # An RPM upgrade
+    /etc/init.d/%{init_script_1} restart
+    /etc/init.d/%{init_script_2} restart
+fi
 
 %changelog
 * Wed Dec 10 2008 aaron@internet2.edu 3.1-1

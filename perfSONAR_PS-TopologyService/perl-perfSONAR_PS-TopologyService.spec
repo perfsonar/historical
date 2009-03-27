@@ -83,8 +83,20 @@ chown -R perfsonar:perfsonar /var/lib/perfsonar
 #/sbin/chkconfig --add %{init_script_2}
 
 %preun
-/etc/init.d/%{init_script_1} stop
-/sbin/chkconfig --del %{init_script_1}
+if [ "$1" = "0" ]; then
+    # Totally removing the service
+    /etc/init.d/%{init_script_1} stop
+    /sbin/chkconfig --del %{init_script_1}
+#   /etc/init.d/%{init_script_2} stop
+#   /sbin/chkconfig --del %{init_script_2}
+fi
+
+%postun
+if [ "$1" != "0" ]; then
+    # An RPM upgrade
+    /etc/init.d/%{init_script_1} restart
+#   /etc/init.d/%{init_script_2} restart
+fi
 
 %clean
 rm -rf $RPM_BUILD_ROOT

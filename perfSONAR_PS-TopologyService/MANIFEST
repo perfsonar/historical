@@ -1,5 +1,6 @@
 MANIFEST
 Makefile
+bin/client.pl
 bin/daemon.pl
 doc/Changes
 doc/LICENSE
