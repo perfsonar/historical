@@ -4,18 +4,11 @@
 
 == Introduction ==
 
-The following describes a change to the Subversion structure effective immediately with the [pSPS20090327Release 3.1 release].  This change allows for:
-
- * Easier organization of the _services_ by sectioning each off into a _jailed_ environment.
- * Easier to add/remove a service
- * Easier packaging of RPMs
- * Common elements including scripts and libraries can and should be shared, but this new organization allows for _private_ scripts and libraries that will not clutter the remaining parts of the framework.  
-
-This document describes the new structure and considerations for developers.
+The following describes the layout of the perfSONAR-PS subversion directory after the the [pSPS20090327Release 3.1 release].
 
 == Organization ==
 
-At the top-level of the repository trunk, there are individual directories for each service, and a directory named _*Shared*_.
+At the top-level of the repository trunk, there are individual directories for each service, and a directory named _*Shared*_ plus several useful scripts.  Efforts should be made to maintain this layout, and avoid cluttering the root of the repository.  
 
 === The Service Directories ===
 
@@ -94,14 +87,6 @@ This structure minimizes the amount of service specific files in the common area
 
 To branch or tag a new release, decide which services are going to be released, and copy those services' service directories, along with the _*Shared*_ directory to the new branch or tag.
 
-== Changes Required ==
-
- # Create a _*Shared*_ directory at the top level and move the lib, scripts and doc into it.
- # Move the directories out of the "modules" directory and move them to the top-level
- # Create a 'scripts' directory at the top-level for the scripts to be used on the repository, instead of packaged
- # Update the package`_``*` scripts to handle the new location of the files and move them to the new location
- # Clear out the existing 'lib' directories in the service directories and add symlinks to the new locations.
-  
 == Last Modified ==
 
 $Id$

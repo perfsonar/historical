@@ -72,12 +72,22 @@ D    trunk/RPM-GPG-KEY-Internet2
  
 ==== Repo Organization ====
 
-TBD
+Specifically the organization of the subversion repository should resemble this from a high level:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/ReleaseManagement/svn.png
+
+The repository has gone through several changes through our development lifecycle.  Please see a [SubversionStructure primer] on how individual directories (e.g. Trunk, Branches) should look to better understand our methodology.  
+
+it is organized .
 
 ==== Code Organization ====
  
-TBD
- 
+As described in [SubversionStructure], we have organized the code in such a way to facilitate:
+
+ * Individual service identity
+ * Packaging procedures
+ * Easy release of specific components
+  
 === Wiki ===
 
 The perfSONAR-PS wiki is located on [http://code.google.com Google Code].  Specifically the wiki can accessed in one of two ways:
@@ -122,11 +132,144 @@ $Id$
 
 === Issue Tracker ===
 
-TBD
+The project uses the Issue tracker that comes with [http://code.google.com Google Code].  This software is a bit minimal compared to other similar offerings such as [http://www.bugzilla.org/ Bugzilla].  The following is aimed to help a developer:
+
+ * Fill out a bug report
+ * Understand how to maintain a bug report through the lifecycle
+
+The issue tracker is located [http://code.google.com/p/perfsonar-ps/issues/list here].
+
+==== Bug Reports ====
+
+Each Bug report main contain certain items:
+
+ # _*Summary*_ - One line description that will be visible in the [http://code.google.com/p/perfsonar-ps/issues/list issue tracker] 
+ # _*Description*_ - Longer description of the bug.  Each update must contain some action that was taken in this field.  
+ # _*Status*_ - Status of the bug, there are two categories and several states in each:
+   * _*Open*_ Issues
+     * _New_ - Issue has not had initial review yet
+     * _Accepted_ - Problem reproduced / Need acknowledged
+     * _Started_ - Work on this issue has begun   
+   * _*Closed*_ Issues 
+     * _Fixed_ - Developer made requested changes, QA should verify
+     * _Verified_ - QA has verified that the fix worked
+     * _Invalid_ - This was not a valid issue report
+     * _Duplicate_ - This report duplicates an existing issue
+     * _WontFix_ - We decided to not take action on this issue
+ # _*Owner*_ - 
+ # _*CC*_ - 
+ # _*Labels*_ - 
+   * _*Type*_ 
+     * _Defect_ - Report of a software defect
+     * _Enhancement_ - Request for enhancement
+     * _Task_ - Constructive work item
+     * _Patch_ - Source code patch for review
+     * _Other_ - Some other kind of issue
+   * _*Priority*_ 
+     * _Critical_ - Must resolve in milestone
+     * _High_ - Strongly want to resolve in milestone
+     * _Medium_ - Normal priority
+     * _Low_ - Might slip to later milestone
+   * _*OpSys*_ 
+     * _All_ - Affects all operating systems
+     * _Windows_ - Affects Windows users
+     * _Linux_ - Affects Linux users
+     * _OSX_ - Affects Mac OS X users
+   * _*Milestone*_ 
+     * _Release0.9Beta_ - perfSONAR-PS September 2007 Release (<font color="red">depreciated</red>) 
+     * _Release0.9_ - perfSONAR-PS January 2008 Release (<font color="red">depreciated</red>) 
+     * _Release1.0_ - perfSONAR-PS July 2008 Release (<font color="red">depreciated</red>) 
+     * _Release3.1Beta_ - perfSONAR-PS March 2009 Release - Special tag for beta testing
+     * _Release3.1_ - perfSONAR-PS March 2009 Release
+     * _Release3.2Beta_ - perfSONAR-PS Summer 2009 Release - Special tag for beta testing
+     * _Release3.2_ - perfSONAR-PS Summer 2009 Release
+     * _Future_ - perfSONAR-PS Future Plans
+   * _*Component*_ 
+     * _Issues_ - Issues Information Request
+     * _Wiki_ - Wiki Information Request
+     * _Docs_ - PerfSONAR-PS documentation
+     * _perfSONAR-PS_ - General Framework - use when unsure of specific parts are unknown
+     * _PingER_ - PingER Measurement Archive and Point
+     * _SNMP_ - SNMP Measurement Archive
+     * _LookupService_ - Class Lookup Service (<font color="red">depreciated</red>) 
+     * _HomeLookupService_ - Home Lookup Service
+     * _GlobalLookupService_ - Global Lookup Service
+     * _TopologyService_ - Topology Service
+     * _CircuitStatus_ - Circuit Status Measurement Archive (<font color="red">depreciated</red>) 
+     * _StatusService_ - Status Measurement Archive
+     * _PerfSONARBUOY_ - PerfSONAR-BOUY Measurement Archive (<font color="red">depreciated</red>) 
+     * _PerfSONARBUOYClient_ - PerfSONAR-BOUY Client Package
+     * _PerfSONARBUOYServer_ - PerfSONAR-BOUY Server Package
+     * _LSRegistrationDaemon_ - LS Registration Daemon
+     * _TL1_ - TL1 Tools
+     * _GUI_ - PerfSONAR-PS GUI Tools
+     * _API_ - Programmer Interfaces
+     * _NPToolkit_ - Network Performance Toolkit (<font color="red">depreciated</red>) 
+     * _PerformanceNode_ - Performance Node
+     * _PerformanceNodeKnoppix_ - Performance Node - Knoppix Releases
+     * _PerformanceNodeFedora_ - Performance Node - Fedora Releases
+   * _*Misc*_ 
+     * _Security_ - Security risk to users
+     * _Performance_ - Performance issue
+     * _Usability_ - Affects program usability
+     * _Maintainability_ - Hinders future changes
+     * _Documentation_ - Documentation issue
+     * _Packaging_ - Issues package construction
+
+==== Bug Lifecycle ==== 
+
+Each bug should go through a typical lifecycle, moving from a start state to one of the closed states.  Each update should include information that addresses the target issue.  Note that labels may be changed at anytime (these will help search later).  
 
 === Mailing Lists ===
 
-TBD
+There are several categories of mailing lists, each targeting specific groups of people.
+
+==== Developer Centric ====
+
+
+|| *List* || *Audience* ||
+|| https://mail.internet2.edu/wws/info/i2-perfsonar || perfSONAR-PS Developers Only ||
+|| https://mail.internet2.edu/wws/info/ps-ps-dev || perfSONAR-PS Developers Only ||
+|| https://mail.internet2.edu/wws/info/perfsonar-dev || perfSONAR Developers (International) || 
+|| https://mail.internet2.edu/wws/info/bwctl-dev || BWCTL Development || 
+|| https://mail.internet2.edu/wws/info/ndt-dev || NDT Development || 
+|| https://mail.internet2.edu/wws/info/owamp-dev || OWAMP Development || 
+
+
+==== User Centric ====
+
+
+|| *List* || *Audience* ||
+|| https://mail.internet2.edu/wws/info/perfsonar-user || perfSONAR Users Group ||
+|| https://mail.internet2.edu/wws/info/performance-node-users || Performance Node Users ||  
+|| https://mail.internet2.edu/wws/info/bwctl-users || BWCTL Users || 
+|| https://mail.internet2.edu/wws/info/ndt-users || NDT Users || 
+|| https://mail.internet2.edu/wws/info/owamp-users || OWAMP Users || 
+
+
+==== Low Volume Announcement ====
+
+
+|| *List* || *Audience* ||
+|| https://mail.internet2.edu/wws/info/perfsonar-announce || perfSONAR Announcements ||
+|| https://mail.internet2.edu/wws/info/performance-node-announce || Performance Node Announcements  || 
+|| https://mail.internet2.edu/wws/info/bwctl-announce || BWCTL Announcements || 
+|| https://mail.internet2.edu/wws/info/ndt-announce || NDT Announcements || 
+|| https://mail.internet2.edu/wws/info/owamp-announce || OWAMP Announcements ||
+
+
+==== Community Discussion ====
+
+
+|| *List* || *Audience* ||
+|| https://mail.internet2.edu/wws/info/is-wg || NTAC Information Services Working Group ||
+|| https://mail.internet2.edu/wws/info/performance-wg || NTAC Performance Working Group ||
+|| https://mail.internet2.edu/wws/info/dcn-wg || DCN Working Group ||
+|| http://www.ogf.org/mailman/listinfo/nm-wg || Network Measurement Working Group ||
+|| http://www.ogf.org/mailman/listinfo/nml-wg || Network Markup Language Working Group ||
+|| http://www.ogf.org/mailman/listinfo/nmc-wg || Network Measurement Control Working Group ||
+|| http://www.ogf.org/mailman/listinfo/nsi-wg || Network Service Interface Working Group ||
+
 
 == Development Practices ==
 
