@@ -140,7 +140,7 @@ Developers are responsible for testing their code:
 
  * Jason
    * Release Tasks
-     * Prepare [YumRepository YUM] repo - <font color=yellow>_*IN PROGRESS - 2/17*_</font>
+     * Prepare [YumRepository YUM] repo - <font color=green>_*DONE - 3/26*_</font>
      * Update Release Documentation - <font color=green>_*DONE - 3/9*_</font>
      * Update Issue Tracker - <font color=green>_*DONE - 3/3*_</font>
      * Review Code Reviews - <font color=green>_*DONE - 3/20*_</font>
