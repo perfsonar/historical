@@ -2295,6 +2295,20 @@ The reasoning for the coverage or density tries to gather whether there exists a
 
 The algorithm is to be further optimized to allow for tuning of its heuristics, and to possibly incorporate the notion of weight of the subtrees.
 
+Currently, the tuning has been incorporated as a "granularity" parameter, ranging from 0 (the finer granularity, or more specific summarization) to 3 (the coarser granularity, or more general summarization).  The heuristic is based on the calculation below:
+
+{{{
+                        if (((c0n.mask - node.mask)/((Constants.MAX_KEY_LENGTH)/((long)Constants.MAX_GRANULARITY+1)) > (long)this.granularity) || 
+				((c1n.mask - node.mask)/((Constants.MAX_KEY_LENGTH)/((long)Constants.MAX_GRANULARITY+1)) > (long)this.granularity) || 
+				(node.coverage/(1/((double)Constants.MAX_GRANULARITY+1)) > (double)this.granularity)) { //original value < 0.000001f
+					markIpTrieCoverageDistance(summaryArrayList, c0n);
+					markIpTrieCoverageDistance(summaryArrayList, c1n);
+			} else {
+				node.setSummaryMember();
+				summaryArrayList.add(node);
+			}
+}}}
+
 The algorithm for [http://en.wikipedia.org/wiki/Cut_(graph_theory) Minimum Cut] might also be a candidate for the summarization issue, and shall be further investigated.
 
 
@@ -3516,11 +3530,11 @@ where the _txt_ file contains the summarizing nodes, and the _dot_ file contains
 
 === Experimentation Results ===
 
-Three implementations are being initially tested on the test sets:  the original Perl code from Jason; the Java code from Martin; and the new Perl code, as a direct translation of the Java code.  The results are below.
+Three implementations are being initially tested on the test sets:  the legacy Perl code from Jason; the Java code from Martin; and the new Perl code, as a direct translation of the Java code.  The results are below.
 
 ==== set APAN ====
 
-*Original Perl*
+*legacy Perl*
 
 Summarization nodes:
 
@@ -3570,7 +3584,7 @@ Comments:  bugs are noticeable in the first IP numbers.  The summarization nodes
 
 ==== set ESNET ====
 
-*Original Perl*
+*legacy Perl*
 
 Summarization nodes:
 
@@ -3635,7 +3649,7 @@ Comments:  bugs are noticeable in the first IP number.  The summarization nodes 
 
 ==== set FCCN ====
 
-*Original Perl*
+*legacy Perl*
 
 Summarization nodes:
 
@@ -3680,7 +3694,7 @@ Comments:  same results as Java code.
 
 ==== set GARR ====
 
-*Original Perl*
+*legacy Perl*
 
 Summarization nodes:
 
@@ -3784,7 +3798,7 @@ Comments:  same results as Java code.
 
 ==== set Geant2 ====
 
-*Original Perl*
+*legacy Perl*
 
 Summarization nodes:
 
@@ -3823,7 +3837,7 @@ Summarization nodes:
 
 ==== set Internet2 ====
 
-*Original Perl*
+*legacy Perl*
 
 Summarization nodes:
 
@@ -3932,7 +3946,7 @@ Summarization nodes:
 
 ==== set Indiana University ====
 
-*Original Perl*
+*legacy Perl*
 
 Summarization nodes:
 
@@ -3972,7 +3986,7 @@ Summarization nodes:
 
 ==== set PIONIER ====
 
-*Original Perl*
+*legacy Perl*
 
 Summarization nodes:
 
@@ -4003,7 +4017,7 @@ Summarization nodes:
 
 ==== set SWITCH ====
 
-*Original Perl*
+*legacy Perl*
 
 Summarization nodes:
 
