@@ -122,3 +122,251 @@ link: `*_`to`_`hostA`_`eth1.3001`_`link
   * peer: hostA`_`eth1.3001`_`link`_`to`_*`
   * parent: `*_`to`_`hostA`_`eth1`_`link
   * composes: dcs_link_upstream
+
+== Sample Topology ==
+A two-tiered approach: the high level describes the circuit and provides
+pointers to domain-specific segments. Domains can choose to leave those
+domain-specific segments as opaque, or can choose to make more information
+available.
+
+{{{
+<!-- one direction of a circuit -->
+<link id="urn:nml:internet2.edu:gri123456_direction1">
+	<source>urn:nml:internet2.edu:packrat_eth0</source>
+	<destination>urn:nml:es.net:dogpile_eth0</destination>
+	<capacity>10000000000</capacity>
+
+	<reverse-link>urn:nml:internet2.edu:gri123456_direction2</reverse-link>
+
+	<composed-of>
+		<path>
+			<hop id="0">
+				<linkIdRef>urn:nml:internet2.edu:gri123456_direction1_segment</linkIdRef>
+				<nextHop>1</nextHop>
+			</hop>
+			<hop id="1">
+				<linkIdRef>urn:nml:geant.net:gri123456_direction1_segment</linkIdRef>
+				<nextHop>2</nextHop>
+			</hop>
+			<hop id="2">
+				<linkIdRef>urn:nml:es.net:gri123456_direction1_segment</linkIdRef>
+			</hop>
+		</path>
+	</composed-of>
+</link>
+
+<!-- these are the linkes of the circuit that Internet2 knows about -->
+<link id="urn:nml:internet2.edu:gri123456_direction1_segment">
+	<source>urn:nml:internet2.edu:packrat_eth0</source>
+	<destination>urn:nml:internet2.edu:link_chic_to_esnet</destination> <!-- the outgoing link -->
+	<capacity>10000000000</capacity>
+
+	<sibling>urn:nml:internet2.edu:gri123456_direction2_segment</sibling>
+
+	<composed-of>
+		<path>
+			<hop id="0">
+				<!-- The link from packrat's eth0 to the chicago router so-0/0/0 -->
+				<idRef>urn:nml:internet2.edu:packrat_to_chic</idRef>
+				<nextHop>1</nextHop>
+			</hop>
+			<hop id="1">
+				<!-- chicago router's cross-connect connecting so-0/0/0 to so-0/1/0 -->
+				<idRef>urn:nml:internet2.edu:chic_cross-connect1</idRef>
+				<nextHop>2</nextHop>
+			</hop>
+			<hop id="2">
+				<!-- Internet2's view of link from the chicago router to ESnet's starlight router -->
+				<idRef>urn:nml:internet2.edu:link_chic_to_esnet</idRef>
+			</hop>
+		</path>
+	</composed-of>
+</link>
+
+<!-- these are the linkes of the circuit that ES.net knows about -->
+<link id="urn:nml:es.net:gri123456_direction1_segment">
+	<source>urn:nml:es.net:link_chic_to_esnet</source> <!-- The incoming link -->
+	<destination>urn:nml:es.net:chic-owamp_eth0</destination>
+	<capacity>10000000000</capacity>
+
+	<sibling>urn:nml:es.net:gri123456_direction2_segment</sibling>
+
+	<composed-of>
+		<path>
+			<hop id="0">
+				<!-- ESnet's view of link from the chicago router to ESnet starlight router -->
+				<idRef>urn:nml:es.net:link_starlight_from_internet2</idRef>
+				<nextHop>1</nextHop>
+			</hop>
+			<hop id="1">
+				<!-- Cross-connect connecting starlight router's so-1/1/0 to s-0/1/0 -->
+				<idRef>urn:nml:es.net:starlight_cross-connect1</idRef>
+				<nextHop>2</nextHop>
+			</hop>
+			<hop id="2">
+				<!-- Link connecting starlight router to chicago owamp server -->
+				<idRef>urn:nml:es.net:link_starlight_to_chic-owamp</idRef>
+			</hop>
+		</path>
+	</composed-of>
+</link>
+
+<!-- The ESnet raw links. These could be placed into the above circuit descriptor in place of the idRefs. -->
+
+<link id="urn:nml:es.net:link_starlight_from_internet2">
+	<source>*</source> <!-- If known, this could be a real port id or it could be a domain id or something else -->
+	<destination>urn:nml:es.net:starlight-so-1/1/0</destination>
+	<capacity>10000000000</capacity>
+
+	<sibling>urn:nml:es.net:link_starlight_to_internet2</sibling>
+
+	<!--  A "composed-of" or "over" relation could exist here if we wanted to provide more detailed information about this link. -->
+</link>
+
+<link id="urn:nml:es.net:starlight_cross-connect1">
+	<source>urn:nml:es.net:starlight-so-1/1/0</source>
+	<destination>urn:nml:es.net:starlight-so-0/1/0</destination>
+	<capacity>10000000000</capacity>
+
+	<sibling>urn:nml:es.net:starlight_cross-connect1</sibling>
+
+	<!--  A "composed-of" or "over" relation could exist here if we wanted to provide more detailed information about this link. -->
+</link>
+
+<link id="urn:nml:es.net:link_starlight_to_chic-owamp">
+	<source>urn:nml:es.net:starlight-so-0/1/0</source>
+	<destination>urn:nml:es.net:chic-owamp_eth0</destination>
+	<capacity>10000000000</capacity>
+
+	<sibling>urn:nml:es.net:link_chic-owamp_to_starlight</sibling>
+
+	<!--  A "composed-of" or "over" relation could exist here if we wanted to provide more detailed information about this link. -->
+</link>
+
+<port id="urn:nml:es.net:starlight-so-1/1/0">
+	<capacity>10000000000</capacity>
+
+	<incoming_link>urn:nml:es.net:starlight_cross-connect_direction1</incoming_link>
+	<outgoing_link>urn:nml:es.net:starlight_cross-connect_direction2</outgoing_link>
+	<incoming_link>urn:nml:es.net:link_starlight_from_internet2</incoming_link>
+	<outgoing_link>urn:nml:es.net:link_starlight_to_internet2</outgoing_link>
+</port>
+
+<port id="urn:nml:es.net:starlight-so-0/1/0">
+	<capacity>10000000000</capacity>
+
+	<parent>urn:nml:es.net:starlight</parent>
+
+	<outgoing_link>urn:nml:es.net:starlight_cross-connect_direction1</outgoing_link>
+	<incoming_link>urn:nml:es.net:starlight_cross-connect_direction2</incoming_link>
+	<outgoing_link>urn:nml:es.net:link_starlight_to_chic-owamp</outgoing_link>
+	<incoming_link>urn:nml:es.net:link_chic-owamp_to_starlight</incoming_link>
+</port>
+
+<port id="urn:nml:es.net:chic-owamp_eth0">
+	<parent>urn:nml:es.net:starlight</parent>
+	<capacity>10000000000</capacity>
+	<incoming_link>urn:nml:es.net:link_starlight_to_chic-owamp</outgoing_link>
+	<outgoing_link>urn:nml:es.net:link_chic-owamp_to_starlight</incoming_link>
+</port>
+
+<node id="urn:nml:es.net:chic-owamp">
+
+</node>
+
+<node id="urn:nml:es.net:starlight">
+	<name type="dns">starlight-rtr.es.net</name>
+	<child>urn:nml:es.net:starlight_so-0/1/0</child>
+	<child>urn:nml:es.net:starlight_so-1/1/0</child>
+</node>
+
+<node id="urn:nml:es.net:chic-owamp">
+	<name type="dns">chic-owamp.es.net</name>
+	<child>urn:nml:es.net:chic-owamp_eth0</child>
+</node>
+
+<!-- Reverse Path (same path back as forward) -->
+
+<link id="urn:nml:internet2.edu:gri123456_direction2">
+	<source>urn:nml:internet2.edu:packrat_eth0</source>
+	<destination>urn:nml:es.net:dogpile_eth0</destination>
+	<capacity>10000000000</capacity>
+
+	<reverse-link>urn:nml:internet2.edu:gri123456_direction1</reverse-link>
+
+	<composed-of>
+		<path>
+			<hop id="0">
+				<linkIdRef>urn:nml:es.net:gri123456_direction2_segment</linkIdRef>
+				<nextHop>1</nextHop>
+			</hop>
+			<hop id="1">
+				<linkIdRef>urn:nml:geant.net:gri123456_direction2_segment</linkIdRef>
+				<nextHop>2</nextHop>
+			</hop>
+			<hop id="2">
+				<linkIdRef>urn:nml:internet2.edu:gri123456_direction2_segment</linkIdRef>
+			</hop>
+		</path>
+	</composed-of>
+</link>
+
+<link id="urn:nml:internet2.edu:gri123456_direction2_segment">
+	<source>urn:nml:internet2.edu:packrat_eth0</source>
+	<destination>urn:nml:internet2.edu:link_chic_to_esnet</destination> <!-- the outgoing link -->
+	<capacity>10000000000</capacity>
+
+	<sibling>urn:nml:internet2.edu:gri123456_direction1_segment</sibling>
+
+	<composed-of>
+		<path>
+			<hop id="0">
+				<!-- Internet2's view of link from the chicago router to ESnet's starlight router -->
+				<idRef>urn:nml:internet2.edu:link_chic_to_esnet</idRef>
+				<nextHop>1</nextHop>
+			</hop>
+			<hop id="1">
+				<!-- chicago router's cross-connect connecting so-0/0/0 to so-0/1/0 -->
+				<idRef>urn:nml:internet2.edu:chic_cross-connect1</idRef>
+				<nextHop>2</nextHop>
+			</hop>
+			<hop id="2">
+				<!-- The link from packrat's eth0 to the chicago router so-0/0/0 -->
+				<idRef>urn:nml:internet2.edu:packrat_to_chic</idRef>
+			</hop>
+		</path>
+	</composed-of>
+</link>
+
+<link id="urn:nml:es.net:gri123456_direction2_segment">
+	<source>urn:nml:es.net:chic-owamp_eth0</source> <!-- The outgoing link -->
+	<destination>urn:nml:es.net:link_chic_to_esnet</destination> 
+	<capacity>10000000000</capacity>
+
+	<sibling>urn:nml:es.net:gri123456_direction1_segment</sibling>
+
+	<composed-of>
+		<path>
+			<hop id="0">
+				<!-- Link connecting starlight router to chicago owamp server -->
+				<idRef>urn:nml:es.net:link_starlight_to_chic-owamp</idRef>
+				<nextHop>1</nextHop>
+			</hop>
+			<hop id="1">
+				<!-- Cross-connect connecting starlight router's so-1/1/0 to s-0/1/0 -->
+				<idRef>urn:nml:es.net:starlight_cross-connect1</idRef>
+				<nextHop>2</nextHop>
+			</hop>
+			<hop id="2">
+				<!-- ESnet's view of link from the chicago router to ESnet starlight router -->
+				<idRef>urn:nml:es.net:link_starlight_from_internet2</idRef>
+			</hop>
+
+		</path>
+	</composed-of>
+</link>
+}}}
+
+== Last Modified ==
+
+$Id$
