@@ -2,12 +2,17 @@
 
 == Agenda/Minutes ==
 
- # Attendees: 
+ # Attendees: Aaron, Marcos, Jason, Brian, Jeff
    * ...
  # Team Updates
    # Internet2
+     Jeff: pS-B owamp database code.
+     Aaron: Packaging/documentation for 3 services. Still needs minor doc on status. Working on examples.
+     Jason: Finished yum repo. Finished doc/testing on services. Worked with PSU on deployment issues.
    # ESnet
+     Brian: Working on pS-B deployment. Mostly done. Lots of suggestions for improved logging. BNL debugging. Many network problems.
    # UDel
+     Marcos: Prototypes for IPSummarization. Examples on wiki, wants comments on what is good. (We want to encourage everyone interested in this to attend IS-WG meetings.)
    # FNAL
  # Review _*Actions*_ from last call
  # perfSONAR-PS v3.1 Release Update
@@ -27,7 +32,10 @@
 
 === ACTIONS ===
 
-TBD
+ * Joe/Others: Please look at the IPSummarization page and comment. http://code.google.com/p/perfsonar-ps/wiki/IPSummarization.
+ * Jeff: Porting/installation testbed. (UWisc thing)
+ * Jason/Aaron/Maxim: Find beta testers.
+ * Aaron: Circuit Monitoring examples.
 
 == Where ==
 
