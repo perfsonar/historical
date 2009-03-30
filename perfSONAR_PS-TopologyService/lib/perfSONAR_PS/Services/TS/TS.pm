@@ -176,6 +176,10 @@ sub init {
     return 0;
 }
 
+=head2 needLS
+    Returns whether or not this service will be registering with a Lookup
+    Service.
+=cut
 sub needLS {
     my ( $self ) = @_;
 
@@ -282,7 +286,9 @@ sub buildLSMetadata {
 
 =head2 buildSummary($self)
 
-TBD
+A function used by the service to pull out the set of identifiers used that get
+registered with the Lookup Service. Longer term, it should produce a more
+complex summary to register.
 
 =cut
 

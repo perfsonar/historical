@@ -53,7 +53,11 @@ sub new {
 
 =head2 init( $self, { directory, file, namespaces, read_only } )
 
-TBD
+Initializes a Topology Database Object. The directory and file parameters must be
+included, and specify which directory to use for the database, and which
+filename the database will have, respectively. The namespaces option is a hash
+containing to explicitly set the namespaces that the database understands. The
+read_only option can be set to 1 to only allow read only access to the database.
 
 =cut
 
@@ -98,8 +102,7 @@ sub init {
 
 =head2 open($self)
 
-The open function could be used to open a persistent connection to the MA.
-However, currently, it is simply a stub function.
+The open function opens the database making it available for queries.
 
 =cut
 
@@ -132,8 +135,7 @@ sub open {
 
 =head2 close($self)
 
-The close function could close a persistent connection to the MA. However,
-currently, it is simply a stub function.
+The close function closes the database.
 
 =cut
 
@@ -149,7 +151,7 @@ sub close {
 
 =head2 dbIsOpen($self)
 
-This function is a stub function that always returns 1.
+This function returns whether the database is open or not.
 
 =cut
 
@@ -159,16 +161,16 @@ sub dbIsOpen {
     return $self->{DB_OPEN};
 }
 
-=head2 setDBContainer( $self, $container )
+=head2 setDBDirectory( $self, $directory )
 
-TBD
+This function sets the database directory, and closes it if open.
 
 =cut
 
-sub setDBContainer {
-    my ( $self, $container ) = @_;
+sub setDBDirectory {
+    my ( $self, $directory ) = @_;
 
-    $self->{DB_CONTAINER} = $container if defined $container;
+    $self->{DB_CONTAINER} = $directory if defined $directory;
     $self->close;
 
     return;
@@ -176,7 +178,7 @@ sub setDBContainer {
 
 =head2 setDBFile( $self, $file )
 
-TBD
+This function sets the database filename, and closes it if open.
 
 =cut
 
@@ -191,7 +193,7 @@ sub setDBFile {
 
 =head2 setDBNamespaces( $self, $namespaces )
 
-TBD
+This function sets the database namespaces without closing the database.
 
 =cut
 
@@ -200,7 +202,7 @@ sub setDBNamespaces {
 
     $self->{DB_NAMESPACES} = $namespaces if defined $namespaces;
 
-    if ( exists $self->{DB_OPEN} and $self->{DB_OPEN} ) {
+    if ( $self->{DB_OPEN} ) {
         $self->{DATADB}->setNamespaces( { ns => $namespaces } );
     }
 
@@ -281,7 +283,9 @@ sub getAll {
 
 =head2 changeTopology( $self, $type, $topology )
 
-TBD
+A function which takes the specified type and topology and updates the
+database.  Returns an array whose first element is 0 on success and -1 on
+failure. On failure, the second element will contain an error message.
 
 =cut
 
