@@ -18,6 +18,8 @@
        * Reviews Due (4/3)
      * Alpha Testing
      * Beta Testing
+ # RPM package question
+   * Since we are making available RPMs of software that we don't produce and may be available elsewhere, should we tag our RPMs with a special version identifier (e.g. -1.ps or -1.internet2)?
  # Circuit Monitoring
  # SNMP-MA ESnet new database integration update
  # LHC/Atlas deployments (status update)
