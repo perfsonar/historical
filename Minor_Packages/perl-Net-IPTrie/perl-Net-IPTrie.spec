@@ -1,6 +1,5 @@
 %{!?perl_prefix: %define perl_prefix %(eval "`%{__perl} -V:installprefix`"; echo $installprefix)}
 %{!?perl_style: %define perl_style %(eval "`%{__perl} -V:installstyle`"; echo $installstyle)}
-%{!?perl_version: %define perl_version %(eval "`%{__perl} -V:version`"; echo $version)}
 
 %define disttag pSPS
 
