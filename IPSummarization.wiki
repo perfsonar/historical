@@ -2227,9 +2227,9 @@ The following data sets were gathered from perfSONAR services in March 2009.
 194.42.48.11
 }}}
 
-=== Proposed Algorithm ===
+=== Proposed Algorithm #1 ===
 
-The proposed algorithm works as follows.
+This algorithm works as follows.
 
 Given a list of IP numbers, create a [http://en.wikipedia.org/wiki/Patricia_tree Patricia Tree] (or simply [http://en.wikipedia.org/wiki/Trie Trie]) and iterate over the list, inserting each IP number into the trie.  The trie data structure will automatically create inner nodes which correspond to the (candidate) summarization nodes, or CIDR classes.
 
@@ -2291,9 +2291,9 @@ The heuristic used for this decision is based on the _distance_ between an inter
 
 The reasoning for the coverage or density tries to gather whether there exists already a relevant number of descendants for the current node; if there is, then it may be convenient to select the current node as a summarization node.
 
-==== Subsequent Work ====
+=== Proposed Algorithm #2 ===
 
-The algorithm is to be further optimized to allow for tuning of its heuristics, and to possibly incorporate the notion of weight of the subtrees.
+For this algorithm, the notion of entropy is to be conveyed and used in the heuristics, and also incorporate some form of "tuning" of the "aggressiveness" of the summarization.
 
 Currently, the tuning has been incorporated as a "granularity" parameter, ranging from 0 (the finer granularity, or more specific summarization) to 3 (the coarser granularity, or more general summarization).  The heuristic is based on the calculation below:
 
@@ -2308,6 +2308,10 @@ Currently, the tuning has been incorporated as a "granularity" parameter, rangin
 				summaryArrayList.add(node);
 			}
 }}}
+
+==== Subsequent Work ====
+
+The algorithm is to be further optimized to allow for tuning of its heuristics, and to possibly incorporate the notion of weight of the subtrees.
 
 The algorithm for [http://en.wikipedia.org/wiki/Cut_(graph_theory) Minimum Cut] might also be a candidate for the summarization issue, and shall be further investigated.
 
