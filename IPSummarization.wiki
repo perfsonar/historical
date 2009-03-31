@@ -2309,6 +2309,10 @@ Currently, the tuning has been incorporated as a "granularity" parameter, rangin
 			}
 }}}
 
+==== Comments ====
+
+The "0" setting for the granularity seems to be overly specific, whereas the "1" setting makes a drastic transition.  The "3" setting seems to be overly general, perhaps not useful in normal conditions.
+
 ==== Subsequent Work ====
 
 The algorithm is to be further optimized to allow for possibly implementing the notion of weight of the subtrees.
