@@ -2311,7 +2311,7 @@ Currently, the tuning has been incorporated as a "granularity" parameter, rangin
 
 ==== Subsequent Work ====
 
-The algorithm is to be further optimized to allow for tuning of its heuristics, and to possibly incorporate the notion of weight of the subtrees.
+The algorithm is to be further optimized to allow for possibly implementing the notion of weight of the subtrees.
 
 The algorithm for [http://en.wikipedia.org/wiki/Cut_(graph_theory) Minimum Cut] might also be a candidate for the summarization issue, and shall be further investigated.
 
