@@ -1,4 +1,6 @@
-#summary perfSONAR-PS Release Management<wiki:toc max_depth="6" />
+#summary perfSONAR-PS Release Management
+
+<wiki:toc max_depth="6" />
 
 == Introduction ==
 
@@ -10,7 +12,7 @@ The perfSONAR-PS release process is based heavily on the [ReleaseManagement gene
 
 || *Date* || *Milestone* ||
 || _8 April_ || [pSPSReleaseManagement#pSPS_Version_3.1 pSPS Version 3.1] ||
-|| _27 April_ || [pSPSReleaseManagement#pSPS_Version_3.1+ pSPS Version 3.1+] ||
+|| _May_ || [pSPSReleaseManagement#pSPS_Version_3.1+ pSPS Version 3.1+] ||
 || _May_ || [pSPSReleaseManagement#PN_Version_3.1 PN Version 3.1] ||
 || _June_ || [pSPSReleaseManagement#pSPS_Version_3.2 pSPS Version 3.2] ||
 || _July_ || [pSPSReleaseManagement#PN_Version_3.2 PN Version 3.2] ||
