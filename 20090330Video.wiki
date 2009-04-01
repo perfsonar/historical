@@ -36,6 +36,9 @@
  * Jeff: Porting/installation testbed. (UWisc thing)
  * Jason/Aaron/Maxim: Find beta testers.
  * Aaron: Circuit Monitoring examples.
+ * All:
+   * Documentation Reviews
+   * Beta testing
 
 == Where ==
 

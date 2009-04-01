@@ -76,8 +76,8 @@
 === ACTIONS ===
 
  * Jason
-   * Packaging Finalization
-   * Documentation Finalization 
+   * ~~Packaging Finalization~~
+   * ~~Documentation Finalization~~
    * Beta Testing
  * Marcos
    * IP Summarization
@@ -94,21 +94,21 @@
    * Beta Testing
  * Maxim
    * Figure out changes to make NPToolkit documentation easier to follow
-   * Packaging Finalization
-   * Documentation Finalization 
+   * ~~Packaging Finalization~~
+   * ~~Documentation Finalization~~ 
    * Doc Reviews
    * Beta Testing
  * Aaron
-   * Update Examples for circuit status
-   * Packaging Finalization
-   * Documentation Finalization 
+   * ~~Update Examples for circuit status~~
+   * ~~Packaging Finalization~~
+   * ~~Documentation Finalization~~
    * Doc Reviews
    * Beta Testing
  * Martin 
  * Jeff
    * pSB Development
    * Doc Reviews
-   * Read CHEP - Give Maxim Feedback   
+   * ~~Read CHEP - Give Maxim Feedback~~   
 
 == Where ==
 
