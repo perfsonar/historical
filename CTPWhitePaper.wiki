@@ -95,7 +95,9 @@ which groups I think are best positioned for the specific parts.
 || 2/23-3/13   || Central configuration setup developed/tested. (rsync or other) || AB/JH/DP || Manual this time around *Complete* ||
 || 3/16-4/6    || Order remaining hardware, deployments of perf-nodes || JH || *Complete* ||
 || 3/2-4/13   || Development of database modifications. || JB || In-progress ||
-|| 3/16-4/13   || GUI, and Nagios plugins. || JZ || Basic Nagios Started ||
+|| 3/16-4/13   || Admin-GUI || AB || In-progress ||
+|| 3/16-4/13   || Nagios plugins. || JZ || Basic Nagios Started ||
+|| 4/1-4/20   || Public GUI (dashboard widget style). || JZ/AB/JB || ||
 || 4/6-4/13    || Debugging of deployments/*Networks*/real-world data validation || JH/JZ || ||
 ||             || (Probable flush of all existing data at the end of this period) || || ||
 || 4/13-4/24   || Iterative development/testing of GUI/nagios alerts || JZ/JH/DP || ||
