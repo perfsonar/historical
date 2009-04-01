@@ -98,7 +98,7 @@ which groups I think are best positioned for the specific parts.
 || 3/16-4/13   || Admin-GUI || AB || In-progress ||
 || 3/16-4/13   || Nagios plugins. || JZ || Basic Nagios Started ||
 || 4/1-4/20   || Public GUI (dashboard widget style). || JZ/AB/JB || ||
-|| 4/6-4/13    || Debugging of deployments/*Networks*/real-world data validation || JH/JZ/*SiteContacts* || ||
+|| 4/6-4/13    || Debugging of deployments/*Networks*/real-world data validation || JH/JZ/*!SiteContacts* || ||
 ||             || (Probable flush of all existing data at the end of this period) || || ||
 || 4/13-4/24   || Iterative development/testing of GUI/nagios alerts || JZ/JH/DP || ||
 ||             || (No database mods during this time, only presentation changes.) || || ||
