@@ -6,10 +6,10 @@ The perfSONAR-PS release process is based heavily on the [ReleaseManagement gene
 
 == Roadmap ==
 
-*LAST REVISED* <font color=red>March 11, 2009</font>
+*LAST REVISED* <font color=red>March 31, 2009</font>
 
 || *Date* || *Milestone* ||
-|| _27 March_ || [pSPSReleaseManagement#pSPS_Version_3.1 pSPS Version 3.1] ||
+|| _8 April_ || [pSPSReleaseManagement#pSPS_Version_3.1 pSPS Version 3.1] ||
 || _27 April_ || [pSPSReleaseManagement#pSPS_Version_3.1+ pSPS Version 3.1+] ||
 || _May_ || [pSPSReleaseManagement#PN_Version_3.1 PN Version 3.1] ||
 || _June_ || [pSPSReleaseManagement#pSPS_Version_3.2 pSPS Version 3.2] ||
@@ -109,6 +109,10 @@ These suggestions were based on group feedback from the [20081211Video December 
 
 For more information regarding this release, please see the information [pSPS20090327Release page].
 
+=== v3.1+ Release ===
+
+TBD
+
 == Release Process ==
 
 The following are recommendations and deviations from the release process [ReleaseManagement#Release_Process recomendations].  These are not set in stone and may be relaxed depending on requirements for a given attempt.  Many are subject to availability of resources (time and manpower).  
@@ -149,8 +153,14 @@ See the original [ReleaseManagement#Schedule recommendations].  The schedule all
 Developers should focus on documentation for the perfSONAR-PS project in the following order:
 
  * Perldoc for all modules and scripts
- * Installation and usage documentation (included in packaging)
- * Wiki pages to describe Installation and usage
+ * Installation and configuration documentation (included in packaging)
+ * User Documentation
+   * This should be of a higher quality than what is prepared for developers
+   * Would be _layered_ to include context regarding the bigger picture in network monitoring
+   * Should be available in the package and on the web (see also: [http://e2epi.internet2.edu/npw/binder-docs/owamp-cookbook.pdf OWAMP Cookbook])
+ * Wiki pages to describe Installation/configuration/developer details
+   * wiki pages get out of date quickly, so this should _*only*_ be used for information that is too detailed to include in a release.
+   * May also be the home of FAQ
  * Wiki pages for API use or other examples that may be helpful for users and other developers
  
 The release team should be sure to:
@@ -200,6 +210,8 @@ Method/Function Information:
 =head2 NAME($self, { ARGUMENT => REQUIRED } )
 
 DESCRIPTION
+
+=head2 API
 
 =cut
 }}}

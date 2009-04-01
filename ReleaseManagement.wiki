@@ -286,10 +286,15 @@ releasing software.  The following image describes this:
 http://perfsonar-ps.googlecode.com/svn/wiki/ReleaseManagement/schedule.png
 
 This particular release process is three (3) weeks long, but can be extended
-to a longer or shorter period of time as desired.  Each phase of the release
-process is market by a significant event that will effect the progress and
-re-focus the effort of the development team.  The following sections detail
-each phase of the release schedule. 
+to a longer or shorter period of time as desired.  See this recent example from
+the perfSONAR-PS [pSPS20090327Release release process]:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPS20090327Release/schedule.png
+
+Note that extra time was inserted to ensure tasks were completed on time.  Each
+phase of the release process is market by a significant event that will effect
+the progress and re-focus the effort of the development team.  The following
+sections detail each phase of the release schedule. 
 
 ==== Pre Release ====
 
@@ -403,9 +408,9 @@ the project, in particular:
  * [http://java.sun.com/j2se/javadoc/ Javadoc] - Java documentation
  * [http://www.stack.nl/~dimitri/doxygen/ Doxygen] - C/C++/Python tool for source documentation
  
-Developers *_should_* document as they develop; this may not always be the case.
-Some projects such as perfSONAR-PS have gone as far as to mandate the process
-and format in specific sets of
+Developers *_should_* document as they developm but this may not always be the
+case.  Some projects such as perfSONAR-PS have gone as far as to mandate the
+process and format in specific sets of
 [http://code.google.com/p/perfsonar-ps/wiki/CodeRules rules].  At a minimum each
 source code file should contain:
 

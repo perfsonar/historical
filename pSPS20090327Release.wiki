@@ -4,7 +4,7 @@
 
 == Introduction ==
 
-This page outlines details regarding the perfSONAR-PS release that began the week of February 23, 2008 and ended on April 3 2009 in the release of v3.1 of perfSONAR-PS.
+This page outlines details regarding the perfSONAR-PS release that began the week of February 23, 2008 and ended on April 8 2009 in the release of v3.1 of perfSONAR-PS.
 
 == Release Team ==
 
@@ -25,9 +25,11 @@ Code Slush: March 6, 2009
 
 Code Freeze: March 23, 2009
 
-RC Phase, Beta Tests: March 27, 2009
+Package Generation Phase, Beta Tests: March 27, 2009
 
-Release: April 3, 2009
+Doc Review: April 3, 2009
+
+First Release Candidates: April 8, 2009
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPS20090327Release/schedule.png
 
@@ -112,15 +114,22 @@ Documentation review is a review of included and posted documentation for errors
 
 Thinks to think about as you review:
 
- * Is the documentation complete:
-   * Same in the package as on the web
-   * Contains references to legitimate sources. 
-   * Does not contain blank sections
-   * Addresses all functionality
- * Is it Understandable
- * Free of spelling/grammar errors
- * Up to date versus previous releases
- * Appropriate to the audience that will be the primary reader
+ # In the _*doc/*_ directory:
+   * _*INSTALL*_ - Complete for all types of installs (svn, tar package, RPM).  Handles prerequisite information (e.g. yum repo maintenance) 
+   * _*Changes*_ - List of changes since the last release where applicable
+   * _*README*_ - Configuration and test information meant to supplement _*INSTALL*_.  Should also be complete and may point to other (web) resources
+   * _*LICENSE*_ - Updated for this release (e.g. copyright dates, all parties are mentioned).  
+   * Others?
+ # _*perldoc*_ in each module/script
+   * Does each module have the necessary header/footer?  Are they correct and up to date (including copyright dates, modules used, authors.
+   * Does each function of a header?  Does it describe in basic terms what the function does?  Do not worry about parameters/return values for this release.
+   * Is the doc readable when using _*perldoc*_?
+   * Spelling/grammar errors
+ # Other documentation (e.g. _*user guides*_)
+   * Updated for the most recent release?
+   * Spelling/grammar error free
+   * Reads well - not too technical and should be useful for the most basic user
+   * Complete (e.g. no blank sections, addresses all functionality)
 
 === Testing ===
 
@@ -150,8 +159,8 @@ Developers are responsible for testing their code:
      * SNMP - <font color=green>_*DONE - 3/23*_</font>
      * pSB - <font color=purple>_*PUSHED OFF - 3/9*_</font>
    * Documentation
-     * LS - <font color=yellow>_*IN PROGRESS - 3/16*_</font>
-     * SNMP - <font color=yellow>_*IN PROGRESS - 3/16*_</font>
+     * LS - <font color=green>_*DONE - 3/28*_</font>
+     * SNMP - <font color=green>_*DONE - 3/28*_</font>
      * PSB - <font color=purple>_*PUSHED OFF - 3/9*_</font>
    * Code Review
      * Status  - <font color=green>_*DONE - 3/19*_</font>
@@ -169,9 +178,9 @@ Developers are responsible for testing their code:
      * Topology - <font color=green>_*DONE*_ - 3/23</font>
      * LS Registration Daemon - <font color=green>_*DONE*_ - 3/23</font>
    * Documentation
-     * Status - <font color=yellow>_*IN PROGRESS*_ - 3/23</font>
-     * Topology - <font color=yellow>_*IN PROGRESS*_ - 3/23</font>
-     * LS Registration Daemon -<font color=yellow> _*IN PROGRESS*_ - 3/23</font>
+     * Status - <font color=green>_*DONE*_ - 3/28</font>
+     * Topology - <font color=green>_*DONE*_ - 3/28</font>
+     * LS Registration Daemon -<font color=green> _*DONE*_ - 3/28</font>
    * Code Review
      * PingER - <font color=green>_*DONE - 3/19*_</font>
    * Documentation Review
@@ -226,6 +235,7 @@ Lessons learned during the release and review process.
  * Same for doc reviews
  * Testing (unit tests - tests harness) should be ready pre-release
  * Keep your documentation up to date 
+ * Longer cycle should be considered, especially when balancing other needs (Paper writing, outside tasks)
       
 === Code Review Reviews ===
 
