@@ -49,7 +49,7 @@ package that gives the necessary configuration information for the YUM and Apt
 tools.  The RPM can be found here:
 
 {{{
-http://software.interent2.edu/Internet2-repo-0.1-2.noarch.rpm
+wget -c http://software.interent2.edu/Internet2-repo-0.1-2.noarch.rpm
 }}}
   
 To install this RPM first import the signing key:
