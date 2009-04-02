@@ -1,7 +1,5 @@
 #summary List of perfSONAR-PS Activites from 2007
 
-<wiki:toc max_depth="6" />
-
 == 2007 Activities ==
 
  * [2007Activities#20071217Call Conference Call for December 17, 2007]
