@@ -1,0 +1,1067 @@
+#summary List of perfSONAR-PS Activites from 2007
+
+<wiki:toc max_depth="6" />
+
+== 2007 Activities ==
+
+ * [2007Activities#20071217Call Conference Call for December 17, 2007]
+ * [2007Activities#20071203Call Conference Call for December 03, 2007]
+ * [2007Activities#20071126Call Conference Call for November 26, 2007]
+ * [2007Activities#20071029Call Conference Call for October 29, 2007]
+ * [2007Activities#20071015Call Conference Call for October 15, 2007]
+ * [2007Activities#20071001Call Conference Call for October 1, 2007]
+ * [2007Activities#20070924Call Conference Call for September 24, 2007]
+ * [2007Activities#20070827Call Conference Call for August 27, 2007]
+ * [2007Activities#20070813Call Conference Call for August 13, 2007]
+ * [2007Activities#20070730Call Conference Call for July 30, 2007]
+ * [2007Activities#20070717Meet perfSONAR-PS Dev Meeting at Summer Joint Techs, July 17, 2007]
+ * [2007Activities#20070709Call Conference Call for July 09, 2007]
+ * [2007Activities#20070625Call Conference Call for June 25, 2007]
+ * [2007Activities#20070618Call Conference Call for June 18, 2007]
+ * [2007Activities#20070604Call Conference Call for June 04, 2007]
+ * [2007Activities#20070521Call Conference Call for May 21, 2007]
+ * [2007Activities#20070514Call Conference Call for May 14, 2007]
+ * [2007Activities#20070430Call Conference Call for April 30, 2007]
+ * [2007Activities#20070416Call Conference Call for April 16, 2007]
+ * [2007Activities#20070409Call Conference Call for April 09, 2007]
+ * [2007Activities#20070326Call Conference Call for March 26, 2007]
+
+=== 20071217Call === 
+
+ # Attendees: Jason, Brian, Maxim, Aaron, Jared, Les
+ # Team Updates
+   # Internet2
+     * Jason: Working on documentation. dLS document fully converted to docbook, expected completion by group is 1st week of January. Echo/LS Protocol docs expected this week (1st drafts), as well as SNMP MA service documentation. Aaron: Working on packaging services (LS, SNMP MA, Circuit/Status MA, Topology) into CPAN and RPM formats.
+   # SLAC
+     * Yee is traveling for the holidays. Jared: Working to package PingER, will be looking closely at Aaron's progress.
+   # IU
+     * N/A
+   # FNAL
+     * Maxim: Currently testing MA. Working with Jared/Yee on packaging. Working with Aaron to integrate Daemon Architecture. Will be changing web script to work with landmarks file to make the web configuration available (Jan). Would like to schedule a meeting day in Jan to discuss progress.
+   # UDEL
+     * N/A - Martin is working on dLS and other NMWG documentation. Karthik has prepared a proof of concept Patricia Trie implementation in Java.
+   # ESnet
+     * N/A
+   # LBL
+     * Brian is coming up to speed on perfSONAR. Has been playing with SNMP MA and discovered 2 bugs (timeout message formating error, no check for validity of RRD files before opening). Will be working on performance issues.
+ # pS-PS (Status)
+   * Packaging
+     * Aaron is preparing CPAN packages (using Module::Build, Maxim has suggested Module::Install), and RPM packages (CentOS, RHEL5, perhaps Fedora). The RPM packaging also needs a package of DBXML. Finding success using 'DAG' repo to find external software (perl modules, slite, rrdtool, etc). Will still need to distribute via our own reop however.
+   * Testing
+     * Discussed testing in the overall framework, not necessarily upcoming release. Need to create request/expected response pairs to test protocol in each service, use a tool such as SOAP-UI. Harder to test this interaction via 'make test'. Need simple tests in the CPAN packages to verify correctness of installation.
+ # Standards Docs (status)
+   * dLS
+     * Expected completion by 1st week of January. Coding has already started.
+   * LS/Echo/(others) protocol
+     * Expected complete before holidays (drafts & skeletons). Will expect group input.
+   * Service Level Documentation (SNMP MA/LS)
+     * Expected complete before holidays (drafts & skeletons). Will expect group input.
+ # pingER MA/MP (Status)
+   * Available for download, will be ready to discuss distribution/testing in meeting 2nd week of January.
+ # Next call will be Jan 7
+
+=== 20071203Call === 
+
+ # Attendees: Jason,
+ # Team Updates
+   # ESnet
+   # Internet2
+     * Jason: dLS document, SNMP Service Documentation, LS Protocol, Echo Protocol
+     * Aaron: Working on daemon architecture. Using Conf::General, HTTP::Daemon for now. Restructured configuration to be more similar to apache configuration for eventual move to mod_perl.
+     * Jeff: Working on bwctl and perfSONOBUOY and dLS document review.
+   # SLAC
+     * Yee: has pingER MP ready. Moved to a more topology-like conf file, and is using Maxim's API. Yee is also using the Agent API that he described a couple of weeks ago.
+   # IU
+   # FNAL
+     * Maxim: Done with framework, pingER-MA is still using same simple configuration module. Maxim sent out a web-configuration URL that others should look at to see if it is useful for configuring other services. Maxim is currently working on making pingER-MA work with SQLite.
+   # UDEL
+     * Martin is in Vancouver for IETF. Working to complete dLS document based on suggestions from Maciej, Jason, Jeff in conf call last week. Working with student at UD (Karthik) to complete summary algorithms based on Patricia Trie/Radix implementations in Java.
+ # pS-PS
+   * pS-PS daemon architecture and CPAN (next week)
+     * Aaron is merging all Aaron/Jason services into a single branch (merge), and is creating the daemon-dispatch architecture there. The idea is to make a good modular design for the service components, and to work on creating CPAN modules out of these pieces for the January releases. These releases will still use HTTP::Daemon for transport, but soon after will be modified to also work within mod_perl. Versions of services need to be released by January 18.
+ # Standards Docs (status)
+   * dLS
+     * Martin will come out with a new version soon. Jason/Jeff will review.
+   * LS/Echo/(others) protocol
+     * Jason will have it out soon.
+   * Service Level Documentation (SNMP MA/LS)
+     * Jason will have it out soon.
+ # pingER MA/MP status
+   * Friendly user testing will start December 10.
+ # Next call will be Dec 17
+
+=== 20071126Call === 
+
+ # Attendees: Les, Yee, Luke, Chris, Jason, Aaron, Maxim, Jeff, Matt (lurked a bit)
+ # Team Updates
+   # ESnet
+     * Joe is concerned about a fracture in the pS development groups due to the Java implementation and the Perl implementation. Specifically, Joe is concerned that it will be difficult to get pingER and other pS-PS services included in the LHC distributions if they are not included in the MDM-Perfsonar distributions. Eric, Joe and Jeff will discuss the issue. Additionally, there was discussion about the pingER MA/MP service, and how soon it would be available. (Discussion in separate section below.)
+   # Internet2
+     * Jason has been working on SC demos every waking minute since the last meeting. There are infosheets, fliers, and posters. Jason will send out links eventually. The demos were very successful. Specifically the KISTI (Korean) networking folks were very interested in GMAPS and the pS services. Additionally, perfSONAR interfaces were shown on the SCinet NOC displays - both some new perfSONAR network weathermaps as well as perfOMeter's of some of the more interesting links. Also, perfOMeter was used to show network utilization during the bandwidth challenge. Jason was able to modify the SNMP MA to store netFLOW data instead of doing SNMP queries. This allowed faster updates of the bandwidth challenge interfaces without impacting the performance of the F10 switch the participants were using.
+     * Aaron was more focused on phoebus, but still managed to create a new pS service to expose Oscars (DCN) topology information. This service, along with a new pS-UI plugin can be used to show links as they are provisioned. Also, Aaron has re-factored the link-status MA to allow more easy integration of a tl1 status monitor for the ciena hardware.
+     * Jeff was primarily involved with SCinet, but was able to get some high-level visibility of perfSONAR interfaces by including them in the NOC displays.
+   # SLAC
+     * Yee has re-factored GMAPS to make it easier to add new data types. Yee has also worked on an MP abstraction to allow multiple 'agents' for running a given tool. It could be useful in context with Aaron's link-status abstraction.
+   # IU
+     * Nothing new this week.
+   # FNAL
+     * Maxim has finished creating an OO parsing abstraction for marshalling/unmarshalling XML. He used the Rose::DB module. The idea was to put all the SQL in one place to allow for a more object oriented model of handing the XML. The code is in the Yee branch. This lead to a discussion of the merits of using DOM parsing vs custom Marshalling. For now, Maxim will sub-class his abstraction in the pingER code as an example, and then others can evaluate what he has done to decide if it is useful for other services.
+   # UDEL
+     * Nothing new this week.
+ # pS-PS
+   * pS-PS daemon architecture and CPAN (next week)
+ # pingER MA/MP status
+   * There was discussion about how soon the pingER MA/MP needed to be available. Generally, it was decided to attempt to get it out in time for Jt Techs so it is available for the MDM-Perfsonar release schedule. This should help ensure it is included in the LHC releases that are being created. It was decided that an initial release would be made in 2 weeks for friendly user testing (Joe). Yee will send out an initial requirements document for what needs to be done to make this happen and others will comment. Maxim will have developer conf-calls on the Fridays.
+ # Standards Docs (status)
+   * dLS
+   * LS protocol
+   * MA/MP protocol
+ # Next call will be Dec 3rd.
+
+=== 20071029Call === 
+
+ # Attendees: Jason, Martin, Aaron, Yee, Joe, Les
+ # Team Updates
+   # Ga Tech
+     * N/A
+   # ESnet
+     * Joe: Working on a deployment of the Topology Service with his Student. Currently getting topology file description done. Potential deployment within 2 weeks (no promises). Looking forward to linking SNMP MA data w/ Topology data. Will deploy new SNMP code when ready from Jason for SC
+   # Internet2
+     * Aaron: Mostly focusing on SC07 work for the various demos we are participating in. Recently completed pS-PS Oscars MP (will query oscars for list of links, functions like a basic topology service). Plugin for pS-UI to consume data from this service, and display geographic placement of links + quantity.
+     * Jason: Since OGF much time was devoted to writing standards/documents with martin. Contributed to dLS, Service documentation, Protocol documentation, chaining description. Updated LS code for SC/DICE requirements. Updated SNMP MA code based on FMM findings. Expect to see new release very soon, will need to redeploy at several sights for SC demo. Will be asking everyone to use a new LS instance due to vhost issues w/ patdev0.
+     * Jeff: In Spain for JRA1 meeting, Will be spending lots of time at SC/SCinet over the next month.
+   # SLAC
+     * Yee: Deployed Pinger/Topology service. Working with maxim on new framework. Will answer questions soon on issues Jeff/Jason have raised regarding complexity. Goal: easier to make new MA/MP services (will only require developers to write new parsers for xml)
+   # IU
+     * N/A
+   # FNAL
+     * N/A
+   # UDEL
+     * Martin: Speant most time on dls docs, nmwg base docs, chaining docs.
+     * Ben: Last time Martin checked was working to make a traceroute MP in java for planetlab? Also may be interested in exporting routing tables from IU (junos?). Karthik: Will be devoting some time to summary stuff, specifically a raddix tree alg in java
+ # SC07 Topics
+   * Who will be there
+     * Martin, Aaron, Jason, Jeff, Eric
+   * Internet2 Demos
+     * perfSONAR(-PS) support in DCN
+       * We will be monitoring the edges of the DCN demo (HEANet, GRNET, PSNC, FNAL, BNL, BU, UNL, CERN?). Will be displaying a weathermap (written by Jason) and Aaron's pS-UI plugin for OSCARS. pS-Ps services in use will include SNMP MA, LS, Topology, OSCARS MP, perfSONAR-UI Plugins
+     * perfSONAR(-PS) support for Phoebus
+       * Will be using the paths set up by the DCN demo to show fast file transfers between Phoebus deployments.
+     * perfSONAR-PS Demo
+       * Will be showing off mostly visualization (GMaps, perfOMeter, perfAdmin, perfSONAR-UI Plugins) for the various servies we have deployed around the US/Europe. Les has asked that Jason look into booth signage for partners.
+   * Measurement BOF (Any interest in a dial-in line?)
+     * When: Wednesday, November 14th 10:00 AM - 12:00 PM
+     * Where: Room A16 at the Reno-Sparks Convention Center
+     * Hosts: Jon Dugan, ESnet and Jeff Boote, Internet2
+ # Standards docs
+   * Martin is hard at work, and hopes to push these out before SC for internal review.
+ # pS-PS code
+   * Anything new in the infrastructure portions?
+     * Jason has added some PID management, it is still rather simple.
+ # pS architecture
+   * N/A
+ # Follow up on LHC-OPN support, requirements, priorities
+   * Joe and Eric will be in Geneva next week for a meeting.
+ # Next call will be November 19, 2:30 EDT ?
+
+=== 20071015Call === 
+
+ # Attendees: Jeff, Les, Yee, Luke, Chris, Maxim, John
+ # Team Updates
+   # UDEL
+     * Martin is at OGF.
+   # Ga Tech
+   # ESnet
+   # Internet2
+     * Jason and Aaron unavailable today. Jeff forgot to mention: the FMM demos were very successful. perfSONAR related talks went well, and attendance was reasonable. Thanks to everyone that put things together for that. Specifically, gmaps was well received at the perfSONAR WG.
+   # SLAC
+     * Yee has been working on name space issues, and abstracting out the MP functionality for the daemon architecture.
+   # IU
+     * Luke reports that there is an issue with the way the store file is updated for the SNMP MA (the configuration changes before data is actually available). He will be working on something to make that happen in a consistent way. Jeff asked about the possibility of the IU nagios system being used to monitor pS-PS services - Chris reported that it would probably be easy and he will look into it.
+   # FNAL
+     * Maxim reports that he as abandoned the idea of using XMLDB for the pingER metadata model. Instead he is mapping queries into SQL on the backend. He is also working on a marshalling/unmarshalling architecture. Jeff was concerned that this would be too heavy weight (like the Java implementation). Maxim indicates that it is not as cumbersome as that interface. Jeff and others will review Maxim's implementation when he checks in to see more closely what Maxim is proposing. If it is not too heavy weight, it could be a good way to make it easier for new services to be written quickly. (Especially in combination with the new daemon architecture simplifications.)
+     * Additionally, there was some discussion about filter-chaining and eventTypes.
+ # Deployment status
+   * Who has what pieces installed, how 'supported' are they. Can we make deployed versions public during SC?
+   * Should we attempt to setup some service 'monitoring'? It might be worth it to us to get more detailed problem reports so we can improve reliability.
+     * As above, Chris will look into it. It was also discussed that we should have these checks be more specific for some services to ensure that the 'backend' is being updated.
+   * Circuit status is now handling IN2P3 for HOPI
+     * Who should be the 'contact' - Dante is asking...
+     * IU NOC will be the 'contact', they will pull Aaron in if needed.
+ # Standards docs
+   * Topic postponed to after OGF meeting.
+     * OGF base schema doc status
+     * Topo schema doc status
+     * LS protocol doc status
+     * other? (MA/MP - individual profiles...)
+ # FMM report
+   * IRNC has deployments (what do we need to do to support this?)
+     * John reports a couple of new deployments for TransPAC2 and APAN. He is not sure what additional support they might like at this point. John is also planning to send notes on his installation experiences with the pS-PS code.
+ # pS-PS code
+   * Anything new in the infrastructure portions?
+   * Central daemon architecture started
+   * owamp/bwctl 'archive' coordination
+ # pS architecture
+   * Scheduling interactions
+     * Resource protection vs regular schedule
+     * How do we ensure on-demand and scheduled to co-exist nicely
+     * This was actually discussed some in the SLAC update. Essentially, we talked about some of the requirements for this. Jeff will look for information links on the Resource Protector (RP) service to share with the group.
+ #  Next call will be October 29, 2:30 EDT
+
+=== 20071001Call === 
+
+ # Attendees: Maxim, Martin, Aaron, Jason, Jeff, Les, Yee, Chris
+ # Team Updates
+   # FNAL
+     * Maxim has worked on modifying the way the pingerMA uses metadata to take into account the 'count' issue. Most queries do not want to differentiate based on this field, it is present mostly to indicate on-demand tests. In the future, Maxim hopes to utilize the Topology and LS services to make this more modular. Next Maxim intends to enhance the XQuery capabilities and also to enhance the visualization tools.
+   # UDEL
+     * Martin has been working on the Base schema document as well as some enhancements to the topology document.
+   # Ga Tech
+   # ESnet
+   # Internet2
+     * Aaron has worked on the topology document and the circuit status service. Also, he made an initial pass at merging the pS MA service code. This will help outline areas that need to be discussed to determine the architecture we need to move forward with. Also, Aaron created an MA example skeleton out of the merged code that can be used as a basis for new services.
+     * Jason made enhancements to the LS and specifically the way it uses the XMLDB backend based on the documentation and hints on message boards he was able to substantially increase the performance. He has also spent time working on the FMM demo, and the dLS protocol document. Jason will be working on the dLS implementation next.
+     * Jeff has worked on bwctl, and the FMM demo. Jeff has also pushed forward the software security issue that Yee brought up on the list. The intention is to get a very simple security 'plan' in place that can be referenced and enhanced over time.
+   # SLAC
+     * Yee has primarily been working on a topology service for pingER. He needs somewhere to house new services he writes since the SLAC policies do not allow him to host them locally right now. He has also worked on an MP framework that he would like others to look at.
+   # IU
+     * Chris has continued to work on getting the IN2P3 circuit monitored with Aaron. The SNMP configuration is mostly set with only a few missing files still causing problems. Chris will give Yee an account on ndb2 this week so he can host some services there. Chris will also attempt to install the gmaps interface on ndb2.
+ # pS-PS
+     * Anything new in the infrastructure portions?
+     * XMLDB changes
+       * see jason's report above
+     * Code-Merge status
+       * see aaron's report above
+ # Schema issues
+   * see martin's report above
+   * Topology (contact information, etc...)
+     * see aaron's/yee's report and information on the list. "Contacts" information has been enhanced.
+ # Security issues
+   * see jeff's report above
+     * Code reviews/tests
+     * Statements about intent
+ # Follow up on LHC-OPN support, requirements, priorities
+    * Jeff will be attending the JRA-1 meeting in Seville Oct 30/31. Eric will be attending the LHC-OPN meeting the first week of November.
+ #  Next call will be 15 October, 2:30 EDT.
+
+=== 20070924Call === 
+
+ # Attendees: Chris, Maxim, Martin, Joe, Aaron, Jason, Jeff, Yee
+ # Team Updates
+   # IU
+     * Chris reported the IU has been working on: access to the devices and topology information for the status service (with aaron), SNMP MA store file changes, Topo service changes (not all information is currently easily accessible from the SQL database they use.
+   # FNAL
+     * Maxim is working on the pingerMA metadata engine because there are over 20,000 entries in the metadata database due to count being used as a differentiator. Looking at better integration into the pS-Topo service. Will soon look into pS-UI. Plans to use Yee's statistics package to enhance graphics. Maxim would like to see a better API abstraction in the pS-PS schema usage to decouple namespace issues from schema in the API. Jeff indicated that an abstraction would be a very reasonable idea here, and that we would work on it immediately after SC.
+   # UDEL
+     * Martin has done some topology schema development. He has also worked with Aaron to better define the Topology service interactions. Martin made the point that going forward we need 3 levels of specification for services:
+       * Schema (Base rules and syntax)
+       * Protocol (Specific service 'type' rules)
+       * Profile (Differences to account for different data types)
+   # Ga Tech
+   # ESnet
+     * Joe has been working on rewriting his trace-route visualization tool. He wanted to know if he could rely on some of the pS-PS API for use in his scripts. Yes!
+   # Internet2
+     * Aaron has been working on the circuit-status service, he has tied it together with topology and the link-status service to provide E2EMon style information. He is not yet able to monitory the IN2P3 circuit because of access issues, but is ready to try. Aaron has also been working on phoebus.
+     * Jason has been primarily working on the dLS document and enhancing the pS-PS usage of XMLDB. pS-PS code needs to set more XMLDB error handlers and such. Jason has also been enhancing the perfAdmin client.
+     * Jeff has primarily been working on owd schema development and is starting to work on the FMM demo. (Along with a fair amount of BWCTL coding.)
+   # SLAC
+     * Yee has worked with Maxim on the metadata issues and is also looking at visualization and analysis of the pinger data.
+ # Next call will be October 1
+
+=== 20070827Call === 
+
+ # Attendees: Yee, Luke, Chris, Maxim, Martin, Joe, Jason, Aaron, Jeff
+ # Team Updates
+   # SLAC
+     * Yee has been primarily working on the pingER-MA, and converting a decade worth of data into the new schema format. Yee and Maxim discussed performance issues with the 'file' style metadata store as well as other issues regarding deployment testing. Please add more details if wanted.
+   # IU
+     * Luke has the SNMP-MA configuration file generation modified to include errors as well as the additional interfaces that were missing before. Jason will work with Luke to deploy the latest software with this configuration. They will then let Jeff know so he can get this service announced throughout the community. Chris has been working with Aaron on describing the Internet2 network topology for the topo service. They have gone through more iterations, and the service and topology description are ready for testing. Yee expressed interested in the topology service (as is Joe). Aaron will work with Yee to show him the topology schema that is being used, and how it is organized.
+   # FNAL
+      * Maxim has been working on the perfSONAR-MA. Specifically on configuration management, a new database, and testing. He will be moving FNAL's pingER instance to a new machine next week in support of this effort. Additionally, Matt Crawford will be giving a presentation at CHEPS next week that will outline an FNAL use case for perfSONAR.
+   # UDEL
+      * Martin has been working with Jeff/Jason on the distributed LS refinements. He has also been updating the tooling required to update the nmwg 'standard' document in preparation for something like a Last-Call at the October OGF meeting. Jeff asked about discussing a way to handle service level 'protocol' standards. Martin, Jeff and probably Eric will get together to discuss ways of doing this.
+   # Ga Tech
+      * N/A
+   # ESnet
+      * Joe will be installing the Java RRD MA and the Perl SNMP MA soon to allow for comparison testing. Also, Brian Tierney will be starting to work on some perfSONAR related things in October. Maxim was interested in finding out if Joe (and Internet2) would be interested in installing the pingER-MP. After some discussion, it was pointed out that visibility into the backbone networks was already possible with OWAMP, and pingER was probably not needed. pingER is most useful to allow testing with non-engaged partners who have not installed any specific software.
+   # Internet2
+      * Jason has been working on refining the distributed-LS specification. Additionally he has been preparing for full CPAN releases of the SNMP-MA and the LS. He has also made test instances of those services available. Interoperability testing has taken up a fairly large amount of time.
+      * Aaron has the Topology service working to expose the Internet2 information from Chris. The bulk of his time has been spent working on the CircuitStatus-MA (The E2EMon compatible service) which seems to be working now. Aaron is still working with Chad to get SNMP access to Internet2 devices to get the LinkStatus component working. Once this is working, it can be tied together with the Topology Service and the CircuitStatus-MA to expose real circuits and links to E2EMon. A very nice feature is that the CircuitStatus-MA uses the LS to find available LinkStatus-MP's so new links should dynamically show up.
+      * Jason and Aaron have both worked with Mark Gordon (an Internet2 intern) to make their services known to perfSONAR-UI. Mark has made plugins to pS-UI for this purpose, and has also been able to get it to interact directly with the LS service. Information on the plugin can be seen from: https://wiki.internet2.edu/confluence/display/PSPS/PerfsonarUI+Plugins
+      * Jeff has worked with Martin/Jason on the distributed-LS refinements. Aside from that he has been spending all of his time working on bwctl.
+ # pS-PS
+   * Anything new in the infrastructure portions?
+     * No
+ # Interoperability Testing
+   * It is becoming clear that we will need to have service/protocol level standards documents.
+     * Java RRD-MA and Perl SNMP-MA
+       * Most issues were due to shortcuts Roman too with chaining. He mostly agrees that changes are needed. Jason was required to make the SNMP-MA service conform to the way it currently works because pS-UI (the only wide-spread client) expected to see messages this way. Nina and Roman have agreed to enhance their code to support the richer functionality.
+     * LS
+       * Maciej has some strange behavior in the Java LS. Specifically with regard to updates, which are implemented as a full delete and add. There is currently no way to implement and incremental updated of the service information given the current message formats. Additionally, responses to queries are given in text format only, even though a client will most likely want to use it as XML. Jason (and Jeff) are attempting to work out these issues with Maciej.
+ # SNMP-MA Service (Internet2 network deployment - util.net.internet2.edu)
+   * Errors/discards?
+     * Errors - yes, Discards - after a hardware upgrade.
+   * Is it ready to announce?
+     * Jason and Luke will get the latest code working with the latest metadata config file, and then the service can be announced.
+ # pS-Topo Service / L2 Status MA for Internet2 network
+   * status update
+     * Aaron and Chris have an instance exposing the Internet2 network data ready for testing.
+ # pS-!LinkStatus and pS-!CircuitStatus for Internet2 network
+   * status update
+     * Aaron is attempting to get SNMP access from IU, and will make test instances available once that is done.
+ # pS-dev meeting at LBL
+   * http://wiki.perfsonar.net/jra1-wiki/index.php/Berkeley_Dev_Sep_11_2007
+ # Next call will be Sept 17th (the week after the ps-dev meeting at LBL)
+
+=== 20070813Call === 
+
+ # Attendees: Chris, Luke, Aaron, Jason, Joe, Matt, Jeff
+ # Team Updates
+   # Internet2
+     * Jeff has been concentrating his coding efforts on bwctl and AMI.  He has also been working with Jason and Martin to further refine the mLS design. 
+     * Jason has been concentrating his efforts on creating a distribution for the SNMP MA. It should be ready this week. 
+     * Jason will also have the first distribution of the LS out this week. 
+     * Aaron has been working with Andy Lake to make sure the topology service is useful from the control-plan as well as from measurement tools. Aaron has been working with Chris and others at the NOC to get the LinkStatusMA and CircuitStatusMA integrated with the LS and Topo service. Most of this is now working. The largest hurtle remaining is coming up with global id's to cross reference topology elements between different services (and the topology service).
+     * Additionally, Aaron has been working with Mark (Internet2 intern) to make these services available to a perfSONAR-UI plugin which is now consuming this data.
+   # SLAC
+   # IU
+     * Chris has taken Aaron's last modifications to the pS-topology generation script so the service should now be exporting the topology with the latest changes. 
+     * Luke is prepared to update the SNMP MA configuration as soon as Jason has it available.
+   # FNAL
+   # UDEL
+   # Ga Tech
+   # ESnet
+     * Joe is back from vacation and had questions about pingER MA status. (MA looks ready to start testing, right?)
+ # pS-PS
+   * Anything new in the infrastructure portions?
+     * Jason reports that message generation will happen using tmp files. This seems to increase performance substantially, but further testing will be done.
+ # RRD Service (Internet2 network deployment)
+   * Jason and Luke will get the service running this week and notify Jeff when he can announce it to the full perfSONAR-dev list. Also, Jason will install a test instance that Nina and Roman can look at to make sure we are exposing the errors/discards in compatible ways.
+ # pS-Topo Service / L2 Status MA for Internet2 network
+   * Aaron will continue to work with Chris to make this service available ASAP.
+ # pingER MA Service
+   * no update
+ # Next call will be August 27 at 2:30 EDT.
+
+=== 20070730Call === 
+
+ # Attendees: Les, Yee, Maxim, Phil, Chris, Luke, Jason, Aaron, Matt, Jeff
+ # Team Updates
+   # ESnet
+   # Internet2
+     * Jeff gave a run-down of the LHCOPN meeting (with respect to how it effects this effort).
+     * Specifically, the MDM 'appliance' that Dante is interested in giving to each LHC Tier-1 center. 
+     * We will attempt to get as much of our pS-PS software installed as part of that distribution. 
+     * Also, the Internet2/Dante software support partnership was discussed.
+   # SLAC
+     * Yee has primarily been working on the pingerMA implementation with Maxim. 
+     * Yee also indicated that GMAPS could be extended to be a pingERMA client.
+   # IU
+     * Chris has made another version of the Internet2 network topology schema instance available to Aaron for testing with his topology service. Chad installed Aaron's link-status MP without much difficulty. 
+     * Also, Luke and Jason will make a 'production' version of the SNMP MA available soon.
+   # FNAL
+     * Maxim has been working on the pingER MA - specifically changing the internal schema.
+   # UDEL
+     * Ben is still interested in getting the traceroute MA working for others. 
+     * Jason will work with him on that.
+   # Ga Tech
+ # LHC Meeting Update
+   * Internet2 and Dante have agreed to a partnership to support software. 
+   * This should allow our tools to be included as part of their MDM effort.
+   * Dante intends to offer an 'appliance' to Tier-1 centers.
+ # pS-PS
+   * Anything new in the infrastructure portions?
+     * Jason has made some changes in the Transport area. 
+     * They should largely be transparent to others, but he will help anyone that has problems.
+ # SNMP Service (Internet2 network deployment)
+   * Service 'software' status
+     * Jason is preparing a release bundle of this service that includes all changes made for the Jt Techs demo. (All the fixes for the bugs we found.) When that is available, he and Luke will get it going on ndb2 and we can announce the service.
+ # pingER MA Service
+   * A version should be ready for testing in the next week. Jeff will see if someone in AA is willing to test it, and will look for other testers as well.
+ # Next call will be August 13 and 2:30 EDT.
+
+=== 20070717Meet === 
+
+Summer Joint Techs 2008, Fermilab, Batavia IL, July 17 2007
+
+==== Atendees ====
+
+ * John Dugan, ESnet
+ * Eric Boyd, Internet2
+ * Ville Aikas, University of WA
+ * Jeff Boote, Internet2
+ * Wenji Wu, Fermilab
+ * Rich Carlson, Internet2
+ * Joe Metzger, ESnet
+ * Jason Zurawski, Internet2
+ * Maxim Grigoriev, Fermilab
+ * Susan Evett, Internet2
+ * Matt Wilson, Northwestern
+ * Aaron Brown, Internet2
+
+==== Agenda/Minutes ====
+
+Meeting commenced at 12:40 pm CDT. 
+Meeting adjourned at 1:50 pm CDT.
+
+Discussion topics included:
+
+ # Listing of tasks required for a full release
+ # Goals for future perfSONAR-PS releases
+ # Rationale for offering Perl (non-Java) implementation
+ # Interoperability of different perfSONAR implementations
+ # Outside interest in group efforts
+ # Work to be completed by September 2007
+ # Action items
+
+===== Tasks =====
+
+The group discussed tasks required for a full release and that could be 
+accomplished/attempted in the next six months. (LHC support was emphasized) 
+The list includes:
+
+ # Standards (group effort) - Martin Swany, lead
+ # Services
+   # LS server ('global' at Internet2 but not Multi-Domain) - JZ, lead
+   # Dispatch Daemon - JZ and JB, lead
+   # Multi-Domain LS (Perl) - JZ, lead (with Maciej Glowiak [PSNC])
+   # AMI-MAs & Scheduler - JB, WM
+   # Topology - AB, lead (with JZ)
+   # Status - AB, lead
+   # Circuit Status Service AB, lead
+   # PingER MP/MA - MG, lead
+   # Tool MP (ping, traceroute, owamp, bwctl, etc. - command line tools, could be Java CLMP...)
+   # SNMP MA - JZ, lead
+ # Testing (Functional, interoperability, and performance)
+ # Packaging/distribution
+ # Configuration service
+ # Maintenance of codebase
+ # Documentation
+ # User Support
+ # GUI/Visualization
+   * Gmaps (ytl)
+   * pS-UI plug-ins (???)
+ # NOC Alarm
+ # Cacti plugin - Google Summer-of-Code project (maybe
+
+===== Goals =====
+
+Should the group try to release perfSONAR-PS at the same time as a Java version 
+is released? JB was concerned that the release process used by the European 
+contingent was time consuming and overly complex. He also wanted to ensure 
+that the code was available via CPAN (instead of just through the pS webpages). 
+He indicated that only a common protocol description was required for a 
+co-release. That having the software bundled together was not particularly 
+useful.
+
+EB expressed an interest in the ps-PS group focusing on a joint release with 
+ps-UI by next summer (2008), a request seconded by JM. MG agreed and felt that 
+it was important for the pS-PS group to stop referring to 'them' and 'us' 
+wherever possible. JB noted that Roman Lapacz is interested in releasing some 
+MA/MPs in Python, which would change the nomenclature to 'perl version', 
+'java version', and 'python version', and away from US vs. European. EB 
+noted that, at a recent pS group meeting in England, developers agreed to 
+do some 'micro' releases of services (stand-alones).
+
+The group agreed that the CPAN distribution is more likely to be adopted (at 
+least in the US, by the LHC community) and the degree of adoption will be its 
+own argument for using this format for delivery in future releases.
+
+===== Rationale =====
+
+VA asked why the group felt the need to offer a non-Java implementation; JB 
+indicated that licensing (via SUN) was a problem but the biggest issue was that 
+the sys admins who would need to be involved in deployment are not highly 
+skilled in Java. For example, of the 100+ sys admins involved in the LHC-US 
+effort, for whom deployment must occur and must be as easy as possible, 99% 
+of them are comfortable with Perl and less than 20% have similar skills with 
+Java.
+
+===== Interoperability =====
+
+MG expressed concern that users would need some functionality from both versions; 
+JB agreed that there was a great need for interoperability tests. However, he 
+felt that the goal was to be interoperable, not to have the same release 
+cycle. EB argued that there should (at some point in the next year) be a 
+joint perl/java implementation release that is interoperable. JB argued that 
+the primary goal of US developers was to get functionality out (over 
+coordinated release management). JM felt that the goal for the interoperable 
+release should be summer 2008; the release would be the most recent releases 
+of each set of code that was subjected to intense interoperability tests.
+
+EB emphasized the need to avoid having a 'them' vs. 'us' attitude or 
+appearing to have a US vs. European version of the code. He noted that Roman 
+Lapacz (PSNC) is working on several Python MA/MPs; if those are released, 
+concurrently with the Perl version, it will eliminate these concerns. EB 
+recommended that this group support the 'micro releases' of services 
+between now and the next major release of perfSONAR code.
+
+===== Interest =====
+
+JZ reported that he was creating an RRD MA; JM urged the group to replace 
+the existing one with JZ's when it is complete.
+
+MW reported that he was being pushed to put a performance measurement system 
+in place for Northwestern. After listening to the talks on Monday, perfSONAR 
+piqued his interest.
+
+===== Work Completion by September 2007 =====
+
+MG asked for the group to compile a list of probable work that could be 
+completed by September:
+
+ # LS (regular)
+ # Dispatch daemon (draft)
+ # Multi-domain LS (draft)
+ # AMI-MAs (OWAMP/BWCTL)
+ # PingER MA/MP
+ # Circuit Status Service
+ # Status
+ # Topology (sufficient to support status)
+ # SNMP MA
+
+===== Action Items =====
+
+ # Set priorities
+ # Assess availability of resources
+ # Setup work groups for tasks
+ # Inter-process communication via mail threads
+
+=== 20070709Call === 
+
+ # Attendees: Luke, Aaron, Jason, Jeff, Yee, Martin
+ # Team Updates
+   # Ga Tech
+   # ESnet
+   # Internet2
+     * Jeff is working on the perf-o-meter for Jt Techs. 
+     * Jason has been working on a pS-UI compatible SNMP MA (and has it complete). 
+     * Aaron has been working on topology and status MA services.
+   # SLAC
+     * Yee has been working with Maxim to define new Schema for pinger. 
+     * This will be helpful for exposing pinger data through the pingerMA interface.
+   # IU
+     * Chris was not on, so a topology update will need to wait. 
+     * Luke has made a host available for collecting RRD data of both the Internet2 network and the Indiana Giga-pop, this will be useful for the Jt Techs demo. 
+     * He has noticed a CPU load issue with the SNMP MA - Jason will take a look and try and figure out what happened.
+   # FNAL
+   # UDEL
+     * Martin has been working on a revision to the Topology schema to reflect control-plane issues. 
+     * Ben has been attempting to get the traceroute MA/MP on planet-lab.
+ # pS-PS
+   * Anything new in the infrastructure portions?
+     * No.
+   * SNMP MA (Jason)
+     * We need to discuss the changes needed to make this work with pS-UI. How do we resolve these differences?
+       * pS-UI expects a specific format from an MA, specifically what the current RRDMA gives.  This format does not obey the 'chaining rules' as I would expect them to behave:
+       * See Examples, [2007Activities#MA_Input 1], [2007Activities#SNMP_MA_Output 2] and [2007Activities#RRD_MA_Output 3]
+       * This is definitely a problem. Jason will see if the Java version is working as expected based on the interface definition documents that they wrote. We will figure out how to proceed based on the findings. (Could just be a bug-report, or it could be a more difficult discussion about what the interface should look like in the future.
+   * Topology Service (Aaron)
+     * Aaron has a topology service working that currently has an SQL and an XMLDB backend. As he looks at queries, if we support xquery syntax, we will need to either translate the xquery syntax into SQL queries, or drop the SQL backend. Currently it expects nodes, interfaces, links to all be top-level elements, but after discussions with Martin is seems likely we will change this to be more similar to what control-plane proponents want. (Nodes contain interfaces contain links).
+   * Status-Monitoring Service (Aaron)
+     * Aaron has a service working that can use constants, SNMP, scripts to fetch current status. The idea is that this will be accessed by something else that will correlate this information with the topology service information and use that to respond to the E2EMon queries.
+   * LS Service (Jason)
+     * Differences between Java
+       * First difference is the 'store' element. The Java version expects a 'store' element container. We either need to fake one, or create one. Jason will look into the performance implications of each. Jason will continue to look for other differences, but expects he can work out most issues with Maciej directly.
+   * PingerMA
+     * No update
+   * OWAMP/BWCTL MA (Warren)
+     * No update
+   * RRD Service (Internet2 network deployment)
+     * Tabled until the compatibility issues can be resolved.
+   * Jt Tech's demo
+     * Trying to show link-utilization across multiple networks. (Universities, Internet2, ESnet, DOE-lab) Who can provide MA's with data for us? Basic demo will include pS-UI as well as a web-page showing some pre-configured paths with multiple perf-o-meters used to show the full path.
+     * Jeff will ping Joe to see where ESnet is with this, and to find out what specific paths will be used to Jt Techs. We may be able to get data from Starlight as well as Firmi. Jason will follow up with Maxim and Warren. Yee will attempt to get an SNMP MA up as well.
+ # Next call will be July 23.
+
+==== MA Input  ====
+
+{{{ 
+<nmwg:metadata id="1">
+  <netutil:subject>
+    <!-- partial/complete measurement data -->
+  </netutil:subject>
+  <nmwg:eventType>http://some.event/type/2.0</nmwg:eventType>
+  <nmwg:parameters>
+    <nmwg:parameter />
+  </nmwg:parameters>
+</nmwg:metadata>
+
+<nmwg:metadata id="2">
+  <select:subject metadataIdRef="1"/>
+  <nmwg:eventType>http://some.event/type/select/2.0</nmwg:eventType>
+  <select:parameters>
+    <nmwg:parameter />
+  </select:parameters>
+</nmwg:metadata>
+
+<nmwg:data id="d1" metadataIdRef="2" /> 
+}}}
+
+==== SNMP MA Output ====
+ 
+{{{ 
+<nmwg:metadata id="1">
+  <netutil:subject>
+    <!-- partial/complete measurement data -->
+  </netutil:subject>
+  <nmwg:eventType>http://some.event/type/2.0</nmwg:eventType>
+  <nmwg:parameters>
+    <nmwg:parameter />
+  </nmwg:parameters>
+</nmwg:metadata>
+
+<nmwg:metadata id="2">
+  <select:subject metadataIdRef="1"/>
+  <nmwg:eventType>http://some.event/type/select/2.0</nmwg:eventType>
+  <select:parameters>
+    <nmwg:parameter />
+  </select:parameters>
+</nmwg:metadata>
+
+<nmwg:data id="d1" metadataIdRef="2">
+  <!-- datum elements -->
+</nmwg:data>
+}}}
+
+==== RRD MA Output ====
+
+{{{ 
+<nmwg:metadata id="store1">
+  <netutil:subject>
+    <!-- complete measurement data from store -->
+  </netutil:subject>
+</nmwg:metadata>
+
+<nmwg:data id="d1" metadataIdRef="store1">
+  <!-- datum elements -->
+</nmwg:data> 
+}}}
+
+=== 20070625Call === 
+
+ # Attendees:
+ # Team Updates
+   # IU
+   # FNAL
+   # UDEL
+   # Ga Tech
+   # ESnet
+   # Internet2
+   # SLAC
+ # pS-PS
+   * Anything new in the infrastructure portions?
+     * N/A
+   * Exploring a dispatcher architecture:
+     * Easier process management (daemon code only written once)
+     * Cleaner distribution/package management
+     * Still working on mappings:
+       * (URL)->(!ServiceType)
+       * (!ServiceType,!MessageType,!EventType)->(Handler)
+ # Standards docs
+   * namespace mismatches and other inconsistencies need to be addressed in an authoritative document. The OGF document will lay the foundation, but more specific 'profile' documents will be required. How much should this group be involved in defining them?
+ # RRD Service (Internet2 network deployment)
+   * status update
+     * N/A
+ # pS-Topo Service / L2 Status MA for Internet2 network
+   * status update
+     * N/A
+ # pingerMP/MA development
+   * status update
+     * N/A
+
+=== 20070618Call === 
+
+ # Attendees:
+ # Team Updates
+   # UDEL
+   # Ga Tech
+   # ESnet
+   # Internet2
+   # SLAC
+   # IU
+   # FNAL
+ # pS-PS
+   * Anything new in the infrastructure portions?
+     * N/A
+   * SVN structure (package management issues/concerns)
+     * N/A
+   * TracerouteMP
+     * N/A
+   * SQL Schema Discussion
+     * Current SQL support is limited to:
+     * my @dbSchema = ("id", "time", "value", "eventtype", "misc");
+     * Is this reasonable for all datatypes? What ways would it need to extend? Is Class::DBI a possible way to extend it?
+   * Threads, Processes, Async-IO
+     * Maxim points out that Perl DBI is not thread-safe. Also, thread support in perl is somewhat lacking anyway. Currently, it would be trivial to change the code to a classic accept-fork loop. We would also need to fork for the different pieces of functionality (MA/MP/LS-reg). The other piece we would need to add is some kind of waitpid/master process. (Jeff already has code for this in the AMI distribution.) Is thread-safety an important enough reason to do this? For some services, we might actually want to deal with async-IO and work-que threads for performance reasons. (The LS comes to mind.)
+ # Standards docs
+   * namespace mismatches and other inconsistencies need to be addressed in an authoritative document. The OGF document will lay the foundation, but more specific 'profile' documents will be required. How much should this group be involved in defining them?
+ # RRD Service (Internet2 network deployment)
+   * N/A
+ # pS-Topo Service / L2 Status MA for Internet2 network
+   * status update
+      * N/A
+ # Follow up on LHC-OPN support, requirements, priorities
+
+=== 20070604Call === 
+
+ # Attendees: (Jason, Les, Yee, Luke, Maxim, Warren, John H., Chris)
+ # Team Updates
+   # FNAL (Maxim)
+     * Worked w/ Yee on the Pinger schema.  
+     * Preparing to start work on a Pinger MA (and will possibly work w/ Yee on the Pinger MP).  
+     * Will be waiting for Tutorial update from Jason regarding use of the new modules.
+   # UDEL (N/A)
+   # Ga Tech (Warren)
+     * Will be updating the OWAMP/BWCTL MP/MA w/ Jason's help to reflect code changes.  
+     * Currently working to integrate access to I2 databases. 
+   # ESnet (N/A)
+   # Internet2 (Jason)
+     * Finishing up adding Log4perl functionality to all classes, and refactoring a lot of common functions for the MA/MP.  
+     * Will be updating tutorial to reflect changes.  
+     * Will be adding a beta single LS using new code.
+   # SLAC (Les/Yee)
+     * Working w/ Maxim on Pinger Schema/Instances.  
+     * Will upload into NMWG repo when they are complete.  
+     * Will be making changes to Pinger itself, then start wrapping a pS MP around the tool.
+   # IU (Luke/Chris)
+     * Chris has prepared a new version of the network topology using NMWG elements: http://dc-1.grnoc.iu.edu/ndl/nmwg/i2_net.xml
+     * Jason will be working w/ Luke to prepare new RRD MA installation on IU servers. 
+ # pS-PS Code Changes
+   * Logging
+     * We  will be using Log4perl to handle logging duties throughout the infrastructure.  
+     * This approach will allow us to use syslog, file logging, or even display to the screen (other formats are available).  
+     * We are  using a standard configuration right now; Maxim will provide a more customized version he uses.  
+     * A wiki page will be added to document how and when to use Log4perl in the code.
+   * MA/Transport Changes
+     * The MA classes were simplified a great deal with much of the common functions being pushed to the Transport module.  
+     * This will allow other services such as the LS to benefit from the basics of message handling. 
+ # RRD Service (Internet2 network deployment)
+   * Luke and Jason will be bringing the IU RRD MA installation online again after the code changes.  
+   * Luke has prepared a new store file.   
+ # pS-Topo Service / L2 Status MA for Internet2 network
+   * There will be a call scheduled later this week to deal with new issues in topology. 
+   * Jason will be uploading a very basic SQL MA to handle status.  
+   * An intern at Internet2 will look into packaging start next week with the goal of packaging both the status tool as well as the RRD MA
+ # LHC-OPN Update
+   * Pinger
+     * Yee explained the origin of Pinger  (originally series of cron jobs to get data they were interested in between sites).  Will be working to wrap Pinger with MP/MA functionality.  Currently not planning on offering 'on demand' measurements (goal to work on).  
+     * Pinger relies on local scheduling to remain easy to use/deploy/configure. 
+   * To validate, or not to validate
+     * The concept has always been viewed as optional.  We will re-visit this in the future when there are more voices on the issue.
+     * Maxim's point of view is that because we are spending the time to write the schema documents, we should use them with validation tooling to do some good for the services (reject poor messages, etc.).  Jason states he is not against it, and will look into what is available in the perl world as well as compare performance w/ and without using the tooling.  
+     * Will need to work on 'one off' schemas on a per service level to enforce what a service is or is not expecting (current approach to testing in the pS framework). 
+     * Yee was curious as to what the EU does w/ pS.  Jason replies that he is pretty sure they do not do validation on live systems, The only validation that could be present is via Axis.
+     * Maxim recalls there are some tools (xml beans?) that could do validation.  Jason explains that at the time of original development these tools (JAXME?) were not as mature as they currently all, which explains the original plan of going with a custom SAX parser.
+   * Schema simplification
+     * Maxim  brings up topic of explaining all possible outcomes in the schema vs. what is required for a service to run/be useful.  From a standards point of view it is good to be able to express many things in many ways, but this can be a drawback from a practical, developmental standpoint.  As we work to simple validation it may be useful to make smaller schemas that validate a service, and not the entire standard as proposed by OGF.
+ # Next call will be June 18.
+
+
+=== 20070521Call === 
+
+ # Attendees: Les, Yee, Joe, Chris, John, Maxim, Jason, Matt, Jeff, Luke
+ # Team Updates
+   # IU
+     * Chris has made a topology map based on NDL and the pS topology format available on the NOC website: http://globalnoc.iu.edu/i2network/maps--documentation.html.
+   # FNAL
+     * Maxim is focusing on the tools that need to be available for the LHCOPN recommendations. 
+     * Specifically he is interested in the traceroute MP/MA that Ben has been working on, and has been working with Yee on creating a pinger MP/MA. For now, ping-on-demand will not be focused on.
+   # UDEL
+     * Jason has made changes to the pS-PS code base. (See the next section for specifics.) 
+     * Jason has also been working with Ben on the traceroute MP/MA. There are significant differences between versions of traceroute that are presenting problems. Maxim suggested using the perl Net::traceroute module as a more simple standard way to deal with this. Jason will suggest it (and may modify the ping MP/MA to use Net::Ping as well).
+   # Ga Tech
+     * Warren was not able to make the call, but has been actively working on the bwctl/owamp MP/MA implementations.
+   # ESnet
+     * Joe's student has been working more on the Topology/Google maps interface.  He has been having problems due to the fact that many networks are setting the LAT/LON fields inconsistently with each other. After much discussion regarding the issues with attempting to get the many organizations to agree on syntax, let alone the more difficult issues of semantics... Chris/Jason will attempt to get a good example of the Internet2 network described in the pS-Topo format including nodes and links finished before the GN2 meeting on June 6. Joe will attempt to do the same for ESnet. All three will make sure the topology files agree with regard to syntax and semantic issues as much as possible. Joe and Jeff will present the two examples at the GN2 E2EMON and cNIS meetings to make others aware of the issues.
+   # Internet2
+     * Jeff is working primarily on the next bwctl release and on figuring out a structure for individual groups to register new namespaces for OGF/NMWG schema extensions (or profiles). Eric asked about the potential for monitoring the link-status of the IN2P3 circuit. The issue is that the EU link-status monitoring application is unable to fully determine the state of this particular circuit due to the fact that the HOPI links are not currently monitored by anything exporting the E2EMON service. http://cnmdev.lrz-muenchen.de/e2e/lhc/G2_E2E_view_e2elink_FERMI-IN2P3-IGTMD-001.html Jason and Jeff will look into creating a package that will combine the topology service and the SNMP collection agent to allow a simple E2EMON service to be built. They will begin that the week of June 18 when they are both in AA. When complete, they will work with Chris and Luke to get it deployed for monitoring the HOPI links of interest.
+   # SLAC
+     * Yee is also working on the pinger MP/MA functionality. Specifically he is determining what the XML schema will look like for representing this data.
+ # pS-PS
+   * Anything new in the infrastructure portions? (Refactoring?)
+     * Jason has moved some functions into Transport and Common where they can be more easily shared (common message types such as echo). This may break some services, so he will be working with others to correct any problems. (Warren - this most likely effects you the most.)
+ # Standards docs
+   * namespace mismatches and other inconsistencies need to be addressed in an authoritative document. The OGF document will lay the foundation, but more specific 'profile' documents will be required. How much should this group be involved in defining them?
+     * Martin unavailable, postponed to next time.
+ # RRD Service (Internet2 network deployment)
+   * status update
+     * Luke has the service auto updating now. The service crashed a few times this week. Jason and/or Jeff will work with Luke to add more logging into the service to attempt to determine where the service is crashing and why.
+ # pS-Topo Service / L2 Status MA for Internet2 network (Meeting planned?)
+   * status update
+     * This is related to the IN2P3 issue above, but more inclusive of the full issue. 
+     * Chris, Luke, Martin, Matt, Jason and Jeff will discuss the issue more fully next week Tuesday during the regular I2-IU syseng call. To be discussed is what pieces need to be created, how they are hooked together, and who can do what.
+ # Follow up on LHC-OPN support, requirements, priorities
+   * Joe plans to reduce the LHCOPN monitoring document to requirements only - and get buy-in for that much only. Then he will add in the additional recommendations. Joe hopes to have that out in the next week.
+ # Next call will be June 4. (Jason will be running the call.)
+
+=== 20070514Call === 
+
+ # Attendees: Luke, Chris, John Hicks, Maxim, Martin, Jason, Ben, Joe, Jeff
+ # Team Updates
+   # SLAC
+   # IU
+     * Luke has worked on store file updates from the auto-gen configs for the RRD MA. When it is done, he will turn auto-gen back on, and the new Kansas City router likes will be added into the current set. There were also questions about adding data from current Abilene and HOPI links. Abilene links are a problem because those configurations are not automatically generated. 
+     * Luke will add the HOPI links, which will make some fermi lab links available. Luke plans on doing this using a separate MA.  HOPI data could be strange due to VLAN tagging - we will need to look at it.
+   # FNAL
+     * Focused on LHCOPN requirements. Has been working with Yee to design a pS/pinger MP/MA. 
+     * Has also been working with Jason on the SQL-MA schema. 
+     * Has not added much to config web services.
+   # UDEL
+     * Martin presented the NMWG schema standardization document at OGF last week.
+     * He will integrate comments received and plans to circulate the document to this group for further comment. Additionally, there are minor changes for topology. Jason has been working with Chris on the topology service. Ben has been making modifications to the traceroute service. Ben will make the traceroute changes available so Maxim and others can determine if it is useful for the LHCOPN set of services.
+   # Ga Tech
+     *  N/A
+   # ESnet
+     * Joe does not have anything new, but will have a recommendation for LHCOPN services soon. He would like some of the people in this group to review the document when it is ready.
+   # Internet2
+     * Jeff has started setting up a schema/eventType registration web site so that extensions to the NMWG schema can be shared.
+ # pS-PS
+     * Anything new in the infrastructure portions?
+       * Jason - Not yet, but more code refactoring will be happening in the next week to improve modularity.
+ # Standards docs
+     * namespace mismatches and other inconsistencies need to be addressed in an authoritative document. 
+     * The OGF document will lay the foundation, but more specific 'profile' documents will be required. 
+     * How much should this group be involved in defining them?
+     * This will be addressed after Martin sends out the next version of the NMWG document.
+ # RRD Service (Internet2 network deployment)
+   * What is needed to make this a 'production' service?
+     * Luke - should be ok once the auto-updates are reapplied.
+   * Status of benchmarking XMLDB vs file storage.
+     * Ben and Jason are working on it.
+   * Feedback on what is needed to make the software a reasonable distribution for other network administrators.
+   * Status of Maxim's configuration web-service - application to other services.
+   * Schema differences from Java RRD-MA
+     * Current strategy is to match what is done in the Java MA. Future strategy is to set up some kind of equivalence mapping so multiple namespaces can be used.
+ # pS-Topo Service / L2 Status MA for Internet2 network
+   * status update
+     * Chris and Jason are making progress. 
+     * Chris would like a meeting fairly soon to discuss naming problems and problems stitching together multiple groups at edges. (Jeff will see if we can meet next week Tuesday as part of the regular IU/I2 call.)
+ # Follow up on LHC-OPN support, requirements, priorities
+   * Things currently look on schedule.
+ # SQL-MA
+   * Any comments regarding the proposed schema?
+     * Martin felt the proposed schema was too complex for the task. Martin will propose an alternative.
+ # Post-Internet2 network deployments
+   * N/A for now, as we get close to deployment we will need to discuss things like code cleanup, testing, configuration, packaging, etc.
+ # GN2 Meeting
+   * Who is going? (Eric, Jeff, Joe)
+   * Is there anything we need to get GN2 to agree to?
+   * Everyone will think about possible things we need agreement on. For example, namespaces for SNMP error counters.
+ # Next call will be next week. (I said 2 weeks on the call, but that is Memorial Day.)
+
+=== 20070430Call === 
+
+ # Attendees: Jason, Eric, MattZ, Maxim, Les
+ # Team Updates
+   # Internet2 (Eric)
+     * Demo's at SMM were successful.  Lots of positive feedback and suggestions on  both the gmaps demo from SLAC and the perfOMeter used in conjunction with the HOPI session.
+   # SLAC (Les)
+     * Nothing new to report, working w/ Joe/Maxim and Phil/Eric and Jeff/Martin and Jason on LHC-OPN strawman work (e-mail was sent around outlining tasks). 
+   # FNAL (Maxim)
+     * Working on LHC-OPN monitoring.  Looking to organize a call with interested people (Les/Yee/Jason/others?) on examining strawman and dividing tasks.  Still interested in wrapping a service around pinger.  Will examine the tutorial's ping MP or work Warren started on OWAMP when thinking about using pinger.
+   # UDEL (Jason)
+     * Busy w/ SMM tasks so nothing major to contribute.  
+     * Started work with Maxim on SQL MA, Topology schema/representation w/ IU and for OGF next week.  
+     * Hope to work on (and present) NMWG schema format standard to working group next week.
+     * SMM changes to codebase will be uploaded soon, and re-deployments of the code will be in progress at IU and Internet2 (monitoring MERIT uplinks). 
+ # pS-PS
+   * N/A This week
+ # RRD Service (Internet2 network deployment)
+   * What is needed to make this a 'production' service?
+     * Ben (UD) and Jason will work on benchmarking of XMLDB vs storage 'file'.  Concern is over the sometimes difficult installation of XMLDB vs the easy of setting up a single file.  If the performance is not horrible, we could (should) offer installations that do not require the extra software.
+   * Feedback on what is needed to make the software a reasonable distribution for other network administrators.
+     * Based on the outcome of the benchmarking, we will know how complex it will be to distribute/configure the software.  We will be working closely with MERIT initially, and other regional providers such as MAX later, to streamline the distribution/configuration of the MA.
+     * Jason and Maxim discussed Maxim's contribution to E2Emon that constructs configuration files, and the potential to extend this idea to other software packages that can be used as a basis for creating the metadata store.
+   * Schema differences from Java RRD-MA
+     * Ongoing work, work w/ gmaps demo has exposed issues such as namespace mismatches.  
+     * Perfsonar UI testing will probably expose more.  
+     * Standards document (in progress) will start to address the differences between java and perl code.
+ # pS-Topo Service
+   * Jason has started examples of topology (available in the wiki) and will work with Martin and IU to create something similar to NDL to display network information.
+ # Internet2 network deployment (L2)
+   * Demo's exposed the need to make some changes to the IU store file.  
+   * Jason is working with Luke and Chris to resolve issues.
+   * Only 'new' network hosts are currently available.  
+   * Asking IU if we can make data available from abilene hosts as well.  
+   * New hosts will be added as they come online. 
+ # Follow up on LHC-OPN support, requirements, priorities
+   * Necessary parties will organize a call later this week, and CC the list with results.
+ # SQL-MA
+   * Current discussions between Jason and Maxim revolve around the databases we should support (sqlite, mysql, postgres, oracle), how similar the db schema can be to the Java version (leaning towards a two table setup):
+   * See [2007Activities#SQL_Examples examples] below
+   * This organization will allow for fewer records (by employing a 'range') than in the Java version. 
+   * Overall design will be similar to the SNMP MA/MP with a focus on getting status variables.
+ # Post-Internet2 network deployments
+   * N/A for now, as we get close to deployment we will need to discuss things like code cleanup, testing, configuration, packaging, etc.
+ # Brazil Meeting
+   * Jeff/Martin will be demoing many of the same things as at the SMM. 
+   * They will keep us updated on how things are going.
+ # SMM Followup
+   * Successful demos and good progress was made.  
+   * The HOPI project is interesting in using pS in monitoring their own infrastructure and will work with us to help monitor dynamic circuits (by potentially inserting hooks into pS or Dragon that aware of the changes to be monitored). 
+
+==== SQL Examples ====
+
+{{{
+   		  create table link_status (
+                    link_id varchar,
+                    status_begin  timestamp,
+                    status_end    timestamp,
+                    link_type varchar,
+                    status_oper varchar,
+                    status_admin varchar,
+                    alarm_id int,
+                    primary key ( link_id, sstatus_begin),
+                    foreign key (alarm_id) references alarms (alarm_id),
+                    index (status_end),
+                    index (link_id)
+                  )
+                  create table alarms (
+                    alarm_id int primary key,
+                    details varchar,
+                  ) 
+}}}
+
+=== 20070416Call === 
+
+ # Attending: Martin, Jason, Warren, Joe, Jeff, Yee, Asif, Luke, Chris, Maxim
+ # Team Updates
+   # UDEL (Martin/Jason)
+     * Martin still has a student working on a C perfSONAR implementation using CGI. The Topology work continues with most enhancements devoted to specialized name-spaces for specialized technologies.
+     * Jason has been working primarily on parsing changes for XML::LibXML integration as well as work on the SMM demos.
+   # Ga Tech (Warren)
+     * Warren has been looking at the tutorial some more and is interested in creating a pS archive around the ITEC/Internet2 owamp data.
+   # ESnet (Joe/Mike)
+     * Joe is interested in the AMI code - especially if it can be wrapped in a pS service. He has a student working on a google-maps interface to the data. He also needs to come up with a recommended set of services for LHCOPN.
+   # Internet2 (Eric/Jeff)
+     * Jeff has been working on the demo exclusively.
+   # SLAC (Yee/Les/Asif)
+     * Asif has been working on some kind of Java front-end.
+     * Yee has been continuing to work on a Google-maps demo.
+   # IU (Luke/Chris)
+     * Luke has the SNMP MA up and running - it is ready for testing.
+   # FNAL (Maxim)
+     * Maxim plans to work through the tutorial and perhaps create a pingER MA.
+ # pS-PS
+   * Parsing status
+     * Anyone have feedback on the new XML::LibXML methods?
+   * Any changes others need to be aware of?
+   * Any tutorial feedback?
+   * Any questions from new developers?
+ # RRD Service (Internet2 network deployment)
+   * What is needed to make this a 'production' service?
+   * Feedback on what is needed to make the software a reasonable distribution for other network administrators.
+ # pS-Topo Service
+   * Status of Internet2 topology database exposed with pS-topology schema.
+   * Overview of available messages. Martin and Chris will work on this.
+ # L2 Status (Internet2 network deployment)
+   * Current status (IU/Jason)
+     * N/A
+ # SQL-MA
+   * Update (Maxim/Jason)
+     * N/A
+ # Post-Internet2 network deployments
+   * As we get services working, we need to have a few of us concentrating on packaging and deployment/configuration scripts to make them easy to install.
+ # Spring Member Meeting
+   * Can we show the SLAC analysis/google maps interface interacting with Internet2 RRD MA in Eric's performance update? (Main session) 
+     * Jeff will call Yee to work out details.
+   * perfSONAR will be used in HOPI demo
+     # Deploy RRD MP/MA to grab SNMP utilization for both ends of a HOPI circuit connection.
+     # Iperf will generate traffic between two hosts connected to circuit.
+     # HOPI/Oscars-BRU/Dragon software will reconfigure the circuit for larger/smaller capacity.
+     # Speedometer style web page will interact with RRD MA to show utilization as it changes.
+
+=== 20070409Call === 
+
+ # Attending: Maxim, Martin, Jason, Joe, Jeff, Matt, Yee, Les, Asif 
+ # Team Updates
+   # FNAL (Maxim)
+     * Not much this week. Will be working on deployment documentation with E2Emon for configuration tool. Wants to work with Jason on a perl SQL MA.
+   # UDEL (Martin/Jason)
+     * Martin: been working with a student on a more general way to incorporate libxml2 functionality into a server. (apache mod_cgi seems easiest at this point, but globus method is still the goal)
+     * Martin: has also been working with students to get multi-ls work done by Yi resurected. Especially the bdb/exist database comparison work.
+     * Jason: been working to integrate the XML::LibXML perl module (that uses libxml2 under the covers) into the pS-PS code base in place of the current perl hash objects. It looks to support all the current things we are doing and allows XPath queries of the DOM objects.
+   # Ga Tech (Warren)
+     * N/A
+   # ESnet (Joe/Mike)
+     * Joe: student working on google maps view of network topology elements.
+     * ESnet will have workshop to define network 'services' for the future at the end of April. ESnet will be exposing network information using pS interfaces so pS is a likely topic of conversation. ESnet recently hired Jon Duggan to rewrite statistics collection for ESnet.
+   # Internet2 (Eric/Jeff)
+     * Jeff: Working on simple speedometer GUI over link-untilization MA. Working on software to define 'meshes' of measurement hosts for collecting data from a full set of points. (owamp and bwctl) Eventually will define pS administrative interfaces. Jeff will contact Joe to discuss creating a shared mesh of Internet2/ESnet measurment points for owamp data.
+   # SLAC (Yee/Les/Asif)
+     * Yee: Working on a google-maps visualization of network. Need:
+       * LS registration for Internet2/ESnet services
+       * More topology resources
+         * Jason and Chris will be be working on pS topology of Internet2 network - update when ready.
+     * Les: SLAC has submitted a proposal to work with the Pakastan research network to deploy pS services on their network. (See Les email for additional details.)
+   # IU (Luke/Chris)
+     * Luke (via email): RRD MA seems to be working. Currently working on auto-update of RRD MA configuration based on changes to the GRNOC database.
+ # SOAP/XML parsing status
+     * Update (XML::LibXML)
+       * Jason will have most code modified to the new method in the next couple of days including updates to the tutorial.
+ # pS-PS
+     * Any changes others need to be aware of?
+       * No
+     * Any tutorial feedback?
+       * No
+     * Any questions from new developers?
+       * No
+ # RRD Service (Internet2 network deployment)
+     * Topic postponed to next week
+       * What is needed to make this a 'production' service?
+       * Feedback on what is needed to make the software a reasonable distribution for other network administrators.
+ # L2 Status (Internet2 network deployment)
+     * Topic postponed to next week
+ # Post-Internet2 network deployments
+     * As we get services working, we need to have a few of us concentrating on packaging and deployment/configuration scripts to make them easy to install.
+ # Spring Member Meeting
+     * Can we show the SLAC analysis/google maps interface interacting with Internet2 RRD MA in Eric's performance update? (Main session)
+     * perfSONAR will be used in HOPI demo
+       * Jeff will send email to update on the status of this when there is something to show.
+         # Deploy RRD MP/MA to grab SNMP utilization for both ends of a HOPI circuit connection.
+         # Iperf will generate traffic between two hosts connected to circuit.
+         # HOPI/Oscars-BRU/Dragon software will reconfigure the circuit for larger/smaller capacity.
+         # Speedometer style web page will interact with RRD MA to show utilization as it changes.
+ # Next Meeting: 16 April 07 2:30 US/Eastern
+
+=== 20070326Call === 
+
+ # Attending: Luke, Maxim, Jason, Jeff, Yee, Les, Mohammad
+ # Team updates:
+   # IU (Luke/Chris)
+     * Luke has a store file for exposing the Internet2 network SNMP data via the pS-PS RRD MA. Still having trouble, will work with Jason to get it going.  Luke and Jason will have this working before the next meeting.
+   # FNAL (Maxim)
+     * Submitted configuration tool to E2EMon.
+   # UDEL (Martin/Jason)
+     * Looking at parsing models and internal object representation for XML structures.
+   # Ga Tech (Warren)
+     * N/A
+   # ESnet (Joe/Mike)
+     * N/A
+   # Internet2 (Eric/Jeff)
+     * bwctl development - Looking at service dispatching to allow for multiple services to co-exist more easily.
+   # SLAC (Yee/Les)
+     * SQL MA integration work, Starting to look at topological/geographical map views.
+ # SOAP/XML parsing status
+     * How do we want to represent the XML objects internal to the code?  Jason will email a proposal out in the next week
+ # pS-PS
+     * Current status. What is new that others should know about.
+       * N/A
+     * Tutorial updates
+       * Not much different - a few small updates
+     * Questions about the current implementation
+       * N/A
+ # RRD
+     * See IU update
+ # L2 Status (Internet2 network)
+     * Where is data coming from?
+       * Jeff will setup a meeting with Luke/Chris/Martin/Jason/Matt/Jeff to discuss this along with exporting Internet2 topology via pS-PS.
+ # Visualizing Internet2 network data with SLAC analysis software
+       * Yee said SLAC could at least present some views of the RRD data in time for the SMM.
+ # Next meeting will be April 10.
+
+== Last Updated ==
+
+$Id$
+
