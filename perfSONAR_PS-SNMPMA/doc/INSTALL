@@ -51,7 +51,7 @@ Installation through apt is easy, simply let the package manager do the work of
 managing the dependencies:
 
   apt-get update
-  apt-get install perl-perfSONAR_PS-SNMPMA-3.1-1.noarch.rpm
+  apt-get install perl-perfSONAR_PS-SNMPMA-3.1-1.pSPS.noarch.rpm
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -65,7 +65,7 @@ Installation (YUM):
 Like Apt, YUM installation also manages the task of finding dependencies.  The
 following command is all that is needed:
 
-  yum install perl-perfSONAR_PS-SNMPMA-3.1-1.noarch.rpm
+  yum install perl-perfSONAR_PS-SNMPMA-3.1-1.pSPS.noarch.rpm
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -80,17 +80,17 @@ If you do not wish to install the Internet2 Repository package, you may simply
 find the appropriate RPM for your architecture without using a package manger.
 For example if you are on an "i386" architecture for example:
 
-  wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-SNMPMA-3.1-1.noarch.rpm
+  wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-SNMPMA-3.1-1.pSPS.noarch.rpm
   
 To install without package manager help:
 
-  rpm -ivh perl-perfSONAR_PS-SNMPMA-3.1-1.noarch.rpm
+  rpm -ivh perl-perfSONAR_PS-SNMPMA-3.1-1.pSPS.noarch.rpm
   
 Note that this RPM may need packages to install correctly: if they are not found
 on your system manual download and install will be required.  An alternate
 method is to still use a package manager in a "local" way (YUM only):
 
-  yum localinstall perl-perfSONAR_PS-SNMPMA-3.1-1.noarch.rpm
+  yum localinstall perl-perfSONAR_PS-SNMPMA-3.1-1.pSPS.noarch.rpm
   
 This will still search the available repositories for any necessary packages.
 

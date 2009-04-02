@@ -6,9 +6,11 @@ Autoreq: 0
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 snmp_ma
 
+%define disttag pSPS
+
 Name:           perl-perfSONAR_PS-SNMPMA
 Version:        3.1
-Release:        1%{?dist}
+Release:        1.%{disttag}
 Summary:        perfSONAR_PS SNMP Measurement Archive
 License:        distributable, see LICENSE
 Group:          Development/Libraries

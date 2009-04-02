@@ -4,9 +4,11 @@
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 lookup_service
 
+%define disttag pSPS
+
 Name:           perl-perfSONAR_PS-LookupService
 Version:        3.1
-Release:        1%{?dist}
+Release:        1.%{disttag}
 Summary:        perfSONAR_PS Lookup Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
