@@ -253,7 +253,7 @@ sub getAll {
 
     return ( -1, "Database not open" ) if ( $self->{DB_OPEN} == 0 );
 
-    @results = $self->{DATADB}->query( { query => "//*", txn => undef, error => \$error } );
+    @results = $self->{DATADB}->query( { query => "/*", txn => undef, error => \$error } );
     if ( $error ) {
         my $msg = "Couldn't get list of domains from database: $error";
         $self->{LOGGER}->error( $msg );

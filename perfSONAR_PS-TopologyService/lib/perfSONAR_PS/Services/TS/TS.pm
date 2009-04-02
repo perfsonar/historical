@@ -438,7 +438,7 @@ This function handles the (hopefully to be standardized) QueryRequest message.
 The semantics of the message are as follows:
 
 If no subject is included, the semantics are "give me the whole database", and
-an XQuery for "//*" (i.e. everything) is submitted to the backend database.
+an XQuery for "/*" (i.e. everything) is submitted to the backend database.
 
 If an xquery subject is included, the semantics are "use the included XQuery to
 query the database". It simply passes the included XQuery to the backend
@@ -461,7 +461,7 @@ sub handleQueryRequest {
     if ( $subjects->size() == 0 ) {
 
         # no subject is the query all request
-        $xquery = "//*";
+        $xquery = "/*";
     }
     else {
         my $subject = $subjects->get_node( 1 );
