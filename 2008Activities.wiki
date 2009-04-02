@@ -1,0 +1,1236 @@
+#summary List of perfSONAR-PS Activites from 2008
+
+== 2008 Activities ==
+
+ * [2008Activities#20081218Video Video Conference for December 18, 2008]
+ * [2008Activities#20081211Video Video Conference Issue: Release Mgmt for December 11, 2008]
+ * [2008Activities#20081201Video Video Conference for December 1, 2008]
+ * [2008Activities#20081103Video Video Conference for November 3, 2008]
+ * [2008Activities#20081020Video Video Conference for October 20, 2008]
+ * [2008Activities#20081013Video Video Conference Issue: CHEP2009 Paper for October 13, 2008]
+ * [2008Activities#20080929Video Video Conference for September 29, 2008]
+ * [2008Activities#20080922Video Video Conference Issue: PAM 2009 Paper for September 22, 2008]
+ * [https://wiki.man.poznan.pl/perfsonar-mdm/index.php/PerfSONAR_developer_meeting_-_in_Ann_Arbor_08 Meet perfSONAR Developers Meeting, Ann Arbor MI, September 8 - 10, 2008]
+ * [2008Activities#20080902Video Video Conference for September 2, 2008] 
+ * [2008Activities#20080825Video Video Conference Issue: ISO Testing for August 25, 2008]
+ * [2008Activities#20080818Video Video Conference for August 18, 2008]
+ * [2008Activities#20080811Video Video Conference on the LHC Disk for August 11, 2008]
+ * [2008Activities#20080804Video Video Conference for August 4, 2008]
+ * [2008Activities#20080720Meet perfSONAR-PS Dev Meeting at Summer Joint Techs, July 20, 2008]
+ * [2008Activities#20080714Video Video Conference for July 14, 2008]
+ * [2008Activities#20080630Call Conference Call for June 30, 2008]
+ * [2008Activities#20080609Call Conference Call for June 09, 2008]
+ * [2008Activities#20080519Call Conference Call for May 19, 2008]
+ * [2008Activities#20080505Call Conference Call for May 05, 2008]
+ * [2008Activities#20080423Meet perfSONAR-PS Dev Meeting at Spring Member Meeting, April 23, 2008]
+ * [2008Activities#20080414Call Conference Call for April 14, 2008]
+ * [2008Activities#20080331Call Conference Call for March 31, 2008]
+ * [2008Activities#20080317Call Conference Call for March 17, 2008]
+ * [2008Activities#20080310Call Conference Call for March 10, 2008]
+ * [2008Activities#20080303Call LHC T2 BCP Conference Call for March 03, 2008]
+ * [2008Activities#20080221Call Conference Call for February 21, 2008]
+ * [2008Activities#20080211Call Conference Call for February 11, 2008]
+ * [2008Activities#20080204Call Conference Call for February 04, 2008]
+ * [2008Activities#20080114Call Conference Call for January 14, 2008]
+ * [2008Activities#20080107Call Conference Call for January 07, 2008]
+
+=== 20081218Video ===
+
+ # Attendees: Jason,Aaron,Jeff,Joe,Brian,Maxim
+ # Team Updates
+   # Internet2
+     * Jason: pS-B to get an MDM rpm out. Working on release-management process.
+     * Aaron: rpm packaging for ls registration daemon and bwctl/owamp releases.
+     * Jeff: new AMI schema, will make version available for ESnet so we can both deploy bwctl active measurements and work together on the GUI/analysis side.
+   # IU
+   # UDEL
+   # Ga Tech
+   # ESnet
+     * Joe: Lots of machine configuration stuff. Getting new 3 production pS servers on-line (gLS, hLS/SNMP-MA/topo, SNMP-MA internal).
+     * Brian: SyNAPSE proposal. Knoppix hosts are back up.
+   # SLAC
+   # FNAL
+     * Maxim: Nothing on CHEP yet. Proposal submitted. Worked with CMS@MIT to get a pS-NPToolkit deployment. Attempting to run pS-NPToolkit under xen.
+   # MCNC
+ # Brain-storm for possible projects and goals for the next 6 months - year.
+     * Community defined measurement meshes.
+     * Community defined dashboards/analysis.
+     * ML or Spectrum gateways or RealTime alarms.
+       * Persistent queries
+     * Test framework
+       * scalability
+       * reliability
+     * traceroute MA/MP
+       * BGP MA?
+     * How do multiple meshes interact? (BCP?)
+     * Focus on deployments/production
+       * GUIs
+       * How do you use these tools to actually debug problems?
+     * GUIs - easy to use, not demoware!
+     * Installation usability
+     * Need more user requirements?
+       * Need to bring users the first good data GUIs, then we can iterate with users.
+       * What specific visualizations do the users need? (First data must be there...)
+ # SC
+     * How much of the one-off coding can be turned into 'real' stuff?
+ # Questions regarding gLS data displays - Brian
+   # Should we advertise things that are only available to certain groups (e.g. NDT servers on Interent2 backbone are not reachable to home users - do we note this?  How?)
+     * How do we manage expectations?
+     * We will need ways to discern what data is available to write good GUIs, this issue is not just about the 'publicity' pages.
+     * (Jeff suggestion: attack this problem by creating a GUI for actually addressing a specific performance problem - that GUI will need to figure this out...)
+ # PAM/CHEP paper status
+   # Where to resubmit PAM paper and when - Brian/Martin
+   # Important Dates for CHEP - Maxim
+ # Next meeting will be Jan 12, 2:30 pm Eastern Time
+
+=== 20081211Video ===
+
+ # Attendees: Brian, Joe, Aaron, Jason, John Hicks, Maxim, Jeff
+ # Issue: Release Management
+ # Release Management Czar (Cat herder): Jason Zurawski
+   # See [ReleaseManagement] for the procedure we intend to use.
+   # Release TODO:
+     * Gather up current documentation of practices, post to wiki
+       # CPAN - Aaron
+       # RPM - Aaron (*IN PROGRESS*)
+       # Deb - Aaron
+     * Document New Tasks
+       * Release Process (General) - Jason  (*IN PROGRESS*)
+       * Release Process Specific
+         # perfSONAR-PS - Jason (*IN PROGRESS*)
+         # BWCTL - Aaron/Jeff
+         # OWAMP - Aaron/Jeff
+         # NDT - Rich/Aaron
+       * Yum Repo - TBD
+       * Apt Repo - TBD
+       * Ports - TBD
+     * Create Roadmap/Milestones - Jeff/Jason
+       # perfSONAR-PS - Group Input
+       # performance node - Larger Group Input
+       # OWAMP - Jeff/Aaron
+       # BWCTL - Jeff/Aaron
+       # NDT - Rich/Aaron
+       # DCN - DCN Folks
+       # Phoebus - Martin and Gang
+ # Actions/Decisions/Open questions from discussion:
+   * *Decision*: Aim for 2 releases a year.
+   * *Everyone*: Review branch structure recommendation.
+   * *Everyone*: Review release mgmt notes, and make suggestions for changes.
+   * *Question*: How will we synchronize release schedules between dependent projects. (i.e. pS-NPToolkit)
+   * *Jason*: Add something on integration/interoperability testing to the release. (each service needs to be tested with the other services it is expected to work with - perhaps with older releases of them.)
+   * *Brian*: Include Q/A in test framework outline.
+ # Next meeting will be Dec 18, 4:00 pm Eastern Time
+
+
+=== 20081201Video ===
+
+ # Attendees: Brian, Joe, Jason, Aaron, Rich, Jeff, Maxim
+ # Team Updates
+   # Internet2
+	 * Jason: gLS performance enhancements, gLS interoperability testing w/LS-MDM, and gLS GUIs to show data freshness. Also worked on GUIs for SC including wmap, circuit status as well as working on many deployments for for SC and BWC.
+     * Aaron: SCinet wan monitoring (pS status service and GUI) and other misc SCinet measurement tasks. BWC - primarily phoebus deployments and performance enhancements as well as pS-proc-scraper functionaity (can perhaps turn it into a 'generaic' MA. Currently working on UDP performance issue with KOI systems.
+     * Rich: Reported back from an OSG-NPWorkshop. Alan Roy may be someone to talk with more to get pS client tools integrated into vdt. Also reported back on LSN/JET request to develop a perfSONAR deployment plan for JET nets.
+     * Jeff: SC hangover. Reported on IRNC rumors and challenges. Beginning to help with DOE proposal. (And sorry, don't remember if I reported on anything else- I took to long to do the notes, and I'm bad about writing down what I talk about myself...)
+   # IU
+   # UDEL
+   # Ga Tech
+   # ESnet
+     * Brian: pS proposal for DOE and gLS testing.
+     * Joe: bwctl deployments.
+   # SLAC
+   # FNAL
+     * Maxim: Nothing this week. Working on VNOC proposal?
+   # MCNC
+ # SC recap
+   # How did weathermap work? Is there usable code here for other projects? Can we make it more plug-n-play for the future? *Should we start a wmap project to make these easier in the future?*
+ # Deployments page - changes still needed?
+    * Yes, changes still needed. *Brian will work with Jason to develop use cases to help define what we ~really~ want to see here.*
+ # KOI UDP performance issue - status?
+    * Still a problem. *Aaron will work on it.*
+ # Central configuration service
+   * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.
+   * *Joe will take a first cut at creating a functional specification.*
+ # ISO - Functional Specification
+   * Attempt to make sure functionality is clear from a user perspective, and to ensure that the disc is useful from a diagnostic perspective as well as a measurement-point perspective.
+   * *Jeff, Rich and Aaron will continue to work on this.*
+ # Release Management is now needed...
+    # stable snapshot of svn trunk
+    *All: Jeff asked for volunteers to be rel-mgmt czar - email*
+    * Next call will be dedicated to release-management.
+ # Discussion of middle-term goals
+   * Wiki
+     * Migration of content is complete, if anyone feels they are missing something contact Jason - he has backup copies.
+   * Release management
+   * It has been proposed that after SC, we shore up a very few pieces of missing functionality, and then concentrate on hardening and optimizing the software we have.
+   * If that is the general sentiment, perhaps we can come up with the specific short list of functionality we want to deal with - and come up with ideas on what reasonable processes we can go through to harden/optimize.
+ # Next meeting will be Dec 11, 4:00 pm Eastern Time
+
+=== 20081103Video ===
+
+ # Attendees:Rich, Aaron, Joe, Brian, Maxim, Jeff, John
+ # Team Updates
+   # Internet2
+        * Aaron: MA for tl1 alarms working to monitor SCinet WAN gear. BWC entry with perfSONAR monitoring integrated. (CPU utilization, Network device values, Memory usage - lots of things that can be retrieved from /proc).
+        * Rich: LHC USATLAS about half-way deployed. Sites need better documentation on how to configure.
+        * Jeff: SCinet measurement deployments, BWC entry, SC signs/handouts w/Jason.
+        * Jason(As reported by Jeff): gLS fixes, SC deployments, SC signs/handouts.
+   # IU
+        * John: Has 10g in LA. Working on nagios for SCinet monitoring. For Transpac: LOSA and Tokyo perfSONAR deployments are active.
+   # UDEL
+   # Ga Tech
+   # ESnet
+        * Brian: Installed pingER MA on 10 owamp boxes. Refuse to register with hLSs.(Reported in Issue tracker, Jason is testing some fixes he believes will address the problem.) LOI - for perfSONAR proposal to SCiDAC.
+        * Joe: Working on owamp,bwctl deployments. Can have some available for SC.
+   # SLAC
+   # FNAL
+        * Maxim: Vacation... Focused on supporting hostname/type parameters for pingER queries and handling errors. Discussion of landmarks files configuration options. (size of pings, etc...) Interest in more functionality from the weathermap (additional metrics etc).
+   # MCNC
+ # SC status
+   * New Weathermap proposal
+     * Still very basic: http://dc211.internet2.edu/SC08/
+     * Will hide/show DCN circuits via OSCARS MA
+     * Will use utilization from SNMP MA
+       * Interest in other metrics?
+   # *General interest, especially on how this could be used to show additional metrics or present the data over other topologies. Jason, please apprise the group if any further developments.*
+ # Central configuration service
+   * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.
+     * *_JZ:_* We keep putting this off, but I would like to put it off a little more since this is a non-trivial problem, and the development/thinking cycles will be pretty sparse until after November.
+   # *Postponed until December, but this will be one of the only new development things we will take on through the first quarter of next year so we can focus on hardening existing services.*
+ # Deployment Status Listings
+   * How do we decide what goes in the list? Everything? Do we attempt to validate?
+     * Joe will send out comments from Jason Lee to start this discussion.
+   # *Lots of discussion. General issues seem to be:*
+     # *showing a complete list of all registered services along with quick-view editing makes it look like many things don't work. Not good for a technical appraisal of perfSONAR.*
+     # *No EU services are registering, so this is not as inclusive as it needs to be for PR efforts.*
+   # *Suggestions:*
+     # *Short term: Disable the quick view of data an only use as a PR view.*
+     # *Short term: See about getting more EU services in the list some how, or provide a link to 'pre-gLS' deployments via the EU smoke-ping page*
+     # *Medium term: Provide a vetted list of services with quick data views available*
+     # *Medium term: Provide links to popular GUIs*
+ # ISO - Functional Specification
+   * Attempt to make sure functionality is clear from a user perspective, and to ensure that the disc is useful from a diagnostic perspective as well as a measurement-point perspective.
+   # *Jeff, Aaron and Rich will provide a proposal for this in December.*
+ # Discussion of middle-term goals
+   * Release management
+   * It has been proposed that after SC, we shore up a very few pieces of missing functionality, and then concentrate on hardening and optimizing the software we have.
+   * If that is the general sentiment, perhaps we can come up with the specific short list of functionality we want to deal with - and come up with ideas on what reasonable processes we can go through to harden/optimize.
+ # Additional Topics:
+   # *Maxim asked that those involved in the CHEP paper comment on the abstract in the next week.*
+   # *Discussion of UDP performance issues with the LHC recommended systems and how to keep kernel modules up to date. For the immediate issue: Brian/Joe will send the driver used on the KOI hosts to Rich. Rich will find the latest driver and compile that into the kernel and give it to Brian/Joe to try out. For the more general question, I'm going to put this on the agenda for the next meeting.*
+ # Next meeting will be Dec 1, 2:30 pm Eastern Time
+
+=== 20081020Video ===
+
+ # Attendees: Jason, Joe, Rich, Aaron, Jeff, Maxim.
+ # Team Updates
+   # Internet2
+    * Jason: Support role for FMM demos, Managing bugs for Disk, Work with Brian on pingER instances on ESnet (and other services too). Bug fixes setup for LS/SNMP MA.
+    * Aaron: Working w/ DCN to fix path finder things. Working on pS pathfinder. Fixes for knoppix toolkit. Looking at different approaches to automate ISO release rolling. For a stop-gap, much of toolkit is now in svn.
+    * Jeff: FMM Performance Update/ perfSONAR BOF
+   # IU
+   # UDEL
+   # Ga Tech
+   # ESnet
+    * Brian: pingER deployments, working on other deployments and hit lots of hardware related snags.
+    * Joe: LHCOPN meeting - MDM - 3 signed MOU agreements, 2 boxes - 1 sun, 1 linux. 14 week deployment cycle. 1 day of training, site survey, planned to extensive detail! EGEE monitoring/ alarming from DFN looking at perfSONAR. Small sub-group will look at this proposal (alarms based on 'interesting data').
+   # SLAC
+   # FNAL
+   # MCNC
+ # LHC ISOs
+   * Status (outstanding bugs? good/bad experiences?)
+     * lots of tiny bugs, only a couple of major bugs
+       * unmount filesystems underneath - believe it is fixed.
+     * mysql logging are large
+   * Next steps
+     * functional specification (jeff/aaron/rich)
+     * release management process (aaron)
+     * yum server
+ # Required attributes in service requests
+   * See http://code.google.com/p/perfsonar-ps/issues/detail?id=62 for context.
+   * General question, how should metadata matching work?
+ # SC plans
+   * SCinet Monitoring/ Internet2 Booth/ What else?
+     * Will setup regular scheduled tests between SCinet and Internet2/ESnet/others.
+     * Will work with others (caltech) to monitor other interesting data.
+     * Will reach out to BNL/FNAL for monitoring as well.
+ # Central configuration service
+   * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.
+     * Will talk about this next week when Brian is available.
+ # Deployment Status Listings
+   * How do we decide what goes in the list? Everything? Do we attempt to validate?
+     * Joe will send out comments from Jason Lee to start this discussion.
+ # Next meeting will Oct 27, 2:30 pm Eastern Time
+
+=== 20081013Video ===
+
+ # Attendees: 
+ # Issue specific meeting: CHEP 2009 paper
+   * Proposals on abstract submission for CHEP2009, deadline is 11/13
+
+=== 20080929Video ===
+
+ # Attendees: Joe, Matt, Jason, Aaron, Jeff, Jared, Antonio
+ # Team Updates
+   # Internet2
+     * Aaron - lots of bug fixes for ISO release. (Services now restarted from web config)
+     * Jason - Arranging beta test deployments (12 remote sites tried it). Keeping track of bug reports and entering 'issues'. Fixed several outstanding bugs.
+     * Jeff - Pam paper, ISO testing, Branding/Naming issues.
+   # IU
+   # UDEL
+   # Ga Tech
+   # ESnet
+     * Joe - Deploying on ESnet backbone (Using CFEngine and SVN). Working on Domain Utiliztion Browser. Made a PAM paper edit pass - concerned with lack of federated measurement infrastructures.
+   # SLAC
+     * Jared - ISO testing, also introduced Antonio who will be working on perfSONAR in the future.
+   # FNAL
+   # MCNC
+ # ISO - Naming
+   [http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/perfnodelabel.png CD Cover Image]
+     * There was concern that the new name did not convey the perfSONAR connection. Jeff will work on this with Internet2 marketing types.
+ # ISO - Status (Outstanding bugs, etc)
+     * Seem to have a good handle on outstanding bugs.
+     * Concern about making good recommendations for user communities. i.e. Want all LHC participants to use the same 'keyword'. General concensus seemed to be that we want user communities to drive this themself, but that we should provide a boiler-plate for this - and perhaps some wiki space for it. Jeff will look into making something like this available on the Internet2 'spaces' wiki.
+ # Pam paper
+   # Editing status
+     * Several passes have happened. Brian could not be on, so this will continue to be coordinated via email.
+   # Data status
+     * Jason reported that there is data from UMich and FNAL. The 'units' issue for the UMich data has been sorted out, and data seems to be stabalizing. It looks like we will hopefully be able to get a good 24 hour period of data.
+ # GLIF Demo Update (Aaron/Jeff)
+     * Aaron reports that the demo circuit and monitoring is mostly stable. Jeff will be presenting a perfSONAR architecture overview and helping Thomas Tam demo the E2EMon GUI.
+ # Central configuration service
+   * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.(Likely won't have time to discuss this, but I'm keeping it on the agenda as very high priority for the *next* version).
+ # Next meeting will Oct 6, 2:30 pm Eastern Time
+
+=== 20080922Video ===
+
+ # Attendees: 
+ # Issue specific meeting: PAM 2009 paper
+   * Discuss current state of paper.
+     * Please look at the latest version of the paper and be ready to discuss the status.
+   * Deadlines:
+     * If we want Susan to edit, we need to let her know *when* and give her some time...
+
+==== Summary/Actions ====
+
+ * Final deadline is Oct 1, 6:00pm PST.
+ * Jeff will make an edit pass over much of the paper today and tomorrow.
+ * Martin will make an edit pass over the IS section, and a full pass following Jeff.
+ * Jason will work with Shawn to get a UMich endpoint working.
+ * Maxim will get a FNAL endpoint working.
+ * Maxim/Jason will work together to generate throughput data.
+ * Brian will continue to make edit passes throughout.
+ * Brian/Martin will make the final passes while together next week in Seattle.
+ * We will attempt to get Susan to make an edit pass Wednesday morning (due date).
+
+=== 20080902Video ===
+
+ # Attendees: Joe, Jason, Aaron, Maxim, Jeff, Rich, Jared, Brian
+ # Team Updates
+   # Internet2
+     * Jason:
+       * ISO/gLS development. API hardening.
+       * New service registration formats for DCN work (Will send out)
+       * Meeting with Martin/Bobby Brown (Vandy) to do REDDInet SC demo featuring pS
+       * WIKI mostly moved
+       * Will be doing gLS interoperability testing with MDM-LS
+     * Aaron:
+       * ISO/pingER UI
+       * WebAdmin authentication issues (cacti pain)
+       * OWAMP RC out (forgot to mention on the call)
+     * Jeff:
+       * AA work to prepare for joint DICE CP/pS meeting
+       * pS-B (owamp star config)
+       * preparing ps-dev agenda
+     * Rich:
+       * BCP has moved to the google-code wiki
+       * Rich will be talking with Ken Bloom/CMS T2 community about installing pS tools and the NPToolkit ISO.
+   # IU
+   # UDEL
+   # Ga Tech
+   # ESnet
+     * Joe:
+       * pingER now running on ESnet owamp hosts. Would like better configuration file solutions. Perhaps something as easy as 'include' file syntax for all config files. (* Will attempt to make time to discuss during ps-dev next week.*)
+     * Brian:
+       * Issues with perl/pingER logging too much information to the console in error states. (Maxim will look into it.)
+       * PAM CFP came out today. (Brian will bring a few ideas to the meeting next week for us all to discuss.)
+   # SLAC
+     * Jarad:
+       * Nothing to update, but will be at the meeting next week.
+   # FNAL
+     * Maxim:
+       * pingER-UI/API fixes. Wiki moves. Looking and 'includes' for landmarks file and thinking about full context of those changes.
+   # MCNC
+ # Project organization (Maxim sql scripts etc question)
+   # Source code locations
+   # Distribution locations
+   * Generally we would like a single location for these things. We do need to come up with a good way to reference that one location from the other various places where we have an expected presents. For example, we will try and maintain 'svn externals' in the google-code svn to make it easier to get to our code for users that attempt to access it from google. Even more important will be the distribution locations since we probably want to put it on the ps-ps site, but have references to it from the www.perfsonar.net and the google-code, and the cpan sites.
+ # Wiki Migration
+   * Mostly complete. Everyone knows what they need to complete, and there are only a handful of things left.
+ # GLIF Demo Update (Aaron/Jeff)
+   * 3 sites have services *mostly* working. (We won't be able to tell until we know if the circuit itself is working...) 1 site will likely never get it working, and we will need to work around it.
+ # ISO status
+   * Release needs to wait until after MDM-LS interoperability testing. New release dates are: Beta out Sept 5, final release out Sept 17.
+   * As mentioned above, pingER agent needs to deal better with error conditions so the console is not unusable. (i.e. network unreachable.)
+   * Maxim brought up some Virtual-NOC software that they intend to work on to provide issue-tracking over top of pS monitoring and control-plane efforts. (jwb - it would be good to track this progress and harmonize efforts as much as possible.)
+ # Papers- PAM CFP
+   * As mentioned above, we will discuss Paper ideas next week in AA.
+ # Central configuration service
+   * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration. Will attempt to make time for this next week as well.
+ # Next meeting will in Ann Arbor at the Internet2 offices on Sept 8, 8:30 am
+
+=== 20080825Video ===
+
+ # Attendees: Brian, Jason, Bobby Brown (Vandy), Martin, Aaron, Joe, Maxim, Jeff
+ # Issue specific meeting: ISO Testing
+
+==== Current ISO status ====
+
+ * Aaron: Better configuration scripts, RAM disk issues handled, LS-reg daemon checks for 'live' processes, j-owping beta added, pS updates so services more unified (all determine accesspoint from same place now instead of being tool specific), state saves are very different - works for whole 'system' instead of being specific to each tool.
+ * Jason: Updates for gLS api, fixes for gLS performance issues, modifications for pS-B. Will be working on more pS-B changes and GUI's for showing latency/throughput together.
+ * Jeff: Modifications to lower-level owamp to support sender-side initiated tests for the star-config.
+Jason and Jeff are not ready for code-freeze yet on pS-B. All other portions are now frozen, but pS-B development will continue for a couple of more days. Anything that is not complete this week will not make it in.
+=== gLS deployments ===
+Internet2 will have a deployment on ndb1.internet2.edu in the next week. ESnet already has a temporary gLS deployment ready (although it is expected that it will need to move in October). Internet2 will be looking for a second location. Additionally, Jeff and Jason are working with Dante to ensure a compatible gLS instance will be installed somewhere in Europe in the next month.
+
+==== ISO testing ====
+
+Plan is to test in three phases:
+ # Our closest friends: Brian, Warren
+ # Our closest friends who know little about pS and the ISO: Jon D? (ESnet), IU, Danno (Internet2)
+ # Friendly intended customers: Sean McKee, CalTech, CERN...
+
+=== 20080818Video ===
+
+ # Attendees: Brian, Jarad, Joe, Aaron, Jason, Jeff, Rich
+ # Team Updates
+   # Internet2
+    * Aaron: Mostly working on NPToolkit modifications. (RAMDISK, Dan (gsoc) config scripts integration, pingER GUI. Also working on the OSCARS-MA/topo service to integrate DCN topology sharing and pathfinding. Also keeping up with the GLIF circuit monitoring demo and finishing up mentoring a GSOC project to create a Java client implementation of OWAMP. Please try it out at http://81.173.19.154/jowping/.
+    * Jason: Also working on NPToolkit enhancements. Primarily gLS and SNMP updates. gLS includes API refinement, stability/performance testing. SNMP service updates include metadata queries for CF's and time-ranges. (The last was done as part of a SCinet project, if it works out well Jason will make a recommendation. Additionally, Jason has made updates to the cacti/cricket/mrtg scripts for generating a SNMP store file from an existing SNMP collector deployment. Further NPToolkit work will be modifications for pS-B.
+    * Jeff: Working on an AAI specification for the DICE meeting with Nate and Candido. (For the CP/PS joint session wednesday afternoon.) Jeff nearly has 'sender' side sessions working in powstream now. Additional work will happen on pS-B to support owamp star-config later this week. Jeff also *requested that the code-freeze* be moved to Friday (effectively Sunday) - the group agreed.
+   # IU
+   # UDEL
+   # Ga Tech
+   # ESnet 
+    * Joe: Attended FNAL Wide-Area-Networking call this past week, and a discussion regarding how network monitoring systems will be maintained and configured came up. Joe suggests we take on software management issues and get FNAL/BNL to take on configuration management issues. (Software needs to support a centralized configuration model for this to work.) Atlas has mandated that all US Tier2 centers install the pS-PS ISO, so it will be important to setup a reasonable support infrastructure. _side-track discussion about the difficulties of getting a non-standard kernel deployed at SLAC ensued. Lets just give Jarad some sympathy and move on._ Joe has also been working on installing pingER, but ran into problems and has not completed the installation yet.
+    * Brian: Spoke with Ruth (?) from OSG about his new role @ESnet. He will be attempting to get pS-PS software into the OSG toolset. New systems have been approved for supporting the central gLS instances and for testing the ISO distributions.  Brian has been working with Jason on performance and stability testing of the gLS implementation.
+   # SLAC
+    * Jarad: SLAC has been looking at what it will take to package gmaps. And, Jarad has asked to go to the AA ps-dev meeting.
+   # FNAL
+    * Maxim: email'd his update. (Basically, he has pingER warnings fixed and has binaries available. - see the email for details.)
+   # MCNC
+ # Wiki Migration
+  * Mostly complete. All meeting notes have been moved. *Jason* will go through the remaining pages and assign 'owners' to either delete or migrate the remaining content.
+ # GLIF Demo Update (Aaron/Jeff)
+   * Status: Participants are attempting to install the software now.
+ # ISO status
+   * Everyone still inline to finish by the 20th? (See [20080811Video 20080811Video] for actions.) Code-freeze has been moved to the 22nd.
+   * Who is available for integration testing?
+    # Jason will ask Warren (GaTech)
+    # Rich will ask Sean McKee (UMich)
+    # Others are likely to be from *this* group.
+   * Need production gLS servers in time for this testing. *ESnet and Internet2 will each have one by Aug 27*.
+ # FMM/SC08 Demo Planning
+   * We will be supporting the 'Circuits' demo by showing a graphic of circuits being created and destroyed along with utilization. (Demo will be HDVideo content.)
+   * We will show something similar to Jt Techs for the ISO's.
+   * It sounds like only Jeff will be attending from this group.
+ # Next meeting will be August 25, 2008
+
+=== 20080811Video ===
+
+ # Attendees: Jason, Aaron, Rich, Joe, Jeff, Brian, Jarad, Maxim
+ # LHC Disk
+   * Timeline:
+     * Code Freeze: Aug 20
+     * Finish integration (testing by friends): Aug 29
+     * Complete ISO's available: Sept 4
+   * Actions by Aug 20:
+     * Aaron: Remove RAM disk, Evaluate convergence with GSoC version, Remote diagnostics availability, ls-registration updates, work with Joe to create a version of ls-registration that can maintain a list of 'ping-able' hosts for LHC
+     * Maxim: Remove excessive warnings, Add GUI, Expore gLS landmarks integration
+     * Jason: Release and Deploy 'production' gLS instances, gLS API support, pS-B owamp-star config changes
+     * Jeff: pS-B owamp start config, powstream - sender session support
+     * Joe: work with Aaron to create an ls-registration daemon for supporting LHC ping-able hosts
+ # Next meeting will be August 18, 2008
+
+=== 20080804Video ===
+
+ # Attendees: Jason, Maxim, Aaron, Joe
+ # Team Updates
+   # Internet2
+     * Jason: Wiki migration.  Need people to update service pages.  Helped get ready for APAN.  Modifications to SNMP MA to support meta queries on data formats (needs lots of work) for SC crowd.  Helped John Bigrow get Cacti SNMP MA up and running/John Hicks w/ pSB.  
+     * Aaron: Post JTs activity is to modify OSCARS to use the topology service to do path finding (paths internal to local domain, hop into next domain).  Using 2 seperate path finding situations: inter/intra domain.  Inter: Each domain has a 'routes' file that explains which domain given certain situations.  Calculates path based on in/out info.  Aaron's approach doesn't use static routes.  All of this written in Java.  BWCTL testing: looking to do full release in next week or so for 1.3.  Doing basic testing (32/64 bit linux, freebsd) on src/dst along with 1.2 testing.
+     * Jeff: At an SC meeting, will report in later.
+   # IU
+   # UDEL
+     * Martin: At APAN.
+   # Ga Tech
+   # ESnet 
+     * Joe: Deploying tools on testers.  Using CFEngine.  
+     * Brian: Nothing to report, meeting with a bunch of climate folks, will try to corner some of them and force pS upon them. 
+   # SLAC
+   # FNAL
+     * Maxim: Web GUI.  Added feature for Jason (direct URL for graph).  Fixed some bugs.  Trying to deploy w/ w/o apache.  SQLite issues in PingER (BNL issues).  Will look into warnings w/ PingER seen on the disk.
+   # MCNC
+ # JT Techs Wrap Up
+   * Talk about the disk.  Maxim: Need a more PR centric web page instead of the technical page.  No one has contacted us about it yet.  More official release in the last week for PR purposes.  'Stable' by Oct.  Joe wants: Security info (e.g. iptables) - will come from SOC student in a couple of weeks.  Also wants to discuss ways to 'update' your testing star as people come online (e.g. define a group, constantly add things to the group - Jason will explore).  Lastly has 2 NTP servers to add to the default config - Need a better way of keeping track of NTP/Smarter way of choosing.
+   * Some talk about SOAP in perl, how pS doesn't use a lot of the SOAP features (headers etc.)
+ # Wiki Migration
+   * Some content there already
+   * Follow the current structure (authors need to fill in the blanks on their services)
+   * Use new wiki from now on
+   * Migrate/Kill anything you won't need.
+ # LHC Disk (Postponed talking about the major issues due to attendance)
+   * Hardening
+     * PingER
+       * Warning handling - Maxim will address.
+     * hLS
+       * Database startup size (DB_CONFIG issues) - Jason will address.
+     * SNMP MA
+       * Better startup/test procedures on cacti integration - Distant future
+       * cricket/mrtg inclusion - Not so distant future.
+     * perfSONAR-BUOY
+       * OWAMP Collection Agent - Fall
+       * Conversion into pS space of collection agents - Fall/Winter
+       * MA Database handling - Fall
+       * Configuration
+   * SOC Improvement roll in (over next month or two)
+   * Community Involvement (Testing by Jon Dugan/Brian/MCNC/GT?)
+ # GLIF Demo Update (Aaron/Jeff)
+   * Aaron: E2E mon demo.  Showing GLIF members how to deploy/use the stuff.  Moving slow due to provisioning.  KISTI up? Others no.  May need to register data into LS (Aaron can write what the plan will be (wikify it?)
+     * Copy to our wiki from glif space (http://wiki.glif.is/index.php/PerfSONAR_Working_Group).
+   * Group inter-dependencies
+     * gLS API/gLS/hLS Instances - Jason
+     * GUIs - Aaron/Jason (where needed)
+     * Status monitor - Aaron
+     * E2EMon Setup - Maxim? - Aaron
+ # FMM/SC08 Demo Planning (Postponed till next week)
+   * What should/could we do?
+     * Use the Disks/gLS
+     * New GUIs (Fusion/addl web things)
+     * Incorporate *all* services; total package of e2e monitoring (potential use case is UMich -> Merit -> Internet2 Network -> SOX -> GT)
+   * Individuals wanting to be involved
+   * Deadlines
+ # Next meeting will be August 11, 2008
+
+=== 20080720Meet ===
+
+Summer Joint Techs 2008, Lincoln NE,  July 20, 2008  - 1 to 5 Central
+
+==== Attendees ====
+
+ # Maxim (FNAL)
+ # Jason (Internet2)
+ # Aaron (Internet2)
+ # Eric (Internet2)
+ # Jeff (Internet2)
+ # Martin (UDel)
+ # Joe (ESnet)
+ # Brian (ESnet)
+ # Carla Hunt (MCNC)
+ # Drew (Broadband Census)
+ # Rich (Internet2)
+ # Mike !VanNorman (UCLA)
+
+==== Agenda/Minutes ====
+
+ # Code restructure:
+   * Break it up in layers (http vs soap vs xml).
+   * Aaron will look at restructuring current daemon and figure out the pieces.
+ # Wiki move:
+   * We will be moving from Confluence to google code wiki.
+   * Jason will move things as he can.
+ # Knoppix vs LiveCD:
+   * Aaron will talk with Tom Throckmorton (MCNC) to explore with Rich.
+ # Configuration Services:
+   * Everyone thinks it is a good idea.
+   * merging information from multiple sources into multiple tool configs is the problem
+   * community configurations
+   * local configurations
+ # Topo V3 for gLS/hLS:
+   * Yes - do it. JEFF ACTION - raise it with Maciej.
+ # Admin
+   * Switch to an every other week for team updates, and interim weeks for specific topics. (Data channel, AA, etc...)
+ # Data Channel
+   * Need to get a small group applied to working on this issue.
+   * Charge: present a couple of alternatives and analysis to back up the recommendation.
+ # Papers
+   * Happy-hour discussion:
+     * We should start putting a paper together. A full architecture paper as well as a more deployment/data paper.
+       * ACTION: *talk to martin about these options*
+        * 1st place - UDel tech report, also prepare for a journal entry.
+        * If a reasonable conference comes up in the process we should do it.
+
+=== 20080714Video ===
+
+ # Attendees: Maxim, Aaron, Jason, Jeff, Jared
+ # Team Updates
+   # IU
+   # FNAL
+     * Maxim: working on web-admin problems - worked out with aaron/jason - fixes should be checked in today. pingER-UI modified data access methods to pick specific data resolution.
+   # UDEL
+   # Ga Tech
+   # ESnet
+   # Internet2
+     * Aaron: New bwctl rc. (New functionality is plug-able logging scripts) lsregistration configuration script. Generates a site info file so daemons registered in similar fashion. Adjusted much of the knoppix distribution (removed unneeded packages, worked on system configuration.) Additionally, there was a discussion about the differences from LiveCD and knoppix distributions.
+     * Jason: Working on puting pS-PS distributions on the iso. gLS/hLS is working and deployed on iso. Maxim will attempt to use gLS in pingER-UI. Jared will ask Yee if it is possible to integrate gmaps with the gLS before next week.
+     * Jeff: Has worked on pSB-agent development including the 'star' configuration. Also worked on owamp/bwctl bug tracking.
+   # SLAC
+     * Jared: Nothing since the gmaps enhancements.
+ # Jt Techs
+   * What do we want to demonstrate? What deployments are ready? What GUI's can we use to show them off?
+     * Planed Deployments
+       # FNAL Aaron will work with Maxim to get the ls-registration daemon deployed.
+       # BNL Jason/Maxim will work with John.
+       # UNL Jeff will contact Dale to attempt to get something deployed.
+       # UCB Brian will try and get something working
+       # Stanford Jarad will see what he can do.
+       # UMich Jeff will contact Shawn if needed.
+       # CalTech Jeff will contact Michael Thomas if needed.
+   * What meetings will we have there?
+     * 20 July 08 - pS-Dev Meeting (plus several presentations throughout the main conference
+       * Jeff will send out a list of initial proposed agenda topics with more details on the meeting.
+ # Next meeting will be at Joint Techs
+
+=== 20080630Call ===
+
+ # Attendees: Maxim, Aaron, Jason, Jeff, Jared
+ # Team Updates
+   # IU
+   # FNAL
+     * Maxim: Worked with John Bigrow to get a pingER instance deployed @BNL. Found MySQL interoperability problems with the pre-compiled version of pingER. Also working on a new pingER web-based analysis GUI. This one will actually interact with pS services on the back end and not directly with the pingER database. This will allow BNL and FNAL pingER data to be shown from the same interface.
+   # UDEL
+   # Ga Tech
+   # ESnet
+   # Internet2
+     * Jason: GN2 meeting. Worked on gLS implementation and deployments. It is now operational but much testing is still happening. Currently modifying registration of services to use the gLS and will be making an API available for this. Also made test GUI's to show gLS information and will be enhancing web-admin client to use this as well as the google-chart API for displaying data contents. Other activities include working on the Knoppix disk to make LS, pingER, pS-BUOY available that way. Incorporating cacti in with the SNMP-MA for BNL. And will be helping John Hicks deploy pS-BUOY for APAN.
+     * Aaron: Worked on TL1 collection scripts so link-status service can support more hardware types. Also working on integrating the use of the circuit-status/link-status services into Internet2 production network so the IU NOC can hopefully start leveraging these tools. Worked on an LS registration daemon for registering non-pS services (for example a phoebus server, an NDT server or an owampd server). It was discussed that this might be a way to register ping-able or traceroute-able addresses as well. Additionally worked on the knoppix disk - specifically specific release versions of some tools on the disk as well as system configuration issues such as where logs are stored.
+     * Jeff: Worked on bwctl and owamp bug fixes and is currently working on star-config for pS-BUOY. Will give LHCOPN/GN2 update below.
+   # SLAC
+     * Jared: SLAC helped by making gmaps work with pS-BUOY data just before LHCOPN. Otherwise, nothing more yet. Still attempting to figure out what kind of re-engagement will be happening with respect to the NSF grant.
+ # LHCOPN report
+   * Jeff reported that the T2/T3 support plan was well received. Most non-US Tier-1 centers have not given much thought to how they plan to support T2/T3 related monitoring of network performance.
+ # GN2 report
+   * Specific thrusts from us in 3 areas: AA integration, Circuit-callbacks, Circuit-monitoring. These discussions were heated but fruitful. The topics will be revisited at the DICE meeting in Ann Arbor in September. Additional ps-dev specific work revolved mostly on schema issues. (How should the results be formated from a 'test' request to a service. What specific information needs to be in an LS registration. etc...)
+   * Additionally, we found out a lot of information about how GN3 is likely to be structured. It sounds like most activities that we have been currently working on will now be handled by a 'service' organization, not a 'research' one. There will be 'research' activities, but it sounds like they will be of much more limited scope both in breadth and in duration. My take on this is that they are trying to 'direct' the research to be more applied.
+ # Jt Techs
+   * What do we want to demonstrate?
+     * Want to essentially have 2 US LHC-T1 sites and a handful of US LHC-T2 sites running pS services and exporting data to show an application community targeted measurement framework. (That is general enough from a backbone networking perspective to support multiple application communities.
+   * What do we want/can we reasonably release?
+     * Will be working on a specific knoppix release that we can hopefully give T2/T3 sites to try deploying post-jt techs.
+   * What meetings will we have there?
+     * 20 July 08 - pS-Dev Meeting (plus several presentations throughout the main conference
+ # Administrivia
+   * Will discuss this portion on-list since there wasn't enough participation this week.
+     * Is call time still good?
+     * Should we consider doing a vid-conf (bridged to the call)?
+ # Next call will be July 14.
+
+=== 20080609Call ===
+
+ # Attendees:
+ # BNL and FERMI perfSONAR deployments
+   * What is currently working?
+   * What support do BNL/FERMI need?
+   * What GUI tools can we put in front of them to show what is possible? i.e. What demo can we do at the LHCOPN meeting?
+ # Team Updates
+   * IU
+   * FNAL
+   * UDEL
+   * Ga Tech
+   * ESnet
+   * Internet2
+   * SLAC
+ # New items.
+
+=== 20080519Call ===
+
+ # Attendees: Jason, Martin, Joe Brian, Maxim, Jeff
+ # New items
+   * perfSONAR Packaging Proposal (From Gijs)
+   * Anything new in the infrastructure portions?
+   * gLS
+   * Performance testing
+     * black-box testing of pingER status
+       * Maxim will give it a try:
+         * Jason's examples are at http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/test_harness/
+         * Bundle a set of test data?
+       * Jason will make error conditions for LS/SNMP/pS-B
+       * Jason will look test harness data generation for SQL PingER data
+     * profiling
+       * Service authors: instrument code
+       * aaron/jason/jeff will split up 'base'
+       * jason will start wiki page for profiler BCP
+   * Jason's GT Summary
+   * Time variant metaData issue
+      * Do we need a new utilization schema to deal with circuits?
+   * UI development
+ # Review of old business
+   * Code directory hierarchy refactoring - status update (maxim)
+   * MDM release
+   * Topo schema available via NMWG URL?
+   * Deployment plan accepted?
+   * API agreed to?
+   * RRD - communicate resolution - (jason update)
+     * Message examples? (New eventType version?)
+     * SNMP MA support it? (and other data storage specifics)
+   * Code review (status)
+     * Need to make the following consistent:
+       * documentation - (and svn tags $Id: 20080519Call.wiki 57 2008-07-25 20:06:23Z jwzurawski $ for example)
+       * logging
+       * parameter parsing
+       * perlcrit/tidy
+   * web admin
+
+=== 20080505Call ===
+
+ # Attendees: Jason, Martin, Joe Brian, Maxim, Jeff
+ # Team Updates
+   # IU
+   # FNAL
+     * Maxim has been working on details regarding rpm installation and deployment for the MDM release. He is also concerned with Debian installations. Maxim will discuss how Debian packages will be built with Aaron. He is also beginning to look at visualization details.
+     * A discussion on the DFN 'rsync/perl object data channel' extension ensued. Some members of the group are very concerned that this effort will hinder interoperability. Martin has been involved with attempting to ensure the extensions are done in a way that does not interfere with the normal extension mechanisms. Martin will ask DFN to share the specific message details that they are planning to use to help ensure that the extensions are done in a way that makes it clear that they are a DFN specific extension. For example, by using a dfn.de rooted namespace for the eventType.
+   # UDEL
+     * Martin has been working on getting the NMC WG accepted in the OGF. It is not yet clear if the June meeting will be a BOF or an actual WG meeting. Martin also agreed to move the topology schema into a more public svn so it could be used as a basis for the gLS work Jason is doing. (If Martin wants a new svn created, Jeff will create it for him.
+   # Ga Tech
+   # ESnet
+     * Joe has been working on the LHC BCP document. There will be a meeting Thursday to discuss that document.
+   # Internet2
+     * Jason has been working on the gLS design and is awaiting comments. He has also been working on rpm's for webadmin as well as deployment instructions for perfSONAR-BUOY. Jason also has been directing the perfSONAR protocol documentation group.
+     * Jeff has been preparing for a CENIC presentation on perfSONAR as well as preparing for the LHC T2/T3 meeting at BNL.
+   # SLAC
+ # pS-PS
+   * Anything new in the infrastructure portions?
+ # Code directory hierarchy refactoring - status update (maxim)
+   * Still open for more review. After a long discussion, it was decided that the current structure is more or less reasonable. However, some additional documentation (perhaps just top level README files) needs to be provided for new developers to explain the organizational hierarchy.
+ # Project Hosting - (jason)
+   * So far a positive experience using google code. The wiki is managed via svn making off-line editing more convenient.
+ # RRD - communicate resolution (and other data storage specifics)
+   * We discussed the following solution:
+     * for req/resp data sampling information should be in parameters of metadata (the one with the eventType=utilization)
+   * How are storage parameters discovered?
+     * Can register md to the LS.
+     * can explode md descriptions by having a md per parameter permutation
+     * can specify individual parameters more than once inside as well.
+     * only completely equivalent event types can live in a single md
+   * What are the next steps? (Example implementation? Example messages for Roman - then convince pS-dev?)
+     * Jason will create message examples with Brian. If he can easily test them in the implementation he will. As messages are available we will also share them with Roman to get his opinion (although we don't expect Roman will be willing to consider this until after the June MDM release).
+ # MDM release
+   * web admin
+
+=== 20080423Meet ===
+
+ # Attending: Jason, Aaron, Martin, Joe, Matt, Maxim, Jeff, Brian (via video)
+ # project hosting: https://wiki.internet2.edu/confluence/display/PSPS/Code_Hosting_Comparison
+   * Jason will test and determine how it works and make a further recommendation
+ # module hierarchy cleanup
+   * expressive names for modules
+     * remove unused code
+     * refactor for 'intuitive' growth and understanding. (Logical structure understandable by NEW developers)
+     * Maxim will propose 'structure' of modules with wiki/ Aaron will work with him and actually do svn moving.
+   * code review
+     * log4perl - make sure 'initialization' is consistent. (any other init stuff as well)
+     * Is other library construct use consistent?
+     * Jeff/Jason/Aaron/Martin will do a walk-through
+   * accessors/mutators
+     * Leave to individual object developers
+ # collaboration with european perl developers?
+   * no response from stephan yet.
+ # licensing
+   * Internet2 wants: use at your own risk
+   * SLAC wants: public domain
+   * FNAL wants: DOE credit
+   * proposed:
+     * Each developer copyrights as they want but MUST use an "apache or bsd" license. Pick one - I don't care. (but we should all use the exact same one)
+     * Jeff will propose something in the june time-frame in an attempt to have this done for jt techs releases
+ # MA: how to communicate what data is available (sample sizes, statistics etc...)
+    * Need protocol for:
+      # What is available? (req/resp - semantics)
+      # If don't have specific res requested, ERROR!!!
+      # Report back what is returned in metadata.
+      # How big would a response be? (how much data would be returned?)
+    * Discussed solution:
+      * for req/resp data sampling information should be in parameters of metadata (the one with the eventType=utilization)
+      * How are storage parameters discovered?
+        * Can register md to the LS.
+          * can explode md descriptions by having a md per parameter permutation
+        * can specify individual parameters more than once inside as well.
+          * Only completely equivalent event types can live in a single md
+    * configuration for utilization/errors (really any eventType):
+        store config needs to have this information (rrdinfo)
+ # Service 'watcher' functionality
+   * cron/syslog thing (DID NOT DISCUSS)
+ # pS-Performance Testing:
+   * black-box performance of pingER service (try using test_harness)
+   * Maxim will give it a try:
+     * Jason's examples are at http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/test_harness/
+     * Bundle a set of test data?
+   * Jason will make error conditions for LS/SNMP/pS-B
+   * Jason will look test harness data generation for SQL PingER data
+ # instrumentation of pS-PS
+   * profiling
+     * Service authors: instrument code
+     * aaron/jason/jeff will split up 'base'
+     * jason will start wiki page for profiler BCP
+ # Architecture:
+   * mod_perl?
+     * 1st step: try creating something simple (say EchoService inside mod_perl)
+   * AAA tie-in?
+ # Deployment/Installation Issues:
+   * packaging, deployment options ( knoppix, rpms, executables - pro/cons)
+   * standalone webserver for webadmin and visualization
+   * pluggable visualization layer
+
+
+=== 20080414Call ===
+
+ # Attendees: Maxim, Joe, Brian, Aaron, Jason, Jeff, Matt
+ # Team Updates
+  # SLAC
+  # IU
+  # FNAL
+    * Maxim: Tested the pingER-pS on 'fresh' Linux installs to determine full dependencies required and make modifications to pS-PS to allow statically linking all dependencies in. This allows for very easy deployment. Worked on a 'super-mp' to allow centralized scheduling of pingER measurements.
+  # UDEL
+  # Ga Tech
+  # ESnet
+    * Joe: Working on a web-GUI interface to pS data. Had a problem due to operator relationships for time selection (Java doesn't support gte/lte). Brian: Looking at what is needed for netlogger instrumentation of services. Asked for a call later in the week to discuss (17:00 EDT, Tuesday).
+  # Internet2
+    * Aaron: 0.09 CPAN release happened. Still need a pingER-pS RPM. 
+    * Jason: Prepared documentation proposal for protocol/schema/service breakdown. perfSONAR-BUOY development. Preparing demos for SMM. Jeff: Proposed a rough schedule for milestones to have pS-PS software ready for T2/T3 deployments. Basically: Sketched out plan in time for BNL meeting May 14, Single 'test' deployment for LHCOPN @ CERN June 16, Knoppix disks ready for Jt Techs July 20.
+ # Update from pS-dev/JRA-1 meeting @ Zagreb (jb/jm/ms):
+   * protocol moving to OGF
+     * Advantage: standards body process and acceptance
+     * Disadvantage: control
+   * transformation service (for now only implementing transparent-proxy style)
+   * echo message extensions
+     * not really needed for JRA-1 SD effort. will use: watch-dog process and syslog
+   * EU collegues are VERY focused on finishing deliverables
+     * (all development with them will likly be focused on short term deliverables for the next while)
+   * Wiki will be split so we can have one more dedicated to high-level perfSONAR without mixing up development details and specific JRA-1 deliverables and 'service desk' content.
+   * EU collegues are very concnerned about showing 'value' from pS right now as they argue for GN3 funding, and GN4 brainstorming/requirements activities.  There was surprise that the perl snmp did not perform much better than java.
+   * There is concern that pS is not being well accepted by NOC's. Joe suggests this is due to visualizations not being relevant for them. There was much discussion about how to incorporate 'alarms'.
+ # GSoC pS projects status
+   * update on which pS related projects likely to be funded (jz)
+ # pS-PS
+   * 0.09 release complete
+     * Jeff will send announcement this week when web-pages are complete
+   * Mutators/Accessors (mg/ab) (next time)
+   * Packaging Issues (jb)
+     * How 'bundled' should we be?
+   * Anything new in the infrastructure portions?
+ # Performance Testing
+   * pingER service testing?
+   * instrumentation of services
+     * A call was planned for tuesday at 17:00 EDT.
+ # Follow up on LHC-OPN support, requirements, priorities
+   * Joe would like more work on the BCP document in preparation for the HENP-SIG at the SMM.
+ # Next call will be April 28, 2:30 EDT
+
+=== 20080331Call ===
+
+ # Attendees: Jason, Yee, Jared, Chris, Luke, Martin, Aaron, Jeff, Joe
+ # Team Updates
+   # ESnet
+     * Brian: Traveling today. Working on CGI backend to ESnet SNMP display interface.
+     * Joe: Joe is interested in getting a pingER installation setup at CERN for upcoming service trials. He would like have data to show at the June LHCOPN meeting. Joe has also been working on creating some netinfo web pages that interact with the backend perfSONAR services. Yee volunteered to help on the pingER effort at CERN.
+   # Internet2
+     * Jason: Working on the web-admin client for perfSONAR-BUOY. It is working now, the next step is to separate the look-n-feel functionality to make it easier to incorporate into the MDM release. Jason has also been working on a straw-man proposal for how schema/protocol/service documentation can work going forward.
+     * Aaron: Working on a test harness for releases. Also working on configuring a 'yum' repository for pS-PS releases. This will works in combinations with the DAG respositories (for things like sleepycat and perl modules, and rrdtool).
+     * Jeff: Has been on vacation, but will be putting out a new release of bwctl and working on the backend of pS-B. He is also preparing for the pS-dev and JRA-1 meeting in Zagreb next week. Jeff is still working on the licensing and trademark issues, but will update when more information is available.
+   # SLAC
+     * Yee has not been working on pS-PS lately, but will be helping with the CERN deployment.
+     * Jared is planning to make a 0.09 release of the pingER services available so that Aaron can upload a new version of services to CPAN.
+   # IU
+     * Luke reports that IU has made a new set of higher resolution RRD files available for the SNMP-MA service. Jason and Luke will work together on upgrading the current SNMP service to support the new data.
+     * Chris and Aaron will work together to make the TL1 libraries and modifications they are working on available via the pS-PS svn.
+   # FNAL
+     * Maxim: On spring break.
+   # UDEL
+     * Martin reports that Karthic is working on extending the radix tree algorthm he has worked on to IPv6 address space. Also, he has sent the V4 version to Roman. He will start working with Jason on this as well. Karthic is also working on some network topology implementations. Martin will be working on some dLS specification updates in time for the pS-dev meeting in Zagreb.
+ # pS-PS 0.09 Release
+   * Are we ready?
+     * Jared will let Aaron know when the pingER service is ready. Aaron will update the latest at that time.
+   * Publicity?
+     * After the CPAN update, Jeff will get the update posted on the pS-PS website and send out a notice to at least the pS-dev email list.
+ # SVN Move
+   * Are we ready (after release)?
+   * Set a date and time: April XX 2008
+ # Additional Topics...
+ # !CodeHause
+   * Jeff will brief us on the discussions held in AA two weeks ago.
+   * See the wiki
+   * Internet2 is interested in at least hosting some of the material in-house due to political issues. However, the bug-tracking project management and software distribution mechanisms could easily be split off. (The main portions of interest for keeping in-house are the 'public project' web pages as well as the svn service.
+ # Licensing/Trademark
+   * Jeff will brief us on the discussions held in AA two weeks ago.
+ # See above.
+ # MDM release update
+   * What remains to be done?
+     # PingER
+       * 0.09 release out this week.
+     # pSB
+       * 0.09 release out this week.
+       * Documentation (will look like PingER)
+       * !WebAdmin (cleanups still needed, it functions fine, needs look and feel of Java version?
+       * Functional testing things (similar to PingER)?
+     # Packages for MDM?
+ # RPM Packages
+   * How should the RPMs be packaged?
+     * Install in default location? Install in /opt?
+     * One RPM per perl module vs. One RPM per service
+     * pS-PS binary RPMs using the thing maxim found?
+   * How should the RPMs be distributed?
+     * YUM repository?
+ # pS-PS
+   * Anything new in the infrastructure portions?
+ # pS-PS and relationship to firewalls/filtering By way of Eric and Ken K.
+   * Reasons why we run on upper ports (8080 etc.)
+     * Historic (tomcat), but we are just HTTP traffic...
+   * Could (should) we run on 80?
+     * Affect layout of other installed services
+   * How does this affect firewall/security setups?
+     * Are we (should we be) doing anything about this during installation?
+ # Next call will be April 7, 2:30 EDT.
+
+=== 20080317Call ===
+
+ # Attendees: Jason, Aaron, Jared, Maxim, John Hicks, Jeff, Joe
+ # Team Updates
+   # UDEL
+     * Martin: Has a student working on DCN/Topology projects. Trying to convert topology representation into graphics (JUNG image?). This will be used by the Topology/LS to show how topologies are being exchanged.
+   # ESnet
+     * Brian: Still working on test harness with Aaron/Jason. Expects to release very soon. Will need to work with other services as well.
+     * Joe: Was at LHC Meeting (Update Later), working on a Whitepaper for Thomas @ DOE, may need input from group very soon. Jeff asks about rrd visualization, Joe says Jon Dugan is still working on backend portion (statistics), then will be put on a test server.
+   # Internet2
+     * Jeff: BWCTL (testing, changes mostly done). In AA all week for meetings. Did the LHC BCP presentation for Eric/Joe, will be working to form this into a document.
+     * Jason: Finished pSB/SNMP/LS For release. Worked with Brian on performance testing a bit more. Installed some additional test instances (pSB, SNMP, RRD) in the DC office. Starting looking at options for code hosting. Additional work on DCN Webadmin. Looking to finish pSB commitments for MDM very soon (2 Week Deadline...), including Webadmin and packaging. Needs to find outsiders to install various perfSONAR packages. Looking at Warren, Bill Owens, Dan Pritts, UDel/SLAC students. Needs to start making a FAQ wiki page on installation procedures (use CW/CT installs as examples).
+     * Aaron: Finished release, although other tasks like creating RPMs still need to be done. Need to Announce this somwhere (Note to Jeff to do so). Installed two versions of TS for Internet2, ESnet and they can communicate. Looking to make switch in SVN this week (Weds, will send email).
+   # SLAC
+     * Jared: Got release out, not much else. May still need to make RPMs of services. Need to find people to install PingER (Joe + SLAC students + whoever Jason can round up).
+   # IU
+     * John Hicks: Nothing new, will be interacting with Jason/Jeff/Eric on some meetings down the road with a vistor to IU who would like to hear some discussions on pS and DCN (End of March/Beginning of April). Will pass on to Luke that Jason will be installing new SNMP MA very soon (after ndb machines have maintenance).
+   # FNAL
+     * Maxim: Worked with Yee/Jared all week on release related activities. Everything seems to work as expected. Has PingER/GUI installed and will keep running. Fixed schema issue (see mailing list). Plans on profiling next week to find the issues (will take Jason's comments into consideration), lots of room for improvement. Fixed a topology schema issue with webadmin.  Thinks we need a more often release system than CPAN such as night builds. There will be issues with quality control, etc. that we would need to work out.
+ # !CodeHause
+   * Jason/Aaron/Maxim will update on anything they have determined on evaluating potential hosting sites.
+     * 1. Wiki page is posted https://wiki.internet2.edu/confluence/display/PSPS/Code_Hosting_Comparison. Will hold off on decision until after Jeff has meeting in AA.
+ # Licensing/Trademark
+   * Licensing/Trademark will be skipped this meeting, but revisited in the next one. (Jeff has a meeting on the 18th to discuss this with Internet2 staff familiar with the issues.)
+     * Will hold off on decision until after Jeff has meeting in AA.
+ # MDM release update
+   * What remains to be done?
+     * In the process of collecting 'Test Points' (PingER, pSB have installed versions to test against currently). As a group we need to discuss/come to some conclusion on packaging soon (see below). Jason needs to see about making pSB use webadmin very soon. Need to package AMI to go along with pSB (at a minimum the collectors and database). April release deadline...
+ # pS-PS
+   * Anything new in the infrastructure portions?
+     * Aaron discussed the modifications that he and Jason made to the framework to the 'Document_file' class that offers a very significant speedup to outputing messages (particularly !SetupDataRequest Messages with LOTS of datum). Jason wants to know if this can be a 'configurable option' so that people could choose. Aaron wants to make a subclass that can be used for either, although Document_string may go away. Jeff points out that 'random write' services may need to use that, and couldn't use file. For now default should be changed to file writing since it is the quickest.
+ # Packaging
+   * We've got the Perl packages. What other kinds of packages should we offer and what should they look like? (e.g. a full tarball of each service, an RPM of each service, RPMs for each Perl package, ...)
+     * Aaron: We should go with all in one 'packages' of SVN on a per-service basis. Jeff: This would be bad for sharing the daemon/configuration, would prefer package of entire svn, or 'daemon' package + 'service' packages. Also wants to the concept of a 'Bundle'. Joe wants everything. For MDM we will need to decide soon.
+ # Standards docs
+   * Jason will update on the current status of the schema/protocol/service document examples. Preparations need to begin in the next couple of weeks to present this in Zagreb.
+     * Jason stalled on these, will pick this up again and make some progress before the meeting.
+ # LHC-OPN Meeting from March 10th
+   * Joe, can you give a summary of what was decided and what that means to us?
+ # LHC-Tier2 BCP
+   * How did LHC-OPN take the direction? If they were supportive, what is our next steps? I assume we need to get more of the document actually written now.
+   * Heard interesting presentations:
+     * Dante presentation on re-designing the LHC OPN (i.e. get rid of circuits and go IP. Discussion ensued, some strong objections. Large part of meeting spent on this issue.
+     * Jamie Shiers/James Casey (both from CERN) - Want/Need to monitor the status of the WLCG (Worldwide LHC Computing Grid). Looking into doing this and tracking to the MOU that each organization signed (i.e. make sure everyone is keeping up with the promises of uptime/availability etc.) The general idea is to print reports for the high level people to see and check out. Will need to get SOME info from the network layer (not just compute). Currently E2EMON & reports by Dante are the only source of network info.  Need to add active measurmenets to the mix to get a more accurate info, and then figure out how to present it to the WLCG grid management framework.
+   * 8/12 Organizations are ok with MDM as a service provided by Dante (i.e. not the appliance or software specifically, just the idea of the service itself). Brookhaven didn't respond yet, same with Triumph. Sara and Italy have security concerns.
+     * The Netherlands (Sara)  wants to see federations and supports the 'single domain' solution for the duration of the GN2 project with the idea that this will provide time to deploy a federated solution.
+   * Our doc will define teir 1/2 in the US only (i.e. we have a constrained environment, easy to move forward and make progress).
+   * Commitments:
+     * Eric (mostly us)  will continue on the BCP for teir 2s
+     * Dante working on the MOU measurement issue for presentation in June (Loukik will probably lead the work)
+     * James Casey working on specifying the API from the measurement group to the grid management software for June.
+ # Next call will be March 31, 2:30 EDT.
+
+=== 20080310Call ===
+
+ # Attendees: Jason, Aaron, Jeff, John, Jared, Brian, Maxim
+ # Team Updates
+   # FNAL
+     * Maxim has been testing the pingER MA/MP. Specifically creating test cases for mal-formed requests. He still has some cleanup to remove some old tests. He will then be working with Jared on packaging for the 0.8 release.
+   # UDel
+   # ESnet
+     * Brian has a test harness that works, but is not yet flexible enough to be used to test the Java code. He will be refactoring the code some, to do that. Brian also has plans to add netlogger profiling into the pS-PS code.
+   # Internet2
+     * Jason has been working on enhancements to the LS service in support of DCN. (API for interacting with the LS, and a web-cgi based GUI for administration.) He has also worked on performance/bug fixes and testing for LS/perfSONARBUOY/SNMP MA. He is working on packaging for those services this week, and will be working on protocol documentation starting next week.
+     * Aaron has been working primarily on testing and packaging as well as a topology sharing agent for DCN. Aaron outlined how the topology agent works and how the global topology is expected to propagate.
+     * Jeff has worked on the development of the LHC Tier2 BCP recommendation that is being presented at the LHCOPN meeting today/tomorrow. Also, he has pushed the licensing discussion up through Internet2 management. Additionally, along these lines Dante has let us know that they are considering trademarking perfSONAR in the EU. There was much discussion about what this might mean - bottom line is that Jeff and Eric will be asking Internet2 management (and possibly lawyers - ugh) for advise.
+   # SLAC
+     * Jared has been working on debugging, packaging and testing for the upcoming release. Specifically some API tests. The bottom line is that Jared and Maxim plan to be ready for a new CPAN release tonight.
+   # IU
+     * John has an APAN (IIU?) visitor coming soon, and would like to arrange for a call with a few people to update the visitor on perfSONAR. John will contact Jeff to arrange something.
+ # Code Storage/Licensing
+   * Maxim has pointed everyone to 'code.google.com' as a repository where we could store releases as well as host things like blogs, bug tracking, wiki, and even svn. Similar to sourceforge.
+     * Upsides - All in one location
+     * Downsides - Licensing still an issue. No integrated CPAN like installation
+   * Much discussion about hosting environments and about code distribution mechanisms. The bottom line is that we need more in depth facts to make a decision. Jason, Aaron, Maxim will do a comparison of a couple of open-source hosting environments and make a recommendation to the group.
+ # Next Release
+   * Aiming for TONIGHT
+   * Included items
+     * SNMP MA
+     * LS
+     * perfSONARBOUY MA
+     * PingER MA/MP
+     * L2 Status MA
+     * Topology Service
+     * CircuitStatus MA
+     * Others?
+ # pS-PS
+   * Anything new in the infrastructure portions?
+     * Jason plans to add some additional pieces into an LS registration API. Also, additional work needs to be done in profiling to determine if the file-concatenation method of building response messages needs to be reintegrated into the current code base.
+   * Merge status
+     * Aaron plans to move the current trunk to a new branch, and move the 'merge' branch to trunk after the 0.8 release is complete.
+ # Standards docs
+   * Stalled pending release, will be resumed within the week and strawman prepared by Zagreb Meeting.
+ # Zagreb Meeting
+   * Attending in person:
+     * Jeff
+     * Martin
+     * Joe
+   * Attending remote:
+     * Jason
+     * Aaron
+     * Eric
+   * Changes to agenda?
+     * Please send any additional topics to Jeff - as well as any requests for specific scheduling.
+ # Internet2 Spring Member Meeting (April 21 - 23)
+   * Topics of Discussion?
+   * Potential Demos?
+ # Google SOC 2008
+   * See our ideas here: https://wiki.internet2.edu/confluence/display/GSoC/Ideas-2008
+   * Suggestions?
+ # Next call will be March 17, 2:30 EST
+
+=== 20080303Call ===
+
+ # Attendees: Matt, Rich, Jeff, Jason, Joe, Phil, Aaron, Jared, Phil
+ # Agenda:
+   * The propose of this meeting is to work on https://wiki.internet2.edu/confluence/display/PSPS/Tier-2-BCP
+   * Identify Who the recommendation should be from
+   * Identify Who is the recommendation to
+   * Discuss current organization
+     * What is the purpose of each section.
+     * Are we missing anything important?
+   * Who can contribute to which sections.
+   * Set a date for next meeting (and when action items at this meeting should be done.)
+
+==== Document Structure ====
+
+ * Introduction
+   * The document should be a US perfSONAR collaboration recommendation to US LHC Tier2 centers.
+   * We should focus on the diagnostics components, and not just the continuous tests.
+   * Make sure it is more explicit that every organization is responsible for ensuring that the measurements to the remote sites important to them are made.
+   * Add more about using ad-hoc measurements to diagnose problems
+     * Add something about the requirements to use a common framework. push LS?
+ * Goals
+   * Change "TIER 1 & TIER 3" to "important Peers"
+ * Methodology
+   * Add a methodology section after goals that discusses:
+     * The increased value to the whole community with more participation.
+     * Present a methodology and discuss how different metrics and tools fit into it.
+
+==== Presentation for next week ====
+
+ * Say we have started a doc
+   * From US PS collaboration
+   * To US CMS & US Atlas collaboration 
+ * Give rough outline
+ * Discuss goals section of document
+ * Discuss existing forums that we are planning on using to get input from our users.
+   * Internet2 HENP SIG
+   * FERMI workshop in April or May for
+     * US Atlas
+     * US CMS 
+     
+==== Action Items ====
+
+ * Jeff:
+   * Will do a presentation outline today & send it out.
+   * Take another pass at the end-to-end delay section
+ * Rich:
+   * Make a pass at the "Diagnostics to look for specific known performance problems" section
+ * Joe:
+   * Make a pass over the presentation outline generated by Jeff
+   * Schedule next meeting to discuss doc on Monday March 17 morning.
+
+=== 20080221Call ===
+
+ # Attendees: Jason, Yee, Jared, Brian, Aaron, Maxim
+ # Team Updates
+   # SLAC
+     * Jared: Finished constructing (module based) test suite for PingER. All code for MP/MA passes. Packaging nearly completed. Need to decide if the conf tools (i.e. webadmin) should belong in the CPAN package.
+     * Yee: Finished MP issues, awaiting packaging and the move to new SVN structure. Would like to move gmaps code (would like code review) into new svn structure.
+   # IU
+     * N/A
+   # UDEL
+     * N/A
+   # ESnet
+     * Brian: Working on test suite with Aaron/Jason currently, others soon. More updates on this below...
+   # Internet2
+     * Aaron: Implemented changes into daemon to handle the filtering. Proof of concept with Status/SNMP MAs (requires further testing to declare victory). Changed several functions in the process to the new parameters API. Will need to change others as well. Need to upgrade skeleton to go with new changes
+     * Jason: At NPW last week, good turnout and participation from NOAA/OU. OU would be interested in installing perfSONAR sometime in the future (check back around summer JTs). Aiding Brian with testing of SNMP MA. Need to fix LS to account for some performance issues. Will address SNMP MA performance/functionality this week. Working on documentation for deadline of Croatian pS Dev meeting.
+   # Fermilab
+     * Maxim: On leave last week, was locked out of systems. Still catching up with e-mail on issues including chaining. Looking for feedback on webadmin (Jason and MM from Greece only two to comment so far). Will webadmin be in the CPAN packages? All: Don't know yet. How do we want to do configuration for other services, CPAN based or webadmin? Nearly done with functional testing for MDM. Notify when svn is being moved.
+   # Georgia Tech
+     * N/A
+ # SVN issues
+   * Merging branches update
+     * Waiting on PingER release for official move.
+       * Estimated Start/End Time
+         * end of this week, beginning of next week (Yee, Maxim, Jared) to notify when ready). Should require single day of freeze + code modifications to ensure everything works.
+       * What is included/what isn't (policy on deleted branches)
+         * All old branches (no activity in months) need to go. New policy to keep branches up to date and merge/delete regularly.
+       * Changes to proposed structure (i.e. where will examples, testing, documentation fit?)
+         * Need spot for testing, documentation, clients, example messages (i.e. do we package example messages with the services for CPAN?)
+ # Testing
+   * Test suite
+     * Brian is leading the effort with help from service developers (Aaron/Jason currently, will be asking Maxim/Yee for assistance after initial work). The starting point will be the SNMP MA. Plan is to auto-generate store file + rrds then send series of messages to test both performance and correctness. Will generalize framework to all services after this stage. Will require request/response messages from each service writer (look in doc). May generalize this framework to SOAP-UI or module based tests as well. Yee has asked for SQLite extensions (to follow rrd pattern) for PingER.
+ # Documentation
+   * Updates
+     * Must be complete for Croatian meeting.
+ # Next call will be 25 Feb 2008
+
+
+=== 20080211Call ===
+
+ # Attendees: Jason, Yee, Jared, Brian, Aaron, Maxim
+ # Team Updates
+   # SLAC
+     * Jared: Finished constructing (module based) test suite for PingER. All code for MP/MA passes. Packaging nearly completed. Need to decide if the conf tools (i.e. webadmin) should belong in the CPAN package.
+     * Yee: Finished MP issues, awaiting packaging and the move to new SVN structure. Would like to move gmaps code (would like code review) into new svn structure.
+   # IU
+     * N/A
+   # UDEL
+     * N/A
+   # ESnet
+     * Brian: Working on test suite with Aaron/Jason currently, others soon. More updates on this below...
+   # Internet2
+     * Aaron: Implemented changes into daemon to handle the filtering. Proof of concept with Status/SNMP MAs (requires further testing to declare victory). Changed several functions in the process to the new parameters API. Will need to change others as well. Need to upgrade skeleton to go with new changes
+     * Jason: At NPW last week, good turnout and participation from NOAA/OU. OU would be interested in installing perfSONAR sometime in the future (check back around summer JTs). Aiding Brian with testing of SNMP MA. Need to fix LS to account for some performance issues. Will address SNMP MA performance/functionality this week. Working on documentation for deadline of Croatian pS Dev meeting.
+   # Fermilab
+     * Maxim: On leave last week, was locked out of systems. Still catching up with e-mail on issues including chaining. Looking for feedback on webadmin (Jason and MM from Greece only two to comment so far). Will webadmin be in the CPAN packages? All: Don't know yet. How do we want to do configuration for other services, CPAN based or webadmin? Nearly done with functional testing for MDM. Notify when svn is being moved.
+   # Georgia Tech
+     * N/A
+ # SVN issues
+   * Merging branches update
+     * Waiting on PingER release for official move.
+       * Estimated Start/End Time
+         * end of this week, beginning of next week (Yee, Maxim, Jared) to notify when ready). Should require single day of freeze + code modifications to ensure everything works.
+       * What is included/what isn't (policy on deleted branches)
+         * All old branches (no activity in months) need to go. New policy to keep branches up to date and merge/delete regularly.
+       * Changes to proposed structure (i.e. where will examples, testing, documentation fit?)
+         * Need spot for testing, documentation, clients, example messages (i.e. do we package example messages with the services for CPAN?)
+ # Testing
+   * Test suite
+     * Brian is leading the effort with help from service developers (Aaron/Jason currently, will be asking Maxim/Yee for assistance after initial work). The starting point will be the SNMP MA. Plan is to auto-generate store file + rrds then send series of messages to test both performance and correctness. Will generalize framework to all services after this stage. Will require request/response messages from each service writer (look in doc). May generalize this framework to SOAP-UI or module based tests as well. Yee has asked for SQLite extensions (to follow rrd pattern) for PingER.
+ # Documentation
+   * Updates
+     * Must be complete for Croatian meeting.
+ # Next call will be 25 Feb 2008
+
+=== 20080204Call ===
+
+ # Attendees: Jared, Yee, Brian, Martin, Chris
+ # Team Updates
+   # Internet2
+     * Jason: Giving a NPW in Norman OK first part of this week. Past Week: Addressed some performance issues in SNMP MA by implementing opaque keys that allow a faster lookup. Starting to address performance issues in LS (waiting for feedback on how to proceed) regarding slow registration. Bugfixes in SNMP MA/LS. Additional documentation updates to protocol docs (LS/MA) and service docs (LS/SNMP MA), still awaiting feedback from everyone. Will need to add more detailed 'service steps' (i.e. what are the expected outcomes for specific input sequences) and should include flow charts etc. Completed early work on perfSONARBOUY MA. Changes will be likely after first release of BWCTL. Expected packaging and release into CPAN late next week.
+     * Aaron: Has been working with Brian with any issues he's had. Also been looking at handling metadata chaining and filter chaining in the daemon by passing two arrays, one containing the metadata chain and the other containing the set of filters. Looking in to outputting to a temporary file since that was able to improve the performance in Jason's previous release, and should be easy to try.
+   # SLAC
+     * There will be a (beta?) PingER release soon (hopefully within the week). Jared has been updating the test suite to handle API changes that have occurred.
+   # IU
+     * Release candidate bwctl deployed on I2 observatory. Some problems, but Jeff is working on them and should be releasing a new RC in the near future. On the E2EMon front, the IN2P3 link no longer goes over HOPI, and there's been some discussion as to where updates need to occur when major topology changes occur
+   # UDEL
+     * Martin and Karthik have been working on the summarization problem. Karthik thinks they're close, but Martin is not so sure. Karthik has some scripts to use graphviz to visualize the summarized radix tree. Ongoing discussions with Maciej and Jason as to how the summarization code will be added to the dLS software
+   # ESnet
+     * The beta SNMP MA is now the default MA in use by ESnet. It's currently stable, but a bit slow.
+   # SVN issues
+     * Merging branches (when? what?)
+       * It was decided that after the PingER release, we'll begin the merge process. Thus, we should start sometime next week barring any unforseen events
+ # Testing
+   * test suite
+     * Brian and Aaron were both interested in creating a test suite. The general idea was to create a set of requests for each service and have a suite that would instantiate each service with some test data, run each request and validate the response. Brian would like to have a call in the near future to discuss the
+ # Performance Issues
+   * LS/(TS?)
+     * Jason is currently exploring ways to speed up the LS for registrations, particularly for the ESnet installation. Reason for slowness: perform a query before each insert to ensure no duplication of items. Possible Solution: Allow duplicates, but let the periodic 'reaper' clean them out [downside: some queries will produce duplicate results from time to time]. Other issues include management of transactions (not mixing reading and writing operations in the same transactions), logging corrections. Issues may effect other services that use the XMLDB such as the TS.
+   * SNMP MA/(Other MAs?)
+     * Jason has implemented fast opaque keys to use in the SNMP MA to allow a much faster conversion of key to data. The new keys are calculated by MD5 fingerprint and stored in lookups, avoiding an expensive XPath. Other MA services may wish to implement this in time.
+ # Documentation
+   * Product docs (pingER doc status, pSB status)
+     * Yee has some PingER documents in the merge branch that he'd like some feedback on.
+ # pS-PS developers meeting
+   * Washington DC end of April (Around SMM time, 21st-23rd)
+     * Jason can secure conference facilities at the Internet2 office before or after the meeting. Could also secure space at the meeting.
+
+=== 20080114Call ===
+
+ # Attendees: Maxim, Yee, Jason, Aaron, Brian, Joe, Jeff
+ # SVN issues
+   * Merging branches (when? what?)
+     * Aim for merging everything into the 'merge' branch the first week of Feb. Once that is done, the 'merge' branch will be brought back into 'trunk'.
+ # Installation issues
+   * common packaging
+   * config files
+     * Maxim is using CGI:Ajax and HTML:Template for his web-config application. Yee suggests looking at CGI:Application.
+ # Testing
+   * functional testing
+     * Maxim is only supporting L3Endpoint because expanding the abstract type was tedious. Jason suggested trying MSV for the rnc->xsd expansion to support this.
+   * wsdl
+ # Documentation
+   * Public Announcement
+     * Jeff asked that everyone review the 'overview' pS-PS content document and add portions they are responsible for. This will be given to the PR arm of Internet2 and a more polished version will be sent back for us to approve.
+   * Product docs (pingER doc status, pSB status)
+ # MDM Release Mgmt Update
+   * Who wants to be on the call tomorrow?
+     *  Jeff, Maxim, Yee all plan to.
+ # pS-PS developers meeting @ HI
+   * Still have it? Perhaps we should plan for something post Jt Techs?
+     * This has been postponed. Probably until late February or March. (Once all the MDM services are ready, so everyone can focus on this. Jeff will bring this up again in February for discussion.
+
+=== 20080107Call ===
+
+ # Attendees: Chris, Jared, Brian, Aaron, Jason, Maxim, Jeff, Martin
+ # Team Updates
+   # SLAC
+     * Jared: Looking at test suites and build systems in an attempt to harmonize what Aaron has put in pS-PS with the pingER code base.
+   # IU
+     * Chris: Nothing new.
+   # FNAL
+     * Maxim: Working on pingER MA functionality doc, hoping to combine it with pingER MP document (with Yee). Enhanced the pingER MA with limits and timeType support. Questions about installation process and packaging. Aaron outlined the packaging solution he is currently developing.
+   # UDEL
+     * Martin: Working on the OGF document to get it ready before the OGF meeting. Iterating on the dLS document, specifically the summarization section.
+   # ESnet
+     * Brian: Working on an interface for the ESnet RRD-MA.
+   # Internet2
+     * Jeff: Working on the dLS document. Nearly ready for a new bwctl release, which will lead to development of the bwctl MA (perfSONOBUOY-MA).
+     * Aaron: Packaging and testing work. Would like others to try the testing as soon as possible.
+     * Jason: Lots of protocol/profile/service documentation. Preparing for Jt-Tech's demos. Preparing to help Jeff with pSB development.
+ # pS-PS
+   * Coding Standards
+     * (Everyone ok with Maxim's suggestions? Perhaps we could document this somewhere - perhaps on this wiki? What about code reviews?)
+     * General agreement with the proposed standards. Jeff will put the current version on the wiki. Outstanding, is how we will deal with code reviews - there is general agreement that we should do them, but it is difficult to implement a process to get it done given the short release cycles we have been dealing with.
+   * Update from Aaron on current state of Daemon architecture.
+     * Main change is the addition of the Error/Exceptions object.
+ # Docs
+   * General status was reported in group updates - there was progress on all current docs.
+     * Status of Protocol Documents
+       * Echo
+       * LS
+       * Others?
+     * Status of Service Documents
+       * SNMP MA
+       * LS
+       * Others?
+     * Status of dLS doc
+ # MDM Requirements/Issues
+   * Documentation for MDM process/procedures is at: http://anonsvn.internet2.edu/svn/perfsonar/trunk/perfsonar-doc/release-management/
+   * Jeff, Brian, Maxim will review this and be on the MDM release-mgmt call tomorrow.
+     * Review requirements to get pS-PS services in MDM-perfSONAR
+     * Review testing team procedures for MDM-perfSONAR
+ # LHC Tier-2 BCP Document
+ # Jeff is enlisting help to write an LHC Tier-2 document to be ready for the next big Tier-2 meeting (Mar 10?). Maxim suggested this should be merged with an effort to get pS-PS code included with OSG tools. (http://www.opensciencegrid.org/)
+ # There will be a release focused call on Jan 11, and a face to face meeting in Hawaii (probably Jan 20, but details will follow).
+
+== Last Updated ==
+
+$Id$
+
