@@ -155,7 +155,7 @@
    * *Jeff, Rich and Aaron will continue to work on this.*
  # Release Management is now needed...
     # stable snapshot of svn trunk
-    *All: Jeff asked for volunteers to be rel-mgmt czar - email*
+    * All: Jeff asked for volunteers to be rel-mgmt czar - email
     * Next call will be dedicated to release-management.
  # Discussion of middle-term goals
    * Wiki
