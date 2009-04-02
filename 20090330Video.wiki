@@ -3,7 +3,6 @@
 == Agenda/Minutes ==
 
  # Attendees: Aaron, Marcos, Jason, Brian, Jeff
-   * ...
  # Team Updates
    # Internet2
      Jeff: pS-B owamp database code.
