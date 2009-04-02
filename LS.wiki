@@ -262,14 +262,14 @@ The following is an explanation of the logging file format.
 
 || *Configuration Name* || *Suggested Value* || *Description* ||
 || log4perl.logger.perfSONAR_PS || INFO, A1 || Log level to use (DEBUG, INFO, CRITICAL, FATAL) and the name of the logger ||
-|| log4perl.appender.A1 || Log::Dispatch::Screen, Log::Dispatch::Syslog, Log::Dispatch::FileRotate || Where to direct logging messages ||
+|| log4perl.appender.A1 || Log::Dispatch::Screen, Log::Dispatch::Syslog, Log::Dispatch::!FileRotate || Where to direct logging messages ||
 || log4perl.appender.A1.facility || local5 || Syslog facility to handle log messages.  Use with the Syslog option ||
-|| log4perl.appender.A1.filename || /var/log/perfsonar/lookup_service.log || Location of logging file.  Use with the FileRotate option ||
-|| log4perl.appender.A1.max || 5 || Maximum log files to maintain.  Use with the FileRotate option ||
-|| log4perl.appender.A1.size || 16777216 || Size of the logging file before rotation.  Use with the FileRotate option ||
+|| log4perl.appender.A1.filename || /var/log/perfsonar/lookup_service.log || Location of logging file.  Use with the !FileRotate option ||
+|| log4perl.appender.A1.max || 5 || Maximum log files to maintain.  Use with the !FileRotate option ||
+|| log4perl.appender.A1.size || 16777216 || Size of the logging file before rotation.  Use with the !FileRotate option ||
 || log4perl.appender.A1.mode || append || Append to a file instead of overwriting. ||
-|| log4perl.appender.A1.layout || Log::Log4perl::Layout::PatternLayout || Use a specific patter generator ||
-|| log4perl.appender.A1.layout.ConversionPattern || %d (%P) %p> %F{1}:%L %M - %m%n || Pattern for log files ||
+|| log4perl.appender.A1.layout || Log::Log4perl::Layout::!PatternLayout || Use a specific patter generator ||
+|| log4perl.appender.A1.layout.!ConversionPattern || %d (%P) %p> %F{1}:%L %M - %m%n || Pattern for log files ||
 
 
 === Suggested Configuration Changes ===

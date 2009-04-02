@@ -1,548 +1,434 @@
-= SNMP Measurement Archive =
+#summary perfSONAR-PS SNMP MA Service Information
 
-== TOC ==
-
- * [SNMPMA#Introduction Introduction]
- * [SNMPMA#Installation Installation]
-   * [SNMPMA#Pre_requisites Pre-requisites]
-     * [SNMPMA#RRD_Tool RRD Tool]
-       * [SNMPMA#RRD_Tool_Patch RRD Tool Patch]
-     * [SNMPMA#SQLite SQLite]
-     * [SNMPMA#MySQL MySQL]
-     * [SNMPMA#Oracle_DB_XML Oracle DB XML]
-   * [SNMPMA#SVN_Installation SVN Installation]
-   * [SNMPMA#CPAN_Instalation CPAN Instalation]
-   * [SNMPMA#Binary_Executable_Installation Binary Executable Installation]
-   * [SNMPMA#RPM_Installation RPM Installation]
-   * [SNMPMA#Deb_Installation Deb Installation]
-   * [SNMPMA#Configuration Configuration]
-     * [SNMPMA#Service_Configuration Service Configuration]
-     * [SNMPMA#Metadata_Configuration Metadata Configuration]
-   * [SNMPMA#Running Running]
-   * [SNMPMA#Testing Testing]
- * [SNMPMA#Code_Tour Code Tour]
-   * [SNMPMA#Initialization Initialization]
-   * [SNMPMA#LS_Registration LS Registration]
-   * [SNMPMA#Communication_Entry Communication Entry]
-     * [SNMPMA#MetadataKeyRequest_Case MetadataKeyRequest Case]
-       * [SNMPMA#metadataKeyRetrieveMetadataData metadataKeyRetrieveMetadataData]
-       * [SNMPMA#metadataKeyRetrieveKey metadataKeyRetrieveKey]
-     * [SNMPMA#SetupDataRequest_Case SetupDataRequest Case]
-       * [SNMPMA#setupDataRetrieveMetadataData setupDataRetrieveMetadataData]
-       * [SNMPMA#setupDataRetrieveKey setupDataRetrieveKey]
- * [SNMPMA#FAQ FAQ]
- * [SNMPMA#Last_Updated Last Updated]
+<wiki:toc max_depth="6" />
 
 == Introduction ==
 
-The following article covers topics related to the perfSONAR-PS SNMP Measurement
-Archive.  This service functions as a standalone warehouse for SNMP gathered
-information, and is currently limited to:
+The [http://www.internet2.edu/performance/pS-PS/ perfSONAR-PS] SNMP based
+Measurement Archive (SNMP MA) is able to expose data collected via variables
+from the Simple Network Management Protocol (SNMP) protocol found on networked
+devices and stored in [http://oss.oetiker.ch/rrdtool/ Round Robin Databases]
+(RRD) archives. The measurements are collected through external means, normally
+through software such as [http://oss.oetiker.ch/mrtg/ MRTG],
+[http://www.cacti.net CACTI], or [http://cricket.sourceforge.net/ Cricket], and
+is commonly stored in RRD archives. External access to commonly requested data
+items, remains challening due to physical and political boundaries.
 
- * Interface Utilization (e.g. interface octet counters)
- * Inteface Errors
- * Interface Discards
-
-Expansion to other MIB values is possible, but was not considered in the initial
-development.
-
-Data is normally stored in [http://oss.oetiker.ch/rrdtool/ RRD] database (e.g. 
-the kind normally used for network monitoring tools such as 
-[http://www.cacti.net Cacti], [http://oss.oetiker.ch/mrtg/ MRTG] or
-[http://cricket.sourceforge.net/ Cricket].  This software has extensions
-available to handle special case storage in SQL based databases (currently
-[http://www.mysql.com/ MySQL] and [http://www.sqlite.org/ SQLite]) although
-these were tested with specific use cases in mind.  Extension to your homegrown
-monitoring solution may require some perl slinging.
-
-As with all perfSONAR-PS tools the underlying communication and storage
-information is described in XML formats as specified by the Network
-Measurements Working Group ([http://nmwg.internet2.edu NM-WG]) organized in the
-Open Grid Forum ([http://www.ogf.org OGF]).
+The SNMP MA provides a simple interface that is cable of exposing these files
+after basic configuration for consumption by
+[http://www.perfsonar.net/ perfSONAR] client applications and services alike.
+The Web Service front end provides a uniform method of access using the
+perfSONAR XML protocols and delivers the data in an unambiguous manner, thus
+eliminating the mystery associated with the backend storage. 
 
 == Installation ==
 
-The following covers several installation methods.
+There are several ways to install this service, the popular methods are listed
+below.  Note that these are from the point of view of installing a particular
+version - this may or may not be the most recent.  
 
-=== Pre requisites ===
+=== Prerequisites ===
 
-There are several dependencies, depending on how the SNMP MA is to be used to
-serve collected data.
+The SNMP MA is packaged as an [http://www.rpm.org/ RPM] - a binary installation
+format that is geared towards use on Red Hat linux based systems.  Examples
+include [http://fedoraproject.org/ Fedora],
+[http://www.redhat.com/ Red Hat Enterprise Linux], [http://centos.org/ CentOS],
+[http://www.whiteboxlinux.org/ White Box],
+[https://www.scientificlinux.org/ Scientific Linux], and others.  
 
-==== RRD Tool ====
-
-[http://oss.oetiker.ch/rrdtool/ RRDTool] is required for the common use case of
-this software (e.g. pairing the application with existing RRD stored data).  If
-you will be installing this software on a host that is already running
-collection software (recommended) this step is probably already done. 
-
-Ensure that you have installed both the rrdtool executable and the rrd-perl
-libraries (different packages in package managers such as _apt_ and _yum_).  If
-installing from source be sure to use the *_--enable-perl-site-install_* flag.
-
-After installation be sure to adjust your *PATH* and *LD_LIBRARY_PATH*
-variables as needed.
-
-===== RRD Tool Patch =====
-
-RRDTool has a known bug in the Perl modules that form the API.  Normally a
-request to read a file that doesn't exist, or using a datasource or RRA name
-that is incorrect would produce an error.  There are hooks to bubble this
-error up through the perl module, but they cause an infinite loop.
-
-A patch has been prepared to handle this situation.  The patchfile and
-instructions regarding use are available here:
-
-http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/scripts/rrdtool/
-
-==== SQLite ====
-
-SQLite can be installed via your package manager (_apt_, _yum_, etc.) along with
-related database access methods (e.g. _DBI_, _DBD::SQLite_).  The alternative is
-to install from [http://www.sqlite.org/download.html source] and 
-[http://search.cpan.org/dist/DBD-SQLite/lib/DBD/SQLite.pm CPAN].
-
-==== MySQL ====
-
-MySQL should be installed via your package manager (_apt_, _yum_, etc.) along with
-related database access methods (e.g. _DBI_, _DBD::mysql_).  The alternative is
-to install from [http://dev.mysql.com/downloads/ source] and 
-[http://search.cpan.org/~capttofu/DBD-mysql-4.007/lib/DBD/mysql.pm CPAN].
-
-==== Oracle DB XML ====
-
-Oracle DB XML is an open source XML database formerly from the
-Berkeley/Sleepycat company.  This optional component can be used instead of
-relying on a flat XML file to store metadata information.  Current testing has
-revealead that there is not an explicit performance advantage for using this
-method unless managing 1000's of metadata descriptions, so we do not expect
-most installations to require this software.
-
-A current version (*2.3.X* series) is available here:
-
-http://www.oracle.com/technology/software/products/berkeley-db/xml/index.html
-
-We are asking that installation of the *2.4.X* series be avoided until we have
-had a time to investigate new features and improvements to the code.  It is
-necessary to install this with the *_--enable-perl_* flag. 
-
-Enabling this flag does cause some strange behaviors on certain systems.  We
-have found through testing it is best to disable the *make test* option directly
-in the *buildall.sh* file.  This can be done by replacing this:
+These Linux distributions normally rely on _Package Management_ tools to install
+and maintain software.  Examples of these tools include
+[http://en.wikipedia.org/wiki/Up2date Up2Date], [http://yum.baseurl.org/ YUM],
+and [http://www.debian.org/doc/manuals/apt-howto/ Apt].
+[http://internet2.edu/ Internet2] has created a repository to house the
+perfSONAR-PS software, related performance tools, and hard to find
+prerequisites.  We encourage adopters of these tools to install a simple RPM
+package that gives the necessary configuration information for the YUM and Apt
+tools.  The RPM can be found here:
 
 {{{
-# Perl
-if [ $BUILD_PERL = "yes" ]; then
-if [ $BUILD_ONE = "no" -o $BUILD_ONE = "perl" ]; then
-    echo Start Perl build: `date`
-    echo "If Perl build fails, see $DBXML_DIR/src/perl/README"
-    echo "for configuration and build instructions"
-    cd $DBXML_DIR/src/perl
-    if [ $DO_CONFIGURE = "yes" ]; then
-        $PERL Makefile.PL
-    fi
-    echo Building Perl
-    $MAKE || exit $?
-    echo Testing Perl
-    $MAKE test || exit $?
-    if [ $DO_INSTALL = "yes" ]; then
-        echo Installing Perl
-        $MAKE install || exit $?
-    fi
+wget -c http://software.interent2.edu/Internet2-repo-0.1-2.noarch.rpm
+}}}
+  
+To install this RPM first import the signing key:
 
-    cd $TOP
-    echo End Perl build: `date`
-fi
-fi
+{{{
+rpm --import http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2
 }}}
 
-with this:
+Then install the RPM:
 
 {{{
-# Perl
-if [ $BUILD_PERL = "yes" ]; then
-if [ $BUILD_ONE = "no" -o $BUILD_ONE = "perl" ]; then
-    echo Start Perl build: `date`
-    echo "If Perl build fails, see $DBXML_DIR/src/perl/README"
-    echo "for configuration and build instructions"
-    cd $DBXML_DIR/src/perl
-    if [ $DO_CONFIGURE = "yes" ]; then
-        $PERL Makefile.PL
-    fi
-    echo Building Perl
-    $MAKE || exit $?
-#    echo Testing Perl
-#    $MAKE test || exit $?
-    if [ $DO_INSTALL = "yes" ]; then
-        echo Installing Perl
-        $MAKE install || exit $?
-    fi
-
-    cd $TOP
-    echo End Perl build: `date`
-fi
-fi
+rpm -ivh Internet2-repo-0.1-2.noarch.rpm
 }}}
 
-Note that this is *_normally_* the last section of *buildall.sh*, at the end of
-the file.  
+It is also recommended that an additional repository be installed for hard to 
+find prerequisite software that may not be available in traditional repositories
+used by the Linux distributions.  Two regarded repositories are:
 
-After installation be sure to adjust your *PATH* and *LD_LIBRARY_PATH*
-variables as needed.
+ * http://dries.ulyssis.org/rpm/
+ * http://dag.wieers.com/rpm/
+ 
+Each site provides configuration instructions and packages similar to the
+Internet2 repository.
 
-=== SVN Installation ===
+=== APT === 
 
-perfSONAR-PS can be downloaded from a read-only copy of svn if you prefer 
-to be on the bleeding edge of things.  Normally we do not expect to upload to
-CPAN more than once a month, so the latest performance and bug fixes will
-always be available here.  Do note that experimental software such
-as this may have some lingering bugs: please let us know via email if you 
-intend to run something production from here and we may recomend making you a
-specific tag.
-
-To download this repository, ensure you have subversion installed on the target
-machine. Then:
-
- * mkdir /path/to/perfSONAR_PS
- * svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk /path/to/perfSONAR_PS
-
-When it comes time to update this repository, it is as simple as:
-
- * cd /path/to/perfSONAR_PS
- * svn update
-
-The svn directory itself contains most of what is needed to run the services
-immediately. There is some minor configuration that must be performed to get
-the perfSONAR-PS daemon configured.  Please see [ServiceConfiguration] and the
-Metadata Configuration section for examples of the configuration file as well
-as instructions for operating the configuration script.
-
-=== CPAN Instalation ===
-
-Each search can be installed (along with most dependencies) via the
-Comprehensive Perl Archive Network ([http://search.cpan.org CPAN]).  Here is a
-breakdown of the requirements/instructions/configuration steps that are 
-required for this service:
-
- # Install any pre-requistes.  
- # perl -MCPAN -e 'install perfSONAR_PS::Services::MA::SNMP'
- # Configure the daemon, see [ServiceConfiguration].
- # Install the store file, this can (see also the section on Metadata Configuration):
-   * be autogenerated in the previous step (for a _test_ instance)
-   * come from an external source such as Cacti (currently), MRTG, Cricket (planned)
-   * may exist from a previous SNMP MA instance
- # Make sure the configuration/store information is up to date, and the RRD files are accessable.
-
-=== Binary Executable Installation ===
-
-Using a tool called the Perl Archive Toolkit
-(or [http://search.cpan.org/~smueller/PAR-0.980/lib/PAR.pm PAR]) it is possible
-to make self contained executables of our perfSONAR-PS services.  These
-executables contain all perl (and in some cases C) library dependencies and are
-tested to function on _clean_ installs of major OS releases (e.g. Debian,
-Fedora, RHEL, Scientific Linux, Ubuntu) on major architectures (e.g. x86,
-x86 64 Bit, PPC).  
-
-To install a PAR package follow these steps:
-
- # Download the PAR .tar.gz file of interest (*N.B.* we do not maintain a stable location of these due to their fleeting nature, the location will be fixed after the next major release) 
- # Untar the application: *tar -zxvf FILE.tar.gz*
- # Enter the directory: *cd FILE*
- # Read any instructions.  These may tell you how to configure/operate the specific software. There may be pre-requisites that are not available in the PAR (e.g. MySQL database drivers)
- # Perform configuration as necessary, see also the section on Metadata Configuraton and [ServiceConfiguration].
- # Install exeuctables in well know locations (optional)
- # Test installation as per-instructions.
- # Adjust logging, install any *init* scripts if available.
-
-=== RPM Installation ===
-
-To install a packaged RPM of a perfSONAR-PS service following the following steps:
-
- # Download the necessary RPMs (due to dependencies this step may be repeated)
- # Select the RPM you wish to install, run: *rpm -ivh RPM_NAME.ARCH.rpm*
- # Repeat step 1 if errors are seen, installing any dependency libraries or applications (may require 3rd party software)
- # Perform configuration as necessary, see also the section on Metadata Configuraton and [ServiceConfiguration].
-
-=== Deb Installation ===
-
-TBD
-
-=== Configuration ===
-
-Configuration has been broken into two subsecitons dealing with the service
-itself and the metadata storage.  
-
-==== Service Configuration ====
-
-See [ServiceConfiguration] for a complete discussion.  Beyond the _daemon_
-level options there are several configuration options specific to the SNMP MA.
-The following is an example configuration:
+Installation through apt is easy, simply let the package manager do the work of
+managing the dependencies:
 
 {{{
-<port 8098>
-        <endpoint /perfSONAR_PS/services/snmpMA>
-                module     perfSONAR_PS::Services::MA::SNMP
-                disabled        0
-                <snmp>
-                    default_resolution     300
-                    enable_registration     1
-                    metadata_db_external     cacti
-                    metadata_db_external_source     /etc/cacti/cactid.conf
-                    metadata_db_file     /usr/local/perfSONAR-PS/snmp-store.xml
-                    metadata_db_type     file
-                    rrdtool     /usr/bin/rrdtool
-                    service_accesspoint     http://HOST.DOMAIN:8098/perfSONAR_PS/services/snmpMA
-                    service_description     SNMP MA @ HOST in DOMAIN
-                    service_name     SNMP MA
-                    service_type     MA
-                </snmp>
-        </endpoint>
+apt-get update
+apt-get install perl-perfSONAR_PS-SNMPMA-3.1-1.pSPS.noarch.rpm
+}}}
+
+There may be several prerequisites to install depending on the age of your
+system.  To ensure that all are found, please be sure to install one of the
+alternative repositories above.  
+
+=== YUM ===
+
+Like Apt, YUM installation also manages the task of finding dependencies.  The
+following command is all that is needed:
+
+{{{
+yum install perl-perfSONAR_PS-SNMPMA-3.1-1.pSPS.noarch.rpm
+}}}
+
+There may be several prerequisites to install depending on the age of your
+system.  To ensure that all are found, please be sure to install one of the
+alternative repositories above. 
+
+=== Standalone RPM ===
+
+If you do not wish to install the Internet2 Repository package, you may simply
+find the appropriate RPM for your architecture without using a package manger.
+The first step is to install the signing key:
+
+{{{
+rpm --import http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2
+}}}
+
+Next download the service, for example if you are on an _*i386*_ architecture:
+
+{{{
+wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-SNMPMA-3.1-1.pSPS.noarch.rpm
+}}}
+  
+To install without package manager help:
+
+{{{
+rpm -ivh perl-perfSONAR_PS-SNMPMA-3.1-1.pSPS.noarch.rpm
+}}}
+  
+Note that this RPM may need packages to install correctly: if they are not found
+on your system manual download and install will be required.  An alternate
+method is to still use a package manager in a _local_ way (YUM only):
+
+{{{
+yum localinstall perl-perfSONAR_PS-SNMPMA-3.1-1.pSPS.noarch.rpm
+}}}
+
+This will still search the available repositories for any necessary packages.
+
+=== Tar Package ===
+
+All RPM packages are also available in _source_ packages that may be installed
+and used in the typical Unix/Linux fashion.  There are helper scripts included
+that may be used to download the necessary prerequisite software packages:
+
+{{{
+wget -c http://software.internet2.edu/source/perl-perfSONAR_PS-SNMPMA-3.1-1.tar.gz
+tar -zxfv perl-perfSONAR_PS-SNMPMA-3.1-1.tar.gz
+cd perl-perfSONAR_PS-SNMPMA-3.1-1/scripts
+./prepare_environment.sh
+./install_dependencies.sh
+}}}
+
+These two included scripts will configure the machine's users and startup
+scripts as well as contact [http://search.cpan.org CPAN] for any necessary perl
+libraries.  
+
+=== Subversion ===
+
+Similar to RPMs, a single service may be downloaded from our anonymous
+subversion server.  This is useful for staying on the cutting edge of our
+development (note the example below uses our specific release, but _trunk_ may
+be used as well:
+
+{{{
+svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-SNMPMA/
+}}}
+
+The instructions are the same here as for the Tar package.  When you wish to
+update (to retrieve new development or bugfixes) run:
+
+{{{
+cd perfSONAR_PS-SNMPMA
+svn update
+}}}
+
+== Configuration ==
+
+The following sections detail the necessary configuration of this service.
+
+=== Configuration File Format ===
+
+{{{
+<port 9990>
+    <endpoint /perfSONAR_PS/services/SNMPMA>
+        <snmp>
+            default_resolution              300
+            rrdtool                         /usr/bin/rrdtool
+            
+            metadata_db_external            none
+            metadata_db_external_source     
+
+                                                        # Sample Cacti configuration
+#            metadata_db_external                   cacti
+#            metadata_db_external_source            /etc/cacti/cactid.conf
+
+                                                        # Sample cricket configuration
+#            metadata_db_external                   cricket
+#            metadata_db_external_cricket_config    /home/cricket/cricket-config
+#            metadata_db_external_cricket_cricket   /home/cricket/cricket
+#            metadata_db_external_cricket_data      /home/cricket/cricket-data
+#            metadata_db_external_cricket_home      /home/cricket
+
+            metadata_db_file                /var/lib/perfsonar/snmp_ma/store.xml
+            metadata_db_type                file
+
+                                                        # Sample dbxml configuration
+#            metadata_db_file                       snmpstore.dbxml
+#            metadata_db_name                       /var/lib/perfsonar/snmp_ma/xmldb
+#            metadata_db_type                       xmldb
+                                                        
+	                                            # 720 minute (12hr) registaration window
+            ls_registration_interval        720
+            enable_registration             1
+                                                # fake LS instance (change to something real)
+            ls_instance                     http://localhost:9995/perfSONAR_PS/services/hLS
+            
+				                                # Service options (please customize)
+            service_accesspoint             http://localhost:9990/perfSONAR_PS/services/SNMPMA
+            service_description             ORG SNMP MA (CITY, STATE, COUNTRY)
+            service_name                    ORG SNMP MA
+            service_type                    MA
+        </snmp>
+        disable                             0
+        module                              perfSONAR_PS::Services::MA::SNMP
+    </endpoint>
 </port>
-disable_echo     0
-ls_registration_interval     60
-max_worker_lifetime     300
-max_worker_processes     30
-pid_dir     /var/run
-pid_file     snmp.pid
-reaper_interval     20
-ls_instance     http://HOST.DOMAIN:9095/perfSONAR_PS/services/hLS
+	                                            # 720 minute (12hr) registaration window
+ls_registration_interval	                720
+                                                # fake LS instance (change to something real)
+ls_instance                                 http://localhost:9995/perfSONAR_PS/services/hLS
+
+disable_echo	                            0
+	                                            # Root hints info, url + local copy location
+root_hints_url	                            http://www.perfsonar.net/gls.root.hints
+root_hints_file	                            /var/lib/perfsonar/snmp_ma/root.hints
+	                                            # Daemon management, shouldn't need changing
+reaper_interval	                            20
+max_worker_lifetime	                        300
+max_worker_processes	                    30
+pid_dir                                     /var/run
+pid_file	                                snmp_ma.pid
 }}}
 
-A breakdown of each item in the *snmp* section follows:
+=== Daemon Configuration File Options ===
 
-|| *Configuration Value* || *Required* || *Type* ||
-|| _default_resolution_ || yes || integer, related to RRD/SQL storage ||
-|| _enable_registration_ || yes || boolean, 0 or 1 ||
-|| _ls_instance_ || yes || string, LS instance to register to (instead of using gLS) ||
-|| _ls_registration_interval_ || no, yes with _ls_instance_ || integer, how often (in minutes) to register to an LS ||
-|| _metadata_db_external_ || yes || string, currently *none* or *cacti* ||
-|| _metadata_db_external_source_ || no, yes w/ *metadata_db_external* || string, path to cactid.conf ||
-|| _metadata_db_type_ || yes || string, either *file* or *xmldb* ||
-|| _metadata_db_file_ || yes || string, when *metadata_db_type* is _xmldb_ this must end in *.dbxml*, when *metadata_db_type* is _file_ this should be a path to an XML file ||
-|| _metadata_db_name_ || yes || string, used only, used only when *metadata_db_type* is _xmldb_  ||
-|| _db_autoload_ || no || boolean, used only when *metadata_db_type* is _xmldb_ ||
-|| _autoload_metadata_db_file_ || yes || used only when *metadata_db_type* is _xmldb_ to load the specified path to an XML file ||
-|| _rrdtool_ || yes || string, location of rrdtool binary ||
-|| _service_accesspoint_ || yes || string, access url of the service ||
-|| _service_description_ || yes || string, description of service ||
-|| _service_name_ || yes || string, name of the service ||
-|| _service_type_ || yes || string, type of service ||
-|| _disabled_ || no || boolean, present at each endpoint to enable/disable service at the daemon level ||        
+There are several _*Global*_ configuration items, an explanation of each follows:
 
-==== Metadata Configuration ====
 
-The metadata congiguration, commonly known as the *store.xml* file, contains
-the decscriptions of individual measured entities (in our case interfaces) as
-well as some identification of backend storage.  The following example
-descrinbes one direction of an ethernet interface:
+|| *Configuration Name* || *Required* || *Type* || *Description* ||
+|| ls_registration_interval || No || Integer (Time in Minutes) || How often the service registers with a _*Global*_ Lookup Service ||
+|| disable_echo || Yes || Boolean, 0 or 1 || Turn on or off the echo response (recommended to keep this on) ||
+|| root_hints_url || Yes || String (URL) || Location of a root hints file (default is http://www.perfsonar.net/gls.root.hints) ||
+|| root_hints_file || Yes || String (file path) || Location to locally store the root hints file ||
+|| ls_instance || No || String (URL) || LS instance to register with ||
+|| reaper_interval || Yes || Integer (Time in Seconds) || Internal daemon setting to manage processes ||
+|| max_worker_lifetime || Yes || Integer (Time in Seconds) || Internal daemon setting to manage processes ||
+|| max_worker_processes || Yes || Integer || Internal daemon setting to manage processes ||
+|| pid_dir || Yes || String (file path) || Directory to store PID files ||
+|| pid_file || Yes || String (file name) || Name of PID file for this service ||
+
+
+There are several configuration items that are directly related to the service,
+an explanation of each follows:
+
+
+|| *Configuration Name* || *Required* || *Type* || *Description* ||
+|| port || Yes || Integer || Port this service will listen on ||
+|| endpoint || Yes || String (URL path) || Endpoint path this service will listen on ||
+|| default_resolution || Yes || Integer || Default resolution for RRD tool archives ||
+|| rrdtool || Yes || String (file path) || Path to rrdtool binary ||
+|| ls_registration_interval || Yes || Integer (Time in Minutes) || How often the service registers with a _*Global*_ Lookup Service ||
+|| ls_instance || No || String (URL) || LS instance to register with ||
+|| enable_registration || Yes || Boolean, 0 or 1 || Allow the service to register with an LS instance ||
+|| metadata_db_name || No || String (file path) || Name of the directory that houses the database ||
+|| metadata_db_file || Yes || String (file name) || Filename of a database file ||
+|| metadata_db_type || Yes || String || Either _file_ or _xmldb_ ||
+|| metadata_db_external || Yes || String || Either _none_, _cacti_, or _cricket_ ||
+|| metadata_db_external_source || No || String || Location of external configration file, Used only for Cacti currently ||
+|| metadata_db_external_cricket_config || No || String (directory path) || Path to cricket config, Used only for cricket ||
+|| metadata_db_external_cricket_cricket || No || String (directory path) || Path to cricket directory, Used only for cricket ||
+|| metadata_db_external_cricket_data || No || String (directory path) || Path to cricket data, Used only for cricket ||
+|| metadata_db_external_cricket_home || No || String (directory path) || Path to cricet home directory, Used only for cricket ||
+|| service_accesspoint || Yes || String (URL) || URL used to contact this service ||
+|| service_description || Yes || String || Description of this service ||
+|| service_name || Yes || String || Name of this service ||
+|| service_type || Yes || String || Type of this service (normally hLS) ||
+|| disable || No || Boolean, 0 or 1 || Is this service active or not (normally 1) ||
+|| module || Yes || String (module name) || Module name that controls this service (normally will not change) ||
+
+
+=== Logger Configuration Options ===
+
+The following is an explanation of the logging file format.  
+
+
+|| *Configuration Name* || *Suggested Value* || *Description* ||
+|| log4perl.logger.perfSONAR_PS || INFO, A1 || Log level to use (DEBUG, INFO, CRITICAL, FATAL) and the name of the logger ||
+|| log4perl.appender.A1 || Log::Dispatch::Screen, Log::Dispatch::Syslog, Log::Dispatch::!FileRotate || Where to direct logging messages ||
+|| log4perl.appender.A1.facility || local5 || Syslog facility to handle log messages.  Use with the Syslog option ||
+|| log4perl.appender.A1.filename || /var/log/perfsonar/snmp_ma.log || Location of logging file.  Use with the !FileRotate option ||
+|| log4perl.appender.A1.max || 5 || Maximum log files to maintain.  Use with the !FileRotate option ||
+|| log4perl.appender.A1.size || 16777216 || Size of the logging file before rotation.  Use with the !FileRotate option ||
+|| log4perl.appender.A1.mode || append || Append to a file instead of overwriting. ||
+|| log4perl.appender.A1.layout || Log::Log4perl::Layout::!PatternLayout || Use a specific patter generator ||
+|| log4perl.appender.A1.layout.!ConversionPattern || %d (%P) %p> %F{1}:%L %M - %m%n || Pattern for log files ||
+
+
+=== Suggested Configuration Changes ===
+
+The SNMP MA comes with a base configuration via the installation procedure.
+This is meant to allow for immediate testing as well as serve as a guide for
+customizing the service.  
+
+There are several files that may be adjusted manually to configure this service
+for a specific use case:
+
+==== Daemon Changes ====
+
+Contains information that identifies the service uniquely and allows it to run
+in a given environment.  There are several options that should be changed:  
+   
+ * _*service_accesspoint*_ - Change the "hostname" from localhost
+ * _*service_description*_ - Identifying information about the service
+ * _*service_name*_ - Service Name (short)  
+ * _*rrdtool*_ - location of the rrdtool binary
+
+There are also several options that may be changed for a configuration:
+
+ * _*port*_ - Port the service listens on
+ * _*endpoint*_ - Endpoint to contact the service
+ * _*ls_registration_interval*_ - How often to contact gLS, 180 minute (3hr)
+ * _*default_resolution*_ - Raise higher or lower depending on RRD files
+ * _*metadata_db_external*_ - Used with external tools (Cacti/Cricket)
+ * _*enable_registration*_ - Turn on or off LS registration
+    
+The rest of the items are normally not to be adjusted.
+        
+==== Logging Changes ====
+
+Contains information related to logging, there are three modes:
+
+ * _*Log::Dispatch::Screen*_ - Log messages to screen (useful for debugging)
+ * _*Log::Dispatch::Syslog*_ - Log messages to syslog facility
+ * _*Log::Dispatch::FileRotate*_ - Log messages to specified file
+
+The rest of the items are normally not to be adjusted.
+    
+==== Metadata Configuration Changes ====
+
+The metadata configuration is stored at:
 
 {{{
-<?xml version="1.0" encoding="UTF-8"?>
-<nmwg:store  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
-             xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
-             xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
-             xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/">
-
-  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.7-273_in">
-    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="subject.7-273_in">
-      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-        <nmwgt:ipAddress type="ipv4">192.168.0.1</nmwgt:ipAddress>
-        <nmwgt:hostName>HOST.DOMIAN</nmwgt:hostName>
-        <nmwgt:ifName>fxp0</nmwgt:ifName>
-        <nmwgt:ifIndex>1</nmwgt:ifIndex>
-        <nmwgt:direction>in</nmwgt:direction>
-        <nmwgt:capacity>10000000</nmwgt:capacity>
-        <nmwgt:description>HOST.DOMIAN Router</nmwgt:description>
-        <nmwgt:ifDescription>fxp0</nmwgt:ifDescription>
-      </nmwgt:interface>
-    </netutil:subject>
-    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
-    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
-    <nmwg:parameters id="parameters.7-273_in">
-      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
-      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
-    </nmwg:parameters>
-  </nmwg:metadata>
-
-  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="data.273_in" metadataIdRef="metadata.7-273_in">
-    <nmwg:key id="key.273_in">
-      <nmwg:parameters id="parametersKey.273_in">
-        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
-        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
-        <nmwg:parameter name="type">rrd</nmwg:parameter>
-        <nmwg:parameter name="file">/usr/share/cacti/site/rra/HOST.DOMIAN_router_traffic_in_273.rrd</nmwg:parameter>
-        <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>
-        <nmwg:parameter name="dataSource">traffic_in</nmwg:parameter>
-      </nmwg:parameters>
-    </nmwg:key>
-  </nmwg:data>
-
-</nmwg:store>
+/var/lib/perfsonar/snmp_ma/store.xml: 
 }}}
 
-The lesson to be learned from this is the format iteslf is complex; as such we 
-have gone to some lengths to generate the information automatically:
+This file represents the _explanation_ of the data that is being offered by the
+service.  It is written in XML and is configured for a _*localhost*_ environment
+with a single empty RRD file.  This file may be modified by hand to add new
+existing RPMs from other services or use of an external service such as Cacti or
+Cricket may be enabled to prevent manual editing. 
+    
+== Service Control ==
 
- * Test Store File - an available option in the configuraiton
- * Existing Store File - used for upgrades
- * [NPToolkitCacti] - Read the native Cacti databases.
- * MRTGConfig - TBD
- * !CricketConfig - TBD
-
-Once configured, the service can be safely tested.
-
-=== Running ===
-
-See [perfSONARPSDaemon] for running instructions.  The configuration file
-dictates the specifics of the service to be run.  
-
-If you run into issues, consult the FAQ, we may have seen it before. The most
-common issues arise with the dependency modules (LibXML in particular),
-dependant software (such as DBXML), and finally library paths
-(LD_LIBRARY_PATH, etc.)
-
-=== Testing ===
-
-To test this service, a client is required.  From subversion a simple client can
-be used:
-
-http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/client.pl
-
-The client can be invoked as such:
+The service comes with init scripts that may be used to start and stop
+operation:
 
 {{{
-perl client.pl --server=localhost --port=8080 --endpoint=perfSONAR_PS/services/snmpMA --verbose request.xml
+/etc/init.d/snmp_ma start
+/etc/init.d/snmp_ma stop
+/etc/init.d/snmp_ma restart
+}}}
+
+The service can also be run in a manual fashion (useful for debugging):
+
+{{{
+perl bin/daemon.pl --verbose --conf=etc/daemon.conf --logger=etc/daemon_logger.conf
+}}}
+  
+Before doing this, be sure to [SNMPMA#Logging_Changes edit] the logging to enable
+_Screen_ debugging.
+
+== Service Validation ==
+
+The service comes with a client application and several test messages that can
+be used to test functionality.  There are many messages provided as examples, 
+to test the service there are four that are recommended:
+
+{{{
+etc/requests/EchoRequest.xml
+etc/requests/MetadataKeyRequest-1.xml 
+etc/requests/DataInfoRequest-1.xml 
+etc/requests/SetupDataRequest-1.xml
+}}}
+
+These four will test the major functions of this service. To test:
+
+ # Ensure the service is started, it helps if you have configured logging to use the "Screen" so you may monitor the service's activities.
+ # Run the client:
+{{{  
+  perl bin/client.pl URL FILENAME
+}}}  
+ # Compare the results of the test with the comments in each file.  Note there may be some differences (e.g. id values, key values).  
+ # If everything looks OK, return logging to normal and restart service via the init system.  
+
+== Service Maintenance ==
+
+Subscribe to the user mailing lists if you are seeking help on some problem
+related to this software.  Announcements regarding availability of new releases
+will also be sent to these locations:
+
+
+|| *List* || *URL* || *Audience* ||
+|| perfSONAR Users Group || https://mail.internet2.edu/wws/info/perfsonar-user || perfSONAR Users Group ||
+|| perfSONAR Announcements || https://mail.internet2.edu/wws/info/perfsonar-announce || perfSONAR Announce (Low Volume) ||
+|| Performance Node Users || https://mail.internet2.edu/wws/info/performance-node-users || Performance Node Users ||
+|| Performance Node Announcements || https://mail.internet2.edu/wws/info/performance-node-announce || Performance Node Announce (Low Volume) ||
+
+
+Also if you are using package management software and have installed the
+Internet2 software repository, a typical upgrade should download new releases:
+
+{{{
+yum update
 }}}
 
 or
 
 {{{
-perl client.pl --verbose  http://localhost:8080/perfSONAR_PS/services/snmpMA request.xml
+apt-get dist-upgrade
 }}}
+  
+Finally, check the following websites for news of software releases:
 
-Along with the client a series of requests exits:
+ * http://software.internet2.edu
+ * http://www.internet2.edu/performance
 
-http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/requests/MA/SNMP/
-
-To test the different cases that are possible in this service.  These basic
-requests should be modified to fit the exact metadat of your service, and
-are a fast way to verify everything is working properly.
-
-== Code Tour ==
-
-The following tour starts in _*perfSONAR_PS::Services::MA::SNMP*_, and enters
-into related _*perfSONAR_PS*_ modules only.  The code tour will end end with
-control is passed back to the [perfSONARPSDaemon daemon].
-
-=== Initialization ===
-
-The module's _init_ function is called by the [perfSONARPSDaemon daemon] on 
-startup.  This function is responsible for:
-
- * Checking the configuration file, exiting if something is wrong, filling in things that are missing
- * Loading the appropriate message handlers.
-   * Currently !MetadataKeyRequest and !SetupDataRequest
- * Loading the appropriate event handlers.
-   * Not used currently.
- * Starting/Loading the DB XML instance (if required)
- * Starting/Loading the File dabtase instance (if required) 
- * Building a 'cache' of registered metadata key values
- 
-After initialization this module will remain unused until an appropriate
-message/metadata is encountered and passed in for handling.
-
-=== LS Registration ===
-
-LS registration is triggered on a periodic timer as specified by a value in the
-configuration file.  This process will be started by the daemon by looking at:
-
- * enable_registration - If this is no, registration will never happen
- * ls_registration_interval - This can be global or within the endpoint/service specification.  This is normally measured in minutes.
- * ls_instance - This can be global or within the endpoint/service specification. This is the LS instance to register with.
- 
-The function that performs LS registration, _registerLS_, extracts the current
-set of registered data from the metadata DB storage, and uses the LS API (soon
-to be gLS API) to create !LSRegistration or !LSKeepalive messages.  
-
-=== Communication Entry ===
-
-The [perfSONARPSDaemon daemon] will pass messages to this module only when
-the observed _eventType_ and _messageType_ of a given message/metadata are
-appropriate for this service as specified by the handlers.
-
-The entry point is the _handleEvent_ function.  This function has several
-serial tasks:
-
- * Resolve filter/merge chains (*N.B.* this module does this outside of the daemon's control for historic reasons, future iterations may not work this way)
- * Resolve filter parameters (e.g. start/end times, resolution, consolidation function)
- * Handle message parameters (if any are applicable)
- * Depending on the message type, pass control to a function:
-   * !MetadataKeyRequest Message - *maMetadataKeyRequest*
-   * !SetupDataRequest Message - *maSetupDataRequest*
-
-==== !MetadataKeyRequest Case ====
-
-This minor function first checks to see if the metadata contains a key.  If
-there is no key, control passes to the *metadataKeyRetrieveMetadataData*  If the
-key is present and valid control will go to *metadataKeyRetrieveKey*.  Other
-paths out of this function are error conditions.
-
-===== metadataKeyRetrieveMetadataData =====
-
-This function handles the rest of the !MetadataKeyRequest message when a key
-is not present by performing an XPath search for the metadata specified in the
-request.  If this returns positive results the _complete_ metadata from storage
-will be returned along with the key.  Any chained parameters will
-be applied to the key in an effort to _cook_ it (e.g. insert the filter
-parameters directly into the key) for later use.  Other paths out of this
-function are error conditions.
-
-===== metadataKeyRetrieveKey =====
-
-This function handles the rest of the !MetadataKeyRequest message when a key
-is present by checking to see if the key is *valid* in the cache or by
-examining the database for the key.  The return value of this function is
-success or failure (e.g. a _key_ element or an error element) depending on the
-results of this search.  Any chained parameters will be applied to the key in
-an effort to _cook_ it (e.g. insert the filter parameters directly into the
-key) for later use.  Other paths out of this function are error conditions.
-
-==== !SetupDataRequest Case ====
-
-This minor function first checks to see if the metadata contains a key.  If
-there is no key, control passes to the *setupDataRetrieveMetadataData*  If the
-key is present and valid control will go to *setupDataRetrieveKey*.  Other
-paths out of this function are error conditions.
-
-===== setupDataRetrieveMetadataData =====
-
-This function handles the rest of the !MetadataKeyRequest message when a key
-is not present by performing an XPath search for the metadata specified in the
-request.  Using filter parameters (if present) the backend storage is consulted
-and queried for the request data in _handleData_.  Depending on what type of
-backend storage is in use (e.g. relational database, RRD) the appropriate 
-function will be used to query and form the datum elements. Other paths out of
-this function are error conditions.
-
-===== setupDataRetrieveKey =====
-
-This function handles the rest of the !SetupDataRequest message when a key
-is present by checking to see if the key is *valid* in the cache or by
-examining the database for the key.  Using filter parameters (if present) the
-backend storage is consulted and queried for the request data in _handleData_.
-Depending on what type of backend storage is in use (e.g. relational database, 
-RRD) the appropriate function will be used to query and form the datum elements.
-Other paths out of this function are error conditions.
-
-== FAQ ==
-
- * *Q:* _Insert question text here?_ 
- * *A:* Insert answer text here.
- 
- * *Q:* _Insert question text here?_ 
- * *A:* Insert answer text here.
- 
 == Last Updated ==
 
 $Id$
-
