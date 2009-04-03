@@ -31,11 +31,12 @@ towards use on Red Hat linux based systems.  Examples include Fedora, Red Hat
 Enterprise Linux, CentOS, White Box, Scientific Linux, and possibly others.  
 
 These Linux distributions normally rely on "Package Management" tools to install
-and maintain software.  Examples of these tools include Up2Date, YUM, and Apt.
-Internet2 has created a repository to house the perfSONAR-PS software, related
-performance tools, and hard to find prerequisites.  We encourage adopters of
-these tools to install a simple RPM package that gives the necessary
-configuration information for the YUM and Apt tools.  The RPM can be found here:
+and maintain software.  Examples of these tools include up2Date, YUM, and
+APT-RPM.  Internet2 has created a repository to house the perfSONAR-PS software,
+related performance tools, and hard to find prerequisites.  We encourage
+adopters of these tools to install a simple RPM package that gives the necessary
+configuration information for the YUM and APT-RPM tools.  The RPM can be found
+here:
 
   wget -c http://software.interent2.edu/Internet2-repo-0.1-2.noarch.rpm
   
@@ -59,21 +60,6 @@ Internet2 repository.
 
 
 
-Installation (APT):
--------------------
-
-Installation through apt is easy, simply let the package manager do the work of
-managing the dependencies:
-
-  apt-get update
-  apt-get install perfSONAR_PS-PingER-server-v3.1-1.noarch.rpm
-
-There may be several prerequisites to install depending on the age of your
-system.  To ensure that all are found, please be sure to install one of the
-alternative repositories above.  
-
-
-
 Installation (YUM):
 -------------------
 
@@ -85,6 +71,21 @@ following command is all that is needed:
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
 alternative repositories above. 
+
+
+
+Installation (APT-RPM):
+-------------------
+
+Installation through APT-RPM is easy, simply let the package manager do the work
+of managing the dependencies:
+
+  apt-get update
+  apt-get install perfSONAR_PS-PingER-server-v3.1-1.noarch.rpm
+
+There may be several prerequisites to install depending on the age of your
+system.  To ensure that all are found, please be sure to install one of the
+alternative repositories above.  
 
 
 
@@ -143,7 +144,7 @@ retrieves all software and another that retrieves only selective services.
 
 To download the entire release:
 
-  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1 perfSONAR-PS
+  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1 perfSONAR-PS
   
 The instructions are the same here as for the Tar package.  When you wish to
 update the checkout (to retrieve new development or bugfixes):
@@ -155,8 +156,8 @@ If a single service is all that is required, a similar method is used but also
 note that the service must have access to a "Shared" directory that contains
 perfSONAR-PS libraries:
 
-  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-PingER/
-  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1/Shared
+  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1/perfSONAR_PS-PingER/
+  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1/Shared
 
 The instructions are also the same as above:
 

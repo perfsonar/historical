@@ -125,10 +125,7 @@ Create symlinks to allow automated start/stop at the boot/shutdown time:
 
 The service can also be run in a manual fashion (useful for debugging):
 
-  perl bin/daemon.pl --verbose --conf=etc/daemon.conf --logger=etc/daemon_logger.conf
-  
-Before doing this, be sure to edit "etc/logger.conf" to enable "Screen"
-debugging.
+  perl bin/daemon.pl --verbose --conf=etc/daemon.conf
 
 Testing:
 --------
