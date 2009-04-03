@@ -189,8 +189,8 @@ Developers are responsible for testing their code:
      * SNMP - <font color=green>_*DONE - 4/3*_</font>
  * Jeff
    * Release Tasks
-     * Contract a new CD image for NPToolkit, dated image [http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/perfnodelabel.png here] - <font color=red>_*PENDING*_ - </font>
-     * Alert Techwriter/Publication Crew of pending release - <font color=red>_*PENDING*_ - </font>
+     * Contract a new CD image for NPToolkit, dated image [http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/perfnodelabel.png here] - <font color=red>_*IN PROGRESS*_ - </font>
+     * Alert Techwriter/Publication Crew of pending release - <font color=red>_*IN PROGRESS*_ - </font>
    * Development
      * pSB - <font color=yellow>_*IN PROGRESS*_ - </font>
    * Documentation
