@@ -167,8 +167,10 @@ Developers are responsible for testing their code:
      * Topology - <font color=green>_*DONE - 3/19*_</font>
      * Shared/lib - <font color=green>_*DONE - 3/19*_</font>
    * Documentation Review
-     * PingER - <font color=red>_*PENDING*_- </font>
-     * LS Registartion Daemon - <font color=red>_*PENDING*_- </font>
+     * PingER - <font color=green>_*DONE - 4/3*_</font>
+     * LS Registartion Daemon - <font color=green>_*DONE - 4/3*_</font>
+     * Status - <font color=green>_*DONE - 4/3*_</font>
+     * Topology - <font color=green>_*DONE - 4/3*_</font>
  * Aaron
    * Release Tasks
      * Branch SVN - <font color=green>_*Done - 3/2*_</font>
@@ -184,7 +186,7 @@ Developers are responsible for testing their code:
    * Code Review
      * PingER - <font color=green>_*DONE - 3/19*_</font>
    * Documentation Review
-     * SNMP - <font color=red>_*PENDING*_ - </font>
+     * SNMP - <font color=green>_*DONE - 4/3*_</font>
  * Jeff
    * Release Tasks
      * Contract a new CD image for NPToolkit, dated image [http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/perfnodelabel.png here] - <font color=red>_*PENDING*_ - </font>
@@ -196,7 +198,7 @@ Developers are responsible for testing their code:
    * Code Review
      * LS - <font color=purple>_*PUSHED OFF - 3/19*_</font>
    * Documentation Review
-     * Topology -<font color=red> _*PENDING*_ - </font>
+     * Topology - <font color=green>_*DONE - 4/3*_</font>
  * Maxim
    * Development
      * PingER - <font color=green>_*DONE - 3/13*_</font>
@@ -205,7 +207,7 @@ Developers are responsible for testing their code:
    * Code Review
      * pSB - <font color=purple>_*PUSHED OFF*_ - </font>
    * Documentation Review
-     * Status -<font color=red> _*PENDING*_ - </font>
+     * Status - <font color=green>_*DONE - 4/3*_</font>
  * Joe
    * Code Review
      * LS Registration Daemon - <font color=green>_*DONE - 3/16*_</font>
