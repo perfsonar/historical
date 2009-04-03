@@ -6,12 +6,17 @@ About:
 ------
 
 The perfSONAR-PS Lookup Service (LS) addresses the always challenging problem of
-resource registration and discovery for the perfSONAR framework. Service
-instances that manage datasets are only useful when they can be contacted by
-consumers. Consumers can only function when there is data available. To manage
-these problems in a dynamic environment such as perfSONAR, it is necessary to
-register, maintain, and query for the services that may contain interesting
-data.
+resource discovery for the perfSONAR framework. Service instances that manage
+datasets are only useful when they can be contacted by consumers. Consumers can
+only function when there is data available. To manage these problems in a
+dynamic environment such as perfSONAR, it is necessary to register, maintain,
+and query for the services that may contain interesting data.
+
+Every perfSONAR-PS service is capable of registering location and metadata
+information with the perfSONAR-PS LS.  The LS then stores, summarizes, and
+shares this information with the global Information Services (IS) framework.
+Clients can then search for this information in numerous ways, making it easier
+to locate resourses without asking services for information directly.  
 
 The perfSONAR-PS LS relies on an XML database, Oracle DB XML, to store service
 registration information in a native manner. Using the power of the XPath and
@@ -87,10 +92,7 @@ operation:
 
 The service can also be run in a manual fashion (useful for debugging):
 
-  perl bin/daemon.pl --verbose --conf=etc/daemon.conf --logger=etc/daemon_logger.conf
-  
-Before doing this, be sure to edit "etc/daemon_logger.conf" to enable "Screen"
-debugging.
+  perl bin/daemon.pl --verbose --conf=etc/daemon.conf
 
 Testing:
 --------
