@@ -1,2 +1,6 @@
 version 3.1
-* Initial RPM release.
+  * Initial RPM release.
+  * The following development changes where added since the last release (0.9)
+    * Improved database robustness
+    * Support for query and update messages that look more like LS messages
+    * Updated example topology and requests
