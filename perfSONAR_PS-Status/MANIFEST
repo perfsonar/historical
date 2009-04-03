@@ -7,9 +7,9 @@ doc/LICENSE
 doc/README
 etc/collector.conf
 etc/collector_logger.conf
+etc/database.conf
 etc/e2emon_metadata.conf
 etc/elements.conf
-etc/database.conf
 etc/service.conf
 etc/service_logger.conf
 lib/perfSONAR_PS/Client/Echo.pm

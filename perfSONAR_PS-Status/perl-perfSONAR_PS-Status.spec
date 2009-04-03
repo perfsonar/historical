@@ -4,9 +4,11 @@
 %define init_script_1 perfsonar-status-service
 %define init_script_2 perfsonar-status-collector
 
+%define disttag pSPS
+
 Name:           perl-perfSONAR_PS-Status
 Version:        3.1
-Release:        1%{?dist}
+Release:        1.%{disttag}
 Summary:        perfSONAR-PS Status Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
