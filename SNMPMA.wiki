@@ -38,13 +38,12 @@ include [http://fedoraproject.org/ Fedora],
 
 These Linux distributions normally rely on _Package Management_ tools to install
 and maintain software.  Examples of these tools include
-[http://en.wikipedia.org/wiki/Up2date Up2Date], [http://yum.baseurl.org/ YUM],
-and [http://www.debian.org/doc/manuals/apt-howto/ Apt].
-[http://internet2.edu/ Internet2] has created a repository to house the
-perfSONAR-PS software, related performance tools, and hard to find
-prerequisites.  We encourage adopters of these tools to install a simple RPM
-package that gives the necessary configuration information for the YUM and Apt
-tools.  The RPM can be found here:
+[http://en.wikipedia.org/wiki/Up2date up2Date], [http://yum.baseurl.org/ YUM],
+and [http://apt-rpm.org/ APT-RPM].  [http://internet2.edu/ Internet2] has
+created a repository to house the perfSONAR-PS software, related performance
+tools, and hard to find prerequisites.  We encourage adopters of these tools to
+install a simple RPM package that gives the necessary configuration information
+for the YUM and APT-RPM tools.  The RPM can be found here:
 
 {{{
 wget -c http://software.interent2.edu/Internet2-repo-0.1-2.noarch.rpm
@@ -72,20 +71,6 @@ used by the Linux distributions.  Two regarded repositories are:
 Each site provides configuration instructions and packages similar to the
 Internet2 repository.
 
-=== APT === 
-
-Installation through apt is easy, simply let the package manager do the work of
-managing the dependencies:
-
-{{{
-apt-get update
-apt-get install perl-perfSONAR_PS-SNMPMA-3.1-1.pSPS.noarch.rpm
-}}}
-
-There may be several prerequisites to install depending on the age of your
-system.  To ensure that all are found, please be sure to install one of the
-alternative repositories above.  
-
 === YUM ===
 
 Like Apt, YUM installation also manages the task of finding dependencies.  The
@@ -98,6 +83,21 @@ yum install perl-perfSONAR_PS-SNMPMA-3.1-1.pSPS.noarch.rpm
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
 alternative repositories above. 
+
+
+=== APT-RPM === 
+
+Installation through APR-RPM is easy, simply let the package manager do the work of
+managing the dependencies:
+
+{{{
+apt-get update
+apt-get install perl-perfSONAR_PS-SNMPMA-3.1-1.pSPS.noarch.rpm
+}}}
+
+There may be several prerequisites to install depending on the age of your
+system.  To ensure that all are found, please be sure to install one of the
+alternative repositories above.  
 
 === Standalone RPM ===
 
@@ -159,7 +159,7 @@ retrieves all software and another that retrieves only selective services.
 To download the entire release:
 
 {{{
-svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1 perfSONAR-PS
+svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1 perfSONAR-PS
 }}}
   
 The instructions are the same here as for the Tar package.  When you wish to
@@ -175,8 +175,8 @@ note that the service must have access to a "Shared" directory that contains
 perfSONAR-PS libraries:
 
 {{{
-svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-SNMPMA/
-svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1/Shared
+svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1/perfSONAR_PS-SNMPMA/
+svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1/Shared
 }}}
 
 The instructions are also the same as above:
