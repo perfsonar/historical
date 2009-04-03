@@ -22,12 +22,12 @@ Hat linux based systems.  Examples include Fedora, Red Hat Enterprise Linux,
 CentOS, White Box, Scientific Linux, and possibly others.  
 
 These Linux distributions normally rely on "Package Management" tools to install
-and maintain software.  Examples of these tools include up2date, YUM, and APT-RPM.
-Internet2 has created a repository to house the perfSONAR-PS software, related
-performance tools, and hard to find prerequisites.  We encourage adopters of
-these performance tools to install a simple RPM package that gives the
-necessary configuration information for the YUM and APT-RPM tools.  The RPM can
-be found here:
+and maintain software.  Examples of these tools include up2date, YUM, and
+APT-RPM.  Internet2 has created a repository to house the perfSONAR-PS software,
+related performance tools, and hard to find prerequisites.  We encourage
+adopters of these performance tools to install a simple RPM package that gives
+the necessary configuration information for the YUM and APT-RPM tools.  The RPM
+can be found here:
 
   wget -c http://software.interent2.edu/Internet2-repo-0.1-2.noarch.rpm
   
@@ -68,8 +68,8 @@ alternative repositories above.
 Installation (APT-RPM):
 -----------------------
 
-Like YUM, installation with apt-rpm also manages the task of finding dependencies.  The
-following commands will install is needed:
+Like YUM, installation with APT-RPM also manages the task of finding
+dependencies.  The following commands will install is needed:
 
   apt-get update
   apt-get install perl-perfSONAR_PS-LookupService-3.1-1.pSPS.noarch.rpm
@@ -159,5 +159,5 @@ and
 
 --------------------------------------------------------------------------------
 
-Fri Mar 27 08:55:59 EDT 2009
+Fri Apr  3 12:09:17 EDT 2009
 
