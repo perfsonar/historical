@@ -133,7 +133,7 @@ configured:
   etc/requests/EchoRequest.xml
   etc/requests/PathStatusSetupDataRequest_now.xml
 
-These requests will test the major components of the service. To test:
+To test:
 
   1) Ensure the service is started, it helps if you have run it using debug mode.
      so you may monitor the service's activities.
@@ -142,11 +142,16 @@ These requests will test the major components of the service. To test:
   
      perl bin/client.pl URL FILENAME
   
-  3) Compare the results of the test with the comments in each file.  Note there
-     may be some differences (e.g. id values, key values).  
-     
-  4) If everything looks OK, restart service with the init scripts.
+  3) If the result does not contain an error message, restart service with the init scripts.
 
+Once the preliminary testing has been done, the service can be tested with
+E2EMon. This can be done by giving the service URL and the chosen domain name
+to an existing E2EMon installation.
+
+Instructions for deploying your own E2EMon instance can be found at
+https://wiki.man.poznan.pl/perfsonar-mdm/index.php/LHC_e2e_mon_soft . You can
+then domain and service can be added to the configuration, and test the
+service.
 
 Maintenance:
 ------------

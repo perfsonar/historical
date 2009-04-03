@@ -162,6 +162,7 @@ sub init {
     }
 
     $handler->registerEventHandler( "QueryRequest",     "http://ggf.org/ns/nmwg/topology/20070809", $self );
+    $handler->registerEventHandler( "TSQueryRequest",   "http://ggf.org/ns/nmwg/topology/20070809", $self );
     $handler->registerEventHandler( "TSAddRequest",     "http://ggf.org/ns/nmwg/topology/20070809", $self );
     $handler->registerEventHandler( "TSUpdateRequest",  "http://ggf.org/ns/nmwg/topology/20070809", $self );
     $handler->registerEventHandler( "TSReplaceRequest", "http://ggf.org/ns/nmwg/topology/20070809", $self );
@@ -180,6 +181,7 @@ sub init {
     Returns whether or not this service will be registering with a Lookup
     Service.
 =cut
+
 sub needLS {
     my ( $self ) = @_;
 
@@ -413,7 +415,7 @@ sub handleEvent {
     if ( $messageType eq "SetupDataRequest" ) {
         $self->handleSetupDataRequest( $output, $eventType, $md, $d );
     }
-    elsif ( $messageType eq "QueryRequest" ) {
+    elsif ( $messageType eq "QueryRequest" or $messageType eq "TSQueryRequest" ) {
         $self->handleQueryRequest( $output, $eventType, $md, $d );
     }
     elsif ( $messageType eq "TSAddRequest" ) {

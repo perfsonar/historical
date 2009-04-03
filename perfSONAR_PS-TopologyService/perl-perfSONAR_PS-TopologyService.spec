@@ -38,7 +38,7 @@ Requires:       perl(POSIX)
 Requires:       perl(Params::Validate)
 Requires:       perl(Sleepycat::DbXml)
 Requires:       perl(Time::HiRes)
-Requires:       perl(XML::LibXML)
+Requires:       perl(XML::LibXML) >= 1.61
 Requires:       perl(base)
 Requires:       perl(lib)
 Requires:       perl(warnings)
