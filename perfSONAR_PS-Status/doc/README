@@ -78,7 +78,8 @@ for a specific use case:
  
   - etc/service_logger.conf:
 
-    Contain information related to where the service logs, there are three modes:
+    Contain information related to where the service logs, there are three
+    modes:
     
       Log::Dispatch::Screen     - Log messages to screen (useful for debugging)
       Log::Dispatch::Syslog     - Log messages to syslog facility
@@ -89,7 +90,8 @@ for a specific use case:
 
   - etc/collector_logger.conf:
 
-    Contain information related to where the collector logs, there are three modes:
+    Contain information related to where the collector logs, there are three
+    modes:
     
       Log::Dispatch::Screen     - Log messages to screen (useful for debugging)
       Log::Dispatch::Syslog     - Log messages to syslog facility
@@ -135,14 +137,15 @@ configured:
 
 To test:
 
-  1) Ensure the service is started, it helps if you have run it using debug mode.
-     so you may monitor the service's activities.
+  1) Ensure the service is started, it helps if you have run it using debug
+     mode.  This is to monitor the service's activities.
 
   2) Run the client:
   
      perl bin/client.pl URL FILENAME
   
-  3) If the result does not contain an error message, restart service with the init scripts.
+  3) If the result does not contain an error message, restart service with the
+     init scripts.
 
 Once the preliminary testing has been done, the service can be tested with
 E2EMon. This can be done by giving the service URL and the chosen domain name
@@ -178,4 +181,4 @@ Finally, check the following websites for news of software releases:
 
 --------------------------------------------------------------------------------
 
-Fri Mar 27 08:55:59 EDT 2009
+Fri Apr  3 12:38:12 EDT 2009
