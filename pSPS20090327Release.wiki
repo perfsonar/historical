@@ -39,7 +39,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPS20090327Release/schedule.png
 || Lookup Service || Jason || Jeff, Macros || Joe,Guilherme ||
 || SNMP Measurement Archive || Jason || Brian || Aaron ||
 || Status Measurement Archive || Aaron || Jason || Maxim ||
-|| perfSONAR-BUOY || Jason || Maxim,Guilherme || Brian,Marcos ||
+|| ~~perfSONAR-BUOY~~ || ~~Jason~~ || ~~Maxim,Guilherme~~ || ~~Brian,Marcos~~ ||
 || PingER || Maxim || Aaron || Jason ||
 || LS Registration Daemon || Aaron || Joe || Jason ||
 || Topology Service || Aaron || Jason || Jeff ||
@@ -225,7 +225,7 @@ Developers are responsible for testing their code:
    * Code Review
      * LS - <font color=green>_*DONE - 3/16*_</font>
    * Documentation Review
-     * perfSONAR-BUOY - <font color=red>_*PENDING*_ - </font>
+     * perfSONAR-BUOY - <font color=purple>_*PUSHED OFF*_ - </font>
    
 == Lessons Learned ==
 
