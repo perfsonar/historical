@@ -1,11 +1,9 @@
-==============================================================================
-perfSONAR-PS PingER
-==============================================================================
+			              perfSONAR Lookup Service
 
-------------------------------------------------------------------------------
-Introduction
-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
+About:
+------
 
 PingER (Ping End-to-end Reporting) is the name given to the Internet
 End-to-end Performance Measurement (IEPM) project to monitor end-to-end
@@ -28,10 +26,8 @@ PingER provides insight into a multitude of network activity. To summarize the
 results, it is necessary to aggregate the measurements by region and to
 divided them into measurements of long-term trends and of short-term glitches.
 
-------------------------------------------------------------------------------
-Uses for PingER
-------------------------------------------------------------------------------
-
+Uses for PingER:
+----------------
 
 Technical: PingER data provides a lightweight way of monitoring the
 throughput, loss and response times, effectively measuring the quality of a
@@ -55,10 +51,8 @@ with the perceptions of voice quality from the users, you can determine how
 well VoIP and other interactive applications might work between various pairs
 of sites.
 
-
-------------------------------------------------------------------------------
-Architecture
-------------------------------------------------------------------------------
+Architecture:
+-------------
 
 PingER uses the ubiquitous Internet ping facility to measure the short and
 long term Response Time, Packet Loss percentages, the variability of the
@@ -84,12 +78,110 @@ Remote Procedure Call (XML) the data archive of PingER data.
 2) Measurement Point (MP): Which performs the measurement and calculation of
 derived statistics from Pings.
 
+Installation:
+-------------
 
-------------------------------------------------------------------------------
-Installation
-------------------------------------------------------------------------------
+Please read the INSTALL file for instructions
+  
+Configuration:
+--------------
 
-See INSTALL file for more details.
+If not started already, start MySQL:
 
+  (sudo) /etc/init.d/mysqld restart
 
+If not done already, set the MySQL Root password:
+
+  (sudo) /usr/bin/mysqladmin -u root password 'new-password'
+
+Edit Files (each is annotated with locations and instructions).  Run
+configuration script:
+
+  /opt/perfsonar_ps/PingER/bin/pinger_ConfigureDaemon
+  
+Answer all questions or accept defaults about desired location of the
+service/port/description etc...  This script will attempt to create the MA
+database.
+
+Check logging config file: 
+     
+  /etc/PingER/logger.conf
+
+Starting/Stopping:
+------------------
+
+The service comes with init scripts that may be used to start and stop
+operation:
+
+  /etc/init.d/PingER start
+  /etc/init.d/PingER stop
+  /etc/init.d/PingER restart
+
+Create symlinks to allow automated start/stop at the boot/shutdown time:
+	
+        ln -s /etc/init.d/PingER  /etc/rc2.d/S99pinger-ps
+        ln -s /etc/init.d/PingEr  /etc/rc6.d/K02pinger-ps
+        ln -s /etc/init.d/PingER  /etc/rc0.d/K02pinger-ps
+
+The service can also be run in a manual fashion (useful for debugging):
+
+  perl bin/daemon.pl --verbose --conf=etc/daemon.conf --logger=etc/daemon_logger.conf
+  
+Before doing this, be sure to edit "etc/logger.conf" to enable "Screen"
+debugging.
+
+Testing:
+--------
+
+Test the web service:
+
+  /opt/perfsonar_ps/PingER/client/bin/pinger_client.pl
+
+It will print  something like this:
+    
+[netadmin@lhcopnmon1-mgm client]$ ./pinger_client.pl 
+Metadata: src=lhcopnmon1-mgm.fnal.gov dst=tier2.ucsd.edu  packetSize=1000
+Metadata Key(s): 8 :
+Metadata: src=lhcopnmon1.fnal.gov dst=cithep130.ultralight.org  packetSize=1000
+Metadata Key(s): 22 :
+Metadata: src=lhcopnmon1.fnal.gov dst=tier2.ihepa.ufl.edu  packetSize=1000
+Metadata Key(s): 21 :
+Metadata: src=lhcopnmon1-mgm.fnal.gov dst=pinger.fnal.gov  packetSize=1000
+Metadata Key(s): 1 :
+Metadata: src=lhcopnmon1.fnal.gov dst=phedex.rcac.purdue.edu  packetSize=1000
+Metadata Key(s): 15 :
+Metadata: src=lhcopnmon1-mgm.fnal.gov dst=www.cmsaf.mit.edu  packetSize=1000
+Metadata Key(s): 9 :
+Metadata: src=lhcopnmon1.fnal.gov dst=t2.unl.edu  packetSize=1000
+
+Maintenance:
+------------
+
+Subscribe to the user mailing lists if you are seeking help on some problem
+related to this software.  Announcements regarding availability of new releases
+will also be sent to these locations
+
+  perfSONAR Users Group - https://mail.internet2.edu/wws/info/perfsonar-user
+  perfSONAR Announcements - https://mail.internet2.edu/wws/info/perfsonar-announce
+
+  Performance Node Users - https://mail.internet2.edu/wws/info/performance-node-users
+  Performance Node Announcements - https://mail.internet2.edu/wws/info/performance-node-announce
+
+Also if you are using package management software and have installed the
+Internet2 software repository, a typical upgrade should download new releases:
+
+  yum update
+
+or
+
+  apt-get dist-upgrade
+  
+Finally, check the following websites for news of software releases:
+
+  http://software.internet2.edu
+  http://www.internet2.edu/performance
+
+--------------------------------------------------------------------------------
+
+Fri Apr  3 10:43:20 EDT 2009
 

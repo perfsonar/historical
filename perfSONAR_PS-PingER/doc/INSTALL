@@ -1,92 +1,174 @@
-                   PingER Installation Instructions
-                   --------------------------------
-		       maxim_at_fnal_dot_gov
- 
-1) Download the RPM:
+               perfSONAR-PS PingER Installation Instructions
 
-	wget -c http://www.perfsonar.net/download/services/perfSONAR_PS-PingER-server-v3.1-1.noarch.rpm or
-	
-	alternatively:
-	
-	wget -c http://tukki.fnal.gov/downloads/perfSONAR_PS-PingER-server-v3.1-1.noarch.rpm 
-	
+--------------------------------------------------------------------------------
 
-2) Using yum, locally install the packages (this ensures dependencies can be
-   fetched) in this order:
+The perfSONAR-PS PingER service is an evolution of the PingER project
+(http://www-iepm.slac.stanford.edu/pinger/) with more than 10 years experience
+in collecting and analysising network performance across the world. The
+perfSONAR-PS PingER service is composed of both a storage backend (MA) and
+measurement frontend (MP) to conduct and store ping measurements and to make
+available such data for consumption by interested parties. Network
+characteristics supported include availability, latency and jitter, which
+provide a broad spectrum of determining end-to-end network performance.
 
-	(sudo) yum localinstall perfSONAR_PS-PingER-server-v3.1-1.noarch.rpm
- 
-3) If the package manager is unable to find certain packages (a common 
-     problem with perl tools) it is recommended that an alternate RPM 
-     repository be installed.  Follow the instructions here:
+perfSONAR-PS PingER is designed to be scalable enough in order to accommodate
+hundreds of monitored pairs of hosts and uses a relational database backend
+(MySQL, Postgres, SQLite) to efficiently store and retrieve such performance
+information.
 
-     	http://dag.wieers.com/rpm/FAQ.php#B2
+perfSONAR-PS PingER also supports the registration of data through perfSONAR
+LS's to faciliate the dynamic discovery and querying of unknown deployments.
 
-4) Follow any instructions to install package dependencies
+The MA provides a web service interface based on NMWG XML that allows queries on
+the PingER data and to be consumpted by perfSONAR client applications and
+services alike.
 
-5) If not started already, start MySQL:
+Prerequisites:
+--------------
 
-	(sudo) /etc/init.d/mysqld restart
+PingER is packaged as an RPM - a binary installation format that is geared
+towards use on Red Hat linux based systems.  Examples include Fedora, Red Hat
+Enterprise Linux, CentOS, White Box, Scientific Linux, and possibly others.  
 
-5.5) If not done already, set the MySQL Root password:
+These Linux distributions normally rely on "Package Management" tools to install
+and maintain software.  Examples of these tools include Up2Date, YUM, and Apt.
+Internet2 has created a repository to house the perfSONAR-PS software, related
+performance tools, and hard to find prerequisites.  We encourage adopters of
+these tools to install a simple RPM package that gives the necessary
+configuration information for the YUM and Apt tools.  The RPM can be found here:
 
-	(sudo) /usr/bin/mysqladmin -u root password 'new-password'
-
-6) Edit Files (each is annotated with locations and instructions):
-
- 
-  Run configuration script:
-  ----------------------------
-   /opt/perfsonar_ps/PingER/bin/pinger_ConfigureDaemon
+  wget -c http://software.interent2.edu/Internet2-repo-0.1-2.noarch.rpm
   
-   and answer all questions or accept defaults about desired location of 
-   the service/port/description etc...
-   This script will attempt to create the MA database.
+To install this RPM first import the signing key:
 
-	 
-   Check logging config file: 
-     
-      /etc/PingER/logger.conf
-    
-     
-9) Start the web service:
+  rpm --import http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2
 
-	/etc/init.d/PingER start
-	
-	create symlinks to allow automated start/stop at the boot/shutdown time:
-	
-        ln -s /etc/init.d/PingER  /etc/rc2.d/S99pinger-ps
-        ln -s /etc/init.d/PingEr  /etc/rc6.d/K02pinger-ps
-        ln -s /etc/init.d/PingER  /etc/rc0.d/K02pinger-ps
+Then install the RPM:
 
-10) Test the web service:
+  rpm -ivh Internet2-repo-0.1-2.noarch.rpm
 
-    /opt/perfsonar_ps/PingER/client/bin/pinger_client.pl
-    
-    it will print  something like this:
-    
-[netadmin@lhcopnmon1-mgm client]$ ./pinger_client.pl 
-Metadata: src=lhcopnmon1-mgm.fnal.gov dst=tier2.ucsd.edu  packetSize=1000
-Metadata Key(s): 8 :
-Metadata: src=lhcopnmon1.fnal.gov dst=cithep130.ultralight.org  packetSize=1000
-Metadata Key(s): 22 :
-Metadata: src=lhcopnmon1.fnal.gov dst=tier2.ihepa.ufl.edu  packetSize=1000
-Metadata Key(s): 21 :
-Metadata: src=lhcopnmon1-mgm.fnal.gov dst=pinger.fnal.gov  packetSize=1000
-Metadata Key(s): 1 :
-Metadata: src=lhcopnmon1.fnal.gov dst=phedex.rcac.purdue.edu  packetSize=1000
-Metadata Key(s): 15 :
-Metadata: src=lhcopnmon1-mgm.fnal.gov dst=www.cmsaf.mit.edu  packetSize=1000
-Metadata Key(s): 9 :
-Metadata: src=lhcopnmon1.fnal.gov dst=t2.unl.edu  packetSize=1000
+It is also recommended that an additional repository be installed for hard to 
+find prerequisite software that may not be available in traditional repositories
+used by the Linux distributions.  Two regarded repositories are:
+
+ * http://dries.ulyssis.org/rpm/
+ * http://dag.wieers.com/rpm/
  
- ...
- 
- 
- If it reported some errors then re-run your config  script.
- If you think there is a bug then send bug report to the perfSONAR-PS mailing list.
- See more information at:
- 
- http://code.google.com/p/perfsonar-ps/wiki/NPToolkit
- 
-    
+Each site provides configuration instructions and packages similar to the
+Internet2 repository.
+
+
+
+Installation (APT):
+-------------------
+
+Installation through apt is easy, simply let the package manager do the work of
+managing the dependencies:
+
+  apt-get update
+  apt-get install perfSONAR_PS-PingER-server-v3.1-1.noarch.rpm
+
+There may be several prerequisites to install depending on the age of your
+system.  To ensure that all are found, please be sure to install one of the
+alternative repositories above.  
+
+
+
+Installation (YUM):
+-------------------
+
+Like Apt, YUM installation also manages the task of finding dependencies.  The
+following command is all that is needed:
+
+  yum install perfSONAR_PS-PingER-server-v3.1-1.noarch.rpm
+
+There may be several prerequisites to install depending on the age of your
+system.  To ensure that all are found, please be sure to install one of the
+alternative repositories above. 
+
+
+
+Installation (Bare RPM):
+------------------------
+
+If you do not wish to install the Internet2 Repository package, you may simply
+find the appropriate RPM for your architecture without using a package manger.
+For example if you are on an "i386" architecture for example:
+
+  wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perfSONAR_PS-PingER-server-v3.1-1.noarch.rpm
+
+alternatively:
+
+  wget -c http://tukki.fnal.gov/downloads/perfSONAR_PS-PingER-server-v3.1-1.noarch.rpm 
+  
+To install without package manager help:
+
+  rpm -ivh perfSONAR_PS-PingER-server-v3.1-1.noarch.rpm
+  
+Note that this RPM may need packages to install correctly: if they are not found
+on your system manual download and install will be required.  An alternate
+method is to still use a package manager in a "local" way (YUM only):
+
+  yum localinstall perfSONAR_PS-PingER-server-v3.1-1.noarch.rpm
+  
+This will still search the available repositories for any necessary packages.
+
+
+
+Installation (Tar Package):
+---------------------------
+
+All RPM packages are also available in "source" packages that may be installed
+and used in the typical Unix/Linux fashion.  There are helper scripts included
+that may be used to download the necessary prerequisite software packages:
+
+  wget -c http://software.internet2.edu/source/perl-perfSONAR_PS-PingER-server-3.1-1.tar.gz
+  tar -zxfv perl-perfSONAR_PS-PingER-server-3.1-1.tar.gz
+  cd perl-perfSONAR_PS-PingER-server-3.1-1/scripts
+  ./prepare_environment.sh
+  ./install_dependencies.sh
+
+These two included scripts will configure the machine's users and startup
+scripts as well as contact CPAN for any necessary perl libraries.  
+
+
+
+Installation (SVN):
+-------------------
+
+Software may be downloaded directly from our anonymous subversion server.  This
+installation method allows for easy upgrades between versions and access to 
+bugfixes immediately.  There are two ways to download from our server, one that
+retrieves all software and another that retrieves only selective services.
+
+To download the entire release:
+
+  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1 perfSONAR-PS
+  
+The instructions are the same here as for the Tar package.  When you wish to
+update the checkout (to retrieve new development or bugfixes):
+
+  cd perfSONAR-PS
+  svn update
+  
+If a single service is all that is required, a similar method is used but also
+note that the service must have access to a "Shared" directory that contains
+perfSONAR-PS libraries:
+
+  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-PingER/
+  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1/Shared
+
+The instructions are also the same as above:
+
+  cd Shared
+  svn update
+
+and
+
+  cd perfSONAR_PS-PingER
+  svn update
+
+--------------------------------------------------------------------------------
+
+Fri Apr  3 10:43:20 EDT 2009
+
