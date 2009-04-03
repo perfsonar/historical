@@ -1,8 +1,7 @@
 #!/bin/bash
 
 MAKEROOT=""
-if [[ $EUID -ne 0 ]];
-then
+if [[ $EUID -ne 0 ]]; then
     MAKEROOT="sudo "
 fi
 
@@ -31,8 +30,5 @@ $MAKEROOT cpan Params::Validate
 $MAKEROOT cpan Time::HiRes
 $MAKEROOT cpan XML::LibXML
 $MAKEROOT cpan base
-$MAKEROOT cpan diagnostics
-$MAKEROOT cpan fields
 $MAKEROOT cpan lib
-$MAKEROOT cpan strict
 $MAKEROOT cpan warnings

@@ -85,7 +85,7 @@ Installation (Bare RPM):
 
 If you do not wish to install the Internet2 Repository package, you may simply
 find the appropriate RPM for your architecture without using a package manger.
-For example if you are on an "i386" architecture for example:
+For example if you are on an "i386" architecture:
 
   wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-LookupService-3.1-1.pSPS.noarch.rpm
   
@@ -114,8 +114,8 @@ that may be used to download the necessary prerequisite software packages:
   wget -c http://software.internet2.edu/source/perl-perfSONAR_PS-LookupService-3.1-1.tar.gz
   tar -zxfv perl-perfSONAR_PS-LookupService-3.1-1.tar.gz
   cd perl-perfSONAR_PS-LookupService-3.1-1/scripts
-  ./prepare_environment.sh
   ./install_dependencies.sh
+  ./prepare_environment.sh
 
 These two included scripts will configure the machine's users and startup
 scripts as well as contact CPAN for any necessary perl libraries.  
@@ -132,7 +132,7 @@ retrieves all software and another that retrieves only selective services.
 
 To download the entire release:
 
-  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1 perfSONAR-PS
+  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1 perfSONAR-PS
   
 The instructions are the same here as for the Tar package.  When you wish to
 update the checkout (to retrieve new development or bugfixes):
@@ -144,8 +144,8 @@ If a single service is all that is required, a similar method is used but also
 note that the service must have access to a "Shared" directory that contains
 perfSONAR-PS libraries:
 
-  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/
-  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1/Shared
+  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1/perfSONAR_PS-LookupService/
+  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1/Shared
 
 The instructions are also the same as above:
 
