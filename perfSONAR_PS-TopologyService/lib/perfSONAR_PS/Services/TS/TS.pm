@@ -178,8 +178,9 @@ sub init {
 }
 
 =head2 needLS
-    Returns whether or not this service will be registering with a Lookup
-    Service.
+
+Returns whether or not this service will be registering with a Lookup Service.
+
 =cut
 
 sub needLS {

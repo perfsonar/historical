@@ -89,8 +89,8 @@ used to test the service:
 
 These requests will test the major components of the service. To test:
 
-  1) Ensure the service is started, it helps if you have run it using debug mode.
-     so you may monitor the service's activities.
+  1) Ensure the service is started, it helps if you have run it using debug
+     mode.  This is to monitor the service's activities.
 
   2) Run the client:
   
@@ -191,4 +191,5 @@ Finally, check the following websites for news of software releases:
 
 --------------------------------------------------------------------------------
 
-Fri Mar 27 08:55:59 EDT 2009
+Fri Apr  3 12:54:06 EDT 2009
+
