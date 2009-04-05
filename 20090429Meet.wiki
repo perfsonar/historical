@@ -51,10 +51,10 @@ The perfSONAR developers meeting will focus on pending issues within the perfSON
    # Joe Meztger - ESnet
    # Jon Dugan - ESnet
    # TBD - ESnet
-   # Chin Guok - ESnet <font color=red>_*TENATIVE*_ - </font> 
+   # Chin Guok - ESnet <font color=red>_*TENTATIVE*_ - </font> 
    # Martin Swany - UDel
-   # Student 1 - UDel <font color=red>_*TENATIVE*_ - </font> 
-   # Student 2 - UDel <font color=red>_*TENATIVE*_ - </font> 
+   # Student 1 - UDel <font color=red>_*TENTATIVE*_ - </font> 
+   # Student 2 - UDel <font color=red>_*TENTATIVE*_ - </font> 
    # ...
  * Remote
    # David Robertson - LBL
@@ -120,8 +120,8 @@ If IDC developers like, a portion of the day can be set aside for other current 
    # TBD - ESnet
    # Chin Guok - ESnet
    # Martin Swany - UDel
-   # Student 1 - UDel <font color=red>_*TENATIVE*_ - </font> 
-   # Student 2 - UDel <font color=red>_*TENATIVE*_ - </font> 
+   # Student 1 - UDel <font color=red>_*TENTATIVE*_ - </font> 
+   # Student 2 - UDel <font color=red>_*TENTATIVE*_ - </font> 
    # ...
  * Remote
    # David Robertson - LBL
