@@ -2391,7 +2391,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 ==== set APAN ====
 
-	<font color="darkgreen">*legacy Perl*</font>
+	|| <font color="darkgreen">*legacy Perl*</font> ||
 
 	Summarization nodes:
 
@@ -2403,7 +2403,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	203.176.0.0/13
 	}}}
 
-	<font color="mediumblue">*Java*</font>
+	|| <font color="mediumblue">*Java*</font> ||
 
 	Summarization nodes with 0 granularity:
 
@@ -2468,7 +2468,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	128.0.0.0/1
 	}}}
 
-	<font color="indigo">*new Perl*</font>
+	|| <font color="indigo">*new Perl*</font> ||
 
 	Summarization nodes:
 
@@ -2490,7 +2490,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 ==== set ESNET ====
 
-	<font color="darkgreen">*legacy Perl*</font>
+	|| <font color="darkgreen">*legacy Perl*</font> ||
 
 	Summarization nodes:
 
@@ -2505,7 +2505,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	134.0.0.0/8
 	}}}
 
-	<font color="mediumblue">*Java*</font>
+	|| <font color="mediumblue">*Java*</font> ||
 
 	Summarization nodes with 0 granularity:
 
@@ -2615,7 +2615,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	128.0.0.0/1
 	}}}
 
-	<font color="indigo">*new Perl*</font>
+	|| <font color="indigo">*new Perl*</font> ||
 
 	Summarization nodes:
 
@@ -2643,7 +2643,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 ==== set FCCN ====
 
-	<font color="darkgreen">*legacy Perl*</font>
+	|| <font color="darkgreen">*legacy Perl*</font> ||
 
 	Summarization nodes:
 
@@ -2662,7 +2662,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	193.136.249.64/26
 	}}}
 
-	<font color="mediumblue">*Java*</font>
+	|| <font color="mediumblue">*Java*</font> ||
 
 	Summarization nodes with 0 granularity:
 
@@ -2696,7 +2696,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	192.0.0.0/6
 	}}}
 
-	<font color="indigo">*new Perl*</font>
+	|| <font color="indigo">*new Perl*</font> ||
 
 	Summarization nodes:
 
@@ -2710,7 +2710,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 ==== set GARR ====
 
-	<font color="darkgreen">*legacy Perl*</font>
+	|| <font color="darkgreen">*legacy Perl*</font> ||
 
 	Summarization nodes:
 
@@ -2792,7 +2792,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	193.206.141.60/30
 	}}}
 
-	<font color="mediumblue">*Java*</font>
+	|| <font color="mediumblue">*Java*</font> ||
 
 	Summarization nodes with 0 granularity:
 
@@ -2822,7 +2822,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	193.206.128.0/20
 	}}}
 
-	<font color="indigo">*new Perl*</font>
+	|| <font color="indigo">*new Perl*</font> ||
 
 	Summarization nodes:
 
@@ -2834,7 +2834,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 ==== set Geant2 ====
 
-	<font color="darkgreen">*legacy Perl*</font>
+	|| <font color="darkgreen">*legacy Perl*</font> ||
 
 	Summarization nodes:
 
@@ -2851,7 +2851,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	62.40.114.8/29
 	}}}
 
-	<font color="mediumblue">*Java*</font>
+	|| <font color="mediumblue">*Java*</font> ||
 
 	Summarization nodes with 0 granularity:
 
@@ -2893,7 +2893,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	216.24.184.86/32
 	}}}
 
-	<font color="indigo">*new Perl*</font>
+	|| <font color="indigo">*new Perl*</font> ||
 
 	Summarization nodes:
 
@@ -2904,7 +2904,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 ==== set Internet2 ====
 
-	<font color="darkgreen">*legacy Perl*</font>
+	|| <font color="darkgreen">*legacy Perl*</font> ||
 
 	Summarization nodes:
 
@@ -2948,7 +2948,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	205.213.119.8/29
 	}}}
 
-	<font color="mediumblue">*Java*</font>
+	|| <font color="mediumblue">*Java*</font> ||
 
 	Summarization nodes with 0 granularity:
 
@@ -3129,7 +3129,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 	Comments:  setting 3 in this set performs very poorly.
 
-	<font color="indigo">*new Perl*</font>
+	|| <font color="indigo">*new Perl*</font> ||
 
 	Summarization nodes:
 
@@ -3140,7 +3140,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 ==== set Indiana University ====
 
-	<font color="darkgreen">*legacy Perl*</font>
+	|| <font color="darkgreen">*legacy Perl*</font> ||
 
 	Summarization nodes:
 
@@ -3150,7 +3150,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	192.0.0.0/4
 	}}}
 
-	<font color="mediumblue">*Java*</font>
+	|| <font color="mediumblue">*Java*</font> ||
 
 	Summarization nodes:
 
@@ -3158,7 +3158,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 		TBD
 	}}}
 
-	<font color="indigo">*new Perl*</font>
+	|| <font color="indigo">*new Perl*</font> ||
 
 	Summarization nodes:
 
@@ -3170,7 +3170,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 ==== set PIONIER ====
 
-	<font color="darkgreen">*legacy Perl*</font>
+	|| <font color="darkgreen">*legacy Perl*</font> ||
 
 	Summarization nodes:
 
@@ -3179,7 +3179,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	212.191.0.0/16
 	}}}
 
-	<font color="mediumblue">*Java*</font>
+	|| <font color="mediumblue">*Java*</font> ||
 
 	Summarization nodes:
 
@@ -3191,7 +3191,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	212.191.224.0/24
 	}}}
 
-	<font color="indigo">*new Perl*</font>
+	|| <font color="indigo">*new Perl*</font> ||
 
 	Summarization nodes:
 
@@ -3202,7 +3202,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 ==== set SWITCH ====
 
-	<font color="darkgreen">*legacy Perl*</font>
+	|| <font color="darkgreen">*legacy Perl*</font> ||
 
 	Summarization nodes:
 
@@ -3215,7 +3215,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	194.0.0.0/8
 	}}}
 
-	<font color="mediumblue">*Java*</font>
+	|| <font color="mediumblue">*Java*</font> ||
 
 	Summarization nodes:
 
@@ -3234,7 +3234,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	213.248.79.190/32
 	}}}
 
-	<font color="indigo">*new Perl*</font>
+	|| <font color="indigo">*new Perl*</font> ||
 
 	Summarization nodes:
 
