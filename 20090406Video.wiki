@@ -3,28 +3,31 @@
 == Agenda/Minutes ==
 
  # Attendees:
- # Team Updates
-   # Internet2
-   # ESnet
-   # UDel
-   # FNAL
- # Review _*Actions*_ from last call [20090330Video].
+   * TBD
  # perfSONAR-PS v3.1 Release Update
    * See [pSPS20090327Release] for details
      * Check individual progress.
      * Documentation Reviews
        * Developers Finish (3/27)
        * Reviews Due (4/3)
-     * Alpha Testing
-     * Beta Testing
- # Circuit Monitoring update
-   * Status of exmples (aaron)
- # SNMP-MA ESnet new database integration update
- # LHC/Atlas deployments (status update)
+     * Uploading to repository
+     * Testing
+       * Testing Procedure
+       * List of Testers
+       * Alpha Testing
+       * Beta Testing
+ # Other Issues
+   # Wiki-reorg
+   # [IPSummarization] Comments
+   # Circuit Monitoring update
+     * Status of exmples (aaron)
+   # SNMP-MA ESnet new database integration update
+   # LHC/Atlas deployments (status update)
  # Next meeting will be 4/13
 
 === ACTIONS ===
 
+TBD
 
 == Where ==
 
