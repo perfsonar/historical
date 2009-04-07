@@ -13,7 +13,7 @@ Summary:        perfSONAR_PS Topology Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-TopologyService/
-Source0:        perfSONAR_PS-TopologyService.tar.gz
+Source0:        perfSONAR_PS-TopologyService-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       perl(Carp)

@@ -13,7 +13,7 @@ Summary:        perfSONAR-PS Status Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-Status/
-Source0:        perfSONAR_PS-Status.tar.gz
+Source0:        perfSONAR_PS-Status-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       perl(Carp)

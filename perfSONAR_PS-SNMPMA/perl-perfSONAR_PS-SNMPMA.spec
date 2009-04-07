@@ -15,7 +15,7 @@ Summary:        perfSONAR_PS SNMP Measurement Archive
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-SNMPMA
-Source0:        perfSONAR_PS-SNMPMA.tar.gz
+Source0:        perfSONAR_PS-SNMPMA-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:		perl(Compress::Zlib)
