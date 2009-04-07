@@ -76,7 +76,7 @@ install -m 755 scripts/%{init_script_2}.new $RPM_BUILD_ROOT/etc/init.d/%{init_sc
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(0644,perfsonar,perfsonar,-)
+%defattr(0644,perfsonar,perfsonar,0755)
 %doc %{install_base}/doc/*
 %config %{install_base}/etc/*
 %attr(0755,perfsonar,perfsonar) %{install_base}/bin/*
