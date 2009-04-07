@@ -2,10 +2,10 @@
 %define logging_base /var/log/perfsonar
 
 # init scripts must be located in the 'scripts' directory
-%define init_script_1 rc.service
+%define init_script_1 PingER
 
 Name:           perl-perfSONAR_PS-PingER-server
-Version:        v0.091
+Version:        3.1
 Release:        1%{?dist}
 Summary:        perfSONAR_PS PingER  Measurement Archive and Collection System
 License:        distributable, see LICENSE

@@ -114,6 +114,6 @@ lib/perfSONAR_PS/Utils/ParameterValidation.pm
 lib/perfSONAR_PS/Utils/PingStats.pm
 lib/perfSONAR_PS/XML/Document.pm
 perl-perfSONAR_PS-PingER-server.spec
+scripts/PingER
 scripts/create_pingerMA_MySQL.sql
 scripts/create_pingerMA_SQLite.sql
-scripts/PingER
