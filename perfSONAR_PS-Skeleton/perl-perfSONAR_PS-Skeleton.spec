@@ -5,10 +5,12 @@
 %define init_script_1 skeleton
 # %define init_script_2 ls_registration_daemon
 
+%define disttag pSPS
+
 Name:           perl-perfSONAR_PS-Skeleton
-Version:        0.10
-Release:        1%{?dist}
-Summary:        perfSONAR_PS Lookup Service Registration Daemon
+Version:        3.1
+Release:        1.%{disttag}
+Summary:        perfSONAR_PS Skeleton Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-Skeleton/
@@ -49,7 +51,7 @@ install -m 755 scripts/%{init_script_1}.new $RPM_BUILD_ROOT/etc/init.d/%{init_sc
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(0644,perfsonar,perfsonar,-)
+%defattr(0644,perfsonar,perfsonar,0755)
 %doc %{install_base}/doc/*
 %config %{install_base}/etc/*
 %attr(0755,perfsonar,perfsonar) %{install_base}/bin/*
@@ -65,11 +67,21 @@ chown perfsonar:perfsonar %{logging_base}
 #/sbin/chkconfig --add %{init_script_2}
 
 %preun
-/etc/init.d/%{init_script_1} stop
-/sbin/chkconfig --del %{init_script_1}
+if [ "$1" = "0" ]; then
+	# Totally removing the service
+        /etc/init.d/%{init_script_1} stop
+        /sbin/chkconfig --del %{init_script_1}
 
-#/etc/init.d/%{init_script_2} stop
-#/sbin/chkconfig --del %{init_script_2}
+        #/etc/init.d/%{init_script_2} stop
+        #/sbin/chkconfig --del %{init_script_2}
+fi
+
+%postun
+if [ "$1" != "0" ]; then
+	# An RPM upgrade
+	/etc/init.d/%{init_script_1} restart
+#	/etc/init.d/%{init_script_2} restart
+fi
 
 %changelog
 * Wed Dec 10 2008 aaron@internet2.edu 0.10-1
