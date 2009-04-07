@@ -1,0 +1,36 @@
+=  April 13, 2009 Conference Call 2:30 pm EST =
+
+== Agenda/Minutes ==
+
+ # Attendees
+   * TBD
+ # Team Updates
+   # Internet2
+   # ESnet
+   # UDel
+   # FNAL
+ # Review _*Actions*_ from last call
+ # perfSONAR-PS v3.1 Release Update
+ # Spring Member Meeting
+   * Group Activities
+     * Perf WG
+     * IS-WG
+     * Demos
+       * DCN
+       * CTP
+     * Others?
+   * Post Meeting Topics
+ # Circuit Monitoring
+ # SNMP-MA ESnet new database integration update
+ # LHC/Atlas deployments (status update)
+ # Next meeting will be 4/20
+
+=== ACTIONS ===
+
+TBD
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.

@@ -3,34 +3,64 @@
 == Agenda/Minutes ==
 
  # Attendees:
-   * TBD
+   * Jason
+   * Aaron
+   * Joe
+   * Rich
+   * Marcos
  # perfSONAR-PS v3.1 Release Update
    * See [pSPS20090327Release] for details
      * Check individual progress.
+       * JZ: All software to be released has been reviewed.  Betas are being generated and tested internally 
      * Documentation Reviews
        * Developers Finish (3/27)
+         * JZ: All developers have completed this.  _User_ guides are still outstanding, but will have to be a work in progress for the next couple of weeks.
        * Reviews Due (4/3)
+         * JZ: Did not receive all reviews on time.  AB/JZ reviewed the remaining items to make the deadline.  Will still need reviewers after the _user_ documentation is complete
      * Uploading to repository
+       * AB/JZ have access, Maxim is still on vacation (will ask him if he wants access to rpm/source repo).  
      * Testing
        * Testing Procedure
-       * List of Testers
-       * Alpha Testing
-       * Beta Testing
+         * JZ has a list of interested parties to send testers to.  Should test locally first (on as many different OS/Arch combinations as possible).  Testing should focus on:
+           # Install Procedure vs instructions
+           # Install success on specific OS/Architectures
+           # Configuration vs instructions
+           # WS Test cases included in the package
+           # Other factors (firewall configuration, etc.)
  # Other Issues
    # Wiki-reorg
+     * There were no objections to cleaning the wiki
    # [IPSummarization] Comments
+     * JM/MP talked about recent comments on IS-WG mailing list.
+     * JM would like to see goals/metrics listed that are used to evaluate one summarization alg. vs another.  Has suggestions:
+       # ratio of entries in result over entries in initial set (e.g. compression)
+       # ratio of unique IP addresses in initial set over unique IP addresses in result set (e.g. if we go from a /32 to a /31, we have increased the number we are claiming by 255)
+     * MP understands, and will try to describe the definition of _good_ summarization on the wiki for conversation.
+     * AB cautions about hLSs advertising _false_ ranges (over summarizing) especially when dealing with data sets that are not continuous.  JZ explains that MP should be testing with _domain_ data sets (e.g. ESnet) but then combining 2 data sets (e.g. ESnet and APAN for example) to see how the alg. behaves.
+     * JM closes with a statement about accuracy when collapsing IP blocks (adjacent blocks = good, non = troublesome)
    # Circuit Monitoring update
      * Status of exmples (aaron)
+       * AB reports no change since last time
    # SNMP-MA ESnet new database integration update
+     * JM is not aware of progress, but that doesn't mean there isn't any.  
+     * JM is pretty sure Jon will make it to DC, we can discuss this topic during the meeting.
+     * JM wants to ensure we deal with diet constraints for the meeting.  JZ has action of sending out something.  
    # LHC/Atlas deployments (status update)
+     * RC reports that things are going about the same as before, still waiting on BNL to be _fixed_.
+     * JZ notes that REDDnet folks are happy Ultralight is in working order again.
  # Next meeting will be 4/13
 
 === ACTIONS ===
 
-TBD
+ * *MP*: Update [IPSummarization] based on email/conference call suggestions
+ * *JZ*: Coordinate testing
+ * *JZ*: Send out lunch email for F2F meeting for diet constraints
+ * *AB*: Update Circuit Examples
+ * *All*: Review documentation
 
 == Where ==
 
 ESnet conference bridge:
  * GDS:  00113498255555
  * phone: 1-510-883-7860  then 8255555# at the prompt.
+
