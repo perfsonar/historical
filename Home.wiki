@@ -19,14 +19,22 @@ A listing of the nodes from all meetings and conference calls can be found in [M
 Ongoing work can be viewed from our anonymous SVN repository: 
 http://anonsvn.internet2.edu/svn/perfSONAR-PS. 
 
+ * Service documentation
+   * [SNMPMA SNMP MA] v3.1
+   * [LS Lookup Service] v3.1
+   * PingER
+   * Toplogy Service
+   * Status MA
+   * LS Registration Daemon
+   * perfSONAR-BUOY
  * [API] documentation is now available. 
  * The [NPToolkit] is nearing the first official release, download yours today!.
  * [http://code.google.com/p/perfsonar-ps/issues/list Request new features] to the perfSONAR-PS framework.
  
 == For developers ==
 
+ * [Developers] info in one location.
  * perfSONAR-PS is entering into a [pSPS20090327Release release phase].  
- * Take a [CodeTour tour] of the services, installation procedures, and source code.
  * Please adhere to the [CodeRules coding guidelines].
 
 == Mailing Lists ==
@@ -36,10 +44,14 @@ http://anonsvn.internet2.edu/svn/perfSONAR-PS.
 || https://mail.internet2.edu/wws/info/perfsonar-dev || perfSONAR Developers (International) || 
 || https://mail.internet2.edu/wws/info/perfsonar-user || perfSONAR Users Group ||
 || https://mail.internet2.edu/wws/info/performance-node-users || Performance Node Users ||  
-|| https://mail.internet2.edu/wws/info/performance-node-announce || Performance Node Announce (Low Volume) || 
+|| https://mail.internet2.edu/wws/info/perfsonar-announce || perfSONAR Announcements (Low Volume) ||
+|| https://mail.internet2.edu/wws/info/performance-node-announce || Performance Node Announcements (Low Volume) || 
 || https://mail.internet2.edu/wws/info/bwctl-users || BWCTL Users || 
+|| https://mail.internet2.edu/wws/info/bwctl-announce || BWCTL Announcements (Low Volume) || 
 || https://mail.internet2.edu/wws/info/ndt-users || NDT Users || 
+|| https://mail.internet2.edu/wws/info/ndt-announce || NDT Announcements (Low Volume) || 
 || https://mail.internet2.edu/wws/info/owamp-users || OWAMP Users || 
+|| https://mail.internet2.edu/wws/info/owamp-announce || OWAMP Announcements (Low Volume) ||
 
 == Last Updated ==
 
