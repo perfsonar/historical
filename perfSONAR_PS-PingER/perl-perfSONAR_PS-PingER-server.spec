@@ -3,14 +3,15 @@
 
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 PingER
+%define disttag pSPS
 
 Name:           perl-perfSONAR_PS-PingER-server
 Version:        3.1
-Release:        1%{?dist}
+Release:        1.%{disttag}
 Summary:        perfSONAR_PS PingER  Measurement Archive and Collection System
 License:        distributable, see LICENSE
 Group:          Development/Libraries
-URL:            http://search.cpan.org/dist/perfSONAR_PS-PingER-server/
+URL:            http://search.cpan.org/dist/perfSONAR_PS-PingER/
 Source0:        perfSONAR_PS-PingER-server-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
