@@ -93,7 +93,7 @@ which groups I think are best positioned for the specific parts.
 || 3/3-3/13    || Test hardware in AA || AB || *Complete* ||
 || 2/23-3/13   || OS integration and perf-node required software development || AB/JH || *Complete* ||
 || 2/23-3/13   || Central configuration setup developed/tested. (rsync or other) || AB/JH/DP || Manual this time around *Complete* ||
-|| 3/16-4/6    || Order remaining hardware, deployments of perf-nodes || JH || *Complete* ||
+|| 3/16-4/6    || Order remaining hardware, deployments of perf-nodes || JH || *Complete*/deployments In-progress ||
 || 3/2-4/13   || Development of database modifications. || JB || In-progress ||
 || 3/16-4/13   || Admin-GUI || AB || In-progress ||
 || 3/16-4/13   || Nagios plugins. || JZ || Basic Nagios Started ||
@@ -103,4 +103,3 @@ which groups I think are best positioned for the specific parts.
 || 4/13-4/24   || Iterative development/testing of GUI/nagios alerts || JZ/JH/DP || ||
 ||             || (No database mods during this time, only presentation changes.) || || ||
 || 4/27        || Ready to show community || all || ||
-
