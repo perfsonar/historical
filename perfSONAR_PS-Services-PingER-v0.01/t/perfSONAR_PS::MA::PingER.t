@@ -1,1 +1,0 @@
-../../../t/perfSONAR_PS::MA::PingER.t
