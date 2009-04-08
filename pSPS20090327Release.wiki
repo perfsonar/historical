@@ -153,7 +153,7 @@ Developers are responsible for testing their code:
      * Update Release Documentation - <font color=green>_*DONE - 3/9*_</font>
      * Update Issue Tracker - <font color=green>_*DONE - 3/3*_</font>
      * Review Code Reviews - <font color=green>_*DONE - 3/20*_</font>
-     * Review Doc Reviews - <font color=red>_*PENDING*_ - </font>
+     * Review Doc Reviews - <font color=red>_*DONE - 4/8*_</font>
    * Development
      * LS - <font color=green>_*DONE - 3/23*_</font>
      * SNMP - <font color=green>_*DONE - 3/23*_</font>
@@ -212,17 +212,17 @@ Developers are responsible for testing their code:
    * Code Review
      * LS Registration Daemon - <font color=green>_*DONE - 3/16*_</font>
    * Documentation Review
-     * LS - <font color=red>_*PENDING*_ - </font>
+     * LS
  * Brian
    * Code Review
      * SNMP - <font color=green>_*DONE - 3/16*_</font>
    * Documentation Review
-     * pSB - <font color=red>_*PENDING*_ - </font>
+     * perfSONAR-BUOY - <font color=purple>_*PUSHED OFF*_ - </font>
  * Guilherme
    * Code Review
-     * perfSONAR-BUOY - <font color=green>_*DONE - 3/16*_</font>
+     * perfSONAR-BUOY - <font color=purple>_*PUSHED OFF*_ - </font>
    * Documentation Review
-     * LS - <font color=red>_*PENDING*_ - </font>
+     * LS
  * Marcos
    * Code Review
      * LS - <font color=green>_*DONE - 3/16*_</font>
@@ -233,8 +233,7 @@ Developers are responsible for testing their code:
 
 Lessons learned during the release and review process.  
 
- * Start and end code reviews earlier
- * Same for doc reviews
+ * Start and end code/doc reviews time period earlier
  * Testing (unit tests - tests harness) should be ready pre-release
  * Keep your documentation up to date 
  * Longer cycle should be considered, especially when balancing other needs (Paper writing, outside tasks)
@@ -297,7 +296,17 @@ We have [CodeRules rules] in place, we need to enforce and add to this list when
 
 === Documentation Review Reviews ===
    
-_*PENDING*_   
+This is a _*review of the reviews*_ so we can start to identify weak points in our development process and try to make things easier in the future.  
+  
+==== Content ====
+
+ * User documentation (cookbooks, etc.) are lacking
+ * Packages were mostly up to date (INSTALL/Changes, etc.)
+ * Wiki documentation is a moving target, may want to move away from this (e.g. unify the 'web' presense so things are easy to find)
+
+==== Re-Review ====
+
+ * Modules were reviewed during code review phase (for perl doc, etc.) should not have to do the same things twice.  
       
 == Last Updated ==
 
