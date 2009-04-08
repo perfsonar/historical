@@ -19,6 +19,8 @@ A listing of the nodes from all meetings and conference calls can be found in [M
 Ongoing work can be viewed from our anonymous SVN repository: 
 http://anonsvn.internet2.edu/svn/perfSONAR-PS. 
 
+ * We have released the first several candidates from our 3.1 software release.
+   * Available at http://software.internet2.edu
  * Service documentation
    * [SNMPMA SNMP MA] v3.1
    * [LS Lookup Service] v3.1
