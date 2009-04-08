@@ -11,7 +11,7 @@ Summary:        perfSONAR_PS PingER  Measurement Archive and Collection System
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-PingER-server/
-Source0:        perfSONAR_PS-PingER-server.tgz
+Source0:        perfSONAR_PS-PingER-server-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       perl(Log::Log4perl) >= 1
