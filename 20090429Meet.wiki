@@ -47,7 +47,6 @@ The perfSONAR developers meeting will focus on pending issues within the perfSON
    # Jarda Flidr - MAX
    # Tom Lehman - ISI
    # Evangelos Chaniotakis - ESnet
-   # Brian Tierney - ESnet
    # Joe Meztger - ESnet
    # Jon Dugan - ESnet
    # TBD - ESnet
@@ -57,6 +56,7 @@ The perfSONAR developers meeting will focus on pending issues within the perfSON
    # Student 2 - UDel <font color=red>_*TENTATIVE*_ - </font> 
    # ...
  * Remote
+   # Brian Tierney - ESnet
    # David Robertson - LBL
    # Chris Robb - Internet2
 
@@ -114,7 +114,6 @@ If IDC developers like, a portion of the day can be set aside for other current 
    # Chris Tracy - MAX
    # Jarda Flidr - MAX
    # Evangelos Chaniotakis - ESnet
-   # Brian Tierney - ESnet
    # Joe Meztger - ESnet
    # Jon Dugan - ESnet
    # TBD - ESnet
@@ -124,6 +123,7 @@ If IDC developers like, a portion of the day can be set aside for other current 
    # Student 2 - UDel <font color=red>_*TENTATIVE*_ - </font> 
    # ...
  * Remote
+   # Brian Tierney - ESnet
    # David Robertson - LBL
    # Chris Robb - Internet2
 
