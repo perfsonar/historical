@@ -1,4 +1,6 @@
-#summary perfSONAR Network Performance Toolkit Quick Start<wiki:toc max_depth="6" />
+#summary perfSONAR Network Performance Toolkit Quick Start
+
+<wiki:toc max_depth="6" />
 
 == Installation and Configuration ==
 
@@ -344,7 +346,18 @@ http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_44_Error.png
      * *eVLBI* - The disk is a part of the larger telescope community
      * *MAX* - A connector of member of the MAX gigapop
    * Use as many community names as necessary to properly categorize the data from the installation. 
-   
+
+ * *Q: How do I enable jumbo frames so that it survives a reboot?*
+ * *A:*  Add a line like "ifconfig eth0 mtu 9000" to the bottom of the file "/etc/rc.local".
+
+ * *Q: What can I do if see errors like the following after booting up the CD:*
+{{{
+ide: failed opcode was: unknown
+hda: no DRQ after issuing MULTWRITE_EXT
+ide0: reset: success
+}}}
+ * *A:* A solution found by one user was to make a change in his BIOS. By default, their !SuperMicro motherboard was configured to see SATA drives as IDE so they had to change it to see the drive as SATA. For the !SuperMicro motherboard, they changed the BIOS option 'Serial ATA -> Native Mode Operation' from the default value of 'Auto' to 'Serial ATA'. If this does not solve your issue send an email the users list and we can try and figure out what's happening.
+
 == Last Updated ==
 
 $Id$
