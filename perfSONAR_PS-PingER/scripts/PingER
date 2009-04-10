@@ -8,13 +8,13 @@
 
 PREFIX=/opt/perfsonar_ps/PingER
 BINDIR=${PREFIX}/bin
-VERSION=0.091
+VERSION=3.1
 CONFDIR=/etc/PingER
 VARDIR=/var/run/PingER
 SERVICE=perfsonar-daemon.pl
-CONFIGBIN=psConfigureDaemon
+CONFIGBIN=pinger_ConfigureDaemon
 
-COLLECTORCONF=${CONFDIR}/perfSONAR_pinger.conf
+COLLECTORCONF=${CONFDIR}/pinger.conf
 LOGGERCONF=${CONFDIR}/logger.conf
 PIDDIR=${VARDIR}
 PIDFILE=pinger.pid
