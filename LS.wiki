@@ -200,11 +200,11 @@ In addition to perl requirements, there are other software requirements that
 should be installed.  These are not controlled via the dependency scripts due to
 differences in package management.  The tools are listed below:
 
-  * Oracle DB XML
-    - Source is available [http://download.oracle.com/berkeley-db/dbxml-2.3.11.tar.gz here]
-    - Package management names:
-      * Debian/Ubuntu: dbxml
-      * RedHat Systems: dbxml
+ * Oracle DB XML
+   * Source is available [http://download.oracle.com/berkeley-db/dbxml-2.3.11.tar.gz here]
+   * Package management names:
+     * Debian/Ubuntu: dbxml
+     * RedHat Systems: dbxml
  * LibXML2
    * Package management names:
      * Debian/Ubuntu: libxml2, libxml2-dev, libxml2-utils
