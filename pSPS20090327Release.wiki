@@ -48,35 +48,53 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPS20090327Release/schedule.png
 
 The following outline some exceptions to the overall release process.  Also see [pSPSReleaseManagement] for overall recomendations on this process for the perfSONAR-PS group.
 
-=== Open Bugs Related to This Release ===
+=== Bugs Related to This Release ===
 
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=19 19] - _*Aaron/Maxim*_ - ~~PingER GUI gLS pingable hosts~~
-   * Resolved (original issue addressed)
-   * Opened [http://code.google.com/p/perfsonar-ps/issues/detail?id=107 107] to address other concerns (next release)
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=73 73] - _*Jason*_ - ~~Client::LS Registration Logic Re-arrange~~
-   * Original issue addressed, but held over for re-design before next release.
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=79 79] - _*Jason*_ - ~~Empty gLS/hLS Messages~~
-   * Resloved
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=84 84] - _*Jason*_ - ~~Exit MA service if no data is present ~~   
-   * Resolved
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=85 85] - _*Jason*_ - ~~add verbose logging on errors for ma/ls~~
-   * Resolved to original spec
-   * Opened [http://code.google.com/p/perfsonar-ps/issues/detail?id=108 108] to address other concerns (next release)
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=105 105] - _*Jason*_ - ~~hLS Summarization of DCN Data~~
-   * Held over for next release
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=109 109] - _*Jason*_ - ~~gLS Discovery of IP Addresses~~
-   * Resolved
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=110 110] - _*Jason*_ - ~~perfSONAR-BUOY Data Query Error~~
-   * Resolved 
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=112 112] - _*Jason*_ - ~~supportedEventType Examples for SNMP/pSB~~ 
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=116 116] - _*Jason*_ - ~~Migrate getRRDData to SNMP.pm~~
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=62 62] - _*Maxim*_ - ~~pingER-MA requires 'hostname" type attribute in endPointPair~~
-   * Resolved
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=66 66] - _*Maxim*_ - ~~PingER Collection Errors~~
-   * Resolved
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=81 81] - _*Maxim*_ - ~~PingER Resolution of IPaddress/Hostnames~~
-   * Resolved 
+ * _*PingER*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=19 19] - _*Aaron/Maxim*_ - ~~PingER GUI gLS pingable hosts~~
+     * Resolved (original issue addressed)
+     * Opened [http://code.google.com/p/perfsonar-ps/issues/detail?id=107 107] to address other concerns (next release)
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=62 62] - _*Maxim*_ - ~~pingER-MA requires 'hostname" type attribute in endPointPair~~
+     * Resolved
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=66 66] - _*Maxim*_ - ~~PingER Collection Errors~~
+     * Resolved
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=81 81] - _*Maxim*_ - ~~PingER Resolution of IPaddress/Hostnames~~
+     * Resolved 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=132 132] - _*Maxim*_ - PingER packaging is non standard
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=133 133] - _*Maxim*_ - PingER Libs are still in Shared/ area
+ * _*Topology Service*_
 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=128 128] - _*Aaron*_ - ~~Topology Service _get all_ returning redundant data~~
+     * Resolved
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=129 129] - _*Aaron*_ - ~~topology service query request name doesn't match documentation~~
+     * Resolved
+ * _*Status Service*_
+ * _*SNMP MA*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=84 84] - _*Jason*_ - ~~Exit MA service if no data is present ~~   
+     * Resolved
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=112 112] - _*Jason*_ - ~~supportedEventType Examples for SNMP/pSB~~ 
+     * Resolved
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=116 116] - _*Jason*_ - ~~Migrate getRRDData to SNMP.pm~~
+     * Resolved
+ * _*Lookup Service*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=79 79] - _*Jason*_ - ~~Empty gLS/hLS Messages~~
+     * Resloved
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=105 105] - _*Jason*_ - ~~hLS Summarization of DCN Data~~
+     * Held over for next release
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=109 109] - _*Jason*_ - ~~gLS Discovery of IP Addresses~~
+     * Resolved
+ * _*LSRegistration Daemon*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=124 124] - _*Aaron*_ - ~~ls registration daemon not disconnecting properly~~
+     * Resolved
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=121 121] - _*Aaron*_ - ~~ls registration daemon TCP services aren't working locally~~
+     * Resolved
+ * _*Framework*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=73 73] - _*Jason*_ - ~~Client::LS Registration Logic Re-arrange~~
+     * Original issue addressed, but held over for re-design before next release.
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=85 85] - _*Jason*_ - ~~add verbose logging on errors for ma/ls~~
+     * Resolved to original spec
+     * Opened [http://code.google.com/p/perfsonar-ps/issues/detail?id=108 108] to address other concerns (next release)     
+     
 === Code Reviews ===
 
 The code _review_ can be a lot more in depth than just reading in suggesting.  Most corrections can be done directly to the code base to save time in the process.  Reviewers are encouraged to run [Perltidy] and [Perlcritic] at the end of the review.  

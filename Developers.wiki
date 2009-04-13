@@ -14,7 +14,53 @@ The perfSONAR-PS services provide Web Services (WS) based interfaces into alread
 
 === Service Examples ===
 
-TBD
+The following represent the current released products in the perfSONAR-PS framework.  Each serves a specific purpose that benefits the measurement framework as a whole.  
+
+==== SNMP Measurement Archive ====
+
+The perfSONAR-PS SNMP based Measurement Archive (SNMP MA) is able to expose data collected via variables from the Simple Network Management Protocol (SNMP) protocol found on networked devices and stored in Round Robin Databases (RRD) archives. The measurements are collected through external means, normally through software such as [http://oss.oetiker.ch/mrtg/ MRTG], [http://www.cacti.net Cacti], or [http://cricket.sourceforge.net/ Cricket], and is commonly stored in [http://oss.oetiker.ch/rrdtool/ RRD] archives. External access to commonly requested data items, remains challenging due to physical and political boundaries.
+
+The SNMP MA provides a simple interface that is cable of exposing these files after basic configuration for consumption by perfSONAR client applications and services alike. The Web Service front end provides a uniform method of access using the perfSONAR XML protocols and delivers the data in an unambiguous manner, thus eliminating the mystery associated with the backend storage. 
+
+For more information see also the development page: [SNMPMA].
+
+==== Lookup Service ====
+
+The perfSONAR-PS Lookup Service (LS) addresses the always challenging problem of resource registration and discovery for the perfSONAR framework. Service instances that manage datasets are only useful when they can be contacted by consumers. Consumers can only function when there is data available. To manage these problems in a dynamic environment such as perfSONAR, it is necessary to register, maintain, and query for the services that may contain interesting data.
+
+The perfSONAR-PS LS relies on an XML database, [http://www.oracle.com/technology/products/berkeley-db/xml/index.html Oracle DB XML], to store service registration information in a native manner. Using the power of the [http://www.w3.org/TR/xpath XPath] and [http://www.w3.org/TR/xquery XQuery] standards it is then possible for client applications and services alike to query for information in a uniform and powerful manner. All perfSONAR services are capable of registering information with an LS instantiation, thus deploying this service within your framework is paramount. 
+
+For more information see also the development page: [LS].
+
+==== Topology Service ====
+
+The perfSONAR-PS Topology Service provides the ability for administrators to make topology information about their networks available to remote clients. Client applications and services can be written that use the [http://www.w3.org/TR/xquery XQuery] language to perform arbitrarily complex queries against the data stored in the database. The Topology information returned by the topology service follows the perfSONAR Topology XML schema being developed in coordination with the the DICE Control Plane Working Group. The Topology Service stores the topology information in the [http://www.oracle.com/technology/products/berkeley-db/xml/index.html Oracle DB XML] XML database.
+
+==== Status Measurement Archive ====
+
+There are two types of status services: measurement and circuit.
+
+The Status Measurement Archive provides a way for an administrator to provide layer2 link status information to remote clients. This information can be obtained via a polling service that can use SNMP, or scripts to collect the link status information, and stores it into a SQL database. The technique used to store the information helps minimize the storage requirements of rarely changing links.  This service is compatible with [https://wiki.man.poznan.pl/perfsonar-mdm/index.php/Geant2_E2E_Monitoring_System_Software_Downloads E2EMon], a commonly used service that provides a webpage containing status information about inter-domain circuits. In order to produce the webpage, the service requests the complete state of each domain in the circuits it has an interest in and then correlates this information to produce end-to-end statistics. This Circuit Status service uses the Status Measurement Archive and can use the Topology Service to provide the complete domain status required by the E2EMon service.
+
+==== PingER ====
+
+The perfSONAR-PS PingER service is an evolution of the [http://www-iepm.slac.stanford.edu/pinger PingER project] with more than 10 years experience in collecting and analysising network performance across the world. The perfSONAR-PS PingER service is composed of both a storage backend (MA) and measurement frontend (MP) to conduct and store ping measurements and to make available such data for consumption by interested parties. Network characteristics supported include availability, latency and jitter, which provide a broad spectrum of determining end-to-end network performance.
+
+perfSONAR-PS PingER is designed to be scalable enough in order to accommodate hundreds of monitored pairs of hosts and uses a relational database backend (MySQL, Postgres, SQLite) to efficiently store and retrieve such performance information.
+
+perfSONAR-PS PingER also supports the registration of data through perfSONAR LS's to faciliate the dynamic discovery and querying of unknown deployments.
+
+The MA provides a web service interface based on [http://nmwg.internet2.edu/ NMWG XML] that allows queries on the PingER data and to be consumpted by perfSONAR client applications and services alike.
+
+==== perfSONAR-BUOY Measurement Archive ====
+
+The perfSONAR-BUOY Measurement Archive service (pSB MA) exposes active measurement data, making the results available through perfSONAR web services interfaces. All performance tests are performed via the [http://e2epi.internet2.edu/bwctl BWCTL] tool (throughput measurements) and currently consist of regularly-scheduled [http://sourceforge.net/projects/iperf Iperf] tests to a configurable list of source and destination hosts.
+
+Data collected through the BWCTL interaction is stored in a MySQL database. Active measurements between known hosts are particularly valuable when assuring connectivity, availability, and quality of the network. perfSONAR-BUOY allows for the easy configuration of a "mesh" of tests to hosts equipped with BWCTL. Based on a configurable schedule, the tests will be conducted autonomously and stored for consumption via the perfSONAR-BUOY interface as well as presentation through included web scripts. Using the same XML protocols as the the other perfSONAR services, perfSONAR-BUOY provides uncomplicated access methods to retrieve the data in an unambiguous manner, thus eliminating the mystery associated with the backend storage. Closely coupled with development on BWCTL, perfSONAR-BUOY will soon offer data originating from sources besides Iperf such as [http://e2epi.internet2.edu/owamp OWAMP] (latency measurements).
+
+==== LS Registration Daemon ====
+
+The perfSONAR-PS LS Registration Daemon allows networks to register their [http://e2epi.internet2.edu/bwctl BWCTL], [http://e2epi.internet2.edu/owamp OWAMP], [http://e2epi.internet2.edu/ndt NDT], [http://www.psc.edu/networking/projects/pathdiag/ NPAD] and [http://damsl.cis.udel.edu/projects/phoebus/ Phoebus] services with a perfSONAR-PS Lookup Service. This allows interested clients to search for and find the network's services. 
 
 === Use Cases ===
 
