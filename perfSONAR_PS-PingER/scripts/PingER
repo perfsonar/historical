@@ -19,7 +19,10 @@ LOGGERCONF=${CONFDIR}/logger.conf
 PIDDIR=${VARDIR}
 PIDFILE=pinger.pid
 
-PERFSONAR="${BINDIR}/${SERVICE}   --config=${COLLECTORCONF} --piddir=${PIDDIR}  --pidfile=${PIDFILE} --logger=${LOGGERCONF}"
+USER=perfsonar
+GROUP=perfsonar
+
+PERFSONAR="${BINDIR}/${SERVICE}   --config=${COLLECTORCONF} --piddir=${PIDDIR}  --pidfile=${PIDFILE} --logger=${LOGGERCONF} --user=${USER} --group=${GROUP}"
 
 ERROR=0
 ARGV="$@"
