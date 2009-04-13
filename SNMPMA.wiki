@@ -12,7 +12,7 @@ devices and stored in [http://oss.oetiker.ch/rrdtool/ Round Robin Databases]
 through software such as [http://oss.oetiker.ch/mrtg/ MRTG],
 [http://www.cacti.net CACTI], or [http://cricket.sourceforge.net/ Cricket], and
 is commonly stored in RRD archives. External access to commonly requested data
-items, remains challening due to physical and political boundaries.
+items, remains challenging due to physical and political boundaries.
 
 The SNMP MA provides a simple interface that is cable of exposing these files
 after basic configuration for consumption by
@@ -46,7 +46,7 @@ install a simple RPM package that gives the necessary configuration information
 for the YUM and APT-RPM tools.  The RPM can be found here:
 
 {{{
-wget -c http://software.interent2.edu/Internet2-repo-0.1-2.noarch.rpm
+wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
 }}}
   
 To install this RPM first import the signing key:
@@ -70,6 +70,47 @@ used by the Linux distributions.  Two regarded repositories are:
  
 Each site provides configuration instructions and packages similar to the
 Internet2 repository.
+
+=== Non-RedHat Based Linux ===
+
+If using a package management system is not an option, or if your system is not
+RedHat based (e.g. Debian, Gentoo, etc.) it is still possible to install this
+software and related requirements by hand.  Please see
+[SNMPMA#Installation_(Tar_Package) Installation (Tar Package)] or
+[SNMPMA#Installation_(SVN) Installation (SVN)] for more details.  This tool uses
+the following Perl libraries, libraries, and external tools to function:
+
+ * Perl Libraries
+   * Config::General
+   * Cwd
+   * DBI
+   * Data::UUID
+   * Date::Manip
+   * Digest::MD5
+   * Error
+   * Exporter
+   * File::Basename
+   * File::Temp
+   * Getopt::Long
+   * HTTP::Daemon
+   * IO::File
+   * LWP::Simple
+   * LWP::UserAgent
+   * Log::Dispatch
+   * Log::Dispatch::FileRotate
+   * Log::Log4perl
+   * Module::Load
+   * Net::Ping
+   * Params::Validate
+   * RRDp
+   * Socket
+   * Sys::Hostname
+   * Time::HiRes
+   * XML::LibXML
+ * Libraries
+   * LibXML2
+ * Tools
+   * RRDTool
 
 === YUM ===
 
@@ -149,6 +190,20 @@ These two included scripts will configure the machine's users and startup
 scripts as well as contact [http://search.cpan.org CPAN] for any necessary perl
 libraries.  
 
+In addition to perl requirements, there are other software requirements that
+should be installed.  These are not controlled via the dependency scripts due to
+differences in package management.  The tools are listed below:
+
+ * RRDTool
+   * Source is available [http://oss.oetiker.ch/rrdtool/ here]
+   * Package management names:
+     * Debian/Ubuntu: rrdtool, librrd2, librrd2-dev, librrds-perl, librrdp-perl
+     * RedHat Systems: rrdtool, rrdtool-devel, perl-rrdtool
+ * LibXML2
+   * Package management names:
+     * Debian/Ubuntu: libxml2, libxml2-dev, libxml2-utils
+     * RedHat Systems: libxml2, libxml2-devel
+
 === Subversion ===
 
 Software may be downloaded directly from our anonymous subversion server.  This
@@ -162,8 +217,10 @@ To download the entire release:
 svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1 perfSONAR-PS
 }}}
   
-The instructions are the same here as for the Tar package.  When you wish to
-update the checkout (to retrieve new development or bugfixes):
+The instructions are the same here as for the Tar package.  Note that
+installation may require pre-requisite software.  Read the preceding sections
+for necessary items and suggestions on how to install and configure them.  When
+you wish to update the checkout (to retrieve new development or bugfixes):
 
 {{{
 cd perfSONAR-PS
@@ -292,18 +349,18 @@ an explanation of each follows:
 || ls_instance || No || String (URL) || LS instance to register with ||
 || enable_registration || Yes || Boolean, 0 or 1 || Allow the service to register with an LS instance ||
 || metadata_db_name || No || String (file path) || Name of the directory that houses the database ||
-|| metadata_db_file || Yes || String (file name) || Filename of a database file ||
+|| metadata_db_file || Yes || String (file name) || File name of a database file ||
 || metadata_db_type || Yes || String || Either _file_ or _xmldb_ ||
 || metadata_db_external || Yes || String || Either _none_, _cacti_, or _cricket_ ||
 || metadata_db_external_source || No || String || Location of external configration file, Used only for Cacti currently ||
 || metadata_db_external_cricket_config || No || String (directory path) || Path to cricket config, Used only for cricket ||
 || metadata_db_external_cricket_cricket || No || String (directory path) || Path to cricket directory, Used only for cricket ||
 || metadata_db_external_cricket_data || No || String (directory path) || Path to cricket data, Used only for cricket ||
-|| metadata_db_external_cricket_home || No || String (directory path) || Path to cricet home directory, Used only for cricket ||
+|| metadata_db_external_cricket_home || No || String (directory path) || Path to cricket home directory, Used only for cricket ||
 || service_accesspoint || Yes || String (URL) || URL used to contact this service ||
 || service_description || Yes || String || Description of this service ||
 || service_name || Yes || String || Name of this service ||
-|| service_type || Yes || String || Type of this service (normally hLS) ||
+|| service_type || Yes || String || Type of this service (normally MA) ||
 || disable || No || Boolean, 0 or 1 || Is this service active or not (normally 1) ||
 || module || Yes || String (module name) || Module name that controls this service (normally will not change) ||
 
@@ -339,7 +396,7 @@ for a specific use case:
 Contains information that identifies the service uniquely and allows it to run
 in a given environment.  There are several options that should be changed:  
    
- * _*service_accesspoint*_ - Change the "hostname" from localhost
+ * _*service_accesspoint*_ - Change the _hostname_ from _*localhost*_
  * _*service_description*_ - Identifying information about the service
  * _*service_name*_ - Service Name (short)  
  * _*rrdtool*_ - location of the rrdtool binary
@@ -376,8 +433,8 @@ The metadata configuration is stored at:
 This file represents the _explanation_ of the data that is being offered by the
 service.  It is written in XML and is configured for a _*localhost*_ environment
 with a single empty RRD file.  This file may be modified by hand to add new
-existing RPMs from other services or use of an external service such as Cacti or
-Cricket may be enabled to prevent manual editing. 
+existing RRD files that describe specific interfaces.  It is also possible to
+configure your service to use external collection tools such as Cacti or Cricket.
     
 == Service Control ==
 

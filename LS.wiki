@@ -48,7 +48,7 @@ install a simple RPM package that gives the necessary configuration information
 for the YUM and APT-RPM tools.  The RPM can be found here:
 
 {{{
-wget -c http://software.interent2.edu/Internet2-repo-0.1-2.noarch.rpm
+wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
 }}}
   
 To install this RPM first import the signing key:
@@ -72,6 +72,51 @@ used by the Linux distributions.  Two regarded repositories are:
  
 Each site provides configuration instructions and packages similar to the
 Internet2 repository.
+
+=== Non-RedHat Based Linux ===
+
+If using a package management system is not an option, or if your system is not
+RedHat based (e.g. Debian, Gentoo, etc.) it is still possible to install this
+software and related requirements by hand.  Please see
+[LS#Installation_(Tar_Package) Installation (Tar Package)] or
+[LS#Installation_(SVN) Installation (SVN)] for more details.  This tool uses
+the following Perl libraries, libraries, and external tools to function:
+
+ * Perl Libraries
+   * Config::General
+   * Cwd
+   * Data::UUID
+   * Data::Validate::IP
+   * Digest::MD5
+   * English
+   * Error
+   * Exporter
+   * File::Basename
+   * File::Temp
+   * File::stat
+   * Getopt::Long
+   * HTTP::Daemon
+   * Hash::Merge
+   * IO::File
+   * LWP::Simple
+   * LWP::UserAgent
+   * Log::Dispatch
+   * Log::Dispatch::FileRotate
+   * Log::Log4perl
+   * Module::Load
+   * Net::CIDR
+   * Net::IPTrie
+   * Net::IPv6Addr
+   * Net::Ping
+   * Params::Validate
+   * Sleepycat::DbXml    
+   * Sys::Hostname
+   * Time::HiRes
+   * XML::LibXML
+ * Libraries
+   * LibXML2
+ * Tools
+   * RRDTool
 
 === YUM ===
 
@@ -151,6 +196,20 @@ These two included scripts will configure the machine's users and startup
 scripts as well as contact [http://search.cpan.org CPAN] for any necessary perl
 libraries.  
 
+In addition to perl requirements, there are other software requirements that
+should be installed.  These are not controlled via the dependency scripts due to
+differences in package management.  The tools are listed below:
+
+  * Oracle DB XML
+    - Source is available [http://download.oracle.com/berkeley-db/dbxml-2.3.11.tar.gz here]
+    - Package management names:
+      * Debian/Ubuntu: dbxml
+      * RedHat Systems: dbxml
+ * LibXML2
+   * Package management names:
+     * Debian/Ubuntu: libxml2, libxml2-dev, libxml2-utils
+     * RedHat Systems: libxml2, libxml2-devel
+
 === Subversion ===
 
 Software may be downloaded directly from our anonymous subversion server.  This
@@ -164,8 +223,10 @@ To download the entire release:
 svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1 perfSONAR-PS
 }}}
   
-The instructions are the same here as for the Tar package.  When you wish to
-update the checkout (to retrieve new development or bugfixes):
+The instructions are the same here as for the Tar package.  Note that
+installation may require pre-requisite software.  Read the preceding sections
+for necessary items and suggestions on how to install and configure them.  When
+you wish to update the checkout (to retrieve new development or bugfixes):
 
 {{{
 cd perfSONAR-PS
@@ -270,8 +331,8 @@ an explanation of each follows:
 || ls_registration_interval || Yes || Integer (Time in Minutes) || How often the service registers with a _*Global*_ Lookup Service ||
 || maintenance_interval || Yes || Integer (Time in Minutes) || How often this service performs cleaning and summarization ||
 || metadata_db_name || Yes || String (file path) || Name of the directory that houses the database ||
-|| metadata_db_file || Yes || String (file name) || Filename of a database file ||
-|| metadata_summary_db_file || Yes || String (file name) || Filename of a database file ||
+|| metadata_db_file || Yes || String (file name) || File name of a database file ||
+|| metadata_summary_db_file || Yes || String (file name) || File name of a database file ||
 || service_accesspoint || Yes || String (URL) || URL used to contact this service ||
 || service_description || Yes || String || Description of this service ||
 || service_name || Yes || String || Name of this service ||
@@ -311,7 +372,7 @@ for a specific use case:
 Contains information that identifies the service uniquely and allows it to run
 in a given environment.  There are several options that should be changed:  
    
- * _*service_accesspoint*_ - Change the "hostname" from localhost
+ * _*service_accesspoint*_ - Change the _hostname_ from _*localhost*_
  * _*service_description*_ - Identifying information about the service
  * _*service_name*_ - Service Name (short)  
 
