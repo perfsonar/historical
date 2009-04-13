@@ -77,10 +77,10 @@ Internet2 repository.
 
 If using a package management system is not an option, or if your system is not
 RedHat based (e.g. Debian, Gentoo, etc.) it is still possible to install this
-software and related requirements by hand.  Please see
-[LS#Installation_(Tar_Package) Installation (Tar Package)] or
-[LS#Installation_(SVN) Installation (SVN)] for more details.  This tool uses
-the following Perl libraries, libraries, and external tools to function:
+software and related requirements by hand.  Please see the
+[LS#Tar_Package TarPackage] or [LS#SVN SVN] sections for more details.
+This tool uses the following Perl libraries, libraries, and external tools to
+function:
 
  * Perl Libraries
    * Config::General
