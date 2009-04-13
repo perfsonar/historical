@@ -71,7 +71,7 @@ used by the Linux distributions.  Two regarded repositories are:
 Each site provides configuration instructions and packages similar to the
 Internet2 repository.
 
-=== Non-RedHat Based Linux ===
+==== Other Forms of Linux ====
 
 If using a package management system is not an option, or if your system is not
 RedHat based (e.g. Debian, Gentoo, etc.) it is still possible to install this
