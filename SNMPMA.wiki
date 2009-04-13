@@ -182,6 +182,7 @@ that may be used to download the necessary prerequisite software packages:
 {{{
 wget -c http://software.internet2.edu/source/perl-perfSONAR_PS-SNMPMA-3.1-1.tar.gz
 tar -zxfv perl-perfSONAR_PS-SNMPMA-3.1-1.tar.gz
+make install
 cd perl-perfSONAR_PS-SNMPMA-3.1-1/scripts
 ./prepare_environment.sh
 ./install_dependencies.sh
