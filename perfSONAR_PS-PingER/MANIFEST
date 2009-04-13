@@ -1,7 +1,7 @@
 MANIFEST
 Makefile
 bin/create_landmarks.pl
-bin/perfsonar-daemon.pl
+bin/daemon.pl
 bin/pinger_ConfigureDaemon
 bin/pinger_client.pl
 doc/INSTALL

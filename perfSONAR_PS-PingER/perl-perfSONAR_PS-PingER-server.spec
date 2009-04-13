@@ -7,7 +7,7 @@
 
 Name:           perl-perfSONAR_PS-PingER-server
 Version:        3.1
-Release:        1.%{disttag}
+Release:        2.%{disttag}
 Summary:        perfSONAR_PS PingER  Measurement Archive and Collection System
 License:        distributable, see LICENSE
 Group:          Development/Libraries
