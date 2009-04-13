@@ -63,12 +63,10 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=132 132] - _*Maxim*_ - PingER packaging is non standard
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=133 133] - _*Maxim*_ - PingER Libs are still in Shared/ area
  * _*Topology Service*_
-
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=128 128] - _*Aaron*_ - ~~Topology Service _get all_ returning redundant data~~
      * Resolved
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=129 129] - _*Aaron*_ - ~~topology service query request name doesn't match documentation~~
      * Resolved
- * _*Status Service*_
  * _*SNMP MA*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=84 84] - _*Jason*_ - ~~Exit MA service if no data is present ~~   
      * Resolved
