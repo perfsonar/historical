@@ -13,12 +13,13 @@ HTTP::Daemon
 IO::File
 LWP::Simple
 LWP::UserAgent
+Log::Dispatch
+Log::Dispatch::FileRotate
 Log::Log4perl
 Module::Load
 Net::Ping
 Params::Validate
 RRDp
-Sleepycat::DbXml
 Socket
 Sys::Hostname
 Time::HiRes

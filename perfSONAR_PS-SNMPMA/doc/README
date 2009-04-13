@@ -77,8 +77,9 @@ for a specific use case:
     This file represents the "explanation" of the data that is being offered by
     the service.  It is written in XML and is configured for a "localhost"
     environment with a single empty RRD file.  This file may be modified by hand
-    to add new existing RPMs from other services or use of an external service
-    such as Cacti or Cricket may be enabled to prevent manual editing. 
+    to add new existing RRD files that describe specific interfaces.  It is also
+    possible to configure your service to use external collection tools such as
+    Cacti or Cricket.
 
     See the wiki page for more information:
     
