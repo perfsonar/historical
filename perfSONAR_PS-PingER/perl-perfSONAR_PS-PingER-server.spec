@@ -3,7 +3,7 @@
 
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 PingER
-%define disttag pSPS
+%define disttag psPS
 
 Name:           perl-perfSONAR_PS-PingER-server
 Version:        3.1
@@ -108,8 +108,8 @@ awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_scri
 install -m 755 scripts/%{init_script_1}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_1}
 
 mkdir -p $RPM_BUILD_ROOT/etc/PingER
-ln -s %{install_base}/etc/pinger.conf $RPM_BUILD_ROOT/etc/PingER/pinger.conf
-ln -s %{install_base}/etc/logger.conf $RPM_BUILD_ROOT/etc/PingER/logger.conf
+ln -s %{install_base}/etc/daemon.conf $RPM_BUILD_ROOT/etc/PingER/daemon.conf
+ln -s %{install_base}/etc/daemon_logger.conf $RPM_BUILD_ROOT/etc/PingER/daemon_logger.conf
  
 chmod -R u+rwX,go+rX,go-w $RPM_BUILD_ROOT/*
  
@@ -127,8 +127,8 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/*
 
 %post
-touch /var/log/perfSONAR_pinger.log 
-chown perfsonar:perfsonar   /var/log/perfSONAR_pinger.log 
+touch ${logging_base}
+chown perfsonar:perfsonar  ${logging_base}
 chown -R perfsonar:perfsonar /etc/PingER
 mkdir -p /var/run/PingER
 chown -R perfsonar:perfsonar   /var/run/PingER

@@ -8,8 +8,8 @@ doc/INSTALL
 doc/LICENSE
 doc/README
 doc/landmarks_example.csv
-etc/logger.conf
-etc/pinger.conf
+etc/daemon_logger.conf
+etc/daemon.conf
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
 lib/perfSONAR_PS/Client/LS/Remote.pm

@@ -13,8 +13,8 @@ VARDIR=/var/run/PingER
 SERVICE=daemon.pl
 CONFIGBIN=pinger_ConfigureDaemon
 
-COLLECTORCONF=${CONFDIR}/pinger.conf
-LOGGERCONF=${CONFDIR}/logger.conf
+COLLECTORCONF=${CONFDIR}/daemon.conf
+LOGGERCONF=${CONFDIR}/daemon_logger.conf
 PIDDIR=${VARDIR}
 PIDFILE=pinger.pid
 
