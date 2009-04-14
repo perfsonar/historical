@@ -64,7 +64,7 @@ use File::Copy;
 use Pod::Usage;
 use Log::Log4perl qw(:easy);
 use Getopt::Long;
-use Text::CSV::Simple;
+use Text::CSV_XS;
 use perfSONAR_PS::Utils::DNS qw/reverse_dns resolve_address/;
 
 use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::pingertopo::Topology';
@@ -148,7 +148,9 @@ foreach my $opt ( keys %all_options ) {
 my %dns_cache         = ();
 my %reverse_dns_cache = ();
 my $num               = 0;
-foreach my $row ( Text::CSV::Simple->new->read_file( $options{file} ) ) {
+my $io_file           = IO::File->new( $options{file} );
+my $csv_obj           = Text::CSV_XS->new();
+while ( my $row = $csv_obj->getline( $io_file ) ) {
     unless ( $row->[0] && $row->[1] && ( $row->[2] || $row->[3] ) ) {
         $logger->error( " Skipping Malformed row: domain=$row->[0]  node=$row->[1] hostname=$row->[2] ip=$row->[3]" );
         next;
@@ -252,7 +254,7 @@ __END__
 =head1 SEE ALSO
 
 L<English>, L<FindBin>, L<Data::Dumper>, L<IO::File>, L<File::Copy>,
-L<Pod::Usage>, L<Log::Log4perl>, L<Getopt::Long>, L<Text::CSV::Simple>,
+L<Pod::Usage>, L<Log::Log4perl>, L<Getopt::Long>, L<Text::CSV_XS>,
 L<perfSONAR_PS::Utils::DNS>
 
 To join the 'perfSONAR Users' mailing list, please visit:

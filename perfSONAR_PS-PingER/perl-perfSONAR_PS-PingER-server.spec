@@ -15,55 +15,71 @@ URL:            http://search.cpan.org/dist/perfSONAR_PS-PingER/
 Source0:        perfSONAR_PS-PingER-server-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
-Requires:       perl(Log::Log4perl) >= 1
-Requires:       perl(Module::Load) >= 0.1
-Requires:       perl(version) >= 0.5
+
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:       perl(Module::Build) >= 0.2808
 Requires:       perl(DateTime) >= 0.41
 Requires:       perl(DateTime::Format::Builder) >= 0.7901
 Requires:       perl(Carp) >= 0.41
 Requires:       perl(Carp::Clan) >= 0.41
-Requires:   	perl(Config::General)
-Requires:   	perl(aliased) >= 0
-Requires:   	perl(Cwd)
-Requires:   	perl(DBI)
-Requires:   	perl(DB_File)
-Requires:   	perl(Data::UUID)
-Requires:   	perl(Date::Manip)
-Requires:   	perl(Digest::MD5)
-Requires:   	perl(English)
-Requires:   	perl(Error)
-Requires:   	perl(Exporter)
-Requires:   	perl(Fcntl)
-Requires:   	perl(File::Basename)
-Requires:   	perl(File::Path)
-Requires:   	perl(File::Temp)
-Requires:   	perl(FileHandle)
-Requires:   	perl(FindBin)
-Requires:   	perl(Getopt::Long)
-Requires:   	perl(Getopt::Std)
-Requires:   	perl(HTTP::Daemon)
-Requires:   	perl(IO::File)
-Requires:   	perl(IO::Socket)
-Requires:   	perl(LWP::Simple)
-Requires:   	perl(LWP::UserAgent)
-Requires:   	perl(Math::BigFloat)
-Requires:   	perl(Math::BigInt)
-Requires:   	perl(Module::Load)
-Requires:   	perl(Net::Ping)
-Requires:   	perl(POSIX)
-Requires:   	perl(Params::Validate)
-Requires:   	perl(Socket)
-Requires:   	perl(Sys::Hostname)
-Requires:   	perl(Sys::Syslog)
-Requires:   	perl(Text::CSV::Simple)
-Requires:   	perl(Term::ReadKey)
-Requires:   	perl(Time::HiRes)
-Requires:   	perl(XML::LibXML)
-Requires:	perl-DBD-MySQL
-Requires:	perl-DBD-SQLite
-Requires:	mysql-server
+Requires:       perl(Config::General)
+Requires:       perl(Class::Accessor)
+Requires:       perl(Class::Fields)
+Requires:       perl(aliased) >= 0
+Requires:       perl(Cwd)
+Requires:       perl(DBI)
+Requires:       perl(DB_File)
+Requires:       perl(Data::UUID)
+Requires:       perl(Date::Manip)
+Requires:       perl(Digest::MD5)
+Requires:       perl(English)
+Requires:       perl(Error)
+Requires:       perl(Exporter)
+Requires:       perl(Fcntl)
+Requires:       perl(File::Basename)
+Requires:       perl(File::Path)
+Requires:       perl(File::Temp)
+Requires:       perl(File::Copy)
+Requires:       perl(FileHandle)
+Requires:       perl(FindBin)
+Requires:       perl(Getopt::Long)
+Requires:       perl(Getopt::Std)
+Requires:       perl(HTTP::Daemon)
+Requires:       perl(Hash::Merge)
+Requires:       perl(IO::File)
+Requires:       perl(IO::Interface)
+Requires:       perl(IO::Socket)
+Requires:       perl(Log::Log4perl) >= 1
+Requires:       perl(LWP::Simple)
+Requires:       perl(LWP::UserAgent)
+Requires:       perl(Math::BigFloat)
+Requires:       perl(Math::BigInt)
+Requires:       perl(Module::Load)
+Requires:       perl(Net::Ping)
+Requires:       perl(Net::DNS)
+Requires:       perl(Net::Domain)
+Requires:       perl(NetAddr::IP)
+Requires:       perl(POSIX)
+Requires:       perl(Pod::Usage)
+Requires:       perl(Params::Validate)
+Requires:       perl(Readonly)
+Requires:       perl(Regexp::Common)
+Requires:       perl(Socket)
+Requires:       perl(Statistics::Descriptive)
+Requires:       perl(Scalar::Util)
+Requires:       perl(Sys::Hostname)
+Requires:       perl(Sys::Syslog)
+Requires:       perl(Text::CSV_XS)
+Requires:       perl(Term::ReadKey)
+Requires:       perl(Time::HiRes)
+Requires:       perl(XML::LibXML)
+Requires:       perl(constant)
+Requires:       perl(version) >= 0.5
+Requires:       perl(fields)
+Requires:       perl(aliased)
+Requires:       perl(base)
+Requires:       perl-DBD-MySQL
+Requires:       mysql-server 
 Requires:       libdbi-dbd-mysql
 ###Requires:       libdbi-dbd-sqlite
 
