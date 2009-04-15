@@ -1,0 +1,213 @@
+#summary CTP Nagios Installation and Configuration
+
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+The following outlines the procedure to install Nagios and related plugins to support the ongoing CTP work.  There are two components to this project:
+
+ * _*The Nagios Monitor*_ - Machine that runs the nagios software and performs checks
+ * _*The Beacon*_ - Machine houses the CTP data and runs a Nagios Plugin to deliver this back to the Nagios Monitor
+
+Most of this guide will focus on the Monitor as the Beacon is already functional.
+
+== Nagios Monitor ==
+
+This is assumed to be the existing TSG Production Nagios Instance.  The instructions below start from the beginning of the process even though this machine may have nagios installed already.
+
+=== Installation ===
+
+There are 3 components that must be installed on this host:
+
+ * [CTPNagios#Nagios Nagios] - The base monitoring package
+ * [CTPNagios#NPRE_(Server) NPRE (Server)] - A plugin that allows remote execution on beacon hosts
+ * [CTPNagios#PNP PNP] - A plugin that graphs collected performance data
+
+The installation and minor testing of each will be described below.
+
+==== Nagios ====
+
+ # Download Nagios (version 3.0.6 used for this guide):
+{{{
+http://www.nagios.org/download/download.php
+}}}
+ # Follow the [http://nagios.sourceforge.net/docs/3_0/toc.html installation guide] for instructions.  
+
+==== NPRE (Server) ====
+
+ # Download NPRE (version 2.12 used for this guide):
+{{{
+http://www.nagios.org/download/addons/
+}}}
+ # Follow the [http://nagios.sourceforge.net/docs/nrpe/NRPE.pdf installation guide] for instructions.  
+   * Note the Beacon is already configured, _*ndb1.internet2.edu*_
+   * Send Jason the address of the Nagios Monitor so he may add it to the _allow list_ for the beacon
+ # Once Jason knows the address, and has configured it to accept your host, this test can be attempted:
+{{{
+/usr/local/nagios/libexec/check_nrpe -H 207.75.164.66 -c check_HOTEL_HARVARD
+}}}
+   * The results should look like this (if everything was configured properly):
+{{{
+Arlington VA sending to Cambridge MA|jitter=2.336030
+
+START:		Wed Apr 15 13:03:40 2009 UTC
+END:		Wed Apr 15 13:04:21 2009 UTC
+LATENCY:	9.03893 ms
+JITTER:		2.33603 ms
+LOSS:		0%
+}}}
+
+==== PNP ====
+
+ # Download PNP (version 0.4.13 used for this guide):
+{{{
+http://www.pnp4nagios.org/pnp/dwnld
+}}}
+ # Follow the [http://www.pnp4nagios.org/pnp/doc_complete installation guide] for instructions.
+   * Be sure you enable this setting:
+{{{
+process_performance_data=1
+}}} 
+   * Note this will collect performance data from other capable plugins as well, not just CTP plugins
+
+=== Configuration ===
+
+There are some minor configuration tweaks that must be made to support some of the CTP activities.  
+
+==== nagios.cfg ====
+
+This file is located on our development instance here:
+
+{{{
+/usr/local/nagios/etc/nagios.cfg
+}}}
+
+Change the following line to allow CGI URLs in the email alerts:
+
+{{{
+#illegal_macro_output_chars=`~$&|'"<>
+illegal_macro_output_chars=`~$|'"
+}}}
+
+==== cgi.cfg ====
+
+This change is _*OPTIONAL*_ but allows guest users access to the nagios status.  This file is located on our development instance here (note that your nagios.cfg may specify this into a different location):
+
+{{{
+/usr/local/nagios/etc/cgi.cfg
+}}}
+
+Change the following lines to add a _*guest*_ user:
+
+{{{
+authorized_for_all_services=nagiosadmin,guest
+authorized_for_all_hosts=nagiosadmin,guest
+}}}
+
+This will also require a guest user/password be added to:
+
+{{{
+/usr/local/nagios/etc/htpasswd.users
+}}}
+
+This can be done by doing something like this:
+
+{{{
+sudo htpasswd /usr/local/nagios/etc/htpasswd.users guest
+}}}
+
+==== commands.cfg ====
+
+This file is located on our development instance here (note that your nagios.cfg may specify this into a different location):
+
+{{{
+/usr/local/nagios/etc/objects/commands.cfg
+}}}
+
+Change the following item regarding email notifications.  This allows us to send a lot more information than a standard alert.
+
+{{{
+# 'notify-service-by-email' command definition
+define command{
+        command_name    notify-service-by-email
+        command_line    /usr/bin/printf "%b" "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTALIAS$
+\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\n\nDate/Time: $LONGDATETIME$\n\nAdditional Info:\n\n$SERVICEOUTPUT$\n\n$LONGSERVICEOUTPUT$\n$SERVICENO
+TESURL$\n" | /bin/mail -s "** $NOTIFICATIONTYPE$ Service Alert: $HOSTALIAS$/$SERVICEDESC$ is $SERVICESTATE$ **" $CONTACTEMAIL$
+        }
+}}}
+
+==== Host Configuration ====
+
+Add the following host to whichever file other hosts are stored, ours is stored here (note that your nagios.cfg may specify this into a different location):
+
+{{{
+/usr/local/nagios/etc/servers/internet2.cfg
+}}}
+
+This is the beacon host, note that the _*use*_ line may change depending on which templates are in use.
+
+{{{
+define host{
+        host_name       ndb1.internet2.edu
+        address         ndb1.internet2.edu
+        use             generic-host
+        }
+}}}
+
+==== Service Configuration ====
+
+Add the following services to whichever file other services are stored, ours is stored here (note that your nagios.cfg may specify this into a different location):
+
+{{{
+/usr/local/nagios/etc/servers/internet2.cfg
+}}}
+
+These are the CTP services that can be checked on the beacon host.  We are only specifying two right now, but there are 79 others that can be used:
+
+{{{
+define service{
+        use                     generic-service
+        host_name               ndb1.internet2.edu
+        service_description     CTP HOTEL - HARVARD        
+        check_command           check_nrpe!check_HOTEL_HARVARD
+        check_interval          1
+        retry_interval          1
+        max_check_attempts      1
+        notification_interval   60
+        notification_options    w,u,c,r
+        notes_url               http://ndb1.internet2.edu/cgi-bin/CTP/owamp_path
+_jitter.cgi?mesh=AA&node=HARVARD&other_node=HOTEL
+#       process_perf_data       0
+        action_url              /nagios/pnp/index.php?host=ndb1.internet2.edu&sr
+v=CTP_HOTEL_-_HARVARD
+        }
+
+define service{
+        use                     generic-service
+        host_name               ndb1.internet2.edu
+        service_description     CTP HARVARD - HOTEL       
+        check_command           check_nrpe!check_HARVARD_HOTEL
+        check_interval          1
+        retry_interval          1
+        max_check_attempts      1
+        notification_interval   60
+        notification_options    w,u,c,r
+        notes_url               http://ndb1.internet2.edu/cgi-bin/CTP/owamp_path
+_jitter.cgi?mesh=AA&node=HOTEL&other_node=HARVARD
+#       process_perf_data       0
+        action_url              /nagios/pnp/index.php?host=ndb1.internet2.edu&sr
+v=CTP_HARVARD_-_HOTEL
+        }
+}}}
+
+== Nagios Beacon ==
+
+=== Installation ===
+
+=== Configuration ===
+
+== Last Updated ==
+
+$Id$
+
+
