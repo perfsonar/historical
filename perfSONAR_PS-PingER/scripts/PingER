@@ -11,7 +11,7 @@ BINDIR=${PREFIX}/bin
 CONFDIR=/etc/PingER
 VARDIR=/var/run/PingER
 SERVICE=daemon.pl
-CONFIGBIN=pinger_ConfigureDaemon
+CONFIGBIN=${BINDIR}/pinger_ConfigureDaemon
 
 COLLECTORCONF=${CONFDIR}/daemon.conf
 LOGGERCONF=${CONFDIR}/daemon_logger.conf

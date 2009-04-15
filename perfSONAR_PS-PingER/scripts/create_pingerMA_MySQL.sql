@@ -1,6 +1,6 @@
-drop  table if exists host;
-drop  table if exists metaData; 
 drop  table if exists data;
+drop  table if exists metaData; 
+drop  table if exists host;
 # 
 # ------------------------------------The part above is for beacons and pinger website ( means administering tasks)--
 #

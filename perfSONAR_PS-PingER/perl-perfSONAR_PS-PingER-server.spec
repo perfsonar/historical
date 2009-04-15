@@ -3,7 +3,7 @@
 
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 PingER
-%define disttag psPS
+%define disttag pSPS
 
 Name:           perl-perfSONAR_PS-PingER-server
 Version:        3.1
@@ -72,7 +72,7 @@ Requires:       perl(Sys::Syslog)
 Requires:       perl(Text::CSV_XS)
 Requires:       perl(Term::ReadKey)
 Requires:       perl(Time::HiRes)
-Requires:       perl(XML::LibXML)
+Requires:       perl(XML::LibXML) >= 1.62
 Requires:       perl(constant)
 Requires:       perl(version) >= 0.5
 Requires:       perl(fields)
@@ -107,9 +107,12 @@ mkdir -p $RPM_BUILD_ROOT/etc/init.d
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_1} > scripts/%{init_script_1}.new
 install -m 755 scripts/%{init_script_1}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_1}
 
-mkdir -p $RPM_BUILD_ROOT/etc/PingER
+mkdir -p $RPM_BUILD_ROOT/etc/PingER/db_config
+ln -s %{install_base}/etc/pinger-landmarks.xml $RPM_BUILD_ROOT/etc/PingER/pinger-landmarks.xml
 ln -s %{install_base}/etc/daemon.conf $RPM_BUILD_ROOT/etc/PingER/daemon.conf
 ln -s %{install_base}/etc/daemon_logger.conf $RPM_BUILD_ROOT/etc/PingER/daemon_logger.conf
+ln -s %{install_base}/scripts/create_pingerMA_MySQL.sql $RPM_BUILD_ROOT/etc/PingER/db_config/create_pingerMA_MySQL.sql
+ln -s %{install_base}/scripts/create_pingerMA_SQLite.sql $RPM_BUILD_ROOT/etc/PingER/db_config/create_pingerMA_SQLite.sql 
  
 chmod -R u+rwX,go+rX,go-w $RPM_BUILD_ROOT/*
  
@@ -127,8 +130,8 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/*
 
 %post
-touch ${logging_base}
-chown perfsonar:perfsonar  ${logging_base}
+mkdir -p %{logging_base}
+chown perfsonar:perfsonar %{logging_base}
 chown -R perfsonar:perfsonar /etc/PingER
 mkdir -p /var/run/PingER
 chown -R perfsonar:perfsonar   /var/run/PingER

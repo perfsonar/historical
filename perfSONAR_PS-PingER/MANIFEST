@@ -10,6 +10,7 @@ doc/README
 doc/landmarks_example.csv
 etc/daemon_logger.conf
 etc/daemon.conf
+etc/pinger-landmarks.xml
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
 lib/perfSONAR_PS/Client/LS/Remote.pm
