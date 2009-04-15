@@ -96,10 +96,11 @@ which groups I think are best positioned for the specific parts.
 || 3/16-4/6    || Order remaining hardware, deployments of perf-nodes || JH || *Complete*/deployments In-progress ||
 || 3/2-4/13   || Development of database modifications. || JB || In-progress ||
 || 3/16-4/13   || Admin-GUI || AB || In-progress ||
-|| 3/16-4/13   || Nagios plugins. || JZ || Basic Nagios Started ||
+|| 3/16-4/13   || Nagios plugins. See allso [CTPNagios] || JZ || *Complete* ||
 || 4/1-4/20   || Public GUI (dashboard widget style). || JZ/AB/JB || ||
-|| 4/6-4/13    || Debugging of deployments/*Networks*/real-world data validation || JH/JZ/*!SiteContacts* || ||
+|| 4/6-4/13    || Debugging of deployments/*Networks*/real-world data validation || JH/JZ/BC/*!SiteContacts* || In-progress ||
 ||             || (Probable flush of all existing data at the end of this period) || || ||
-|| 4/13-4/24   || Iterative development/testing of GUI/nagios alerts || JZ/JH/DP || ||
+|| 4/13-4/24   || Iterative development/testing of GUI/nagios alerts || JZ/JH/DP || In-progress ||
 ||             || (No database mods during this time, only presentation changes.) || || ||
 || 4/27        || Ready to show community || all || ||
+
