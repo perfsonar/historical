@@ -62,7 +62,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * Resolved 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=132 132] - _*Maxim*_ - PingER packaging is non standard
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=133 133] - _*Maxim*_ - PingER Libs are still in Shared/ area
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=134 134] - _*Maxim*_ - PingER RPM depends on Text::CSV::Simple 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=134 134] - _*Maxim*_ - ~~PingER RPM depends on Text::CSV::Simple~~
  * _*Topology Service*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=128 128] - _*Aaron*_ - ~~Topology Service _get all_ returning redundant data~~
      * Resolved
