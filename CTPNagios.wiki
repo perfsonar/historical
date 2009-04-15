@@ -130,9 +130,7 @@ Change the following item regarding email notifications.  This allows us to send
 # 'notify-service-by-email' command definition
 define command{
         command_name    notify-service-by-email
-        command_line    /usr/bin/printf "%b" "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTALIAS$
-\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\n\nDate/Time: $LONGDATETIME$\n\nAdditional Info:\n\n$SERVICEOUTPUT$\n\n$LONGSERVICEOUTPUT$\n$SERVICENO
-TESURL$\n" | /bin/mail -s "** $NOTIFICATIONTYPE$ Service Alert: $HOSTALIAS$/$SERVICEDESC$ is $SERVICESTATE$ **" $CONTACTEMAIL$
+        command_line    /usr/bin/printf "%b" "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTALIAS$\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\n\nDate/Time: $LONGDATETIME$\n\nAdditional Info:\n\n$SERVICEOUTPUT$\n\n$LONGSERVICEOUTPUT$\n$SERVICENOTESURL$\n" | /bin/mail -s "** $NOTIFICATIONTYPE$ Service Alert: $HOSTALIAS$/$SERVICEDESC$ is $SERVICESTATE$ **" $CONTACTEMAIL$
         }
 }}}
 
@@ -175,11 +173,9 @@ define service{
         max_check_attempts      1
         notification_interval   60
         notification_options    w,u,c,r
-        notes_url               http://ndb1.internet2.edu/cgi-bin/CTP/owamp_path
-_jitter.cgi?mesh=AA&node=HARVARD&other_node=HOTEL
+        notes_url               http://ndb1.internet2.edu/cgi-bin/CTP/owamp_path_jitter.cgi?mesh=AA&node=HARVARD&other_node=HOTEL
 #       process_perf_data       0
-        action_url              /nagios/pnp/index.php?host=ndb1.internet2.edu&sr
-v=CTP_HOTEL_-_HARVARD
+        action_url              /nagios/pnp/index.php?host=ndb1.internet2.edu&srv=CTP_HOTEL_-_HARVARD
         }
 
 define service{
@@ -192,11 +188,9 @@ define service{
         max_check_attempts      1
         notification_interval   60
         notification_options    w,u,c,r
-        notes_url               http://ndb1.internet2.edu/cgi-bin/CTP/owamp_path
-_jitter.cgi?mesh=AA&node=HOTEL&other_node=HARVARD
+        notes_url               http://ndb1.internet2.edu/cgi-bin/CTP/owamp_path_jitter.cgi?mesh=AA&node=HOTEL&other_node=HARVARD
 #       process_perf_data       0
-        action_url              /nagios/pnp/index.php?host=ndb1.internet2.edu&sr
-v=CTP_HARVARD_-_HOTEL
+        action_url              /nagios/pnp/index.php?host=ndb1.internet2.edu&srv=CTP_HARVARD_-_HOTEL
         }
 }}}
 
