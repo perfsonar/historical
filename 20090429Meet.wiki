@@ -122,7 +122,7 @@ If IDC developers like, a portion of the day can be set aside for other current 
    # Ezra Kissel - UDel
    # Marcos Portnoi - UDel
    # Guilherme Fernandes - UDel
-   # John Vollbrecht - Internet2 <font color=red>_*TENTATIVE*_ - </font>
+   # John Vollbrecht
  * Remote
    # Brian Tierney - ESnet
    # David Robertson - LBL
