@@ -15,12 +15,12 @@ Most of this guide will focus on the Monitor as the Beacon is already functional
 
 This is assumed to be the existing TSG Production Nagios Instance.  The instructions below start from the beginning of the process even though this machine may have nagios installed already.
 
-=== Installation ===
+=== Server Installation ===
 
 There are 3 components that must be installed on this host:
 
  * [CTPNagios#Nagios Nagios] - The base monitoring package
- * [CTPNagios#NPRE_(Server) NPRE (Server)] - A plugin that allows remote execution on beacon hosts
+ * [CTPNagios#NRPE_(Server) NRPE (Server)] - A plugin that allows remote execution on beacon hosts
  * [CTPNagios#PNP PNP] - A plugin that graphs collected performance data
 
 The installation and minor testing of each will be described below.
@@ -33,9 +33,9 @@ http://www.nagios.org/download/download.php
 }}}
  # Follow the [http://nagios.sourceforge.net/docs/3_0/toc.html installation guide] for instructions.  
 
-==== NPRE (Server) ====
+==== NRPE (Server) ====
 
- # Download NPRE (version 2.12 used for this guide):
+ # Download NRPE (version 2.12 used for this guide):
 {{{
 http://www.nagios.org/download/addons/
 }}}
@@ -70,7 +70,7 @@ process_performance_data=1
 }}} 
    * Note this will collect performance data from other capable plugins as well, not just CTP plugins
 
-=== Configuration ===
+=== Server Configuration ===
 
 There are some minor configuration tweaks that must be made to support some of the CTP activities.  
 
@@ -194,11 +194,150 @@ define service{
         }
 }}}
 
+=== Server Verification ===
+
+Visit the nagios web view to see that the host and service(s) have been added.  The following tests are usually a good idea:
+
+ # On the left side, click on _*Service Detail*_
+ # Click on _*CTP HOTEL - HARVARD*_ under _*ndb1.internet2.edu*_
+ # On the right side click on _*Re-schedule the next check of this service*_
+   * Have this check immediately
+ # Wait for the result to arrive, ensure that the plugin is returning something:
+   * Green (_*OK*_) - The result will say something similar to:
+{{{
+Arlington VA sending to Cambridge MA 
+}}}
+   * Yellow (_*WARNING*_) - The result will say also something similar to (the more detail page will have a reason why):
+{{{
+Arlington VA sending to Cambridge MA 
+}}}
+   * RED (_*CRITICAL*_) - The result will say also something similar to (the more detail page will have a reason why):
+{{{
+Arlington VA sending to Cambridge MA 
+}}}
+   * RED (_*CRITICAL*_) - The may feature some other kind of warning, this could indicate a problem with communication to the beacon, for example:
+{{{
+CHECK_NRPE: Error - Could not complete SSL handshake. 
+}}}
+   * Orange (_*UNKNOWN*_) - This is a message that is thrown when the plugin is being used wrong (wrong arguments), when there is a database problem, or when data may not be available, such as:
+{{{
+Cannot find most recent data. 
+}}}
+ # The second test will force a notification to the email list, click on _*Send custom service notification*_
+   * Also be sure you have added the necessary folks to the email distribution list, including Aaron, Jason, and Jeff.
+
+Contact Jason if you run into any trouble.
+
 == Nagios Beacon ==
 
-=== Installation ===
+The Nagios beacon is installed on ndb1.internet2.edu already.  The instructions are provided in the event that we require another beacon.  
 
-=== Configuration ===
+=== Client Installation ===
+
+There are 2 components that must be installed on this host:
+
+ * [CTPNagios#NRPE_(Client) NRPE (Client)] - A plugin that allows remote execution on beacon hosts and communication back to the monitor
+ * [CTPNagios#perfSONAR-PS perfSONAR-PS] - perfSONAR-PS tools, including libraries and the CTP plugin 
+
+The installation and minor testing of each will be described below.
+
+==== NRPE (Client) ====
+
+ # Download NRPE (version 2.12 used for this guide):
+{{{
+http://www.nagios.org/download/addons/
+}}}
+ # Follow the [http://nagios.sourceforge.net/docs/nrpe/NRPE.pdf installation guide] for instructions.  
+   * Note the Beacon is already configured, _*ndb1.internet2.edu*_
+   * Send Jason the address of the Nagios Monitor so he may add it to the _allow list_ for the beacon
+ # Once Jason knows the address, and has configured it to accept your host, this test can be attempted:
+{{{
+/usr/local/nagios/libexec/check_nrpe -H 207.75.164.66 -c check_HOTEL_HARVARD
+}}}
+   * The results should look like this (if everything was configured properly):
+{{{
+Arlington VA sending to Cambridge MA|jitter=2.336030
+
+START:		Wed Apr 15 13:03:40 2009 UTC
+END:		Wed Apr 15 13:04:21 2009 UTC
+LATENCY:	9.03893 ms
+JITTER:		2.33603 ms
+LOSS:		0%
+}}}
+
+==== perfSONAR-PS ====
+
+ # Download the perfSONAR-PS CTP Branch:
+{{{
+svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/CTP/
+}}}
+ # Copy the plugin to the proper location (locations may vary):
+{{{
+cp ~/CTP/nagios/check_db.pl /usr/local/nagios/libexec
+}}}
+ # Edit the plugin to point to the correct library:
+{{{
+use lib "/home/zurawski/CTP/lib";
+}}}
+ # Install any pre-requisite perl libraries (use CPAN), the plugin requires:
+   * DBI
+   * Getopt::Long
+   * Data::Dumper
+ # Ensure the database, _*powmaster.pl*_, and _*powcollector.pl*_ are functioning 
+ # Run a test:
+{{{
+/usr/local/nagios/libexec/check_db.pl --sender=HOTEL --receiver=HARVARD
+}}}
+   * The results should be similar to:
+{{{
+Arlington VA sending to Cambridge MA|jitter=2.007960
+
+START:		Wed Apr 15 14:00:24 2009 UTC
+END:		Wed Apr 15 14:01:06 2009 UTC
+LATENCY:	8.7471 ms
+JITTER:		2.00796 ms
+LOSS:		0%
+}}}
+
+=== Client Configuration ===
+
+There are a couple of minor configuration tweaks to address:
+
+==== nrpe.cfg ====
+
+Edit this file to add commands that can be remotely executed:
+
+{{{
+command[check_HOTEL_HARVARD]=/usr/local/nagios/libexec/check_db.pl --sender=HOTEL --receiver=HARVARD
+command[check_HARVARD_HOTEL]=/usr/local/nagios/libexec/check_db.pl --sender=HARVARD --receiver=HOTEL
+}}}
+
+==== xinitd ====
+
+Edit the _*nrpe*_ conf to add the appropriate servers:
+
+{{{
+# default: on
+# description: NRPE (Nagios Remote Plugin Executor)
+service nrpe
+{
+        flags           = REUSE
+        socket_type     = stream    
+        port            = 5666    
+        wait            = no
+        user            = nagios
+        group           = nagios
+        server          = /usr/local/nagios/bin/nrpe
+        server_args     = -c /usr/local/nagios/etc/nrpe.cfg --inetd
+        log_on_failure  += USERID
+        disable         = no
+        only_from       = 127.0.0.1 207.75.165.160
+}
+}}}
+
+=== Client Verification ===
+
+See [CTPNagios#Server_Verification Server Verification] for most of the verification.  
 
 == Last Updated ==
 
