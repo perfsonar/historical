@@ -248,22 +248,6 @@ The installation and minor testing of each will be described below.
 http://www.nagios.org/download/addons/
 }}}
  # Follow the [http://nagios.sourceforge.net/docs/nrpe/NRPE.pdf installation guide] for instructions.  
-   * Note the Beacon is already configured, _*ndb1.internet2.edu*_
-   * Send Jason the address of the Nagios Monitor so he may add it to the _allow list_ for the beacon
- # Once Jason knows the address, and has configured it to accept your host, this test can be attempted:
-{{{
-/usr/local/nagios/libexec/check_nrpe -H 207.75.164.66 -c check_HOTEL_HARVARD
-}}}
-   * The results should look like this (if everything was configured properly):
-{{{
-Arlington VA sending to Cambridge MA|jitter=2.336030
-
-START:		Wed Apr 15 13:03:40 2009 UTC
-END:		Wed Apr 15 13:04:21 2009 UTC
-LATENCY:	9.03893 ms
-JITTER:		2.33603 ms
-LOSS:		0%
-}}}
 
 ==== perfSONAR-PS ====
 
@@ -337,7 +321,23 @@ service nrpe
 
 === Client Verification ===
 
-See [CTPNagios#Server_Verification Server Verification] for most of the verification.  
+See [CTPNagios#Server_Verification Server Verification] for most of the verification.  This simple test can be attempted to check:
+
+{{{
+/usr/local/nagios/libexec/check_nrpe -H localhost -c check_HOTEL_HARVARD
+}}}
+
+The results should look like this (if everything was configured properly):
+
+{{{
+Arlington VA sending to Cambridge MA|jitter=2.336030
+
+START:		Wed Apr 15 13:03:40 2009 UTC
+END:		Wed Apr 15 13:04:21 2009 UTC
+LATENCY:	9.03893 ms
+JITTER:		2.33603 ms
+LOSS:		0%
+}}}
 
 == Last Updated ==
 
