@@ -414,7 +414,7 @@ sub __handleEvent {
 
     my ( $self, $messageType, $raw_request, $mds, $data, $filters, $message_parameters ) = @_;
 
-    $logger->debug( "\n\n\nRequest:\n" . Dumper $raw_request );
+#    $logger->debug( "\n\n\nRequest:\n" . Dumper $raw_request );
 
     $logger->debug( "  Type= $messageType md = " . $mds->[0]->toString . " Data=" . $data->toString );
 
