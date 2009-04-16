@@ -172,27 +172,27 @@ sub parse {
             seqs     => \@{ $self->results()->{'seqs'} }
         }
     );
-    my @results = @{ $stats->rtt_stats() };
-    if ( @results ) {
-        $self->results()->{'minRtt'}    ||= $results[0];
-        $self->results()->{'maxRtt'}    ||= $results[1];
-        $self->results()->{'meanRtt'}   ||= $results[2];
-        $self->results()->{'medianRtt'} ||= $results[3];
+    if($stats->rtt_stats() && $stats->ipdv_stats()) {
+        my @results = @{ $stats->rtt_stats() };
+        if ( @results ) {
+            $self->results()->{'minRtt'}    ||= $results[0];
+            $self->results()->{'maxRtt'}    ||= $results[1];
+            $self->results()->{'meanRtt'}   ||= $results[2];
+            $self->results()->{'medianRtt'} ||= $results[3];
+        }
+        # ipd
+        @results = @{ $stats->ipdv_stats() };
+        if ( @results ) {
+            $self->results()->{'minIpd'}  ||= $results[0];
+            $self->results()->{'maxIpd'}  ||= $results[1];
+            $self->results()->{'meanIpd'} ||= $results[2];
+            $self->results()->{'iqrIpd'}  ||= $results[3];
+
+            # loss
+            $self->results()->{'lossPercent'} = $stats->loss();
+            $self->results()->{'clp'} ||= $stats->clp();
+        }
     }
-
-    # ipd
-    @results = @{ $stats->ipdv_stats() };
-    if ( @results ) {
-        $self->results()->{'minIpd'}  ||= $results[0];
-        $self->results()->{'maxIpd'}  ||= $results[1];
-        $self->results()->{'meanIpd'} ||= $results[2];
-        $self->results()->{'iqrIpd'}  ||= $results[3];
-
-        # loss
-        $self->results()->{'lossPercent'} = $stats->loss();
-        $self->results()->{'clp'} ||= $stats->clp();
-    }
-
     # duplicates
     my $dups = $stats->dups();
     if ( $dups && ref $dups eq 'ARRAY' ) {
@@ -221,9 +221,6 @@ sub parse {
     $logger->debug( "  Results: ", sub { Dumper $self->results() } );
     $self->results()->{'startTime'} = $time;
     $self->results()->{'endTime'}   = $endtime;
-
-    undef @results;
-
     return 0;
 }
 

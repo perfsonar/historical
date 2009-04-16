@@ -188,13 +188,17 @@ sub _add_metric {
 
 sub _rtt_stats {
     my $self = shift;
+    return unless($self->{rtts} && ref $self->{rtts} eq 'ARRAY');
     my $size = scalar @{ $self->{rtts} };
     $logger->debug( "input: $size " );
     my $stat = Statistics::Descriptive::Full->new();
     for ( my $i = 0; $i < $size; $i++ ) {
         $stat->add_data( $self->{rtts}[$i] );
     }
-    push @{ $self->{rtt_stats} }, ( sprintf( "%0.3f", $stat->min() || '0.0' ), sprintf( "%0.3f", $stat->max() || '0.0' ), sprintf( "%0.3f", $stat->mean() || '0.0' ), sprintf( "%0.3f", $stat->median() || '0.0' ) );
+    push @{ $self->{rtt_stats} }, ( sprintf( "%0.3f", $stat->min() || '0.0' ), 
+                                    sprintf( "%0.3f", $stat->max() || '0.0' ), 
+                                    sprintf( "%0.3f", $stat->mean() || '0.0' ), 
+				    sprintf( "%0.3f", $stat->median() || '0.0' ) );
     return $self->{rtt_stats};
 }
 
@@ -205,7 +209,8 @@ sub _rtt_stats {
 #
 
 sub _ipdv_stats {
-    my $self = shift;
+    my $self = shift; 
+    return unless($self->{rtts} && ref $self->{rtts} eq 'ARRAY');
     my $size = scalar @{ $self->{rtts} };
     $logger->debug( "input: $size" );
     my $stat = Statistics::Descriptive::Full->new();
@@ -236,6 +241,7 @@ sub _ipdv_stats {
 
 sub _dups {
     my $self = shift;
+    return unless($self->{seqs} && ref $self->{seqs} eq 'ARRAY');
     my $size = scalar @{ $self->{seqs} };
     $logger->debug( "input: sent $self->{sent}, recv $self->{received}, seqs  ($size)" );
 
@@ -298,7 +304,8 @@ sub _loss {
 ###
 
 sub _clp {
-    my $self            = shift;
+    my $self            = shift; 
+    return unless($self->{seqs} && ref $self->{seqs} eq 'ARRAY');
     my $stringified_arr = join ",", @{ $self->{seqs} };
     my $size            = scalar @{ $self->{seqs} };
 
