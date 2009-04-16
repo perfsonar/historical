@@ -58,7 +58,6 @@ The perfSONAR developers meeting will focus on pending issues within the perfSON
  * Remote
    # Brian Tierney - ESnet
    # TBD - ESnet
-   # David Robertson - LBL
    # Chris Robb - Internet2
 
 ==== pS Agenda ====
