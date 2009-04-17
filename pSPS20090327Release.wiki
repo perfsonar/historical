@@ -60,9 +60,11 @@ The following outline some exceptions to the overall release process.  Also see 
      * Resolved
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=81 81] - _*Maxim*_ - ~~PingER Resolution of IPaddress/Hostnames~~
      * Resolved 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=132 132] - _*Maxim*_ - PingER packaging is non standard
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=133 133] - _*Maxim*_ - PingER Libs are still in Shared/ area
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=134 134] - _*Maxim*_ - ~~PingER RPM depends on Text::CSV::Simple~~
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=132 132] - _*Maxim*_ - ~~PingER packaging is non standard~~
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=133 133] - _*Maxim*_ - ~~PingER Libs are still in Shared/ area~~
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=134 134] - _*Maxim*_ - ~~PingER RPM depends on Text::CSV::Simple~~	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=138 138] - _*Maxim*_ - ~~PingER request fail with _Can't coerce GLOB to string..._~~ 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=139 139] - _*Maxim*_ - PingER is giving off warnings 
  * _*Topology Service*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=128 128] - _*Aaron*_ - ~~Topology Service _get all_ returning redundant data~~
      * Resolved
@@ -75,6 +77,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * Resolved
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=116 116] - _*Jason*_ - ~~Migrate getRRDData to SNMP.pm~~
      * Resolved
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=137 137] - _*Jason*_ - ~~RRD.pm cannot read RRD File~~  
  * _*Lookup Service*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=79 79] - _*Jason*_ - ~~Empty gLS/hLS Messages~~
      * Resloved
