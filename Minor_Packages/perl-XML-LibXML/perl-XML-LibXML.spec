@@ -12,7 +12,6 @@ Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/XML-LibXML/
 Source0:        http://www.cpan.org/modules/by-module/XML/XML-LibXML-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Buildarch:      i386
 Requires:       perl
 Requires:       libxml2
 Requires:       libxml2-devel

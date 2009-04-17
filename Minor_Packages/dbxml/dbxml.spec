@@ -14,7 +14,6 @@ Group:          Libraries
 URL:            http://download.oracle.com/berkeley-db
 Source0:        %{name}-2.3.11.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-root
-BuildArch:      i386
 Prefix:         /usr
 
 %description
