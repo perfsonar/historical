@@ -1,6 +1,5 @@
 #!/usr/bin/perl -w
 
-use lib qw(../lib ./lib);
 use strict;
 use warnings;
 
@@ -13,6 +12,9 @@ pinger_client.pl
 TBD
 
 =cut
+
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
 
 use perfSONAR_PS::Client::PingER;
 use Data::Dumper;
