@@ -137,6 +137,15 @@ mkdir -p /var/run/PingER
 chown -R perfsonar:perfsonar   /var/run/PingER
 mkdir -p /var/lib/PingER
 chown -R perfsonar:perfsonar   /var/lib/PingER
+echo "-----------------------------------------------------------------"
+echo "                  P L E A S E  R E A D                           "
+echo "----- - - - - - - - - - -  - - - - - - -  --  --  - - - - - - - -"
+echo "    In order to finish PingER MP/MA installation You have to     "
+echo " Run:       /etc/init.d/PingER configure                         "
+echo " This will configure the MA/MP database and webservice's endpoint"
+echo " More information can be found in the                            "
+echo "    /opt/perfsonar_ps/PingER/doc/INSTALL file                    "
+echo "-----------------------------------------------------------------"
 
 %changelog
 * Mon Mar 23 2009 maxim@fnal.gov v3.1

@@ -465,7 +465,9 @@ sub storeData {
         return -1;
     }
     $ip_name = $agent->destination() ? $agent->destination() : $agent->destinationIp();
-    eval { $dst = $self->database()->soi_host( { ip_name => $ip_name, ip_number => $agent->destinationIp() } ); };
+    eval { 
+        $dst = $self->database()->soi_host( { ip_name => $ip_name, ip_number => $agent->destinationIp() } ); 
+    };
     if ( $EVAL_ERROR || !$dst || $dst !~ /^[\-\w\.]+$/ ) {
         $logger->error(  "Failed: " . ($EVAL_ERROR?$EVAL_ERROR : '') . 
 	                 "- to find or insert soi_host:  " . ($ip_name?"$ip_name " : ' no HOSTNAME ')  . 

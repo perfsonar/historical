@@ -95,7 +95,7 @@ sub soi_host {
         }
     );
     if ( !ref( $query ) && $query < 0 ) {
-        self->ERRORMSG( "soi_host  failed for ip_name=$param->{ip_name}  ip_number=$param->{ip_number} " );
+        $self->ERRORMSG( "soi_host  failed for ip_name=$param->{ip_name}  ip_number=$param->{ip_number} " );
         return $query;
     }
 
