@@ -5,7 +5,7 @@
 
 == Introduction ==
 
-The effective and efficient summarization of the IPv4 (and eventually IPv6) address space is paramount for the Information services of perfSONAR.  The current algorithm has been the mainstay since advent of the gLS, and may take liberties with the final output:
+The effective and efficient summarization of the IPv4 (and eventually IPv6) address space is paramount for the Information services of perfSONAR.  The goal of the summarization is to achieve a good compression of the address space, in order to optimize the exchange of information for the LookupService (LS) and memory usage.  The current algorithm has been the mainstay since advent of the gLS, and may take liberties with the final output:
 
  * Summarization is not as _tight_ as possible.  For instance given several addresses that share an A class subnet (e.g. 192.168.0.56, 192.168.48.98, 192.168.48.197) a larger than required CIDR recommendation is made: 192.0.0.0/8.  
  * Multiple ranges may confuse the overall output.  If two primary ranges are seen, 192.168.0.0/16 and 10.10.0.0/16, the recommendation may be returned that is even greater, e.g. 0.0.0.0/0.
@@ -16,6 +16,11 @@ Implementations should also consider:
  * Internal data structures, such as IPTrie.  
  
 The following document describes the current state of the algorithm and then lays out recommendations for upgrade as well as a work plan.  Schedules are not exact.
+
+
+== Goal of the Summarization ==
+
+The goal of the summarization is to achieve a good compression of the address space, in order to optimize the exchange of information for the LookupService (LS) and memory usage.
 
 
 == Current ==
@@ -2262,11 +2267,11 @@ The _coverage_ is a measure of the density of number of descendants of the node 
 	
 where MAX_KEY_LENGTH is typically 32, the _mask_ is the CIDR class (number after the / in the IP number), and _childCount_ is the number of descendants (calculated as above).  The meaning of this equation is:  MAX_KEY_LENGTH - _mask_ yields the number of bits available, in the range of IP addresses, to be assigned to hosts.  Raising 2 to this power results in the equivalent number of hosts available within this range of IP addresses.  Dividing the actual number of descendants by the number of (maximum) available hosts yields the density, or coverage.  This coverage value is also updated as new nodes are added to the trie.
 
-Once created, recurse down the trie, starting from the root node (the root node should be the looser, or larger, summarization IP number; in a worst case, it would be 0.0.0.0/0).  At each internal node, evaluate whether the trie should continue to be recursed down, or whether it should be pruned, and the corresponding node is then marked as a summarization node.  The decision of whether to mark a summarization node is done in the method _markIpTrieCoverageDistance_, shown below:
+Once created, recurse down the trie, starting from the root node (the root node should be the looser, or larger, summarization IP number; in a worst case, it would be 0.0.0.0/0).  At each internal node, evaluate whether the trie should continue to be recursed down, or whether it should be pruned, and the corresponding node is then marked as a summarization node.  The decision of whether to mark a summarization node is done in the method _markIpTrieCoverageDistanceBalance_, shown below:
 
 
 {{{
-private void markIpTrieCoverageDistance (ArrayList<IpTrieNode> summaryArrayList, IpTrieNode node) {
+private void markIpTrieCoverageDistanceBalance (ArrayList<IpTrieNode> summaryArrayList, IpTrieNode node) {
 	IpTrieNode c0n = node.childZero;
 	IpTrieNode c1n = node.childOne;
 	
@@ -2290,8 +2295,11 @@ private void markIpTrieCoverageDistance (ArrayList<IpTrieNode> summaryArrayList,
 	 *  
 	 *  The decision for summarization is based on converting the given granularity setting into a coverage and distance threshold by
 	 *  means of a proper equation.  The real (node) value of the distance and coverage is then compared to this calculated threshold
-	 *  and the decision is made.  The equations represent interpolating functions for each distance and coverage based on empirical
-	 *  points, as shown below:
+	 *  and the decision is made.
+	 *  Here, the distances from both children of a node are subtracted from one another, such that a short distance, that would trigger
+	 *  a summarization, is balanced with a possible large distance from the sibling.  The same reasoning is used for the coverage from
+	 *  each child of a node.
+	 *  The equations represent interpolating functions for each distance and coverage based on empirical points, as shown below:
 	 *  
 	 *  			Threshold value for comparison	
 	 *	Granularity	Distance	Coverage
@@ -2304,21 +2312,20 @@ private void markIpTrieCoverageDistance (ArrayList<IpTrieNode> summaryArrayList,
 	 *  Distance uses equation y = 4x + 4
 	 *  Coverage uses equation y = 1e-5*exp(-2.303x),
 	 *  where x is the granularity.  The output is to be compared with the real distance or coverage value.
-	 *  These equations attempt to mimic empiric (ideal) settings for coverage and distance that perform finer and coarser summarizations.
+	 *  These equations attempt to mimic empirical (ideal) settings for coverage and distance that perform finer and coarser summarizations.
 	 */
 	
 	else {
-		if ((c0n.mask - node.mask > (long)(4 * (long)this.granularity + 4)) ||
-			(c1n.mask - node.mask > (long)(4 * (long)this.granularity + 4)) ||
-			(node.coverage < 1e-5 * Math.exp(-2.303*(double)this.granularity))) {
-				markIpTrieCoverageDistance(summaryArrayList, c0n);
-				markIpTrieCoverageDistance(summaryArrayList, c1n);
+		if ((Math.abs(c0n.mask - c1n.mask) > (long)(4 * (long)this.granularity + 4)) ||
+				(Math.abs(c0n.coverage - c1n.coverage) < 1e-5 * Math.exp(-2.303*(double)this.granularity))) {
+			markIpTrieCoverageDistanceBalance(summaryArrayList, c0n);
+			markIpTrieCoverageDistanceBalance(summaryArrayList, c1n);
 		} else {
 			node.setSummaryMember();
 			summaryArrayList.add(node);
 		}
 	}
-}	
+}
 }}}
 
 Basically, both children of a node are evaluated for the following conditions:
@@ -2336,18 +2343,19 @@ The reasoning for the coverage or density tries to gather whether there exists a
 The algorithm also incorporates "tuning" of the "aggressiveness" of the summarization.  Currently, the tuning has been integrated as a "granularity" parameter, ranging from 0 (the finer granularity, or more specific summarization) to 3 (the coarser granularity, or more general summarization).  The heuristic is based on the calculation as follows:
 
 {{{
-if ((c0n.mask - node.mask > (long)(4 * (long)this.granularity + 4)) ||
-	(c1n.mask - node.mask > (long)(4 * (long)this.granularity + 4)) ||
-	(node.coverage < 1e-5 * Math.exp(-2.303*(double)this.granularity))) {
-		markIpTrieCoverageDistance(summaryArrayList, c0n);
-		markIpTrieCoverageDistance(summaryArrayList, c1n);
+if ((Math.abs(c0n.mask - c1n.mask) > (long)(4 * (long)this.granularity + 4)) ||
+		(Math.abs(c0n.coverage - c1n.coverage) < 1e-5 * Math.exp(-2.303*(double)this.granularity))) {
+	markIpTrieCoverageDistanceBalance(summaryArrayList, c0n);
+	markIpTrieCoverageDistanceBalance(summaryArrayList, c1n);
 } else {
 	node.setSummaryMember();
 	summaryArrayList.add(node);
 }
 }}}
 
-The decision for summarization is based on converting the given granularity setting into a coverage and distance threshold by means of a proper equation.  The real (node) value of the distance and coverage is then compared to this calculated threshold and the decision is made.  The equations represent interpolating functions for each distance and coverage based on empirical points, as shown below:
+The decision for summarization is based on converting the given granularity setting into a coverage and distance threshold by means of a proper equation.  The real (node) value of the distance and coverage is then compared to this calculated threshold and the decision is made.  Here, the distances from both children of a node are subtracted from one another, such that a short distance, that would trigger a summarization, is balanced with a possible large distance from the sibling.  The same reasoning is used for the coverage from each child of a node; this conveys the notion of _balance_ of the subtrees under a node.
+
+The equations represent interpolating functions for each distance and coverage based on empirical points, as shown below:
 
  
 || || <font color="mediumblue">*Threshold value for comparison*</font> || ||	
@@ -2363,12 +2371,14 @@ The decision for summarization is based on converting the given granularity sett
 
 where x is the granularity.
 
-The output is to be compared with the real distance or coverage value.  These equations attempt to mimic empiric (ideal) settings for coverage and distance that perform finer and coarser summarizations.
+The output is to be compared with the real distance or coverage value.  These equations attempt to mimic empirical (ideal) settings for coverage and distance that perform finer and coarser summarizations.
 
 
 ==== Comments ====
 
 The coarser or finer result of the granularity setting seems to be highly dependent on the data.  Some data present noticeable differences for each setting, whereas other data displays no change from one setting to a coarser or finer one.
+
+From the analysis of the experimental results of some sets (below), the _balance_ is actually generating coarser summarizations.
  
 
 ==== Subsequent Work ====
@@ -2405,9 +2415,14 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 	|| <font color="mediumblue">*Java*</font> ||
 
-	Summarization nodes with 0 granularity:
-
 	{{{
+	File                 :  data\apan-summary.txt
+	Granularity setting  :  0
+	Original set count   :  104
+	Summarized set count :  18
+	Compression rate     :  0.17307693
+	(summarized/original)
+
 	10.0.0.4/32
 	45.0.0.1/32
 	117.103.111.133/32
@@ -2425,13 +2440,15 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	202.249.2.160/32
 	203.178.133.141/32
 	203.181.102.130/32
-	203.181.194.0/23
-	203.181.248.0/23
-	}}}
+	203.181.192.0/18
 
-	Summarization nodes with 1 granularity:
+	File                 :  data\apan-summary.txt
+	Granularity setting  :  1
+	Original set count   :  104
+	Summarized set count :  10
+	Compression rate     :  0.09615385
+	(summarized/original)
 
-	{{{
 	10.0.0.4/32
 	45.0.0.1/32
 	117.103.111.133/32
@@ -2442,26 +2459,26 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	172.24.100.210/32
 	192.203.116.144/28
 	202.0.0.0/7
-	}}}
 
-	Summarization nodes with 2 granularity:
+	File                 :  data\apan-summary.txt
+	Granularity setting  :  2
+	Original set count   :  104
+	Summarized set count :  4
+	Compression rate     :  0.03846154
+	(summarized/original)
 
-	{{{
 	10.0.0.4/32
 	45.0.0.1/32
 	117.103.111.133/32
-	133.69.37.1/32
-	140.221.251.2/32
-	163.220.127.238/32
-	172.24.61.30/32
-	172.24.100.210/32
-	192.203.116.144/28
-	202.0.0.0/7
-	}}}
+	128.0.0.0/1
 
-	Summarization nodes with 3 granularity:
+	File                 :  data\apan-summary.txt
+	Granularity setting  :  3
+	Original set count   :  104
+	Summarized set count :  4
+	Compression rate     :  0.03846154
+	(summarized/original)
 
-	{{{
 	10.0.0.4/32
 	45.0.0.1/32
 	117.103.111.133/32
@@ -2507,16 +2524,20 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 	|| <font color="mediumblue">*Java*</font> ||
 
-	Summarization nodes with 0 granularity:
-
 	{{{
+	File                 :  data\ESnet-summary.txt
+	Granularity setting  :  0
+	Original set count   :  618
+	Summarized set count :  58
+	Compression rate     :  0.093851134
+	(summarized/original)
+
 	10.0.0.4/32
 	10.10.10.1/32
 	10.31.20.2/32
 	18.201.0.118/32
 	62.40.124.230/32
-	62.40.125.72/29
-	62.40.125.94/32
+	62.40.125.64/27
 	117.103.111.157/32
 	128.115.190.1/32
 	128.115.190.101/32
@@ -2527,10 +2548,14 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	147.155.254.1/32
 	150.99.198.218/32
 	150.99.199.62/32
-	172.16.32.0/30
+	172.16.32.1/32
+	172.16.32.2/32
 	192.5.170.78/32
 	192.12.208.1/32
-	192.13.56.0/25
+	192.13.56.41/32
+	192.13.56.45/32
+	192.13.56.89/32
+	192.13.56.93/32
 	192.31.96.2/32
 	192.31.99.138/32
 	192.33.240.193/32
@@ -2542,8 +2567,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	192.107.175.3/32
 	192.150.29.210/32
 	192.150.31.78/32
-	192.168.201.0/28
-	192.168.201.52/32
+	192.168.201.0/26
 	192.188.106.140/32
 	192.203.230.13/32
 	192.245.178.6/32
@@ -2557,9 +2581,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	198.124.17.17/32
 	198.124.128.0/17
 	198.125.140.0/24
-	198.128.4.5/32
-	198.128.15.101/32
-	198.129.0.0/16
+	198.128.0.0/15
 	198.151.133.185/32
 	198.151.133.253/32
 	198.206.220.1/32
@@ -2568,32 +2590,35 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	204.134.149.2/32
 	207.231.240.0/20
 	211.79.48.173/32
-	}}}
 
-	Summarization nodes with 1 granularity:
+	File                 :  data\ESnet-summary.txt
+	Granularity setting  :  1
+	Original set count   :  618
+	Summarized set count :  13
+	Compression rate     :  0.021035599
+	(summarized/original)
 
-	{{{
 	10.0.0.4/32
 	10.10.10.1/32
 	10.31.20.2/32
 	18.201.0.118/32
-	62.40.124.230/32
-	62.40.125.64/27
+	62.40.124.0/23
 	117.103.111.157/32
-	128.0.0.0/4
-	147.155.254.1/32
-	150.99.198.218/32
-	150.99.199.62/32
-	172.16.32.0/30
+	128.0.0.0/3
+	172.16.32.1/32
+	172.16.32.2/32
 	192.0.0.0/5
 	204.134.149.2/32
 	207.231.240.0/20
 	211.79.48.173/32
-	}}}
 
-	Summarization nodes with 2 granularity:
+	File                 :  data\ESnet-summary.txt
+	Granularity setting  :  2
+	Original set count   :  618
+	Summarized set count :  7
+	Compression rate     :  0.011326861
+	(summarized/original)
 
-	{{{
 	10.0.0.4/32
 	10.10.10.1/32
 	10.31.20.2/32
@@ -2601,11 +2626,14 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	62.40.124.0/23
 	117.103.111.157/32
 	128.0.0.0/1
-	}}}
 
-	Summarization nodes with 3 granularity:
+	File                 :  data\ESnet-summary.txt
+	Granularity setting  :  3
+	Original set count   :  618
+	Summarized set count :  7
+	Compression rate     :  0.011326861
+	(summarized/original)
 
-	{{{
 	10.0.0.4/32
 	10.10.10.1/32
 	10.31.20.2/32
@@ -2664,34 +2692,44 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 	|| <font color="mediumblue">*Java*</font> ||
 
-	Summarization nodes with 0 granularity:
-
 	{{{
-	62.40.124.186/32
-	193.136.0.0/15
-	194.210.30.1/32
-	194.210.63.253/32
-	}}}
+	File                 :  data\FCCN-summary.txt
+	Granularity setting  :  0
+	Original set count   :  43
+	Summarized set count :  2
+	Compression rate     :  0.046511628
+	(summarized/original)
 
-	Summarization nodes with 1 granularity:
-
-	{{{
-	62.40.124.186/32
-	193.136.0.0/15
-	194.210.30.1/32
-	194.210.63.253/32
-	}}}
-
-	Summarization nodes with 2 granularity:
-
-	{{{
 	62.40.124.186/32
 	192.0.0.0/6
-	}}}
 
-	Summarization nodes with 3 granularity:
+	File                 :  data\FCCN-summary.txt
+	Granularity setting  :  1
+	Original set count   :  43
+	Summarized set count :  2
+	Compression rate     :  0.046511628
+	(summarized/original)
 
-	{{{
+	62.40.124.186/32
+	192.0.0.0/6
+
+	File                 :  data\FCCN-summary.txt
+	Granularity setting  :  2
+	Original set count   :  43
+	Summarized set count :  2
+	Compression rate     :  0.046511628
+	(summarized/original)
+
+	62.40.124.186/32
+	192.0.0.0/6
+
+	File                 :  data\FCCN-summary.txt
+	Granularity setting  :  3
+	Original set count   :  43
+	Summarized set count :  2
+	Compression rate     :  0.046511628
+	(summarized/original)
+
 	62.40.124.186/32
 	192.0.0.0/6
 	}}}
@@ -2794,30 +2832,44 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 	|| <font color="mediumblue">*Java*</font> ||
 
-	Summarization nodes with 0 granularity:
-
 	{{{
+	File                 :  data\GARR-summary.txt
+	Granularity setting  :  0
+	Original set count   :  163
+	Summarized set count :  2
+	Compression rate     :  0.012269938
+	(summarized/original)
+
 	10.1.2.3/32
 	193.206.128.0/20
-	}}}
 
-	Summarization nodes with 1 granularity:
+	File                 :  data\GARR-summary.txt
+	Granularity setting  :  1
+	Original set count   :  163
+	Summarized set count :  2
+	Compression rate     :  0.012269938
+	(summarized/original)
 
-	{{{
 	10.1.2.3/32
 	193.206.128.0/20
-	}}}
 
-	Summarization nodes with 2 granularity:
+	File                 :  data\GARR-summary.txt
+	Granularity setting  :  2
+	Original set count   :  163
+	Summarized set count :  2
+	Compression rate     :  0.012269938
+	(summarized/original)
 
-	{{{
 	10.1.2.3/32
 	193.206.128.0/20
-	}}}
 
-	Summarization nodes with 3 granularity:
+	File                 :  data\GARR-summary.txt
+	Granularity setting  :  3
+	Original set count   :  163
+	Summarized set count :  2
+	Compression rate     :  0.012269938
+	(summarized/original)
 
-	{{{
 	10.1.2.3/32
 	193.206.128.0/20
 	}}}
@@ -2853,39 +2905,53 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 	|| <font color="mediumblue">*Java*</font> ||
 
-	Summarization nodes with 0 granularity:
-
 	{{{
+	File                 :  data\Geant-summary.txt
+	Granularity setting  :  0
+	Original set count   :  30
+	Summarized set count :  5
+	Compression rate     :  0.16666667
+	(summarized/original)
+
 	62.40.112.0/20
 	128.0.0.6/32
 	150.99.188.202/32
 	198.32.11.51/32
 	216.24.184.86/32
-	}}}
 
-	Summarization nodes with 1 granularity:
+	File                 :  data\Geant-summary.txt
+	Granularity setting  :  1
+	Original set count   :  30
+	Summarized set count :  5
+	Compression rate     :  0.16666667
+	(summarized/original)
 
-	{{{
 	62.40.112.0/20
 	128.0.0.6/32
 	150.99.188.202/32
 	198.32.11.51/32
 	216.24.184.86/32
-	}}}
 
-	Summarization nodes with 2 granularity:
+	File                 :  data\Geant-summary.txt
+	Granularity setting  :  2
+	Original set count   :  30
+	Summarized set count :  5
+	Compression rate     :  0.16666667
+	(summarized/original)
 
-	{{{
 	62.40.112.0/20
 	128.0.0.6/32
 	150.99.188.202/32
 	198.32.11.51/32
 	216.24.184.86/32
-	}}}
 
-	Summarization nodes with 3 granularity:
+	File                 :  data\Geant-summary.txt
+	Granularity setting  :  3
+	Original set count   :  30
+	Summarized set count :  5
+	Compression rate     :  0.16666667
+	(summarized/original)
 
-	{{{
 	62.40.112.0/20
 	128.0.0.6/32
 	150.99.188.202/32
@@ -2950,11 +3016,15 @@ Three implementations are being initially tested on the test sets:  the legacy P
 
 	|| <font color="mediumblue">*Java*</font> ||
 
-	Summarization nodes with 0 granularity:
-
 	{{{
-	10.254.254.0/28
-	62.40.125.18/32
+	File                 :  data\Internet2-summary.txt
+	Granularity setting  :  0
+	Original set count   :  282
+	Summarized set count :  79
+	Compression rate     :  0.28014183
+	(summarized/original)
+
+	0.0.0.0/2
 	64.57.16.0/20
 	64.208.110.0/24
 	64.215.195.42/32
@@ -2970,31 +3040,26 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	131.247.47.213/32
 	131.247.47.225/32
 	134.75.108.46/32
-	137.164.26.128/29
-	137.227.2.182/32
-	138.18.47.32/28
-	138.18.155.34/32
-	140.173.1.238/32
-	141.225.250.24/29
+	137.128.0.0/9
+	138.18.0.0/16
+	140.0.0.0/7
 	143.215.193.10/32
 	144.92.233.117/32
 	149.165.254.0/27
 	150.99.199.94/32
 	150.99.200.194/32
-	156.110.203.0/29
+	156.110.203.2/32
+	156.110.203.6/32
 	164.113.238.142/32
 	164.113.238.193/32
 	192.5.89.222/32
 	192.17.10.46/32
 	192.31.99.134/32
 	192.35.86.9/32
-	192.35.86.174/32
-	192.35.86.224/29
+	192.35.86.128/25
 	192.41.213.113/32
 	192.84.8.254/32
-	192.88.115.25/32
-	192.88.115.117/32
-	192.88.192.128/28
+	192.88.0.0/16
 	192.91.246.125/32
 	192.122.183.10/32
 	192.122.183.30/32
@@ -3005,129 +3070,100 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	198.9.201.205/32
 	198.9.202.205/32
 	198.32.0.0/16
-	198.49.182.4/30
+	198.49.182.5/32
+	198.49.182.7/32
 	198.86.17.66/32
 	198.86.53.2/32
 	198.109.37.22/32
 	198.124.194.10/32
 	198.124.216.158/32
 	198.125.140.230/32
-	199.18.156.128/25
+	199.18.156.130/32
+	199.18.156.134/32
+	199.18.156.242/32
+	199.18.156.246/32
 	199.109.4.154/32
 	199.109.11.2/32
 	200.0.207.10/32
 	200.23.60.122/32
 	203.181.248.141/32
-	204.238.76.0/29
-	205.189.32.93/32
-	205.189.32.97/32
-	205.189.32.117/32
-	205.213.118.0/28
-	205.213.119.0/27
+	204.238.76.2/32
+	204.238.76.6/32
+	205.128.0.0/9
 	206.196.177.106/32
 	206.196.178.46/32
 	206.220.240.86/32
 	206.223.119.120/32
-	207.72.112.32/29
+	207.72.112.34/32
+	207.72.112.38/32
 	207.210.142.2/32
 	207.231.240.0/21
-	208.77.76.128/28
-	208.100.127.32/29
+	208.64.0.0/10
 	209.131.107.142/32
 	211.79.48.158/32
 	211.79.48.178/32
-	216.27.100.48/28
-	216.249.136.134/32
-	216.249.136.198/32
-	}}}
+	216.0.0.0/8
 
-	Summarization nodes with 1 granularity:
+	File                 :  data\Internet2-summary.txt
+	Granularity setting  :  1
+	Original set count   :  282
+	Summarized set count :  32
+	Compression rate     :  0.11347517
+	(summarized/original)
 
-	{{{
-	10.254.254.0/28
-	62.40.125.18/32
-	64.57.16.0/20
-	64.208.110.0/24
-	64.215.195.42/32
+	0.0.0.0/2
+	64.0.0.0/8
 	69.31.111.90/32
 	72.36.127.138/32
-	74.125.48.0/24
-	74.200.187.5/32
+	74.0.0.0/8
 	80.231.134.30/32
 	117.103.111.153/32
-	128.135.247.125/32
-	131.247.47.192/26
+	128.0.0.0/6
 	134.75.108.46/32
-	137.164.26.128/29
-	137.227.2.182/32
-	138.18.47.32/28
-	138.18.155.34/32
-	140.173.1.238/32
-	141.225.250.24/29
+	136.0.0.0/6
+	140.0.0.0/7
 	143.215.193.10/32
 	144.92.233.117/32
-	149.165.254.0/27
-	150.99.199.94/32
-	150.99.200.194/32
-	156.110.203.0/29
-	164.113.238.128/25
+	148.0.0.0/6
+	156.110.203.2/32
+	156.110.203.6/32
+	164.113.238.142/32
+	164.113.238.193/32
 	192.0.0.0/8
 	198.0.0.0/7
 	200.0.207.10/32
 	200.23.60.122/32
 	203.181.248.141/32
-	204.238.76.0/29
-	205.189.32.64/26
-	205.213.118.0/23
-	206.196.177.106/32
-	206.196.178.46/32
-	206.220.240.86/32
-	206.223.119.120/32
-	207.72.112.32/29
-	207.210.142.2/32
-	207.231.240.0/21
-	208.77.76.128/28
-	208.100.127.32/29
+	204.238.76.2/32
+	204.238.76.6/32
+	205.128.0.0/9
+	206.0.0.0/7
+	208.64.0.0/10
 	209.131.107.142/32
-	211.79.48.128/26
-	216.27.100.48/28
-	216.249.136.128/25
-	}}}
+	211.79.48.158/32
+	211.79.48.178/32
+	216.0.0.0/8
 
-	Summarization nodes with 2 granularity:
+	File                 :  data\Internet2-summary.txt
+	Granularity setting  :  2
+	Original set count   :  282
+	Summarized set count :  2
+	Compression rate     :  0.0070921984
+	(summarized/original)
 
-	{{{
-	10.254.254.0/28
-	62.40.125.18/32
-	64.0.0.0/4
-	80.231.134.30/32
-	117.103.111.153/32
-	128.135.247.125/32
-	131.247.47.192/26
-	134.75.108.46/32
-	137.164.26.128/29
-	137.227.2.182/32
-	138.18.47.32/28
-	138.18.155.34/32
-	140.173.1.238/32
-	141.225.250.24/29
-	143.215.193.10/32
-	144.92.233.117/32
-	149.165.254.0/27
-	150.99.192.0/20
-	156.110.203.0/29
-	164.113.238.128/25
-	192.0.0.0/3
-	}}}
+	0.0.0.0/1
+	128.0.0.0/1
 
-	Summarization nodes with 3 granularity:
+	File                 :  data\Internet2-summary.txt
+	Granularity setting  :  3
+	Original set count   :  282
+	Summarized set count :  2
+	Compression rate     :  0.0070921984
+	(summarized/original)
 
-	{{{
 	0.0.0.0/1
 	128.0.0.0/1
 	}}}
-
-	Comments:  setting 3 in this set performs very poorly.
 
 	|| <font color="indigo">*new Perl*</font> ||
 
@@ -3138,7 +3174,7 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	}}}
 
 
-==== set Indiana University ====
+==== set Indianna University ====
 
 	|| <font color="darkgreen">*legacy Perl*</font> ||
 
@@ -3155,7 +3191,62 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	Summarization nodes:
 
 	{{{
-		TBD
+	File                 :  data\iu-summary.txt
+	Granularity setting  :  0
+	Original set count   :  79
+	Summarized set count :  10
+	Compression rate     :  0.12658228
+	(summarized/original)
+
+	10.10.10.4/32
+	72.12.192.0/19
+	72.36.127.150/32
+	144.228.154.166/32
+	149.159.254.125/32
+	149.165.128.0/17
+	192.0.0.0/12
+	198.49.182.129/32
+	199.8.220.0/25
+	207.72.112.50/32
+
+	File                 :  data\iu-summary.txt
+	Granularity setting  :  1
+	Original set count   :  79
+	Summarized set count :  8
+	Compression rate     :  0.101265825
+	(summarized/original)
+
+	10.10.10.4/32
+	72.12.192.0/19
+	72.36.127.150/32
+	144.228.154.166/32
+	149.159.254.125/32
+	149.165.128.0/17
+	192.0.0.0/5
+	207.72.112.50/32
+
+	File                 :  data\iu-summary.txt
+	Granularity setting  :  2
+	Original set count   :  79
+	Summarized set count :  4
+	Compression rate     :  0.050632913
+	(summarized/original)
+
+	10.10.10.4/32
+	72.12.192.0/19
+	72.36.127.150/32
+	128.0.0.0/1
+
+	File                 :  data\iu-summary.txt
+	Granularity setting  :  3
+	Original set count   :  79
+	Summarized set count :  3
+	Compression rate     :  0.03797468
+	(summarized/original)
+
+	10.10.10.4/32
+	72.0.0.0/10
+	128.0.0.0/1
 	}}}
 
 	|| <font color="indigo">*new Perl*</font> ||
@@ -3184,11 +3275,45 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	Summarization nodes:
 
 	{{{
+	File                 :  data\psnc-summary.txt
+	Granularity setting  :  0
+	Original set count   :  27
+	Summarized set count :  2
+	Compression rate     :  0.074074075
+	(summarized/original)
+
 	62.40.124.182/32
-	150.254.162.229/32
-	150.254.255.0/28
-	212.191.126.4/32
-	212.191.224.0/24
+	128.0.0.0/1
+
+	File                 :  data\psnc-summary.txt
+	Granularity setting  :  1
+	Original set count   :  27
+	Summarized set count :  2
+	Compression rate     :  0.074074075
+	(summarized/original)
+
+	62.40.124.182/32
+	128.0.0.0/1
+
+	File                 :  data\psnc-summary.txt
+	Granularity setting  :  2
+	Original set count   :  27
+	Summarized set count :  2
+	Compression rate     :  0.074074075
+	(summarized/original)
+
+	62.40.124.182/32
+	128.0.0.0/1
+
+	File                 :  data\psnc-summary.txt
+	Granularity setting  :  3
+	Original set count   :  27
+	Summarized set count :  2
+	Compression rate     :  0.074074075
+	(summarized/original)
+
+	62.40.124.182/32
+	128.0.0.0/1
 	}}}
 
 	|| <font color="indigo">*new Perl*</font> ||
@@ -3220,18 +3345,64 @@ Three implementations are being initially tested on the test sets:  the legacy P
 	Summarization nodes:
 
 	{{{
-	62.40.124.0/25
+	File                 :  data\SWITCH-summary.txt
+	Granularity setting  :  0
+	Original set count   :  214
+	Summarized set count :  18
+	Compression rate     :  0.08411215
+	(summarized/original)
+
+	62.40.124.22/32
+	62.40.124.82/32
 	64.212.70.62/32
 	64.213.33.222/32
 	129.143.29.42/32
-	130.59.15.12/30
+	130.59.15.13/32
+	130.59.15.14/32
+	130.59.15.15/32
 	130.59.32.0/21
-	192.65.184.0/24
+	192.65.184.84/32
+	192.65.184.173/32
+	192.65.184.221/32
 	192.65.185.130/32
 	194.42.48.11/32
-	194.242.34.52/31
+	194.242.34.52/32
+	194.242.34.53/32
 	213.242.73.138/32
 	213.248.79.190/32
+
+	File                 :  data\SWITCH-summary.txt
+	Granularity setting  :  1
+	Original set count   :  214
+	Summarized set count :  5
+	Compression rate     :  0.023364486
+	(summarized/original)
+
+	62.40.124.22/32
+	62.40.124.82/32
+	64.212.70.62/32
+	64.213.33.222/32
+	128.0.0.0/1
+
+	File                 :  data\SWITCH-summary.txt
+	Granularity setting  :  2
+	Original set count   :  214
+	Summarized set count :  2
+	Compression rate     :  0.009345794
+	(summarized/original)
+
+	0.0.0.0/1
+	128.0.0.0/1
+
+	File                 :  data\SWITCH-summary.txt
+	Granularity setting  :  3
+	Original set count   :  214
+	Summarized set count :  2
+	Compression rate     :  0.009345794
+	(summarized/original)
+
+	0.0.0.0/1
+	128.0.0.0/1
 	}}}
 
 	|| <font color="indigo">*new Perl*</font> ||
