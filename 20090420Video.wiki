@@ -9,7 +9,7 @@
    # ESnet
    # UDel
    # FNAL
- # Review _*Actions*_ from last call: 20090406Video
+ # Review _*Actions*_ from last call: [20090406Video April 06]
  # perfSONAR-PS v3.1 Release Update
  # Spring Member Meeting
    * Group Activities
