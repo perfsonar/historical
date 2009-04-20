@@ -20,8 +20,8 @@
        * CTP
      * Others?
    * Post Meeting Topics
-     * 20090429Meet#pS_Agenda
-     * 20090429Meet#IDC_Agenda
+     * [20090429Meet#pS_Agenda pS Agenda]
+     * [20090429Meet#IDC_Agenda IDC Agenda]
  # Circuit Monitoring
  # SNMP-MA ESnet new database integration update
  # LHC/Atlas deployments (status update)
