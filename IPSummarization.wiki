@@ -2383,7 +2383,7 @@ From the analysis of the experimental results of some sets (below), the _balance
 
 ==== Subsequent Work ====
 
-The notion of weight of the subtrees is to be investigated as a part of the summarization heuristics.
+The heuristics integrating the notion of balance or weight of the subtrees seems to be generating coarser, perhaps suboptimal summarizations.  Further analysis required.
 
 The algorithm for [http://en.wikipedia.org/wiki/Cut_(graph_theory) Minimum Cut] might also be a candidate for the summarization issue, and shall be further investigated.
 
