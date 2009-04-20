@@ -3,13 +3,19 @@
 == Agenda/Minutes ==
 
  # Attendees
-   * TBD
+   * Aaron, Maxim, Jason, Rich, Jeff, Marcos, Martin
  # Team Updates
    # Internet2
+     * Aaron: Cisco teleprescence work. pingER testing.
+     * Jason: Cisco teleprescence work - nagios and remote hands at hotel. Also help pingER testing.
+     * Rich: iperf testing is showing a lot of variations.
+     * Jeff: CTP, auth, architecture.
    # ESnet
    # UDel
+     * Martin: Seeking funds...
+     * Marcos: IPSummarization, Protocol docs.
    # FNAL
- # Review _*Actions*_ from last call: [20090406Video April 06]
+     * Maxim: pingER testing, and RPM preparation. Work with MIT to get bwctl tests going - test results have large variations and Maxim will be working more with them. Maxim will try and reproduce a problem with zombie processes.
  # perfSONAR-PS v3.1 Release Update
    * New Bugs
      * [http://code.google.com/p/perfsonar-ps/issues/detail?id=132 132] - ~~PingER packaging is non standard~~ 	 
@@ -28,6 +34,7 @@
    * Release Candidate Generation
      * Waiting on PingER testing.  Will regenerate PingER/SNMP MA.
    * Suggestions on Testing
+ # Review _*Actions*_ from last call: [20090406Video April 06]
  # Spring Member Meeting
    * Group Activities
      * Perf WG
