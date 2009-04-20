@@ -11,6 +11,23 @@
    # FNAL
  # Review _*Actions*_ from last call: [20090406Video April 06]
  # perfSONAR-PS v3.1 Release Update
+   * New Bugs
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=132 132] - ~~PingER packaging is non standard~~ 	 
+       * Fixed and closed
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=133 133] - ~~PingER Libs are still in Shared/ area~~ 	 
+       * Fixed and closed
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=134 134] - ~~PingER RPM depends on Text::CSV::Simple~~ 
+       * Fixed and closed
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=137 137] - ~~RRD.pm cannot read RRD File~~ 	 
+       * Fixed and closed
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=138 138] - ~~PingER request fail with _Can't coerce GLOB to string..._~~ 	 
+       * Fixed and closed
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=139 139] - PingER is giving off warnings 
+       * Open - Testing pending
+   * Software/Performance Web Pages will be updated this week
+   * Release Candidate Generation
+     * Waiting on PingER testing.  Will regenerate PingER/SNMP MA.
+   * Suggestions on Testing
  # Spring Member Meeting
    * Group Activities
      * Perf WG
