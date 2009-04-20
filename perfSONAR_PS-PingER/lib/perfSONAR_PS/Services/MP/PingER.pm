@@ -443,11 +443,11 @@ sub storeData {
     if ( $agent->results() ) {
         if ( $agent->results()->{'rtts'} && ref $agent->results()->{'rtts'} eq 'ARRAY' ) {
             $rtts = join ',', @{ $agent->results()->{'rtts'} };
-            $logger->debug( "construcing array from rtts '$rtts'" );
+            $logger->debug( "constructing array from rtts '$rtts'" );
         }
         if ( $agent->results()->{'seqs'} && ref $agent->results()->{'seqs'} eq 'ARRAY' ) {
             $seqs = join ',', @{ $agent->results()->{'seqs'} };
-            $logger->debug( "construcing array from seqs '$seqs'" );
+            $logger->debug( "constructing array from seqs '$seqs'" );
         }
     }
 

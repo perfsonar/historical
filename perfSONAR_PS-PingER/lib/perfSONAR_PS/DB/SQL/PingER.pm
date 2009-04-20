@@ -80,6 +80,7 @@ sub soi_host {
     my ( $self, $param ) = @_;
     unless ( $param && ref( $param ) eq 'HASH' && $self->validateQuery( $param, HOST, { ip_name => 1, ip_number => 2 } ) == 0 ) {
         $self->ERRORMSG( "soi_host  requires single HASH ref parameter with ip_name and ip_number set" );
+	$self->LOGGER->error( "soi_host  requires single HASH ref parameter with ip_name and ip_number set" );
         return -1;
     }
     my $query = $self->getFromTable(
@@ -96,6 +97,7 @@ sub soi_host {
     );
     if ( !ref( $query ) && $query < 0 ) {
         $self->ERRORMSG( "soi_host  failed for ip_name=$param->{ip_name}  ip_number=$param->{ip_number} " );
+	$self->LOGGER->error("soi_host  failed for ip_name=$param->{ip_name}  ip_number=$param->{ip_number} ");
         return $query;
     }
 
@@ -108,9 +110,29 @@ sub soi_host {
                 table  => 'host'
             }
         );
-
-        # return ip_name if everything is OK or result code
-        $id > 0 ? return $param->{ip_name} : return $id;
+        if($id) {
+	    return $id;
+	} 
+	else {
+	    my $query_repeat = $self->getFromTable(
+	        {
+        	    query => [
+        		'ip_name'   => { 'eq' => $param->{ip_name} },
+        		'ip_number' => { 'eq' => $param->{ip_number} }
+        	    ],
+        	    table    => 'host',
+        	    validate => HOST,
+        	    index    => 'ip_name',
+        	    limit    => 1
+		}
+	    );
+	    if ( !ref( $query_repeat) && $query_repeat < 0 ) {
+		$self->ERRORMSG( "soi_host  failed for ip_name=$param->{ip_name}  ip_number=$param->{ip_number} " );
+		$self->LOGGER->error("soi_host  failed for ip_name=$param->{ip_name}  ip_number=$param->{ip_number} ");
+		return $query;
+	    }
+	    return $param->{ip_name}; 
+	} 
     }
     $self->LOGGER->debug( "found host " . $param->{ip_name} . "/ " . $param->{ip_number} );
     return ( keys %{$query} )[0];
