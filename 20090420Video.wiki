@@ -1,4 +1,4 @@
-=  April 13, 2009 Conference Call 2:30 pm EST =
+=  April 20, 2009 Conference Call 2:30 pm EST =
 
 == Agenda/Minutes ==
 
@@ -9,7 +9,7 @@
    # ESnet
    # UDel
    # FNAL
- # Review _*Actions*_ from last call
+ # Review _*Actions*_ from last call: 20090406Video
  # perfSONAR-PS v3.1 Release Update
  # Spring Member Meeting
    * Group Activities
@@ -20,10 +20,12 @@
        * CTP
      * Others?
    * Post Meeting Topics
+     * 20090429Meet#pS_Agenda
+     * 20090429Meet#IDC_Agenda
  # Circuit Monitoring
  # SNMP-MA ESnet new database integration update
  # LHC/Atlas deployments (status update)
- # Next meeting will be 4/20
+ # Next meeting will be 4/29 in D.C.
 
 === ACTIONS ===
 
