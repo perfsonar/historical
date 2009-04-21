@@ -28,8 +28,8 @@
        * Fixed and closed
      * [http://code.google.com/p/perfsonar-ps/issues/detail?id=138 138] - ~~PingER request fail with _Can't coerce GLOB to string..._~~ 	 
        * Fixed and closed
-     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=139 139] - PingER is giving off warnings 
-       * Open - Testing pending
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=139 139] - ~~PingER is giving off warnings~~ 
+       * Fixed and closed
    * Software/Performance Web Pages will be updated this week
    * Release Candidate Generation
      * Waiting on PingER testing.  Will regenerate PingER/SNMP MA.

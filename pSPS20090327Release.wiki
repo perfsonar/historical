@@ -64,7 +64,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=133 133] - _*Maxim*_ - ~~PingER Libs are still in Shared/ area~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=134 134] - _*Maxim*_ - ~~PingER RPM depends on Text::CSV::Simple~~	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=138 138] - _*Maxim*_ - ~~PingER request fail with _Can't coerce GLOB to string..._~~ 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=139 139] - _*Maxim*_ - PingER is giving off warnings 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=139 139] - _*Maxim*_ - ~~PingER is giving off warnings~~
  * _*Topology Service*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=128 128] - _*Aaron*_ - ~~Topology Service _get all_ returning redundant data~~
      * Resolved
@@ -255,6 +255,10 @@ Lessons learned during the release and review process.
 
  * Start and end code/doc reviews time period earlier
  * Testing (unit tests - tests harness) should be ready pre-release
+   * Test constructed RPMS on:
+     * i386 - RHEL4/5 + Recent Fedora
+     * x86_64 - RHEL 4/5 + Recent Fedora
+   * Run tests included in each RPM (unit + service) on each test arch/machine
  * Keep your documentation up to date 
  * Longer cycle should be considered, especially when balancing other needs (Paper writing, outside tasks)
       
