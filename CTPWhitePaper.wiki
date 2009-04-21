@@ -93,14 +93,14 @@ which groups I think are best positioned for the specific parts.
 || 3/3-3/13    || Test hardware in AA || AB || *Complete* ||
 || 2/23-3/13   || OS integration and perf-node required software development || AB/JH || *Complete* ||
 || 2/23-3/13   || Central configuration setup developed/tested. (rsync or other) || AB/JH/DP || Manual this time around *Complete* ||
-|| 3/16-4/6    || Order remaining hardware, deployments of perf-nodes || JH || *Complete*/deployments In-progress ||
-|| 3/2-4/13   || Development of database modifications. || JB || In-progress ||
+|| 3/16-4/6    || Order remaining hardware, deployments of perf-nodes || JH || *Complete* ||
+|| 3/2-4/13   || Development of database modifications. || JB || *In-progress* ||
 || 3/16-4/13   || Admin-GUI || AB || In-progress ||
 || 3/16-4/13   || Nagios plugins. See allso [CTPNagios] || JZ || *Complete* ||
-|| 4/1-4/20   || Public GUI (dashboard widget style). || JZ/AB/JB || ||
-|| 4/6-4/13    || Debugging of deployments/*Networks*/real-world data validation || JH/JZ/BC/*!SiteContacts* || In-progress ||
+|| 4/1-4/20   || Public GUI (dashboard widget style). || JZ/AB/JB || *In-progress* ||
+|| 4/1-4/20   || Public GUI (status style). || JZ || *Complete* [http://ndb1.internet2.edu/SMM09/ctp.html] ||
+|| 4/6-4/13    || Debugging of deployments/*Networks*/real-world data validation || JH/JZ/BC/*!SiteContacts* || *In-progress* ||
 ||             || (Probable flush of all existing data at the end of this period) || || ||
-|| 4/13-4/24   || Iterative development/testing of GUI/nagios alerts || JZ/JH/DP || In-progress ||
+|| 4/13-4/24   || Iterative development/testing of GUI/nagios alerts || JZ/JH/DP || *In-progress* ||
 ||             || (No database mods during this time, only presentation changes.) || || ||
 || 4/27        || Ready to show community || all || ||
-
