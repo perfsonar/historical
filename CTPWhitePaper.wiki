@@ -95,7 +95,7 @@ which groups I think are best positioned for the specific parts.
 || 2/23-3/13   || Central configuration setup developed/tested. (rsync or other) || AB/JH/DP || Manual this time around *Complete* ||
 || 3/16-4/6    || Order remaining hardware, deployments of perf-nodes || JH || *Complete* ||
 || 3/2-4/13   || Development of database modifications. || JB || *In-progress* ||
-|| 3/16-4/13   || Admin-GUI || AB || In-progress ||
+|| 3/16-4/13   || Admin-GUI || AB || *In-progress* ||
 || 3/16-4/13   || Nagios plugins. See allso [CTPNagios] || JZ || *Complete* ||
 || 4/1-4/20   || Public GUI (dashboard widget style). || JZ/AB/JB || *In-progress* ||
 || 4/1-4/20   || Public GUI (status style). || JZ || *Complete* [http://ndb1.internet2.edu/SMM09/ctp.html] ||
