@@ -164,14 +164,10 @@ http://perfsonar-ps.googlecode.com/svn/wiki/20090429Meet/dc_map.png
 
 === Remote Participation ===
 
-Video access is available, but limited to a small number of participants (4 or 5).  The video information is tenatively:
+Video access is available, we will be using the ESnet conference bridge:
 
-{{{
-IP Address:     192.52.179.246 
-GDS:            0011892028729111
-}}}
-
-Please arrange with Jason to test your connection before the meeting.  
+ * GDS: 00113498255555
+ * phone: 1-510-883-7860 then 8255555# at the prompt. 
 
 === Transportation (Airports) ===
 
