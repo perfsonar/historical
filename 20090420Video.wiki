@@ -53,7 +53,10 @@
 
 === ACTIONS ===
 
-TBD
+ * *MP*: Update [IPSummarization] based on email/conference call suggestions
+ * *JZ*: Coordinate RC testing
+ * *AB*: Update Circuit Examples
+ * *JB*: Prepare agenda page from ideas talked about (not putting them in the meeting notes).
 
 == Where ==
 
