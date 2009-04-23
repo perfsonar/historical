@@ -27,7 +27,7 @@
      * AAA
      * IS (Topology and Service Discovery)
  # 12:00 Lunch
- # 12:30 (4:00) 0.6 Design Decisions
+ # 12:30 (4:00) 0.6 Design Decisions (Chin)
    * Technologies to support modules' WS interface (e.g. Tomcat, Jetty)
    * Distinction between modules' exposed interface (e.g. to Coordinator) and internal module
    * Symmetric/asymmetric behavior for module functions
