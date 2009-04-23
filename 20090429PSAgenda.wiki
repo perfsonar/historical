@@ -4,67 +4,62 @@
 
 ==== pS Agenda ====
 
-  # - 0:15 Release Status (Jason)
-    * Next RC?
-    * Post-mortum planned for VC in May.
+ # - 0:15 Release Status (Jason)
+   * Next RC?
+   * Post-mortum planned for VC in May.
+ # - 1:00 Project Roadmap (Jeff)
+   * Project scalability
+   * Community Outreach Milestones (including demos)
+   * Documentation Milestones
+   * Software Milestones
+ # - 0:30 gLS: Current System Arch (Jason)
+   * hLS mode
+   * gLS overlay/root servers
+   * Summary of current Summarization
+   * Distribution - discovery phase
+   * Query
+   * Timing issues
+     * Synchronization of root gLSs
+     * Refresh of registrations
+     * Refresh of summaries
+   * API
+     * Bootstrapping
+   * Percieved limitations
+     * Stability (XMLDB dies...)
+     * Performance (XMLDB/Summarization)
+     * IPTree (v4 only)
+     * Inflexible discovery for new data/event types
+ # - 1:00 gLS: Transition to IS (Martin/Marcos)
+   * Address current limitations as much as possible
+   * Topology distribution within summarization
+   * Authoritative data
+   * New IPTree summaries
+ # - 1:00 gLS: Roadmap (Jeff)
+   * Specific enhancements for 3.2
+ # - 0:30 pS protocols (Martin)
+   * Strategy for publishing standards (IRNC etc...)
+     * Start with de-facto (as-builts)
+     * Engage OGF process
+ # - 2:00 Configuration Management (Joe)
+   * Problem statement
+     * use-cases
+   * Current range of solutions
+   * List of effected software packages
+ # - 1:00 Meta-scheduler (???)
+   * Single node scheduling among tools
+   * Shared link/resource scheduling
+ # - 2:00 Software Architecture (Jeff)
+   * Goal is to unify more of the code base.
+   * Goal is to make it easy for new developers to create a service to provide a new kind of performance data.
+   * Common config file interfaces
+   * Common daemon (mod-perl/Apache)
+   * [What else needs to be common - please add into agenda here]
+ # - 0:30 GUI Development
+   * What APIs should we be providing?
+     * Current messages good enough?
+ # - 0:30 Auth use-case discussion (Jeff)
 
-  # - 1:00 Project Roadmap (Jeff)
-    * Project scalability
-    * Community Outreach Milestones (including demos)
-    * Documentation Milestones
-    * Software Milestones
+== Last Modified ==
 
-  # - 0:30 gLS: Current System Arch (Jason)
-    * hLS mode
-    * gLS overlay/root servers
-    * Summary of current Summarization
-    * Distribution - discovery phase
-    * Query
-    * Timing issues
-      * Synchronization of root gLSs
-      * Refresh of registrations
-      * Refresh of summaries
-    * API
-      * Bootstrapping
-    * Percieved limitations
-      * Stability (XMLDB dies...)
-      * Performance (XMLDB/Summarization)
-      * IPTree (v4 only)
-      * Inflexible discovery for new data/event types
+$Id$
 
-  # - 1:00 gLS: Transition to IS (Martin/Marcos)
-    * Address current limitations as much as possible
-    * Topology distribution within summarization
-    * Authoritative data
-    * New IPTree summaries
-
-  # - 1:00 gLS: Roadmap (Jeff)
-    * Specific enhancements for 3.2
-
-  # - 0:30 pS protocols (Martin)
-    * Strategy for publishing standards (IRNC etc...)
-      * Start with de-facto (as-builts)
-      * Engage OGF process
-
-  # - 2:00 Configuration Management (Joe)
-    * Problem statement
-      * use-cases
-    * Current range of solutions
-    * List of effected software packages
-
-  # - 1:00 Meta-scheduler (???)
-    * Single node scheduling among tools
-    * Shared link/resource scheduling
-
-  # - 2:00 Software Architecture (Jeff)
-    * Goal is to unify more of the code base.
-    * Goal is to make it easy for new developers to create a service to provide a new kind of performance data.
-    * Common config file interfaces
-    * Common daemon (mod-perl/Apache)
-    * [What else needs to be common - please add into agenda here]
-
-  # - 0:30 GUI Development
-    * What APIs should we be providing?
-      * Current messages good enough?
-
-  # - 0:30 Auth use-case discussion (Jeff)

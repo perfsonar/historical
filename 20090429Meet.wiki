@@ -60,40 +60,9 @@ The perfSONAR developers meeting will focus on pending issues within the perfSON
    # TBD - ESnet
    # Chris Robb - Internet2
 
-==== pS Agenda ====
+==== pS Agenda and Notes ====
 
-  # Release Management
-    * Review of the process; comments from developers
-    * Code Review (see also [pSPS20090327Release#Code_Review_Reviews these] comments)
-      * _*accessPoint*_ in configuration: should not rely on _localhost_
-        * Construct access point on the fly (NPToolkit like - prone to errors)
-        * Exit if no access point found (e.g. if still _localhost_ or _CHANGEME_)
-      * Standardize configuration files
-        * Services use different types (Config::Genera, OWP, homemade)
-        * File formats differ when we do this    
-      * Standardize LSRegistration
-        * provide _*getMetadata*_ function in a base class, let the daemon do the rest
-        * will be tricky for dynamic vs static services (where the metadata may or may not change)
-        * should re-consider LS architecture regarding this too
-      * Use of _*Class::Accessor*_/_*Class::Fields*_
-        * Everyone should use them, or no one should
-        * Mixture of sometimes vs never makes the framework messy
-  # Configuration Management
-    * Problem statement (e.g. management of several services domain wide - possibly deployed via RPMs)
-    * Current range of existing solutions
-    * Proposals
-  # Meta-scheduler for cross measurement point use
-    * schedule bwctl/ping/owamp/ndt tests so they don't interfere
-  # Upcoming Demos/Releases/Conferences
-    * See the [pSPSReleaseManagement#Roadmap roadmap]
-    * Summer Joint Techs
-    * Fall Member Meeting
-    * GLIF
-    * SC
- 
-==== pS Notes ====
-
-TBD
+See the Agenda here: [20090429PSAgenda].
 
 === pS/IDC Developers (5/1)===
 
@@ -128,13 +97,9 @@ If IDC developers like, a portion of the day can be set aside for other current 
    # Chris Robb - Internet2
    # TBD - ESnet
 
-==== IDC Agenda ====
+==== IDC Agenda and Notes ====
 
-TBD
-
-==== IDC Notes ====
-
-TBD
+See the Agenda here: [20090501IDCAgenda].
 
 == Local Information ==
 
@@ -152,13 +117,13 @@ Washington, DC 20036
 
 This is between _*L*_ and _*M*_ streets on _*18th*_ (left side of street when facing North, white building between 2 parking garages).  The office is on the 10th floor (see the lobby attendant when entering).  
 
-From Orange/Blue Metro Line:
+_*From Orange/Blue Metro Line*_:
 
-Get off at the *Farragut West* [http://www.wmata.com/rail/station_detail.cfm?station_id=38 stop].  There are two exits, please exit on _18th Street_.  Walk *North* along 18th street (*Straight* as you exit the station) and cross over _K_ and _L_ Streets.  1150 is midway between _L_ and _M_ on the left hand side, it is a white building.
+Get off at the *Farragut West* [http://www.wmata.com/rail/station_detail.cfm?station_id=38 stop].  There are two exits, please exit on _18th Street_.  Walk *North* along 18th street (*Straight* as you exit the station) and cross over _K_ and _L_ Streets.  _*N.B._ There is construction on the West (left) side of _18th Street_ between _K_ and _L_.  1150 is midway between _L_ and _M_ on the left hand side, it is a white building (there is a construction fence outside of our entrance).
 
-From Red Metro Line:
+_*From Red Metro Line*_:
 
-Get off at the *Farragut North* [http://www.wmata.com/rail/station_detail.cfm?station_id=4 stop].  There are three exits, please exit on one of the _L Street and Conn. Ave_ exits.  Walk *West* along L street (towards oncoming traffic) and cross over _18th_ Streets.  Make a right (*North*) onto _18th Street_, 1150 is midway between _L_ and _M_ on the left hand side, it is a white building.
+Get off at the *Farragut North* [http://www.wmata.com/rail/station_detail.cfm?station_id=4 stop].  There are three exits, please exit on one of the _L Street and Conn. Ave_ exits.  Walk *West* along L street (towards oncoming traffic) and cross over _18th_ Streets.  Make a right (*North*) onto _18th Street_, 1150 is midway between _L_ and _M_ on the left hand side, it is a white building (there is a construction fence outside of our entrance).
 
 http://perfsonar-ps.googlecode.com/svn/wiki/20090429Meet/dc_map.png
 
@@ -167,7 +132,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/20090429Meet/dc_map.png
 Video access is available, we will be using the ESnet conference bridge:
 
  * GDS: 00113498255555
- * phone: 1-510-883-7860 then 8255555# at the prompt. 
+ * Phone: 1-510-883-7860 then 8255555# at the prompt. 
 
 === Transportation (Airports) ===
 
@@ -181,7 +146,7 @@ IAD is located in Chantilly VA, which is fairly far out (and very close to were 
 
 === Transportation (Ground) ===
 
-Using the [http://www.wmata.com/rail/maps/map.cfm Metro] is by far the easiest way to get around.  I would suggest buying a _SmartTrip_ electronic card (comes with $10 loaded on it) and using this for your stay.  The card can be loaded with more value as you need it in any station.  This is preferred to attempting to purchase paper tickets for each ride, or trying to figure out the strange rules regarding entry vs exit fare, etc.
+Using the [http://www.wmata.com/rail/maps/map.cfm Metro] is by far the easiest way to get around.  I would suggest buying a _SmartTrip_ electronic card (comes with $10 loaded on it) and using this for your stay.  The card can be loaded with more value as you need it in any station.  This is preferred to attempting to purchase paper tickets for each ride, or trying to figure out rules regarding entry vs exit fare, etc.
 
 Shuttle services such as [http://www.washfly.com/flyer_bus_about.htm Washington Flyer] and [http://www.supershuttle.com/ Super Shuttle] can get you to the airports.
 

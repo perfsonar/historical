@@ -4,27 +4,28 @@
 
 ==== IDC Agenda ====
 
-  # 8:30 (0:30) NSI Summary (John)
-    * Coordinate IDC planning with NSI architecture definition
+ # 8:30 (0:30) NSI Summary (John)
+   * Coordinate IDC planning with NSI architecture definition
+ # 9:00 (0:15) Circuit Status (E2EMon lives on...): Current Arch (Aaron)
+   * Architecture: GUI/MA/agent
+   * Configuration requirements
+   * Limitations: CurrentE2EMonLimitations
+ # 9:15 (2:30) Circuit Status: Planned Architecture Enhancements (Aaron)
+   * Use-case clarification collection
+     * What needs to be 'monitored'
+     * Look at chrobb/IU use-case
+   * [CircuitMonitoring Circuit Monitoring Roadmap]
+   * pS DCN Monitoring Architecture
+     * Picture of the pieces
+     * Proposal for interfaces
+     * Topology examples
+     * Evaluation
+       * How does 0.5 fit this model? 0.6?
+       * Where does the hardware specific content get added?
+ # 12:00 Lunch
+ # 0.6
 
-  # 9:00 (0:15) Circuit Status (E2EMon lives on...): Current Arch (Aaron)
-    * Architecture: GUI/MA/agent
-    * Configuration requirements
-    * Limitations: CurrentE2EMonLimitations
+== Last Modified ==
 
-  # 9:15 (2:30) Circuit Status: Planned Architecture Enhancements (Aaron)
-    * Use-case clarification collection
-      * What needs to be 'monitored'
-      * Look at chrobb/IU use-case
-    * [CircuitMonitoring Circuit Monitoring Roadmap]
-    * pS DCN Monitoring Architecture
-      * Picture of the pieces
-      * Proposal for interfaces
-      * Topology examples
-      * Evaluation
-        * How does 0.5 fit this model? 0.6?
-        * Where does the hardware specific content get added?
+$Id$
 
-  # 12:00 Lunch
-
-  # 0.6
