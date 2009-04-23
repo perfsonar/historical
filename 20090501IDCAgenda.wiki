@@ -2,7 +2,7 @@
 
 <wiki:toc max_depth="6" />
 
-==== IDC Agenda ====
+== IDC Agenda ==
 
  # 8:30 (0:30) NSI Summary (John)
    * Coordinate IDC planning with NSI architecture definition

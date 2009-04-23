@@ -2,7 +2,7 @@
 
 <wiki:toc max_depth="6" />
 
-==== pS Agenda ====
+== pS Agenda ==
 
  # - 0:15 Release Status (Jason)
    * Next RC?
