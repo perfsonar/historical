@@ -90,6 +90,10 @@ The following outline some exceptions to the overall release process.  Also see 
      * Resolved
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=121 121] - _*Aaron*_ - ~~ls registration daemon TCP services aren't working locally~~
      * Resolved
+ * _*Status Service/Collector*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=150 150] - _*Aaron*_ - ~~Status service might erroneously list status as "unknown"~~
+     * Resolved
+  
  * _*Framework*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=73 73] - _*Jason*_ - ~~Client::LS Registration Logic Re-arrange~~
      * Original issue addressed, but held over for re-design before next release.
