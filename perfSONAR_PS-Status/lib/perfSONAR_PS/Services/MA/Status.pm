@@ -45,6 +45,7 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::DB::Status;
 use perfSONAR_PS::Status::Element;
+use perfSONAR_PS::Status::Common qw(get_new_oper_status get_new_admin_status);
 use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Services::MA::General;
 
@@ -1369,43 +1370,18 @@ sub handleData {
 
     startData( $args->{output}, $args->{data_id}, $args->{metadata_id}, undef );
     foreach my $period ( @periods ) {
-        my $period_oper_status  = "unknown";
-        my $period_admin_status = "unknown";
+        my $period_oper_status;
+        my $period_admin_status;
 
         foreach my $oper_value ( @{ $period->{oper_status} } ) {
-            if ( $period_oper_status eq "down" or $oper_value eq "down" ) {
-                $period_oper_status = "down";
-            }
-            elsif ( $period_oper_status eq "degraded" or $oper_value eq "degraded" ) {
-                $period_oper_status = "degraded";
-            }
-            elsif ( $period_oper_status eq "up" or $oper_value eq "up" ) {
-                $period_oper_status = "up";
-            }
-            else {
-                $period_oper_status = "unknown";
-            }
+            $period_oper_status = get_new_oper_status($period_oper_status, $oper_value);
         }
 
         foreach my $admin_value ( @{ $period->{admin_status} } ) {
-            if ( $period_admin_status eq "maintenance" or $admin_value eq "maintenance" ) {
-                $period_admin_status = "maintenance";
-            }
-            elsif ( $period_admin_status eq "troubleshooting" or $admin_value eq "troubleshooting" ) {
-                $period_admin_status = "troubleshooting";
-            }
-            elsif ( $period_admin_status eq "underrepair" or $admin_value eq "underrepair" ) {
-                $period_admin_status = "underrepair";
-            }
-            elsif ( $period_admin_status eq "normaloperation" or $admin_value eq "normaloperation" ) {
-                $period_admin_status = "normaloperation";
-            }
-            else {
-                $period_admin_status = "unknown";
-            }
+            $period_admin_status = get_new_admin_status($period_admin_status, $admin_value);
         }
 
-        #        $self->{LOGGER}->debug( "Period: " . Dumper( $period ) );
+        $self->{LOGGER}->debug( "Period: " . Dumper( $period ) );
 
         # if we can output the range, just output one datum with the range
         if ( $args->{output_ranges} ) {

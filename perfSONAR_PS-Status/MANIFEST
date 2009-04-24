@@ -2,6 +2,7 @@ MANIFEST
 Makefile
 bin/collector.pl
 bin/service.pl
+bin/client.pl
 doc/Changes
 doc/LICENSE
 doc/README

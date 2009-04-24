@@ -8,11 +8,11 @@
 
 Name:           perl-perfSONAR_PS-Status
 Version:        3.1
-Release:        1.%{disttag}
+Release:        2.%{disttag}
 Summary:        perfSONAR-PS Status Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
-URL:            http://search.cpan.org/dist/perfSONAR_PS-Status/
+URL:            http://www.internet2.edu/performance/pS-PS/
 Source0:        perfSONAR_PS-Status-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
