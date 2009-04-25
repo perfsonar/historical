@@ -8,9 +8,12 @@
    * Next RC?
    * Post-mortum planned for VC in May.
  # (1:00) Project Roadmap (Jeff)
+   * Political landscape (IRNC, GENI, CTP, Regionals, Labs, LHC oh my.)
    * Project scalability
    * Community Outreach Milestones (including demos)
    * Documentation Milestones
+     * Web-site cleanup/orgainization
+     * Availability of protocols/schemas
    * Software Milestones
  # (0:30) gLS: Current System Arch (Jason)
    * hLS mode
@@ -34,12 +37,18 @@
    * Topology distribution within summarization
    * Authoritative data
    * New IPTree summaries
+ # (0:15) gLS: Test Plan (Brian)
+   * Scalability testing
  # (1:00) gLS: Roadmap (Jeff)
    * Specific enhancements for 3.2
  # (0:30) pS protocols (Martin)
    * Strategy for publishing standards (IRNC etc...)
      * Start with de-facto (as-builts)
      * Engage OGF process
+ # (0:30) MA protocol enhancements (Brian)
+   * Addition of 'limit' option to MA/MP queries (on by default)
+   * Addition of metadata queries to MA (i.e.: what interfaces have new data in past T?)
+   * Addition of TTL negotiation to LS registration
  # (2:00) Configuration Management (Joe)
    * Problem statement
      * use-cases
@@ -54,6 +63,14 @@
    * Common config file interfaces
    * Common daemon (mod-perl/Apache)
    * [What else needs to be common - please add into agenda here]
+ # (1:00) pS-Performance node (Aaron)
+   * pS-NPToolkit roadmap
+     * Change of defaults (iperf buffer/duration)
+     * What functions *must* be in the next release
+     * Fedora transition
+   * software.internet2.edu yum repo
+     * Mirrors? (Regionals, ESnet?)
+   * pS-Performance Grid
  # (0:30) GUI Development (???)
    * What APIs should we be providing?
      * Current messages good enough?
