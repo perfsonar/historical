@@ -172,11 +172,27 @@ performed.
 
 ==== Lookup Service ====   
 
-The Lookup Service is clearly the most difficult to properly test. Complete testing must involve the ability to modify each of the following:
+The Lookup Service is clearly the most difficult to properly test. Complete testing must involve the ability to modify each of the following independently:
+ * the gLS to gLS synchronization update rate
+ * the hLS to gLS synchronization update rate
+ * the MA to hLS update rate
+ * the number of MAs
+ * the number of gLS's
+ * the number of (src/dest/eventTypes) in an MA
 
 ===== Recommended assumptions for Testing =====
- # each MA registers with 2 hLS for redundancy
- # each 'domain' runs to gLS for redundancy
+ * each MA registers with 2 hLS's for redundancy
+ * each 'domain' runs 2 gLS's for redundancy
+ * number of MA's should scale to around 100 per gLS
+ * number of gLS's should scale to around 100  
+ * the synchronization rate should tested at the following intervals: 
+   ** 10,30,60 min updates
+
+A planet lab experiment that should be created to allow this testing, and the following should be measured for each test configuration:
+ * Query time for a single requests
+ * Query time for simultaneous requests (5, 10, 50) to a single gLS
+ * measure the change in query time when a hLS or gLS fails
+
 
 ==== Measurement Archive ====   
 
