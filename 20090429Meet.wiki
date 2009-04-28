@@ -22,7 +22,7 @@ Fax: (202) 872-6648
 
 The meetings will span 3 days:
 
- * _*perfSONAR*_ - Weds April 29, 2009 - 1PM to 6PM
+ * _*perfSONAR*_ - Weds April 29, 2009 - 2PM to 6PM
  * _*perfSONAR*_ - Thurs April 30, 2009 - 8AM to 5PM
  * _*perfSONAR*_ and _*IDC*_ (Circuit Monitoring) - Friday May 1, 2009 - 8AM to 5PM
 
