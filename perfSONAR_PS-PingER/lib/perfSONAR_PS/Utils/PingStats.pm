@@ -109,6 +109,8 @@ use fields ( PARAMS );
 
 our $logger = Log::Log4perl::get_logger( CLASSPATH );
 
+Params::Validate::validation_options( on_fail => sub { $logger->( error => shift ) } );
+
 #######################################################################
 
 no strict 'refs';
@@ -134,7 +136,7 @@ sub new {
     my $class = ref( $that ) || $that;
     my $self = fields::new( $class );
     foreach my $key ( PARAMS ) {
-        $self->_add_metric( $key => $param->{$key} ) if exists $param->{$key};    ###
+        $self->_add_metric( $key => $param->{$key} ) if $param->{$key};    ###
     }
     return $self;
 }
