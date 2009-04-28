@@ -168,7 +168,7 @@ cycle, and by members of the release team within a cycle.  Any time a
 significant change is made to a function/module/service this testing should be
 performed.
 
-=== Service Specific Testing ===   
+=== Service Specific System Testing ===   
 
 ==== Lookup Service ====   
 
@@ -182,7 +182,7 @@ The Lookup Service is clearly the most difficult to properly test. Complete test
 
 ===== Recommended assumptions for Testing =====
  * each MA registers with 2 hLS's for redundancy
- * each 'domain' runs 2 gLS's for redundancy
+ * each 'network domain' runs 2 gLS's for redundancy
  * number of MA's should scale to around 100 per gLS
  * number of gLS's should scale to around 100  
  * the synchronization rate should tested at the following intervals: 
