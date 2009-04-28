@@ -4,9 +4,18 @@
 
 == pS Agenda ==
 
- # (0:15) Release Status (Jason)
-   * Next RC?
-   * Post-mortum planned for VC in May.
+ # (0:15) Release Process (Jason)
+   * Release Process
+     * Overall comments
+     * Potential changes
+   * 3.1 Release
+     * RC Status
+     * Testing Status
+     * Next RC?
+     * Post-mortum planned for VC in May.
+   * Future Releases
+     * 3.1+
+     * 3.2
  # (1:00) Project Roadmap (Jeff)
    * Political landscape (IRNC, GENI, CTP, Regionals, Labs, LHC oh my.)
    * Project scalability
@@ -79,4 +88,3 @@
 == Last Modified ==
 
 $Id$
-
