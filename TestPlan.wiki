@@ -15,6 +15,9 @@
      * [TestPlan#Alpha_Testing Alpha Testing]
      * [TestPlan#Beta_Testing Beta Testing]
      * [TestPlan#Regression_Testing Regression Testing]
+   * [TestPlan#Service_Specific Service Specific Testing]
+     * [TestPlan#LS Lookup Service]
+     * [TestPlan#MA Measurement Archive Service]
    * [TestPlan#Open_Issues Open Issues]
        
 == Introduction ==
