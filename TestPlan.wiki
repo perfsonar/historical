@@ -172,7 +172,16 @@ performed.
 
 ==== Lookup Service ====   
 
+The Lookup Service is clearly the most difficult to properly test. Complete testing must involve the ability to modify each of the following:
+
+===== Recommended assumptions for Testing =====
+ # each MA registers with 2 hLS for redundancy
+ # each 'domain' runs to gLS for redundancy
+
 ==== Measurement Archive ====   
+
+Test to make sure query time is reasonable if MA scales to 1000's of measurements (src/dest/eventType).
+
 
 === Open Issues ====   
 
