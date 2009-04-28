@@ -168,7 +168,13 @@ cycle, and by members of the release team within a cycle.  Any time a
 significant change is made to a function/module/service this testing should be
 performed.
 
-=== Open Issues ===   
+=== Service Specific Testing ===   
+
+==== Lookup Service ====   
+
+==== Measurement Archive ====   
+
+=== Open Issues ====   
 
  * _*Scalability*_
    * For testing distributed information services (hLS/gLS/TS) - use resources like [http://www.planetlab.org PlanetLab]?
