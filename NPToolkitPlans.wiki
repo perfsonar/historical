@@ -13,19 +13,30 @@
 === Proposed Changes ===
   * Scheduled OWAMP tests
   * Improved Configuration GUIs
+    * Standardize Look
     * Configure BWCTL
     * Configure OWAMP
     * Configure NTP
     * Configure Advertised Interface
+    * pSB Configuration
+      * Let people set duration of the tests.
+      * Display the network usage based on the number of hosts and the duration.
   * Improved GUIs
+    * Standardize Look
+    * ???
   * Auto-select "near" NTP hosts unless configured
   * Boot without requiring configuration
   * Disable interrupt coalescing
   * Use dhclient instead of pump
+  * Watcher daemon to restart services if they crash - Brian
+  * Easy way to clear out old data - Maxim
+  * Nagios - Jeff
+  * 
 
 === Measurement Functions ===
   * Scheduled OWAMP tests
   * Scheduled BWCTL tests
+  * Scheduled Ping tests
   * SNMP Monitoring
   * Home Lookup Service
   * NDT Service
@@ -51,6 +62,7 @@
     * OWAMP Support
   * SNMP MA
   * Lookup Service
+  * PingER
 
 == v?.? - First Fedora ==
 
@@ -60,6 +72,7 @@
 === Measurement Functions ===
   * Scheduled OWAMP tests
   * Scheduled BWCTL tests
+  * Scheduled Ping tests
   * SNMP Monitoring
   * Home Lookup Service
   * NDT Service
@@ -95,6 +108,7 @@
     * Packaged
   * Lookup Service
     * Packaged
+  * PingER
 
 == Last Modified ==
 
