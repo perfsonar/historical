@@ -10,6 +10,19 @@
 
 == v3.1 - Last Knoppix Release ==
 
+=== Proposed Changes ===
+  * Scheduled OWAMP tests
+  * Improved Configuration GUIs
+    * Configure BWCTL
+    * Configure OWAMP
+    * Configure NTP
+    * Configure Advertised Interface
+  * Improved GUIs
+  * Auto-select "near" NTP hosts unless configured
+  * Boot without requiring configuration
+  * Disable interrupt coalescing
+  * Use dhclient instead of pump
+
 === Measurement Functions ===
   * Scheduled OWAMP tests
   * Scheduled BWCTL tests
@@ -40,6 +53,9 @@
   * Lookup Service
 
 == v?.? - First Fedora ==
+
+=== Proposed Changes ===
+  * Use Fedora/CentOS LiveCD instead of Knoppix
 
 === Measurement Functions ===
   * Scheduled OWAMP tests
