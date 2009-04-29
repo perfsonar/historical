@@ -4,7 +4,8 @@
 
 == pS Agenda ==
 
- # (0:15) Release Process (Jason)
+=== Wednesday ===
+ # 2:00 (0:30) Release Process (Jason)
    * Release Process
      * Overall comments
      * Potential changes
@@ -16,15 +17,34 @@
    * Future Releases
      * 3.1+
      * 3.2
- # (1:00) Project Roadmap (Jeff)
-   * Political landscape (IRNC, GENI, CTP, Regionals, Labs, LHC oh my.)
+ # 2:30 (1:00) Software Architecture (Jeff)
+   * One goal is to unify more of the code base.
+   * Another goal is to make it easy for new developers to create a service to provide a new kind of performance data.
+   * Common config file interfaces
+   * Common daemon (mod-perl/Apache)
+   * [What else needs to be common - please add into agenda here]
+ # 3:30 (1:00) pS-Performance node (Aaron)
+   * pS-NPToolkit roadmap
+     * Change of defaults (iperf buffer/duration)
+     * What functions *must* be in the next release
+     * Fedora transition
+   * software.internet2.edu yum repo
+     * Mirrors? (Regionals, ESnet?)
+   * pS-Performance Grid
+=== Thursday ===
+ # 8:30 (1:00) Project Roadmap (Jeff)
+   * Political landscape (IRNC, GENI, CTP, Regionals, Labs, LHC)
    * Project scalability
    * Community Outreach Milestones (including demos)
    * Documentation Milestones
      * Web-site cleanup/orgainization
      * Availability of protocols/schemas
    * Software Milestones
- # (0:30) gLS: Current System Arch (Jason)
+ # 9:30 (1:00) pS protocols (Martin)
+   * Strategy for publishing standards (IRNC etc...)
+     * Start with de-facto (as-builts)
+     * Engage OGF process
+ # 10:30 (0:30) gLS: Current System Arch (Jason)
    * hLS mode
    * gLS overlay/root servers
    * Summary of current Summarization
@@ -41,49 +61,32 @@
      * Performance (XMLDB/Summarization)
      * IPTree (v4 only)
      * Inflexible discovery for new data/event types
- # (1:00) gLS: Transition to IS (Martin/Marcos)
+ # 11:00 (1:00) gLS: Transition to IS (Martin/Marcos)
    * Address current limitations as much as possible
    * Topology distribution within summarization
    * Authoritative data
    * New IPTree summaries
- # (0:15) gLS: Test Plan (Brian)
+ # 12:00 (0:30) Lunch
+ # 12:30 (0:15) gLS: Test Plan (Brian)
    * Scalability testing
- # (1:00) gLS: Roadmap (Jeff)
+ # 12:45 (0:30) gLS: Roadmap (Jeff)
    * Specific enhancements for 3.2
- # (0:30) pS protocols (Martin)
-   * Strategy for publishing standards (IRNC etc...)
-     * Start with de-facto (as-builts)
-     * Engage OGF process
- # (0:30) MA protocol enhancements (Brian)
+ # 1:15 (0:30) Auth use-case discussion (Andy)
+ # 1:45 (0:30) MA protocol enhancements (Brian)
    * Addition of 'limit' option to MA/MP queries (on by default)
    * Addition of metadata queries to MA (i.e.: what interfaces have new data in past T?)
    * Addition of TTL negotiation to LS registration
- # (2:00) Configuration Management (Joe)
+ # 2:15 (1:00) Configuration Management (Joe)
    * Problem statement
      * use-cases
    * Current range of solutions
    * List of effected software packages
- # (1:00) Meta-scheduler (???)
+ # 3:15 (1:00) Meta-scheduler (???)
    * Single node scheduling among tools
    * Shared link/resource scheduling
- # (2:00) Software Architecture (Jeff)
-   * Goal is to unify more of the code base.
-   * Goal is to make it easy for new developers to create a service to provide a new kind of performance data.
-   * Common config file interfaces
-   * Common daemon (mod-perl/Apache)
-   * [What else needs to be common - please add into agenda here]
- # (1:00) pS-Performance node (Aaron)
-   * pS-NPToolkit roadmap
-     * Change of defaults (iperf buffer/duration)
-     * What functions *must* be in the next release
-     * Fedora transition
-   * software.internet2.edu yum repo
-     * Mirrors? (Regionals, ESnet?)
-   * pS-Performance Grid
- # (0:30) GUI Development (???)
+ # 4:15 (0:30) GUI Development (???)
    * What APIs should we be providing?
      * Current messages good enough?
- # (0:30) Auth use-case discussion (Jeff)
 
 == Last Modified ==
 
