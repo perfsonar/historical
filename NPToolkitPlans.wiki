@@ -1,0 +1,77 @@
+#summary Roadmap/Plans for the NPToolkit
+
+== Proposed Releases ==
+  * v3.1 - Last Knoppix-based NPToolkit Release
+  * v?.? - First Fedora Release
+
+== v3.1 - Last Knoppix Release ==
+
+=== Measurement Functions ===
+  * Scheduled OWAMP tests
+  * Scheduled BWCTL tests
+  * SNMP Monitoring
+  * Home Lookup Service
+  * NDT Service
+  * NPAD Service
+  * BWCTL Service
+  * OWAMP Service
+  * NDT Client
+  * NPAD Client
+  * BWCTL Client
+  * OWAMP Client
+
+=== Software to be included ===
+  * Web100
+  * NDT
+  * NPAD
+  * OWAMP
+  * BWCTL
+  * Iperf
+  * Nuttcp
+  * Cacti
+  * perfSONAR-BUOY
+    * BWCTL Support
+    * OWAMP Support
+  * SNMP MA
+  * Lookup Service
+
+== v?.? - First Fedora ==
+
+=== Measurement Functions ===
+  * Scheduled OWAMP tests
+  * Scheduled BWCTL tests
+  * SNMP Monitoring
+  * Home Lookup Service
+  * NDT Service
+  * NPAD Service
+  * BWCTL Service
+  * OWAMP Service
+  * NDT Client
+  * NPAD Client
+  * BWCTL Client
+  * OWAMP Client
+
+=== Software to be included ===
+  * Web100
+    * Preliminary packages available
+  * NDT
+    * Preliminary packages available
+  * NPAD
+  * OWAMP
+    * Packaged
+  * BWCTL
+    * Packaged
+  * Iperf
+    * .spec files exist, package may exist for whichever Fedora/CentOS version we choose
+  * Nuttcp
+    * .spec files exist, package may exist for whichever Fedora/CentOS version we choose
+  * Cacti? ESxSNMP?
+    * Cacti RPMs exist. ESxSNMP RPMs do not.
+  * perfSONAR-BUOY
+    * BWCTL Support
+      * Preliminary packages available
+    * OWAMP Support
+  * SNMP MA
+    * Packaged
+  * Lookup Service
+    * Packaged
