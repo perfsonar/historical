@@ -1,5 +1,9 @@
 #summary Roadmap/Plans for the NPToolkit
 
+= Roadmap/Plans for the NPToolkit =
+
+<wiki:toc max_depth="6" />
+
 == Proposed Releases ==
   * v3.1 - Last Knoppix-based NPToolkit Release
   * v?.? - First Fedora Release
@@ -75,3 +79,7 @@
     * Packaged
   * Lookup Service
     * Packaged
+
+== Last Modified ==
+
+$Id$
