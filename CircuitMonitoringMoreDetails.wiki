@@ -1,4 +1,23 @@
-= Architecture =
+== Assumptions ==
+Assumptions about Domains:
+
+  * There is not necessarily a single source of topology information for a domain
+  * There is not necessarily a single source of measurement information about a given domain
+  * Domains may want to provide somewhere on a gradient from very little information about their network to in depth information
+
+Assumptions about Clients:
+
+  * Clients may not know where to obtain topology and measurement archives in a domain
+  * Clients may want to obtain as much information about a circuit as possible
+  * Clients may not know how to interpret device specific information
+  * Clients may want to get at device specific information
+
+Assumptions about Circuits:
+
+  * They may be setup dynamically or statically
+  * They may traverse a variety of device architectures
+
+== Architecture ==
 
 [http://packrat.internet2.edu/~aaron/circuit_monitoring_architecture.png]
 
@@ -15,7 +34,7 @@
   # The client then contacts each MA asking for data about the elements it knows about
   # The client displays the results to the end user.
 
-= The Agent =
+== The Agent ==
 There are multiple purposes for this agent. First it is to handle the differences between [CircuitMonitoring the proposed information model] and the one currently employed by the IDC. Second, it will lookup extra information about what elements need to be monitored if it's not all discernable from the path given by the IDC. Third, its purpose is to kick off the monitoring for any new elements.
 
 There are two areas of difference between the information model of the IDC and the proposed information model. The IDC keeps its static topology data in the ctrlplane schema, but the circuit information, things like lifetime, bandwidth, etc, are not. Also, the IDC's paths have hop pairs implicitly defining each domain's 'segment', as opposed to explicit segment elements in the proposed information model.
@@ -24,7 +43,26 @@ The agent will need to convert the information given out by the IDC into informa
 
 Once the agent has the set of measurable elements, it can then start the measurement infrastructure, and construct the circuit segment descriptor and register it with the Topology Service.
 
-= Measurement Collectors =
+== Measurement Collectors ==
 In order to do collection, the agent needs to be able to ensure that necessary elements are being measured. It also needs to either be privy to, or be able to set, the naming convention used for the monitored elements, so that it can create a segment descriptor with appropriately named elements.
 
 For some network routers, the measurement could all be setup ahead of time. For example, ESnet has a measurement tool that will collect all desired data, and makes it available in a known format. The agent here could simply construct the segment descriptor based on its knowledge of how the elements are being monitored. For Ciena networks, this might be more difficult as there is a large amount of data that can be collected about all the various monitored elements, much of which may or may not be useful. In this case, it would likely make sense to only have some of the data monitored, and to have the agent specifically kick off the monitoring. The naming convention could be standardized so that all the agent needs to do is say which elements to monitor, and then it could use the standardized naming to specify the elements in the circuit segment descriptor.
+
+== Collected Measurements ==
+  * Generic
+    * Utilization
+    * Operational status
+    * Administrative status (if available)
+    * Error counts (if available)
+  * Alarms
+  * Raw Counters?
+  * SONET
+    * Errored Seconds
+    * Unavailable Seconds
+    * Coding Violation
+    * Optical Power (Receive/Transmit)
+    * Others?
+  * Ethernet
+    * In errors
+    * Out errors
+    * Others?
