@@ -46,9 +46,9 @@
      * Engage OGF process
  # 10:30 (0:30) gLS: Current System Arch (Jason)
    * Slides
-     * [http://code.google.com/p/perfsonar-ps/wiki/20090429Meet/dev_ls.ppt]
-     * [http://code.google.com/p/perfsonar-ps/wiki/20090429Meet/dev_gls.ppt]
-     * [http://code.google.com/p/perfsonar-ps/wiki/20090429Meet/dev_issues.ppt]
+     * [http://perfsonar-ps.googlecode.com/svn/wiki/20090429Meet/dev_ls.ppt]
+     * [http://perfsonar-ps.googlecode.com/svn/wiki/20090429Meet/dev_gls.ppt]
+     * [http://perfsonar-ps.googlecode.com/svn/wiki/20090429Meet/dev_issues.ppt]
    * hLS mode
    * gLS overlay/root servers
    * Summary of current Summarization
