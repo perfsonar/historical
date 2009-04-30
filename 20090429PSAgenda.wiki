@@ -68,7 +68,7 @@
    * New IPTree summaries
  # 12:00 (0:30) Lunch
  # 12:30 (0:15) gLS: Test Plan (Brian)
-   * Scalability testing
+   * Scalability testing (See: http://code.google.com/p/perfsonar-ps/wiki/TestPlan#Service_Specific)
  # 12:45 (0:30) gLS: Roadmap (Jeff)
    * Specific enhancements for 3.2
  # 1:15 (0:30) Auth use-case discussion (Andy)
