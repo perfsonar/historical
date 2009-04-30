@@ -1,4 +1,23 @@
-= High-Level Overview =
+== Assumptions ==
+Assumptions about Domains:
+
+  * There is not necessarily a single source of topology information for a domain
+  * There is not necessarily a single source of measurement information about a given domain
+  * Domains may want to provide somewhere on a gradient from very little information about their network to in depth information
+
+Assumptions about Clients:
+
+  * Clients may not know where to obtain topology and measurement archives in a domain
+  * Clients may want to obtain as much information about a circuit as possible
+  * Clients may not know how to interpret device specific information
+  * Clients may want to get at device specific information
+
+Assumptions about Circuits:
+
+  * They may be setup dynamically or statically
+  * They may traverse a variety of device architectures
+
+== High-Level Overview ==
 
 Each circuit has a circuit descriptor containing pointers to each domain's
 segment of the circuit. Each domain then publishes a descriptor of its
@@ -32,7 +51,7 @@ circuit. To speed up recurring requests, the client could cache the address for
 each measurement archive.
 
 
-= The Overall Topology Architecture =
+== The Overall Topology Architecture ==
 
 As part of the circuit creation process, a circuit descriptor is created that
 describes, from a very high level, the path that the circuit is taking.
@@ -198,7 +217,7 @@ identifier, but the elements are now fleshed out some.
 </link>
 }}}
 
-== Virtual Elements ==
+=== Virtual Elements ===
 
 During circuit creation, the domain might create virtual elements that
 correspond to just that subsegment of a port or link that is traversed by the
@@ -316,7 +335,7 @@ circuits traversing it.
 }}}
 
 
-= How Status Is Obtained =
+== How Status Is Obtained ==
 
 The interested client starts off with the Circuit Descriptor. The client looks
 up any desired status or monitored values (if applicable) using the
@@ -337,9 +356,9 @@ the elements at this level.
 
 
 
-= Roadmap from Where We Are Today To The Above =
+== Roadmap from Where We Are Today To The Above ==
 
-== Step 1 ==
+=== Step 1 ===
 
 Start off with the highest level of granularity. There are no Segment
 Descriptors, each domain makes available information for their circuit segment.
@@ -352,7 +371,7 @@ these lookups and find this information, this gui would need to cache this
 information. It would likely be best if it were a web frontend like E2EMon so
 that the user doesn't have substantial lag when they click a link.
 
-== Step 2 ==
+=== Step 2 ===
 
 Either each domain deploys its own TS or a central one could be provided by
 Internet2. Each domain could register a segment descriptor for their segment.
@@ -364,18 +383,18 @@ The gui would be modified to lookup the segment descriptors in the TS. It
 would then allow users to click on segments that have a corresponding segment
 descriptor. The user would be taken to a page containing status.
 
-== Step 3 ==
+=== Step 3 ===
 
 Software would be written (or reused) to collect and make available any
 available counters. This would include TL1 or SNMP.
 
 The gui would be modified to collect this information when available.
 
-== Step 4 ==
+=== Step 4 ===
 
 The above software would be deployed on the various domains, and configured.
 
-== Step 5 ==
+=== Step 5 ===
 
 An agent would be written that would listen to OSCARS NB events. This agent
 would construct the segment descriptors for a given domain, and an end-to-end
@@ -384,7 +403,7 @@ segment descriptor using the naming convention used in the above examples.
 Initially, it would only work with predefined physical hardware that is always
 being monitored.
 
-== Step 6 ==
+=== Step 6 ===
 
 The agent and monitoring software so that the agent could signal the monitoring
 software to start collecting information about a given circuit's virtual links.
