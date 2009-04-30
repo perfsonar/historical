@@ -66,6 +66,8 @@
      * IPTree (v4 only)
      * Inflexible discovery for new data/event types
  # 11:00 (1:00) gLS: Transition to IS (Martin/Marcos)
+   * Summarization notes
+     * [http://perfsonar-ps.googlecode.com/svn/wiki/20090429Meet/summ.pdf]
    * Address current limitations as much as possible
    * Topology distribution within summarization
    * Authoritative data
