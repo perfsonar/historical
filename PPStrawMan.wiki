@@ -171,7 +171,7 @@ In support of the CTP project (*if applicable*). Otherwise, some of these things
   * Fedora-Live based (drop knoppix) to enable ISO building from rpms
   * Use pS-PS 3.2
 
-==== pS-PS 4.0 ====
+==== pS-Performance Grid 4.0 ====
 
   * LS - Topology based service queries (nearest MP problem)
   * Centralized Configuration Service
@@ -188,13 +188,13 @@ In support of the CTP project (*if applicable*). Otherwise, some of these things
 These dates are very aggressive, but do assume approximately the current resources. (With a guess that some small fraction of additional funding will come through from grant submissions.)
 
 || *Date* || *Milestone* ||
-|| _27 March_ || pS-PS 3.1 ||
-|| _27 April_ || pS-PS 3.1+ ||
-|| _May_ || pS-NPToolkit 3.1 ||
-|| _June_ || pS-PS 3.2 ||
-|| _July_ || pS-NPToolkit 3.2 ||
+|| _27 May || pS-PS 3.1 ||
+|| _27 May_ || pS-PS 3.1+ ||
+|| _June || pS-NPToolkit 3.1 ||
+|| _July || pS-PS 3.2 ||
+|| _Aug || pS-NPToolkit 3.2 ||
 || _Jan 10_ || pS-PS 4.0 ||
-|| _Jan 10_ || pS-NPDomain 4.0 ||
+|| _Jan 10_ || pS-Performance Grid 4.0 ||
 
 ==== pS Additional Desired Enhancements ====
 
