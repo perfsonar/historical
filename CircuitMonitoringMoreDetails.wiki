@@ -48,14 +48,11 @@ In order to do collection, the agent needs to be able to ensure that necessary e
 
 For some network routers, the measurement could all be setup ahead of time. For example, ESnet has a measurement tool that will collect all desired data, and makes it available in a known format. The agent here could simply construct the segment descriptor based on its knowledge of how the elements are being monitored. For Ciena networks, this might be more difficult as there is a large amount of data that can be collected about all the various monitored elements, much of which may or may not be useful. In this case, it would likely make sense to only have some of the data monitored, and to have the agent specifically kick off the monitoring. The naming convention could be standardized so that all the agent needs to do is say which elements to monitor, and then it could use the standardized naming to specify the elements in the circuit segment descriptor.
 
-== Collected Measurements ==
+== Collectable Metrics ==
   * Generic
     * Utilization
     * Operational status
     * Administrative status (if available)
-    * Error counts (if available)
-  * Alarms
-  * Raw Counters?
   * SONET
     * Errored Seconds
     * Unavailable Seconds
@@ -66,3 +63,6 @@ For some network routers, the measurement could all be setup ahead of time. For 
     * In errors
     * Out errors
     * Others?
+  * Alarms
+    * On a per-host basis, or correlated to an individual port
+  * Raw Counters?
