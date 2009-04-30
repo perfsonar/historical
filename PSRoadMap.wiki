@@ -45,14 +45,14 @@ In support of the CTP project (*if applicable*). Otherwise, some of these things
   * Fedora-Live based (drop knoppix) to enable ISO building from rpms
   * Use pS-PS 3.2
 
-==== pS-Performance Grid 4.0 ====
+==== pS-PS 4.0 ====
 
   * LS - Topology based service queries (nearest MP problem)
   * Centralized Configuration Service
   * GUI enhancements
     * User community centric - search for problems relating to X
   
-==== pS-NPDomain 4.0 ====
+==== pS-Performance Grid 4.0 ====
 
   * Allow an administrator to control a set of pS-performance nodes
   * Combination of yum repository and centralized configuration management tools
