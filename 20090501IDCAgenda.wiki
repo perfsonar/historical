@@ -5,6 +5,7 @@
 == IDC Agenda ==
 
  # 8:30 (0:30) NSI Summary (John)
+   * [http://perfsonar-ps.googlecode.com/svn/wiki/20090429Meet/NSI.IDC.05012008.ppt]
    * Coordinate IDC planning with NSI architecture definition
  # 9:00 (0:15) Circuit Status (E2EMon lives on...): Current Arch (Aaron)
    * [http://perfsonar-ps.googlecode.com/svn/wiki/20090429Meet/e2emon_howto.ppt]
