@@ -57,7 +57,10 @@ As part of the circuit creation process, a circuit descriptor is created that
 describes, from a very high level, the path that the circuit is taking.
 
 {{{
-<link id="urn:nml:internet2.edu:gri123456">
+<link id="urn:nml:internet2.edu:gri123456_downstream">
+  <source>urn:nml:internet2.edu:hostA_eth0</source> <!-- the source can be a URN or a full description of a domain, node, port or link -->
+  <destination>urn:nml:es.net:hostZ_eth1</destination> <!-- the destination can be a URN or a full description of a domain, node, port or link -->
+
   <!-- Name of the Circuit. Specified as GRI, but could be a human-readable one -->
   <name>gri123456</name>
 
@@ -73,19 +76,51 @@ describes, from a very high level, the path that the circuit is taking.
      <end>1234567890</end>
   </lifetime>
 
+  <reverse-link>urn:nml:internet2.edu:gri123456_upstream</reverse-link>
+
   <relation type="over">
-      <bidirectionalPath>
-          <path direction="downstream">
-              <hop id="internet2">
-                  <linkIdRef>urn:nml:internet2.edu:gri123456_segment</linkIdRef>
-                  <nextHop>esnet</nextHop>
-              </hop>
-              <hop id="esnet">
-                  <linkIdRef>urn:nml:es.net:gri123456_segment</linkIdRef>
-              </hop>
-          </path>
-          <path direction="upstream" />
-      </bidirectionalPath>
+      <path>
+          <hop id="internet2">
+              <linkIdRef>urn:nml:internet2.edu:gri123456_downstream_segment</linkIdRef>
+              <nextHop>esnet</nextHop>
+          </hop>
+          <hop id="esnet">
+              <linkIdRef>urn:nml:es.net:gri123456_downstream_segment</linkIdRef>
+          </hop>
+      </path>
+  </relation>
+</link>
+
+<link id="urn:nml:internet2.edu:gri123456_upstream">
+  <source>urn:nml:internet2.edu:hostA_eth0</source> <!-- the source can be a URN or a full description of a domain, node, port or link -->
+  <destination>urn:nml:es.net:hostZ_eth1</destination> <!-- the destination can be a URN or a full description of a domain, node, port or link -->
+  <!-- Name of the Circuit. Specified as GRI, but could be a human-readable one -->
+  <name>gri123456</name>
+
+  <!-- Human-Readable Description of the Circuit -->
+  <description>Phoebus Circuit</description>
+
+  <!-- Capacity of the circuit in bps. --> 
+  <capacity>1000000000</capacity>  <!-- 1Gbps -->
+
+  <!-- Period when the circuit will be active for -->
+  <lifetime>
+     <start>1234177754</start>
+     <end>1234567890</end>
+  </lifetime>
+
+  <reverse-link>urn:nml:internet2.edu:gri123456_downstream</reverse-link>
+
+  <relation type="over">
+      <path>
+          <hop id="internet2">
+              <linkIdRef>urn:nml:internet2.edu:gri123456_upstream_segment</linkIdRef>
+              <nextHop>esnet</nextHop>
+          </hop>
+          <hop id="esnet">
+              <linkIdRef>urn:nml:es.net:gri123456_upstream_segment</linkIdRef>
+          </hop>
+      </path>
   </relation>
 </link>
 }}}
