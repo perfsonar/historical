@@ -8,7 +8,7 @@
 
 Name:           perl-perfSONAR_PS-LookupService
 Version:        3.1
-Release:        1.%{disttag}
+Release:        2.%{disttag}
 Summary:        perfSONAR_PS Lookup Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -98,6 +98,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Thu May 7 2009 zurawski@internet2.edu 3.1-2
+- Bugfix to inclcude makeDBConf script
+
 * Thu Mar 12 2009 zurawski@internet2.edu 3.1-1
 - Initial release as an RPM
 

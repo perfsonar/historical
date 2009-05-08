@@ -10,7 +10,7 @@ Autoreq: 0
 
 Name:           perl-perfSONAR_PS-SNMPMA
 Version:        3.1
-Release:        2.%{disttag}
+Release:        3.%{disttag}
 Summary:        perfSONAR_PS SNMP Measurement Archive
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -133,6 +133,12 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Thur May 16 2009 zurawski@internet2.edu 3.1-3
+- Bugfix to include the makeDBConf script
+
+* Tues Apr 21 2009 zurawski@internet2.edu 3.1-2
+- Bugfix to the RRD.pm library
+
 * Mon Mar 16 2009 zurawski@internet2.edu 3.1-1
 - Initial release as an RPM
 
