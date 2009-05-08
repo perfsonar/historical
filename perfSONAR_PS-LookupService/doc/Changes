@@ -18,6 +18,8 @@ version 3.1
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=79
       Empty gLS/hLS Messages 	  	 
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=109
-      gLS Discovery of IP Addresses 	 
+      gLS Discovery of IP Addresses 	
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=159
+      makeDBConf Missing from LS package  
 
 
