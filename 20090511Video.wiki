@@ -2,13 +2,12 @@
 
 == Agenda/Minutes ==
 
- # Attendees
-Brian, Xi, Aaron, Maxim, Rich, Martin, Joe, Jason, Jeff, Marcos, Evangalis
+ # Attendees: Brian, Xi, Aaron, Maxim, Rich, Martin, Joe, Jason, Jeff, Marcos, Evangalis
  # Team Updates
    # Internet2
     * Aaron: pS-NPToolkit (web admin update)
     * Jason: OGF26 docs.
-    * Jeff: AA, OWAMP,
+    * Jeff: AA, OWAMP, planning.
     * Rich: nothing
    # ESnet
     * Brian: SNMP-MA back up - registering gLS. Looking at traceroute visualizer.
@@ -19,7 +18,7 @@ Brian, Xi, Aaron, Maxim, Rich, Martin, Joe, Jason, Jeff, Marcos, Evangalis
    # FNAL
     * Maxim: Working on catalyst/modperl/tt. (KOI perf problems still exist.)
  # KOI performance
-   * network issues still exist.
+   * network issues still exist. *Aaron* will make sure new driver is on a test release of the ISO. *Brian* will test the hardware more.
  # DOE funding issues
    * FNAL GUI was funded (Bucknell? Statistics on pS.)
    * ESnet stimulous $$$ for pS
@@ -31,7 +30,7 @@ Brian, Xi, Aaron, Maxim, Rich, Martin, Joe, Jason, Jeff, Marcos, Evangalis
      * LS, SNMP-MA, LS-reg, status to be updated this week (by friday).
      * pingER may need one for docs and hLS registration issue.
    * Suggestions on Testing
-     * Jason will be trying to get 
+     * Jason will be trying to get Penn st/ TAMU to test.
  # Review _*Actions*_ from last call: [20090429Meet April 29]
  # Review open issue tracker items
    * *Jeff* will dump the table before calls and bring out specific ones for discussing at future calls. 
@@ -39,8 +38,10 @@ Brian, Xi, Aaron, Maxim, Rich, Martin, Joe, Jason, Jeff, Marcos, Evangalis
    * Brian/Rich like Shawns list, Jeff is not crazy about the GUI.
    * Maxim would like an option to 'reset' any service.
    * Brian (self monitoring?)
+   * Aaron reviewed the list from Shawn, and will attempt to address all but the GUI question.
  # OGF Documents (Jason)
-   * 3 main thrusts: Base, Topo, 
+   * 3 main thrusts: Base, Topo, NMC
+   * Brian, Jon, Joe will be asked to review pieces.
  # Circuit Monitoring
    * Aaron/Andy working on overlap issues.
    * Joe asked about an overall architecture document.
