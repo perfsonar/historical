@@ -21,7 +21,7 @@
    * network issues still exist. *Aaron* will make sure new driver is on a test release of the ISO. *Brian* will test the hardware more.
  # DOE funding issues
    * FNAL GUI was funded (Bucknell? Statistics on pS.)
-   * ESnet stimulous $$$ for pS
+   * ESnet stimulus $$$ for pS
    * Total of 2-3 more FTEs.
  # perfSONAR-PS v3.1 Release Update
    * New Bugs
