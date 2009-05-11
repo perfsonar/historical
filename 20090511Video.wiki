@@ -1,0 +1,31 @@
+=  May 11, 2009 Conference Call 2:30 pm EST =
+
+== Agenda/Minutes ==
+
+ # Attendees
+ # Team Updates
+   # Internet2
+   # ESnet
+   # UDel
+   # FNAL
+ # perfSONAR-PS v3.1 Release Update
+   * New Bugs
+   * Release Candidate Generation
+   * Suggestions on Testing
+ # Review _*Actions*_ from last call: [20090429Meet April 29]
+ # Review open issue tracker items
+ # Discuss priorities for next pS-NPToolkit Release (see Shawn email for ref)
+ # OGF Documents (Jason)
+ # Circuit Monitoring
+ # SNMP-MA ESnet new database integration update
+ # LHC/Atlas deployments (status update)
+ # Next meeting will be 4/29 in D.C.
+
+=== ACTIONS ===
+
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.

@@ -97,10 +97,18 @@
    * Topology distribution within summarization
    * Authoritative data
    * New IPTree summaries
+   * *Action*:
+     * How do we do time dimension?
+       * Add timestamps to topo-elements.
+       * Need to think about queries/discovery/storage for this.
+     * Question on how to summarize L2/L1 for gLS distribution.
+   * Use cases for topology service. *Evangelis*
+   * *Action*:
+     * Basic element relationships in combined IS. *Martin*
  # 12:00 (0:30) Lunch
  # 12:30 (0:15) gLS: Test Plan (Brian)
    * Scalability testing (See: http://code.google.com/p/perfsonar-ps/wiki/TestPlan#Service_Specific)
-   * Resolution of overlapping summaries *Marting/Joe - deathcar*
+   * Resolution of overlapping summaries *Martin/Joe - deathcar*
  # 12:45 (0:30) gLS: Roadmap (Jeff)
    * Specific enhancements for 3.2
  # 2:15 (1:00) Configuration Management (Joe)
@@ -114,7 +122,7 @@
  # 4:15 (0:30) GUI Development (???)
    * What APIs should we be providing?
      * Current messages good enough?
- # 8:30 (1:00) Project Roadmap (Jeff)
+ # X:XX (1:00) Project Roadmap (Jeff)
    * Project scalability
    * Community Outreach Milestones (including demos)
    * Documentation Milestones
