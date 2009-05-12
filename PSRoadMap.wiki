@@ -11,13 +11,13 @@ These dates are very aggressive, but do assume approximately the current resourc
 
 || *Date* || *Milestone* ||
 || _27 May || pS-PS 3.1 ||
-|| _27 May_ || pS-PS 3.1+ ||
 || _27 May_ || pS related protocol docs in OGF ||
-|| _June || pS-NPToolkit 3.1 ||
-|| _July || pS-PS 3.2 ||
-|| _Aug || pS-NPToolkit 3.2 ||
-|| _Jan 10_ || pS-PS 4.0 ||
-|| _Jan 10_ || pS-Performance Grid 4.0 ||
+|| _15 June_ || pS-PS 3.1+ ||
+|| _30 June_ || pS-NPToolkit 3.1 ||
+|| _July_ || pS-PS 3.2 ||
+|| _Aug_ || pS-NPToolkit 3.2 ||
+|| _Jan, 2010_ || pS-PS 4.0 ||
+|| _Jan, 2010_ || pS-Performance Grid 4.0 ||
 
 == pS-PS 3.1 Enhancements ==
 
