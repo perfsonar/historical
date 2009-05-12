@@ -16,6 +16,7 @@ There are five major fields defined for network entities:
   * node
   * port
   * link
+  * path
   * service
 
 The _domain_ field describes the "administrative domain" in which the _network_ element is located. If this field is included, it will always be positioned first. The value is the globally unique DNS name for the domain. While other options exist for this value (e.g. AS number), the simplicity and availability of the former makes this more desirable.
