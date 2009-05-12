@@ -73,7 +73,11 @@ In support of the CTP project (*if applicable*). Otherwise, some of these things
 
 == pS-PS 4.0 ==
 
-  * LS - Topology based service queries (nearest MP problem)
+  * IS - Topology based service queries (nearest MP problem)
+  * IS/gLS - Performance optimizations
+    * Optimize summarization
+    * Modify polling intervals
+    * Add TTL negotiation
   * Centralized Configuration Service
     * Community specific operations
   * GUI enhancements
