@@ -28,7 +28,7 @@ multiple devices. If the interface is physical or logically inside a single devi
 
 The _link_ field can describe logical or physical _link_s, regardless of direction.  Bidirectional _link_s (both physical and logical) must appear directly after the _domain_ designation since they will logically connect multiple _node_s.  Unidirectional _link_s, regardless of direction, will appear after _port_ that is able to "write" that link. As in previous descriptions there is no constraint placed on the value but care should be taken to select a name with meaning to the overall infrastructure.
 
-The _path_ field can be used for circuits or other named paths. Named paths can occur globally or within a domain, the field can appear either first or immediately after the _domain_ field. The value can be anything but should be globally unique.
+The _path_ field can be used for circuits or other named paths. A domain can create an identifier for a _path_ that is completely contained within the domain, or spans multiple domains. In either case, the _path_ field must appear immediately after the _domain_ field of the domain creating the identifier. The value can be anything but must be unique in the domain.
 
 The _service_ field is used in identifiers for software services offered by network elements. These can be used to describe high-level services like Web Services or low-level services like ICMP responders or optical
 converters. This field will appear after the field for the element providing the service. For example, a service offered by a domain would appear immediately after the _domain_ field. The value can be anything, but
