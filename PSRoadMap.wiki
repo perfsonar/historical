@@ -5,6 +5,20 @@
 == Synopsis ==
 The primary short-term goals for perfSONAR development is: to harden and make useful GUIs for existing backbone, regional, and community related deployments (i.e. the LHC community), enable diagnostics of dynamic circuits, and to add the features needed to entice additional deployments into regionals, campuses, and labs.
 
+=== pS Schedule ===
+
+These dates are very aggressive, but do assume approximately the current resources. (With a guess that some small fraction of additional funding will come through from grant submissions.)
+
+|| *Date* || *Milestone* ||
+|| _27 May || pS-PS 3.1 ||
+|| _27 May_ || pS-PS 3.1+ ||
+|| _27 May_ || pS related protocol docs in OGF ||
+|| _June || pS-NPToolkit 3.1 ||
+|| _July || pS-PS 3.2 ||
+|| _Aug || pS-NPToolkit 3.2 ||
+|| _Jan 10_ || pS-PS 4.0 ||
+|| _Jan 10_ || pS-Performance Grid 4.0 ||
+
 ==== pS-PS 3.1 Enhancements ====
 
   * OWAMP support in perfSONAR-BUOY
@@ -66,17 +80,3 @@ In support of the CTP project (*if applicable*). Otherwise, some of these things
 
   * Allow an administrator to control a set of pS-performance nodes
   * Combination of yum repository and centralized configuration management tools
-
-=== pS Schedule ===
-
-These dates are very aggressive, but do assume approximately the current resources. (With a guess that some small fraction of additional funding will come through from grant submissions.)
-
-|| *Date* || *Milestone* ||
-|| _27 May || pS-PS 3.1 ||
-|| _27 May_ || pS-PS 3.1+ ||
-|| _27 May_ || pS related protocol docs in OGF ||
-|| _June || pS-NPToolkit 3.1 ||
-|| _July || pS-PS 3.2 ||
-|| _Aug || pS-NPToolkit 3.2 ||
-|| _Jan 10_ || pS-PS 4.0 ||
-|| _Jan 10_ || pS-Performance Grid 4.0 ||
