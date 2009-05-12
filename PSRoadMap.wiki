@@ -10,12 +10,12 @@ The primary short-term goals for perfSONAR development is: to harden and make us
 These dates are very aggressive, but do assume approximately the current resources. (With a guess that some small fraction of additional funding will come through from grant submissions.)
 
 || *Date* || *Milestone* ||
-|| _27 May || pS-PS 3.1 ||
+|| _27 May_ || pS-PS 3.1 ||
 || _27 May_ || pS related protocol docs in OGF ||
 || _15 June_ || pS-PS 3.1+ ||
 || _30 June_ || pS-NPToolkit 3.1 ||
-|| _July_ || pS-PS 3.2 ||
-|| _Aug_ || pS-NPToolkit 3.2 ||
+|| _Aug_ || pS-PS 3.2 ||
+|| _Sept_ || pS-NPToolkit 3.2 ||
 || _Jan, 2010_ || pS-PS 4.0 ||
 || _Jan, 2010_ || pS-Performance Grid 4.0 ||
 
@@ -62,6 +62,9 @@ In support of the CTP project (*if applicable*). Otherwise, some of these things
   * Discovery APIs
     * Well structured, documented - designed for application programmers
   * _limited AA integration_
+  * IS/Topology Service unification with DCN topology service
+    * 'views' of topo with limited AA (different classes of user get different views)
+    * Storing topo changes over time
 
 == pS-NPToolkit 3.2 ==
 
