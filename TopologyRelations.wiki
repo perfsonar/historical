@@ -6,7 +6,33 @@
 
 The purpose of this page is to put together the topology relationships that will be presented to the IDC and NML groups.
 
-== Relationships ==
+== Use-Cases ==
+  * parent/child, contained-in/contains
+    * Cases Covered
+      * A logical link related to the various segments that make it up
+      * An ethernet port related to the node its in
+      * A node related to the domain its in
+      * A service related to the node/domain/port offering it
+      * A vlan port related to the ethernet port (e.g. eth0 and eth0.3500)
+    * I'm not a big fan of contained-in/contains, but I think they have fewer pre-existing connotations than parent/child     
+  * incoming-link/outgoing-link and source/destination
+    * Cases Covered
+      * A port related to both the link it sends via and the link it receives from
+      * Proposed: incoming-link/outgoing-link and source/destination
+    * These would be used for the relationship between ports and links. The names seem logical to me. It might make sense to make these first class entities instead of 'relation' elements.
+  * sibling
+    * Cases Covered:  
+      * A link in one direction related to the link in the reverse direction (especially if they share resources)
+      * A vlan port related to the other vlan ports on the same ethernet port (e.g. eth0.3500 and eth0.3400)
+      * An ethernet port and the other ethernet ports on a node
+    * It seems logical, though we'll need to think about how to differentiate when they compete for resources and when they don't. E.g. a half-duplex link vs. a full-duplex link or two vlan ports vs. two ethernet ports.
+  * composed-of/composes
+    * Cases Covered:
+      * A logical link related to the path that makes it up (intertwined with the above)
+      * A logical entity like a POP related to all the elements that make it up
+    * The elements that would be in here would be Path for a link and Topology for a POP. The idea is more that these elements aren't separate things like a parent/child, they're constructed out of some underlying elements. This is probably a situation similar to "sibling" where we could reuse the contains/contained-in constructs as long as we have a way to say "all of this things resources are constructed out of the resources from elements X, Y and Z".
+
+== Old Relationships List ==
   * child  - This element has logical elements contained with it. This could be nodes inside a domain, or VLAN ports over a physical port.
   * parent - This element is contained completely within the element pointed to.
   * peer - For bidirectional links, each unidirectional link points has a peer relation. For layer2 VLAN ports, it can point to the other VLAN ports that share the underlying physical port. 
