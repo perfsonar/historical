@@ -1,0 +1,35 @@
+=  May 18, 2009 Conference Call 2:30 pm EST =
+
+== Agenda/Minutes ==
+
+ # Attendees: 
+ # Team Updates
+ # KOI performance update
+ # perfSONAR-PS v3.1 Release Update
+   * New Bugs
+   * Release Candidate Generation
+     * LS, SNMP-MA, LS-reg, status to be updated this week (by friday).
+     * pingER may need one for docs and hLS registration issue.
+   * Suggestions on Testing
+     * Jason will be trying to get Penn st/ TAMU to test.
+ # Review _*Actions*_ from last call: [20090511Video May 11]
+ # Review open issue tracker items
+   * *Jeff* will dump the table before calls and bring out specific ones for discussing at future calls. 
+ # pS-NPToolkit 3.1 status
+ # OGF Document status (Jason)
+ # Circuit Monitoring Development Status
+ # SNMP-MA ESnet new database integration update
+   * Still waiting on release branching issues
+ # LHC/Atlas deployments (status update)
+   * MIT/FL/UNL all pending.
+   * Rich needs good estimate for next pS-NPToolkit Release. Jeff suggested Jt Techs as the absolute limit, but hopes late June.
+ # Next VC will be 6/1.
+
+=== ACTIONS ===
+
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
