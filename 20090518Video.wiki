@@ -22,6 +22,7 @@
      * pingER may need one for docs and hLS registration issue.
    * Suggestions on Testing
      * Jason will be trying to get Penn st/ TAMU to test.
+     * Fahad will talk with Les/Yee about testing the latest pS-pingER RC.
  # pS-NPToolkit 3.1 status
    * Updated the roadmap with the atlas requests: http://code.google.com/p/perfsonar-ps/wiki/NPToolkitPlans
    * Plans to update the roadmap with feature status.
