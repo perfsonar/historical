@@ -2,8 +2,18 @@
 
 == Agenda/Minutes ==
 
- # Attendees: 
+ # Attendees: Brian, Jason, Marcos, Aaron, Jeff, Martin, Fahad
  # Team Updates
+   * Brian: KOI network drivers. Solid if within around 15 ms.
+   * Jason: OGF docs, looking for reviews this week. Wants to keep this going.
+   * Marcos: Summarization looks reasonable, will work on perl version. Joe agreed this version looked reasonable.
+   * Aaron: Working on next pS-NPToolkit release. Updating configuration GUIs. Working on an interaction with 'keywords'/communities to allow better community related things across multiple pages. Discussion on how to optimize the HTTP connects.
+   * Martin: Looking at topology, and focusing on OGF.
+   * Jeff:  OGF/ pS-B-owamp.
+   * Joe: no update.
+   * Fahad: Working on integrating gridFTP with pS.
+ # Review _*Actions*_ and _*Issues*_
+   * [http://perfsonar-ps.googlecode.com/svn/wiki/20090518perfsonar-ps-issues.xls]
  # KOI performance update
  # perfSONAR-PS v3.1 Release Update
    * New Bugs
@@ -12,16 +22,15 @@
      * pingER may need one for docs and hLS registration issue.
    * Suggestions on Testing
      * Jason will be trying to get Penn st/ TAMU to test.
- # Review _*Actions*_ and _*Issues*_
-   * [http://perfsonar-ps.googlecode.com/svn/wiki/20090518perfsonar-ps-issues.xls]
  # pS-NPToolkit 3.1 status
  # OGF Document status (Jason)
+   * Discussed reviewers.
  # Circuit Monitoring Development Status
  # SNMP-MA ESnet new database integration update
    * Still waiting on release branching issues
  # LHC/Atlas deployments (status update)
    * MIT/FL/UNL all pending.
-   * Rich needs good estimate for next pS-NPToolkit Release. Jeff suggested Jt Techs as the absolute limit, but hopes late June.
+   * Jeff attended the Atlas call last week and updated that community on the 'roadmap'. They seemed ok with the schedule as communicated. (Next pS-NPToolkit in late June.)
  # Next VC will be 6/1.
 
 === ACTIONS ===
