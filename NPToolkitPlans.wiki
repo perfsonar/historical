@@ -11,6 +11,8 @@
 == v3.1 - Last Knoppix Release ==
 
 === Proposed Changes ===
+NOTE: These are proposed changes, some of the features may end up having a more limited scope, and some of the features may not make it into this release. This page will be updated as changes occur. The ones with a `*` by them are likely to be pared down or pushed back to the next release.
+
   * Scheduled OWAMP tests
   * Improved Configuration GUIs
     * Standardize Look
@@ -22,21 +24,22 @@
       * Let people set duration of the tests.
       * Display the network usage based on the number of hosts and the duration.
   * Improved GUIs
-    * Standardize Look
+    * Standardize Look `*`
     * ???
   * Auto-select "near" NTP hosts unless configured
   * Boot without requiring configuration
   * Disable interrupt coalescing
   * Use dhclient instead of pump
-  * Watcher daemon to restart services if they crash - Brian
-  * Easy way to clear out old data - Maxim
-  * Nagios - Jeff
+  * Watcher daemon to restart services if they crash - Brian `*`
+  * Easy way to clear out old data - Maxim `*`
+  * Nagios - Jeff `*`
   * Support for jumbo frame setup as part of the menu items
   * Support for syslog destination configuration as part of the menu items
-  * Example for “Communities of Interest” that show USATLAS:  ‘LHC USATLAS’ as part of the setup
+  * Example for “Communities of Interest” that show USATLAS:  ‘LHC USATLAS’ as part of the setup `*`
   * Some way to make it clearer that a default install can (should for USATLAS) have two boxes:  one OWAMP (Box#1) and one BWCTL (Box#2)
-  * Filtering and searching support for Communities of Interest at various configuration screens.
+  * Filtering and searching support for Communities of Interest at various configuration screens. `*`
   * Option to “initialize” local disk (remove ALL partitions and setup for perfSONAR use)
+
 
 
 === Measurement Functions ===
