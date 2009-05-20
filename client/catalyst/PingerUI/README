@@ -1,1 +1,2 @@
 Run script/pingerui_server.pl to test the application.
+And open your browser at http://loclahost:3000/gui/display
