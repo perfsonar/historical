@@ -1,0 +1,13 @@
+ [% IF graphs.size > 0 %]   
+  [% FOREACH graph IN graphs %]     
+     <IMG   ALT="[% alt %]"  SRC="[% graph.image %]"/>    
+  [% END %]
+ [% ELSE %]
+     <h2> No graph is available for this link, time, parameters </h2>
+ [% END %]
+
+ 
+
+
+ 
+  

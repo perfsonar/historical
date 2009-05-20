@@ -1,0 +1,166 @@
+<HTML>
+<HEAD>
+<Title>Percentage Bar Chart</Title>
+<link type='text/css' rel='Stylesheet' href="maxchartapi.css" />
+</HEAD>
+<body bgcolor="#FFFFFF" text="#000000" topmargin="0" leftmargin="0" rightmargin="0" marginwidth="0" marginheight="0">
+
+<p class="heading0">ChartDirector Ver 4.1 (Perl Edition)</p>
+<p class="heading1">Percentage Bar Chart</p>
+<hr class="separator">
+<div class="content">
+<img src="images/percentbar.png">
+<br><br>
+This example demonstrates creating a percentage bar chart. It also demonstrates how to include icons in the legend box using <a href="cdml.htm">CDML</a>.<br><br>
+A percentage bar chart is like a stacked bar chart, except the bars are individually scaled so that they stacked up to 100.<br><br>
+Note that in this example, the legend box contains icons. This is achieved by including the icons in the data set name using <a href="cdml.htm">CDML</a>.<br><br>
+The key features demonstrated in this example are:<br><br>
+<ul><li> Add a legend to the chart using <a href="BaseChart.addLegend.htm">BaseChart.addLegend</a>, and set the key size (the color box to the right of each legend entry) to 16 x 32 pixels using <a href="LegendBox.setKeySize.htm">LegendBox.setKeySize</a>. This is to better match the size of the icons.<br><br>
+<li> Reverse the legend box entries using <a href="Layer.setLegend.htm">Layer.setLegend</a>, so that the last data set name is on top in the legend box. This is useful for a vertical legend box in a vertical stacked chart with purely positive data. In such case, the last data set will be stacked to the top. Reversing the legend box will make the legend keys visually consistent with the stacking order of the chart.<br><br>
+<li> Add a percentage bar layer using <a href="XYChart.addBarLayer2.htm">XYChart.addBarLayer2</a> with the <a href="perlchartdir.Percentage.htm">Percentage</a> predefined constant.<br><br>
+<li> Add multiple data sets to the bar layer using <a href="Layer.addDataSet.htm">Layer.addDataSet</a>, with data set names expressed using <a href="cdml.htm">CDML</a> to include icons.<br><br>
+<li> Include labels for the bar segments using <a href="Layer.setDataLabelStyle.htm">Layer.setDataLabelStyle</a>, with center alignment configured using <a href="TextBox.setAlignment.htm">TextBox.setAlignment</a>.</ul>
+Note that by default, the data label format is <b>{percent}%</b> (showing the percentage) for a percentage bar layer, as opposed to <b>{value}</b> (showing the data value) for other types of bar layer. The data label format can be modified using <a href="Layer.setDataLabelFormat.htm">Layer.setDataLabelFormat</a>.
+</div>
+<p class="heading1a">Source Code Listing</p>
+<div class="content">
+<b>[Standalone Version]</b> perldemo\percentbar.pl
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/perl
+use perlchartdir;
+
+# The data for the bar chart
+my $data0 = [100, 125, 245, 147, 67];
+my $data1 = [85, 156, 179, 211, 123];
+my $data2 = [97, 87, 56, 267, 157];
+
+# The labels for the bar chart
+my $labels = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+
+# Create a XYChart object of size 500 x 280 pixels, using 0xffffcc as background
+# color, with a black border, and 1 pixel 3D border effect
+my $c = new XYChart(500, 280, 0xffffcc, 0, 1);
+
+# Set the plotarea at (50, 45) and of size 320 x 200 pixels. Use white (0xffffff)
+# color as background.
+$c-&gt;setPlotArea(50, 45, 320, 200, 0xffffff);
+
+# Add a legend box at (370, 45) using vertical layout and 8 points Arial Bold font.
+my $legendBox = $c-&gt;addLegend(370, 45, 1, "arialbd.ttf", 8);
+
+# Set the legend box background and border to transparent
+$legendBox-&gt;setBackground($perlchartdir::Transparent, $perlchartdir::Transparent);
+
+# Set the legend box icon size to 16 x 32 pixels to match with custom icon size
+$legendBox-&gt;setKeySize(16, 32);
+
+# Add a title to the chart using 14 points Times Bold Itatic font and white font
+# color, and 0x804020 as the background color
+$c-&gt;addTitle("Weekly Product Sales", "timesbi.ttf", 14, 0xffffff)-&gt;setBackground(
+    0x804020);
+
+# Set the labels on the x axis
+$c-&gt;xAxis()-&gt;setLabels($labels);
+
+# Add a percentage bar layer and set the layer 3D depth to 8 pixels
+my $layer = $c-&gt;addBarLayer2($perlchartdir::Percentage);
+
+# Add the three data sets to the bar layer, using icons images with labels as data
+# set names
+$layer-&gt;addDataSet($data0, 0xddaa77,
+    "&lt;*block,valign=absmiddle*&gt;&lt;*img=service.png*&gt; Service&lt;*/*&gt;");
+$layer-&gt;addDataSet($data1, 0xaadd77,
+    "&lt;*block,valign=absmiddle*&gt;&lt;*img=software.png*&gt; Software&lt;*/*&gt;");
+$layer-&gt;addDataSet($data2, 0xaa77dd,
+    "&lt;*block,valign=absmiddle*&gt;&lt;*img=computer.png*&gt; Hardware&lt;*/*&gt;");
+
+# Disable bar borders by setting their colors to transparent
+$layer-&gt;setBorderColor($perlchartdir::Transparent);
+
+# Enable data label at the middle of the the bar
+$layer-&gt;setDataLabelStyle()-&gt;setAlignment($perlchartdir::Center);
+
+# For a vertical stacked chart with positive data only, the last data set is always
+# on top. However, in a vertical legend box, the last data set is at the bottom. This
+# can be reversed by using the setLegend method.
+$layer-&gt;setLegend($perlchartdir::ReverseLegend);
+
+# output the chart
+$c-&gt;makeChart("percentbar.png")</pre></tr></td></table><br><b>[CGI Version]</b> perldemo_cgi\percentbar.pl
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/perl
+
+# Include current script directory in the module path (needed on Microsoft IIS).
+# This allows this script to work by copying ChartDirector to the same directory
+# as the script (as an alternative to installation in Perl module directory)
+use File::Basename;
+use lib dirname($0);
+
+use perlchartdir;
+
+# The data for the bar chart
+my $data0 = [100, 125, 245, 147, 67];
+my $data1 = [85, 156, 179, 211, 123];
+my $data2 = [97, 87, 56, 267, 157];
+
+# The labels for the bar chart
+my $labels = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+
+# Create a XYChart object of size 500 x 280 pixels, using 0xffffcc as background
+# color, with a black border, and 1 pixel 3D border effect
+my $c = new XYChart(500, 280, 0xffffcc, 0, 1);
+
+#Set directory for loading images to current script directory
+#Need when running under Microsoft IIS
+$c-&gt;setSearchPath(dirname($0));
+
+# Set the plotarea at (50, 45) and of size 320 x 200 pixels. Use white (0xffffff)
+# color as background.
+$c-&gt;setPlotArea(50, 45, 320, 200, 0xffffff);
+
+# Add a legend box at (370, 45) using vertical layout and 8 points Arial Bold font.
+my $legendBox = $c-&gt;addLegend(370, 45, 1, "arialbd.ttf", 8);
+
+# Set the legend box background and border to transparent
+$legendBox-&gt;setBackground($perlchartdir::Transparent, $perlchartdir::Transparent);
+
+# Set the legend box icon size to 16 x 32 pixels to match with custom icon size
+$legendBox-&gt;setKeySize(16, 32);
+
+# Add a title to the chart using 14 points Times Bold Itatic font and white font
+# color, and 0x804020 as the background color
+$c-&gt;addTitle("Weekly Product Sales", "timesbi.ttf", 14, 0xffffff)-&gt;setBackground(
+    0x804020);
+
+# Set the labels on the x axis
+$c-&gt;xAxis()-&gt;setLabels($labels);
+
+# Add a percentage bar layer and set the layer 3D depth to 8 pixels
+my $layer = $c-&gt;addBarLayer2($perlchartdir::Percentage);
+
+# Add the three data sets to the bar layer, using icons images with labels as data
+# set names
+$layer-&gt;addDataSet($data0, 0xddaa77,
+    "&lt;*block,valign=absmiddle*&gt;&lt;*img=service.png*&gt; Service&lt;*/*&gt;");
+$layer-&gt;addDataSet($data1, 0xaadd77,
+    "&lt;*block,valign=absmiddle*&gt;&lt;*img=software.png*&gt; Software&lt;*/*&gt;");
+$layer-&gt;addDataSet($data2, 0xaa77dd,
+    "&lt;*block,valign=absmiddle*&gt;&lt;*img=computer.png*&gt; Hardware&lt;*/*&gt;");
+
+# Disable bar borders by setting their colors to transparent
+$layer-&gt;setBorderColor($perlchartdir::Transparent);
+
+# Enable data label at the middle of the the bar
+$layer-&gt;setDataLabelStyle()-&gt;setAlignment($perlchartdir::Center);
+
+# For a vertical stacked chart with positive data only, the last data set is always
+# on top. However, in a vertical legend box, the last data set is at the bottom. This
+# can be reversed by using the setLegend method.
+$layer-&gt;setLegend($perlchartdir::ReverseLegend);
+
+# output the chart
+binmode(STDOUT);
+print "Content-type: image/png\n\n";
+print $c-&gt;makeChart2($perlchartdir::PNG);</pre></tr></td></table>
+</div>
+<br><hr class="separator"><div class="copyright">&copy; 2008 Advanced Software Engineering Limited. All rights reserved.</div>
+</body>
+</HTML>

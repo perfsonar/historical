@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml2/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:v="urn:schemas-microsoft-com:vml" xml:lang="en"> 
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+ <noscript><b>JavaScript must be enabled in order for you to use this webpage.
+ </noscript>
+   <!--  <LINK HREF="/cdincludes/style.css" TYPE="text/css" REL="stylesheet"> -->
+    <LINK HREF="/css/mystyle.css" TYPE="text/css" REL="stylesheet"> 
+    <style type="text/css">@import url(/js/jscalendar-1.0/calendar-win2k-1.css);</style>
+    <script type="text/javascript" src="/js/jscalendar-1.0/calendar.js"></script>
+    <script type="text/javascript" src="/js/jscalendar-1.0/lang/calendar-en.js"></script>
+    <script type="text/javascript" src="/js/jscalendar-1.0/calendar-setup.js"></script>
+    <script type="text/javascript" src="/js/prototype.js"></script> 
+     <script type="text/javascript" src="/js/lvp/src/livepipe.js"></script> 
+    <script type="text/javascript" src="/js/lvp/src/progressbar.js"></script>     
+    <script type="text/javascript">
+       
+function displayLinks() {
+   var params = {};  
+ 
+   ['ma_urls', 'src_regexp', 'dst_regexp', 'packetsize', 'stored_links'].each(function(name) {
+       if($(name)) {
+          this[name] = $(name).value;
+       }
+   }, params); 
+   new Ajax.Updater({ success: 'linksdiv', failure: 'statusDiv'}, '/gui/displayLinks', {
+                      parameters: params
+   });  
+  
+   
+}
+
+function displayGraph() {
+   var params = {}; 
+ 
+   ['start_time', 'end_time',  'gmt_offset',  'gtype', 'upper_rt','gpresent',   'links', 'stored_links'].each(function(name, index) {
+       if($(name)) {
+          this[name] = $(name).value;
+       }
+   }, params); 
+   new Ajax.Updater({ success: 'graph', failure: 'statusDiv'}, '/gui/displayGraph', {
+                      parameters: params
+   });
+  
+}
+
+function resetSession() {
+   var params = {};
+   new Ajax.Updater({ success: 'wrapper', failure: 'statusDiv'}, '/gui/display');
+}
+
+</script>
+<title>[% title %]</title>
+  
+</head> 
+
+<BODY>
+
+
+<div id="wrapper">
+<div id="header">
+   <h2 id="header">[% title %]</h2>
+</div>
+<div id="remote_ma">
+<TABLE class="main" cols="6">  
+  <tr>
+  <TD   colspan="1"> 
+      <span class="arn">Enter URL(s)</span>
+  </TD>	
+  <TD   colspan="5"> 
+     <textarea rows="5" cols="75"   name="ma_urls"  
+				    id="ma_urls">[% ma_urls %]</textarea>
+ </TD>	     
+ </TR>      
+ <tr>
+  <td  colspan="6">
+   <input type="button"  class="buttons" 
+	  	        name="get_links"  
+		        id="get_links"
+                        onClick="displayLinks();" 
+                        value="Get Metadata from remote MA"/>
+ </td>
+ </tr> 
+ </TABLE>     
+</div>
+<div id="container" name="container"></div>
+<div id="matching">
+<TABLE    class="main"  cols="6"> 
+<TR>
+      <TD class="nblue" colspan="6">   
+        Use wildcard to get hostname or packetsize of interest. List of links will be updated automatically.<br/>
+   </TD>
+  </TR>   
+  <TR>
+      <TD class="snbld"> Source Hostname: </TD>
+      <TD VALIGN="Middle"><INPUT TYPE="text" 
+                                 NAME="src_regexp" SIZE=15    
+                                 ID="src_regexp"  VALUE="[% src_regexp | uri %]"
+				 onChange="displayLinks();"> 
+      </TD>
+      <TD class="snbld"> Destination Hostname: </TD>
+      <TD VALIGN="Middle"><INPUT TYPE="text" 
+                                 NAME="dst_regexp" SIZE=15    
+				 ID="dst_regexp"  VALUE="[% dst_regexp | uri  %]" 
+                                 onChange="displayLinks();"> 
+      </TD>
+      <TD class="snbld" VALIGN="Middle">  Packetsize: <INPUT TYPE="text" 
+                                                            NAME="packetsize" SIZE="5"  
+							    ID="packetsize"  
+							    VALUE="[%  packetsize %]"
+							    onChange="displayLinks();"> 
+     </TD>
+  </TR>   
+ </TABLE> 
+</div> 
+<div id="statusDiv" name="statusDiv"></div>
+<div id="linksdiv" name="linksdiv"></div> 
+<div id="graph" name="graph"></div>
+<div id="params">
+<TABLE   class="main"  cols="6"> 
+   <TR>
+   <TD   colspan="6">
+       <span class="arn">Graph parameters</span>
+    </TD>
+  </TR>
+  <TR>
+    <TD  colspan="2">
+    <input  type="text" id="start_time" name="start_time"/>
+    <button id="trigger1">Start Time</button>    
+     <script type="text/javascript">   
+     Calendar.setup(
+     { 
+      isPopup: "true",
+      timeFormat:   "24",
+      showsTime: "true",
+    
+      inputField  : "start_time",         // ID of the input field
+      ifFormat    : "%Y-%m-%dT%H:%M:%S",    // the date format
+      button      : "trigger1"       // ID of the button
+    }
+   );
+   </script>
+    <TD   colspan="2">
+    <input  type="text" id="end_time" name="end_time"/>
+    <button id="trigger2">End Time</button>
+    <script type="text/javascript">   
+      Calendar.setup(
+    { 
+      timeFormat:   "24",
+      showsTime: "true",
+     
+      inputField  : "end_time",         // ID of the input field
+      ifFormat    : "%Y-%m-%dT%H:%M:%S",    // the date format
+      button      : "trigger2"       // ID of the button
+    }
+   );
+    </script>
+     </TD>  
+       <TD   colspan="2">
+       <TABLE class="params">	 
+	        <TR>
+		   <span class="snbld">GMT offset</span>
+                   <TD class="smver_2"> 
+	             <SELECT ID="gmt_offset"  NAME="gmt_offset" class="fc_st">
+                       [% FOREACH gmt_option IN gmt_options %]	
+                          <OPTION VALUE="[% gmt_option.gmt_time %]>[% gmt_option.gmt_time_label %]
+	               [% END %]	  
+                      </SELECT>
+                    </TD>
+	      </TR>
+      </TABLE>    
+     </TD>             
+  </TR>
+   <TR>
+   <TD   colspan="6">
+    &nbsp;
+    </TD>
+     </TR>
+     <TR>
+        <TD colspan="2">
+	 <span class="snbld">Type of metric:</span><br>
+	   <SELECT NAME="gtype" ID="gtype" class="fc_st">
+	   <OPTION VALUE="ipdv">MIN/MAX/MEAN/IQR IPD
+	   <OPTION VALUE="dupl">DUPL/REORDERED packets
+	   <OPTION VALUE="rt">Round Trip Time (RTT)
+	   <OPTION VALUE="loss">Loss/Conditional Loss
+	   <OPTION VALUE="rtloss" SELECTED>RTT/Loss/Conditional Loss
+	  </SELECT>
+	 </TD>
+	 <TD colspan="2">
+	    <span class="snbld">Upper RTT(or IPD) Limit:</span><br>
+              <SELECT NAME="upper_rt"  ID="upper_rt"  class="fc_st">  
+	           [% FOREACH rt_time IN rt_times %]
+                     <OPTION VALUE="[% rt_time.rtt_time %]>[% rt_time.rtt_time_label %]
+	           [% END %]
+                </SELECT>
+        </TD>
+	<TD colspan="2">
+	  <span class="snbld">Graph type:</span><br>
+	  <SELECT NAME="gpresent"  ID="gpresent" class="fc_st">
+	    <OPTION VALUE="bars">BARS
+	    <OPTION VALUE="lines" SELECTED>LINES
+	    <OPTION VALUE="area">AREA(STACKED)
+	    <OPTION VALUE="points">POINTS
+	  </SELECT>
+      </TD> 
+  </TR>
+ 
+ <p>
+<TR>
+  <TD colspan="3">
+  <input type="button"  class="buttons" 
+	  	        name="get_graph"  
+		        id="get_graph"
+                        onClick="displayGraph();" 
+                        value="Get Graph"/>
+  </TD>   
+  <TD colspan="3">
+  <input type="button"  class="buttons" 
+	  	        name="resetSession"  
+		        id="resetSession"
+                        onClick="resetSession();" 
+                        value="Reset Session"/>
+  </TD> 
+</TR>
+</TABLE>
+</div>
+</div>
+</body>
+</html>
+  

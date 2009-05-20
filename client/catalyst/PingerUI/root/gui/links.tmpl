@@ -1,0 +1,26 @@
+<input type="hidden" id="stored_links" name="stored_links" value="[% stored_links %]"/>
+<TABLE   class="main" cols="6">   
+ <TR>
+   <TD   colspan="6">
+   <span class="arn">End-to-End Links</span>
+    </TD>
+     </TR>
+  <TR>
+      <TD colspan="3">
+         [% IF links.size > 0 %] 
+         <SELECT NAME="links" ID="links" SIZE="10" MULTIPLE class="fc_st">    
+	   [% FOREACH link IN links %]	
+	      <OPTION VALUE="[% link.meta_link %]">[% link.meta_link_label %] 
+	   [% END %]
+	 </SELECT>
+         [% ELSE %]
+           <h2> No links found </h3>
+         [% END %]
+      </TD>
+      <TD colspan="3">
+         <div id="graph">  
+               &nbsp;
+        </div> 
+    </TD>
+  </TR>
+</TABLE>      
