@@ -40,16 +40,18 @@
     
      h3 {height:20px;line-height:20px;margin:0; padding-left: 20px;background: #EEF;width: 750px; font-family: Arial, serif;  }
     
-   . #container {  
-   	width:102px;  
-   	height:7px;  
-   	border:1px solid #ccc;  
-   	padding:0;  
-   	margin:0;  
-   	position:relative;
-   	background-repeat:repeat-x;  
-    } 
-     
-    #container div {  
-   	background-color:#fff;  
-    }  
+ #spinner {
+ z-index: 100;
+ position: absolute;
+ top: 40%;
+ left: 40%;
+ background-image: url("/static/images/spinner.gif");
+ background-repeat: no-repeat;
+ background-position: 5px;
+ padding-left: 10px;
+ padding-top: 10px;
+ border: 0;
+ width: 10px;
+ height: 10px; 
+ font-weight: bolder;
+}

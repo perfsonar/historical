@@ -13,7 +13,20 @@
     <script type="text/javascript" src="/js/jscalendar-1.0/calendar-setup.js"></script>
     <script type="text/javascript" src="/js/prototype.js"></script> 
     <script type="text/javascript">
-       
+  
+   Ajax.Responders.register({
+     onCreate: function() {
+        if (Ajax.activeRequestCount === 1) {
+           $('spinner').show();
+        }
+    },
+    onComplete: function() {
+        if (Ajax.activeRequestCount === 0) {
+           $('spinner').hide();
+        }
+    }
+   }); 
+     
 function displayLinks() {
    var params = {};  
  
@@ -25,13 +38,13 @@ function displayLinks() {
    new Ajax.Updater({ success: 'linksdiv', failure: 'statusDiv'}, '/gui/displayLinks', {
                       parameters: params
    });  
-  
+    
    
 }
 
 function displayGraph() {
    var params = {}; 
- 
+  
    ['start_time', 'end_time',  'gmt_offset',  'gtype', 'upper_rt','gpresent',   'links', 'stored_links'].each(function(name, index) {
        if($(name)) {
           this[name] = $(name).value;
@@ -82,7 +95,11 @@ function resetSession() {
  </tr> 
  </TABLE>     
 </div>
-<div id="container" name="container"></div>
+<div id="spinner" name="spinner"   style="display:none">
+<div style="background-color: white; position: absolute; top: 0px; right: 0px; width: 1px; height: 1px; cursor:pointer;"
+ onclick="$('spinner').hide()">
+ </div>
+  </div>
 <div id="matching">
 <TABLE    class="main"  cols="6"> 
 <TR>
