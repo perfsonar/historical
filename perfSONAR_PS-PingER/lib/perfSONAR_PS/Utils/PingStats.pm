@@ -91,8 +91,11 @@ Delay and Loss in the Internet by J. Bolot in the Journal of High-Speed
 Networks, vol 2, no. 3 pp 305-323 December 1993.
 
 See: http://citeseer.ist.psu.edu/bolot93characterizing.html
+
+clp =P(rttn+1=0/rttn=0)
  
    return conditional packet loss
+   also calculates plg - packet loss gap as 1/(1 - clp)
    
 =cut
 
@@ -102,7 +105,7 @@ use English qw( -no_match_vars );
 use Params::Validate qw(:all);
 use Log::Log4perl qw(get_logger);
 
-use constant PARAMS    => qw(rtts  ERROR sent received seqs loss clp rtt_stats ipdv_stats iqr dups out_of_order);
+use constant PARAMS    => qw(rtts  ERROR sent received seqs loss clp plg rtt_stats ipdv_stats iqr dups out_of_order);
 use constant CLASSPATH => "perfSONAR_PS::Utils::PingStats";
 
 use fields ( PARAMS );
@@ -317,15 +320,16 @@ sub _clp {
         $logger->debug( "pkts recvd ($self->{received}) is not equal to size $size of array $stringified_arr " );
         return $self->{clp} = undef;
     }
+    return $self->{clp} = 0 unless $self->{sent};
+    my $lost_packets            = $self->{sent} - $self->{received};
+    return $self->{clp} = 0 unless $lost_packets && $lost_packets > 1;
     ### lookup hash with sequence numbers as keys and sequence numbers + 1 as values
     ###  ( to get defined value for the first packet
     ###  duplicated packets will be considered as lost, reordered packets will be ignored
     ###  for example: 0 2 3 4 5 5 6 7 sequence with 8 packets sent and
     my %lookup_seq              = map { ( $_ + 1 ) => ( $_ + 1 ) } @{ $self->{seqs} };
-    my $consecutive_packet_loss = 0;
-    my $lost_packets            = $self->{sent} - $self->{received};
-    $logger->debug( "input: sent  $self->{sent}  / recv  $self->{received}" );
-
+    my $consecutive_packet_loss = 0;    
+    $logger->debug( "input: sent  $self->{sent}  / recv  $self->{received}", sub{Dumper(\%lookup_seq)});
     $logger->debug( "Determining lost packets from sequence $stringified_arr" );
     for my $i ( 2 .. $self->{sent} ) {
         $logger->debug( " Looking at packet #$i " );
@@ -335,10 +339,9 @@ sub _clp {
         }
     }
     $logger->debug( "Determining Conditional Loss Probability where lost_packets=$lost_packets" );
-    my $clp;
-    if ( $lost_packets > 1 ) {
-        $self->{clp} = sprintf( "%0.3f", $consecutive_packet_loss * 100 / ( $lost_packets - 1 ) );
-    }
+    $self->{clp} = sprintf( "%0.3f", $consecutive_packet_loss * 100. /  $lost_packets  );
+    $self->{plg} = sprintf( "%0.3f",  1./(1 -  $self->{clp}/100.));
+    
     return $self->{clp};
 }
 
