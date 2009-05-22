@@ -323,6 +323,7 @@ sub _clp {
     return $self->{clp} = 0 unless $self->{sent};
     my $lost_packets            = $self->{sent} - $self->{received};
     return $self->{clp} = 0 unless $lost_packets && $lost_packets > 1;
+    return $self->{clp} = 100 if $lost_packets == $self->{sent};
     ### lookup hash with sequence numbers as keys and sequence numbers + 1 as values
     ###  ( to get defined value for the first packet
     ###  duplicated packets will be considered as lost, reordered packets will be ignored
