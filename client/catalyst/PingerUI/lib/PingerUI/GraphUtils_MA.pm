@@ -1,4 +1,7 @@
 package PingerUI::GraphUtils_MA;
+
+ 
+
 use strict;
 use warnings;
 use English qw( -no_match_vars );
@@ -28,6 +31,7 @@ use version; our $VERSION = '0.09';
 
 =cut
  
+ 
 use PingerUI::GraphIt qw(graph_it2);
 use Data::Dumper;
 use Exporter ();  
@@ -35,8 +39,9 @@ use base qw(Exporter);
 our @EXPORT = ();
 our @EXPORT_OK = qw(build_graph);
 use Time::gmtime;
+use File::Path;
 use perfSONAR_PS::Client::PingER;
-use PingerUI::Utils qw(max min get_time_hash getURL validURL);
+use PingerUI::Utils qw(max min get_time_hash getURL validURL $MYPATH);
 use POSIX qw(strftime);
 # OY labels 
  
@@ -114,7 +119,7 @@ sub build_graph {
     my $gpr =  $c->stash->{gpresent};
     my $tm_s =   $c->stash->{time_start};
     my $tm_d =   $c->stash->{time_end};
-    my $gmt_off =   $c->stash->{gmt_offset};
+    my $gmt_off =   $c->stash->{gmt_off};
     my $time_label  =   $c->stash->{time_label};
     my $only_one = 1;
     
@@ -135,6 +140,9 @@ sub build_graph {
     my @datums = qw/meanRtt minRtt maxRtt meanIpd minIpd maxIpd iqrIpd clp lossPercent duplicates/;
     ## main cycle for every link
     my $ssid = sprintf("%d", 1E6*rand());
+    my $localpath =  "$SCRATCH_DIR/$GOUT_DIR";
+    mkpath([$localpath], undef, 0777);
+    system("ln -s $localpath $MYPATH/root/") unless -l "$MYPATH/root/$GOUT_DIR";
     for ( my $i = 0; $i < $num_grs; $i++ ) {
         my $metaID_key=  $c->stash->{links}->[$i];
         my($src_name, $dst_name, $packet_size) = split ':', $metaID_key;
@@ -163,7 +171,7 @@ sub build_graph {
 	    $c->log->debug(" -- $gtype  $i_y = DATA : " . Dumper $data_row);	  
             $previous_ind = $i_y if ( !$previous_ind ); 
             for ( my $ind_y = $previous_ind + 1; $ind_y <= $i_y; $ind_y++ )   {
-            	
+            	next if $datum_href->{clp} > 99;
             	if (
             	    ( $gtype =~ /^rt/ && $datum_href->{meanRtt} > 0. )
             	      || ( $gtype eq 'ipdv'
@@ -175,7 +183,7 @@ sub build_graph {
             	      || ( $gtype eq 'dupl' && $datum_href->{duplicates} )
             	      || ( $gtype =~ /loss$/
             		   && ( $datum_href->{clp} > 0. || $datum_href->{lossPercent} > 0. ) )
-            	) {
+            	) { 
                     $summ{it_y}{count}->[$ind_y] ++;
             	    ####   depends on type of graph
 	    	    foreach my $datum_type (@datums) {

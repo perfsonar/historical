@@ -10,7 +10,7 @@
          [% IF links.size > 0 %] 
          <SELECT NAME="links" ID="links" SIZE="10" MULTIPLE class="fc_st">    
 	   [% FOREACH link IN links %]	
-	      <OPTION VALUE="[% link.meta_link %]">[% link.meta_link_label %] 
+	      <OPTION class="smver_1" VALUE="[% link.meta_link %]">[% link.meta_link_label %] 
 	   [% END %]
 	 </SELECT>
          [% ELSE %]

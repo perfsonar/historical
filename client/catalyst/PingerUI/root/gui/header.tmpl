@@ -76,7 +76,7 @@ function resetSession() {
 <div id="remote_ma">
 <TABLE class="main" cols="6">  
   <tr>
-  <TD   colspan="1"> 
+  <TD   colspan="1"> <span class="nblue">Step 1</span><br/> 
       <span class="arn">Enter URL(s)</span>
   </TD>	
   <TD   colspan="5"> 
@@ -85,8 +85,8 @@ function resetSession() {
  </TD>	     
  </TR>      
  <tr>
-  <td  colspan="6">
-   <input type="button"  class="buttons" 
+  <td  colspan="6"><span class="nblue">Step 2</span>
+   <input type="button"  class="bbuttons" 
 	  	        name="get_links"  
 		        id="get_links"
                         onClick="displayLinks();" 
@@ -103,24 +103,23 @@ function resetSession() {
 <div id="matching">
 <TABLE    class="main"  cols="6"> 
 <TR>
-      <TD class="nblue" colspan="6">   
-        Use wildcard to get hostname or packetsize of interest. List of links will be updated automatically.<br/>
+      <TD class="nblue_normal" colspan="6">   
+        Use wildcard to filter list of links by hostname(s) or packetsize.<br/> 
+	Click on the "End-to-End Links" area to update list. Or submit another Metadata request.<br/>
    </TD>
   </TR>   
   <TR>
-      <TD class="snbld"> Source Hostname: </TD>
-      <TD VALIGN="Middle"><INPUT TYPE="text" 
+      <TD VALIGN="Middle" class="snbld"> Source Hostname <INPUT TYPE="text" 
                                  NAME="src_regexp" SIZE=15    
                                  ID="src_regexp"  VALUE="[% src_regexp | uri %]"
 				 onChange="displayLinks();"> 
       </TD>
-      <TD class="snbld"> Destination Hostname: </TD>
-      <TD VALIGN="Middle"><INPUT TYPE="text" 
+      <TD VALIGN="Middle" class="snbld" VALIGN="Middle"> Destination Hostname <INPUT TYPE="text" 
                                  NAME="dst_regexp" SIZE=15    
 				 ID="dst_regexp"  VALUE="[% dst_regexp | uri  %]" 
                                  onChange="displayLinks();"> 
       </TD>
-      <TD class="snbld" VALIGN="Middle">  Packetsize: <INPUT TYPE="text" 
+      <TD class="snbld" VALIGN="Middle">   Packetsize<INPUT TYPE="text" 
                                                             NAME="packetsize" SIZE="5"  
 							    ID="packetsize"  
 							    VALUE="[%  packetsize %]"
@@ -130,6 +129,7 @@ function resetSession() {
  </TABLE> 
 </div> 
 <div id="statusDiv" name="statusDiv"></div>
+&nbsp;
 <div id="linksdiv" name="linksdiv"></div> 
 <div id="graph" name="graph"></div>
 <div id="params">
@@ -142,7 +142,7 @@ function resetSession() {
   <TR>
     <TD  colspan="2">
     <input  type="text" id="start_time" name="start_time"/>
-    <button id="trigger1">Start Time</button>    
+    <button class="buttons" id="trigger1">Start Time</button>    
      <script type="text/javascript">   
      Calendar.setup(
      { 
@@ -158,7 +158,7 @@ function resetSession() {
    </script>
     <TD   colspan="2">
     <input  type="text" id="end_time" name="end_time"/>
-    <button id="trigger2">End Time</button>
+    <button class="buttons" id="trigger2">End Time</button>
     <script type="text/javascript">   
       Calendar.setup(
     { 
@@ -194,7 +194,7 @@ function resetSession() {
      </TR>
      <TR>
         <TD colspan="2">
-	 <span class="snbld">Type of metric:</span><br>
+	 <span class="snbld">Type of Metric</span><br>
 	   <SELECT NAME="gtype" ID="gtype" class="fc_st">
 	   <OPTION VALUE="ipdv">MIN/MAX/MEAN/IQR IPD
 	   <OPTION VALUE="dupl">DUPL/REORDERED packets
@@ -204,7 +204,7 @@ function resetSession() {
 	  </SELECT>
 	 </TD>
 	 <TD colspan="2">
-	    <span class="snbld">Upper RTT(or IPD) Limit:</span><br>
+	    <span class="snbld">Upper RTT(or IPD) Limit</span><br>
               <SELECT NAME="upper_rt"  ID="upper_rt"  class="fc_st">  
 	           [% FOREACH rt_time IN rt_times %]
                      <OPTION VALUE="[% rt_time.rtt_time %]>[% rt_time.rtt_time_label %]
@@ -212,7 +212,7 @@ function resetSession() {
                 </SELECT>
         </TD>
 	<TD colspan="2">
-	  <span class="snbld">Graph type:</span><br>
+	  <span class="snbld">Graph Type</span><br>
 	  <SELECT NAME="gpresent"  ID="gpresent" class="fc_st">
 	    <OPTION VALUE="bars">BARS
 	    <OPTION VALUE="lines" SELECTED>LINES
@@ -224,19 +224,20 @@ function resetSession() {
  
  <p>
 <TR>
-  <TD colspan="3">
-  <input type="button"  class="buttons" 
+  <TD colspan="3"><span class="nblue">Step 3</span>
+  <input type="button"  class="bbuttons" 
 	  	        name="get_graph"  
 		        id="get_graph"
                         onClick="displayGraph();" 
                         value="Get Graph"/>
   </TD>   
   <TD colspan="3">
-  <input type="button"  class="buttons" 
+  <!-- input type="button"  class="bbuttons" 
 	  	        name="resetSession"  
 		        id="resetSession"
                         onClick="resetSession();" 
                         value="Reset Session"/>
+			-->
   </TD> 
 </TR>
 </TABLE>

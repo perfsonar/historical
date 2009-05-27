@@ -21,7 +21,7 @@ use version; our $VERSION = '3.2';
 use Exporter (); 
 use base qw(Exporter);
 our @EXPORT = ();
-our @EXPORT_OK = qw(check_time get_time_hash  max min $build_in_key validURL getURL  fix_regexp);
+our @EXPORT_OK = qw(check_time get_time_hash  $MYPATH max min $build_in_key validURL getURL  fix_regexp);
 use Time::Local; 
 use POSIX qw(strftime);  
 use Date::Manip;
@@ -29,7 +29,7 @@ use Date::Manip;
 use Log::Log4perl  qw(get_logger); 
 
 our $build_in_key = 'jh34587wuhlkh789hbyf78343gort03idjuhf3785t0gfgofbf78o4348orgofg7o4fg7';
-
+our $MYPATH = '/home/netadmin/LHCOPN/perfSONAR-PS/trunk/client/catalyst/PingerUI';
 our $LOGGER = get_logger(__PACKAGE__);
 
 =head2 validURL 

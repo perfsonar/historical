@@ -1,6 +1,5 @@
 package PingerUI::Controller::Gui;
 
-use lib "/home/pinger/WEB/PingerUI/lib/PingerUI";
 use strict;
 use warnings;
 

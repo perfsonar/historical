@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use English qw( -no_match_vars );
 use version; our $VERSION = '0.09'; 
+use PingerUI::Utils qw($MYPATH);
 
 =head1 NAME
 
@@ -17,8 +18,8 @@ use version; our $VERSION = '0.09';
 =head1 EXPORTED 
 
 =cut
+use lib "$MYPATH/lib/PingerUI/ChartDirector/lib";
 
-use lib "/home/pinger/WEB/PingerUI/lib/PingerUI/ChartDirector/lib";
 use perlchartdir; 
 use Exporter (); 
 use base qw(Exporter);
@@ -57,28 +58,37 @@ my %legends = (
 #   number of pixels for OY dimension
 my $GR_HEIGHT = 150;
 # number of pixels for OX dimension
-my $GR_WIDTH = 400;  
+my $GR_WIDTH = 420;  
  
 sub graph_it2 {
     my ( $gpr, $title, $gtyp, $ox, $summs, $x_l, $y_l, $fl_name ) = @_;
 
-    my ( $y1_l, $y2_l ) = $y_l =~ /(\S+)\s+(\S+)/;
+    my ( $y1_l, $y2_l ) = split(' ', $y_l);
     my $loss_max = $summs->{lossPercent}{max} * 1.2;
-    $loss_max =  90 if $loss_max > 100;
-
-   # Create a XYChart object of size 600 x 300 pixels, with a pale blue (eeeeff)
-   # background, black border, 1 pixel 3D border effect and rounded corners.
-
-    my $c = new XYChart(  $GR_WIDTH + 40,  $GR_HEIGHT + 55, 0xeeeeff, 0x000000,
-                         1 );
+    $loss_max =  100 if $loss_max > 100;
+ 
+    # Create a XYChart object of size 600 x 300 pixels, with a pale blue (eeeeff)
+    # background, black border, 1 pixel 3D border effect and rounded corners.
+    my $c; 
+    if ( $gtyp eq 'rtloss' ) {
+        $c = new XYChart(  $GR_WIDTH + 40,  $GR_HEIGHT + 55, 0xeeeeff, 0x000000,  1 );
+        $c->setPlotArea( 30, 45,
+                         $GR_WIDTH - 35,
+                         $GR_HEIGHT - 28,
+                         0xffffff, -1, -1, 0xcccccc, 0xcccccc );
+    } else {
+        $c = new XYChart(  $GR_WIDTH + 40,  $GR_HEIGHT + 55, 0xeeeeff, 0x000000, 1 );
+        $c->setPlotArea( 46, 45,
+                         $GR_WIDTH - 22,
+                         $GR_HEIGHT - 28,
+                         0xffffff, -1, -1, 0xcccccc, 0xcccccc );
+    }
     $c->setRoundedFrame();
+    $c->setDropShadow();
 
 # Set the plotarea at (55, 55) and of size 520 x 195 pixels, with white (ffffff)
 # background. Set horizontal and vertical grid lines to grey (cccccc).
-    $c->setPlotArea( 25, 45,
-                      $GR_WIDTH - 15,
-                      $GR_HEIGHT - 28,
-                     0xffffff, -1, -1, 0xcccccc, 0xcccccc );
+   
 
 # Add a title box to the chart using 15 pts Times Bold Italic font. The text is white
 # (ffffff) on a deep blue (000088) background, with soft lighting effect from the
@@ -109,13 +119,16 @@ sub graph_it2 {
     $c->xAxis()->setTitle("<*block,valign=absmiddle*> $x_l <*/*>");
 
     if ( $gtyp eq 'rtloss' ) {
-        my ( $y1_l, $y2_l ) = $y_l =~ /(\S+)\s+(\S+)/;
-
+       
         # Add a title to the y axis
         $c->yAxis()->setTitle($y1_l);
         $c->yAxis2()->setTitle($y2_l);
+	$c->yAxis2()->setAutoScale(0.01,0.01);
+
+
     } else {
         $c->yAxis()->setTitle($y_l);
+	$c->yAxis2()->setAutoScale(0.01,0.01);
     }
 
     my $layer       = undef;
