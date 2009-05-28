@@ -61,7 +61,7 @@ my $GR_HEIGHT = 150;
 my $GR_WIDTH = 420;  
  
 sub graph_it2 {
-    my ( $gpr, $title, $gtyp, $ox, $summs, $x_l, $y_l, $fl_name ) = @_;
+    my ( $req, $gpr, $title, $gtyp, $ox, $summs, $x_l, $y_l  ) = @_;
 
     my ( $y1_l, $y2_l ) = split(' ', $y_l);
     my $loss_max = $summs->{lossPercent}{max} * 1.2;
@@ -251,10 +251,7 @@ sub graph_it2 {
             $layer->addDataSet( $summs->{maxRtt}{count},  -1, 'MAX RTT' );
         }
     }
-
- 
-    $c->makeChart("$fl_name.png");
-    return "$fl_name.png";
+    return $c;
 }
 
 1;

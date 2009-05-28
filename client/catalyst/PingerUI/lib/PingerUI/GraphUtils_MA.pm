@@ -41,7 +41,7 @@ our @EXPORT_OK = qw(build_graph);
 use Time::gmtime;
 use File::Path;
 use perfSONAR_PS::Client::PingER;
-use PingerUI::Utils qw(max min get_time_hash getURL validURL $MYPATH);
+use PingerUI::Utils qw(max min get_time_hash getURL validURL $SCRATCH_DIR $MYPATH);
 use POSIX qw(strftime);
 # OY labels 
  
@@ -57,7 +57,6 @@ my %Y_label = (
 my $GOUT_DIR = 'graphsMA';
 #   graphs filename base
 my $GFN_BASE = 'graph';
-my $SCRATCH_DIR =  '/tmp';
 
 #
 my $NUM_DOTS = 200;
@@ -83,7 +82,7 @@ sub get_data {
     	 start =>   $c->stash->{start}, 
 	 cf => 'AVERAGE',
 	 resolution =>  $NUM_DOTS,
-    	 end =>    $c->stash-> {end}, 
+    	 end =>    $c->stash->{end}, 
     	 keys =>   $c->stash->{stored_links}{$url}{$link}{keys},
        });    
      my $metaids    = $ma->getData($dresult);   
@@ -150,7 +149,7 @@ sub build_graph {
         my $filename       = "$SCRATCH_DIR/$local_filename";
         $local_filename .=  '.png';
         my %o_y_max = ( rt => 1, loss => 1, ipdv => 1, dupl => 1 );
-        my $new_fl = '';
+         
         ## Query database and create   Image for every link
         my @o_x;
         my $total_pnts = 0;
@@ -238,10 +237,16 @@ sub build_graph {
          $title
              = "Duplicated/Reordered packets\n $src_dest_string, pinged by $packet_size   bytes"
              if $gtype eq 'dupl';
-         #$c->log->info('DATA : ' . Dumper      $summ{meanRtt}{count});
-         $new_fl = &graph_it2( $gpr, $title, $gtype, \@o_x,  \%summ,  "Date, $time_label", $Y_label{$gtype}, $filename);
-        if ( $new_fl && !( -z $new_fl ) ) {
-            push  @img_flns, { image => $local_filename, alt => $title};
+         $c->log->info('DATA : ' . Dumper      $summ{meanRtt}{count});
+         my $image_obj = &graph_it2( $c, $gpr, $title, $gtype, \@o_x,  \%summ,  "Date, $time_label", $Y_label{$gtype});
+        if ( $image_obj ) {
+	    if($c->stash->{get_files}) {
+	        $image_obj->makeChart("$filename.png");
+                push  @img_flns, { image => $local_filename, alt => $title} unless -z  $local_filename;
+	    }
+	    elsif($c->stash->{get_stream}) {
+	        return $image_obj;
+	    }
         }
     }   
     

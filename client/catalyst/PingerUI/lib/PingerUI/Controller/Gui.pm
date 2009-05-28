@@ -3,7 +3,7 @@ package PingerUI::Controller::Gui;
 use strict;
 use warnings;
 
-use PingerUI::Utils qw(check_time validURL   fix_regexp);
+use PingerUI::Utils qw(check_time validURL  $BUILD_IN_KEY $SCRATCH_DIR fix_regexp);
 use PingerUI::GraphUtils_MA  qw(build_graph);
 use JSON::XS;
 use Data::Dumper;
@@ -53,10 +53,10 @@ sub display : Local {
 
 sub _process_params : Private {
     my ( $self,   $c ) = @_;
-   foreach my $name (qw/src_regexp dst_regexp packetsize ma_urls start_time end_time gmt_offset gtype upper_rt gpresent links/) {
+   foreach my $name (qw/src_regexp get_it ma  dst_regexp packetsize ma_urls start_time end_time gmt_offset gtype upper_rt gpresent links/) {
         $c->stash->{$name} = $c->req->param($name);
    }
-   if($c->req->param('stored_links')) {
+   if( !$c->stash->{'stored_links'} && $c->req->param('stored_links') ) {
         $c->stash->{'stored_links'}   = $c->req->param('stored_links');
         $c->stash->{'stored_links'}   =~ s/'/"/gm;
         $c->stash->{'stored_links'} = decode_json     $c->stash->{'stored_links'}  ;
@@ -179,11 +179,12 @@ sub _get_links : Private {
       create graph with pinger's data, used in ajax call
 
 =cut
- 
+
 sub displayGraph : Local {
     my ( $self, $c ) = @_;
     $c->forward('_process_params');
     my $graphs = [{ image => "", alt => " Submit request to see graphs" }];
+    $c->stash->{get_files} = 1;    
     if($c->stash->{start_time} && $c->stash->{end_time}) {
         $c->forward('_updateParams');
         ( $c->stash->{time_start}, $c->stash->{time_end}, 
@@ -197,6 +198,38 @@ sub displayGraph : Local {
     $c->stash->{graphs} =  $graphs;
     $c->stash->{template} =  'gui/graph.tmpl';
 }
+
+=head2 getGraph
+    
+      create graph with pinger's data, used in GET request only
+
+=cut
+ 
+sub getGraph : Local {
+    my ( $self, $c ) = @_;
+    $c->forward('_process_params');
+    $c->log->logdie(" Keys is not supplied   ") unless $c->stash->{get_it} &&
+                                                       $c->stash->{get_it} eq $BUILD_IN_KEY &&
+						       $c->stash->{links} &&
+						       $c->stash->{ma} ;
+    $c->stash->{get_stream} = 1;
+    if($c->stash->{start_time} && $c->stash->{end_time}) {
+        push @{$c->stash->{remote_ma}{ma_urls}}, $c->stash->{ma};
+        $c->forward('_get_links');
+        ( $c->stash->{time_start}, $c->stash->{time_end}, 
+	  $c->stash->{gmt_off}, $c->stash->{time_label})     =    check_time($c->stash->{start_time}, 
+	                                                                  $c->stash->{end_time},
+								          $c->stash->{gmt_offset});
+									  
+        my $graph_obj = build_graph($c);
+	if($graph_obj) {
+	    $c->response->content_type('image/jpg');
+	    $c->response->body($graph_obj->makeChart2(2));
+	}
+    }
+   
+}
+
 
 =head2 displayLinks
     
