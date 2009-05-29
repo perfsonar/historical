@@ -117,5 +117,10 @@ if [ "$1" != "0" ]; then
 fi
 
 %changelog
+* Thu May 29 2009 aaron@internet2.edu 3.1-2
+- Documentation updates
+- Fix a problem where the MA might erroneously report "unknown" states: http://code.google.com/p/perfsonar-ps/issues/detail?id=150
+- Include the client.pl script
+
 * Wed Dec 10 2008 aaron@internet2.edu 3.1-1
 - Initial service oriented spec file

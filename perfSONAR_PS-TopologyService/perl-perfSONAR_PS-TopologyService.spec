@@ -8,7 +8,7 @@
 
 Name:           perl-perfSONAR_PS-TopologyService
 Version:        3.1
-Release:        1.%{disttag}
+Release:        2.%{disttag}
 Summary:        perfSONAR_PS Topology Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -113,5 +113,8 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0755,perfsonar,perfsonar) /etc/init.d/*
 
 %changelog
+* Thu May 29 2009 aaron@internet2.edu 3.1-2
+- Documentation updates
+
 * Wed Dec 10 2008 aaron@internet2.edu 3.1-1
 - Initial service oriented spec file
