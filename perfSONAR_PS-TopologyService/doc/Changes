@@ -5,7 +5,7 @@ version 3.1
     * Support for query and update messages that look more like LS messages
     * Updated example topology and requests
   * Bugfixes
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=149
-      the TL1 status collector doesn't handle timeouts well   	 
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=150
-      Status service might erroneously list status as "unknown" 
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=128
+      Topology Service "get all" returning redundant data   	 
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=129
+      topology service query request name doesn't match documentation 

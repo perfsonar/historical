@@ -5,7 +5,5 @@ version 3.1
     * Can perform bulk SNMP queries
     * Better E2EMon compatibility
   * Bugfixes
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=128
-      Topology Service "get all" returning redundant data   	 
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=129
-      topology service query request name doesn't match documentation 
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=150
+      Fix a problem where the MA might erroneously report "unknown" states
