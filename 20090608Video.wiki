@@ -1,0 +1,30 @@
+=  June 8, 2009 Conference Call 2:30 pm EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees: 
+ # Team Updates
+ # Review _*Actions*_ and _*Issues*_
+ # KOI performance update
+ # perfSONAR-PS v3.1 Release Update
+   * New Bugs
+   * Release Candidate Generation
+     * LS, SNMP-MA, LS-reg, status to be updated this week (not done yet).
+     * pingER may need one for docs and hLS registration issue.
+ # pS-NPToolkit 3.1 status
+   * Plans to update the roadmap with feature status.
+ # OGF Document status (Jason)
+ # Circuit Monitoring Development Status
+ # SNMP-MA ESnet new database integration update
+   * Still waiting on release branching issues
+ # LHC/Atlas deployments (status update)
+ # Next VC will be 6/15.
+
+=== ACTIONS ===
+
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
