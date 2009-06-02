@@ -7,7 +7,6 @@ Thre are a lot of info on Catalyst on the web since its mature product with
 == Googled links, reviews, blogs... ==
 
 === Links ===
-
   * [http://www.catalystframework.org/ Project page]
   * [http://search.cpan.org/dist/Catalyst-Manual/ Most complete Manual]
   * [http://www.template-toolkit.org/docs/tutorial/index.html Template::Tookit tutorial]
