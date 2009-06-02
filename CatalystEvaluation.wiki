@@ -1,4 +1,4 @@
-= Evaluation and useful inforamtion about applicability of the perl's Catalyst web framework for ps-ps =
+= Evaluation of the applicability of Catalyst web framework for ps-ps =
 
 The proposed solution for the ps-ps web interfaces is to utilize Catalyst with Template::Toolkit. There is no dependency on the webserver, it could be either plain Apache or anything with CGI support or FastCGI or mod_perl under Apache.
 Thre are a lot of info on Catalyst on the web since its mature product with 
