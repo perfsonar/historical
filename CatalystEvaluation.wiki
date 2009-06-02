@@ -10,6 +10,7 @@ Thre are a lot of info on Catalyst on the web since its mature product with
 
   * [http://www.catalystframework.org/ Project page]
   * [http://search.cpan.org/dist/Catalyst-Manual/ Most complete Manual]
+  *[http://dev.catalystframework.org/wiki/gettingstarted/howtos/introduction_to_catalyst_for_cgi_programmers Introduction for CGI programmers]
   * [http://www.template-toolkit.org/docs/tutorial/index.html Template::Tookit tutorial]
   * [http://dragonstaff.blogspot.com/2009/05/testing-with-perl-catalyst.html Testing under Catalyst]
   * [http://perlalchemy.blogspot.com/2008/10/progress.html On move to Catalyst]
