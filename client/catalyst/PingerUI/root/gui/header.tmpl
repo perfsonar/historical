@@ -39,7 +39,7 @@
 	  	        name="filter_project[% index %]"  
 		        id="filter_project[%  index %]"
                         value="[% project  %]"
-			onClick="filterMAs('[% project  %]')"/> 
+			onClick="filterMAs('[% project  %]','[% index   %]')"/> 
 	[%  index = index + 1 %] 
 	[% END %]
   </TD>
@@ -241,8 +241,13 @@
     }
    }); 
 
-function filterMAs(name) {
-   
+function filterMAs(name,index) {
+      $$('input.bbuttons_filter_ma_selected').each(function(name){
+                $(name).removeClassName('bbuttons_filter_ma_selected');
+		 
+      }); 
+      $('get_links').removeClassName('bbuttons_filter_ma_selected');
+      $('filter_project' + index).addClassName('bbuttons_filter_ma_selected');
       new Ajax.Updater({ success: 'filtered_ma', failure: 'statusDiv'}, '/gui/filter_links', {
                       parameters: { filter_project : name }
      });
@@ -250,7 +255,7 @@ function filterMAs(name) {
 
 function displayLinks() {
    var params = {};  
-   
+   $('get_links').addClassName('bbuttons_filter_ma_selected');
    ['ma_urls', 'src_regexp', 'dst_regexp', 'filter_project', 'packetsize', 'stored_links', 'select_url'].each(function(name) {
        if($(name)  && $F(name)) {
           this[name] = $F(name);

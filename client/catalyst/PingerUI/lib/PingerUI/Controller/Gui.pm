@@ -250,6 +250,7 @@ sub _get_links : Private {
 	my $remote_links = $c->stash->{stored_links}{$url};
 	
 	foreach my $meta  (keys %{$remote_links}) {
+	    next if  $remote_links->{$meta}->{src_name} eq '-1';
 	    $truncated{$meta} = $remote_links->{$meta} if ((!$c->stash->{src_regexp} ||  $remote_links->{$meta}->{src_name}  =~  $c->stash->{src_regexp}) &&
 							   (!$c->stash->{dst_regexp} ||  $remote_links->{$meta}->{dst_name}  =~  $c->stash->{dst_regexp}) &&
 							   (!$c->stash->{packetize}  ||  $remote_links->{$meta}->{packetSize} =~  $c->stash->{packetsize}) 

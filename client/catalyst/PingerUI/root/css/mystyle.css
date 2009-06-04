@@ -22,6 +22,15 @@
   		  margin-left: 3px;
   		  margin-right: 3px;
 		  text-align: left} 
+    .bbuttons_filter_ma_selected {  font-family: Verdana, Geneva, Arial, Helvetica; font-size: 14px; 
+                    font-weight: bolder;               
+  		  background-color: #ADE5D2; 
+  		  color: #000000; 
+  		  margin-top: 3px;
+  		  margin-bottom: 3px;
+  		  margin-left: 3px;
+  		  margin-right: 3px;
+		  text-align: left} 	  
      .buttons {  font-family: Verdana, Geneva, Arial, Helvetica; font-size: 11px; 
                 font-weight: bolder;               
   		  background-color: #DCE5F2; 
