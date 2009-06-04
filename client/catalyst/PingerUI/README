@@ -1,2 +1,15 @@
 Run script/pingerui_server.pl to test the application.
 And open your browser at http://loclahost:3000/gui/display
+-------------
+to run it under Apache webserver with mod_perl:
+
+add contents of the apache_perl.conf as instructed into the
+apache config file and restart apache webserver.
+If your apache server is running on standard port 80 then
+you will be able to see pigner UI interface at:
+
+http://yourwebserver_hostname/gui/display
+
+-------------
+
+author: Maxim Grigoriev maxim_at_fnal_dot_gov, 2009

@@ -87,7 +87,7 @@ sub get_data {
        });    
      my $metaids    = $ma->getData($dresult);   
      my @data =();
-     $c->log->debug(" DATA :: " . Dumper $metaids   );
+     ###$c->log->debug(" DATA :: " . Dumper $metaids   );
      foreach my $key_id  (keys %{$metaids}) {
 	foreach my $id ( keys %{$metaids->{$key_id}{data}}) {
 	   foreach my $timev   (sort {$a <=> $b} keys %{$metaids->{$key_id}{data}{$id}}) {
@@ -125,7 +125,7 @@ sub build_graph {
     my %time_hash  = %{ get_time_hash( $tm_s, $tm_d ) };
     $c->log->fatal("  Illegal time supplied, try again ") unless ( $tm_s && $tm_d );
     $c->stash->{links} =  [$c->stash->{links} ] unless ref $c->stash->{links}  eq 'ARRAY';
-    $c->log->debug(" links ?: " . Dumper  $c->stash->{links});
+    ##$c->log->debug(" links ?: " . Dumper  $c->stash->{links});
  
     my $num_grs = min( scalar @{$c->stash->{links}}, 10 );
     ## only graphs for 10 links will be created
@@ -167,7 +167,7 @@ sub build_graph {
             			       )
             		      ),   ( $NUM_DOTS - 1 )
             		  );
-	    $c->log->debug(" -- $gtype  $i_y = DATA : " . Dumper $data_row);	  
+	    ##$c->log->debug(" -- $gtype  $i_y = DATA : " . Dumper $data_row);	  
             $previous_ind = $i_y if ( !$previous_ind ); 
             for ( my $ind_y = $previous_ind + 1; $ind_y <= $i_y; $ind_y++ )   {
             	next if $datum_href->{clp} > 99;
@@ -237,7 +237,7 @@ sub build_graph {
          $title
              = "Duplicated/Reordered packets\n $src_dest_string, pinged by $packet_size   bytes"
              if $gtype eq 'dupl';
-         $c->log->info('DATA : ' . Dumper      $summ{meanRtt}{count});
+         ##$c->log->info('DATA : ' . Dumper      $summ{meanRtt}{count});
          my $image_obj = &graph_it2( $c, $gpr, $title, $gtype, \@o_x,  \%summ,  "Date, $time_label", $Y_label{$gtype});
         if ( $image_obj ) {
 	    if($c->stash->{get_files}) {

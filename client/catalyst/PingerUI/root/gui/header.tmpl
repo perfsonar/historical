@@ -12,75 +12,41 @@
     <script type="text/javascript" src="/js/jscalendar-1.0/lang/calendar-en.js"></script>
     <script type="text/javascript" src="/js/jscalendar-1.0/calendar-setup.js"></script>
     <script type="text/javascript" src="/js/prototype.js"></script> 
-    <script type="text/javascript">
-  
-   Ajax.Responders.register({
-     onCreate: function() {
-        if (Ajax.activeRequestCount === 1) {
-           $('spinner').show();
-        }
-    },
-    onComplete: function() {
-        if (Ajax.activeRequestCount === 0) {
-           $('spinner').hide();
-        }
-    }
-   }); 
-     
-function displayLinks() {
-   var params = {};  
- 
-   ['ma_urls', 'src_regexp', 'dst_regexp', 'packetsize', 'stored_links'].each(function(name) {
-       if($(name)) {
-          this[name] = $(name).value;
-       }
-   }, params); 
-   new Ajax.Updater({ success: 'linksdiv', failure: 'statusDiv'}, '/gui/displayLinks', {
-                      parameters: params
-   });  
     
-   
-}
-
-function displayGraph() {
-   var params = {}; 
-  
-   ['start_time', 'end_time',  'gmt_offset',  'gtype', 'upper_rt','gpresent',   'links', 'stored_links'].each(function(name, index) {
-       if($(name)) {
-          this[name] = $(name).value;
-       }
-   }, params); 
-   new Ajax.Updater({ success: 'graph', failure: 'statusDiv'}, '/gui/displayGraph', {
-                      parameters: params
-   });
-  
-}
-
-function resetSession() {
-   var params = {};
-   new Ajax.Updater({ success: 'wrapper', failure: 'statusDiv'}, '/gui/display');
-}
-
-</script>
 <title>[% title %]</title>
   
 </head> 
-
 <BODY>
-
-
 <div id="wrapper">
 <div id="header">
    <h2 id="header">[% title %]</h2>
 </div>
+
 <div id="remote_ma">
-<TABLE class="main" cols="6">  
+<TABLE class="main" cols="6">
+ [% IF remote_urls.size > 0 %]  
   <tr>
-  <TD   colspan="1"> <span class="nblue">Step 1</span><br/> 
+  <td> <span class="nblue">Step 1</span><br/> 
+       <span class="arn"> Select remote PingER MA<p/> or</span>
+  </TD>
+   <TD   colspan="5">          
+         <SELECT NAME="select_url" ID="select_url" SIZE="7" MULTIPLE class="fc_st">    
+	   [% FOREACH url IN remote_urls %]	
+	      <OPTION class="smver_1" VALUE="[% url.url %]">[% url.url_label %] 
+	   [% END %]
+	 </SELECT>
+   </TD>
+  </tr> 
+ [% END %]
+  <tr>	
+  <TD> 
+  [% UNLESS remote_urls.size > 0 %]  
+         <span class="nblue">Step 1</span><br/> 
+   [% END %]
       <span class="arn">Enter URL(s)</span>
   </TD>	
   <TD   colspan="5"> 
-     <textarea rows="5" cols="75"   name="ma_urls"  
+     <textarea rows="2" cols="64"   name="ma_urls"  
 				    id="ma_urls">[% ma_urls %]</textarea>
  </TD>	     
  </TR>      
@@ -131,7 +97,7 @@ function resetSession() {
 <div id="statusDiv" name="statusDiv"></div>
 &nbsp;
 <div id="linksdiv" name="linksdiv"></div> 
-<div id="graph" name="graph"></div>
+ 
 <div id="params">
 <TABLE   class="main"  cols="6"> 
    <TR>
@@ -173,20 +139,14 @@ function resetSession() {
     </script>
      </TD>  
        <TD   colspan="2">
-       <TABLE class="params">	 
-	        <TR>
-		   <span class="snbld">GMT offset</span>
-                   <TD class="smver_2"> 
-	             <SELECT ID="gmt_offset"  NAME="gmt_offset" class="fc_st">
+	 <span class="snbld">GMT offset</span>
+	             <SELECT ID="gmt_offset"  NAME="gmt_offset" class="fc_st_auto">
                        [% FOREACH gmt_option IN gmt_options %]	
                           <OPTION VALUE="[% gmt_option.gmt_time %]>[% gmt_option.gmt_time_label %]
 	               [% END %]	  
                       </SELECT>
-                    </TD>
-	      </TR>
-      </TABLE>    
-     </TD>             
-  </TR>
+      </TD>           
+   </TR>
    <TR>
    <TD   colspan="6">
     &nbsp;
@@ -195,7 +155,7 @@ function resetSession() {
      <TR>
         <TD colspan="2">
 	 <span class="snbld">Type of Metric</span><br>
-	   <SELECT NAME="gtype" ID="gtype" class="fc_st">
+	   <SELECT NAME="gtype" ID="gtype" class="fc_st_auto">
 	   <OPTION VALUE="ipdv">MIN/MAX/MEAN/IQR IPD
 	   <OPTION VALUE="dupl">DUPL/REORDERED packets
 	   <OPTION VALUE="rt">Round Trip Time (RTT)
@@ -205,7 +165,7 @@ function resetSession() {
 	 </TD>
 	 <TD colspan="2">
 	    <span class="snbld">Upper RTT(or IPD) Limit</span><br>
-              <SELECT NAME="upper_rt"  ID="upper_rt"  class="fc_st">  
+              <SELECT NAME="upper_rt"  ID="upper_rt"  class="fc_st_auto">  
 	           [% FOREACH rt_time IN rt_times %]
                      <OPTION VALUE="[% rt_time.rtt_time %]>[% rt_time.rtt_time_label %]
 	           [% END %]
@@ -213,7 +173,7 @@ function resetSession() {
         </TD>
 	<TD colspan="2">
 	  <span class="snbld">Graph Type</span><br>
-	  <SELECT NAME="gpresent"  ID="gpresent" class="fc_st">
+	  <SELECT NAME="gpresent"  ID="gpresent" class="fc_st_auto">
 	    <OPTION VALUE="bars">BARS
 	    <OPTION VALUE="lines" SELECTED>LINES
 	    <OPTION VALUE="area">AREA(STACKED)
@@ -226,10 +186,10 @@ function resetSession() {
 <TR>
   <TD colspan="3"><span class="nblue">Step 3</span>
   <input type="button"  class="bbuttons" 
-	  	        name="get_graph"  
-		        id="get_graph"
-                        onClick="displayGraph();" 
-                        value="Get Graph"/>
+	  	        name="get_graph2"  
+		        id="get_graph2"
+                        value="Get Graph"
+			onClick="displayGraph()"/>
   </TD>   
   <TD colspan="3">
   <!-- input type="button"  class="bbuttons" 
@@ -243,6 +203,56 @@ function resetSession() {
 </TABLE>
 </div>
 </div>
+<script type="text/javascript">
+   Ajax.Responders.register({
+     onCreate: function() {
+        if (Ajax.activeRequestCount === 1) {
+           $('spinner').show();
+        }
+    },
+    onComplete: function() {
+        if (Ajax.activeRequestCount === 0) {
+           $('spinner').hide();
+        }
+    }
+   }); 
+     
+function displayLinks() {
+   var params = {};  
+  
+   ['ma_urls', 'src_regexp', 'dst_regexp', 'packetsize', 'stored_links', 'select_url'].each(function(name) {
+       if($(name)) {
+          this[name] = $(name).value;
+       }
+   }, params); 
+   new Ajax.Updater({ success: 'linksdiv', failure: 'statusDiv'}, '/gui/displayLinks', {
+                      parameters: params
+   });
+}
+
+function displayGraph() {
+   var params = {}; 
+   if ($('notice')) {
+       $('notice').hide(); 
+   } 
+   ['start_time', 'end_time',  'gmt_offset',  'gtype', 'upper_rt','gpresent',   'links', 'stored_links'].each(function(name, index) {
+       if($(name)) {
+          this[name] = $(name).value;
+       }
+   }, params); 
+   new Ajax.Updater({ success: 'graph', failure: 'statusDiv'}, '/gui/displayGraph', {
+                      parameters: params
+   });
+  
+}
+
+function resetSession() {
+   var params = {};
+   new Ajax.Updater({ success: 'wrapper', failure: 'statusDiv'}, '/gui/display');
+} 
+ 
+</script>
 </body>
 </html>
-  
+ 
+

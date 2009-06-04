@@ -21,7 +21,7 @@ use version; our $VERSION = '3.2';
 use Exporter (); 
 use base qw(Exporter);
 our @EXPORT = ();
-our @EXPORT_OK = qw(check_time get_time_hash $SCRATCH_DIR $MYPATH max min $BUILD_IN_KEY validURL getURL  fix_regexp);
+our @EXPORT_OK = qw(check_time   get_time_hash $SCRATCH_DIR $MYPATH max min $BUILD_IN_KEY validURL getURL  fix_regexp);
 use Time::Local; 
 use POSIX qw(strftime);  
 use Date::Manip;
@@ -170,10 +170,7 @@ sub min {
   return  $_[0] < $_[1] ? $_[0] : $_[1] ;
 
 }
-
-
-
-
+ 
 1;
 
 

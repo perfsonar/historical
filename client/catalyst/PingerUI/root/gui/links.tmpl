@@ -8,7 +8,7 @@
   <TR>
       <TD colspan="3">
          [% IF links.size > 0 %] 
-         <SELECT NAME="links" ID="links" SIZE="10" MULTIPLE class="fc_st">    
+         <SELECT NAME="links" ID="links" SIZE="10" MULTIPLE class="fc_st_links">    
 	   [% FOREACH link IN links %]	
 	      <OPTION class="smver_1" VALUE="[% link.meta_link %]">[% link.meta_link_label %] 
 	   [% END %]
@@ -19,8 +19,9 @@
       </TD>
       <TD colspan="3">
          <div id="graph">  
-               &nbsp;
+             <span class="arn" id="notice" name="notice">Select End to End link from the left menu and select Start Time and End Time from the buttom menu.
+           All other parameters are optional.</span>
         </div> 
     </TD>
   </TR>
-</TABLE>      
+</TABLE>
