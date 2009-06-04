@@ -11,7 +11,7 @@
    * Maxim: Fixing statistical bug in pingER. Have new RPM's. Explored catalyst for GUIs. Can handle large loads. Moved pingER data UI under catalyst under trunk. Will start a wiki page to start evaluation of moving pS-PS GUIs into the same framework.
    * Jeff: OGF last week. NM-WG is progressing as expected. NMC is on track, but more input is needed from GN3 participants. NML was contentious as expected, but progress was made. Specifically, lifetime concept was agreed to. And, the 'relation' element in UNIS makes the UNIS model much closer to NDL. Watch for notes/docuements.
  # Review _*Actions*_ and _*Issues*_
-   * [http://perfsonar-ps.googlecode.com/svn/wiki/20090601perfsonar-ps-issues.xls]
+   * [http://perfsonar-ps.googlecode.com/svn/wiki/20090518Video/20090601perfsonar-ps-issues.xls]
       * Brian: will look at the data since it has been running a while now.
       * Joe: We should be tracking progress of issues week by week.
  # Next VC will be 6/8.

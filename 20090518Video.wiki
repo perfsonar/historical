@@ -13,7 +13,7 @@
    * Joe: no update.
    * Fahad: Working on integrating gridFTP with pS.
  # Review _*Actions*_ and _*Issues*_
-   * [http://perfsonar-ps.googlecode.com/svn/wiki/20090518perfsonar-ps-issues.xls]
+   * [http://perfsonar-ps.googlecode.com/svn/wiki/20090518Video/20090518perfsonar-ps-issues.xls]
  # KOI performance update
  # perfSONAR-PS v3.1 Release Update
    * New Bugs
