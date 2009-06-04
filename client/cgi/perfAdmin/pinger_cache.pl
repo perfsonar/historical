@@ -308,10 +308,7 @@ my %counter = ();
 my %lookup_url = ();
 foreach my $et ( keys %list ) {
     my $file = q{};
-    if ( $et eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" or $et eq "http://ggf.org/ns/nmwg/tools/snmp/2.0" ) {
-        $file = "list.snmpma";
-    }
-    elsif ( $et eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" or $et eq "http://ggf.org/ns/nmwg/tools/pinger/2.0" ) {
+    if ( $et eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" or $et eq "http://ggf.org/ns/nmwg/tools/pinger/2.0" ) {
         $file = "list.pinger";
     }
     next unless $file;
@@ -384,11 +381,13 @@ foreach my $et ( keys %list ) {
             push  @results_json,  \%hash_toadd; 
 	}
     }
-    my $tmpfile = '/tmp/pinger_cache_tmp' . time();
-    open( OUT, $tmpfile  ) or croak "can't open $tmpfile .";
+    my $tmpfile = "/tmp/$file" . time();
+    copy($base . "/" . $file, $tmpfile);
+    open( OUT, "$writetype$tmpfile"  ) or croak "$! : can't open $tmpfile";
     print OUT encode_json \@results_json if @results_json;
     close(OUT);
-    move($tmpfile ,$writetype . $base . "/" . $file);
+    carp(" Renaming $tmpfile ->   $base$file ");
+    move($tmpfile ,  $base . $file);
 
 }
 
@@ -416,6 +415,7 @@ $Id: cache.pl 2481 2009-02-26 18:30:54Z zurawski $
 =head1 AUTHOR
 
 Jason Zurawski, zurawski@internet2.edu
+Maxim Grigoriev, AKA "the_butcher", maxim_at_fnal_gov
 
 =head1 LICENSE
 
