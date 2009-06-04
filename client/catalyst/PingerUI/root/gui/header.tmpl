@@ -16,36 +16,60 @@
 <title>[% title %]</title>
   
 </head> 
+
 <BODY>
 <div id="wrapper">
 <div id="header">
    <h2 id="header">[% title %]</h2>
 </div>
-
 <div id="remote_ma">
-<TABLE class="main" cols="6">
- [% IF remote_urls.size > 0 %]  
-  <tr>
-  <td> <span class="nblue">Step 1</span><br/> 
-       <span class="arn"> Select remote PingER MA<p/> or</span>
+<TABLE class="main" cols="6"> 
+ [% IF project_table.size > 0 %]  
+   <tr> 
+   <td colspan="6"> 
+     <span class="nblue">Step 1</span><br/>  
+       <span class="arn"> Filter the list below by clicking on the project button</span>
+    </TD>
+    </tr> 
+     <tr>
+    <td colspan="6">
+    [% SET index = 1 %] 
+       [% FOREACH project IN   project_table.keys %]	
+	  <input type="button"  class="bbuttons_filter_ma" 
+	  	        name="filter_project[% index %]"  
+		        id="filter_project[%  index %]"
+                        value="[% project  %]"
+			onClick="filterMAs('[% project  %]')"/> 
+	[%  index = index + 1 %] 
+	[% END %]
   </TD>
-   <TD   colspan="5">          
+ </tr> 
+  [% END %]     		
+ 
+   <tr> 
+   <TD   colspan="6">
+      
+       <div id="filtered_ma" name="filtered_ma" style="display:[% UNLESS remote_urls.size > 0; 'none'; END %];">          
          <SELECT NAME="select_url" ID="select_url" SIZE="7" MULTIPLE class="fc_st">    
-	   [% FOREACH url IN remote_urls %]	
+	   [% FOREACH url IN  remote_urls %]	
 	      <OPTION class="smver_1" VALUE="[% url.url %]">[% url.url_label %] 
 	   [% END %]
 	 </SELECT>
+      </div>
+    [% UNLESS remote_urls.size > 0 %]
+      <span class="nblue">Step 1</span><br/> 
+      <span class="arn">Enter URL(s)</span>     
+    [% END %] 
+         
    </TD>
   </tr> 
- [% END %]
   <tr>	
-  <TD> 
-  [% UNLESS remote_urls.size > 0 %]  
-         <span class="nblue">Step 1</span><br/> 
-   [% END %]
-      <span class="arn">Enter URL(s)</span>
-  </TD>	
-  <TD   colspan="5"> 
+  <TD   colspan="6"> 
+         <span class="nblue">Select remote MA from the list above or enter the URL in the text area below</span>   
+  </TD>	     
+ </TR> 
+  <tr>	
+  <TD   colspan="6"> 
      <textarea rows="2" cols="64"   name="ma_urls"  
 				    id="ma_urls">[% ma_urls %]</textarea>
  </TD>	     
@@ -216,13 +240,20 @@
         }
     }
    }); 
-     
+
+function filterMAs(name) {
+   
+      new Ajax.Updater({ success: 'filtered_ma', failure: 'statusDiv'}, '/gui/filter_links', {
+                      parameters: { filter_project : name }
+     });
+}     
+
 function displayLinks() {
    var params = {};  
-  
-   ['ma_urls', 'src_regexp', 'dst_regexp', 'packetsize', 'stored_links', 'select_url'].each(function(name) {
-       if($(name)) {
-          this[name] = $(name).value;
+   
+   ['ma_urls', 'src_regexp', 'dst_regexp', 'filter_project', 'packetsize', 'stored_links', 'select_url'].each(function(name) {
+       if($(name)  && $F(name)) {
+          this[name] = $F(name);
        }
    }, params); 
    new Ajax.Updater({ success: 'linksdiv', failure: 'statusDiv'}, '/gui/displayLinks', {
@@ -235,7 +266,7 @@ function displayGraph() {
    if ($('notice')) {
        $('notice').hide(); 
    } 
-   ['start_time', 'end_time',  'gmt_offset',  'gtype', 'upper_rt','gpresent',   'links', 'stored_links'].each(function(name, index) {
+   ['start_time', 'end_time',  'gmt_offset', 'filter_project',  'gtype', 'upper_rt','gpresent',   'links', 'stored_links'].each(function(name, index) {
        if($(name)) {
           this[name] = $(name).value;
        }

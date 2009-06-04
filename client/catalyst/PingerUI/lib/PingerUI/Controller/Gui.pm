@@ -12,6 +12,7 @@ use perfSONAR_PS::Client::PingER;
 use parent 'Catalyst::Controller';
 use English qw( -no_match_vars );
 use Log::Log4perl  qw(:easy);
+use File::Slurp qw( slurp ) ;
 
 =head1 NAME
 
@@ -48,17 +49,18 @@ sub display : Local {
     my ( $self, $c ) = @_;
     $c->forward('_set_defaults');
     $c->stash->{title} = "PingER Data Charts";
-    $c->stash->{template} = 'gui/header_new.tmpl';
+    $c->stash->{template} = 'gui/header.tmpl';
 }
  
 
 sub _process_params : Private {
-    my ( $self,   $c ) = @_;
-   foreach my $name (qw/src_regexp get_it ma  dst_regexp packetsize ma_urls select_url start_time end_time gmt_offset gtype upper_rt gpresent links/) {
-        $c->stash->{$name} = $c->req->param($name);
+   my ( $self,   $c ) = @_;
+  
+   foreach my $name (qw/src_regexp get_it ma  filter_project dst_regexp packetsize ma_urls select_url start_time end_time gmt_offset gtype upper_rt gpresent links/) {
+        $c->stash->{$name} = $c->request->parameters->{$name};
    }
-   if( !$c->stash->{'stored_links'} && $c->req->param('stored_links') ) {
-        $c->stash->{'stored_links'}   = $c->req->param('stored_links');
+   if( !$c->stash->{'stored_links'} &&  $c->request->parameters->{stored_links} ) {
+        $c->stash->{'stored_links'}   =  $c->request->parameters->{stored_links} ;
         $c->stash->{'stored_links'}   =~ s/'/"/gm;
         $c->stash->{'stored_links'} = decode_json     $c->stash->{'stored_links'}  ;
    }
@@ -79,20 +81,38 @@ sub _set_defaults : Private {
     $c->stash->{gmt_options}  = \@times_gmt;
     $c->stash->{rt_times}  = \@rtt_times;
     $c->stash->{links} = {};
-    $c->stash->{remote_ma} = {ma_urls =>  []};
+    $c->stash->{remote_ma} = {};
     $c->stash->{menu} =  {src_regexp => '*', dst_regexp => '*', packetsize => '*'};
     $c->stash->{stored_links} = {};
     $c->stash->{projects} = {};
     $c->stash->{project_table} = {};
-    #readgLSSites($c);  
+    $c->forward('_get_local_cache');    
+}
+
+=head2  filter_links
+    
+    return only links ofr the project
+
+=cut
+
+sub filter_links : Local {
+    my ( $self, $c ) = @_;
+    $c->forward('_process_params');
+    if($c->stash->{filter_project}) {
+       $c->forward('_get_local_cache');  
+    }
+    $c->stash->{template} =  'gui/filtered_ma.tmpl'; 
+}
+
+
+sub _get_local_cache : Private { 
+    my ( $self,   $c ) = @_;
     my @tmp = ();
     #$c->log->debug("" . Dumper $c->stash->{projects});
     if(-e '/var/lib/perfsonar/list.pinger') {
-        open IN, '/var/lib/perfsonar/list.pinger' or $c->log->logdie(" Global lookup cache failed to poen");
-       
-	my $string = join "", <IN>;
-	close IN;
-	$c->log->debug(" JOSN:: $string ");
+        my $string =  slurp('/var/lib/perfsonar/list.pinger', err_mode => 'croak');
+	return unless $string; 	 
+	#$c->log->debug(" JOSN:: $string ");
         my $data_struct = decode_json $string;
 	foreach my $ma (@{$data_struct}) {
 	    my $url;
@@ -102,38 +122,38 @@ sub _set_defaults : Private {
 		   last;
 		}
 	    }
-	    foreach my $link  (keys %{$ma->{$url}}) {
-	        next unless $link  && %{$ma->{$url}{$link}};
-                push @{$c->stash->{remote_ma}{$url}}, { meta_link => $link, 
-		                                        keys =>  $ma->{$url}{$link}{keys},
-	                                                meta_link_label =>   $ma->{$url}{$link}{src_name}  . 
-		                                                             " -&gt; ".
-	                                                                     $ma->{$url}{$link}{dst_name} . 
-					                                     " (" .
-					                                     $ma->{$url}{$link}{packetSize}  . ")\n"
-		                                      };
-            } 	  
-            my ($domain) =  $url  =~ /http\:\/\/([^\/]+)\//xsm;
+	    my ($domain) =  $url  =~ /http\:\/\/([^\/]+)\//xsm;
             $ma->{desc}  =~ s/^.+\ at\ (.+)$/$1/xsm;
             if($ma->{keywords} && ref $ma->{keywords} eq 'ARRAY') {
 	         foreach my $keyword (@{$ma->{keywords}}) {
 		      $keyword =~ s/^project\://;
-                      $c->stash->{projects}{$ma}{$keyword}++;
-		      $c->stash->{project_table}{$keyword}++;
+		      $c->stash->{projects}{$url}{'ALL PROJECTS'}++;
+                      $c->stash->{projects}{$url}{$keyword}++;
+		      push @{$c->stash->{project_table}{$keyword}}, $url;
+		      push @{$c->stash->{project_table}{'ALL PROJECTS'}}, $url; 
 		 }
-	     }   
-   	     push  @tmp, {url => $url, url_label => $ma->{desc} . "($domain)"} if $url;    
+	     }
+	     if(!$c->stash->{filter_project} ||
+	         ($c->stash->{filter_project} && 
+		  $c->stash->{project_table}{$c->stash->{filter_project}})) {
+		  $c->stash->{remote_ma}{$url} = $ma->{$url} if exists $c->stash->{remote_ma}{$url} &&
+		                                               $ma->{$url} && %{$ma->{$url}};
+   	        push  @tmp, {url => $url, url_label => $ma->{desc} . "($domain)"} if $url;
+	     } 
         }
     }
-    foreach my $local_koi (qw|http://lhc-cms-latency.fnal.gov:8075/perfSONAR_PS/services/pinger/ma 
-                              http://lhc-dmz-latency.deemz.net:8075/perfSONAR_PS/services/pinger/ma|) {   
-        next if($c->stash->{projects}{$local_koi});
-        push  @tmp, {url =>  $local_koi, url_label => 'Fermilab Tier-1 USCMS in Batavia, IL'};     
-        $c->stash->{projects}{$local_koi}{LHC}++;
-        $c->stash->{projects}{$local_koi}{LHCOPN}++;
-        $c->stash->{projects}{$local_koi}{USCMS}++;
+    if(!$c->stash->{filter_project} || $c->stash->{filter_project} =~ /^(LHC|LHCOPN|USCMS|ALL PROJECTS)$/i) {
+	foreach my $local_koi (qw|http://lhc-cms-latency.fnal.gov:8075/perfSONAR_PS/services/pinger/ma 
+                        	  http://lhc-dmz-latency.deemz.net:8075/perfSONAR_PS/services/pinger/ma|) {   
+            next if($c->stash->{projects}{$local_koi});
+            push  @tmp, {url =>  $local_koi, url_label => 'Fermilab Tier-1 USCMS in Batavia, IL'};     
+            foreach my $project_key ('LHC', 'LHCOPN', 'USCMS', 'ALL PROJECTS') {
+        	$c->stash->{projects}{$local_koi}{$project_key}++;
+            }
+
+	}
     }
-    @{$c->stash->{remote_urls}} = sort {$a->{url_label} cmp $b->{url_label}} @tmp  if @tmp;     
+    @{$c->stash->{remote_urls}} = sort {$a->{url_label} cmp $b->{url_label}} @tmp  if @tmp;  
 }
 
 sub _updateParams : Private {
@@ -166,23 +186,24 @@ sub _updateMenu : Private {
 	}
     }    
     my @links = ();
-    $c->stash->{remote_ma}{ma_urls} = [];
+    $c->stash->{remote_ma}  = {};
     if($c->stash->{ma_urls}) {
         my @ma_url_array = split /\s+/,  $c->stash->{ma_urls};
         $c->log->debug('entered URLS: ' . Dumper \@ma_url_array);
-        push @{$c->stash->{remote_ma}{ma_urls}},   @ma_url_array;
+	 my %ma_hash = map { $_ => {}  }  @ma_url_array;
+        $c->stash->{remote_ma} =  %ma_hash; 
     }
     if($c->stash->{select_url}) {
-        my @ma_url_array = split /\s+/,  $c->stash->{select_url};
-        $c->log->debug(' selected  URLS: ' . Dumper \@ma_url_array);
-        push @{$c->stash->{remote_ma}{ma_urls}},  @ma_url_array;
+       $c->stash->{select_url} = [  $c->stash->{select_url} ] if $c->stash->{select_url} && !(ref $c->stash->{select_url});
+       my %ma_hash =  map { $_ => {}  }  @{$c->stash->{select_url}};
+       $c->stash->{remote_ma} = \%ma_hash; 
     } 
     $c->forward('_get_links');
     unless($c->stash->{got_links} && ref $c->stash->{got_links} eq 'HASH') {
-        $c->log->error(" Failed to retrieve links from MAs:" . (join "\n", @{$c->stash->{remote_ma}{ma_urls}}));
+        $c->log->error(" Failed to retrieve links from MAs:" . (join "\n", keys %{$c->stash->{remote_ma}}));
 	$c->stash->{links} =  [ { meta_link  => 'foo',  meta_link_label => "NO Metadata: " . $c->stash->{got_links}  }];
     }
-    foreach my $link (keys %{$c->stash->{got_links}}) {         
+    foreach my $link (sort {$a  cmp $b} keys %{$c->stash->{got_links}}) {         
         push @links, { meta_link =>  "$link", 
 	               meta_link_label => $c->stash->{got_links}{$link}{src_name}  . 
 		                              " -&gt; ".
@@ -201,24 +222,28 @@ sub _get_links : Private {
     my $param = {};
     $param =  { parameters => { packetSize => $c->stash->{packetsize}} } if $c->stash->{packetsize} && 
                                                                             $c->stash->{packetsize} =~ /^\d+$/;
-    my %truncated = ();   
-    foreach my $url (@{$c->stash->{remote_ma}{ma_urls}}) {
+    my %truncated = ();
+    $c->forward('_get_local_cache');  
+    foreach my $url (keys %{$c->stash->{remote_ma}}) {
         unless(validURL($url)) {
 	    $c->log->warn(" Malformed remote MA URL: $url ");
 	    next;
 	}
 	my $metaids = {};
-	eval {
-            my $ma = new perfSONAR_PS::Client::PingER( { instance => $url } );
-	    $c->log->debug(" MA $url  connected: " . Dumper $ma);
-            my $result = $ma->metadataKeyRequest($param);
-	    $c->log->debug(' result from ma: ' . Dumper $result); 
-	    $metaids = $ma->getMetaData($result);
-	};
-	if($EVAL_ERROR) {
-	    $c->log->fatal(" Problem with MA $EVAL_ERROR ");
-	}
-         $c->log->debug(' Metaids: ' . Dumper $metaids);
+	unless(%{$c->stash->{remote_ma}{$url}} ) {
+	    eval {
+        	my $ma = new perfSONAR_PS::Client::PingER( { instance => $url } );
+		$c->log->debug(" MA $url  connected: " . Dumper $ma);
+        	my $result = $ma->metadataKeyRequest($param);
+		$c->log->debug(' result from ma: ' . Dumper $result); 
+		$metaids = $ma->getMetaData($result);
+	    };
+	    if($EVAL_ERROR) {
+		$c->log->fatal(" Problem with MA $EVAL_ERROR ");
+	    }
+	 } else {
+	    $metaids = $c->stash->{remote_ma}{$url};
+	 }
         foreach  my $meta  (keys %{$metaids}) {
            $c->stash->{stored_links}{$url}{$meta} =  $metaids->{$meta} unless $c->stash->{stored_links}{$url}{$meta}; 
         }
@@ -274,7 +299,7 @@ sub getGraph : Local {
 						       $c->stash->{ma} ;
     $c->stash->{get_stream} = 1;
     if($c->stash->{start_time} && $c->stash->{end_time}) {
-        push @{$c->stash->{remote_ma}{ma_urls}}, $c->stash->{ma};
+        $c->stash->{remote_ma}{$c->stash->{ma}} = {};
         $c->forward('_get_links');
         ( $c->stash->{time_start}, $c->stash->{time_end}, 
 	  $c->stash->{gmt_off}, $c->stash->{time_label})     =    check_time($c->stash->{start_time}, 
@@ -301,8 +326,10 @@ sub displayLinks : Local {
     my ( $self, $c ) = @_;
     $c->forward('_process_params');
     $c->forward('_updateMenu');
+   
     $c->stash->{stored_links} = encode_json  $c->stash->{stored_links} if ref $c->stash->{stored_links};
     $c->stash->{stored_links} =~ s/"/'/gm;
+    
     $c->stash->{template} =  'gui/links.tmpl'; 
 }
 
