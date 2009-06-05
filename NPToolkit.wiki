@@ -352,7 +352,7 @@ Version 2.3.11 of this software comes pre-loaded, but does not need to be _start
    * Use as many community names as necessary to properly categorize the data from the installation. 
 
  * *Q: How do I partition a new disk or re-partition an old disk?*
- * *A:* Please see this [NPToolkitDiskFormatting|article] for a primer on disk formatting and re-formatting using the tools on the NPToolkit.
+ * *A:* Please see this [NPToolkitDiskFormatting] for a primer on disk formatting and re-formatting using the tools on the NPToolkit.
 
  * *Q: I see an expired certificate error when I visit the HTTPS pages, what should I do?*
  * *A:* Older versions of the NPToolkit contained an expired, _self signed_ certificate that was originally created by Knoppix.  We have updated this cert on new releases, but there are some steps that can be taken to address the problem.  
