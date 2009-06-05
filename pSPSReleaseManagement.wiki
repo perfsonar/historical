@@ -8,16 +8,13 @@ The perfSONAR-PS release process is based heavily on the [ReleaseManagement gene
 
 == Roadmap ==
 
-*LAST REVISED* <font color=red>March 31, 2009</font>
+*LAST REVISED* <font color=red>June 5, 2009</font>
 
 || *Date* || *Milestone* ||
-|| _8 April_ || [pSPSReleaseManagement#pSPS_Version_3.1 pSPS Version 3.1] ||
-|| _May_ || [pSPSReleaseManagement#pSPS_Version_3.1+ pSPS Version 3.1+] ||
-|| _May_ || [pSPSReleaseManagement#PN_Version_3.1 PN Version 3.1] ||
-|| _June_ || [pSPSReleaseManagement#pSPS_Version_3.2 pSPS Version 3.2] ||
-|| _July_ || [pSPSReleaseManagement#PN_Version_3.2 PN Version 3.2] ||
+|| _8 April 09_ || [pSPSReleaseManagement#pSPS_Version_3.1 pSPS Version 3.1] ||
+|| _3 July 09_ || [pSPSReleaseManagement#pSPS_Version_3.1+ pSPS Version 3.1+] ||
+|| _Aug 09_ || [pSPSReleaseManagement#pSPS_Version_3.2 pSPS Version 3.2] ||
 || _Jan 10_ || [pSPSReleaseManagement#pSPS_Version_4.0 pSPS Version 4.0] ||
-|| _Jan 10_ || [pSPSReleaseManagement#PN_Version_4.0 PN Version 4.0] ||
 
 === perfSONAR-PS ===
 
@@ -75,29 +72,6 @@ The following section details perfSONAR-PS specific enhancements for the future.
   * perfSONAR interfaces for sharing of ProtoGENI performance and management data. (LAMP)
   * DICE-AA integrated AAA supported
 
-=== Performance Node ===
-
-The following section details Performance Node specific enhancements for the future. 
-
-==== PN Version 3.1 ====
-
-  * Additions to pS-NPToolkit to enable Zero-Config mode
-  * Use new versions of OWAMP/BWCTL and [pSPSReleaseManagement#pSPS_Version_3.1+ pSPS Version 3.1+]
-  * Minimal-configuration start-up for diagnostic
-  * All Administration via HTTP
-  * Stability and performance enhancements
-  * Community specific operations
-
-==== PN Version 3.2 ====
-
-  * Fedora-Live based to enable ISO building from rpms
-  * Use [pSPSReleaseManagement#pSPS_Version_3.2 pSPS Version 3.2]
-
-==== PN Version 4.0 ====
-
-  * Allow an administrator to control a set of pS-performance nodes
-  * Combination of yum repository and centralized configuration management tools
-
 == Release Frequency ==
 
 perfSONAR-PS will be released on a bi-yearly basis to coincide with major activities of group members.  We are currently aiming to release:
@@ -113,7 +87,7 @@ For more information regarding this release, please see the information [pSPS200
 
 === v3.1+ Release ===
 
-TBD
+For more information regarding this release, please see the information [pSPS200907Release page].
 
 == Release Process ==
 
