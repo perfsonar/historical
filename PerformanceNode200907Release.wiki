@@ -4,6 +4,78 @@
 
 == Introduction ==
 
+This page outlines details regarding the Performance Node release to begin the week of June 8, 2009 and ended on July 17, 2009 in the release of v3.1 of the Performance Node.
+
+== Release Team ==
+
+ * Jason - Lead
+ * Aaron
+ * Maxim
+ * Jeff
+ * Brian
+ * Joe
+ * TBD
+
+== Release Schedule ==
+
+Release Start: June 12, 2009
+
+Code Slush: June 19, 2009
+
+Code Freeze: June 26, 2009
+
+Beta Generation/Testing Week: July 3, 2009
+
+RC Generation/Testing Week: July 10, 2009
+
+Official Release: July 17, 2009
+
+http://perfsonar-ps.googlecode.com/svn/wiki/PerformanceNode200907Release/schedule.png
+
+== Tasks ==
+
+|| *Task* || *Developer* ||
+|| Disk Integration || Aaron/Jason ||
+|| ... || ... ||
+|| Testing Coordination || Jason/Jeff ||
+|| Tester || Brian/Joe/Maxim/UDel ||
+
+== Specifics ==
+
+The following outline some exceptions to the overall release process.  Also see [PerformanceNodeReleaseManagement] for overall recomendations on this process for the release of this software.
+
+=== Bugs Related to This Release ===
+
+TBD
+
+=== Code Reviews ===
+
+TBD 
+
+=== Documentation Reviews ===
+
+TBD
+
+=== Testing ===
+
+TBD
+
+== Open Tasks ==
+
+ * Jason
+   * List tasks - <font color=yellow>_*IN PROGRESS - 6/5*_</font>
+ * Aaron
+ * Jeff
+ * Maxim
+ * Joe
+ * Brian
+ * Guilherme
+ * Marcos
+   
+== Lessons Learned ==
+
+TBD
+
 == Last Updated ==
 
 $Id$

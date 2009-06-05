@@ -4,6 +4,130 @@
 
 == Introduction ==
 
+This page outlines details regarding the perfSONAR-PS release that began the week of June 12, 2009 and ended on June 5 2009 in the release of v3.1+ of perfSONAR-PS.
+
+== Release Team ==
+
+ * Jason - Lead
+ * Aaron
+ * Maxim
+ * Jeff
+ * Brian
+ * Joe
+ * TBD
+
+== Release Schedule ==
+
+Release Start: June 5, 2009
+
+Code Slush: June 12, 2009
+
+Code Freeze: June 19, 2009
+
+Package Generation Phase, Beta Tests: June 26, 2009
+
+First Release Candidates: July 3, 2009
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPS200907Release/schedule.png
+
+== Services Released and Parties Involved ==
+
+|| *Service* || *Developer* || *Code Reviewer* || *Documentation Reviewer* ||
+|| ... || ... || ... || ... ||
+
+
+== Specifics ==
+
+The following outline some exceptions to the overall release process.  Also see [pSPSReleaseManagement] for overall recomendations on this process for the perfSONAR-PS group.
+
+=== Bugs Related to This Release ===
+
+TBD
+     
+=== Code Reviews ===
+
+The code _review_ can be a lot more in depth than just reading in suggesting.  Most corrections can be done directly to the code base to save time in the process.  Reviewers are encouraged to run [Perltidy] and [Perlcritic] at the end of the review.  
+
+Things to think about as you review:
+
+ * Perldoc:
+   * Is there a footer on each script/module?
+     * License info
+     * Contact Info
+     * Related libraries
+     * API use (where applicable)
+   * Is there a header on each script/module?
+     * Are the names and information correct?
+   * Does each method have a function header
+     * Does it describe inputs and outputs as well as expected behaviour
+ * Library Use - Examine each external library dependency
+   * Is it necessary to use the library (e.g. does the use justify including the dependency)
+   * Could the library be ommited (provide suggestions how)
+ * Code Structure
+   * See the [CodeRules rules of the code]
+ * Design decisions
+   * Question why things are organized/designed they way they are in a constructive fashion.  Developers will be happy to hear the commentary
+ * Function/Module Size
+   * Make constructive comments regarding excessively large or small modules and functions.  Note that ware trying to make a sound object oriented piece of software.
+ * Test Cases
+   * Ensure test cases for unit testing are appropriate in both structure and quantity
+   * Ensure test cases for test harness are appropriate in both structure and quantity
+
+See the [pSPSReleaseManagement#Code_Review Code Review] section from the other document for more information.  The reviews should be shared with the entire group (use the mailing list).  
+
+=== Documentation Reviews ===
+
+Documentation review is a review of included and posted documentation for errors and omissions.  It may help to physically install the software when following installation instructions, etc.
+
+Thinks to think about as you review:
+
+ # In the _*doc/*_ directory:
+   * _*INSTALL*_ - Complete for all types of installs (svn, tar package, RPM).  Handles prerequisite information (e.g. yum repo maintenance) 
+   * _*Changes*_ - List of changes since the last release where applicable
+   * _*README*_ - Configuration and test information meant to supplement _*INSTALL*_.  Should also be complete and may point to other (web) resources
+   * _*LICENSE*_ - Updated for this release (e.g. copyright dates, all parties are mentioned).  
+   * Others?
+ # _*perldoc*_ in each module/script
+   * Does each module have the necessary header/footer?  Are they correct and up to date (including copyright dates, modules used, authors.
+   * Does each function of a header?  Does it describe in basic terms what the function does?  Do not worry about parameters/return values for this release.
+   * Is the doc readable when using _*perldoc*_?
+   * Spelling/grammar errors
+ # Other documentation (e.g. _*user guides*_)
+   * Updated for the most recent release?
+   * Spelling/grammar error free
+   * Reads well - not too technical and should be useful for the most basic user
+   * Complete (e.g. no blank sections, addresses all functionality)
+
+=== Testing ===
+
+Developers are responsible for testing their code:
+
+ * Designing and running unit tests
+   * Address all modules
+   * Address all methods
+   * Test methods for multiple inputs (good and bad)
+   * Generate supporting materials (databases, etc.)
+   * Frequently run these tests after bugfixes and development
+ * Designing and running the test harness to simulate black box activity
+   * Design and provide numerous messages and expected responses
+   * Frequently run these tests after bugfixes and development
+
+== Open Tasks ==
+
+ * Jason
+   * List tasks - <font color=yellow>_*IN PROGRESS - 6/5*_</font>
+ * Aaron
+ * Jeff
+ * Maxim
+ * Joe
+ * Brian
+ * Guilherme
+ * Marcos
+   
+== Lessons Learned ==
+
+TBD
+      
 == Last Updated ==
 
 $Id$
