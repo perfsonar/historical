@@ -122,6 +122,18 @@ Loading Topology:
 	3) If no errors are printed to the screen, you should now be able to try
 	   the requests in the Testing section and see the topology data.
 
+Removing Elements:
+------------------
+  There is an included script to remove topology elements from the topology
+  service. It takes the database information along with a list of topology
+  element identifiers for elements to remove. It then removes those elements
+  from the database.
+
+    perl scripts/remove_elements --db_dir=/path/to/db/directory --db_filename=topology.dbxml --elements=IDENTIFIER[,IDENTIFIER,...]
+
+  If no errors are printed to the screen, those elements will have been removed
+  from the topology database.
+
 Topology Descriptions:
 ----------------------
   The accepted topologies are somewhat flexible to be able to handle the DCN

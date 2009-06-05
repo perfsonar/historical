@@ -113,6 +113,9 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0755,perfsonar,perfsonar) /etc/init.d/*
 
 %changelog
+* XXX YYY ZZ 2009 aaron@internet2.edu 3.1-3
+- Add script to remove elements from the database
+
 * Thu May 29 2009 aaron@internet2.edu 3.1-2
 - Documentation updates
 

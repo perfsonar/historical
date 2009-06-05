@@ -40,4 +40,5 @@ scripts/install_dependencies.sh
 scripts/load_topology
 scripts/prepare_environment.sh
 scripts/psCreateTopologyDB
+scripts/remove_elements
 scripts/topology_service

@@ -34,10 +34,9 @@ use perfSONAR_PS::Utils::ParameterValidation qw( validateParams );
 use perfSONAR_PS::Topology::Common qw( normalizeTopology validateDomain validateNode validatePort validateLink getTopologyNamespaces );
 use perfSONAR_PS::Topology::ID qw( idConstruct idIsFQ idAddLevel idRemoveLevel idBaseLevel idEncode idDecode idSplit idCompare idMatch idIsAmbiguous );
 
-=head2 new($package, $uri_string)
+=head2 new($package)
 
-The new function takes a URI connection string as its first argument. This
-specifies which MA to interact with.
+The new function creates a new Topology Database object.
 
 =cut
 
@@ -645,6 +644,124 @@ sub changeTopology {
 
     return ( 0, q{} );
 }
+
+
+=head2 removeElement( $self, $ids )
+
+A function which takes a list of identifiers and removes those elements from
+the database.  Returns an array whose first element is 0 on success and -1 on
+failure. On failure, the second element will contain an error message.
+
+=cut
+sub removeElements {
+    my ( $self, $ids ) = @_;
+    my ( $status, $res );
+
+    return ( -1, "Database not open" ) if ( $self->{DB_OPEN} == 0 );
+
+    return ( -1, "Database is Read-Only" ) if ( $self->{READ_ONLY} == 1 );
+
+    my %elements = ();
+    my %toplevel_to_remove = ();
+    my %elements_to_remove = ();
+
+    # Loop through the elements to make sure they all exist before we start
+    # making changes. This will preload them into the elements hash so we can
+    # look them up later.
+    foreach my $id (@{ $ids }) {
+        my ( $status, $res ) = $self->lookupElement( $id, \%elements );
+
+        if ($status != 0) {
+            return (-1, "Couldn't locate specified element: $res");
+        }
+
+	$elements_to_remove{$id} = 1;
+    }
+
+    my $error;
+
+    my $dbTr = $self->{DATADB}->getTransaction( { error => \$error } );
+    unless ( $dbTr ) {
+        my $msg = "Cound not start database transaction, database responded with \"" . $error . "\".";
+        $self->{LOGGER}->error( $msg );
+        return ( -1, $msg );
+    }
+
+    foreach my $id (@{ $ids }) {
+        my $parent;
+        my $child;
+        my $status;
+        my $res;
+
+        ( $status, $res ) = $self->lookupElement( idRemoveLevel( $id, q{} ), \%elements );
+        if ($status != 0) {
+            # If no parent is found, the element is at the top-level so we'll
+            # need to make a note to remove it.
+            $toplevel_to_remove{$id} = 1;
+            next;
+        }
+
+        $parent = $res;
+
+        # The below was cached in the elements hash so we can ignore the return values.
+        ( $status, $res ) = $self->lookupElement( $id, \%elements );
+
+        $child = $res;
+
+        $parent->removeChild( $child );
+    }
+
+    # Find and commit the changed documents
+    foreach my $id ( keys %elements ) {
+        next if ( defined $elements{$id}->parentNode->parentNode );
+
+        # Skip the document if we're going to remove it.
+        next if ($elements_to_remove{$id});
+
+        $self->{LOGGER}->debug( "Inserting $id" );
+
+        # This is a hack to force the namespace declaration into the
+        # node we're going to insert. A better solution would be to
+        # have each node declare its namespace, but I'm not sure how to
+        # finagle libxml into doing that.
+        $elements{$id}->unbindNode;
+        $elements{$id}->setNamespace( $elements{$id}->namespaceURI(), $elements{$id}->prefix, 1 );
+
+        $self->{DATADB}->remove( { name => $id, txn => $dbTr } );
+
+        if ( $self->{DATADB}->insertIntoContainer( { content => $elements{$id}->toString, name => $id, txn => $dbTr, error => \$error } ) != 0 ) {
+            $self->{DATADB}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+            $self->{DATADB}->checkpoint( { error => \$error } );
+            $self->{DATADB}->closeDB( { error => \$error } );
+
+            my $msg = "Error updating $id: $error";
+            $self->{LOGGER}->error( $msg );
+            return ( -1, $msg );
+        }
+    }
+
+    # Remove all the top-level elements that are slated to be removed.
+    foreach my $id ( keys %toplevel_to_remove) {
+        $self->{DATADB}->remove( { name => $id, txn => $dbTr } );
+    }
+
+    $status = $self->{DATADB}->commitTransaction( { txn => $dbTr, error => \$error } );
+    if ( $status != 0 ) {
+        $self->{DATADB}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+        $self->{DATADB}->checkpoint( { error => \$error } );
+        $self->{DATADB}->closeDB( { error => \$error } );
+
+        my $msg = "Database Error: \"" . $error . "\".";
+        $self->{LOGGER}->error( $msg );
+        return ( -1, $msg );
+    }
+
+    $self->{DATADB}->checkpoint( { error => \$error } );
+    $self->{DATADB}->closeDB( { error => \$error } );
+
+    return ( 0, q{} );
+}
+
 
 =head2 lookupElement ($self, $id, \%elements)
 
