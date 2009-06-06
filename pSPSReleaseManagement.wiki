@@ -105,7 +105,7 @@ perfSONAR-PS has dependencies on the following software components in Internet2 
    * The OSCARS MA, TL1 Collection, and Status services may be effected by a DCN release.  Each of these can coordinate with the DCN development team prior to a release to ensure compatibility.
  * _*Phobeus*_
    * Phoebus will begin to use perfSONAR-based host monitoring as well as network measurements.  This is not a hard requirement, but prior to a release the Phoebus development team must be consulted.  
- * _*Performance Node*_
+ * _*pS-Performance Toolkit*_
    * This software will normally be released *after* perfSONAR-PS to take full advantage of all new features and bugfixes
 
 Prior to a release cycle each of these should be weighed to gauge the importance they may hold in a new product vs. a previously tested release.
@@ -331,9 +331,9 @@ A breakdown and explanation of each label follows:
    * _*GUI*_ - PerfSONAR-PS GUI Tools
    * _*API*_ - Programmer Interfaces
    * _*NPToolkit*_ - Network Performance Toolkit (<font color="red">depreciated</font>) 
-   * _*PerformanceNode*_ - Performance Node
-   * _*PerformanceNodeKnoppix*_ - Performance Node - Knoppix Releases
-   * _*PerformanceNodeFedora*_ - Performance Node - Fedora Releases
+   * _*PerformanceToolkit*_ - pS-Performance Toolkit
+   * _*PerformanceToolkitKnoppix*_ - pS-Performance Toolkit - Knoppix Releases
+   * _*PerformanceToolkitFedora*_ - pS-Performance Toolkit - Fedora Releases
  * Misc
    * _*Security*_ - Security risk to users
    * _*Performance*_ - Performance issue

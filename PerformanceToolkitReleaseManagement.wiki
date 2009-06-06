@@ -1,24 +1,24 @@
-#summary Performance Node Release Management
+#summary Performance Toolkit Release Management
 
 <wiki:toc max_depth="6" />
 
 == Introduction ==
 
-The Performance Node release process is based heavily on the [ReleaseManagement generic] process.  This page recommends actions for release of the Performance Node only.  Content subject to change, so please review frequently.
+The Performance Toolkit release process is based heavily on the [ReleaseManagement generic] process.  This page recommends actions for release of the Performance Toolkit only.  Content subject to change, so please review frequently.
 
 == Roadmap ==
 
 *LAST REVISED* <font color=red>June 5, 2009</font>
 
 || *Date* || *Milestone* ||
-|| _17 July 09_ || [pSPSReleaseManagement#PN_Version_3.1 PN Version 3.1] ||
-|| _Sept 09_ || [pSPSReleaseManagement#PN_Version_3.2 PN Version 3.2] ||
+|| _17 July 09_ || [pSPSReleaseManagement#PTK_Version_3.1 PTK Version 3.1] ||
+|| _Sept 09_ || [pSPSReleaseManagement#PTK_Version_3.2 PTK Version 3.2] ||
 
-=== Performance Node ===
+=== Performance Toolkit ===
 
-The following section details Performance Node specific enhancements for the future. 
+The following section details Performance Toolkit specific enhancements for the future. 
 
-==== PN Version 3.1 ====
+==== PTK Version 3.1 ====
 
   * Additions to pS-NPToolkit to enable Zero-Config mode
   * Use new versions of OWAMP/BWCTL and [pSPSReleaseManagement#pSPS_Version_3.1+ pSPS Version 3.1+]
@@ -27,15 +27,15 @@ The following section details Performance Node specific enhancements for the fut
   * Stability and performance enhancements
   * Community specific operations
 
-==== PN Version 3.2 ====
+==== PTK Version 3.2 ====
 
   * Fedora-Live based to enable ISO building from rpms
   * Use [pSPSReleaseManagement#pSPS_Version_3.2 pSPS Version 3.2]
 
-==== PN Version 4.0 ====
+==== PTK Version 4.0 ====
 
-  * Allow an administrator to control a set of pS-performance nodes
-  * Combination of yum repository and centralized configuration management tools
+  * Combination of yum repository and centralized configuration management tools to potentially network install performance nodes. Coordinated installs might be referred to as a pS-Performance Grid.
+  * Allow an administrator to control a set of pS-performance nodes (created using the pS-Performance Toolkit or potentially done via network install).
 
 == Release Frequency ==
 

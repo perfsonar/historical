@@ -1,4 +1,6 @@
-#summary Release Management Overview<wiki:toc max_depth="6" />
+#summary Release Management Overview
+
+<wiki:toc max_depth="6" />
   
 == Introduction ==
 
@@ -56,7 +58,7 @@ Each sub project will maintain a seperate page with specifics related to the rel
  * OWAMP
  * BWCTL
  * NDT
- * [PerformanceNodeReleaseManagement Performance Node]
+ * [PerformanceToolkitReleaseManagement Performance Toolkit]
  * DCN
  * Phoebus
 
@@ -216,24 +218,24 @@ should be shared with others so the schedule can be adjusted as needed.  Some
 major dependencies in our own case:
 
  * *perfSONAR-PS Components*
-   * _Should_ be complete prior to any release of the *Performance Node*
+   * _Should_ be complete prior to any release of the *Performance Toolkit*
    * _Should_ depend on relationship to schedules of other partners (_ESnet_, _Fermilab_, _SLAC_, _GT_, _IU_, _UDel_)
    * _May_ depend on *DCN* or *Phoebus* for particular components
- * *Performance Node*
+ * *Performance Toolkit*
    * _Should not_ release at the same time as other tools; this may be relaxed depending on forecast
    * External relationship to *NPAD*, *Iperf*, *Web100*
  * *Phoebus*
    * _Should_ depend on certain parts of *perfSONAR-PS* and *DCN*
    * _Should_ depend on the scheduling needs of _UDel_ and _Internet2_
  * *OWAMP*
-   * _Should_ be complete prior to *Performance Node* release
+   * _Should_ be complete prior to *Performance Toolkit* release
    * _May_ run concurrent to *bwctl*, *ndt* due to lack of strong dependencies
  * *BWCTL*
-   * _Should_ be complete prior to *Performance Node* release
+   * _Should_ be complete prior to *Performance Toolkit* release
    * _May_ run concurrent to *owamp*, *ndt* due to lack of strong dependencies
    * External relationship to *thurlay*, *iperf*, *nuttcp*
  * *NDT*
-   * _Should_ be complete prior to *Performance Node* release
+   * _Should_ be complete prior to *Performance Toolkit* release
    * _May_ run concurrent to *owamp*, *bwctl* due to lack of strong dependencies
    * External relationship to *web100* and the linux kernel
  * *DCN*

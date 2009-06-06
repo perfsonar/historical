@@ -1,10 +1,10 @@
-#summary Performance Node 3.1 Release
+#summary Performance Toolkit 3.1 Release
 
 <wiki:toc max_depth="6" />
 
 == Introduction ==
 
-This page outlines details regarding the Performance Node release to begin the week of June 8, 2009 and ended on July 17, 2009 in the release of v3.1 of the Performance Node.
+This page outlines details regarding the Performance Toolkit release to begin the week of June 8, 2009 and ended on July 17, 2009 in the release of v3.1 of the Performance Toolkit.
 
 == Release Team ==
 
@@ -30,7 +30,7 @@ RC Generation/Testing Week: July 10, 2009
 
 Official Release: July 17, 2009
 
-http://perfsonar-ps.googlecode.com/svn/wiki/PerformanceNode200907Release/schedule.png
+http://perfsonar-ps.googlecode.com/svn/wiki/PerformanceToolkit200907Release/schedule.png
 
 == Tasks ==
 
@@ -42,7 +42,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/PerformanceNode200907Release/schedul
 
 == Specifics ==
 
-The following outline some exceptions to the overall release process.  Also see [PerformanceNodeReleaseManagement] for overall recomendations on this process for the release of this software.
+The following outline some exceptions to the overall release process.  Also see [PerformanceToolkitReleaseManagement] for overall recomendations on this process for the release of this software.
 
 === Bugs Related to This Release ===
 
