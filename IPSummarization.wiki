@@ -2257,83 +2257,84 @@ The following data sets were gathered from perfSONAR services in March 2009.
 }}}
 
 
-=== Proposed Algorithm #1:  Independent Children Algorithm with Minimum Summarizing Mask ===
+=== Proposed Algorithm:  Independent Children Algorithm with Minimum Summarizing Mask ===
 
 This algorithm works as follows.
 
 Given a list of IP numbers, create a [http://en.wikipedia.org/wiki/Patricia_tree Patricia Tree] (or simply [http://en.wikipedia.org/wiki/Trie Trie]) and iterate over the list, inserting each IP number into the trie.  The trie data structure will automatically create inner nodes which correspond to the (candidate) summarization nodes, or CIDR classes.
 
-When a node is created into the trie, two values are calculated and attached to the node:  the _coverage_ and the _childCount_.
+When a node is created into the trie, two values are calculated and attached to the node:  the _density_ and the _childCount_.
 
 The _childCount_ is the number of descendants below a node.  Or, in other words, the number of nodes within the subtrees deriving from that node.  Every time a node is added to the trie, its ancestors also have this value updated.
 
-The _coverage_ is a measure of the density of number of descendants of the node over the maximum possible number of hosts below the node.  The idea here is that, if below a node, there can exist a maximum of 32 hosts, but actually there exists only one, then the density of hosts below that node is low.  If there can exist a maximum of 32 hosts, and there are actually 32 hosts below the node, then the density is high (or maximal in this case).  The number of maximum hosts below a node is calculated as:
+The _density_ is a measure of the density of number of descendants of the node over the maximum possible number of hosts below the node.  The idea here is that, if below a node, there can exist a maximum of 32 hosts, but actually there exists only one, then the density of hosts below that node is low.  If there can exist a maximum of 32 hosts, and there are actually 32 hosts below the node, then the density is high (or maximal in this case).  The number of maximum hosts below a node is calculated as:
 
-    `$self->{coverage} =  $self->{childCount} / (2**(MAX_KEY_LENGTH - $self->{mask}));`
+    `$self->{density} =  $self->{childCount} / (2**(MAX_KEY_LENGTH - $self->{mask}));`
 	
-where MAX_KEY_LENGTH is typically 32, the _mask_ is the CIDR class (number after the / in the IP number), and _childCount_ is the number of descendants (calculated as above).  The meaning of this equation is:  MAX_KEY_LENGTH - _mask_ yields the number of bits available, in the range of IP addresses, to be assigned to hosts.  Raising 2 to this power results in the equivalent number of hosts available within this range of IP addresses.  Dividing the actual number of descendants by the number of (maximum) available hosts yields the density, or coverage.  This coverage value is also updated as new nodes are added to the trie.
+where MAX_KEY_LENGTH is typically 32, the _mask_ is the CIDR class (number after the / in the IP number), and _childCount_ is the number of descendants (calculated as above).  The meaning of this equation is:  MAX_KEY_LENGTH - _mask_ yields the number of bits available, in the range of IP addresses, to be assigned to hosts.  Raising 2 to this power results in the equivalent number of hosts available within this range of IP addresses.  Dividing the actual number of descendants by the number of (maximum) available hosts yields the density.  This density value is also updated as new nodes are added to the trie.
 
-Once created, recurse down the trie, starting from the root node (the root node should be the looser, or larger, summarization IP number; in a worst case, it would be 0.0.0.0/0).  At each internal node, evaluate whether the trie should continue to be recursed down, or whether it should be pruned, and the corresponding node is then marked as a summarization node.  The decision of whether to mark a summarization node is done in the method _markIpTrieCoverageDistance_, shown below:
+Once created, recurse down the trie, starting from the root node (the root node should be the looser, or larger, summarization IP number; in a worst case, it would be 0.0.0.0/0).  At each internal node, evaluate whether the trie should continue to be recursed down, or whether it should be pruned, and the corresponding node is then marked as a summarization node.  The decision of whether to mark a summarization node is done in the method _markIpTrieDensityDistance_, shown below:
 
 
 {{{
-private void markIpTrieCoverageDistance (ArrayList<IpTrieNode> summaryArrayList, IpTrieNode node) {
-	IpTrieNode c0n = node.childZero;
-	IpTrieNode c1n = node.childOne;
-	
-	if(c0n == null) {
-		node.setSummaryMember();
-		summaryArrayList.add(node);
-	}
-	/* If either condition below is satisfied, then the program will recurse down the subtrees below the current node and perform
-	 *  the same tests on the descendants. If none of the conditions is satisfied, then the current node is marked
-	 *  as a summarization node and the subtrees below this node will not be further analyzed. 
-	 *  The heuristic used for this decision is based on the distance between an internal node and its children,
-	 *  and the coverage or density. The distance value expresses the number of CIDR classes between the current
-	 *  node and its child; basically, it conveys the notion whether the current node represents a too large subnet
-	 *  to be considered for summarization. For example, consider that the current node has a mask of 20 and its child
-	 *  has a mask of 32. Then the current node represents a subclass of 4096 hosts (12 bits), so there's a possibility
-	 *  of having a substantial amount of nodes below the current node. The algorithm then decides to recurse down the subtree.
-	 *  Conversely, if the distance is short, then the current node may already comprise sufficient information to be selected
-	 *  as a summarization node.
-	 *  The reasoning for the coverage or density tries to gather whether there exists already a relevant number of descendants
-	 *  for the current node; if there is, then it may be convenient to select the current node as a summarization node.
-	 *  
-	 *  The decision for summarization is based on converting the given granularity setting into a coverage and distance threshold by
-	 *  means of a proper equation.  The real (node) value of the distance and coverage is then compared to this calculated threshold
-	 *  and the decision is made.  The equations represent interpolating functions for each distance and coverage based on empirical
-	 *  points, as shown below:
-	 *  
-	 *  			Threshold value for comparison	
-	 *	Granularity	Distance	Coverage
-	 *			0		4		1,00E-05
-	 *			1		8		1,00E-06
-	 *			2		12		1,00E-07
-	 *			3		16		1,00E-08
-	 *
-	 *
-	 *  Distance uses equation y = 4x + 4
-	 *  Coverage uses equation y = 1e-5*exp(-2.303x),
-	 *  where x is the granularity.  The output is to be compared with the real distance or coverage value.
-	 *  These equations attempt to mimic empirical (ideal) settings for coverage and distance that perform finer and coarser summarizations.
-	 */
-	
-	else {
-		if ((node.mask < this.minMask) || //triggers subtrees recursion if this node mask is lower than minMask (not inclusive)
-				(c0n.mask - node.mask > (long)(4 * (long)this.granularity + 4)) ||
-				(c1n.mask - node.mask > (long)(4 * (long)this.granularity + 4)) ||
-				//testing here the independent coverage for each child
-				(c0n.coverage < 1e-5 * Math.exp(-2.303*(double)this.granularity)) ||
-				(c1n.coverage < 1e-5 * Math.exp(-2.303*(double)this.granularity))) {
-				//combination coverage commented out
-				//(node.coverage < 1e-5 * Math.exp(-2.303*(double)this.granularity))) {
-			markIpTrieCoverageDistance(summaryArrayList, c0n);
-			markIpTrieCoverageDistance(summaryArrayList, c1n);
-		} else {
-			node.setSummaryMember();
-			summaryArrayList.add(node);
-		}
-	}
+sub markIpTrieDensityDistance {
+    my ( $self, $summaryArrayListref, $node ) = @_;
+
+    my @summaryArrayList = @$summaryArrayListref;
+
+    my $c0n = $node->{childZero};
+    my $c1n = $node->{childOne};
+
+    if ( !( defined $c0n ) ) {
+        $node->setSummaryMember();
+        push( @summaryArrayList, $node );
+
+#If either condition below is satisfied, then the program will recurse down the subtrees below the current node and perform
+#the same tests on the descendants. If none of the conditions is satisfied, then the current node is marked
+#as a summarization node and the subtrees below this node will not be further analyzed.
+#The heuristic used for this decision is based on the distance between an internal node and its children,
+#and the density. The distance value expresses the number of CIDR classes between the current
+#node and its child; basically, it conveys the notion whether the current node represents a too large subnet
+#to be considered for summarization. For example, consider that the current node has a mask of 20 and its child
+#has a mask of 32. Then the current node represents a subclass of 4096 hosts (12 bits), so there's a possibility
+#of having a substantial amount of nodes below the current node. The algorithm then decides to recurse down the subtree.
+#Conversely, if the distance is short, then the current node may already comprise sufficient information to be selected
+#as a summarization node.
+#         *  The reasoning for the density tries to gather whether there exists already a relevant number of descendants
+#for the current node; if there is, then it may be convenient to select the current node as a summarization node.
+#
+#The decision for summarization is based on converting the given granularity setting into a density and distance threshold by
+#means of a proper equation.  The real (node) value of the distance and density is then compared to this calculated threshold
+#and the decision is made.  The equations represent interpolating functions for each distance and density based on empirical
+#points, as shown below:
+#
+#            Threshold value for comparison
+#             Granularity    Distance    Density
+#                     0        4        1,00E-05
+#                     1        8        1,00E-06
+#                     2        12        1,00E-07
+#                     3        16        1,00E-08
+#
+#
+#Distance uses equation y = 4x + 4
+#Density uses equation y = 1e-5*exp(-2.303x),
+#where x is the granularity.  The output is to be compared with the real distance or density value.
+#These equations attempt to mimic empirical (ideal) settings for density and distance that perform finer and coarser summarizations.
+#
+    } elsif ( defined $c0n && ( $node->{mask} < $self->{minMask} ) || #triggers subtrees recursion if this node mask is lower than minMask (not inclusive)
+        ( $c0n->{mask} - $node->{mask} > ( 4 * $self->{granularity} + 4 ) )    ||
+        ( $c1n->{mask} - $node->{mask} > ( 4 * $self->{granularity} + 4 ) )    ||
+
+        #testing here the independent density for each child
+        ( $c0n->{density} < 1e-5 * exp( -2.303 * $self->{granularity} ) ) ||
+        ( $c1n->{density} < 1e-5 * exp( -2.303 * $self->{granularity} ) ) ) {
+            @summaryArrayList = $self->markIpTrieDensityDistance( \@summaryArrayList, $c0n );
+            @summaryArrayList = $self->markIpTrieDensityDistance( \@summaryArrayList, $c1n );
+        } else {
+            $node->setSummaryMember();
+            push( @summaryArrayList, $node );
+        }
+    return @summaryArrayList;
 }
 }}}
 
@@ -2345,32 +2346,37 @@ Next, each child of a node is evaluated for the following conditions:
 
     _!ChildMask_ - _!NodeMask_ > <font color="firebrick">distanceThreshold</font>
 
-    _Node Coverage_ < <font color="firebrick">coverageThreshold</font> (i.e., low density)
+    _Node Density_ < <font color="firebrick">densityThreshold</font> (i.e., low density)
 
 If either is satisfied, then the program will recurse down the subtrees below the current node and perform the same tests on the descendants.  If none of the conditions is satisfied, then the current node is marked as a summarization node and the subtrees below this node will not be further analyzed.
 
-The heuristic used for this decision is based on the _distance_ between an internal node and its children, and the coverage or density.  The _distance_ value expresses the number of CIDR classes between the current node and its child; basically, it conveys the notion whether the current node represents a too large subnet to be considered for summarization.  For example, consider that the current node has a mask of 20 and its child has a mask of 32.  Then the current node represents a subclass of 4096 hosts (12 bits), so there's a possibility of having a substantial amount of nodes below the current node.  The algorithm then decides to recurse down the subtree.  Conversely, if the distance is short, then the current node may already comprise sufficient information to be selected as a summarization node.
+The heuristic used for this decision is based on the _distance_ between an internal node and its children, and the density.  The _distance_ value expresses the number of CIDR classes between the current node and its child; basically, it conveys the notion whether the current node represents a too large subnet to be considered for summarization.  For example, consider that the current node has a mask of 20 and its child has a mask of 32.  Then the current node represents a subclass of 4096 hosts (12 bits), so there's a possibility of having a substantial amount of nodes below the current node.  The algorithm then decides to recurse down the subtree.  Conversely, if the distance is short, then the current node may already comprise sufficient information to be selected as a summarization node.
 
-The reasoning for the coverage or density tries to gather whether there exists already a relevant number of descendants for the current node; if there is, then it may be convenient to select the current node as a summarization node.
+The reasoning for the density tries to gather whether there exists already a relevant number of descendants for the current node; if there is, then it may be convenient to select the current node as a summarization node.
 
 The algorithm also incorporates "tuning" of the "aggressiveness" of the summarization.  Currently, the tuning has been integrated as a "granularity" parameter, ranging from 0 (the finer granularity, or more specific summarization) to 3 (the coarser granularity, or more general summarization).  The heuristic is based on the calculation as follows:
 
 {{{
-if ((Math.abs(c0n.mask - c1n.mask) > (long)(4 * (long)this.granularity + 4)) ||
-		(Math.abs(c0n.coverage - c1n.coverage) < 1e-5 * Math.exp(-2.303*(double)this.granularity))) {
-	markIpTrieCoverageDistanceBalance(summaryArrayList, c0n);
-	markIpTrieCoverageDistanceBalance(summaryArrayList, c1n);
-} else {
-	node.setSummaryMember();
-	summaryArrayList.add(node);
+elsif ( defined $c0n && ( $node->{mask} < $self->{minMask} ) || #triggers subtrees recursion if this node mask is lower than minMask (not inclusive)
+        ( $c0n->{mask} - $node->{mask} > ( 4 * $self->{granularity} + 4 ) )    ||
+        ( $c1n->{mask} - $node->{mask} > ( 4 * $self->{granularity} + 4 ) )    ||
+
+        #testing here the independent density for each child
+        ( $c0n->{density} < 1e-5 * exp( -2.303 * $self->{granularity} ) ) ||
+        ( $c1n->{density} < 1e-5 * exp( -2.303 * $self->{granularity} ) ) ) {
+            @summaryArrayList = $self->markIpTrieDensityDistance( \@summaryArrayList, $c0n );
+            @summaryArrayList = $self->markIpTrieDensityDistance( \@summaryArrayList, $c1n );
+        } else {
+            $node->setSummaryMember();
+            push( @summaryArrayList, $node );
 }
 }}}
 
-The decision for summarization is based on converting the given granularity setting into a coverage and distance threshold by means of a proper equation.  The real (node) value of the distance and coverage is then compared to this calculated threshold and the decision is made.  The equations represent interpolating functions for each distance and coverage based on empirical points, as shown below:
+The decision for summarization is based on converting the given granularity setting into a density and distance threshold by means of a proper equation.  The real (node) value of the distance and density is then compared to this calculated threshold and the decision is made.  The equations represent interpolating functions for each distance and density based on empirical points, as shown below:
 
  
 || || <font color="mediumblue">*Threshold value for comparison*</font> || ||	
-|| <font color="mediumblue">*Granularity*</font> || <font color="mediumblue">*Distance*</font> || <font color="mediumblue">*Coverage*</font> ||
+|| <font color="mediumblue">*Granularity*</font> || <font color="mediumblue">*Distance*</font> || <font color="mediumblue">*Density*</font> ||
 || 0 || 4 || 1,00E-05 ||
 || 1 || 8 || 1,00E-06 ||
 || 2 || 12 || 1,00E-07 ||
@@ -2378,11 +2384,11 @@ The decision for summarization is based on converting the given granularity sett
 
     Distance uses equation _y = 4x + 4_
 
-    Coverage uses equation _y = 1E-5*e^-2.303x^_,
+    Density uses equation _y = 1E-5*e^-2.303x^_,
 
 where x is the granularity.
 
-The output is to be compared with the real distance or coverage value.  These equations attempt to mimic empirical (ideal) settings for coverage and distance that perform finer and coarser summarizations.
+The output is to be compared with the real distance or density value.  These equations attempt to mimic empirical (ideal) settings for density and distance that perform finer and coarser summarizations.
 
 
 ==== Comments ====
@@ -2390,17 +2396,18 @@ The output is to be compared with the real distance or coverage value.  These eq
 The coarser or finer result of the granularity setting seems to be highly dependent on the data.  Some data present noticeable differences for each setting, whereas other data displays no change from one setting to a coarser or finer one.
 
 
-==== Experimentation Results for Algorithm #1 ====
+==== Experimentation Results ====
 
-	|| <font color="mediumblue">*Java*</font> ||
-
+	
 	{{{
-	File                 :  data\apan-summary.txt
+	
+
+	File                 :  data\APAN.txt
 	Granularity setting  :  0
 	Minimum Summ. Mask   :  8
 	Original set count   :  104
 	Summarized set count :  19
-	Compression rate     :  0.1826923
+	Compression rate     :  0.182692307692308
 	(summarized/original)
 
 	10.0.0.4/32
@@ -2424,12 +2431,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	203.181.248.0/23
 
 
-	File                 :  data\apan-summary.txt
+	File                 :  data\APAN.txt
 	Granularity setting  :  1
 	Minimum Summ. Mask   :  8
 	Original set count   :  104
 	Summarized set count :  17
-	Compression rate     :  0.16346154
+	Compression rate     :  0.163461538461538
 	(summarized/original)
 
 	10.0.0.4/32
@@ -2451,12 +2458,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	203.181.192.0/18
 
 
-	File                 :  data\apan-summary.txt
+	File                 :  data\APAN.txt
 	Granularity setting  :  2
 	Minimum Summ. Mask   :  8
 	Original set count   :  104
 	Summarized set count :  17
-	Compression rate     :  0.16346154
+	Compression rate     :  0.163461538461538
 	(summarized/original)
 
 	10.0.0.4/32
@@ -2478,7 +2485,7 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	203.181.192.0/18
 
 
-	File                 :  data\apan-summary.txt
+	File                 :  data\APAN.txt
 	Granularity setting  :  3
 	Minimum Summ. Mask   :  8
 	Original set count   :  104
@@ -2501,12 +2508,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	203.181.0.0/16
 
 
-	File                 :  data\ESnet-summary.txt
+	File                 :  data\ESnet.txt
 	Granularity setting  :  0
 	Minimum Summ. Mask   :  8
 	Original set count   :  618
 	Summarized set count :  58
-	Compression rate     :  0.093851134
+	Compression rate     :  0.0938511326860841
 	(summarized/original)
 
 	10.0.0.4/32
@@ -2569,12 +2576,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	211.79.48.173/32
 
 
-	File                 :  data\ESnet-summary.txt
+	File                 :  data\ESnet.txt
 	Granularity setting  :  1
 	Minimum Summ. Mask   :  8
 	Original set count   :  618
 	Summarized set count :  28
-	Compression rate     :  0.045307443
+	Compression rate     :  0.0453074433656958
 	(summarized/original)
 
 	10.0.0.4/32
@@ -2607,12 +2614,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	211.79.48.173/32
 
 
-	File                 :  data\ESnet-summary.txt
+	File                 :  data\ESnet.txt
 	Granularity setting  :  2
 	Minimum Summ. Mask   :  8
 	Original set count   :  618
 	Summarized set count :  20
-	Compression rate     :  0.03236246
+	Compression rate     :  0.0323624595469256
 	(summarized/original)
 
 	10.0.0.4/32
@@ -2637,12 +2644,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	211.79.48.173/32
 
 
-	File                 :  data\ESnet-summary.txt
+	File                 :  data\ESnet.txt
 	Granularity setting  :  3
 	Minimum Summ. Mask   :  8
 	Original set count   :  618
 	Summarized set count :  20
-	Compression rate     :  0.03236246
+	Compression rate     :  0.0323624595469256
 	(summarized/original)
 
 	10.0.0.4/32
@@ -2667,12 +2674,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	211.79.48.173/32
 
 
-	File                 :  data\FCCN-summary.txt
+	File                 :  data\FCCN.txt
 	Granularity setting  :  0
 	Minimum Summ. Mask   :  8
 	Original set count   :  43
 	Summarized set count :  4
-	Compression rate     :  0.093023255
+	Compression rate     :  0.0930232558139535
 	(summarized/original)
 
 	62.40.124.186/32
@@ -2681,12 +2688,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	194.210.63.253/32
 
 
-	File                 :  data\FCCN-summary.txt
+	File                 :  data\FCCN.txt
 	Granularity setting  :  1
 	Minimum Summ. Mask   :  8
 	Original set count   :  43
 	Summarized set count :  4
-	Compression rate     :  0.093023255
+	Compression rate     :  0.0930232558139535
 	(summarized/original)
 
 	62.40.124.186/32
@@ -2695,12 +2702,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	194.210.63.253/32
 
 
-	File                 :  data\FCCN-summary.txt
+	File                 :  data\FCCN.txt
 	Granularity setting  :  2
 	Minimum Summ. Mask   :  8
 	Original set count   :  43
 	Summarized set count :  4
-	Compression rate     :  0.093023255
+	Compression rate     :  0.0930232558139535
 	(summarized/original)
 
 	62.40.124.186/32
@@ -2709,12 +2716,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	194.210.63.253/32
 
 
-	File                 :  data\FCCN-summary.txt
+	File                 :  data\FCCN.txt
 	Granularity setting  :  3
 	Minimum Summ. Mask   :  8
 	Original set count   :  43
 	Summarized set count :  3
-	Compression rate     :  0.069767445
+	Compression rate     :  0.0697674418604651
 	(summarized/original)
 
 	62.40.124.186/32
@@ -2722,60 +2729,60 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	194.210.0.0/18
 
 
-	File                 :  data\GARR-summary.txt
+	File                 :  data\GARR.txt
 	Granularity setting  :  0
 	Minimum Summ. Mask   :  8
 	Original set count   :  163
 	Summarized set count :  2
-	Compression rate     :  0.012269938
+	Compression rate     :  0.0122699386503067
 	(summarized/original)
 
 	10.1.2.3/32
 	193.206.128.0/20
 
 
-	File                 :  data\GARR-summary.txt
+	File                 :  data\GARR.txt
 	Granularity setting  :  1
 	Minimum Summ. Mask   :  8
 	Original set count   :  163
 	Summarized set count :  2
-	Compression rate     :  0.012269938
+	Compression rate     :  0.0122699386503067
 	(summarized/original)
 
 	10.1.2.3/32
 	193.206.128.0/20
 
 
-	File                 :  data\GARR-summary.txt
+	File                 :  data\GARR.txt
 	Granularity setting  :  2
 	Minimum Summ. Mask   :  8
 	Original set count   :  163
 	Summarized set count :  2
-	Compression rate     :  0.012269938
+	Compression rate     :  0.0122699386503067
 	(summarized/original)
 
 	10.1.2.3/32
 	193.206.128.0/20
 
 
-	File                 :  data\GARR-summary.txt
+	File                 :  data\GARR.txt
 	Granularity setting  :  3
 	Minimum Summ. Mask   :  8
 	Original set count   :  163
 	Summarized set count :  2
-	Compression rate     :  0.012269938
+	Compression rate     :  0.0122699386503067
 	(summarized/original)
 
 	10.1.2.3/32
 	193.206.128.0/20
 
 
-	File                 :  data\Geant-summary.txt
+	File                 :  data\Geant.txt
 	Granularity setting  :  0
 	Minimum Summ. Mask   :  8
 	Original set count   :  30
 	Summarized set count :  5
-	Compression rate     :  0.16666667
+	Compression rate     :  0.166666666666667
 	(summarized/original)
 
 	62.40.112.0/20
@@ -2785,12 +2792,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	216.24.184.86/32
 
 
-	File                 :  data\Geant-summary.txt
+	File                 :  data\Geant.txt
 	Granularity setting  :  1
 	Minimum Summ. Mask   :  8
 	Original set count   :  30
 	Summarized set count :  5
-	Compression rate     :  0.16666667
+	Compression rate     :  0.166666666666667
 	(summarized/original)
 
 	62.40.112.0/20
@@ -2800,12 +2807,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	216.24.184.86/32
 
 
-	File                 :  data\Geant-summary.txt
+	File                 :  data\Geant.txt
 	Granularity setting  :  2
 	Minimum Summ. Mask   :  8
 	Original set count   :  30
 	Summarized set count :  5
-	Compression rate     :  0.16666667
+	Compression rate     :  0.166666666666667
 	(summarized/original)
 
 	62.40.112.0/20
@@ -2815,12 +2822,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	216.24.184.86/32
 
 
-	File                 :  data\Geant-summary.txt
+	File                 :  data\Geant.txt
 	Granularity setting  :  3
 	Minimum Summ. Mask   :  8
 	Original set count   :  30
 	Summarized set count :  5
-	Compression rate     :  0.16666667
+	Compression rate     :  0.166666666666667
 	(summarized/original)
 
 	62.40.112.0/20
@@ -2830,12 +2837,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	216.24.184.86/32
 
 
-	File                 :  data\Internet2-summary.txt
+	File                 :  data\Internet2.txt
 	Granularity setting  :  0
 	Minimum Summ. Mask   :  8
 	Original set count   :  282
 	Summarized set count :  86
-	Compression rate     :  0.30496454
+	Compression rate     :  0.304964539007092
 	(summarized/original)
 
 	10.254.254.0/28
@@ -2926,12 +2933,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	216.249.136.198/32
 
 
-	File                 :  data\Internet2-summary.txt
+	File                 :  data\Internet2.txt
 	Granularity setting  :  1
 	Minimum Summ. Mask   :  8
 	Original set count   :  282
 	Summarized set count :  54
-	Compression rate     :  0.19148937
+	Compression rate     :  0.191489361702128
 	(summarized/original)
 
 	10.254.254.0/28
@@ -2990,12 +2997,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	216.249.136.128/25
 
 
-	File                 :  data\Internet2-summary.txt
+	File                 :  data\Internet2.txt
 	Granularity setting  :  2
 	Minimum Summ. Mask   :  8
 	Original set count   :  282
 	Summarized set count :  44
-	Compression rate     :  0.15602838
+	Compression rate     :  0.156028368794326
 	(summarized/original)
 
 	10.254.254.0/28
@@ -3044,12 +3051,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	216.249.136.128/25
 
 
-	File                 :  data\Internet2-summary.txt
+	File                 :  data\Internet2.txt
 	Granularity setting  :  3
 	Minimum Summ. Mask   :  8
 	Original set count   :  282
 	Summarized set count :  42
-	Compression rate     :  0.14893617
+	Compression rate     :  0.148936170212766
 	(summarized/original)
 
 	10.254.254.0/28
@@ -3096,12 +3103,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	216.249.136.128/25
 
 
-	File                 :  data\iu-summary.txt
+	File                 :  data\iu.txt
 	Granularity setting  :  0
 	Minimum Summ. Mask   :  8
 	Original set count   :  79
 	Summarized set count :  14
-	Compression rate     :  0.17721519
+	Compression rate     :  0.177215189873418
 	(summarized/original)
 
 	10.10.10.4/32
@@ -3120,12 +3127,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	207.72.112.50/32
 
 
-	File                 :  data\iu-summary.txt
+	File                 :  data\iu.txt
 	Granularity setting  :  1
 	Minimum Summ. Mask   :  8
 	Original set count   :  79
 	Summarized set count :  12
-	Compression rate     :  0.15189873
+	Compression rate     :  0.151898734177215
 	(summarized/original)
 
 	10.10.10.4/32
@@ -3142,12 +3149,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	207.72.112.50/32
 
 
-	File                 :  data\iu-summary.txt
+	File                 :  data\iu.txt
 	Granularity setting  :  2
 	Minimum Summ. Mask   :  8
 	Original set count   :  79
 	Summarized set count :  12
-	Compression rate     :  0.15189873
+	Compression rate     :  0.151898734177215
 	(summarized/original)
 
 	10.10.10.4/32
@@ -3164,12 +3171,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	207.72.112.50/32
 
 
-	File                 :  data\iu-summary.txt
+	File                 :  data\iu.txt
 	Granularity setting  :  3
 	Minimum Summ. Mask   :  8
 	Original set count   :  79
 	Summarized set count :  10
-	Compression rate     :  0.12658228
+	Compression rate     :  0.126582278481013
 	(summarized/original)
 
 	10.10.10.4/32
@@ -3184,12 +3191,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	207.72.112.50/32
 
 
-	File                 :  data\psnc-summary.txt
+	File                 :  data\Psnc.txt
 	Granularity setting  :  0
 	Minimum Summ. Mask   :  8
 	Original set count   :  27
 	Summarized set count :  5
-	Compression rate     :  0.18518518
+	Compression rate     :  0.185185185185185
 	(summarized/original)
 
 	62.40.124.182/32
@@ -3199,12 +3206,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	212.191.224.0/24
 
 
-	File                 :  data\psnc-summary.txt
+	File                 :  data\Psnc.txt
 	Granularity setting  :  1
 	Minimum Summ. Mask   :  8
 	Original set count   :  27
 	Summarized set count :  5
-	Compression rate     :  0.18518518
+	Compression rate     :  0.185185185185185
 	(summarized/original)
 
 	62.40.124.182/32
@@ -3214,12 +3221,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	212.191.224.0/24
 
 
-	File                 :  data\psnc-summary.txt
+	File                 :  data\Psnc.txt
 	Granularity setting  :  2
 	Minimum Summ. Mask   :  8
 	Original set count   :  27
 	Summarized set count :  5
-	Compression rate     :  0.18518518
+	Compression rate     :  0.185185185185185
 	(summarized/original)
 
 	62.40.124.182/32
@@ -3229,12 +3236,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	212.191.224.0/24
 
 
-	File                 :  data\psnc-summary.txt
+	File                 :  data\Psnc.txt
 	Granularity setting  :  3
 	Minimum Summ. Mask   :  8
 	Original set count   :  27
 	Summarized set count :  3
-	Compression rate     :  0.11111111
+	Compression rate     :  0.111111111111111
 	(summarized/original)
 
 	62.40.124.182/32
@@ -3242,12 +3249,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	212.191.0.0/16
 
 
-	File                 :  data\SWITCH-summary.txt
+	File                 :  data\SWITCH.txt
 	Granularity setting  :  0
 	Minimum Summ. Mask   :  8
 	Original set count   :  214
 	Summarized set count :  15
-	Compression rate     :  0.07009346
+	Compression rate     :  0.0700934579439252
 	(summarized/original)
 
 	62.40.124.22/32
@@ -3267,12 +3274,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	213.248.79.190/32
 
 
-	File                 :  data\SWITCH-summary.txt
+	File                 :  data\SWITCH.txt
 	Granularity setting  :  1
 	Minimum Summ. Mask   :  8
 	Original set count   :  214
 	Summarized set count :  12
-	Compression rate     :  0.056074765
+	Compression rate     :  0.0560747663551402
 	(summarized/original)
 
 	62.40.124.0/25
@@ -3289,12 +3296,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	213.248.79.190/32
 
 
-	File                 :  data\SWITCH-summary.txt
+	File                 :  data\SWITCH.txt
 	Granularity setting  :  2
 	Minimum Summ. Mask   :  8
 	Original set count   :  214
 	Summarized set count :  10
-	Compression rate     :  0.046728972
+	Compression rate     :  0.0467289719626168
 	(summarized/original)
 
 	62.40.124.0/25
@@ -3309,12 +3316,12 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	213.248.79.190/32
 
 
-	File                 :  data\SWITCH-summary.txt
+	File                 :  data\SWITCH.txt
 	Granularity setting  :  3
 	Minimum Summ. Mask   :  8
 	Original set count   :  214
 	Summarized set count :  10
-	Compression rate     :  0.046728972
+	Compression rate     :  0.0467289719626168
 	(summarized/original)
 
 	62.40.124.0/25
@@ -3327,1738 +3334,13 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	194.242.34.52/31
 	213.242.73.138/32
 	213.248.79.190/32
+
 	}}}
 	
-
-=== Proposed Algorithm #2:  Independent Children Algorithm (without Minimum Mask) ===
-
-This algorithm works similarly as the #1 algorithm, but no minimum mask is analyzed for a candidate node.  Nodes of any mask can be selected as summarizing nodes.
-
-The main test is:
-
-	{{{
-	if ((c0n.mask - node.mask > (long)(4 * (long)this.granularity + 4)) ||
-			(c1n.mask - node.mask > (long)(4 * (long)this.granularity + 4)) ||
-			//testing here the independent coverage for each child
-			(c0n.coverage < 1e-5 * Math.exp(-2.303*(double)this.granularity)) ||
-			(c1n.coverage < 1e-5 * Math.exp(-2.303*(double)this.granularity))) {
-			//combination coverage commented out
-			//(node.coverage < 1e-5 * Math.exp(-2.303*(double)this.granularity))) {
-		markIpTrieCoverageDistance(summaryArrayList, c0n);
-		markIpTrieCoverageDistance(summaryArrayList, c1n);
-	} else {
-		node.setSummaryMember();
-		summaryArrayList.add(node);
-	}
-	}}}
-
-The experimental results are displayed below in condensed form.
-
-
-==== Experimentation Results for Algorithm #2 ====
-
-	|| <font color="mediumblue">*Java*</font> ||
-
-	{{{
-
-	File                 :  data\apan-summary.txt
-	Granularity setting  :  0
-	Original set count   :  104
-	Summarized set count :  19
-	Compression rate     :  0.1826923
-	(summarized/original)
-
-	10.0.0.4/32
-	45.0.0.1/32
-	117.103.111.133/32
-	133.69.37.1/32
-	140.221.251.2/32
-	163.220.127.238/32
-	172.24.61.30/32
-	172.24.100.210/32
-	192.203.116.144/28
-	202.40.161.239/32
-	202.178.96.85/32
-	202.179.241.37/32
-	202.180.34.134/32
-	202.180.34.158/32
-	202.249.2.160/32
-	203.178.133.141/32
-	203.181.102.130/32
-	203.181.194.0/23
-	203.181.248.0/23
-
-	File                 :  data\apan-summary.txt
-	Granularity setting  :  1
-	Original set count   :  104
-	Summarized set count :  17
-	Compression rate     :  0.16346154
-	(summarized/original)
-
-	10.0.0.4/32
-	45.0.0.1/32
-	117.103.111.133/32
-	133.69.37.1/32
-	140.221.251.2/32
-	163.220.127.238/32
-	172.24.61.30/32
-	172.24.100.210/32
-	192.203.116.144/28
-	202.40.161.239/32
-	202.178.96.85/32
-	202.179.241.37/32
-	202.180.34.128/27
-	202.249.2.160/32
-	203.178.133.141/32
-	203.181.102.130/32
-	203.181.192.0/18
-
-	File                 :  data\apan-summary.txt
-	Granularity setting  :  2
-	Original set count   :  104
-	Summarized set count :  10
-	Compression rate     :  0.09615385
-	(summarized/original)
-
-	10.0.0.4/32
-	45.0.0.1/32
-	117.103.111.133/32
-	133.69.37.1/32
-	140.221.251.2/32
-	163.220.127.238/32
-	172.24.61.30/32
-	172.24.100.210/32
-	192.203.116.144/28
-	202.0.0.0/7
-
-	File                 :  data\apan-summary.txt
-	Granularity setting  :  3
-	Original set count   :  104
-	Summarized set count :  9
-	Compression rate     :  0.086538464
-	(summarized/original)
-
-	10.0.0.4/32
-	45.0.0.1/32
-	117.103.111.133/32
-	133.69.37.1/32
-	140.221.251.2/32
-	163.220.127.238/32
-	172.24.0.0/17
-	192.203.116.144/28
-	202.0.0.0/7
-
-	File                 :  data\ESnet-summary.txt
-	Granularity setting  :  0
-	Original set count   :  618
-	Summarized set count :  58
-	Compression rate     :  0.093851134
-	(summarized/original)
-
-	10.0.0.4/32
-	10.10.10.1/32
-	10.31.20.2/32
-	18.201.0.118/32
-	62.40.124.230/32
-	62.40.125.72/29
-	62.40.125.94/32
-	117.103.111.157/32
-	128.115.190.1/32
-	128.115.190.101/32
-	134.55.0.0/16
-	134.167.160.49/32
-	137.164.27.93/32
-	138.18.155.22/32
-	147.155.254.1/32
-	150.99.198.218/32
-	150.99.199.62/32
-	172.16.32.0/30
-	192.5.170.78/32
-	192.12.208.1/32
-	192.13.56.0/25
-	192.31.96.2/32
-	192.31.99.138/32
-	192.33.240.193/32
-	192.65.95.2/32
-	192.68.191.146/32
-	192.68.191.162/32
-	192.73.7.193/32
-	192.84.8.50/32
-	192.107.175.3/32
-	192.150.29.210/32
-	192.150.31.78/32
-	192.168.201.0/28
-	192.168.201.52/32
-	192.188.106.140/32
-	192.203.230.13/32
-	192.245.178.6/32
-	198.9.202.13/32
-	198.32.153.13/32
-	198.49.208.14/32
-	198.49.208.17/32
-	198.49.208.229/32
-	198.124.16.1/32
-	198.124.17.9/32
-	198.124.17.17/32
-	198.124.128.0/17
-	198.125.140.0/24
-	198.128.4.5/32
-	198.128.15.101/32
-	198.129.0.0/16
-	198.151.133.185/32
-	198.151.133.253/32
-	198.206.220.1/32
-	198.206.221.254/32
-	199.109.4.150/32
-	204.134.149.2/32
-	207.231.240.0/20
-	211.79.48.173/32
-
-	File                 :  data\ESnet-summary.txt
-	Granularity setting  :  1
-	Original set count   :  618
-	Summarized set count :  20
-	Compression rate     :  0.03236246
-	(summarized/original)
-
-	10.0.0.4/32
-	10.10.10.1/32
-	10.31.20.2/32
-	18.201.0.118/32
-	62.40.124.230/32
-	62.40.125.64/27
-	117.103.111.157/32
-	128.115.190.0/25
-	134.55.0.0/16
-	134.167.160.49/32
-	137.164.27.93/32
-	138.18.155.22/32
-	147.155.254.1/32
-	150.99.198.218/32
-	150.99.199.62/32
-	172.16.32.0/30
-	192.0.0.0/5
-	204.134.149.2/32
-	207.231.240.0/20
-	211.79.48.173/32
-
-	File                 :  data\ESnet-summary.txt
-	Granularity setting  :  2
-	Original set count   :  618
-	Summarized set count :  7
-	Compression rate     :  0.011326861
-	(summarized/original)
-
-	10.0.0.4/32
-	10.10.10.1/32
-	10.31.20.2/32
-	18.201.0.118/32
-	62.40.124.0/23
-	117.103.111.157/32
-	128.0.0.0/1
-
-	File                 :  data\ESnet-summary.txt
-	Granularity setting  :  3
-	Original set count   :  618
-	Summarized set count :  7
-	Compression rate     :  0.011326861
-	(summarized/original)
-
-	10.0.0.4/32
-	10.10.10.1/32
-	10.31.20.2/32
-	18.201.0.118/32
-	62.40.124.0/23
-	117.103.111.157/32
-	128.0.0.0/1
-
-	File                 :  data\FCCN-summary.txt
-	Granularity setting  :  0
-	Original set count   :  43
-	Summarized set count :  4
-	Compression rate     :  0.093023255
-	(summarized/original)
-
-	62.40.124.186/32
-	193.136.0.0/15
-	194.210.30.1/32
-	194.210.63.253/32
-
-	File                 :  data\FCCN-summary.txt
-	Granularity setting  :  1
-	Original set count   :  43
-	Summarized set count :  4
-	Compression rate     :  0.093023255
-	(summarized/original)
-
-	62.40.124.186/32
-	193.136.0.0/15
-	194.210.30.1/32
-	194.210.63.253/32
-
-	File                 :  data\FCCN-summary.txt
-	Granularity setting  :  2
-	Original set count   :  43
-	Summarized set count :  2
-	Compression rate     :  0.046511628
-	(summarized/original)
-
-	62.40.124.186/32
-	192.0.0.0/6
-
-	File                 :  data\FCCN-summary.txt
-	Granularity setting  :  3
-	Original set count   :  43
-	Summarized set count :  2
-	Compression rate     :  0.046511628
-	(summarized/original)
-
-	62.40.124.186/32
-	192.0.0.0/6
-
-	File                 :  data\GARR-summary.txt
-	Granularity setting  :  0
-	Original set count   :  163
-	Summarized set count :  2
-	Compression rate     :  0.012269938
-	(summarized/original)
-
-	10.1.2.3/32
-	193.206.128.0/20
-
-	File                 :  data\GARR-summary.txt
-	Granularity setting  :  1
-	Original set count   :  163
-	Summarized set count :  2
-	Compression rate     :  0.012269938
-	(summarized/original)
-
-	10.1.2.3/32
-	193.206.128.0/20
-
-	File                 :  data\GARR-summary.txt
-	Granularity setting  :  2
-	Original set count   :  163
-	Summarized set count :  2
-	Compression rate     :  0.012269938
-	(summarized/original)
-
-	10.1.2.3/32
-	193.206.128.0/20
-
-	File                 :  data\GARR-summary.txt
-	Granularity setting  :  3
-	Original set count   :  163
-	Summarized set count :  2
-	Compression rate     :  0.012269938
-	(summarized/original)
-
-	10.1.2.3/32
-	193.206.128.0/20
-
-	File                 :  data\Geant-summary.txt
-	Granularity setting  :  0
-	Original set count   :  30
-	Summarized set count :  5
-	Compression rate     :  0.16666667
-	(summarized/original)
-
-	62.40.112.0/20
-	128.0.0.6/32
-	150.99.188.202/32
-	198.32.11.51/32
-	216.24.184.86/32
-
-	File                 :  data\Geant-summary.txt
-	Granularity setting  :  1
-	Original set count   :  30
-	Summarized set count :  5
-	Compression rate     :  0.16666667
-	(summarized/original)
-
-	62.40.112.0/20
-	128.0.0.6/32
-	150.99.188.202/32
-	198.32.11.51/32
-	216.24.184.86/32
-
-	File                 :  data\Geant-summary.txt
-	Granularity setting  :  2
-	Original set count   :  30
-	Summarized set count :  5
-	Compression rate     :  0.16666667
-	(summarized/original)
-
-	62.40.112.0/20
-	128.0.0.6/32
-	150.99.188.202/32
-	198.32.11.51/32
-	216.24.184.86/32
-
-	File                 :  data\Geant-summary.txt
-	Granularity setting  :  3
-	Original set count   :  30
-	Summarized set count :  5
-	Compression rate     :  0.16666667
-	(summarized/original)
-
-	62.40.112.0/20
-	128.0.0.6/32
-	150.99.188.202/32
-	198.32.11.51/32
-	216.24.184.86/32
-
-	File                 :  data\Internet2-summary.txt
-	Granularity setting  :  0
-	Original set count   :  282
-	Summarized set count :  86
-	Compression rate     :  0.30496454
-	(summarized/original)
-
-	10.254.254.0/28
-	62.40.125.18/32
-	64.57.16.0/20
-	64.208.110.0/24
-	64.215.195.42/32
-	69.31.111.90/32
-	72.36.127.138/32
-	74.125.48.106/32
-	74.125.48.178/32
-	74.125.48.226/32
-	74.200.187.5/32
-	80.231.134.30/32
-	117.103.111.153/32
-	128.135.247.125/32
-	131.247.47.213/32
-	131.247.47.225/32
-	134.75.108.46/32
-	137.164.26.128/29
-	137.227.2.182/32
-	138.18.47.32/28
-	138.18.155.34/32
-	140.173.1.238/32
-	141.225.250.24/29
-	143.215.193.10/32
-	144.92.233.117/32
-	149.165.254.0/27
-	150.99.199.94/32
-	150.99.200.194/32
-	156.110.203.0/29
-	164.113.238.142/32
-	164.113.238.193/32
-	192.5.89.222/32
-	192.17.10.46/32
-	192.31.99.134/32
-	192.35.86.9/32
-	192.35.86.174/32
-	192.35.86.224/29
-	192.41.213.113/32
-	192.84.8.254/32
-	192.88.115.25/32
-	192.88.115.117/32
-	192.88.192.128/28
-	192.91.246.125/32
-	192.122.183.10/32
-	192.122.183.30/32
-	192.122.183.46/32
-	192.150.29.6/32
-	192.168.1.1/32
-	192.245.196.110/32
-	198.9.201.205/32
-	198.9.202.205/32
-	198.32.0.0/16
-	198.49.182.4/30
-	198.86.17.66/32
-	198.86.53.2/32
-	198.109.37.22/32
-	198.124.194.10/32
-	198.124.216.158/32
-	198.125.140.230/32
-	199.18.156.128/25
-	199.109.4.154/32
-	199.109.11.2/32
-	200.0.207.10/32
-	200.23.60.122/32
-	203.181.248.141/32
-	204.238.76.0/29
-	205.189.32.93/32
-	205.189.32.97/32
-	205.189.32.117/32
-	205.213.118.0/28
-	205.213.119.0/27
-	206.196.177.106/32
-	206.196.178.46/32
-	206.220.240.86/32
-	206.223.119.120/32
-	207.72.112.32/29
-	207.210.142.2/32
-	207.231.240.0/21
-	208.77.76.128/28
-	208.100.127.32/29
-	209.131.107.142/32
-	211.79.48.158/32
-	211.79.48.178/32
-	216.27.100.48/28
-	216.249.136.134/32
-	216.249.136.198/32
-
-	File                 :  data\Internet2-summary.txt
-	Granularity setting  :  1
-	Original set count   :  282
-	Summarized set count :  47
-	Compression rate     :  0.16666667
-	(summarized/original)
-
-	10.254.254.0/28
-	62.40.125.18/32
-	64.57.16.0/20
-	64.208.110.0/24
-	64.215.195.42/32
-	69.31.111.90/32
-	72.36.127.138/32
-	74.125.48.0/24
-	74.200.187.5/32
-	80.231.134.30/32
-	117.103.111.153/32
-	128.135.247.125/32
-	131.247.47.192/26
-	134.75.108.46/32
-	137.164.26.128/29
-	137.227.2.182/32
-	138.18.47.32/28
-	138.18.155.34/32
-	140.173.1.238/32
-	141.225.250.24/29
-	143.215.193.10/32
-	144.92.233.117/32
-	149.165.254.0/27
-	150.99.199.94/32
-	150.99.200.194/32
-	156.110.203.0/29
-	164.113.238.128/25
-	192.0.0.0/5
-	200.0.207.10/32
-	200.23.60.122/32
-	203.181.248.141/32
-	204.238.76.0/29
-	205.189.32.64/26
-	205.213.118.0/23
-	206.196.177.106/32
-	206.196.178.46/32
-	206.220.240.86/32
-	206.223.119.120/32
-	207.72.112.32/29
-	207.210.142.2/32
-	207.231.240.0/21
-	208.77.76.128/28
-	208.100.127.32/29
-	209.131.107.142/32
-	211.79.48.128/26
-	216.27.100.48/28
-	216.249.136.128/25
-
-	File                 :  data\Internet2-summary.txt
-	Granularity setting  :  2
-	Original set count   :  282
-	Summarized set count :  23
-	Compression rate     :  0.081560284
-	(summarized/original)
-
-	10.254.254.0/28
-	62.40.125.18/32
-	64.0.0.0/8
-	69.31.111.90/32
-	72.36.127.138/32
-	74.125.48.0/24
-	74.200.187.5/32
-	80.231.134.30/32
-	117.103.111.153/32
-	128.135.247.125/32
-	131.247.47.192/26
-	134.75.108.46/32
-	136.0.0.0/6
-	140.173.1.238/32
-	141.225.250.24/29
-	143.215.193.10/32
-	144.92.233.117/32
-	149.165.254.0/27
-	150.99.192.0/20
-	156.110.203.0/29
-	164.113.238.128/25
-	192.0.0.0/4
-	208.0.0.0/4
-
-	File                 :  data\Internet2-summary.txt
-	Granularity setting  :  3
-	Original set count   :  282
-	Summarized set count :  6
-	Compression rate     :  0.021276595
-	(summarized/original)
-
-	10.254.254.0/28
-	62.40.125.18/32
-	64.0.0.0/4
-	80.231.134.30/32
-	117.103.111.153/32
-	128.0.0.0/1
-
-	File                 :  data\iu-summary.txt
-	Granularity setting  :  0
-	Original set count   :  79
-	Summarized set count :  14
-	Compression rate     :  0.17721519
-	(summarized/original)
-
-	10.10.10.4/32
-	72.12.193.22/32
-	72.12.215.248/29
-	72.36.127.150/32
-	144.228.154.166/32
-	149.159.254.125/32
-	149.165.128.0/17
-	192.5.40.134/32
-	192.5.40.166/32
-	192.5.40.176/28
-	192.12.206.128/25
-	198.49.182.129/32
-	199.8.220.0/25
-	207.72.112.50/32
-
-	File                 :  data\iu-summary.txt
-	Granularity setting  :  1
-	Original set count   :  79
-	Summarized set count :  12
-	Compression rate     :  0.15189873
-	(summarized/original)
-
-	10.10.10.4/32
-	72.12.193.22/32
-	72.12.215.248/29
-	72.36.127.150/32
-	144.228.154.166/32
-	149.159.254.125/32
-	149.165.128.0/17
-	192.5.40.128/26
-	192.12.206.128/25
-	198.49.182.129/32
-	199.8.220.0/25
-	207.72.112.50/32
-
-	File                 :  data\iu-summary.txt
-	Granularity setting  :  2
-	Original set count   :  79
-	Summarized set count :  9
-	Compression rate     :  0.11392405
-	(summarized/original)
-
-	10.10.10.4/32
-	72.12.193.22/32
-	72.12.215.248/29
-	72.36.127.150/32
-	144.228.154.166/32
-	149.159.254.125/32
-	149.165.128.0/17
-	192.0.0.0/5
-	207.72.112.50/32
-
-	File                 :  data\iu-summary.txt
-	Granularity setting  :  3
-	Original set count   :  79
-	Summarized set count :  4
-	Compression rate     :  0.050632913
-	(summarized/original)
-
-	10.10.10.4/32
-	72.12.192.0/19
-	72.36.127.150/32
-	128.0.0.0/1
-
-	File                 :  data\psnc-summary.txt
-	Granularity setting  :  0
-	Original set count   :  27
-	Summarized set count :  5
-	Compression rate     :  0.18518518
-	(summarized/original)
-
-	62.40.124.182/32
-	150.254.162.229/32
-	150.254.255.0/28
-	212.191.126.4/32
-	212.191.224.0/24
-
-	File                 :  data\psnc-summary.txt
-	Granularity setting  :  1
-	Original set count   :  27
-	Summarized set count :  5
-	Compression rate     :  0.18518518
-	(summarized/original)
-
-	62.40.124.182/32
-	150.254.162.229/32
-	150.254.255.0/28
-	212.191.126.4/32
-	212.191.224.0/24
-
-	File                 :  data\psnc-summary.txt
-	Granularity setting  :  2
-	Original set count   :  27
-	Summarized set count :  5
-	Compression rate     :  0.18518518
-	(summarized/original)
-
-	62.40.124.182/32
-	150.254.162.229/32
-	150.254.255.0/28
-	212.191.126.4/32
-	212.191.224.0/24
-
-	File                 :  data\psnc-summary.txt
-	Granularity setting  :  3
-	Original set count   :  27
-	Summarized set count :  2
-	Compression rate     :  0.074074075
-	(summarized/original)
-
-	62.40.124.182/32
-	128.0.0.0/1
-
-	File                 :  data\SWITCH-summary.txt
-	Granularity setting  :  0
-	Original set count   :  214
-	Summarized set count :  15
-	Compression rate     :  0.07009346
-	(summarized/original)
-
-	62.40.124.22/32
-	62.40.124.82/32
-	64.212.70.62/32
-	64.213.33.222/32
-	129.143.29.42/32
-	130.59.15.12/30
-	130.59.32.0/21
-	192.65.184.84/32
-	192.65.184.173/32
-	192.65.184.221/32
-	192.65.185.130/32
-	194.42.48.11/32
-	194.242.34.52/31
-	213.242.73.138/32
-	213.248.79.190/32
-
-	File                 :  data\SWITCH-summary.txt
-	Granularity setting  :  1
-	Original set count   :  214
-	Summarized set count :  12
-	Compression rate     :  0.056074765
-	(summarized/original)
-
-	62.40.124.0/25
-	64.212.70.62/32
-	64.213.33.222/32
-	129.143.29.42/32
-	130.59.15.12/30
-	130.59.32.0/21
-	192.65.184.0/24
-	192.65.185.130/32
-	194.42.48.11/32
-	194.242.34.52/31
-	213.242.73.138/32
-	213.248.79.190/32
-
-	File                 :  data\SWITCH-summary.txt
-	Granularity setting  :  2
-	Original set count   :  214
-	Summarized set count :  6
-	Compression rate     :  0.028037382
-	(summarized/original)
-
-	62.40.124.0/25
-	64.212.70.62/32
-	64.213.33.222/32
-	129.143.29.42/32
-	130.59.0.0/18
-	192.0.0.0/3
-
-	File                 :  data\SWITCH-summary.txt
-	Granularity setting  :  3
-	Original set count   :  214
-	Summarized set count :  4
-	Compression rate     :  0.018691588
-	(summarized/original)
-
-	62.40.124.0/25
-	64.212.70.62/32
-	64.213.33.222/32
-	128.0.0.0/1
-
-	}}}
-
-	
-=== Proposed Algorithm #3:  Combined Coverage Algorithm ===
-
-This algorithm works similarly as the #1 algorithm, but the values of _coverage_ are taken as the combined coverage of both children of a candidate summarizing node.  This way, a low value of coverage for one child might not trigger the recursion of the subtrees, if the other child has a high coverage (thus resulting in a high final combined coverage).  The minimum mask parameter *is* taken into consideration in this algorithm.
-
-The main test is:
-
-	{{{
-	if ((node.mask < this.minMask) || //triggers subtrees recursion if this node mask is lower than minMask (not inclusive)
-			(c0n.mask - node.mask > (long)(4 * (long)this.granularity + 4)) ||
-			(c1n.mask - node.mask > (long)(4 * (long)this.granularity + 4)) ||
-			//testing here the independent coverage for each child
-			//no:  let's use, instead, the combined coverage for both children
-			//(c0n.coverage < 1e-5 * Math.exp(-2.303*(double)this.granularity)) ||
-			//(c1n.coverage < 1e-5 * Math.exp(-2.303*(double)this.granularity))) {
-			(node.coverage < 1e-5 * Math.exp(-2.303*(double)this.granularity))) {
-		markIpTrieCombinedCoverageDistance(summaryArrayList, c0n);
-		markIpTrieCombinedCoverageDistance(summaryArrayList, c1n);
-	} else {
-		node.setSummaryMember();
-		summaryArrayList.add(node);
-	}
-	}}}
-
-The experimental results are displayed below in condensed form.
-
-
-==== Experimentation Results for Algorithm #3 ====
-
-	|| <font color="mediumblue">*Java*</font> ||
-
-	{{{
-	File                 :  data\apan-summary.txt
-	Granularity setting  :  0
-	Minimum Summ. Mask   :  8
-	Original set count   :  104
-	Summarized set count :  18
-	Compression rate     :  0.17307693
-	(summarized/original)
-
-	10.0.0.4/32
-	45.0.0.1/32
-	117.103.111.133/32
-	133.69.37.1/32
-	140.221.251.2/32
-	163.220.127.238/32
-	172.24.61.30/32
-	172.24.100.210/32
-	192.203.116.144/28
-	202.40.161.239/32
-	202.178.96.85/32
-	202.179.241.37/32
-	202.180.34.134/32
-	202.180.34.158/32
-	202.249.2.160/32
-	203.178.133.141/32
-	203.181.102.130/32
-	203.181.192.0/18
-
-
-	File                 :  data\apan-summary.txt
-	Granularity setting  :  1
-	Minimum Summ. Mask   :  8
-	Original set count   :  104
-	Summarized set count :  18
-	Compression rate     :  0.17307693
-	(summarized/original)
-
-	10.0.0.4/32
-	45.0.0.1/32
-	117.103.111.133/32
-	133.69.37.1/32
-	140.221.251.2/32
-	163.220.127.238/32
-	172.24.61.30/32
-	172.24.100.210/32
-	192.203.116.144/28
-	202.40.161.239/32
-	202.178.96.85/32
-	202.179.241.37/32
-	202.180.34.134/32
-	202.180.34.158/32
-	202.249.2.160/32
-	203.178.133.141/32
-	203.181.102.130/32
-	203.181.192.0/18
-
-
-	File                 :  data\apan-summary.txt
-	Granularity setting  :  2
-	Minimum Summ. Mask   :  8
-	Original set count   :  104
-	Summarized set count :  15
-	Compression rate     :  0.14423077
-	(summarized/original)
-
-	10.0.0.4/32
-	45.0.0.1/32
-	117.103.111.133/32
-	133.69.37.1/32
-	140.221.251.2/32
-	163.220.127.238/32
-	172.24.61.30/32
-	172.24.100.210/32
-	192.203.116.144/28
-	202.40.161.239/32
-	202.176.0.0/13
-	202.249.2.160/32
-	203.178.133.141/32
-	203.181.102.130/32
-	203.181.192.0/18
-
-
-	File                 :  data\apan-summary.txt
-	Granularity setting  :  3
-	Minimum Summ. Mask   :  8
-	Original set count   :  104
-	Summarized set count :  13
-	Compression rate     :  0.125
-	(summarized/original)
-
-	10.0.0.4/32
-	45.0.0.1/32
-	117.103.111.133/32
-	133.69.37.1/32
-	140.221.251.2/32
-	163.220.127.238/32
-	172.24.61.30/32
-	172.24.100.210/32
-	192.203.116.144/28
-	202.40.161.239/32
-	202.176.0.0/13
-	202.249.2.160/32
-	203.176.0.0/13
-
-
-	File                 :  data\ESnet-summary.txt
-	Granularity setting  :  0
-	Minimum Summ. Mask   :  8
-	Original set count   :  618
-	Summarized set count :  58
-	Compression rate     :  0.093851134
-	(summarized/original)
-
-	10.0.0.4/32
-	10.10.10.1/32
-	10.31.20.2/32
-	18.201.0.118/32
-	62.40.124.230/32
-	62.40.125.64/27
-	117.103.111.157/32
-	128.115.190.1/32
-	128.115.190.101/32
-	134.55.0.0/16
-	134.167.160.49/32
-	137.164.27.93/32
-	138.18.155.22/32
-	147.155.254.1/32
-	150.99.198.218/32
-	150.99.199.62/32
-	172.16.32.1/32
-	172.16.32.2/32
-	192.5.170.78/32
-	192.12.208.1/32
-	192.13.56.41/32
-	192.13.56.45/32
-	192.13.56.89/32
-	192.13.56.93/32
-	192.31.96.2/32
-	192.31.99.138/32
-	192.33.240.193/32
-	192.65.95.2/32
-	192.68.191.146/32
-	192.68.191.162/32
-	192.73.7.193/32
-	192.84.8.50/32
-	192.107.175.3/32
-	192.150.29.210/32
-	192.150.31.78/32
-	192.168.201.0/26
-	192.188.106.140/32
-	192.203.230.13/32
-	192.245.178.6/32
-	198.9.202.13/32
-	198.32.153.13/32
-	198.49.208.14/32
-	198.49.208.17/32
-	198.49.208.229/32
-	198.124.16.1/32
-	198.124.17.9/32
-	198.124.17.17/32
-	198.124.128.0/17
-	198.125.140.0/24
-	198.128.0.0/15
-	198.151.133.185/32
-	198.151.133.253/32
-	198.206.220.1/32
-	198.206.221.254/32
-	199.109.4.150/32
-	204.134.149.2/32
-	207.231.240.0/20
-	211.79.48.173/32
-
-
-	File                 :  data\ESnet-summary.txt
-	Granularity setting  :  1
-	Minimum Summ. Mask   :  8
-	Original set count   :  618
-	Summarized set count :  36
-	Compression rate     :  0.058252428
-	(summarized/original)
-
-	10.0.0.4/32
-	10.10.10.1/32
-	10.31.20.2/32
-	18.201.0.118/32
-	62.40.124.0/23
-	117.103.111.157/32
-	128.115.190.1/32
-	128.115.190.101/32
-	134.55.0.0/16
-	134.167.160.49/32
-	137.164.27.93/32
-	138.18.155.22/32
-	147.155.254.1/32
-	150.99.198.218/32
-	150.99.199.62/32
-	172.16.32.1/32
-	172.16.32.2/32
-	192.5.170.78/32
-	192.12.0.0/15
-	192.31.96.2/32
-	192.31.99.138/32
-	192.33.240.193/32
-	192.64.0.0/13
-	192.73.7.193/32
-	192.84.8.50/32
-	192.107.175.3/32
-	192.150.29.210/32
-	192.150.31.78/32
-	192.160.0.0/11
-	192.203.230.13/32
-	192.245.178.6/32
-	198.0.0.0/8
-	199.109.4.150/32
-	204.134.149.2/32
-	207.231.240.0/20
-	211.79.48.173/32
-
-
-	File                 :  data\ESnet-summary.txt
-	Granularity setting  :  2
-	Minimum Summ. Mask   :  8
-	Original set count   :  618
-	Summarized set count :  23
-	Compression rate     :  0.037216827
-	(summarized/original)
-
-	10.0.0.4/32
-	10.10.10.1/32
-	10.31.20.2/32
-	18.201.0.118/32
-	62.40.124.0/23
-	117.103.111.157/32
-	128.115.190.1/32
-	128.115.190.101/32
-	134.55.0.0/16
-	134.167.160.49/32
-	137.164.27.93/32
-	138.18.155.22/32
-	147.155.254.1/32
-	150.99.198.218/32
-	150.99.199.62/32
-	172.16.32.1/32
-	172.16.32.2/32
-	192.0.0.0/8
-	198.0.0.0/8
-	199.109.4.150/32
-	204.134.149.2/32
-	207.231.240.0/20
-	211.79.48.173/32
-
-
-	File                 :  data\ESnet-summary.txt
-	Granularity setting  :  3
-	Minimum Summ. Mask   :  8
-	Original set count   :  618
-	Summarized set count :  22
-	Compression rate     :  0.035598706
-	(summarized/original)
-
-	10.0.0.4/32
-	10.10.10.1/32
-	10.31.20.2/32
-	18.201.0.118/32
-	62.40.124.0/23
-	117.103.111.157/32
-	128.115.190.1/32
-	128.115.190.101/32
-	134.0.0.0/8
-	137.164.27.93/32
-	138.18.155.22/32
-	147.155.254.1/32
-	150.99.198.218/32
-	150.99.199.62/32
-	172.16.32.1/32
-	172.16.32.2/32
-	192.0.0.0/8
-	198.0.0.0/8
-	199.109.4.150/32
-	204.134.149.2/32
-	207.231.240.0/20
-	211.79.48.173/32
-
-
-	File                 :  data\FCCN-summary.txt
-	Granularity setting  :  0
-	Minimum Summ. Mask   :  8
-	Original set count   :  43
-	Summarized set count :  4
-	Compression rate     :  0.093023255
-	(summarized/original)
-
-	62.40.124.186/32
-	193.136.0.0/15
-	194.210.30.1/32
-	194.210.63.253/32
-
-
-	File                 :  data\FCCN-summary.txt
-	Granularity setting  :  1
-	Minimum Summ. Mask   :  8
-	Original set count   :  43
-	Summarized set count :  4
-	Compression rate     :  0.093023255
-	(summarized/original)
-
-	62.40.124.186/32
-	193.136.0.0/15
-	194.210.30.1/32
-	194.210.63.253/32
-
-
-	File                 :  data\FCCN-summary.txt
-	Granularity setting  :  2
-	Minimum Summ. Mask   :  8
-	Original set count   :  43
-	Summarized set count :  4
-	Compression rate     :  0.093023255
-	(summarized/original)
-
-	62.40.124.186/32
-	193.136.0.0/15
-	194.210.30.1/32
-	194.210.63.253/32
-
-
-	File                 :  data\FCCN-summary.txt
-	Granularity setting  :  3
-	Minimum Summ. Mask   :  8
-	Original set count   :  43
-	Summarized set count :  4
-	Compression rate     :  0.093023255
-	(summarized/original)
-
-	62.40.124.186/32
-	193.136.0.0/15
-	194.210.30.1/32
-	194.210.63.253/32
-
-
-	File                 :  data\GARR-summary.txt
-	Granularity setting  :  0
-	Minimum Summ. Mask   :  8
-	Original set count   :  163
-	Summarized set count :  2
-	Compression rate     :  0.012269938
-	(summarized/original)
-
-	10.1.2.3/32
-	193.206.128.0/20
-
-
-	File                 :  data\GARR-summary.txt
-	Granularity setting  :  1
-	Minimum Summ. Mask   :  8
-	Original set count   :  163
-	Summarized set count :  2
-	Compression rate     :  0.012269938
-	(summarized/original)
-
-	10.1.2.3/32
-	193.206.128.0/20
-
-
-	File                 :  data\GARR-summary.txt
-	Granularity setting  :  2
-	Minimum Summ. Mask   :  8
-	Original set count   :  163
-	Summarized set count :  2
-	Compression rate     :  0.012269938
-	(summarized/original)
-
-	10.1.2.3/32
-	193.206.128.0/20
-
-
-	File                 :  data\GARR-summary.txt
-	Granularity setting  :  3
-	Minimum Summ. Mask   :  8
-	Original set count   :  163
-	Summarized set count :  2
-	Compression rate     :  0.012269938
-	(summarized/original)
-
-	10.1.2.3/32
-	193.206.128.0/20
-
-
-	File                 :  data\Geant-summary.txt
-	Granularity setting  :  0
-	Minimum Summ. Mask   :  8
-	Original set count   :  30
-	Summarized set count :  5
-	Compression rate     :  0.16666667
-	(summarized/original)
-
-	62.40.112.0/20
-	128.0.0.6/32
-	150.99.188.202/32
-	198.32.11.51/32
-	216.24.184.86/32
-
-
-	File                 :  data\Geant-summary.txt
-	Granularity setting  :  1
-	Minimum Summ. Mask   :  8
-	Original set count   :  30
-	Summarized set count :  5
-	Compression rate     :  0.16666667
-	(summarized/original)
-
-	62.40.112.0/20
-	128.0.0.6/32
-	150.99.188.202/32
-	198.32.11.51/32
-	216.24.184.86/32
-
-
-	File                 :  data\Geant-summary.txt
-	Granularity setting  :  2
-	Minimum Summ. Mask   :  8
-	Original set count   :  30
-	Summarized set count :  5
-	Compression rate     :  0.16666667
-	(summarized/original)
-
-	62.40.112.0/20
-	128.0.0.6/32
-	150.99.188.202/32
-	198.32.11.51/32
-	216.24.184.86/32
-
-
-	File                 :  data\Geant-summary.txt
-	Granularity setting  :  3
-	Minimum Summ. Mask   :  8
-	Original set count   :  30
-	Summarized set count :  5
-	Compression rate     :  0.16666667
-	(summarized/original)
-
-	62.40.112.0/20
-	128.0.0.6/32
-	150.99.188.202/32
-	198.32.11.51/32
-	216.24.184.86/32
-
-
-	File                 :  data\Internet2-summary.txt
-	Granularity setting  :  0
-	Minimum Summ. Mask   :  8
-	Original set count   :  282
-	Summarized set count :  82
-	Compression rate     :  0.29078013
-	(summarized/original)
-
-	10.254.254.0/28
-	62.40.125.18/32
-	64.57.16.0/20
-	64.208.110.0/24
-	64.215.195.42/32
-	69.31.111.90/32
-	72.36.127.138/32
-	74.125.48.106/32
-	74.125.48.178/32
-	74.125.48.226/32
-	74.200.187.5/32
-	80.231.134.30/32
-	117.103.111.153/32
-	128.135.247.125/32
-	131.247.47.213/32
-	131.247.47.225/32
-	134.75.108.46/32
-	137.128.0.0/9
-	138.18.0.0/16
-	140.173.1.238/32
-	141.225.250.26/32
-	141.225.250.30/32
-	143.215.193.10/32
-	144.92.233.117/32
-	149.165.254.0/27
-	150.99.199.94/32
-	150.99.200.194/32
-	156.110.203.2/32
-	156.110.203.6/32
-	164.113.238.142/32
-	164.113.238.193/32
-	192.5.89.222/32
-	192.17.10.46/32
-	192.31.99.134/32
-	192.35.86.9/32
-	192.35.86.128/25
-	192.41.213.113/32
-	192.84.8.254/32
-	192.88.0.0/16
-	192.91.246.125/32
-	192.122.183.10/32
-	192.122.183.30/32
-	192.122.183.46/32
-	192.150.29.6/32
-	192.168.1.1/32
-	192.245.196.110/32
-	198.9.201.205/32
-	198.9.202.205/32
-	198.32.0.0/16
-	198.49.182.5/32
-	198.49.182.7/32
-	198.86.17.66/32
-	198.86.53.2/32
-	198.109.37.22/32
-	198.124.194.10/32
-	198.124.216.158/32
-	198.125.140.230/32
-	199.18.156.130/32
-	199.18.156.134/32
-	199.18.156.242/32
-	199.18.156.246/32
-	199.109.4.154/32
-	199.109.11.2/32
-	200.0.207.10/32
-	200.23.60.122/32
-	203.181.248.141/32
-	204.238.76.2/32
-	204.238.76.6/32
-	205.128.0.0/9
-	206.196.177.106/32
-	206.196.178.46/32
-	206.220.240.86/32
-	206.223.119.120/32
-	207.72.112.34/32
-	207.72.112.38/32
-	207.210.142.2/32
-	207.231.240.0/21
-	208.64.0.0/10
-	209.131.107.142/32
-	211.79.48.158/32
-	211.79.48.178/32
-	216.0.0.0/8
-
-
-	File                 :  data\Internet2-summary.txt
-	Granularity setting  :  1
-	Minimum Summ. Mask   :  8
-	Original set count   :  282
-	Summarized set count :  45
-	Compression rate     :  0.15957446
-	(summarized/original)
-
-	10.254.254.0/28
-	62.40.125.18/32
-	64.0.0.0/8
-	69.31.111.90/32
-	72.36.127.138/32
-	74.0.0.0/8
-	80.231.134.30/32
-	117.103.111.153/32
-	128.135.247.125/32
-	131.247.47.213/32
-	131.247.47.225/32
-	134.75.108.46/32
-	137.128.0.0/9
-	138.18.0.0/16
-	140.173.1.238/32
-	141.225.250.26/32
-	141.225.250.30/32
-	143.215.193.10/32
-	144.92.233.117/32
-	149.165.254.0/27
-	150.99.199.94/32
-	150.99.200.194/32
-	156.110.203.2/32
-	156.110.203.6/32
-	164.113.238.142/32
-	164.113.238.193/32
-	192.0.0.0/8
-	198.0.0.0/9
-	199.0.0.0/9
-	200.0.207.10/32
-	200.23.60.122/32
-	203.181.248.141/32
-	204.238.76.2/32
-	204.238.76.6/32
-	205.128.0.0/9
-	206.192.0.0/11
-	207.72.112.34/32
-	207.72.112.38/32
-	207.210.142.2/32
-	207.231.240.0/21
-	208.64.0.0/10
-	209.131.107.142/32
-	211.79.48.158/32
-	211.79.48.178/32
-	216.0.0.0/8
-
-
-	File                 :  data\Internet2-summary.txt
-	Granularity setting  :  2
-	Minimum Summ. Mask   :  8
-	Original set count   :  282
-	Summarized set count :  44
-	Compression rate     :  0.15602838
-	(summarized/original)
-
-	10.254.254.0/28
-	62.40.125.18/32
-	64.0.0.0/8
-	69.31.111.90/32
-	72.36.127.138/32
-	74.0.0.0/8
-	80.231.134.30/32
-	117.103.111.153/32
-	128.135.247.125/32
-	131.247.47.213/32
-	131.247.47.225/32
-	134.75.108.46/32
-	137.128.0.0/9
-	138.18.0.0/16
-	140.173.1.238/32
-	141.225.250.26/32
-	141.225.250.30/32
-	143.215.193.10/32
-	144.92.233.117/32
-	149.165.254.0/27
-	150.99.199.94/32
-	150.99.200.194/32
-	156.110.203.2/32
-	156.110.203.6/32
-	164.113.238.142/32
-	164.113.238.193/32
-	192.0.0.0/8
-	198.0.0.0/9
-	199.0.0.0/9
-	200.0.207.10/32
-	200.23.60.122/32
-	203.181.248.141/32
-	204.238.76.2/32
-	204.238.76.6/32
-	205.128.0.0/9
-	206.192.0.0/11
-	207.72.112.34/32
-	207.72.112.38/32
-	207.192.0.0/10
-	208.64.0.0/10
-	209.131.107.142/32
-	211.79.48.158/32
-	211.79.48.178/32
-	216.0.0.0/8
-
-
-	File                 :  data\Internet2-summary.txt
-	Granularity setting  :  3
-	Minimum Summ. Mask   :  8
-	Original set count   :  282
-	Summarized set count :  44
-	Compression rate     :  0.15602838
-	(summarized/original)
-
-	10.254.254.0/28
-	62.40.125.18/32
-	64.0.0.0/8
-	69.31.111.90/32
-	72.36.127.138/32
-	74.0.0.0/8
-	80.231.134.30/32
-	117.103.111.153/32
-	128.135.247.125/32
-	131.247.47.213/32
-	131.247.47.225/32
-	134.75.108.46/32
-	137.128.0.0/9
-	138.18.0.0/16
-	140.173.1.238/32
-	141.225.250.26/32
-	141.225.250.30/32
-	143.215.193.10/32
-	144.92.233.117/32
-	149.165.254.0/27
-	150.99.199.94/32
-	150.99.200.194/32
-	156.110.203.2/32
-	156.110.203.6/32
-	164.113.238.142/32
-	164.113.238.193/32
-	192.0.0.0/8
-	198.0.0.0/9
-	199.0.0.0/9
-	200.0.207.10/32
-	200.23.60.122/32
-	203.181.248.141/32
-	204.238.76.2/32
-	204.238.76.6/32
-	205.128.0.0/9
-	206.192.0.0/11
-	207.72.112.34/32
-	207.72.112.38/32
-	207.192.0.0/10
-	208.64.0.0/10
-	209.131.107.142/32
-	211.79.48.158/32
-	211.79.48.178/32
-	216.0.0.0/8
-
-
-	File                 :  data\iu-summary.txt
-	Granularity setting  :  0
-	Minimum Summ. Mask   :  8
-	Original set count   :  79
-	Summarized set count :  10
-	Compression rate     :  0.12658228
-	(summarized/original)
-
-	10.10.10.4/32
-	72.12.192.0/19
-	72.36.127.150/32
-	144.228.154.166/32
-	149.159.254.125/32
-	149.165.128.0/17
-	192.0.0.0/12
-	198.49.182.129/32
-	199.8.220.0/25
-	207.72.112.50/32
-
-
-	File                 :  data\iu-summary.txt
-	Granularity setting  :  1
-	Minimum Summ. Mask   :  8
-	Original set count   :  79
-	Summarized set count :  10
-	Compression rate     :  0.12658228
-	(summarized/original)
-
-	10.10.10.4/32
-	72.12.192.0/19
-	72.36.127.150/32
-	144.228.154.166/32
-	149.159.254.125/32
-	149.165.128.0/17
-	192.0.0.0/12
-	198.49.182.129/32
-	199.8.220.0/25
-	207.72.112.50/32
-
-
-	File                 :  data\iu-summary.txt
-	Granularity setting  :  2
-	Minimum Summ. Mask   :  8
-	Original set count   :  79
-	Summarized set count :  10
-	Compression rate     :  0.12658228
-	(summarized/original)
-
-	10.10.10.4/32
-	72.12.192.0/19
-	72.36.127.150/32
-	144.228.154.166/32
-	149.159.254.125/32
-	149.165.128.0/17
-	192.0.0.0/12
-	198.49.182.129/32
-	199.8.220.0/25
-	207.72.112.50/32
-
-
-	File                 :  data\iu-summary.txt
-	Granularity setting  :  3
-	Minimum Summ. Mask   :  8
-	Original set count   :  79
-	Summarized set count :  8
-	Compression rate     :  0.101265825
-	(summarized/original)
-
-	10.10.10.4/32
-	72.0.0.0/10
-	144.228.154.166/32
-	149.128.0.0/10
-	192.0.0.0/12
-	198.49.182.129/32
-	199.8.220.0/25
-	207.72.112.50/32
-
-
-	File                 :  data\psnc-summary.txt
-	Granularity setting  :  0
-	Minimum Summ. Mask   :  8
-	Original set count   :  27
-	Summarized set count :  4
-	Compression rate     :  0.14814815
-	(summarized/original)
-
-	62.40.124.182/32
-	150.254.128.0/17
-	212.191.126.4/32
-	212.191.224.0/24
-
-
-	File                 :  data\psnc-summary.txt
-	Granularity setting  :  1
-	Minimum Summ. Mask   :  8
-	Original set count   :  27
-	Summarized set count :  3
-	Compression rate     :  0.11111111
-	(summarized/original)
-
-	62.40.124.182/32
-	150.254.128.0/17
-	212.191.0.0/16
-
-
-	File                 :  data\psnc-summary.txt
-	Granularity setting  :  2
-	Minimum Summ. Mask   :  8
-	Original set count   :  27
-	Summarized set count :  3
-	Compression rate     :  0.11111111
-	(summarized/original)
-
-	62.40.124.182/32
-	150.254.128.0/17
-	212.191.0.0/16
-
-
-	File                 :  data\psnc-summary.txt
-	Granularity setting  :  3
-	Minimum Summ. Mask   :  8
-	Original set count   :  27
-	Summarized set count :  3
-	Compression rate     :  0.11111111
-	(summarized/original)
-
-	62.40.124.182/32
-	150.254.128.0/17
-	212.191.0.0/16
-
-
-	File                 :  data\SWITCH-summary.txt
-	Granularity setting  :  0
-	Minimum Summ. Mask   :  8
-	Original set count   :  214
-	Summarized set count :  18
-	Compression rate     :  0.08411215
-	(summarized/original)
-
-	62.40.124.22/32
-	62.40.124.82/32
-	64.212.70.62/32
-	64.213.33.222/32
-	129.143.29.42/32
-	130.59.15.13/32
-	130.59.15.14/32
-	130.59.15.15/32
-	130.59.32.0/21
-	192.65.184.84/32
-	192.65.184.173/32
-	192.65.184.221/32
-	192.65.185.130/32
-	194.42.48.11/32
-	194.242.34.52/32
-	194.242.34.53/32
-	213.242.73.138/32
-	213.248.79.190/32
-
-
-	File                 :  data\SWITCH-summary.txt
-	Granularity setting  :  1
-	Minimum Summ. Mask   :  8
-	Original set count   :  214
-	Summarized set count :  15
-	Compression rate     :  0.07009346
-	(summarized/original)
-
-	62.40.124.22/32
-	62.40.124.82/32
-	64.212.70.62/32
-	64.213.33.222/32
-	129.143.29.42/32
-	130.59.15.13/32
-	130.59.15.14/32
-	130.59.15.15/32
-	130.59.32.0/21
-	192.65.184.0/23
-	194.42.48.11/32
-	194.242.34.52/32
-	194.242.34.53/32
-	213.242.73.138/32
-	213.248.79.190/32
-
-
-	File                 :  data\SWITCH-summary.txt
-	Granularity setting  :  2
-	Minimum Summ. Mask   :  8
-	Original set count   :  214
-	Summarized set count :  12
-	Compression rate     :  0.056074765
-	(summarized/original)
-
-	62.40.124.22/32
-	62.40.124.82/32
-	64.212.70.62/32
-	64.213.33.222/32
-	129.143.29.42/32
-	130.59.0.0/18
-	192.65.184.0/23
-	194.42.48.11/32
-	194.242.34.52/32
-	194.242.34.53/32
-	213.242.73.138/32
-	213.248.79.190/32
-
-
-	File                 :  data\SWITCH-summary.txt
-	Granularity setting  :  3
-	Minimum Summ. Mask   :  8
-	Original set count   :  214
-	Summarized set count :  12
-	Compression rate     :  0.056074765
-	(summarized/original)
-
-	62.40.124.22/32
-	62.40.124.82/32
-	64.212.70.62/32
-	64.213.33.222/32
-	129.143.29.42/32
-	130.59.0.0/18
-	192.65.184.0/23
-	194.42.48.11/32
-	194.242.34.52/32
-	194.242.34.53/32
-	213.242.73.138/32
-	213.248.79.190/32
-	}}}
-
 
 === Subsequent Work ===
 
-The algorithm for [http://en.wikipedia.org/wiki/Cut_(graph_theory) Minimum Cut] might also be a candidate for the summarization issue, and may be further investigated.
+The algorithm for [http://en.wikipedia.org/wiki/Cut_(graph_theory) Minimum Cut] might also be a candidate for the summarization issue, and may be further investigated in future versions.
 
 
 == Project Management ==
