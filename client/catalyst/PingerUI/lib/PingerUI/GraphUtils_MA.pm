@@ -59,7 +59,7 @@ my $GOUT_DIR = 'graphsMA';
 my $GFN_BASE = 'graph';
 
 #
-my $NUM_DOTS = 200;
+my $NUM_DOTS = 100;
 
 
 =head2 get_data

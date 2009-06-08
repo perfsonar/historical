@@ -1,6 +1,6 @@
      .smver_1 { font-weight: bolder;   font: 11px Verdana, Geneva, Arial, Helvetica, sans-serif;   }
      .smver_2 {font-weight: normal; font-family: Verdana, Times, serif; font-size:  12px }
-     .nblue {color: blue; font-style: normal; text-align: center; font-weight: bold; 
+     .nblue {color: blue; font-style: normal; text-align: center; font-weight: normal; 
                   font-family:   Verdana, serif;}
      .nblue_normal {color: blue; font-style: normal; text-align: center;}
      
@@ -10,12 +10,17 @@
   		  color: #000000;  padding-left: 3px; padding-right: 3px;
   		  margin-top: 3px;
   		  margin-bottom: 3px;
-  		  margin-left: 3px; border: 1px solid #284279;
+  		  margin-left: 3px; border: 0px solid #284279;
   		  margin-right: 3px; }
      .arn {font-family: Arial, serif;font-weight: bold;  }
-     .bbuttons_filter_ma, .bbuttons {  font-family: Verdana, Geneva, Arial, Helvetica; font-size: 14px; 
-                    font-weight: bolder;               
+     .bbuttons_filter_ma, .bbuttons {  
+                  clear:both;			  
+		  font-family: Verdana, Geneva, Arial, Helvetica; 
+		  font-size: 14px; 
+                  font-weight: bolder;             
+		  border:1px solid #999999;  
   		  background-color: #DDE5D2; 
+		  text-decoration:none;
   		  color: #000000; 
   		  margin-top: 3px;
   		  margin-bottom: 3px;
@@ -23,15 +28,19 @@
   		  margin-right: 3px;
 		  text-align: left} 
     .bbuttons_filter_ma_selected {  font-family: Verdana, Geneva, Arial, Helvetica; font-size: 14px; 
-                    font-weight: bolder;               
-  		  background-color: #ADE5D2; 
+                  clear:both;	
+		    border:1px solid #999999;  
+		   font-weight: bolder;               
+  		  background-color: #CDEFDF; 
   		  color: #000000; 
   		  margin-top: 3px;
   		  margin-bottom: 3px;
   		  margin-left: 3px;
   		  margin-right: 3px;
 		  text-align: left} 	  
-     .buttons {  font-family: Verdana, Geneva, Arial, Helvetica; font-size: 11px; 
+     .buttons {   clear:both;	
+		    border:1px solid #999999; 
+		     font-family: Verdana, Geneva, Arial, Helvetica; font-size: 11px; 
                 font-weight: bolder;               
   		  background-color: #DCE5F2; 
   		  color: #000000; 
@@ -62,7 +71,7 @@
               margin-right: 0px; padding-right: 0px;   } 
     .fc_st_links { background-color: #F2F7FB; color: #000000;  text-align:   left;
               border: 1px solid #A5A5A5; 
-	      width: 20em;
+	      width: 25em;
               margin-right: 0px; padding-right: 0px;   }       
      .smlc_st {  font: 11px Verdana, Geneva, Arial, Helvetica, sans-serif;   color: #3670A7;  
                width: 100px; }
@@ -86,26 +95,26 @@
      div#domainPage {border: 1px  solid #EEC;font-weight: normal; font-family: Verdana, Times, serif; 
                      font-size:  12px}
      div#wrapper {float: left; width: 100%; padding-left: 5px; padding-right: 5px;  }
-     h2 {height:40px;line-height:40px;  padding-left: 20px;background: #EEF;   } 
+     h2 {height:40px;line-height:40px;  padding-left: 20px;background: #EEEEEF;   } 
      div#header h2{height:60px;line-height:60px; margin: -1px; padding-left:  -5px;width: 730px;
-                   font-family: Arial, serif; border: 1px solid #A5A5A5; background: #CEEE;}
+                   font-family: Arial, serif; border: 1px solid #A5A5A5; background: #CECEC9;}
     
-     h3 {height:20px;line-height:20px;margin:0; padding-left: 20px;background: #EEF;width: 750px; 
-                   font-family: Arial, serif;  }
+     h3 {height:20px;line-height:20px;margin:0; padding-left: 20px; width: 750px; 
+                   font-family: Verdana, Arial, serif;  }
     
  #spinner {
  z-index: 100;
  position: absolute;
- top: 40%;
- left: 40%;
+ top: 12px;
+ left: 680px;
  background-image: url("/static/images/spinner.gif");
  background-repeat: no-repeat;
  background-position: 5px;
  padding-left: 10px;
  padding-top: 10px;
  border: 0;
- width: 10px;
- height: 10px; 
+ width: 24px;
+ height: 24px; 
  font-weight: bolder;
 }
 
