@@ -57,7 +57,6 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - _*Aaron*_ - owamp/bwctl defaults for LHC sites 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=146 146] - _*Aaron*_ - bwctld.limits should be updated as well 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=163 163] - _*Aaron*_ - Add warning if both owamp/bwctl are configured 
- * _*NDT/NPAD*_ 
  * _*Testing*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - _*Jason*_ - Automated Nessus Evaluation of Software 	
  * _*GUIs*_
