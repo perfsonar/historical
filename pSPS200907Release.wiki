@@ -4,7 +4,7 @@
 
 == Introduction ==
 
-This page outlines details regarding the perfSONAR-PS release that began the week of June 12, 2009 and ended on June 5 2009 in the release of v3.1+ of perfSONAR-PS.
+This page outlines details regarding the perfSONAR-PS release that began June 5, 2009 and ended on July 3 2009 in the release of v3.1+ of perfSONAR-PS.
 
 == Release Team ==
 
