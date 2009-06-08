@@ -5,23 +5,40 @@
  # Attendees: 
  # Team Updates
  # Review _*Actions*_ and _*Issues*_
- # KOI performance update
- # perfSONAR-PS v3.1 Release Update
-   * New Bugs
-   * Release Candidate Generation
-     * LS, SNMP-MA, LS-reg, status to be updated this week (not done yet).
-     * pingER may need one for docs and hLS registration issue.
- # pS-NPToolkit 3.1 status
-   * Plans to update the roadmap with feature status.
- # OGF Document status (Jason)
- # Circuit Monitoring Development Status
- # SNMP-MA ESnet new database integration update
-   * Still waiting on release branching issues
- # LHC/Atlas deployments (status update)
+ # KOI performance update - *Aaron*
+ # Release Activities - *Jason*
+   # perfSONAR-PS 3.1 status 
+     * New Bugs
+     * RC Generation
+   # perfSONAR-PS 3.1+ status 
+     * See [pSPS200907Release]     
+     * Tasks Assigned
+     * Bugs Updated
+   # pS-NPToolkit 3.1 status 
+     * See [PerformanceToolkit200907Release] 
+     * Tasks Assigned
+     * Bugs Updated
+ # OGF Document status - *Jason*
+   * NM-WG
+     * Base Uploaded to GF - [https://forge.gridforum.org/sf/go/doc15649?nav=1]
+     * Outstanding Edits - Jeff/Martin/Brian
+     * New version to upload by end of this week
+   * NML-WG
+     * Nothing uploaded (yet)
+     * Outstanding Edits - Jeff/Martin
+     * Expected upload in 1/2 weeks
+   * NMC-WG
+     * Base Uploaded to GF - [https://forge.gridforum.org/sf/go/doc15644?nav=1]
+     * MA Uploaded to GF - [https://forge.gridforum.org/sf/go/doc15646?nav=1]
+     * MA still incomplete
+     * Changes/upload in 1/2 weeks
+ # LHC/Atlas deployments (status update) - *Rich*
  # Next VC will be 6/15.
+   * Will be short and focused on release due to DCN developers conference.
 
 === ACTIONS ===
 
+TBD
 
 == Where ==
 
