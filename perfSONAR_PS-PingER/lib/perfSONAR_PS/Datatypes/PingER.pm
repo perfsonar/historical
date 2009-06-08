@@ -108,13 +108,13 @@ sub handle {
             no strict 'refs';
             $_sizeLimit = $maconfig->{query_size_limit} if $maconfig && ref( $maconfig ) eq 'HASH' && $maconfig->{query_size_limit};
             $self->get_LOGGER->debug( " Size limit set to:  $_sizeLimit " );
-            return $type->( $self, $response );
+            $type->( $self, $response );
         };
         if ( $EVAL_ERROR ) {
-            $self->get_LOGGER->error( " Handler for $type failed: $EVAL_ERROR" );
+            $self->get_LOGGER->logdie( " Handler for $type failed: $EVAL_ERROR" );
         }
     }
-    $self->get_LOGGER->error( " Handler for $type Not supported" );
+    $self->get_LOGGER->debug( " Handler for $type Not supported" );
     return;
 }
 

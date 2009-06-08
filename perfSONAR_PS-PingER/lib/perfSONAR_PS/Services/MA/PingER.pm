@@ -253,7 +253,7 @@ sub getConf {
     my $self = shift;
     my $key  = shift;
     if ( defined $self->{'CONF'}->{$basename}->{$key} ) {
-        $logger->info( "Value for '$basename/$key' is set" );
+        $logger->debug( "Value for '$basename/$key' is set" );
         return $self->{'CONF'}->{$basename}->{$key};
     }
     else {
@@ -427,7 +427,7 @@ sub __handleEvent {
             push @{$arr_filters}, Metadata->new( $filter );
         }
     }
-    $logger->info( "Unmarshalling into PingER object" );
+    $logger->debug( "Unmarshalling into PingER object" );
     my $pingerRequest = perfSONAR_PS::Datatypes::PingER->new(
         {
             metadata => [ Metadata->new( $mds->[0] ) ],

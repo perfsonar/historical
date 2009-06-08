@@ -7,7 +7,7 @@
 
 Name:           perl-perfSONAR_PS-PingER-server
 Version:        3.1
-Release:        2.%{disttag}
+Release:        3.%{disttag}
 Summary:        perfSONAR_PS PingER  Measurement Archive and Collection System
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -148,6 +148,9 @@ echo "    /opt/perfsonar_ps/PingER/doc/INSTALL file                    "
 echo "-----------------------------------------------------------------"
 
 %changelog
+* Mon Jun 06 2009 maxim@fnal.gov v3.1.3
+- fixed CLP bugs and unresolved source hostname bug
+
 * Mon Mar 23 2009 maxim@fnal.gov v3.1
 - refactored for the ps-ps release
 
