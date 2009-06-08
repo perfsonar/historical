@@ -440,6 +440,10 @@ public class DCNLookupClient{
             this.log.debug("hLS: " + hLS);
             PSLookupClient lsClient = new PSLookupClient(hLS);
             Element response = lsClient.query(request);
+            if(response == null){
+                this.log.debug("No response returned from "+ hLS);
+                continue;
+            }
             datum = lsClient.parseDatum(response, psNS.PS_SERVICE);
             Element metaData = response.getChild("metadata", psNS.NMWG);
             if(metaData == null){
