@@ -75,7 +75,7 @@ Requires:		perl(XML::SAX::DocumentLocator)
 Requires:		perl(XML::SAX::Base)
 Requires:		perl(XML::SAX::Exception)
 #Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-Requires:       perl
+Requires:       	perl
 Requires:		rrdtool
 Requires:		rrdtool-perl
 
@@ -133,12 +133,11 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Thur May 16 2009 zurawski@internet2.edu 3.1-3
+* Thu May 16 2009 zurawski@internet2.edu 3.1-3
 - Bugfix to include the makeDBConf script
 
-* Tues Apr 21 2009 zurawski@internet2.edu 3.1-2
+* Tue Apr 21 2009 zurawski@internet2.edu 3.1-2
 - Bugfix to the RRD.pm library
 
 * Mon Mar 16 2009 zurawski@internet2.edu 3.1-1
 - Initial release as an RPM
-
