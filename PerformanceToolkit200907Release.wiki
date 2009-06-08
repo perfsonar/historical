@@ -4,7 +4,7 @@
 
 == Introduction ==
 
-This page outlines details regarding the Performance Toolkit release to begin the week of June 8, 2009 and ended on July 17, 2009 in the release of v3.1 of the Performance Toolkit.
+This page outlines details regarding the Performance Toolkit release to begin the week of June 5, 2009 and ended on July 17, 2009 in the release of v3.1 of the Performance Toolkit.
 
 == Release Team ==
 
@@ -14,11 +14,12 @@ This page outlines details regarding the Performance Toolkit release to begin th
  * Jeff
  * Brian
  * Joe
- * TBD
+ * Marcos
+ * Guilherme
 
 == Release Schedule ==
 
-Release Start: June 12, 2009
+Release Start: June 5, 2009
 
 Code Slush: June 19, 2009
 
@@ -35,10 +36,10 @@ http://perfsonar-ps.googlecode.com/svn/wiki/PerformanceToolkit200907Release/sche
 == Tasks ==
 
 || *Task* || *Developer* ||
+|| Development || All ||
 || Disk Integration || Aaron/Jason ||
-|| ... || ... ||
-|| Testing Coordination || Jason/Jeff ||
-|| Tester || Brian/Joe/Maxim/UDel ||
+|| Testing Coordination (External) || Jason/Jeff ||
+|| Testing (Internal) || Brian/Joe/Maxim/Marcos/Guilherme ||
 
 == Specifics ==
 
@@ -46,15 +47,45 @@ The following outline some exceptions to the overall release process.  Also see 
 
 === Bugs Related to This Release ===
 
-TBD
+ * _*pSB*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=179 179] - _*Jeff*_ - Add scripts to clean/migrate SQL data in pS-B 
+ * _*PingER*_  
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=180 180] - _*Maxim*_ - Add scripts to clean/migrate SQL data in pingER
+ * _*SNMP MA/Cacti*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - _*Aaron*_ - Cacti Configuration on NPToolkit  
+ * _*OWAMP/BWCTL*_  
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - _*Aaron*_ - owamp/bwctl defaults for LHC sites 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=146 146] - _*Aaron*_ - bwctld.limits should be updated as well 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=163 163] - _*Aaron*_ - Add warning if both owamp/bwctl are configured 
+ * _*NDT/NPAD*_ 
+ * _*Testing*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - _*Jason*_ - Automated Nessus Evaluation of Software 	
+ * _*GUIs*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=47 47] - _*Jason*_ - Manual BWCTL/OWAMP host add to pSB Admin 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=49 49] - _*Jason*_ - Daemon job to automatically add BWCTL/OWAMP isntances 
+ * _*Disk Misc.*_   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=10 10] - _*Jeff*_ - Splash screen   	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=17 17] - _*Aaron*_ - Java plugin/homepage for KDE env 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=26 26] - _*Aaron*_ - kernel nic drivers 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=57 57] - _*Aaron*_ - Console Configuration Issues 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=69 69] - _*Aaron*_ - MySQL Logging 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=83 83] - _*Aaron*_ - Live CD Network Card Drivers (Broadcom) 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=90 90] - _*Aaron*_ - Find workaround for KOI UDP performance issues	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=98 98] - _*Jason*_ - Ensure all service packages have init.d scripts 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=104 104] - _*Aaron*_ - var log export
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=140 140] - _*Aaron*_ - Upgrades of NPToolkit may miss key file changes 	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=164 164] - _*Aaron*_ - Add option to completely clear disk/partition table and all 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=165 165] - _*Aaron*_ - Explore syslog-ng, and potential loghost setup 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - _*Aaron*_ - Add vmxnet module 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=175 175] - _*Aaron*_ - kernel headers 	
 
 === Code Reviews ===
 
-TBD 
+There will be no code reviews for this release.  
 
 === Documentation Reviews ===
 
-TBD
+There will be no formal documentation reviews for this release
 
 === Testing ===
 
@@ -63,14 +94,29 @@ TBD
 == Open Tasks ==
 
  * Jason
-   * List tasks - <font color=yellow>_*IN PROGRESS - 6/5*_</font>
+   * Development (perfSONAR-PS 3.1+) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
+   * Development (GUIs) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
+   * Disk Integration - <font color=red>_*NOT STARTED - 6/8*_</font>
+   * Testing Coordination - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Aaron
+   * Development (perfSONAR-PS 3.1+) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
+   * Development (GUIs) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
+   * Disk Integration - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
  * Jeff
+   * Development (perfSONAR-PS 3.1+) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
+   * Testing Coordination - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Maxim
+   * Development (perfSONAR-PS 3.1+) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
+   * Development (GUIs) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
+   * Testing - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Joe
+   * Testing - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Brian
+   * Testing - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Guilherme
+   * Testing - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Marcos
+   * Testing - <font color=red>_*NOT STARTED - 6/8*_</font>   
    
 == Lessons Learned ==
 
