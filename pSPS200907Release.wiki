@@ -60,9 +60,9 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*PingER*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=181 181] - _*Maxim*_ - PingER MA server errors
  * _*PingER GUI*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=19 19] - _*Aaron*_ - ~~PingER GUI gLS pingable hosts~~
-     * <font color=green>_*Fixed - 6/8*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=19 19] - _*Maxim*_ - PingER GUI gLS pingable hosts
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=107 107] - _*Maxim*_ - PingER LandMarks GUI Displays All Pingable Hosts - Selectable by Community
+     * <font color=green>_*Merged into 19 - 6/8*_</font>
  * _*perfAdmin*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=136 136] - _*Jason*_ - Units displayed in perfAdmin should correspond with service definition 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=141 141] - _*Jason*_ - bandwidthGraph.cgi plots are missleading for data is missing 	 	 
