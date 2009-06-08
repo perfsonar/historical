@@ -14,7 +14,8 @@ This page outlines details regarding the perfSONAR-PS release that began the wee
  * Jeff
  * Brian
  * Joe
- * TBD
+ * Marcos
+ * Guilherme
 
 == Release Schedule ==
 
@@ -33,8 +34,12 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPS200907Release/schedule.png
 == Services Released and Parties Involved ==
 
 || *Service* || *Developer* || *Code Reviewer* || *Documentation Reviewer* ||
-|| ... || ... || ... || ... ||
-
+|| perfSONAR-BUOY (Collection) || Jeff || Jason/Aaron || Brian ||
+|| perfSONAR-BUOY (Web Service) || Jason || Marcos || Joe ||
+|| perfAdmin CGIs/APIs || Jason || Maxim || Guilherme ||
+|| PingER GUI || Maxim || Brian || Guilherme ||
+|| gLS || Jason || Aaron/Guilherme/Marcos || Maxim ||
+|| Nagios Plugis || Jason || Jeff || Marcos ||
 
 == Specifics ==
 
@@ -42,8 +47,27 @@ The following outline some exceptions to the overall release process.  Also see 
 
 === Bugs Related to This Release ===
 
-TBD
-     
+ * _*pSB*_  
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=106 106] - _*Jeff*_ - bwmaster/bwcontroller: better logging support
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=115 115] - _*Jason*_ - pSB Metadata Generation 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=125 125] - _*Jeff*_ - testconf.pl: Print out description of exactly what tests are configured to run by an owmesh.conf file 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=127 127] - _*Jeff*_ - Refactor bwmaster.pl to fetch addresses from 'conf' before forking 	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=130 130] - _*Jason*_ - pSB Store File generation: Star vs Mesh 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=131 131] - _*Jason*_ - achievable bandwidth event type is mis-spelled achieveable 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=152 152] - _*Jason*_ - pSB MA gLS ERRORS 	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=157 157] - _*Jeff*_ - bwcollector debugging support 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=174 174] - _*Jason*_ - windowSize not reported correctly for pSB
+ * _*PingER*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=181 181] - _*Maxim*_ - PingER MA server errors
+ * _*PingER GUI*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=19 19] - _*Aaron*_ - PingER GUI gLS pingable hosts
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=107 107] - _*Maxim*_ - PingER LandMarks GUI Displays All Pingable Hosts - Selectable by Community
+ * _*perfAdmin*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=136 136] - _*Jason*_ - Units displayed in perfAdmin should correspond with service definition 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=141 141] - _*Jason*_ - bandwidthGraph.cgi plots are missleading for data is missing 	 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=143 143] - _*Jason*_ - graphs are not coming up under IE 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - _*Jason*_ - disable buttons on the stats grpahs page for empty graphs 	  
+
 === Code Reviews ===
 
 The code _review_ can be a lot more in depth than just reading in suggesting.  Most corrections can be done directly to the code base to save time in the process.  Reviewers are encouraged to run [Perltidy] and [Perlcritic] at the end of the review.  
@@ -115,14 +139,35 @@ Developers are responsible for testing their code:
 == Open Tasks ==
 
  * Jason
-   * List tasks - <font color=yellow>_*IN PROGRESS - 6/5*_</font>
+   * Development (pSB WS) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
+   * Development (perfAdmin) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
+   * Development (gLS) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
+   * Development (Nagios Plugins) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
+   * Code Review (pSB Coll.) - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Aaron
+   * Code Review (pSB Coll.) - <font color=red>_*NOT STARTED - 6/8*_</font>
+   * Code Review (gLS) - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Jeff
+   * Development (pSB Coll.) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
+   * Code Review (Nagios Plugin) - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Maxim
+   * Development (PingER GUI) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
+   * Code Review (perfAdmin) - <font color=red>_*NOT STARTED - 6/8*_</font>
+   * Doc Review (gLS) - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Joe
+   * Doc Review (pSB WS) - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Brian
+   * Code Review (PingER GUI) - <font color=red>_*NOT STARTED - 6/8*_</font>
+   * Doc Review (pSB Coll.) - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Guilherme
+   * Doc Review (perfAdmin) - <font color=red>_*NOT STARTED - 6/8*_</font>
+   * Doc Review (PingER GUI) - <font color=red>_*NOT STARTED - 6/8*_</font>
+   * Code Review (gLS) - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Marcos
+   * Beta IP Summarization - <font color=yellow>_*IN PROGRESS - 6/8*_</font>   
+   * Doc Review (Nagios) - <font color=red>_*NOT STARTED - 6/8*_</font>
+   * Code Review (pSB WS) - <font color=red>_*NOT STARTED - 6/8*_</font>
+   * Code Review (gLS) - <font color=red>_*NOT STARTED - 6/8*_</font>
    
 == Lessons Learned ==
 

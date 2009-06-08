@@ -11,10 +11,10 @@ The perfSONAR-PS release process is based heavily on the [ReleaseManagement gene
 *LAST REVISED* <font color=red>June 5, 2009</font>
 
 || *Date* || *Milestone* ||
-|| _8 April 09_ || [pSPSReleaseManagement#pSPS_Version_3.1 pSPS Version 3.1] ||
-|| _3 July 09_ || [pSPSReleaseManagement#pSPS_Version_3.1+ pSPS Version 3.1+] ||
-|| _Aug 09_ || [pSPSReleaseManagement#pSPS_Version_3.2 pSPS Version 3.2] ||
-|| _Jan 10_ || [pSPSReleaseManagement#pSPS_Version_4.0 pSPS Version 4.0] ||
+|| _8 April 2009_ || [pSPSReleaseManagement#pSPS_Version_3.1 pSPS Version 3.1] ||
+|| _3 July 2009_ || [pSPSReleaseManagement#pSPS_Version_3.1+ pSPS Version 3.1+] ||
+|| _Aug 2009_ || [pSPSReleaseManagement#pSPS_Version_3.2 pSPS Version 3.2] ||
+|| _Jan 2010_ || [pSPSReleaseManagement#pSPS_Version_4.0 pSPS Version 4.0] ||
 
 === perfSONAR-PS ===
 
@@ -24,9 +24,6 @@ The following section details perfSONAR-PS specific enhancements for the future.
   
   * RPM Packages for all current perfSONAR-PS services
   * gLS/hLS performance and stability updates
-  * CGI based GUIs
-    * gLS/hLS GUIs
-    * Simple data GUIs for OWAMP/BWCTL/PingER/SNMP
   * Circuit monitoring (glif version, still E2EMon compatible)
   * Yum/APT repository
 
@@ -36,7 +33,11 @@ The following section details perfSONAR-PS specific enhancements for the future.
   * Nagios pluggins
     * Liveness
     * Threshold of performance data
-  * Enhanced CGI script for OWAMP data (dash-board)
+  * CGI based GUIs
+    * gLS/hLS GUIs
+    * Simple data GUIs for BWCTL/SNMP
+    * Enhanced CGI script for OWAMP data (dash-board)
+    * Enhanced CGI script for PingER
   * Modified pS-B OWAMP database back-end with support for history of delay-variation
 
 ==== pSPS Version 3.2 ====
@@ -88,6 +89,14 @@ For more information regarding this release, please see the information [pSPS200
 === v3.1+ Release ===
 
 For more information regarding this release, please see the information [pSPS200907Release page].
+
+=== v3.2 Release ===
+
+TBD
+
+=== v4.0 Release ===
+
+TBD
 
 == Release Process ==
 
@@ -307,6 +316,8 @@ A breakdown and explanation of each label follows:
    * _*Release1.0*_ - perfSONAR-PS July 2008 Release (<font color="red">depreciated</font>) 
    * _*Release3.1Beta*_ - perfSONAR-PS March 2009 Release - Special tag for beta testing
    * _*Release3.1*_ - perfSONAR-PS March 2009 Release
+   * _*Release3.1PlusBeta*_ - perfSONAR-PS July 2009 Release - Special tag for beta testing
+   * _*Release3.1Plus*_ - perfSONAR-PS July 2009 Release
    * _*Release3.2Beta*_ - perfSONAR-PS Summer 2009 Release - Special tag for beta testing
    * _*Release3.2*_ - perfSONAR-PS Summer 2009 Release
    * _*Future*_ - perfSONAR-PS Future Plans
