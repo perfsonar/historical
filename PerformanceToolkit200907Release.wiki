@@ -56,7 +56,8 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*OWAMP/BWCTL*_  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - _*Aaron*_ - owamp/bwctl defaults for LHC sites 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=146 146] - _*Aaron*_ - bwctld.limits should be updated as well 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=163 163] - _*Aaron*_ - Add warning if both owamp/bwctl are configured 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=163 163] - _*Aaron*_ - ~~Add warning if both owamp/bwctl are~~ configured 
+     * Fixed <font color=green>_*6/8*_</font>
  * _*Testing*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - _*Jason*_ - Automated Nessus Evaluation of Software 	
  * _*GUIs*_
@@ -71,7 +72,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=83 83] - _*Aaron*_ - Live CD Network Card Drivers (Broadcom) 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=90 90] - _*Aaron*_ - Find workaround for KOI UDP performance issues	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=98 98] - _*Jason*_ - Ensure all service packages have init.d scripts 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=104 104] - _*Aaron*_ - var log export
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=104 104] - _*Aaron*_ - ~~var log export~~
+     * Fixed <font color=green>_*6/8*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=140 140] - _*Aaron*_ - Upgrades of NPToolkit may miss key file changes 	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=164 164] - _*Aaron*_ - Add option to completely clear disk/partition table and all 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=165 165] - _*Aaron*_ - Explore syslog-ng, and potential loghost setup 	 
