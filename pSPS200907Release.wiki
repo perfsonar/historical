@@ -47,6 +47,8 @@ The following outline some exceptions to the overall release process.  Also see 
 
 === Bugs Related to This Release ===
 
+ * _*LS Registration Daemon*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=182 182] - _*Aaron*_ - need better error checking on ls_instance string in ls_registration_daemon 
  * _*pSB*_  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=106 106] - _*Jeff*_ - bwmaster/bwcontroller: better logging support
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=115 115] - _*Jason*_ - pSB Metadata Generation 	 
@@ -58,10 +60,11 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=157 157] - _*Jeff*_ - bwcollector debugging support 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=174 174] - _*Jason*_ - windowSize not reported correctly for pSB
  * _*PingER*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=181 181] - _*Maxim*_ - PingER MA server errors
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=181 181] - _*Maxim*_ - ~~PingER MA server errors~~
+     * <font color=green>_*Fixed - 6/8*_</font>
  * _*PingER GUI*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=19 19] - _*Maxim*_ - PingER GUI gLS pingable hosts
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=107 107] - _*Maxim*_ - PingER LandMarks GUI Displays All Pingable Hosts - Selectable by Community
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=107 107] - _*Maxim*_ - ~~PingER LandMarks GUI Displays All Pingable Hosts - Selectable by Community~~
      * <font color=green>_*Merged into 19 - 6/8*_</font>
  * _*perfAdmin*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=136 136] - _*Jason*_ - Units displayed in perfAdmin should correspond with service definition 
