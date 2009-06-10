@@ -59,6 +59,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=152 152] - _*Jason*_ - pSB MA gLS ERRORS 	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=157 157] - _*Jeff*_ - bwcollector debugging support 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=174 174] - _*Jason*_ - windowSize not reported correctly for pSB
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - _*Jason*_ - Address/Name Normalization in pSB 
  * _*PingER*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=181 181] - _*Maxim*_ - ~~PingER MA server errors~~
      * <font color=green>_*Fixed - 6/8*_</font>
