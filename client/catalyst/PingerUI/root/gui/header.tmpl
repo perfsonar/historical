@@ -18,6 +18,11 @@
 </head> 
 
 <BODY>
+<div id="spinner" name="spinner"   style="display:none">
+<div style="background-color: white; position: absolute; top: 0px; right: 0px; width: 1px; height: 1px; cursor:pointer;"
+ onclick="$('spinner').hide()">
+ </div>
+  </div>
 <div id="wrapper">
 <div id="header">
    <h2 id="header">[% title %]</h2>
@@ -58,7 +63,7 @@
       </div>
     [% UNLESS remote_urls.size > 0 %]
       <span class="nblue">Step 1</span><br/> 
-      <span class="arn">Enter URL(s)</span>     
+      <span class="arn_black">Enter URL(s)</span>     
     [% END %] 
          
    </TD>
@@ -85,11 +90,6 @@
  </tr> 
  </TABLE>     
 </div>
-<div id="spinner" name="spinner"   style="display:none">
-<div style="background-color: white; position: absolute; top: 0px; right: 0px; width: 1px; height: 1px; cursor:pointer;"
- onclick="$('spinner').hide()">
- </div>
-  </div>
 <div id="matching">
 <TABLE    class="main"  cols="6"> 
 <TR>
@@ -119,14 +119,12 @@
  </TABLE> 
 </div> 
 <div id="statusDiv" name="statusDiv"></div>
-&nbsp;
-<div id="linksdiv" name="linksdiv"></div> 
- 
-<div id="params">
+<div id="linksdiv" name="linksdiv"></div>
+<div id="params_table" name="params_table" style="display:none">
 <TABLE   class="main"  cols="6"> 
    <TR>
    <TD   colspan="6">
-       <span class="arn">Graph parameters</span>
+       <span class="arn_black">Graph parameters</span>
     </TD>
   </TR>
   <TR>
@@ -228,6 +226,8 @@
 </div>
 </div>
 <script type="text/javascript">
+   
+  
    Ajax.Responders.register({
      onCreate: function() {
         if (Ajax.activeRequestCount === 1) {
@@ -238,14 +238,17 @@
         if (Ajax.activeRequestCount === 0) {
            $('spinner').hide();
         }
-    }
+    },
    }); 
+
 
 function filterMAs(name,index) {
       $$('input.bbuttons_filter_ma_selected').each(function(name){
                 $(name).removeClassName('bbuttons_filter_ma_selected');
 		 
-      }); 
+      });
+      $('params_table').hide();
+      $('get_graph2').removeClassName('bbuttons_filter_ma_selected'); 
       $('get_links').removeClassName('bbuttons_filter_ma_selected');
       $('filter_project' + index).addClassName('bbuttons_filter_ma_selected');
       new Ajax.Updater({ success: 'filtered_ma', failure: 'statusDiv'}, '/gui/filter_links', {
@@ -254,7 +257,9 @@ function filterMAs(name,index) {
 }     
 
 function displayLinks() {
-   var params = {};  
+   var params = {};
+  
+   $('get_graph2').removeClassName('bbuttons_filter_ma_selected'); 
    $('get_links').addClassName('bbuttons_filter_ma_selected');
    ['ma_urls', 'src_regexp', 'dst_regexp', 'filter_project', 'packetsize', 'stored_links', 'select_url'].each(function(name) {
        if($(name)  && $F(name)) {
@@ -263,14 +268,17 @@ function displayLinks() {
    }, params); 
    new Ajax.Updater({ success: 'linksdiv', failure: 'statusDiv'}, '/gui/displayLinks', {
                       parameters: params
-   });
+   }); 
+   $('params_table').show();
+    
 }
 
 function displayGraph() {
    var params = {}; 
    if ($('notice')) {
        $('notice').hide(); 
-   } 
+   }
+   $('get_graph2').addClassName('bbuttons_filter_ma_selected');
    ['start_time', 'end_time',  'gmt_offset', 'filter_project',  'gtype', 'upper_rt','gpresent',   'links', 'stored_links'].each(function(name, index) {
        if($(name)) {
           this[name] = $(name).value;
@@ -279,6 +287,7 @@ function displayGraph() {
    new Ajax.Updater({ success: 'graph', failure: 'statusDiv'}, '/gui/displayGraph', {
                       parameters: params
    });
+   
   
 }
 

@@ -75,7 +75,7 @@ sub get_data {
    
     my $link = $c->stash->{link};
     my $url =  getURL($c->stash->{stored_links}, $link);
-    $c->log->fatal(" Malformed remote MA URL: $url ") unless  validURL($url);
+    $c->log->fatal(" Malformed remote MA URL: $url ") unless  $url && validURL($url);
     my $ma = new perfSONAR_PS::Client::PingER( { instance =>  $url } );
     
     my $dresult = $ma->setupDataRequest( { 

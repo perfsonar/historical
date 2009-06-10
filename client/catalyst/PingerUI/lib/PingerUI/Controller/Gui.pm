@@ -137,7 +137,9 @@ sub _get_local_cache : Private {
 	         ($c->stash->{filter_project} && 
 		  $c->stash->{project_table}{$c->stash->{filter_project}})) {
 		  $c->stash->{remote_ma}{$url} = $ma->{$url} if exists $c->stash->{remote_ma}{$url} &&
-		                                               $ma->{$url} && %{$ma->{$url}};
+		                                               $ma->{$url} && 
+							       ref $ma->{$url} eq 'HASH' && 
+							       %{$ma->{$url}};
    	        push  @tmp, {url => $url, url_label => $ma->{desc} . "($domain)"} if $url;
 	     } 
         }
@@ -191,7 +193,7 @@ sub _updateMenu : Private {
         my @ma_url_array = split /\s+/,  $c->stash->{ma_urls};
         $c->log->debug('entered URLS: ' . Dumper \@ma_url_array);
 	 my %ma_hash = map { $_ => {}  }  @ma_url_array;
-        $c->stash->{remote_ma} =  %ma_hash; 
+        $c->stash->{remote_ma} =  \%ma_hash; 
     }
     if($c->stash->{select_url}) {
        $c->stash->{select_url} = [  $c->stash->{select_url} ] if $c->stash->{select_url} && !(ref $c->stash->{select_url});
@@ -278,11 +280,14 @@ sub displayGraph : Local {
 	                                                                  $c->stash->{end_time},
 								          $c->stash->{gmt_offset});
         $graphs  = build_graph($c);
+        $graphs = [{ image => "", alt => " No graphs " }] unless @{$graphs} && $graphs->[0]->{image};
+        $c->stash->{graphs} =  $graphs;
+        $c->stash->{template} =  'gui/graph.tmpl';	
+    } else  {
+        $c->stash->{error_message} = " Start Time and End Time must be set";
+	$c->stash->{template} = 'gui/error.tmpl';
     }
-  
-    $graphs = [{ image => "", alt => " No graphs " }] unless @{$graphs};
-    $c->stash->{graphs} =  $graphs;
-    $c->stash->{template} =  'gui/graph.tmpl';
+
 }
 
 =head2 getGraph
@@ -313,7 +318,6 @@ sub getGraph : Local {
 	    $c->response->body($graph_obj->makeChart2(2));
 	}
     }
-   
 }
 
 
