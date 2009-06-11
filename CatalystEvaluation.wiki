@@ -1,7 +1,7 @@
 = Evaluation of the applicability of Catalyst web framework for ps-ps =
 
 The proposed solution for the ps-ps web interfaces is to utilize Catalyst with Template::Toolkit. There is no dependency on the webserver, it could be either plain Apache or anything with CGI support or FastCGI or mod_perl under Apache.
-Thre are a lot of info on Catalyst on the web since its mature product with 
+There are a lot of info on Catalyst on the web since its mature product with 
 
 
 == Googled links, reviews, blogs... ==
@@ -13,7 +13,7 @@ Thre are a lot of info on Catalyst on the web since its mature product with
   * [http://dev.catalystframework.org/wiki/faq The FAQ]
   * [http://www.perl.com/lpt/a/930 Very nice intro with Ajax example]
   * [http://dev.catalystframework.org/wiki/gettingstarted/howtos/introduction_to_catalyst_for_cgi_programmers Introduction for CGI programmers]
-  * [http://www.template-toolkit.org/docs/tutorial/index.html Template::Tookit tutorial]
+  * [http://www.template-toolkit.org/docs/tutorial/index.html Template::Toolkit tutorial]
   * [http://dragonstaff.blogspot.com/2009/05/testing-with-perl-catalyst.html Testing under Catalyst]
   * [http://perlalchemy.blogspot.com/2008/10/progress.html On move to Catalyst]
   * [http://refcards.com/docs/forda/catalyst/catalyst-refcard-a4.pdf Catalyst Reference Card]
@@ -23,11 +23,11 @@ Thre are a lot of info on Catalyst on the web since its mature product with
 
 The pinger data charts UI was moved under the Catalyst and TT from being CGI script with
 CGI::Ajax and HTML::Template modules in use. It resulted in less code with more cleaner module structure although the MVC pattern was not utilized completely and all interactions with the Model ( remote MA ) were done under the Controller. Also, there was
-only single View - TT based and it didnt require any extra code except for the templates. The prototype.js was utilized as Ajax API and it required less coding as well because all Ajax callbacks were already implemented. 
+only single View - TT based and it didn't require any extra code except for the templates. The prototype.js was utilized as Ajax API and it required less coding as well because all Ajax callbacks were already implemented. 
 From the scratch it took me only several minutes to build the whole directory tree with all basic tests and Catalyst came with own standalone server which was extremely helpful for the debugging. The Catalyst supports Log4perl logging.  
-The Catalyst is encouraging a "chain" pattern where you can have several small calls each implementing only partial functinality. The internal "stash" storage makes its very easy to have session persistent storage shared among different components. The Catalyst framework makes its very easy to add numerous plugins for the higher level of persistence supported by Catalyst::Plugin::Session set of modules. Also, it supports role based authorization and multiple ways of authentication ( even OpenID which could be used as an example on how to write our own authentication plugin based on perfSONAR AA ).
+The Catalyst is encouraging a "chain" pattern where you can have several small calls each implementing only partial functionality. The internal "stash" storage makes its very easy to have session persistent storage shared among different components. The Catalyst framework makes its very easy to add numerous plugins for the higher level of persistence supported by Catalyst::Plugin::Session set of modules. Also, it supports role based authorization and multiple ways of authentication ( even OpenID which could be used as an example on how to write our own authentication plugin based on perfSONAR AA ).
 
 
 == Misc ==
 
-The latest supoprted RPM package on DAG is perl-Catalyst-Runtime-5.7012 which is not the most up to date  ( 5.8 ) but more than enough for us. The 5.8 has support and built upon the new modern perl objects called  Moose but I dont think we will be turning our heads on this one soon. The Moose is still a slow alternative to hash based objects and requires much steeper learning curve and another half of CPAN modules. And it completely refactors all OO perl.
+The latest supported RPM package on DAG is perl-Catalyst-Runtime-5.7012 which is not the most up to date  ( 5.8 ) but more than enough for us. The 5.8 has support and built upon the new modern perl objects called  Moose but I don't think we will be turning our heads on this one soon. The Moose is still a slow alternative to hash based objects and requires much steeper learning curve and another half of CPAN modules. And it completely refactors all OO perl.
