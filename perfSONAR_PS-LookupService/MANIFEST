@@ -34,6 +34,7 @@ etc/requests/hLS/LSQueryRequest.xml
 etc/requests/hLS/LSRegisterRequest-key.xml
 etc/requests/hLS/LSRegisterRequest-update.xml
 etc/requests/hLS/LSRegisterRequest.xml
+lib/perfSONAR_PS/Client/DCN.pm
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
 lib/perfSONAR_PS/Client/gLS.pm

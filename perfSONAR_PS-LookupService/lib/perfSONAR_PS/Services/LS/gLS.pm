@@ -152,40 +152,43 @@ sub init {
     $self->{IPTRIE}    = ();
     $self->{CLAIMTREE} = ();
 
-    unless ( exists $self->{CONF}->{"root_hints_url"} ) {
+    unless ( exists $self->{DIRECTORY} and $self->{DIRECTORY} and -d $self->{DIRECTORY} ) {
+        $self->{LOGGER}->fatal( "Value for current directory not set, aborting." );
+        return -1;
+    }
+
+    unless ( exists $self->{CONF}->{"root_hints_url"} and $self->{CONF}->{"root_hints_url"} =~ m/^http:\/\// ) {
         $self->{CONF}->{"root_hints_url"} = "http://www.perfsonar.net/gls.root.hints";
-        $self->{LOGGER}->warn( "gLS Hints file not set, using default at \"http://www.perfsonar.net/gls.root.hints\"." );
+        $self->{LOGGER}->info( "gLS Hints file not set, using default at \"http://www.perfsonar.net/gls.root.hints\"." );
     }
 
     if ( exists $self->{CONF}->{"root_hints_file"} and $self->{CONF}->{"root_hints_file"} ) {
-        if ( exists $self->{DIRECTORY} and $self->{DIRECTORY} and -d $self->{DIRECTORY} ) {
-            unless ( $self->{CONF}->{"root_hints_file"} =~ "^/" ) {
-                $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"root_hints_file"};
-                $self->{LOGGER}->debug( "Setting full path to 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
-            }
+        unless ( $self->{CONF}->{"root_hints_file"} =~ "^/" ) {
+            $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"root_hints_file"};
+            $self->{LOGGER}->debug( "Setting full path to 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
         }
     }
     else {
         $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/gls.root.hints";
-        $self->{LOGGER}->warn( "Setting 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
+        $self->{LOGGER}->info( "Setting 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
     }
 
     unless ( exists $self->{CONF}->{"gls"}->{"root"} ) {
-        $self->{LOGGER}->warn( "Setting 'root' to \"0\" (e.g. we are pretty sure you *DON'T* want to set up a root)" );
+        $self->{LOGGER}->info( "Setting 'root' to \"0\" (we are pretty sure you *DON'T* want to set up a root)" );
         $self->{CONF}->{"gls"}->{"root"} = "0";
     }
 
     if ( exists $self->{CONF}->{"gls"}->{"metadata_db_name"} and $self->{CONF}->{"gls"}->{"metadata_db_name"} ) {
-        if ( exists $self->{DIRECTORY} and $self->{DIRECTORY} and -d $self->{DIRECTORY} ) {
-            unless ( $self->{CONF}->{"gls"}->{"metadata_db_name"} =~ "^/" ) {
-                $self->{CONF}->{"gls"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_name"};
-                $self->{LOGGER}->debug( "Setting full path to 'metadata_db_name': \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "\"" );
-            }
+        unless ( $self->{CONF}->{"gls"}->{"metadata_db_name"} =~ "^/" ) {
+            $self->{CONF}->{"gls"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_name"};
+            $self->{LOGGER}->debug( "Setting full path to 'metadata_db_name': \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "\"" );
         }
+
         unless ( $self->{CONF}->{"gls"}->{"metadata_db_name"} and -d $self->{CONF}->{"gls"}->{"metadata_db_name"} ) {
             system( "mkdir " . $self->{CONF}->{"gls"}->{"metadata_db_name"} );
             $self->{LOGGER}->debug( "Creating 'metadata_db_name': \"mkdir " . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "\"" );
         }
+ 
         unless ( $self->{CONF}->{"gls"}->{"metadata_db_name"} and -f $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/DB_CONFIG" ) {
             open( CONF, ">" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/DB_CONFIG" );
             print CONF "set_lock_timeout 5000\n";
@@ -206,20 +209,26 @@ sub init {
     }
 
     unless ( exists $self->{CONF}->{"gls"}->{"metadata_db_file"} and $self->{CONF}->{"gls"}->{"metadata_db_file"} ) {
-        $self->{LOGGER}->warn( "Setting 'metadata_db_file' to \"glsstore.dbxml\"" );
+        $self->{LOGGER}->info( "Setting 'metadata_db_file' to \"glsstore.dbxml\"" );
         $self->{CONF}->{"gls"}->{"metadata_db_file"} = "glsstore.dbxml";
+    }
+    unless ( -f $self->{CONF}->{"gls"}->{"metadata_db_file"} ) {
+        $self->{LOGGER}->debug( "Creating 'metadata_db_file' file at \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\"" );        
     }
 
     unless ( exists $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} and $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} ) {
-        $self->{LOGGER}->warn( "Setting 'metadata_summary_db_file' to \"glsstore-summary.dbxml\"" );
+        $self->{LOGGER}->info( "Setting 'metadata_summary_db_file' to \"glsstore-summary.dbxml\"" );
         $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} = "glsstore-summary.dbxml";
+    }
+    unless ( -f $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} ) {
+        $self->{LOGGER}->debug( "Creating 'metadata_db_file' file at \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\"" );        
     }
 
     if ( exists $self->{CONF}->{"gls"}->{"ls_ttl"} and $self->{CONF}->{"gls"}->{"ls_ttl"} ) {
         $self->{CONF}->{"gls"}->{"ls_ttl"} *= 60;
     }
     else {
-        $self->{LOGGER}->warn( "Setting 'ls_ttl' to \"48hrs\"." );
+        $self->{LOGGER}->info( "Setting 'ls_ttl' to \"48hrs\"." );
         $self->{CONF}->{"gls"}->{"ls_ttl"} = 172800;
     }
 
@@ -238,14 +247,14 @@ sub init {
             $self->{CONF}->{"ls_registration_interval"} = $self->{CONF}->{"gls"}->{"ls_registration_interval"};
         }
         else {
-            $self->{LOGGER}->info( "Setting 'ls_registration_interval' to 1 hour." );
+            $self->{LOGGER}->debug( "Setting 'ls_registration_interval' to 1 hour." );
             $self->{CONF}->{"ls_registration_interval"} = 3600;
         }
     }
-    $self->{LOGGER}->info( "Setting 'gls->ls_registration_interval' to " . $self->{CONF}->{"gls"}->{"ls_registration_interval"} );
+    $self->{LOGGER}->debug( "Setting 'ls_registration_interval' to " . $self->{CONF}->{"gls"}->{"ls_registration_interval"} );
 
     unless ( exists $self->{CONF}->{"gls"}->{"maintenance_interval"} ) {
-        $self->{LOGGER}->info( "Configuration value 'maintenance_interval' not searching for other values..." );
+        $self->{LOGGER}->debug( "Configuration value 'maintenance_interval' not present.  Searching for other values..." );
         if ( exists $self->{CONF}->{"gls"}->{"summarization_interval"} ) {
             $self->{CONF}->{"gls"}->{"maintenance_interval"} = $self->{CONF}->{"gls"}->{"summarization_interval"};
         }
@@ -266,15 +275,15 @@ sub init {
             $self->{CONF}->{"gls"}->{"maintenance_interval"} = 30;
         }
     }
-    $self->{LOGGER}->info( "Setting 'maintenance_interval' to \"" . $self->{CONF}->{"gls"}->{"maintenance_interval"} . "\" minutes." );
+    $self->{LOGGER}->debug( "Setting 'maintenance_interval' to \"" . $self->{CONF}->{"gls"}->{"maintenance_interval"} . "\" minutes." );
     $self->{CONF}->{"gls"}->{"maintenance_interval"} *= 60;
 
     unless ( exists $self->{CONF}->{"gls"}->{"service_accesspoint"} and $self->{CONF}->{"gls"}->{"service_accesspoint"} ) {
         unless ( exists $self->{CONF}->{external_address} and $self->{CONF}->{external_address} ) {
-            $self->{LOGGER}->fatal( "With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address, exiting." );
+            $self->{LOGGER}->fatal( "This service requires a service_accesspoint or external_address to be set, exiting." );
             return -1;
         }
-        $self->{LOGGER}->info( "Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT} );
+        $self->{LOGGER}->debug( "Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT} );
         $self->{CONF}->{"gls"}->{"service_accesspoint"} = "http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT};
     }
 
@@ -287,12 +296,12 @@ sub init {
             $description .= " in " . $self->{CONF}->{site_location};
         }
         $self->{CONF}->{"gls"}->{"service_description"} = $description;
-        $self->{LOGGER}->warn( "Setting 'service_description' to \"" . $description . "\"." );
+        $self->{LOGGER}->info( "Setting 'service_description' to \"" . $description . "\"." );
     }
 
     unless ( exists $self->{CONF}->{"gls"}->{"service_name"} and $self->{CONF}->{"gls"}->{"service_name"} ) {
         $self->{CONF}->{"gls"}->{"service_name"} = "Lookup Service";
-        $self->{LOGGER}->warn( "Setting 'service_name' to \"Lookup Service\"." );
+        $self->{LOGGER}->info( "Setting 'service_name' to \"Lookup Service\"." );
     }
 
     unless ( exists $self->{CONF}->{"gls"}->{"service_type"} and $self->{CONF}->{"gls"}->{"service_type"} ) {
@@ -302,7 +311,7 @@ sub init {
         else {
             $self->{CONF}->{"gls"}->{"service_type"} = "hLS";
         }
-        $self->{LOGGER}->info( "Setting 'service_type' to \"" . $self->{CONF}->{"gls"}->{"service_type"} . "\"." );
+        $self->{LOGGER}->debug( "Setting 'service_type' to \"" . $self->{CONF}->{"gls"}->{"service_type"} . "\"." );
     }
 
     $handler->registerFullMessageHandler( "LSRegisterRequest",        $self );
@@ -314,7 +323,7 @@ sub init {
     $handler->registerFullMessageHandler( "LSSynchronizationRequest", $self );
 
     my $error = q{};
-    my $metadatadb = $self->prepareDatabase( { recover => 1, container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
+    my $metadatadb = $self->prepareDatabase( { recover => 0, container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
     unless ( $metadatadb ) {
         $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error );
         return -1;
@@ -322,7 +331,7 @@ sub init {
     $metadatadb->checkpoint( { error => \$error } );
     $metadatadb->closeDB( { error => \$error } );
 
-    my $summarydb = $self->prepareDatabase( { recover => 1, container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
+    my $summarydb = $self->prepareDatabase( { recover => 0, container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
     unless ( $summarydb ) {
         $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
         return -1;
@@ -356,6 +365,10 @@ sub prepareDatabase {
 
     my $retry  = 0;
     my $return = q{};
+
+    # Open/Recover loop.  This is a bandaid for DBXML - all we want to do is
+    # return a DB handle and this can be challenging if the service's storage
+    # is not well.  
     do {
         if ( exists $parameters->{recover} and $parameters->{recover} or ( $error and $error =~ m/DbEnv::open:\sDB_RUNRECOVERY:\sFatal\serror,\srun\sdatabase\srecovery/ ) ) {
             $return = $db->prep( { txn => q{}, error => \$error } );
@@ -365,6 +378,9 @@ sub prepareDatabase {
         }
 
         unless ( $return == 0 ) {
+            # Gross hack.  Do we want this configurable?  I think that 20
+            # seconds is fair to wait/retry before giving up (if we are in a
+            # maintenance cycle maybe not...)
             if ( $retry >= 0 and $retry <= 4 ) {
                 $self->{LOGGER}->warn( "Waiting on DBXML error." );
                 sleep 5;
@@ -3546,8 +3562,7 @@ Any database errors will cause the given metadata/data pair to fail.
 sub lsKeyRequest {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1 } );
-
-    my $error     = q{};
+    my $error     = q{};
     my $errorFlag = 0;
     my $summary   = 0;
     my $et        = find( $parameters->{m}, "./nmwg:eventType", 1 );
@@ -3566,7 +3581,12 @@ sub lsKeyRequest {
     if ( $service ) {
         my $junk = q{};
         $junk = $parameters->{m}->removeChild( $et ) if $et;
-        my $queryString = "collection('CHANGEME')/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{m} } ) . "]";
+
+        my $queryString;
+        foreach my $url ( keys %{ $parameters->{request}->{NAMESPACES} } ) {
+           $queryString .= "declare namespace " . $parameters->{request}->{NAMESPACES}->{$url} . "=\"" . $url . "\";\n";  
+        }
+        $queryString .= "collection('CHANGEME')/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{m} } ) . "]";
 
         my $dbContainer = q{};
         if ( $summary ) {
@@ -3612,7 +3632,6 @@ sub lsKeyRequest {
                 undef $dbTr;
                 $database->checkpoint( { error => \$error } );
                 $database->closeDB( { error => \$error } );
-
                 my $parser   = XML::LibXML->new();
                 my $metadata = $parser->parse_string( $resultsString[0] );
                 if ( $metadata and $metadata->getDocumentElement->getAttribute( "id" ) ) {
