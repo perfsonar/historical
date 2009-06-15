@@ -188,7 +188,7 @@ sub init {
             system( "mkdir " . $self->{CONF}->{"gls"}->{"metadata_db_name"} );
             $self->{LOGGER}->debug( "Creating 'metadata_db_name': \"mkdir " . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "\"" );
         }
- 
+
         unless ( $self->{CONF}->{"gls"}->{"metadata_db_name"} and -f $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/DB_CONFIG" ) {
             open( CONF, ">" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/DB_CONFIG" );
             print CONF "set_lock_timeout 5000\n";
@@ -213,7 +213,7 @@ sub init {
         $self->{CONF}->{"gls"}->{"metadata_db_file"} = "glsstore.dbxml";
     }
     unless ( -f $self->{CONF}->{"gls"}->{"metadata_db_file"} ) {
-        $self->{LOGGER}->debug( "Creating 'metadata_db_file' file at \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\"" );        
+        $self->{LOGGER}->debug( "Creating 'metadata_db_file' file at \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\"" );
     }
 
     unless ( exists $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} and $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} ) {
@@ -221,7 +221,7 @@ sub init {
         $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} = "glsstore-summary.dbxml";
     }
     unless ( -f $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} ) {
-        $self->{LOGGER}->debug( "Creating 'metadata_db_file' file at \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\"" );        
+        $self->{LOGGER}->debug( "Creating 'metadata_db_file' file at \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\"" );
     }
 
     if ( exists $self->{CONF}->{"gls"}->{"ls_ttl"} and $self->{CONF}->{"gls"}->{"ls_ttl"} ) {
@@ -368,7 +368,7 @@ sub prepareDatabase {
 
     # Open/Recover loop.  This is a bandaid for DBXML - all we want to do is
     # return a DB handle and this can be challenging if the service's storage
-    # is not well.  
+    # is not well.
     do {
         if ( exists $parameters->{recover} and $parameters->{recover} or ( $error and $error =~ m/DbEnv::open:\sDB_RUNRECOVERY:\sFatal\serror,\srun\sdatabase\srecovery/ ) ) {
             $return = $db->prep( { txn => q{}, error => \$error } );
@@ -378,6 +378,7 @@ sub prepareDatabase {
         }
 
         unless ( $return == 0 ) {
+
             # Gross hack.  Do we want this configurable?  I think that 20
             # seconds is fair to wait/retry before giving up (if we are in a
             # maintenance cycle maybe not...)
@@ -627,8 +628,8 @@ sub registerLS {
             foreach my $root ( @{ $gls->{ROOTS} } ) {
                 $self->{LOGGER}->debug( "gLS synchronization to root \"" . $root . "\"." );
 
-                my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
-                my $result = $ls->keyRequestLS( { servicexml => $mapping{$m}{"service"} } );
+                my $ls     = perfSONAR_PS::Client::LS->new( { instance   => $root } );
+                my $result = $ls->keyRequestLS(             { servicexml => $mapping{$m}{"service"} } );
                 if ( $result and exists $result->{key} and $result->{key} ) {
                     my $key = $result->{key};
                     $result = $ls->registerClobberRequestLS( { key => $key, eventType => $eventType, servicexml => $mapping{$m}{"service"}, data => $mapping{$m}{"content"} } );
@@ -2536,7 +2537,7 @@ sub lsRegisterRequestUpdateNew {
                     my $insRes = $parameters->{database}->insertIntoContainer(
                         { content => createLSData( { type => "LSStore", dataId => $mdKeyStorage . "/" . $cleanHash, metadataId => $mdKeyStorage, data => $d_content->toString } ), name => $mdKeyStorage . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$parameters->{error} } );
                     $parameters->{errorFlag}++ if $parameters->{error};
-                    $dCount++ if $insRes == 0;
+                    $dCount++                  if $insRes == 0;
                 }
             }
         }
@@ -2649,7 +2650,7 @@ sub lsRegisterRequestUpdate {
                         }
                     );
                     $parameters->{errorFlag}++ if $parameters->{error};
-                    $dCount++ if $insRes == 0;
+                    $dCount++                  if $insRes == 0;
                 }
             }
         }
@@ -2826,7 +2827,7 @@ sub lsRegisterRequestNew {
                     my $insRes = $parameters->{database}
                         ->insertIntoContainer( { content => createLSData( { type => "LSStore", dataId => $mdKey . "/" . $cleanHash, metadataId => $mdKey, data => $d_content->toString } ), name => $mdKey . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$parameters->{error} } );
                     $parameters->{errorFlag}++ if $parameters->{error};
-                    $dCount++ if $insRes == 0;
+                    $dCount++                  if $insRes == 0;
                 }
             }
         }
@@ -3562,11 +3563,11 @@ Any database errors will cause the given metadata/data pair to fail.
 sub lsKeyRequest {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1 } );
-    my $error     = q{};
-    my $errorFlag = 0;
-    my $summary   = 0;
-    my $et        = find( $parameters->{m}, "./nmwg:eventType", 1 );
-    my $eventType = extract( $et, 0 );
+    my $error      = q{};
+    my $errorFlag  = 0;
+    my $summary    = 0;
+    my $et         = find( $parameters->{m}, "./nmwg:eventType", 1 );
+    my $eventType  = extract( $et, 0 );
 
     if ( $eventType ) {
         unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/service/2.0" or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/summary/2.0" ) {
@@ -3584,7 +3585,7 @@ sub lsKeyRequest {
 
         my $queryString;
         foreach my $url ( keys %{ $parameters->{request}->{NAMESPACES} } ) {
-           $queryString .= "declare namespace " . $parameters->{request}->{NAMESPACES}->{$url} . "=\"" . $url . "\";\n";  
+            $queryString .= "declare namespace " . $parameters->{request}->{NAMESPACES}->{$url} . "=\"" . $url . "\";\n";
         }
         $queryString .= "collection('CHANGEME')/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{m} } ) . "]";
 
