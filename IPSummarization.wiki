@@ -635,7 +635,6 @@ This is worth pursuing by the student after the work on the initial algorithm.
 === Proposed Implementation ===
 
 Must be in Perl.  We will not be supporting the Java implementation directly.  The subsequent perl version can be translated by external programmers.
-For practical purposes, however, the current code for testing and research is being done in Java.
 
 
 === Proposed Data Sets ===
