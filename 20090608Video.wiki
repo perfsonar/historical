@@ -71,7 +71,7 @@
      * Changes/upload in 1/2 weeks
  # LHC/Atlas deployments (status update) - *Rich*
    * Nothing to add
- # Next VC will be 6/15.
+ # Next VC will be 6/22.
    * Will be short and focused on release due to DCN developers conference.
 
 === ACTIONS ===

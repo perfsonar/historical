@@ -1,0 +1,32 @@
+=  June 22, 2009 Conference Call 2:30 pm EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees: 
+ # Team Updates     
+ # Review _*Actions*_ and _*Issues*_
+   * _*Jason*_ - ~~will update release pages as needed~~
+   * _*Jason*_ - will contact Marcos about IP Summarization
+   * _*Jason/Martin/Jeff*_ - Finish editing OGF documents
+   * _*Jason/Martin/Jeff*_ - Complete/Upload NML document
+   * _*All*_ - Review release pages
+   * _*Aaron*_ - Update CGIs based on suggestions today.  
+   * _*Aaron*_ - Consider the switch to catalyst - weigh positives and negatives
+   * _*All*_ - Review Aaron's CGIs, provide more feedback
+ # Release Activities
+   # Development Update
+     * pSB
+     * Admin GUIs
+   # Open Bugs
+ # LHC/Atlas deployments (status update)
+ # Next VC will be 6/29.
+
+=== ACTIONS ===
+
+TBD
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
