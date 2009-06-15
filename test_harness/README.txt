@@ -13,7 +13,8 @@ Sample use with existing services:
     test_PS.py -u http://dc200.internet2.edu:8081/perfSONAR_PS/services/LS -c LS-test-config.xml
     test_PS.py -u http://dc211.internet2.edu:8080/perfSONAR_PS/services/perfSONARBOUY -c psBOUY-test-config.xml
     test_PS.py -u http://stats.geant2.net/perfsonar/RRDMA-access/MeasurementArchiveService -c snpmMA-test-config.xml
-    test_PS.py -u http://tukki.fnal.gov:8075/perfSONAR_PS/services/pinger/ma -c pinger-test-config.xml
+    test_PS.py -u http://fnal-owamp.es.net:8075/perfSONAR_PS/services/pinger/ma -c pinger-test-config.xml
+
 
 
 See snpmMA-test-config.xml for notes on how to build the test config file

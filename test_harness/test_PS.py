@@ -56,7 +56,7 @@ if PSHOME == None:
 timingResultsFile = "results.csv"
 
 # location of client.pl
-client_script = PSHOME+"/client/client.pl "
+client_script = PSHOME+"/Shared/client/client.pl "
 
 # log files for this program go here
 logdir = "/tmp/"
