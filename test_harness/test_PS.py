@@ -467,7 +467,7 @@ def main():
         file.writelines(data)
         file.close()
 
-        if options.PS_url.find("perfSONARBOUY") > 0 or options.PS_url.find("pinger") > 0:
+        if options.PS_url.find("perfSONARBOUY") > 0 or options.PS_url.find("pSB") > 0 or options.PS_url.find("pinger") > 0:
             src, dst, nr = pickEndPointPair(resultFile)
             if options.PS_url.find("perfSONARBOUY") > 0:
                 print "Using src/dst randomly selected interface: %s/%s : %s/%s" % ( src.attrib.get("value"),
