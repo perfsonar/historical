@@ -196,10 +196,11 @@ def loadTestConfigFile(filename):
 def pickInterface(filename):
     """ add Comment here
     """
-    num_interfaces = 0
+    num_interfaces = num_keys = 0
     interfaceList = []
     hostList = []
     addrList = []
+    keyList = []
 
     try:
         tree = ElementTree.parse(filename)
@@ -230,7 +231,13 @@ def pickInterface(filename):
             num_interfaces += 1
          #   print "Adding to list: ", hostName, ifAddr, ifName
 
-    print "Found %d interfaces" % num_interfaces
+    for e in tree.findall("//%sparameter" % NMWG):
+        if e.get("name") == "maKey":
+             num_keys += 1
+	     #print "    maKey = %s " % e.text
+             keyList.append(e.text)
+
+    print "Found %d interfaces and %d keys" % (num_interfaces, num_keys)
     if num_interfaces <= 0:
         print "Error: need at least 1 interface to continue. Exiting..."
         sys.exit(-1)
@@ -238,16 +245,17 @@ def pickInterface(filename):
     # pick one at random
     random.seed()
     rdm = random.randint(0, num_interfaces-1)
-    return (hostList[rdm], addrList[rdm], interfaceList[rdm], num_interfaces)
+    return (hostList[rdm], addrList[rdm], interfaceList[rdm], keyList[rdm], num_interfaces)
 
 #######################################################
 
 def pickEndPointPair(filename):
     """ add Comment here
     """
-    num_pairs = 0
+    num_pairs = num_keys =0
     srcList = []
     dstList = []
+    keyList = []
 
     try:
         tree = ElementTree.parse(filename)
@@ -258,20 +266,40 @@ def pickEndPointPair(filename):
     for e in tree.findall("//%sendPointPair" % NMWGT):
         num_pairs += 1
         for n in e:
+            #print "    checking element: ", ElementTree.dump(n)
             if n.tag.find("src") > 0:
-                srcList.append(n)
+	    #    print "   src found: %s" % n.attrib.get("value")
+                srcList.append(n.attrib.get("value"))
             if n.tag.find("dst") > 0:
-                dstList.append(n)
+	    #    print "   dst found: %s" % n.attrib.get("value")
+                dstList.append(n.attrib.get("value"))
 
-    print "Found %d endPointPairs" % num_pairs
-    if num_pairs <= 0:
-        print "Error: need at least 1 endPointPair to continue. Exiting..."
+    for e in tree.findall("//%sparameter" % NMWG):
+	# SNMP MA and pSB MA use "maKey", but PingER MA using just "key" for some reason
+        if e.get("name") == "maKey":
+             num_keys += 1
+	     #print "    maKey = %s " % e.text
+             keyList.append(e.text)
+
+    # special case for PingER
+    #print "looking for Pinger Keys"
+    for e in tree.findall("//%skey" % NMWG):
+	# SNMP MA and pSB MA use "maKey", but PingER MA using just "key" for some reason
+        #print "    checking element: ", ElementTree.dump(e)
+	#print "   pinger Key = %s " % e.attrib.get("id")
+        keyList.append(e.attrib.get("id"))
+        num_keys += 1
+
+    print "Found %d endPointPairs and %d keys" % (num_pairs, num_keys)
+    if num_pairs <= 0 or num_keys <=0:
+        print "Error: need at least 1 endPointPair and 1 key to continue. Exiting..."
         sys.exit(-1)
 
     # pick one at random
     random.seed()
     rdm = random.randint(0, num_pairs - 1)
-    return (srcList[rdm], dstList[rdm], num_pairs )
+    #return (srcList[rdm], dstList[rdm], keyList[rdm], num_pairs )
+    return (srcList[rdm], dstList[rdm], keyList[rdm], num_pairs )
 
 #######################################################
 
@@ -288,7 +316,7 @@ def runClient(fd, logfile, service, requestFile):
     d1 = pipe.readlines()
     if verbose > 0:
         print "Query returned %d lines of data" % len(d1)
-	print d1
+	#print d1
     if len(d1) == 0:
         PS_Error(fd,logfile)
     return (d1)
@@ -299,45 +327,18 @@ def replaceElement(tree, tag, newval):
     """ add Comment here
     """
     searchstring = ".//%s%s/" % (NMWGT, tag)
-    #print "Searching for: ", searchstring
+    #print "replaceElement: looking for: ", tag
     try:
         el = tree.findall(searchstring)[0]
     except:
-#           print "%s not found " % tag
+    #    print "   tag %s not found " % tag
         pass
     else:
         if verbose > 0:
-            print "replacing %s with %s" % (el.text, newval)
+            print "   replacing %s with %s" % (el.text, newval)
         el.text = newval
     return
 
-#######################################################
-
-def replaceKey(tree, tag, saveKey):
-    """ add Comment here
-    """
-    #find the "key" element by tag name
-    try:
-        e = tree.findall("//%skey" % NMWG)[0]
-    except:
-        return
-
-    #debug
-    #print "found and replaced key element"
-    #print "replacement key: "
-    #ElementTree.dump(saveKey)
-
-    e.clear()  # clear out old key
-    for el in saveKey.getiterator():
-        if el.tag != "%skey" % NMWG:  # key tag is still there, so dont add it a 2nd time
-           e.append(el)
-
-    #debug
-    #print "new request: "
-    #ElementTree.dump(tree)
-    #print "-------------------------------"
-
-    return
 
 #######################################################
 
@@ -345,19 +346,24 @@ def replaceElementAttribute(tree, tag, aname, newval):
     """ Unfortunately python 2.5's version of elementtree does not
         support xpath queries for attributes, so have to look one by one
     """
+
+#    print "replaceElementAttribute: ", tag
     searchstring = ".//%s%s/" % (NMWG, tag)
     try:
         el = tree.findall(searchstring)
     except:
         pass
     else:
-        for e in el:
-            if e.get("name") == aname:
-                if verbose > 0:
-                    print "replacing %s with %s" % (e.text, newval)
-                e.text = newval
-#            else:
-#               print "replaceElementAttribute: attr %s not found for tag %s " % (e.get("name"), tag)
+	if len(el) == 0:
+            pass
+	else:
+            for e in el:
+                if e.get("name") == aname:
+                    if verbose > 0:
+                        print "replacing attribute %s: %s with %s" % (aname, e.text, newval)
+                    e.text = newval
+#                else:
+#                    print "replaceElementAttribute: attr %s not found for tag %s " % (e.get("name"), tag)
     return
 
 ######################################################################################
@@ -468,16 +474,11 @@ def main():
         file.close()
 
         if options.PS_url.find("perfSONARBOUY") > 0 or options.PS_url.find("pSB") > 0 or options.PS_url.find("pinger") > 0:
-            src, dst, nr = pickEndPointPair(resultFile)
-            if options.PS_url.find("perfSONARBOUY") > 0:
-                print "Using src/dst randomly selected interface: %s/%s : %s/%s" % ( src.attrib.get("value"),
-                    src.attrib.get("port"), dst.attrib.get("value"), dst.attrib.get("port"))
-	    else:  # pinger
-                print "Using src/dst randomly selected interface: %s : %s" % ( src.attrib.get("value"),
-                    dst.attrib.get("value"))
+            src, dst, key, nr = pickEndPointPair(resultFile)
+            print "Using src/dst randomly selected interface: %s : %s (key = %s)" % ( src, dst, key)
         else:
-            hostName, ifAddr, ifName, nr = pickInterface(resultFile)
-            print "Using interface randomly selected interface %s:%s " % (hostName, ifName)
+            hostName, ifAddr, ifName, key, nr = pickInterface(resultFile)
+            print "Using interface randomly selected interface %s:%s (key=%s)" % (hostName, ifName, key)
 
         if options.csv:
             csvFile.write("\n%s\n" % options.PS_url)
@@ -485,7 +486,6 @@ def main():
             csvFile.write("%d, %f, %d %s\n" % (1, float(t), nr, "Get All Metadata"))
 
 
-    save_Key = None   # place to store valid maKey for future tests
     testNum = total_pass = total_fail = 0
     for requestFile in inputFile:
         print "-----------------------------------------"
@@ -499,29 +499,17 @@ def main():
 
         now = int(time.time())
 
-        if options.PS_url.find("perfSONARBOUY") > 0:
-            replaceElementAttribute(tree, "src", "value", src.attrib.get("value"))
-            replaceElementAttribute(tree, "dst", "value", dst.attrib.get("value"))
-            replaceElementAttribute(tree, "src", "port", src.attrib.get("port"))
-            replaceElementAttribute(tree, "dst", "port", dst.attrib.get("port"))
-        elif options.PS_url.find("pinger") > 0:
-            replaceElementAttribute(tree, "src", "value", src.attrib.get("value"))
-            replaceElementAttribute(tree, "dst", "value", dst.attrib.get("value"))
+        if options.PS_url.find("perfSONARBOUY") > 0 or options.PS_url.find("pSB") > 0 or options.PS_url.find("pinger") > 0:
+            replaceElementAttribute(tree, "src", "value", src)
+            replaceElementAttribute(tree, "dst", "value", dst)
         elif getAllRequest != "":
-            replaceElement(tree, "ifAddress", ifAddr)
+	    replaceElement(tree, "ifAddress", ifAddr)
             replaceElement(tree, "hostName", hostName)
             replaceElement(tree, "ifName", ifName)
 
-        if options.PS_url.find("perfSONARBOUY") > 0: # XXX: Hack untill have a call to request valid time ranges
-                                                     # current perfSONARBOUY test database has 2007 data only
-            oneYearAgo = 3600 * 24 * 365
-            replaceElementAttribute(tree, "parameter", "startTime", "%s" % (now - oneYearAgo - (3600 * 12)) )  # 1yr + 12 hrs ago
-            replaceElementAttribute(tree, "parameter", "endTime", "%s" % (now - oneYearAgo) )
-        else:
-            replaceElementAttribute(tree, "parameter", "startTime", "%s" % (now - (3600 * 12)) )  # 12 hrs ago
-            replaceElementAttribute(tree, "parameter", "endTime", "%s" % (now - 600) )  # 10 min ago
-        if save_Key != None:
-            replaceKey(tree, "parameter", save_Key)
+        replaceElementAttribute(tree, "parameter", "maKey", key)
+        replaceElementAttribute(tree, "parameter", "startTime", "%s" % (now - (3600 * 12)) )  # 12 hrs ago
+        replaceElementAttribute(tree, "parameter", "endTime", "%s" % (now - 600) )  # 10 min ago
 
         #write out the modified XML
         testFile = logdir + os.path.basename(requestFile) + ".test"
@@ -531,6 +519,7 @@ def main():
 
         if verbose > 0:
             print "Running test %d: %s " % (testNum, testDescription[testNum])
+	    print "using request file: ", testFile
 
         data,t = timeIt(runClient,fd,logfname, options.PS_url, testFile)
         #print "Got reply: %d lines " % len(data)
@@ -574,30 +563,6 @@ def main():
             csvFile.write("%d, %f, %d, %s \n" % (testNum+2, float(t), result, testDescription[testNum]))
 
         testNum += 1
-
-        if save_Key == None:  # need to find a valid key to use in future requests
-            if options.PS_url.find("pinger") > 0: # pinger puts key under data, so need to find data first... 
-		# FIXME? not sure if this is generalizable???
-                e = tree.findall("//%sdata" % NMWG)[0]
-                for p in e.getiterator():
-                    for c in p:
-                        #print "  tag: %s; text: %s; attrib: %s " %(c.tag, c.text, c.attrib)
-			if c.tag.find("key") >=0:
-			    print "Found key to save for future requests: ", c.attrib.get("id")
-                            save_Key = c.attrib.get("id")
-            else:
-	        try:
-                    e = tree.findall("//%skey" % NMWG)[0]
-	        except:
-		    continue
-                if options.debug:
-                    ElementTree.dump(e)
-                save_Key = e[0]  # known good Key: save this to use in a future request
-                if options.debug:
-                    print "Saving this key element for future requests: ", e
-                    for p in e[0].getiterator():
-                        for c in p:
-                            print "   ", c.tag, c.text, c.attrib
 
 
     print "\nTotal of %d tests passed and %d tests failed. " % (total_pass, total_fail)
