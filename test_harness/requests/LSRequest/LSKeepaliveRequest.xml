@@ -6,7 +6,7 @@
   <nmwg:metadata id="key_to_keepalive">
     <nmwg:key>
       <nmwg:parameters id="keys">
-        <nmwg:parameter name="lsKey">5cfb07ea7a5b840ce4f8f48b842ac9c0</nmwg:parameter>
+        <nmwg:parameter name="lsKey">replaceMe</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key>
   </nmwg:metadata>
@@ -16,7 +16,7 @@
   <nmwg:metadata id="key_to_keepalive2">
     <nmwg:key>
       <nmwg:parameters id="keys">
-        <nmwg:parameter name="lsKey">a3f9c6904d10c7e810ce108bb334258c</nmwg:parameter>
+        <nmwg:parameter name="lsKey">replaceMe</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key>
   </nmwg:metadata>

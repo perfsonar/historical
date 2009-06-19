@@ -76,6 +76,7 @@ TOPO  = "{http://ogf.org/schema/network/topology/base/20070828/}"
 IPERF = "{http://ggf.org/ns/nmwg/tools/iperf/2.0/}"
 PINGER = "{http://ggf.org/ns/nmwg/tools/pinger/2.0/}"
 NMWGR = "{http://ggf.org/ns/nmwg/result/2.0/}"  # for error/status messages only
+NMWGXQ = "{http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/}"
 
 #NMWG_ALL = [NMWG, NMWG2, NMWGT, NMWGR, NMWGS, IPERF]
 NMWG_ALL = [NMWG, NMWGT, NMWGS, NMWGC, IPERF, PINGER, TOPO, NMWGR]
@@ -91,7 +92,7 @@ def getOptions():
     parser = OptionParser()
     parser.add_option("-u", "--url", action="store", type="string", dest="PS_url",
                   default=defaultService,
-                  help="Connect to MA and LS service at this URL [default = %default]", metavar="URL")
+                  help="Connect to MA or LS service at this URL [default = %default]", metavar="URL")
     parser.add_option("-D", "--dir", action="store", type="string", dest="requestDir",
                   default=requestDir,
                   help="Directory where XML request files are found [default = %default]", metavar="PATH")
@@ -323,9 +324,37 @@ def runClient(fd, logfile, service, requestFile):
 
 #######################################################
 
+def replaceXQuery(tree, tag, newval):
+    """ needed for LS queries with keys
+    """
+
+    if newval == "":
+	return
+
+    print "looking for tag: ", tag
+    for e in tree.findall("//%ssubject" % NMWGXQ):
+        #print ElementTree.dump(e)
+        #print "replaceXQuery element: ", ElementTree.dump(e)
+        #print "replaceXQuery text: ",e.text
+	newstring = '@id="%s"' % newval
+        print "newstring: ", newstring
+	# XXX: would be better to extract the test ID string, and not hard code this
+	savestring = e.text
+        e.text = string.replace(e.text,'@id="replaceMe"', newstring)
+        if verbose > 0:
+            print "   replacing %s with %s" % (savestring, e.text)
+	 
+
+    return
+
+
+#######################################################
+
 def replaceElement(tree, tag, newval):
     """ add Comment here
     """
+    if newval == "":
+	return
     searchstring = ".//%s%s/" % (NMWGT, tag)
     #print "replaceElement: looking for: ", tag
     try:
@@ -351,6 +380,8 @@ def replaceElementAttribute(tree, tag, aname, newval):
 #     <ns0:parameter name="endTime" xmlns:ns0="http://ggf.org/ns/nmwg/base/2.0/">1105453100</ns0:parameter>
 
 
+    if newval == "":
+	return
     #print "replaceElementAttribute: ", tag
     searchstring = ".//%s%s/" % (NMWG, tag)
     try:
@@ -379,6 +410,8 @@ def replaceElementTopoAttribute(tree, tag, aname, newval):
  # this routine works with lines that look like this:
  #     <ns0:dst port="5433" type="ipv4" value="198.32.8.174" xmlns:ns0="http://ggf.org/ns/nmwg/topology/2.0/" />
 
+    if newval == "":
+	return
     #print "replaceTopoElement: ", tag
     searchstring = ".//%s%s/" % (NMWGT, tag)
     try:
@@ -453,14 +486,14 @@ def CheckResult(testNum, expectedOutput, tree):
 #######################################################
 
 def PS_Error(fd, logfname):
-    print "Error: no reply from MA"
+    print "Error: no reply from server"
     fd.close() # flush errors
     fd =  open(logfname)
     d = fd.readlines()
     try:
 	print d[len(d)-1] # print last line of log file
     except:
-	pass
+	sys.exit(-1)
     return()
 
 #######################################################
@@ -477,7 +510,7 @@ def timeIt(*args):
 def main():
 
     global verbose, requestDir, options
-    hostName = ifAddr = ifName = key = src = dst = ""
+    hostName = ifAddr = ifName = key = src = dst = maKey = lsKey = ""
     options = getOptions()
     inputFile, testDescription, expectedOutput, getAllRequest = loadTestConfigFile(options.configFile)
     #print inputFile
@@ -537,14 +570,23 @@ def main():
 	# replace elements in test request files as necessary
         #if hostName == "": # needed for PingER tests, maybe (XXX)
 	#     hostName = src;
+
+	# NOTE: could make sure these are only called for the appropriate request types,
+	#   but its easier to just call them every time even if not needed
         replaceElementTopoAttribute(tree, "src", "value", src)
         replaceElementTopoAttribute(tree, "dst", "value", dst)
 	replaceElement(tree, "ifAddress", ifAddr)
         replaceElement(tree, "hostName", hostName)
         replaceElement(tree, "ifName", ifName)
+        replaceXQuery(tree, "subject", lsKey)  # for LS queries
 
         replaceElementAttribute(tree, "parameter", "maKey", key)
-        replaceElementAttribute(tree, "parameter", "startTime", "%s" % (now - (3600 * 12)) )  # 12 hrs ago
+        replaceElementAttribute(tree, "parameter", "lsKey", lsKey)
+        if options.PS_url.find("pinger") > 0:
+	    # only do 1 hour for PingER
+            replaceElementAttribute(tree, "parameter", "startTime", "%s" % (now - (3600)) )  # 1 hrs ago
+        else:
+            replaceElementAttribute(tree, "parameter", "startTime", "%s" % (now - (3600 * 12)) )  # 12 hrs ago
         replaceElementAttribute(tree, "parameter", "endTime", "%s" % (now - 600) )  # 10 min ago
 
         #write out the modified XML
@@ -586,12 +628,16 @@ def main():
 		    #sys.exit()  # sometimes useful for debugging
 		    break
 
-	# look for result 'Key'. Might need for future test?
-        # XXX
-        #print "looking for key"
-        #for e in tree.findall("//%skey" % NMWGR):
-        #   if e.get("name") == "maKey":
-        #       print "  *** found key ** = %s " % e.text
+	# special handling for LS: need to save the lsKey returned by LSRegisterRequest-key.xml
+        if requestFile.find("LSRegisterRequest-key") > 0:
+            print "looking for LS key"
+            for e in tree.findall("//%sparameter" % NMWG):
+               if e.get("name") == "lsKey":
+                   print "  *** found key ** = %s " % e.text
+		   lsKey = e.text
+            if lsKey == "":  # cant continue if not found
+	         print "Error: no lsKey found. Exiting "
+		 sys.exit(-1)
 
 
 	if found_error == 0:

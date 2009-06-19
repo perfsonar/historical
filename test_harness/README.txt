@@ -21,7 +21,7 @@ Sample use with existing services:
     test_PS.py -u http://lab246.internet2.edu:8085/perfSONAR_PS/services/pSB -c psBOUY-test-config.xml
  #Pinger
     test_PS.py -u http://fnal-owamp.es.net:8075/perfSONAR_PS/services/pinger/ma -c pinger-test-config.xml
-
+    test_PS.py -u http://wash-owamp.es.net:8075/perfSONAR_PS/services/pinger/ma -c pinger-test-config.xml
 
 
 See snpmMA-test-config.xml for notes on how to build the test config file
