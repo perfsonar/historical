@@ -9,10 +9,17 @@ See instructions below for starting the test services
 
 Sample use with existing services:
     setenv PSHOME /path/to/perfSONAR-PS
+ #SNMP MAs
     test_PS.py -u http://ps3.es.net:8080/perfSONAR_PS/services/snmpMA -c snpmMA-test-config.xml
-    test_PS.py -u http://ndb1.internet2.edu:9995/perfSONAR_PS/services/hLS -c LS-test-config.xml
-    test_PS.py -u http://sunn-pt1.es.net:8085/perfSONAR_PS/services/pSB -c psBOUY-test-config.xml
+    test_PS.py -u http://ndb1.internet2.edu:9990/perfSONAR_PS/services/SNMPMA -c snpmMA-test-config.xml
     test_PS.py -u http://stats.geant2.net/perfsonar/RRDMA-access/MeasurementArchiveService -c snpmMA-test-config.xml
+ #hLS
+    test_PS.py -u http://ndb1.internet2.edu:9995/perfSONAR_PS/services/hLS -c LS-test-config.xml
+    test_PS.py -u http://ps2.es.net:8095/perfSONAR_PS/services/hLS -c LS-test-config.xml
+ #pSB
+    test_PS.py -u http://sunn-pt1.es.net:8085/perfSONAR_PS/services/pSB -c psBOUY-test-config.xml
+    test_PS.py -u http://lab246.internet2.edu:8085/perfSONAR_PS/services/pSB -c psBOUY-test-config.xml
+ #Pinger
     test_PS.py -u http://fnal-owamp.es.net:8075/perfSONAR_PS/services/pinger/ma -c pinger-test-config.xml
 
 

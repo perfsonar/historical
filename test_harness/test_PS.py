@@ -281,7 +281,7 @@ def pickEndPointPair(filename):
 	     #print "    maKey = %s " % e.text
              keyList.append(e.text)
 
-    # special case for PingER
+    # special case for PingER  (XXX: not working??)
     #print "looking for Pinger Keys"
     for e in tree.findall("//%skey" % NMWG):
 	# SNMP MA and pSB MA use "maKey", but PingER MA using just "key" for some reason
@@ -347,7 +347,11 @@ def replaceElementAttribute(tree, tag, aname, newval):
         support xpath queries for attributes, so have to look one by one
     """
 
-#    print "replaceElementAttribute: ", tag
+# this version works with lines that look like this:
+#     <ns0:parameter name="endTime" xmlns:ns0="http://ggf.org/ns/nmwg/base/2.0/">1105453100</ns0:parameter>
+
+
+    #print "replaceElementAttribute: ", tag
     searchstring = ".//%s%s/" % (NMWG, tag)
     try:
         el = tree.findall(searchstring)
@@ -357,13 +361,40 @@ def replaceElementAttribute(tree, tag, aname, newval):
 	if len(el) == 0:
             pass
 	else:
+	    #print "found %d elements using NMWG namespace" % len(el)
             for e in el:
+                #print "    checking element: ", ElementTree.dump(e)
                 if e.get("name") == aname:
                     if verbose > 0:
-                        print "replacing attribute %s: %s with %s" % (aname, e.text, newval)
+                        print "    replacing attribute %s: %s with %s" % (aname, e.text, newval)
                     e.text = newval
 #                else:
-#                    print "replaceElementAttribute: attr %s not found for tag %s " % (e.get("name"), tag)
+#                    print "    replaceElementAttribute: attr %s not found for tag %s " % (e.get("name"), tag)
+
+    return
+
+#######################################################
+
+def replaceElementTopoAttribute(tree, tag, aname, newval):
+ # this routine works with lines that look like this:
+ #     <ns0:dst port="5433" type="ipv4" value="198.32.8.174" xmlns:ns0="http://ggf.org/ns/nmwg/topology/2.0/" />
+
+    #print "replaceTopoElement: ", tag
+    searchstring = ".//%s%s/" % (NMWGT, tag)
+    try:
+        el = tree.findall(searchstring)
+    except:
+        pass
+    else:
+	if len(el) == 0:
+            pass
+	else:
+            for e in el:
+	        oldval = e.get(aname)
+                e.set(aname, newval)
+                if verbose > 0:
+                    print "    replacing attribute %s: %s with %s" % (aname, oldval, newval)
+
     return
 
 ######################################################################################
@@ -426,7 +457,10 @@ def PS_Error(fd, logfname):
     fd.close() # flush errors
     fd =  open(logfname)
     d = fd.readlines()
-    print d[len(d)-1] # print last line of log file
+    try:
+	print d[len(d)-1] # print last line of log file
+    except:
+	pass
     return()
 
 #######################################################
@@ -443,6 +477,7 @@ def timeIt(*args):
 def main():
 
     global verbose, requestDir, options
+    hostName = ifAddr = ifName = key = src = dst = ""
     options = getOptions()
     inputFile, testDescription, expectedOutput, getAllRequest = loadTestConfigFile(options.configFile)
     #print inputFile
@@ -499,13 +534,14 @@ def main():
 
         now = int(time.time())
 
-        if options.PS_url.find("perfSONARBOUY") > 0 or options.PS_url.find("pSB") > 0 or options.PS_url.find("pinger") > 0:
-            replaceElementAttribute(tree, "src", "value", src)
-            replaceElementAttribute(tree, "dst", "value", dst)
-        elif getAllRequest != "":
-	    replaceElement(tree, "ifAddress", ifAddr)
-            replaceElement(tree, "hostName", hostName)
-            replaceElement(tree, "ifName", ifName)
+	# replace elements in test request files as necessary
+        #if hostName == "": # needed for PingER tests, maybe (XXX)
+	#     hostName = src;
+        replaceElementTopoAttribute(tree, "src", "value", src)
+        replaceElementTopoAttribute(tree, "dst", "value", dst)
+	replaceElement(tree, "ifAddress", ifAddr)
+        replaceElement(tree, "hostName", hostName)
+        replaceElement(tree, "ifName", ifName)
 
         replaceElementAttribute(tree, "parameter", "maKey", key)
         replaceElementAttribute(tree, "parameter", "startTime", "%s" % (now - (3600 * 12)) )  # 12 hrs ago
@@ -542,12 +578,21 @@ def main():
 
         # check for errors
 	for e in tree.findall("//%seventType/" % NMWG):
-		if e != None and e.text.find("error") >= 0:
+	    if e != None and e.text.find("error") >= 0:
 	            error = tree.find("//%sdatum/" % NMWGR).text
 	            print "Got error message: ", error
 	            print "Test Failed!"
 		    found_error = 1
+		    #sys.exit()  # sometimes useful for debugging
 		    break
+
+	# look for result 'Key'. Might need for future test?
+        # XXX
+        #print "looking for key"
+        #for e in tree.findall("//%skey" % NMWGR):
+        #   if e.get("name") == "maKey":
+        #       print "  *** found key ** = %s " % e.text
+
 
 	if found_error == 0:
             result = CheckResult(testNum, expectedOutput[testNum], tree)
