@@ -15,7 +15,7 @@ expected output: a list of 1 or more xml tags that the reply should contain
 
   <test>
      <input>LSRequest/LSRegisterRequest.xml</input>
-     <description> Test LS </description>
+     <description> Test LS Register</description>
      <expected_output>key</expected_output>
   </test>
   <test>
@@ -29,12 +29,6 @@ expected output: a list of 1 or more xml tags that the reply should contain
      <expected_output>serviceType</expected_output>
   </test>
   <test>
-     <input>LSRequest/LSDeregisterRequest.xml</input>
-     <description> Test LS </description>
-     <expected_output>eventType</expected_output>
-     <expected_output>datum</expected_output>
-  </test>
-  <test>
      <input>LSRequest/LSKeepaliveRequest.xml</input>
      <description> Test LS Keepalive  </description>
      <expected_output>eventType</expected_output>
@@ -44,6 +38,12 @@ expected output: a list of 1 or more xml tags that the reply should contain
      <input>LSRequest/LSRegisterRequest-update.xml</input>
      <description> Test LS Register update  </description>
      <expected_output>key</expected_output>
+  </test>
+  <test>
+     <input>LSRequest/LSDeregisterRequest.xml</input>
+     <description> Test LS Deregister </description>
+     <expected_output>eventType</expected_output>
+     <expected_output>datum</expected_output>
   </test>
 
 
