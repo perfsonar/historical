@@ -58,6 +58,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=146 146] - _*Aaron*_ - bwctld.limits should be updated as well 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=163 163] - _*Aaron*_ - ~~Add warning if both owamp/bwctl are~~ configured 
      * <font color=green>_*Fixed - 6/8*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - _*Aaron*_ - ability to set peer_port and iperf_port using web config GUI
  * _*Testing*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - _*Jason*_ - Automated Nessus Evaluation of Software 	
  * _*GUIs*_
