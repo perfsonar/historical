@@ -37,7 +37,7 @@ expected output: a list of 1 or more xml tags that the reply should contain
   <test>
      <input>LSRequest/LSRegisterRequest-update.xml</input>
      <description> Test LS Register update  </description>
-     <expected_output>key</expected_output>
+     <expected_output>success.ls.register</expected_output>
   </test>
   <test>
      <input>LSRequest/LSDeregisterRequest.xml</input>

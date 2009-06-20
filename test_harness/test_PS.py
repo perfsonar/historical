@@ -331,13 +331,13 @@ def replaceXQuery(tree, tag, newval):
     if newval == "":
 	return
 
-    print "looking for tag: ", tag
+    #print "looking for tag: ", tag
     for e in tree.findall("//%ssubject" % NMWGXQ):
         #print ElementTree.dump(e)
         #print "replaceXQuery element: ", ElementTree.dump(e)
         #print "replaceXQuery text: ",e.text
 	newstring = '@id="%s"' % newval
-        print "newstring: ", newstring
+        #print "newstring: ", newstring
 	# XXX: would be better to extract the test ID string, and not hard code this
 	savestring = e.text
         e.text = string.replace(e.text,'@id="replaceMe"', newstring)
@@ -629,11 +629,11 @@ def main():
 		    break
 
 	# special handling for LS: need to save the lsKey returned by LSRegisterRequest-key.xml
-        if requestFile.find("LSRegisterRequest-key") > 0:
-            print "looking for LS key"
+        if (lsKey == "") and  (requestFile.find("LSRegisterRequest.xml") > 0):
+            #print " *** looking for LS key"
             for e in tree.findall("//%sparameter" % NMWG):
                if e.get("name") == "lsKey":
-                   print "  *** found key ** = %s " % e.text
+                   print "  *** found LS key to use in remaining tests *** = %s " % e.text
 		   lsKey = e.text
             if lsKey == "":  # cant continue if not found
 	         print "Error: no lsKey found. Exiting "

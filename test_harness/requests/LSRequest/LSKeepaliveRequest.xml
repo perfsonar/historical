@@ -13,14 +13,4 @@
      
   <nmwg:data metadataIdRef="key_to_keepalive" id="d1"/>
 
-  <nmwg:metadata id="key_to_keepalive2">
-    <nmwg:key>
-      <nmwg:parameters id="keys">
-        <nmwg:parameter name="lsKey">replaceMe</nmwg:parameter>
-      </nmwg:parameters>
-    </nmwg:key>
-  </nmwg:metadata>
-     
-  <nmwg:data metadataIdRef="key_to_keepalive2" id="d2"/>
-             
 </nmwg:message>
