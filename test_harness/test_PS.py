@@ -629,7 +629,7 @@ def main():
 		    break
 
 	# special handling for LS: need to save the lsKey returned by LSRegisterRequest-key.xml
-        if (lsKey == "") and  (requestFile.find("LSRegisterRequest.xml") > 0):
+        if requestFile.find("LSRegisterRequest.xml") > 0:
             #print " *** looking for LS key"
             for e in tree.findall("//%sparameter" % NMWG):
                if e.get("name") == "lsKey":
