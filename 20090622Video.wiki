@@ -2,8 +2,16 @@
 
 == Agenda/Minutes ==
 
- # Attendees: 
- # Team Updates     
+ # Attendees: Jason, Brian, Maxim, Marcos, Joe, Rich, Aaron, Jeff
+ # Team Updates
+   * Jason: NIST proposal. Hope to get bugs done over the next week. Will update release plan in the next week.
+   * Aaron: IDC developers meeting. Document clean up pS-PerfTK. Throughput tests seem to be more stable. Testing hardware for good owamp hosts. Will be focusing on circuit monitoring going forward.
+   * Rich: Nothing new. All of Atlas is up except for SLAC.
+   * Jeff: Focus on pS-B owamp from here on out.
+   * Brian: Bug fixes in test harness. Tested nptoolkit.
+   * Joe: Working on throughput-google-maps GUIs. Having problems interacting with gLS infrastructure. Working on presentations - Jt Techs. Also working on recommendations for ESnet sites for deploying pS.
+   * Marcos: Preparing paper on IPsummarization. Perl is done, but not integrated into LS yet.
+   * Maxim: Admin interface of pingER is now in catalyst. AJAX interaction is a bit strange. Anticipate finishing this week. 
  # Review _*Actions*_ and _*Issues*_
    * _*Jason*_ - ~~will update release pages as needed~~
    * _*Jason*_ - will contact Marcos about IP Summarization
@@ -23,7 +31,11 @@
 
 === ACTIONS ===
 
-TBD
+   * _*Jason*_ - ~~will update release pages as needed~~
+   * _*Jason*_ - will contact Marcos about IP Summarization
+   * _*Aaron/Maxim*_ - Review admin GUIs and unify as much as possible.
+   * _*Joe*_ - Suggest interim steps to improve LS user experience, that don't require new software deployments.
+   * _*Jeff*_ - Start collecting agenda topics for a Jt Techs meeting. (First up is LS convergence time assumptions, goals.)
 
 == Where ==
 
