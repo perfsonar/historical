@@ -19,7 +19,9 @@ use English qw( -no_match_vars );
 use Module::Load;
 use File::Temp qw(tempfile);
 use Term::ReadKey;
+use Data::Dumper;
 use Cwd;
+use Date::Parse;
 
 my $dirname =  '/etc/PingER';
 
@@ -77,30 +79,60 @@ if ( defined $config{"port"} ) {
         }
     }
 }
-
+my $pre_input = '';
 while ( 1 ) {
     my $input;
     print "1) Set global values for the PingER MA/MP\n";
-    print "2) Add/Edit PingER endpoint\n";
+    print "2) Add/Edit PingER endpoint\n";   
     print "3) Enable/Disable PingER  port/endpoint\n";
-    print "4) Save PingER configuration\n";
-    print "5) Exit\n";
-    $input = &ask( "? ", q{}, undef, '[12345]' );
+    print "4) PingER MP/MA storage cleanup\n";
+    print "5) Save and Exit ( configuration is saved automatically when you select 1 - 4 )\n";
+    print "6) Exit without Save\n";
+    $input = &ask( "? ", q{}, undef, '[123456]' );
 
-    if ( $input == 5 ) {
+    if ( $input == 6 ) {
         exit( 0 );
     }
-    elsif ( $input == 4 ) {
-        if ( -f $file ) {
-            system( "cp -f $file $file.old" );
-        }
-
+    elsif ( $input == 5 ) { 
         SaveConfig_mine( $file, \%config );
         print "\n";
         print "Saved config to $file\n";
         print "\n";
     }
-    elsif ( $input == 1 ) {
+    elsif( $input == 4) { 
+      SaveConfig_mine( $file, \%config ) if  $pre_input && $pre_input != 5;
+      my @endpoints = ();
+        foreach my $port ( sort keys %{ $config{"port"} } ) {
+            next unless ( exists $config{"port"}->{$port}->{"endpoint"} );
+            foreach my $endpoint ( sort keys %{ $config{"port"}->{$port}->{"endpoint"} } ) {
+                push @endpoints, "$port$endpoint";
+            }
+        }
+	  if ( $#endpoints > -1 ) {
+            print "\n";
+            print "Existing Endpoints: \n";
+            my $len = $#endpoints;
+            for my $i ( 0 .. $len ) {
+                print " $i) $endpoints[$i]\n" if  $endpoints[$i] =~ /\/ma$/ms;
+            }
+            print "\n";
+        }  
+        do {
+            $input = &ask( "Enter PingER endpoint to cleanup (for example as: 8075/perfSONAR_PS/services/pingerma) or select from a number from the above ", q{8075/perfSONAR_PS/services/pingerma}, undef, '^(\d+[\/].*|\d+)$' );
+            if ( $input =~ /^\d+$/mx ) {
+                $input = $endpoints[$input];
+            }
+        } while ( not( $input =~ /\d+[\/].*/mx ) ); 
+        my ( $port, $endpoint );
+        if ( $input =~ /(\d+)([\/].*)/mx ) {
+            $port     = $1;
+            $endpoint = $2;
+        } 
+	###print      "Port: $port Endpoint:  $endpoint \n" . Dumper ($config{"port"}->{$port}->{"endpoint"}->{$endpoint});
+        cleanup_pinger( $config{"port"}->{$port}->{"endpoint"}->{$endpoint},  "pingerma" );  
+    }
+    elsif ( $input == 1 ) { 
+        SaveConfig_mine( $file, \%config ) if  $pre_input && $pre_input != 5;
         $config{"max_worker_processes"}     = &ask( "Enter the maximum number of children processes (0 means infinite) ",                   "30",                                                         $config{"max_worker_processes"},     '^\d+$' );
         $config{"max_worker_lifetime"}      = &ask( "Enter number of seconds a child can process before it is stopped (0 means infinite) ", "300",                                                        $config{"max_worker_lifetime"},      '^\d+$' );
         $config{"disable_echo"}             = &ask( "Disable echo by default (0 for no, 1 for yes) ",                                       0,                                                            $config{"disable_echo"},             '^[01]$' );
@@ -115,7 +147,7 @@ while ( 1 ) {
     elsif ( $input == 3 ) {
         my @elements = ();
         my %status   = ();
-
+        SaveConfig_mine( $file, \%config ) if  $pre_input && $pre_input != 5;
         foreach my $port ( sort keys %{ $config{"port"} } ) {
             next unless ( exists $config{"port"}->{$port}->{"endpoint"} );
             push @elements, $port;
@@ -188,7 +220,8 @@ while ( 1 ) {
             print "\n";
         }
     }
-    elsif ( $input == 2 ) {
+    elsif ( $input == 2 ) { 
+        SaveConfig_mine( $file, \%config ) if  $pre_input && $pre_input != 5;
         my @endpoints = ();
         foreach my $port ( sort keys %{ $config{"port"} } ) {
             next unless ( exists $config{"port"}->{$port}->{"endpoint"} );
@@ -275,6 +308,7 @@ while ( 1 ) {
             config_pinger( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config, "pingermp" );
         }
     }
+    $pre_input = $input;
 }
 
 =head2 config_pinger
@@ -359,6 +393,7 @@ sub config_pinger {
         	$dbh->do( "INSERT into host (ip_name, ip_number, comments) values ('test_name', '1.0.0.1', 'test')" );
 
         	if ( $dbh->err() ) { die "$DBI::errstr\n"; }
+		$dbh->disconnect();
             };
             if ( $EVAL_ERROR ) {
         	die " $EVAL_ERROR :: You have to install perl DBD::mysql driver, run: sudo cpan -i 'DBD::mysql' ";
@@ -391,6 +426,94 @@ sub config_pinger {
 
     $config->{$modulename}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{$modulename}->{"service_accesspoint"}, '^http:\/\/' );
 
+}
+
+=head2 cleanup_pinger
+
+TBD
+
+=cut
+
+sub cleanup_pinger {
+    my ( $config,    $modulename ) = @_;
+    my $moduletype =   "MA";
+    $config->{$modulename} = () unless exists $config->{$modulename};
+
+    $config->{$modulename}->{"db_type"} = &ask( "Enter the database type to read from (sqlite,mysql) ", "mysql", $config->{$modulename}->{"db_type"}, '^(sqlite|mysql)$' );
+
+    my $dirname = '/etc/PingER/db_config';
+    my $date =  &ask( "\nEnter date as mm-dd-yyyy ( example: 06-01-2009 ) to delete all records older than that", '', undef, '^\d\d\-\d\d\-\d{4}$');           
+    unless($date) {
+     print " No cleanup because date have not been entered...\n";
+     return;
+    }
+    my $dbh = '';
+    if ( $config->{$modulename}->{"db_type"} eq "sqlite" ) {      
+        eval {
+            require DBD::SQLite;
+            require DBI;
+
+            $dbh = DBI->connect(
+                "dbi:SQLite:dbname=$config->{$modulename}->{db_file}",
+                "", "",
+                {
+                    AutoCommit => 1,
+                    RaiseError => 1
+                }
+            );
+            $dbh->disconnect();
+        };
+        if ( $EVAL_ERROR || $dbh->err) {
+            die " $EVAL_ERROR :: You have to install perl DBD::SQLite driver, run: sudo cpan -i 'DBD::SQLite' ";
+        }
+    }
+    elsif ( $config->{$modulename}->{"db_type"} eq "mysql" ) {       
+            eval {
+        	require DBD::mysql;
+        	require DBI;
+                my $tmp = &ask( "Enter the username for the PingER MA/MP MySQL database (leave blank for default) ", $config->{pingerma}->{db_username} || $config->{pingermp}->{db_username} || $db_username, $config->{$modulename}->{db_username}, '' );
+                $config->{$modulename}->{db_username} = $tmp if ( $tmp ne "" );
+		$tmp = &ask( "Enter the password for the PingER MA/MP MySQL database (leave blank for default) ", $config->{pingerma}->{db_password} || $config->{pingermp}->{db_password} || $db_password, $config->{$modulename}->{"db_password"}, '' );
+                $config->{$modulename}->{db_password} = $tmp if ( $tmp ne "" );
+        	$dbh = DBI->connect(
+        	    "dbi:mysql:host=$config->{$modulename}->{db_host};database=$config->{$modulename}->{db_name}",
+        	    $config->{$modulename}->{db_username},
+        	    $config->{$modulename}->{db_password},
+        	    {
+        		AutoCommit => 1,
+        		RaiseError => 1
+        	    }
+        	);
+     	 	$date = str2time($date);
+     	 	my @tables = @{$dbh->selectall_arrayref("SHOW TABLES")};
+        	foreach my $table_row ( @tables ) {
+		  
+		    my $table_name =  $table_row->[0];
+		    print " Table :: $table_name   ";  
+     	 	    my ($tb_y, $tb_mn) = $table_name   =~ /data_(\d{4})(\d{2})/;
+		    next unless $tb_y &&  $tb_mn;
+     	 	    my $start_time = str2time("$tb_mn-01-$tb_y");
+     	 	    print " start_date ::$tb_mn-01-$tb_y \n";
+     	 	    if ($date > $start_time) {
+     	 		$dbh->do( "DELETE FROM $table_name WHERE timestamp < $date");
+			  print " ... deleted ... \n";
+     	 	    }
+     	 	    ### some extra cleanup
+     	 	    $dbh->do( "DELETE $table_name d FROM $table_name d join metaData m using(metaID) where m.ip_name_src = '-1'" );
+     	 	}
+     	 	### some extra cleanup
+        	$dbh->do( "DELETE FROM  metaData  where ip_name_src = '-1'" );
+        	 
+     	 	$dbh->disconnect();
+            };
+            if ( $EVAL_ERROR || $dbh->err) {
+        	die " $EVAL_ERROR :: You have to install perl DBD::mysql driver, run: sudo cpan -i 'DBD::mysql' or check DB";
+            } 
+    } 
+    else {
+        print "\n Found unsupported DB type: $config->{$modulename}->{db_type} in the config file, ONLY mysql and SQLite are supported ..\n"; 
+    }
+ 
 }
 
 =head2 ask
@@ -441,7 +564,7 @@ TBD
 
 sub SaveConfig_mine {
     my ( $file, $hash ) = @_;
-
+    system( "cp -f $file $file.old" ) if ( -f $file );
     my $fh;
 
     if ( open( $fh, ">", $file ) ) {
@@ -449,7 +572,8 @@ sub SaveConfig_mine {
         if ( close( $fh ) ) {
             return 0;
         }
-    }
+    } 
+    $hash = ParseConfig( $file );
     return -1;
 }
 
