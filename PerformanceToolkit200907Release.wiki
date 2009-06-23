@@ -66,12 +66,14 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=49 49] - _*Jason*_ - Daemon job to automatically add BWCTL/OWAMP isntances 
  * _*Disk Misc.*_   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=10 10] - _*Jeff*_ - Splash screen   	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=17 17] - _*Aaron*_ - Java plugin/homepage for KDE env 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=17 17] - _*Aaron*_ - Java plugin/homepage for KDE env
+     * <font color=yellow>_*Mostly Done - 6/23*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=26 26] - _*Aaron*_ - kernel nic drivers 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=57 57] - _*Aaron*_ - Console Configuration Issues 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=69 69] - _*Aaron*_ - MySQL Logging 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=83 83] - _*Aaron*_ - Live CD Network Card Drivers (Broadcom) 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=90 90] - _*Aaron*_ - Find workaround for KOI UDP performance issues	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=90 90] - _*Aaron*_ - ~~Find workaround for KOI UDP performance issues~~
+     * <font color=green>_*Fixed - 6/22*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=98 98] - _*Jason*_ - Ensure all service packages have init.d scripts 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=104 104] - _*Aaron*_ - ~~var log export~~
      * <font color=green>_*Fixed - 6/8*_</font>
@@ -79,7 +81,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=164 164] - _*Aaron*_ - Add option to completely clear disk/partition table and all 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=165 165] - _*Aaron*_ - Explore syslog-ng, and potential loghost setup 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - _*Aaron*_ - Add vmxnet module 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=175 175] - _*Aaron*_ - kernel headers 	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=175 175] - _*Aaron*_ - ~~ kernel headers 	~~
+     * <font color=green>_*Fixed - 6/23*_</font>
 
 === Code Reviews ===
 
