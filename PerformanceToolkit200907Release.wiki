@@ -52,10 +52,12 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*PingER*_  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=180 180] - _*Maxim*_ - Add scripts to clean/migrate SQL data in pingER
  * _*SNMP MA/Cacti*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - _*Aaron*_ - Cacti Configuration on NPToolkit  
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - _*Aaron*_ - Cacti Configuration on NPToolkit
+     * <font color=yellow>_*Mostly Done, Needs Testing - 6/23*_</font>
  * _*OWAMP/BWCTL*_  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - _*Aaron*_ - owamp/bwctl defaults for LHC sites 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=146 146] - _*Aaron*_ - bwctld.limits should be updated as well 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=146 146] - _*Aaron*_ - ~~bwctld.limits should be updated as well~~
+     * <font color=green>_*Fixed - 6/8*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=163 163] - _*Aaron*_ - ~~Add warning if both owamp/bwctl are configured~~
      * <font color=green>_*Fixed - 6/8*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - _*Aaron*_ - ability to set peer_port and iperf_port using web config GUI
@@ -71,8 +73,10 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=24 24] - _*Aaron*_ - ~~Automated MOTD generation~~
      * <font color=green>_*Fixed - 6/23*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=26 26] - _*Aaron*_ - kernel nic drivers 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=57 57] - _*Aaron*_ - Console Configuration Issues 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=69 69] - _*Aaron*_ - MySQL Logging 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=57 57] - _*Aaron*_ - ~~Console Configuration Issues~~ 	 
+     * <font color=green>_*Fixed - 6/23*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=69 69] - _*Aaron*_ - ~~MySQL Logging~~
+     * <font color=green>_*Fixed - 6/23*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=83 83] - _*Aaron*_ - Live CD Network Card Drivers (Broadcom) 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=90 90] - _*Aaron*_ - ~~Find workaround for KOI UDP performance issues~~
      * <font color=green>_*Fixed - 6/22*_</font>
