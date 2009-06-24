@@ -2272,7 +2272,7 @@ The _density_ is a measure of the density of number of descendants of the node o
 	
 where MAX_KEY_LENGTH is typically 32, the _mask_ is the CIDR class (number after the / in the IP number), and _childCount_ is the number of descendants (calculated as above).  The meaning of this equation is:  MAX_KEY_LENGTH - _mask_ yields the number of bits available, in the range of IP addresses, to be assigned to hosts.  Raising 2 to this power results in the equivalent number of hosts available within this range of IP addresses.  Dividing the actual number of descendants by the number of (maximum) available hosts yields the density.  This density value is also updated as new nodes are added to the trie.
 
-Once created, recurse down the trie, starting from the root node (the root node should be the looser, or larger, summarization IP number; in a worst case, it would be 0.0.0.0/0).  At each internal node, evaluate whether the trie should continue to be recursed down, or whether it should be pruned, and the corresponding node is then marked as a summarization node.  The decision of whether to mark a summarization node is done in the method _markIpTrieDensityDistance_, shown below:
+Once created, traverse down the trie, starting from the root node (the root node should be the looser, or larger, summarization IP number; in a worst case, it would be 0.0.0.0/0).  At each internal node, evaluate whether the trie should continue to be traversed down, or whether it should be pruned, and the corresponding node is then marked as a summarization node.  The decision of whether to mark a summarization node is done in the method _markIpTrieDensityDistance_, shown below:
 
 
 {{{
@@ -2288,7 +2288,7 @@ sub markIpTrieDensityDistance {
         $node->setSummaryMember();
         push( @summaryArrayList, $node );
 
-#If either condition below is satisfied, then the program will recurse down the subtrees below the current node and perform
+#If either condition below is satisfied, then the program will traverse down the subtrees below the current node and perform
 #the same tests on the descendants. If none of the conditions is satisfied, then the current node is marked
 #as a summarization node and the subtrees below this node will not be further analyzed.
 #The heuristic used for this decision is based on the distance between an internal node and its children,
@@ -2296,7 +2296,7 @@ sub markIpTrieDensityDistance {
 #node and its child; basically, it conveys the notion whether the current node represents a too large subnet
 #to be considered for summarization. For example, consider that the current node has a mask of 20 and its child
 #has a mask of 32. Then the current node represents a subclass of 4096 hosts (12 bits), so there's a possibility
-#of having a substantial amount of nodes below the current node. The algorithm then decides to recurse down the subtree.
+#of having a substantial amount of nodes below the current node. The algorithm then decides to traverse down the subtree.
 #Conversely, if the distance is short, then the current node may already comprise sufficient information to be selected
 #as a summarization node.
 #         *  The reasoning for the density tries to gather whether there exists already a relevant number of descendants
@@ -2347,9 +2347,9 @@ Next, each child of a node is evaluated for the following conditions:
 
     _Node Density_ < <font color="firebrick">densityThreshold</font> (i.e., low density)
 
-If either is satisfied, then the program will recurse down the subtrees below the current node and perform the same tests on the descendants.  If none of the conditions is satisfied, then the current node is marked as a summarization node and the subtrees below this node will not be further analyzed.
+If either is satisfied, then the program will traverse down the subtrees below the current node and perform the same tests on the descendants.  If none of the conditions is satisfied, then the current node is marked as a summarization node and the subtrees below this node will not be further analyzed.
 
-The heuristic used for this decision is based on the _distance_ between an internal node and its children, and the density.  The _distance_ value expresses the number of CIDR classes between the current node and its child; basically, it conveys the notion whether the current node represents a too large subnet to be considered for summarization.  For example, consider that the current node has a mask of 20 and its child has a mask of 32.  Then the current node represents a subclass of 4096 hosts (12 bits), so there's a possibility of having a substantial amount of nodes below the current node.  The algorithm then decides to recurse down the subtree.  Conversely, if the distance is short, then the current node may already comprise sufficient information to be selected as a summarization node.
+The heuristic used for this decision is based on the _distance_ between an internal node and its children, and the density.  The _distance_ value expresses the number of CIDR classes between the current node and its child; basically, it conveys the notion whether the current node represents a too large subnet to be considered for summarization.  For example, consider that the current node has a mask of 20 and its child has a mask of 32.  Then the current node represents a subclass of 4096 hosts (12 bits), so there's a possibility of having a substantial amount of nodes below the current node.  The algorithm then decides to traverse down the subtree.  Conversely, if the distance is short, then the current node may already comprise sufficient information to be selected as a summarization node.
 
 The reasoning for the density tries to gather whether there exists already a relevant number of descendants for the current node; if there is, then it may be convenient to select the current node as a summarization node.
 
