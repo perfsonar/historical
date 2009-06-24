@@ -51,7 +51,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=179 179] - Enhancement - Low - _*Jeff*_ - Add scripts to clean/migrate SQL data in pS-B 
  * _*PingER*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=180 180] - Enhancement - Low - _*Maxim*_ - Add scripts to clean/migrate SQL data in pingER 
-     * <font color=yellow>_*In progress - 6/23*_</font>
+     * <font color=yellow>_*Done - 6/24*_</font>
  * _*SNMP MA*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - Defect - High - _*Aaron*_ - Cacti Configuration on NPToolkit 
      * <font color=yellow>_*Mostly Done, Needs Testing - 6/23*_</font>
