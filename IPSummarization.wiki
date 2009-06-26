@@ -2266,7 +2266,7 @@ When a node is created into the trie, two values are calculated and attached to 
 
 The _childCount_ is the number of descendants below a node.  Or, in other words, the number of nodes within the subtrees deriving from that node.  Every time a node is added to the trie, its ancestors also have this value updated.
 
-The _density_ is a measure of the density of number of descendants of the node over the maximum possible number of hosts below the node.  The idea here is that, if below a node, there can exist a maximum of 32 hosts, but actually there exists only one, then the density of hosts below that node is low.  If there can exist a maximum of 32 hosts, and there are actually 32 hosts below the node, then the density is high (or maximal in this case).  The number of maximum hosts below a node is calculated as:
+The _density_ is a measure of the density of number of descendants of the node over the maximum possible number of hosts below the node.  The idea here is that, if below a node, there can exist a maximum of 32 hosts, but actually there exists only one, then the density of hosts below that node is low.  If there can exist a maximum of 32 hosts, and there are actually 32 hosts below the node, then the density is high (or maximal in this case).  The density is calculated as:
 
     `$self->{density} =  $self->{childCount} / (2**(MAX_KEY_LENGTH - $self->{mask}));`
 	
