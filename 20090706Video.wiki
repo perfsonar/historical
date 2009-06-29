@@ -1,0 +1,28 @@
+=  July 7, 2009 Conference Call 2:30 pm EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+ # Team Updates
+ # Review _*Actions*_ and _*Issues*_
+   * _*Jason*_ - ~~will update release pages as needed~~
+   * _*Jason*_ - ~~will contact Marcos about IP Summarization~~
+   * _*Jason/Martin/Jeff*_ - Finish editing OGF documents
+   * _*Jason/Martin/Jeff*_ - Complete/Upload NML document
+   * _*Aaron/Maxim*_ - Review admin GUIs and unify as much as possible.
+   * _*Joe*_ - Suggest interim steps to improve LS user experience, that don't require new software deployments.
+   * _*Jeff*_ - Start collecting agenda topics for a Jt Techs meeting. (First up is LS convergence time assumptions, goals.)
+   * _*All*_ - Review release pages
+ # Release Activities
+ # LHC/Atlas deployments (status update)
+ # Next VC will be 7/13.
+
+=== ACTIONS ===
+
+TBD
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
