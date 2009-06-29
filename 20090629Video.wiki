@@ -6,7 +6,7 @@
  # Team Updates
  # Review _*Actions*_ and _*Issues*_
    * _*Jason*_ - ~~will update release pages as needed~~
-   * _*Jason*_ - will contact Marcos about IP Summarization
+   * _*Jason*_ - ~~will contact Marcos about IP Summarization~~
    * _*Jason/Martin/Jeff*_ - Finish editing OGF documents
    * _*Jason/Martin/Jeff*_ - Complete/Upload NML document
    * _*Aaron/Maxim*_ - Review admin GUIs and unify as much as possible.
