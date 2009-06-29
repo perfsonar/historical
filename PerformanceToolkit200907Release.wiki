@@ -51,7 +51,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=179 179] - Enhancement - Low - _*Jeff*_ - Add scripts to clean/migrate SQL data in pS-B 
  * _*PingER*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=180 180] - Enhancement - Low - _*Maxim*_ - Add scripts to clean/migrate SQL data in pingER 
-     * <font color=yellow>_*Done - 6/24*_</font>
+     * <font color=green>_*Fixed - 6/24*_</font>
  * _*SNMP MA*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - Defect - High - _*Aaron*_ - Cacti Configuration on NPToolkit 
      * <font color=yellow>_*Mostly Done, Needs Testing - 6/23*_</font>
@@ -64,6 +64,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 6/8*_</font>
  * _*Testing*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - Task - Critical - _*Jason*_ - Automated Nessus Evaluation of Software    
+     * <font color=yellow>_*In progress - 6/29*_</font>
  * _*GUIs*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=47 47] - Enhancement - High - _*Jason*_ - Manual BWCTL/OWAMP host add to pSB Admin
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - Enhancement - New - Medium - _*Aaron*_ - ability to set peer_port and iperf_port using web config GUI
