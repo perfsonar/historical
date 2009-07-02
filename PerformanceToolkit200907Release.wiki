@@ -69,10 +69,11 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*GUIs*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=47 47] - Enhancement - High - _*Aaron*_ - Manual BWCTL/OWAMP host add to pSB Admin
      * <font color=green>_*Fixed - 7/2*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - Enhancement - New - Medium - _*Aaron*_ - ability to set peer_port and iperf_port using web config GUI
-     * <font color=purple>_*Post Beta - 7/2*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - Enhancement - New - Medium - _*Aaron*_ - ~~ability to set peer_port and iperf_port using web config GUI~~
+     * <font color=purple>_*Moved to Next Release - 7/2*_</font>
  * _*Disc Misc.*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=10 10] - Enhancement - Critical - _*Jeff*_ - Splash screen 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=10 10] - Enhancement - Critical - _*Jeff*_ - Splash screen 	
+     * <font color=yellow>_*In Progress - 6/30*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=17 17] - Enhancement - Critical - _*Aaron*_ - Java plugin/homepage for KDE env  
      * <font color=yellow>_*Mostly Done - 6/23*_</font>: Needs link to firefox on desktop or modify Konqueror to accept plugin
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=24 24] - _*Aaron*_ - ~~Automated MOTD generation~~
@@ -91,6 +92,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=104 104] - _*Aaron*_ - ~~var log export~~
      * <font color=green>_*Fixed - 6/8*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=140 140] - Defect - High - _*Aaron*_ - Upgrades of NPToolkit may miss key file changes 
+     * <font color=yellow>_*In Progress - 7/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=164 164] - Enhancement - High - _*Aaron*_ - Add option to completely clear disk/partition table and all 
      * <font color=yellow>_*In Progress - 6/23*_</font>: The better sorting of the partitions may obviate this need
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=165 165] - Enhancement - Medium - _*Aaron*_ - Explore syslog-ng, and potential loghost setup 	 
