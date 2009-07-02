@@ -66,6 +66,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 6/8*_</font>
  * _*PingER GUI*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=19 19] - Enhancement - High - _*Maxim*_ - PingER GUI gLS pingable hosts 	
+     * <font color=green>_*Fixed - 7/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=107 107] - _*Maxim*_ - ~~PingER LandMarks GUI Displays All Pingable Hosts - Selectable by Community~~
      * <font color=green>_*Merged into 19 - 6/8*_</font>
  * _*perfAdmin*_
