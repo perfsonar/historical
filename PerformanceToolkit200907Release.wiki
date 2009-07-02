@@ -71,7 +71,7 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*Disc Misc.*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=10 10] - Enhancement - Critical - _*Jeff*_ - Splash screen 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=17 17] - Enhancement - Critical - _*Aaron*_ - Java plugin/homepage for KDE env  
-     * <font color=yellow>_*Mostly Done - 6/23*_</font>
+     * <font color=yellow>_*In Progress - 6/23*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=24 24] - _*Aaron*_ - ~~Automated MOTD generation~~
      * <font color=green>_*Fixed - 6/23*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=26 26] - Enhancement - High - _*Aaron*_ - kernel nic drivers 	 
