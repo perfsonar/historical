@@ -72,7 +72,7 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*Disc Misc.*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=10 10] - Enhancement - Critical - _*Jeff*_ - Splash screen 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=17 17] - Enhancement - Critical - _*Aaron*_ - Java plugin/homepage for KDE env  
-     * <font color=yellow>_*In Progress - 6/23*_</font>
+     * <font color=yellow>_*Mostly Done - 6/23*_</font>: Needs link to firefox on desktop or modify Konqueror to accept plugin
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=24 24] - _*Aaron*_ - ~~Automated MOTD generation~~
      * <font color=green>_*Fixed - 6/23*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=26 26] - Enhancement - High - _*Aaron*_ - kernel nic drivers 	 
@@ -81,6 +81,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=69 69] - _*Aaron*_ - ~~MySQL Logging~~
      * <font color=green>_*Fixed - 6/23*_</font>	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=83 83] - Defect - High - _*Aaron*_ - Live CD Network Card Drivers (Broadcom) 	 
+     * <font color=yellow>_*In Progress - 6/23*_</font>: Most up to date drivers are included, needs testing on host with broadcom
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=90 90] - _*Aaron*_ - ~~Find workaround for KOI UDP performance issues~~
      * <font color=green>_*Fixed - 6/22*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=98 98] - Defect - Critical - _*Jason*_ - Ensure all service packages have init.d scripts 
@@ -88,8 +89,11 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 6/8*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=140 140] - Defect - High - _*Aaron*_ - Upgrades of NPToolkit may miss key file changes 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=164 164] - Enhancement - High - _*Aaron*_ - Add option to completely clear disk/partition table and all 
+     * <font color=yellow>_*In Progress - 6/23*_</font>: The better sorting of the partitions may obviate this need
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=165 165] - Enhancement - Medium - _*Aaron*_ - Explore syslog-ng, and potential loghost setup 	 
+     * <font color=yellow>_*In Progress - 6/23*_</font>: Need to document how to add loghost into /etc/syslog-ng/syslog-ng.conf
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - Enhancement - Medium - _*Aaron*_ - Add vmxnet module 	
+     * <font color=grey>7/2 - Arguing for pushing back post Beta release</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=175 175] - _*Aaron*_ - ~~ kernel headers 	~~
      * <font color=green>_*Fixed - 6/23*_</font>
 
