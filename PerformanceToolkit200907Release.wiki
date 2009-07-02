@@ -66,7 +66,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - Task - Critical - _*Jason*_ - Automated Nessus Evaluation of Software    
      * <font color=yellow>_*In progress - 6/29*_</font>
  * _*GUIs*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=47 47] - Enhancement - High - _*Jason*_ - Manual BWCTL/OWAMP host add to pSB Admin
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=47 47] - Enhancement - High - _*Aaron*_ - Manual BWCTL/OWAMP host add to pSB Admin
+     * <font color=green>_*Fixed - 7/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - Enhancement - New - Medium - _*Aaron*_ - ability to set peer_port and iperf_port using web config GUI
  * _*Disc Misc.*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=10 10] - Enhancement - Critical - _*Jeff*_ - Splash screen 	 
