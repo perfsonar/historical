@@ -49,7 +49,7 @@ The following outline some exceptions to the overall release process.  Also see 
 
  * _*LS Registration Daemon*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=182 182] - Defect - High - _*Aaron*_ - ~~need better error checking on ls_instance string in ls_registration_daemon~~
-     * <font color=green>_*Fixed - 7/2*_</font>
+     * <font color=green>_*Moved to Next Release - 7/2*_</font>
  * _*pSB*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=106 106] - Enhancement - Medium - _*Jeff*_ - bwmaster/bwcontroller: better logging support	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=115 115] - Defect - High - _*Jason*_ - pSB Metadata Generation 	 	 
@@ -76,6 +76,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=141 141] - Enhancement - High - _*Jason*_ - bandwidthGraph.cgi plots are missleading for data is missing 	 
      * <font color=yellow>_*In Progress - 7/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=143 143] - Defect - High - _*Jason*_ - graphs are not coming up under IE 	 
+     * <font color=yellow>_*In Progress - 7/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - Enhancement - Medium - _*Jason*_ - disable buttons on the stats grpahs page for empty graphs 
 
 === Code Reviews ===
