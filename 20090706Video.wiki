@@ -13,6 +13,7 @@
    * _*Joe*_ - Suggest interim steps to improve LS user experience, that don't require new software deployments.
    * _*Jeff*_ - Start collecting agenda topics for a Jt Techs meeting. (First up is LS convergence time assumptions, goals.)
    * _*All*_ - Review release pages
+ # New email lists (ps-perfsonar-users, ps-perfsonar-announce, ps-perfsonar-dev)
  # Release Activities
    * New Dates
      * pSPS 3.1 Release (7/10) 
