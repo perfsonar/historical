@@ -27,7 +27,7 @@ Code Freeze: June 26, 2009
 
 Beta Generation/Testing Week: July 3, 2009
 
-RC Generation/Testing Week: July 10, 2009
+RC Generation/Testing Week: July 15, 2009
 
 Official Release: July 17, 2009
 

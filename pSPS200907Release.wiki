@@ -27,7 +27,7 @@ Code Freeze: June 19, 2009
 
 Package Generation Phase, Beta Tests: June 26, 2009
 
-First Release Candidates: July 3, 2009
+First Release Candidates: July 10, 2009
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPS200907Release/schedule.png
 
@@ -49,6 +49,7 @@ The following outline some exceptions to the overall release process.  Also see 
 
  * _*hLS*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=187 187] - Defect - Critical - _*Jason*_ - perl-Clone needed by hLS (other?) RPM 
+     * <font color=green>_*Done - 7/6*_</font>
  * _*LS Registration Daemon*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=182 182] - Defect - High - _*Aaron*_ - ~~need better error checking on ls_instance string in ls_registration_daemon~~
      * <font color=purple>_*Moved to Next Release - 7/2*_</font>
