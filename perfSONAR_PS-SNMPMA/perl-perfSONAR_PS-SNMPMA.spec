@@ -10,7 +10,7 @@ Autoreq: 0
 
 Name:           perl-perfSONAR_PS-SNMPMA
 Version:        3.1
-Release:        3.%{disttag}
+Release:        4.%{disttag}
 Summary:        perfSONAR_PS SNMP Measurement Archive
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -18,6 +18,7 @@ URL:            http://search.cpan.org/dist/perfSONAR_PS-SNMPMA
 Source0:        perfSONAR_PS-SNMPMA-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
+Requires:		perl(Clone)
 Requires:		perl(Compress::Zlib)
 Requires:		perl(Config::General)
 Requires:		perl(Cwd)
@@ -133,6 +134,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Mon Jul 6 2009 zurawski@internet2.edu 3.1-4
+- Bugfix to inclcude perl(Clone) as a dep.
+
 * Thu May 16 2009 zurawski@internet2.edu 3.1-3
 - Bugfix to include the makeDBConf script
 

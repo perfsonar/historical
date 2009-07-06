@@ -5,7 +5,7 @@
 
 Name:           perl-Net-IPTrie
 Version:        0.4
-Release:        2.%{disttag}
+Release:        3.%{disttag}
 Summary:        Perl module for building IPv4 and IPv6 address space hierarchies fast
 License:        GPL+ or Artistic
 Group:          Development/Libraries
@@ -57,6 +57,9 @@ find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null \;
 %{__rm} /tmp/perl-Net-IPTrie_post.sh
 
 %changelog
+* Mon Jul 6 2009 Jason Zurawski 0.4-3
+- Compat changes for 64 bit linux.
+
 * Tue Mar 31 2009 Jason Zurawski 0.4-2
 - Compat changes for RHEL/Fedora/CentOS/Scientific linux.
 

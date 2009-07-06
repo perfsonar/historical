@@ -8,7 +8,7 @@
 
 Name:           perl-perfSONAR_PS-LookupService
 Version:        3.1
-Release:        2.%{disttag}
+Release:        3.%{disttag}
 Summary:        perfSONAR_PS Lookup Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -16,6 +16,7 @@ URL:            http://search.cpan.org/dist/perfSONAR_PS-LookupService/
 Source0:        perfSONAR_PS-LookupService-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
+Requires:		perl(Clone)
 Requires:		perl(Config::General)
 Requires:		perl(Data::UUID)
 Requires:		perl(Data::Validate::IP)
@@ -98,6 +99,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Mon Jul 6 2009 zurawski@internet2.edu 3.1-3
+- Bugfix to inclcude perl(Clone) as a dep.
+
 * Thu May 7 2009 zurawski@internet2.edu 3.1-2
 - Bugfix to inclcude makeDBConf script
 

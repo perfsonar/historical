@@ -5,7 +5,7 @@
 
 Name:           perl-Data-Validate-IP
 Version:        0.08
-Release:        2.%{disttag}
+Release:        3.%{disttag}
 Summary:        Ip validation methods
 License:        GPL+ or Artistic
 Group:          Development/Libraries
@@ -57,6 +57,9 @@ rm -rf $RPM_BUILD_ROOT
 %{__rm} /tmp/perl-Data-Validate-IP_post.sh
 
 %changelog
+* Mon Jul 6 2009 Jason Zurawski 0.08-3
+- Compat changes for 64 bit linux.
+
 * Tue Mar 31 2009 Jason Zurawski 0.08-2
 - Compat changes for RHEL/Fedora/CentOS/Scientific linux.
 
