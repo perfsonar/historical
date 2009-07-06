@@ -2,8 +2,16 @@
 
 == Agenda/Minutes ==
 
- # Attendees:
+ # Attendees: Aaron, Joe, Maxim, Marcos, Rich, Jeff, Jason, Martin
  # Team Updates
+   * Maxim: Investigating administrative interfaces for pingER. No more bug fixes. No integration with Aaron's administration GUIs yet. Catalyst supports many auth plugins and lots of other goodness. Maxim thinks we should do catalyst.
+   * Joe: weathermap.es.net prototype. Topology is pS driven, will do utilization soon. SNMP-MA will likely use xml-db for store in the future to deal with the dynamic changes to topology. Aaron is looking at the same issue. Joe will be developing a risk analysis of deploying a pS-PerfTK host.
+   * Marcos: Test sets started for the IPTree implementation.
+   * Martin: NML schema update before Thursday NML call.
+   * Rich: Just waiting for the new disks.
+   * Aaron: Working on monitoring of the Cienas. Attempting to have that by jt techs. Hoping to leverage ESnet weathermap.
+   * Jason: Working on submission for NIST proposal. Closed out bugs on GUI issues. Temporary version of new pS-B GUIs. Fixing LS bugs. Bug fix on rpm packages. pS-B development is finishing up. Call with Marcos/Martin on summarization work. Need more test cases for IP summarization.
+   * Jeff: NIST proposal, pS-PerfTK splash screen, publicity, use cases. Working on other proposals as well.
  # Review _*Actions*_ and _*Issues*_
    * _*Jason*_ - ~~will update release pages as needed~~
    * _*Jason*_ - ~~will contact Marcos about IP Summarization~~
@@ -27,8 +35,6 @@
  # Next VC will be 7/13.
 
 === ACTIONS ===
-
-TBD
 
 == Where ==
 
