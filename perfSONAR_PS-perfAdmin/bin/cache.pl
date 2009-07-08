@@ -28,12 +28,8 @@ use LWP::Simple;
 use English qw( -no_match_vars );
 
 use FindBin qw($RealBin);
-
 my $basedir = "$RealBin/";
-
 use lib "$RealBin/../lib";
-
-use lib "/home/jason/RELEASE/RELEASE_3.1/perfSONAR_PS-perfAdmin/lib";
 
 use perfSONAR_PS::Common qw( extract find unescapeString escapeString );
 use perfSONAR_PS::Utils::ParameterValidation;
@@ -61,7 +57,7 @@ my $hints  = "http://www.perfsonar.net/gls.root.hints";
 my @private_list = ( "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16" );
 
 #my $base = "/var/lib/hLS/cache";
-my $base = "/home/jason/RELEASE/RELEASE_3.1/perfSONAR_PS-perfAdmin/cache";
+my $base = "/home/jason/RELEASE/RELEASE_3.1/test/cache";
 
 my %hls     = ();
 my %matrix1 = ();
@@ -80,7 +76,7 @@ my $output_level = $INFO;
 my %logger_opts = (
     level  => $output_level,
     layout => '%d (%P) %p> %F{1}:%L %M - %m%n',
-    file   => "/home/jason/RELEASE/RELEASE_3.1/perfSONAR_PS-perfAdmin/cache.log",
+    file   => "/home/jason/RELEASE/RELEASE_3.1/test/cache.log",
 );
 
 #    file   => "/var/log/perfSONAR/hLS_cache.log",

@@ -1,0 +1,124 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+
+=head1 NAME
+
+view.cgi - View the contents of an hLS. 
+
+=head1 DESCRIPTION
+
+Supply an hLs argument, and see the internal XML contents of that hLS.
+
+=cut
+
+use CGI;
+use HTML::Template;
+use XML::LibXML;
+use CGI::Carp qw(fatalsToBrowser);
+
+use FindBin qw($RealBin);
+my $basedir = "$RealBin/";
+use lib "$RealBin/../lib";
+
+use perfSONAR_PS::Client::DCN;
+use perfSONAR_PS::Common qw( escapeString find extract );
+
+my $cgi = new CGI;
+my $parser = XML::LibXML->new();
+
+croak "hLS instance not provided unless " unless $cgi->param('hls');
+
+my $INSTANCE = $cgi->param('hls');
+my $template = HTML::Template->new( filename => "$RealBin/../etc/view.tmpl" );
+
+my @data = ();
+my $ls = new perfSONAR_PS::Client::LS( { instance => $INSTANCE } );
+my @eT = ( "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/2.0", "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0" );
+my @store = ( "LSStore", "LSStore-summary", "LSStore-control" );
+
+foreach my $e ( @eT ) {
+    foreach my $s ( @store ) {
+        my $METADATA = q{};
+        my $q = "/nmwg:store[\@type=\"".$s."\"]/nmwg:metadata";
+        my $result = $ls->queryRequestLS( { query => $q, eventType => $e, format => 1 } );
+        if ( exists $result->{eventType} and not ( $result->{eventType} =~ m/^error/ ) ) {
+            my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
+            my $md = find( $doc->getDocumentElement, ".//nmwg:metadata", 0 );
+            foreach my $m ( $md->get_nodelist ) {
+                $METADATA .= escapeString( $m->toString ) . "\n";
+            }
+        }
+        else {
+            $METADATA = "EventType:\t" , $result->{eventType} . "\tResponse:\t" . $result->{response};
+        }
+
+        my $DATA = q{};
+        $q = "/nmwg:store[\@type=\"".$s."\"]/nmwg:data";
+        $result = $ls->queryRequestLS( { query => $q, eventType => $e, format => 1 } );
+        if ( exists $result->{eventType} and not ( $result->{eventType} =~ m/^error/ ) ) {
+            my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
+            my $data = find( $doc->getDocumentElement, ".//nmwg:data", 0 );
+            foreach my $d ( $data->get_nodelist ) {
+                $DATA .= escapeString( $d->toString ) . "\n";
+            }
+        }
+        else {
+            $DATA = "EventType:\t" , $result->{eventType} . "\tResponse:\t" . $result->{response};
+        }
+        
+        push @data, { COLLECTION => $e, STORE => $s, METADATA => $METADATA, DATA => $DATA };
+    }
+}
+
+print $cgi->header();
+
+$template->param(
+    INSTANCE => $INSTANCE,
+    DATA => \@data
+);
+
+print $template->output;
+
+__END__
+
+=head1 SEE ALSO
+
+L<CGI>, L<HTML::Template>, L<XML::LibXML>, L<CGI::Carp>, L<FindBin>,
+L<perfSONAR_PS::Client::DCN>, L<perfSONAR_PS::Common>
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  https://svn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Jason Zurawski, zurawski@internet2.edu
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2007-2009, Internet2
+
+All rights reserved.
+
+=cut
