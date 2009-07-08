@@ -43,15 +43,30 @@ foreach my $e ( @eT ) {
         my $METADATA = q{};
         my $q = "/nmwg:store[\@type=\"".$s."\"]/nmwg:metadata";
         my $result = $ls->queryRequestLS( { query => $q, eventType => $e, format => 1 } );
-        if ( exists $result->{eventType} and not ( $result->{eventType} =~ m/^error/ ) ) {
-            my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
+        if ( exists $result->{"eventType"} and not ( $result->{"eventType"} =~ m/^error/ ) ) {
+            my $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"};        
             my $md = find( $doc->getDocumentElement, ".//nmwg:metadata", 0 );
             foreach my $m ( $md->get_nodelist ) {
                 $METADATA .= escapeString( $m->toString ) . "\n";
             }
         }
         else {
-            $METADATA = "EventType:\t" , $result->{eventType} . "\tResponse:\t" . $result->{response};
+            if( exists $result->{"eventType"} and $result->{"eventType"} eq "error.ls.query.ls_output_not_accepted" ) {
+                $result = $ls->queryRequestLS( { query => $q, eventType => $e, format => 0 } );
+                if ( exists $result->{"eventType"} and not ( $result->{"eventType"} =~ m/^error/ ) ) {
+                    my $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"};        
+                    my $md = find( $doc->getDocumentElement, ".//nmwg:metadata", 0 );
+                    foreach my $m ( $md->get_nodelist ) {
+                        $METADATA .= $m->toString . "\n";
+                    }
+                }
+                else {
+                    $METADATA = "EventType:\t" . $result->{'eventType'} . "\nResponse:\t" . $result->{"response"};
+                }
+            }
+            else {
+                $METADATA = "EventType:\t" . $result->{'eventType'} . "\nResponse:\t" . $result->{"response"};
+            }
         }
 
         my $DATA = q{};
@@ -65,7 +80,22 @@ foreach my $e ( @eT ) {
             }
         }
         else {
-            $DATA = "EventType:\t" , $result->{eventType} . "\tResponse:\t" . $result->{response};
+            if( exists $result->{"eventType"} and $result->{"eventType"} eq "error.ls.query.ls_output_not_accepted" ) {
+                $result = $ls->queryRequestLS( { query => $q, eventType => $e, format => 0 } );
+                if ( exists $result->{"eventType"} and not ( $result->{"eventType"} =~ m/^error/ ) ) {
+                    my $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"};        
+                    my $data = find( $doc->getDocumentElement, ".//nmwg:data", 0 );
+                    foreach my $d ( $data->get_nodelist ) {
+                        $DATA .= $d->toString . "\n";
+                    }
+                }
+                else {
+                    $DATA = "EventType:\t" . $result->{'eventType'} . "\nResponse:\t" . $result->{"response"};
+                }
+            }
+            else {
+                $DATA = "EventType:\t" . $result->{'eventType'} . "\nResponse:\t" . $result->{"response"};
+            }
         }
         
         push @data, { COLLECTION => $e, STORE => $s, METADATA => $METADATA, DATA => $DATA };
