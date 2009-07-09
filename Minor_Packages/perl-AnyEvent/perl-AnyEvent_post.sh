@@ -8,7 +8,7 @@ eval "`perl -V:version`";
 mkdir -p $installprefix/$installstyle/vendor_perl/$version/AnyEvent
 mkdir -p $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
 
-if [ -d $installprefix/$installstyle ];
+if [ -f $installprefix/$installstyle/AnyEvent.pm ];
 then
     ln -s $installprefix/$installstyle/AnyEvent.pm $installprefix/$installstyle/vendor_perl/$version
     if [ "$installstyle" != "$defaultstyle" ]
@@ -16,7 +16,7 @@ then
         ln -s $installprefix/$installstyle/AnyEvent.pm $installprefix/$defaultstyle/vendor_perl/$version
     fi
 else
-    if [ -d $installprefix/$defaultstyle/AnyEvent ];
+    if [ -f $installprefix/$defaultstyle/AnyEvent.pm ];
     then
         ln -s $installprefix/$defaultstyle/AnyEvent.pm $installprefix/$installstyle/vendor_perl/$version
         if [ "$installstyle" != "$defaultstyle" ]
@@ -31,7 +31,7 @@ then
     ln -s $installprefix/$installstyle/AnyEvent/Util.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent
     ln -s $installprefix/$installstyle/AnyEvent/Strict.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent 
     ln -s $installprefix/$installstyle/AnyEvent/DNS.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent
-    ln -s $installprefix/$installstyle/AnyEvent/Intro.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent           
+    ln -s $installprefix/$installstyle/AnyEvent/Intro.pod $installprefix/$installstyle/vendor_perl/$version/AnyEvent           
     ln -s $installprefix/$installstyle/AnyEvent/TLS.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent 
     ln -s $installprefix/$installstyle/AnyEvent/Socket.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent
     ln -s $installprefix/$installstyle/AnyEvent/Handle.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent     
@@ -40,7 +40,7 @@ then
         ln -s $installprefix/$installstyle/AnyEvent/Util.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
         ln -s $installprefix/$installstyle/AnyEvent/Strict.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
         ln -s $installprefix/$installstyle/AnyEvent/DNS.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
-        ln -s $installprefix/$installstyle/AnyEvent/Intro.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
+        ln -s $installprefix/$installstyle/AnyEvent/Intro.pod $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
         ln -s $installprefix/$installstyle/AnyEvent/TLS.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
         ln -s $installprefix/$installstyle/AnyEvent/Socket.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
         ln -s $installprefix/$installstyle/AnyEvent/Handle.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
@@ -51,7 +51,7 @@ else
         ln -s $installprefix/$defaultstyle/AnyEvent/Util.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent
         ln -s $installprefix/$defaultstyle/AnyEvent/Strict.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent
         ln -s $installprefix/$defaultstyle/AnyEvent/DNS.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent
-        ln -s $installprefix/$defaultstyle/AnyEvent/Intro.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent
+        ln -s $installprefix/$defaultstyle/AnyEvent/Intro.pod $installprefix/$installstyle/vendor_perl/$version/AnyEvent
         ln -s $installprefix/$defaultstyle/AnyEvent/TLS.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent
         ln -s $installprefix/$defaultstyle/AnyEvent/Socket.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent
         ln -s $installprefix/$defaultstyle/AnyEvent/Handle.pm $installprefix/$installstyle/vendor_perl/$version/AnyEvent
@@ -60,7 +60,7 @@ else
             ln -s $installprefix/$defaultstyle/AnyEvent/Util.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
             ln -s $installprefix/$defaultstyle/AnyEvent/Strict.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
             ln -s $installprefix/$defaultstyle/AnyEvent/DNS.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
-            ln -s $installprefix/$defaultstyle/AnyEvent/Intro.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
+            ln -s $installprefix/$defaultstyle/AnyEvent/Intro.pod $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
             ln -s $installprefix/$defaultstyle/AnyEvent/TLS.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
             ln -s $installprefix/$defaultstyle/AnyEvent/Socket.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
             ln -s $installprefix/$defaultstyle/AnyEvent/Handle.pm $installprefix/$defaultstyle/vendor_perl/$version/AnyEvent
