@@ -6,11 +6,13 @@ applicable.
 
 == Future Events ==
 
-   * [20090706Video] - Video Conference for July 6, 2009
+   * [20090713Video] - Video Conference for July 13, 2009
+   * [20090720Meet] - Meeting at Joint Techs, Indianapolis *date is tentative*
 
 == Past Events ==
 
  * 2009
+   * [20090706Video] - Video Conference for July 6, 2009
    * [20090622Video] - Video Conference for June 22, 2009
    * [20090608Video] - Video Conference for June 8, 2009
    * [20090601Video] - Video Conference for June 1, 2009
