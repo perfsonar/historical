@@ -61,12 +61,12 @@ make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} install
 mkdir -p $RPM_BUILD_ROOT/etc/cron.d
 
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{crontab} > scripts/%{crontab}.new
-install -D -m 755 scripts/%{crontab}.new $RPM_BUILD_ROOT/etc/cron.d/%{crontab}
+install -D -m 600 scripts/%{crontab}.new $RPM_BUILD_ROOT/etc/cron.d/%{crontab}
 
 mkdir -p $RPM_BUILD_ROOT/etc/httpd/conf.d
 
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{apacheconf} > scripts/%{apacheconf}.new
-install -D -m 755 scripts/%{apacheconf}.new $RPM_BUILD_ROOT/etc/httpd/conf.d/%{apacheconf}
+install -D -m 644 scripts/%{apacheconf}.new $RPM_BUILD_ROOT/etc/httpd/conf.d/%{apacheconf}
 
 %post
 mkdir -p /var/log/perfsonar
@@ -75,7 +75,11 @@ chown perfsonar:perfsonar /var/log/perfsonar
 mkdir -p /var/lib/perfsonar/perfAdmin/cache
 chown -R perfsonar:perfsonar /var/lib/perfsonar/perfAdmin
 
-chown -R apache:apache /var/lib/perfsonar/perfAdmin/etc
+chown -R apache:apache /opt/perfsonar_ps/perfAdmin/etc
+chown -R root:root /etc/cron.d/perfAdmin.cron
+
+/etc/init.d/crond restart
+/etc/init.d/httpd restart
 
 %clean
 rm -rf $RPM_BUILD_ROOT
