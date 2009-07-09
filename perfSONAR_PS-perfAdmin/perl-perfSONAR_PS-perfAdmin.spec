@@ -1,6 +1,10 @@
 %define _unpackaged_files_terminate_build      0
 %define install_base /opt/perfsonar_ps/perfAdmin
 
+# cron/apache entry are located in the 'scripts' directory
+%define crontab perfAdmin.cron
+%define apacheconf perfAdmin.conf
+
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfAdmin
@@ -13,7 +17,7 @@ URL:            http://search.cpan.org/dist/perfSONAR_PS-perfAdmin
 Source0:        perfSONAR_PS-perfAdmin-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
-Requires:		perl(AnyEvent)
+Requires:		perl(AnyEvent) >= 4.81
 Requires:		perl(AnyEvent::HTTP)
 Requires:		perl(CGI)
 Requires:		perl(CGI::Carp)
@@ -54,12 +58,24 @@ rm -rf $RPM_BUILD_ROOT
 
 make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} install
 
+mkdir -p $RPM_BUILD_ROOT/etc/cron.d
+
+awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{crontab} > scripts/%{crontab}.new
+install -D -m 755 scripts/%{crontab}.new $RPM_BUILD_ROOT/etc/cron.d/%{crontab}
+
+mkdir -p $RPM_BUILD_ROOT/etc/httpd/conf.d
+
+awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{apacheconf} > scripts/%{apacheconf}.new
+install -D -m 755 scripts/%{apacheconf}.new $RPM_BUILD_ROOT/etc/httpd/conf.d/%{apacheconf}
+
 %post
 mkdir -p /var/log/perfsonar
 chown perfsonar:perfsonar /var/log/perfsonar
 
 mkdir -p /var/lib/perfsonar/perfAdmin/cache
 chown -R perfsonar:perfsonar /var/lib/perfsonar/perfAdmin
+
+chown -R apache:apache /var/lib/perfsonar/perfAdmin/etc
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -69,8 +85,11 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{install_base}/doc/*
 %config %{install_base}/etc/*
 %{install_base}/bin/*
+%{install_base}/cgi-bin/*
 %{install_base}/scripts/*
 %{install_base}/lib/*
+/etc/cron.d/*
+/etc/httpd/conf.d/*
 
 %changelog
 * Thu Jul 9 2009 zurawski@internet2.edu 3.1-1

@@ -20,6 +20,8 @@ etc/serviceTest_pinger.tmpl
 etc/serviceTest_psb_bwctl.tmpl
 etc/serviceTest_psb_owamp.tmpl
 etc/serviceTest_utilization.tmpl
+etc/perfAdmin.conf
+etc/perfAdmin.cron
 etc/tree.tmpl
 etc/view.tmpl
 lib/perfSONAR_PS/Client/DCN.pm

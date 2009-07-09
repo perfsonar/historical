@@ -21,7 +21,7 @@ use FindBin qw($RealBin);
 my $basedir = "$RealBin/";
 use lib "$RealBin/../lib";
 
-my $base     = "/home/jason/RELEASE/RELEASE_3.1/test/cache";
+my $base = "/var/lib/perfsonar/perfAdmin/cache";
 my $template = HTML::Template->new( filename => "$RealBin/../etc/tree.tmpl" );
 my $CGI = CGI->new();
 
