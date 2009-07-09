@@ -9,7 +9,7 @@ cache.pl - Build a cache of information from the global gLS infrastructure
 
 =head1 DESCRIPTION
 
-Contact the gLS's to gain a list of hLS instances (for now double up to be sure
+Contact the gLSs to gain a list of hLS instances (for now double up to be sure
 we get things that may not have spun yet).  After this, contact each and get a
 list of services.  Store the list in text files where they can be used by other
 applications.
@@ -56,8 +56,7 @@ my $hints  = "http://www.perfsonar.net/gls.root.hints";
 
 my @private_list = ( "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16" );
 
-#my $base = "/var/lib/hLS/cache";
-my $base = "/home/jason/RELEASE/RELEASE_3.1/test/cache";
+my $base = "/var/lib/perfsonar/perfAdmin/cache";
 
 my %hls     = ();
 my %matrix1 = ();
@@ -76,10 +75,8 @@ my $output_level = $INFO;
 my %logger_opts = (
     level  => $output_level,
     layout => '%d (%P) %p> %F{1}:%L %M - %m%n',
-    file   => "/home/jason/RELEASE/RELEASE_3.1/test/cache.log",
+    file   => "/var/log/perfsonar/cache.log",
 );
-
-#    file   => "/var/log/perfSONAR/hLS_cache.log",
 
 Log::Log4perl->easy_init( \%logger_opts );
 

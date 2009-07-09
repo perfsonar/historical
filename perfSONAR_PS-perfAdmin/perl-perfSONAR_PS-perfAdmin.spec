@@ -1,9 +1,6 @@
 %define _unpackaged_files_terminate_build      0
 %define install_base /opt/perfsonar_ps/perfAdmin
 
-# init scripts must be located in the 'scripts' directory
-%define init_script_1 lookup_service
-
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfAdmin
@@ -57,22 +54,12 @@ rm -rf $RPM_BUILD_ROOT
 
 make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} install
 
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
-
-awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_1} > scripts/%{init_script_1}.new
-install -D -m 755 scripts/%{init_script_1}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_1}
-
 %post
 mkdir -p /var/log/perfsonar
 chown perfsonar:perfsonar /var/log/perfsonar
 
-#mkdir -p /var/lib/perfsonar/lookup_service/xmldb
-#if [ ! -f /var/lib/perfsonar/lookup_service/xmldb/DB_CONFIG ]; then
-#	%{install_base}/scripts/psCreateLookupDB --directory /var/lib/perfsonar/lookup_service/xmldb
-#fi
-#chown -R perfsonar:perfsonar /var/lib/perfsonar
-
-#/sbin/chkconfig --add lookup_service
+mkdir -p /var/lib/perfsonar/perfAdmin/cache
+chown -R perfsonar:perfsonar /var/lib/perfsonar/perfAdmin
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -84,13 +71,6 @@ rm -rf $RPM_BUILD_ROOT
 %{install_base}/bin/*
 %{install_base}/scripts/*
 %{install_base}/lib/*
-/etc/init.d/*
-
-%preun
-#if [ $1 -eq 0 ]; then
-#    /sbin/chkconfig --del lookup_service
-#    /sbin/service lookup_service stop
-#fi
 
 %changelog
 * Thu Jul 9 2009 zurawski@internet2.edu 3.1-1

@@ -1,5 +1,5 @@
 AnyEvent
-AnyEvent::HTTP      - need
+AnyEvent::HTTP
 CGI
 CGI::Carp
 Data::Dumper

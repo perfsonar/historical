@@ -1,0 +1,62 @@
+			               perfSONAR-PS perfAdmin
+
+--------------------------------------------------------------------------------
+
+About:
+------
+
+The perfSONAR-PS perfAdmin package contains a series of web-based GUIs that
+interact with perfSONAR Information and Data-oriented services.  The goal of
+this package is to make these GUIs available for public use and modification.
+
+Installation:
+-------------
+
+Please read the INSTALL file for instructions
+  
+Configuration:
+--------------
+
+TBD
+
+Starting/Stopping:
+------------------
+
+TBD
+
+Testing:
+--------
+
+TBD  
+
+Maintenance:
+------------
+
+Subscribe to the user mailing lists if you are seeking help on some problem
+related to this software.  Announcements regarding availability of new releases
+will also be sent to these locations
+
+  perfSONAR Users Group - https://mail.internet2.edu/wws/info/perfsonar-user
+  perfSONAR Announcements - https://mail.internet2.edu/wws/info/perfsonar-announce
+
+  Performance Node Users - https://mail.internet2.edu/wws/info/performance-node-users
+  Performance Node Announcements - https://mail.internet2.edu/wws/info/performance-node-announce
+
+Also if you are using package management software and have installed the
+Internet2 software repository, a typical upgrade should download new releases:
+
+  yum update
+
+or
+
+  apt-get dist-upgrade
+  
+Finally, check the following websites for news of software releases:
+
+  http://software.internet2.edu
+  http://www.internet2.edu/performance
+
+--------------------------------------------------------------------------------
+
+Thu Jul  9 09:29:16 EDT 2009
+
