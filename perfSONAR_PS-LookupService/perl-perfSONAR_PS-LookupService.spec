@@ -99,6 +99,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Fri Jul 10 2009 zurawski@internet2.edu 3.1-4
+- Documentation updates, DCN use case bug fixes.
+
 * Mon Jul 6 2009 zurawski@internet2.edu 3.1-3
 - Bugfix to inclcude perl(Clone) as a dep.
 
