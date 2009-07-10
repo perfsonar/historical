@@ -75,12 +75,14 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Merged into 19 - 6/8*_</font>
  * _*perfAdmin*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=136 136] - Defect - High - _*Jason*_ - Units displayed in perfAdmin should correspond with service definition 	
-     * <font color=yellow>_*In Progress - 7/2*_</font>
+     * <font color=green>_*Done - 7/10*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=141 141] - Enhancement - High - _*Jason*_ - bandwidthGraph.cgi plots are missleading for data is missing 	 
-     * <font color=yellow>_*In Progress - 7/2*_</font>
+     * <font color=green>_*Done - 7/10*_</font>
+     * Open a new bug to discuss larger issue.
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=143 143] - Defect - High - _*Jason*_ - graphs are not coming up under IE 	 
      * <font color=green>_*Done - 7/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - Enhancement - Medium - _*Jason*_ - disable buttons on the stats grpahs page for empty graphs 
+     * <font color=purple>_*Pushing off till 3.2 - 7/10*_</font>
 
 === Code Reviews ===
 
