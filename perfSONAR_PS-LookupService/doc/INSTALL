@@ -99,7 +99,7 @@ Installation (YUM):
 Installation using YUM lets the package manager do the work of finding and
 installing the dependencies.  The following command is all that is needed:
 
-  yum install perl-perfSONAR_PS-LookupService-3.1-2.pSPS.noarch.rpm
+  yum install perl-perfSONAR_PS-LookupService-3.1-4.pSPS.noarch.rpm
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -114,7 +114,7 @@ Like YUM, installation with APT-RPM also manages the task of finding
 dependencies.  The following commands will install is needed:
 
   apt-get update
-  apt-get install perl-perfSONAR_PS-LookupService-3.1-2.pSPS.noarch.rpm
+  apt-get install perl-perfSONAR_PS-LookupService-3.1-4.pSPS.noarch.rpm
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -129,18 +129,18 @@ If you do not wish to install the Internet2 Repository package, you may simply
 find the appropriate RPM for your architecture without using a package manger.
 For example if you are on an "i386" architecture:
 
-  wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-LookupService-3.1-2.pSPS.noarch.rpm
+  wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-LookupService-3.1-4.pSPS.noarch.rpm
   
 To install without package manager help:
 
-  rpm -ivh perl-perfSONAR_PS-LookupService-3.1-2.pSPS.noarch.rpm
+  rpm -ivh perl-perfSONAR_PS-LookupService-3.1-4.pSPS.noarch.rpm
   
 Note that this RPM may need other packages to install correctly: if these
 packages are not found on your system, you will need to manually download and
 install them before proceeding.  An alternate method is to still use a package
 manager in a "local" way (YUM only):
 
-  yum localinstall perl-perfSONAR_PS-LookupService-3.1-2.pSPS.noarch.rpm
+  yum localinstall perl-perfSONAR_PS-LookupService-3.1-4.pSPS.noarch.rpm
   
 This will search the available repositories for any necessary packages.
 
@@ -219,5 +219,5 @@ and
 
 --------------------------------------------------------------------------------
 
-Thu May  7 20:58:25 EDT 2009
+Fri Jul 10 06:40:36 EDT 2009
 
