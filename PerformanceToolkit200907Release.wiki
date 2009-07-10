@@ -104,7 +104,9 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=purple>_*Post Beta (needs user feedback) - 7/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=175 175] - _*Aaron*_ - ~~ kernel headers 	~~
      * <font color=green>_*Fixed - 6/23*_</font>
-
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=189 188] - _*Aaron*_ - Add RNP NTP servers to NPToolkit 
+     * <font color=yellow>_*In Progress - 7/10*_</font>
+     
 === Code Reviews ===
 
 There will be no code reviews for this release.  
