@@ -59,13 +59,15 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - Defect - Critical - _*Aaron*_ - owamp/bwctl defaults for LHC sites
      * <font color=yellow>_*In Progress - 7/2*_</font>	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=49 49] - Enhancement - High - _*Jason*_ - Daemon job to automatically add BWCTL/OWAMP isntances 	 
+     * <font color=purple>_*Pushing back to 3.2 - 7/10*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=146 146] - _*Aaron*_ - ~~bwctld.limits should be updated as well~~
      * <font color=green>_*Fixed - 6/8*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=163 163] - _*Aaron*_ - ~~Add warning if both owamp/bwctl are configured~~
      * <font color=green>_*Fixed - 6/8*_</font>
  * _*Testing*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - Task - Critical - _*Jason*_ - Automated Nessus Evaluation of Software    
-     * <font color=yellow>_*In progress - 6/29*_</font>
+     * <font color=green>_*Done for now - 6/10*_</font>
+     * Need to do testing after first RC (after JTs)
  * _*GUIs*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=47 47] - Enhancement - High - _*Aaron*_ - Manual BWCTL/OWAMP host add to pSB Admin
      * <font color=green>_*Fixed - 7/2*_</font>
@@ -89,6 +91,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=90 90] - _*Aaron*_ - ~~Find workaround for KOI UDP performance issues~~
      * <font color=green>_*Fixed - 6/22*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=98 98] - Defect - Critical - _*Jason*_ - Ensure all service packages have init.d scripts 
+     * <font color=yellow>_*In Progress - 7/10*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=104 104] - _*Aaron*_ - ~~var log export~~
      * <font color=green>_*Fixed - 6/8*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=140 140] - Defect - High - _*Aaron*_ - Upgrades of NPToolkit may miss key file changes 
