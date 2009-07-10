@@ -6,6 +6,27 @@ The perfSONAR-PS perfAdmin package contains a series of web-based GUIs that
 interact with perfSONAR Information and Data-oriented services.  The goal of
 this package is to make these GUIs available for public use and modification.
 
+perfAdmin relies on an external script to contact the perfSONAR IS
+infrastructure.  This optimization prevents the CGI scripts from directly
+initiating an active query and flooding the IS with duplicate requests for
+information.  The results of this script, which is run through cron a regular
+schedule, are then consumed by the GUIs to display a snapshot of the
+infrastructure.
+
+perfAdmin has the ability to display 4 different types of measurement data:
+
+ - SNMP Utilization (from perfSONAR-PS SNMP MA and perfSONAR-MDM RRD MA)
+ - Throughput (from perfSONAR-PS perfSONAR-BUOY)
+ - One Way Latency (from perfSONAR-PS perfSONAR-BUOY)
+ - Two Way Latency (from perfSONAR-PS PingER)
+
+Extending perfAdmin to fit the needs of a particular deployment is possible and
+expected - all CGI scripts and the caching program are open source and included
+in the package.  The perfSONAR-PS team encourages suggestions and questions
+regarding this product.  For more information please join the mailing list:
+
+https://mail.internet2.edu/wws/subrequest/perfsonar-ps-users
+
 Prerequisites:
 --------------
 
@@ -150,7 +171,7 @@ for any necessary perl libraries.
 
 In addition to perl requirements, there are other software requirements that
 should be installed.  These are not controlled via the dependency scripts due to
-differences in package mangement.  The tools are listed below:
+differences in package management.  The tools are listed below:
 
   * Apache httpd
     - Package management names:
