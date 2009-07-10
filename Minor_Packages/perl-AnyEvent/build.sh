@@ -12,7 +12,7 @@ rm -f AnyEvent-4.81.tar.gz
 mkdir AnyEvent-4.81/scripts
 cp perl-AnyEvent_post.sh AnyEvent-4.81/scripts
 chmod +w AnyEvent-4.81/MANIFEST 
-echo "scripts/perl-AnyEvent_post.sh" >> AnyEvent-1.4/MANIFEST 
+echo "scripts/perl-AnyEvent_post.sh" >> AnyEvent-4.81/MANIFEST 
 tar -zvcf AnyEvent-4.81.tar.gz AnyEvent-4.81
 rm -frd AnyEvent-4.81
 mv AnyEvent-4.81.tar.gz ~/rpmbuild/SOURCES
