@@ -54,5 +54,7 @@ lib/perfSONAR_PS/XML/Document.pm
 modules.rules
 perl-perfSONAR_PS-perfSONARBUOY.spec
 scripts/install_dependencies.sh
+scripts/perfsonarbuoy_collector
 scripts/perfsonarbuoy_ma
+scripts/perfsonarbuoy_master
 scripts/prepare_environment.sh
