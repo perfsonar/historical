@@ -56,7 +56,7 @@ Requires:		perl(Sys::Hostname)
 Requires:		perl(Sys::Syslog)
 Requires:		perl(Term::ReadKey)
 Requires:		perl(Time::HiRes)
-Requires:		perl(XML::LibXML)
+Requires:		perl(XML::LibXML) >= 1.60
 Requires:	    perl-DBD-MySQL
 Requires:	    mysql
 Requires:	    mysql-server
@@ -83,7 +83,7 @@ Requires:		perl(Log::Log4perl)
 Requires:		perl(Params::Validate)
 Requires:		perl(Sys::Syslog)
 Requires:		perl(Time::HiRes)
-Requires:		perl(XML::LibXML)
+Requires:		perl(XML::LibXML) >= 1.60
 Requires:       perl-perfSONAR_PS-perfSONARBUOY-config
 %description client
 The perfSONARBUOY client conists of tools that perform measurements on the beacons as well as client applications that can interact with the web service.
@@ -94,7 +94,15 @@ Group:          Applications/Network
 %description config
 The perfSONARBUOY config package contains a configuration file that both the server and client packages require to operate.  
 
-%pre
+%pre server
+/usr/sbin/groupadd perfsonar 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+
+%pre client
+/usr/sbin/groupadd perfsonar 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+
+%pre config
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
 /usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
