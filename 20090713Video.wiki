@@ -7,10 +7,13 @@
    * Joe: Have not looked at LS issues yet. East coast servers should be running in the next week. Working on a perfSONAR deployment white paper and jt techs talks.
      * Jt Techs: Deployment experiences track session and perfSONAR deployment BOF.
    * Aaron: Working on DCN weather-map/circuit monitoring page. Functionally complete for this release. Also working on pS-PerfTK - specifically have fixed an issue where it would not boot on the Dell 1750. Focus going forward is making DCN monitoring pretty and working on talks.
+     * Jt Techs: Circuit Monitoring demonstration in perfWG, scribe DCN-WG.
    * Jason: Release pain continues. pS-B not yet done, new iso's out thursday.
+     * Jt Techs: Supporting role.
    * Rich: Bigrow is looking at the pre-release.
+     * Jt Techs: Mini-Perf workshop, JET, pS deployment BOF
    * Jeff: Working on pS-B/owamp. Specifically, the signal handling in perl completely changed in version 5.8, and the master/collector process loops were crafted with the old model in mind (and now go crazy sometimes). Also preparing for Jt Techs track session on the pS-Performance Toolkit.
-
+     * Jt Techs: PerfWG (staff update), JET, pS-PerfTk track-session, DCN-WG
  # Review _*Actions*_ and _*Issues*_
    * _*Jason*_ - ~~will update release pages as needed~~
    * _*Jason*_ - ~~will contact Marcos about IP Summarization~~
