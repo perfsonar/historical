@@ -1,14 +1,14 @@
-#!/bin/sh
-# $Id$
+#!/bin/bash
 #
-# rc.d script to start bwcollector.pl
+# Init file for perfSONAR perfSONAR-BUOY Collection Service
 #
 # chkconfig: 2345 60 20
-# description: perfSONAR-BUOY Measurement Collector
+# description: perfSONAR perfSONAR-BUOY Collection Service
+#
 
-TOOL="pSB Collector"
-PREFIX=/usr/lib/perfsonar/services/perfSONAR-BUOY/server
-CONF_PREFIX=/etc/perfSONAR-BUOY
+TOOL="perfSONAR perfSONAR-BUOY Collection Service"
+PREFIX=/opt/perfsonar_ps/perfsonarbuoy_ma
+CONF_PREFIX=${PREFIX}/etc
 TOOL_EXE=${PREFIX}/bin/bwcollector.pl
 
 cmd="$TOOL_EXE -c $CONF_PREFIX "
