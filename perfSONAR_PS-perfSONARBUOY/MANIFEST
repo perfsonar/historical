@@ -14,6 +14,7 @@ doc/LICENSE
 doc/README
 etc/daemon.conf
 etc/daemon_logger.conf
+etc/owmesh.conf
 etc/requests/EchoRequest.xml
 etc/requests/MetadataKeyRequest.xml
 etc/requests/SetupDataRequest.xml
@@ -57,4 +58,5 @@ scripts/install_dependencies.sh
 scripts/perfsonarbuoy_collector
 scripts/perfsonarbuoy_ma
 scripts/perfsonarbuoy_master
-scripts/prepare_environment.sh
+scripts/prepare_environment_client.sh
+scripts/prepare_environment_server.sh

@@ -15,7 +15,7 @@ Summary:        perfSONAR_PS perfSONAR-BUOY Measurement Archive and Collection S
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-perfSONAR-BUOY/
-Source0:        perfSONAR_PS-perfSONARBUOY.tar.gz
+Source0:        perfSONAR_PS-perfSONARBUOY-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       perl
@@ -84,6 +84,7 @@ Requires:		perl(Params::Validate)
 Requires:		perl(Sys::Syslog)
 Requires:		perl(Time::HiRes)
 Requires:		perl(XML::LibXML)
+Requires:       perl-perfSONAR_PS-perfSONARBUOY-config
 %description client
 The perfSONARBUOY client conists of tools that perform measurements on the beacons as well as client applications that can interact with the web service.
 
@@ -97,18 +98,12 @@ The perfSONARBUOY config package contains a configuration file that both the ser
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
 /usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
-%prep server
-%setup -q -n perfSONAR_PS-perfSONARBUOY-server
-
-%prep client
-%setup -q -n perfSONAR_PS-perfSONARBUOY-client
-
-%prep config
-%setup -q -n perfSONAR_PS-perfSONARBUOY-config
+%prep
+%setup -q -n perfSONAR_PS-perfSONARBUOY
 
 %build
 
-%install server
+%install
 rm -rf $RPM_BUILD_ROOT
 
 make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} install
@@ -121,18 +116,8 @@ install -m 755 scripts/%{init_script_ma}.new $RPM_BUILD_ROOT/etc/init.d/%{init_s
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_collector} > scripts/%{init_script_collector}.new
 install -m 755 scripts/%{init_script_collector}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_collector}
 
-%install client
-rm -rf $RPM_BUILD_ROOT
-
-make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} install
-
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
-
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_master} > scripts/%{init_script_master}.new
 install -m 755 scripts/%{init_script_master}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_master}
-
-%install config
-rm -rf $RPM_BUILD_ROOT
 
 %post server
 mkdir -p /var/log/perfsonar
