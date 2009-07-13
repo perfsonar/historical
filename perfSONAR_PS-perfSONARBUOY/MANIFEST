@@ -1,5 +1,8 @@
 MANIFEST
 Makefile
+bin/bwcollector.pl
+bin/bwdb.pl
+bin/bwmaster.pl
 bin/client.pl
 bin/configureDaemon.pl
 bin/daemon.pl
@@ -11,8 +14,18 @@ doc/LICENSE
 doc/README
 etc/daemon.conf
 etc/daemon_logger.conf
+etc/requests/EchoRequest.xml
 etc/requests/MetadataKeyRequest.xml
 etc/requests/SetupDataRequest.xml
+lib/OWP.pm
+lib/OWP/Archive.pm
+lib/OWP/Conf.pm
+lib/OWP/DB.pm
+lib/OWP/Helper.pm
+lib/OWP/MeasSet.pm
+lib/OWP/RawIO.pm
+lib/OWP/Syslog.pm
+lib/OWP/Utils.pm
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
 lib/perfSONAR_PS/Client/LS/Remote.pm
@@ -40,4 +53,6 @@ lib/perfSONAR_PS/Utils/ParameterValidation.pm
 lib/perfSONAR_PS/XML/Document.pm
 modules.rules
 perl-perfSONAR_PS-perfSONARBUOY.spec
+scripts/install_dependencies.sh
 scripts/perfsonarbuoy_ma
+scripts/prepare_environment.sh

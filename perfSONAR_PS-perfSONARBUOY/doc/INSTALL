@@ -51,11 +51,13 @@ the following Perl libraries, libraries, and external tools to function:
   * Perl Libraries
     - Config::General
     - Cwd
+    - DBD::mysql
     - DBI
     - Data::UUID
     - Date::Manip
     - Digest::MD5
     - Error
+    - Exporter
     - File::Temp
     - FileHandle
     - Getopt::Long
