@@ -106,7 +106,9 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 6/23*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=189 188] - _*Aaron*_ - Add RNP NTP servers to NPToolkit 
      * <font color=yellow>_*In Progress - 7/10*_</font>
-     
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=191 191] - _*Aaron*_ - ~~nptoolkit doesn't boot on dell 1750~~
+     * <font color=green>_*Done - 7/13*_</font>
+
 === Code Reviews ===
 
 There will be no code reviews for this release.  
