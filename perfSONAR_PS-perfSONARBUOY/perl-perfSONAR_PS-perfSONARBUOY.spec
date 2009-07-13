@@ -131,7 +131,8 @@ install -m 755 scripts/%{init_script_master}.new $RPM_BUILD_ROOT/etc/init.d/%{in
 mkdir -p /var/log/perfsonar
 chown perfsonar:perfsonar /var/log/perfsonar
 
-mkdir -p /var/lib/perfsonar/perfsonarbuoy_ma
+mkdir -p /var/lib/perfsonar/perfsonarbuoy_ma/bwctl
+mkdir -p /var/lib/perfsonar/perfsonarbuoy_ma/owamp
 chown -R perfsonar:perfsonar /var/lib/perfsonar
 
 /sbin/chkconfig --add perfsonarbuoy_ma
