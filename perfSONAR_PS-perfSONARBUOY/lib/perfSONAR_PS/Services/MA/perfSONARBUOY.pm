@@ -112,8 +112,19 @@ sub init {
     $self->{LOGGER} = get_logger( "perfSONAR_PS::Services::MA::perfSONARBUOY" );
 
     unless ( exists $self->{CONF}->{"root_hints_url"} ) {
-        $self->{CONF}->{"root_hints_url"} = "http://www.perfsonar.net/gls.root.hints";
-        $self->{LOGGER}->warn( "gLS Hints file not set, using default at \"http://www.perfsonar.net/gls.root.hints\"." );
+        $self->{CONF}->{"root_hints_url"} = q{};     
+        $self->{LOGGER}->info( "gLS Hints file was not set, automatic discovery of hLS instance disabled." );
+    }
+
+    if ( exists $self->{CONF}->{"root_hints_file"} and $self->{CONF}->{"root_hints_file"} ) {
+        unless ( $self->{CONF}->{"root_hints_file"} =~ "^/" ) {
+            $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"root_hints_file"};
+            $self->{LOGGER}->debug( "Setting full path to 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
+        }
+    }
+    else {
+        $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/gls.root.hints";
+        $self->{LOGGER}->info( "Setting 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
     }
 
     if ( exists $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} and $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} and -d $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} ) {
