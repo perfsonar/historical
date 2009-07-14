@@ -64,7 +64,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=131 131] - Defect - Low - _*Jason*_ - achievable bandwidth event type is mis-spelled achieveable 
      * <font color=green>_*Done - 7/14*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=152 152] - Defect - High - _*Jason*_ - pSB MA gLS ERRORS 
-     * <font color=purple>_*migratingt to next release - 7/14*_</font> 	 
+     * <font color=purple>_*migrating to next release - 7/14*_</font> 	 
      * Temp fix applied, will address further in next release.
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=157 157] - Enhancement - High - _*Jeff*_ - bwcollector debugging support 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=174 174] - Defect - High - _*Jason*_ - windowSize not reported correctly for pSB 	 
