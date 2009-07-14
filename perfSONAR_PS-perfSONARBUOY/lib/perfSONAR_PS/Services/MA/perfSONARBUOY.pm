@@ -47,6 +47,8 @@ use Sys::Hostname;
 use Fcntl ':flock';
 use Date::Manip;
 use Math::BigInt;
+use Data::Validate::IP qw(is_ipv4);
+use Net::IPv6Addr;
 
 use perfSONAR_PS::Config::OWP;
 use perfSONAR_PS::Config::OWP::Utils;
@@ -607,59 +609,80 @@ sub generateStoreEndPointPair {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { conf => 1, type => 1, center => 1, n => 1 } );
 
-    ( my $choice = $parameters->{type} ) =~ s/^(BW|LAT)//;
-    my $endPointPair = "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-
     my @srcPart = ();
     my @dstPart = ();
-    if ( $choice == 6 ) {
-        my $src = $parameters->{conf}->get_val( NODE => $parameters->{center}, TYPE => $parameters->{type}, ATTR => "ADDR" );
-        if ( $src eq "1" ) {
-            my @temp = $parameters->{conf}->get_val( NODE => $parameters->{center}, TYPE => $parameters->{type}, ATTR => "ADDR" );
-            $src = $temp[0] if $temp[0];
-        }
-        @srcPart = split( /\]/, $src );
+    my $src = $parameters->{conf}->get_val( NODE => $parameters->{center}, TYPE => $parameters->{type}, ATTR => "ADDR" );
+    if ( $src eq "1" ) {
+        my @temp = $parameters->{conf}->get_val( NODE => $parameters->{center}, TYPE => $parameters->{type}, ATTR => "ADDR" );
+        $src = $temp[0] if $temp[0];
+    }
+
+    my @cols = split( /:/, $src );
+    if ( $#cols > 1 ) {
+        @srcPart = split( /\]/, $src );        
         $srcPart[0] =~ s/^\[//;
         $srcPart[1] =~ s/^:// if $srcPart[1];
 
-        my $dst = $parameters->{conf}->get_val( NODE => $parameters->{n}, TYPE => $parameters->{type}, ATTR => "ADDR" );
-        if ( $dst eq "1" ) {
-            my @temp = $parameters->{conf}->get_val( NODE => $parameters->{n}, TYPE => $parameters->{type}, ATTR => "ADDR" );
-            $dst = $temp[0] if $temp[0];
-        }
+    }
+    else {
+        @srcPart = split( /:/, $src );
+    }
+
+    my $dst = $parameters->{conf}->get_val( NODE => $parameters->{n}, TYPE => $parameters->{type}, ATTR => "ADDR" );
+    if ( $dst eq "1" ) {
+        my @temp = $parameters->{conf}->get_val( NODE => $parameters->{n}, TYPE => $parameters->{type}, ATTR => "ADDR" );
+        $dst = $temp[0] if $temp[0];
+    }
+
+    @cols = split( /:/, $dst );
+    if ( $#cols > 1 ) {
         @dstPart = split( /\]/, $dst );
         $dstPart[0] =~ s/^\[//;
         $dstPart[1] =~ s/^:// if $dstPart[1];
     }
-    elsif ( $choice == 4 ) {
-        @srcPart = split( /:/, $parameters->{conf}->get_val( NODE => $parameters->{center}, TYPE => $parameters->{type}, ATTR => "ADDR" ) );
-        @dstPart = split( /:/, $parameters->{conf}->get_val( NODE => $parameters->{n},      TYPE => $parameters->{type}, ATTR => "ADDR" ) );
-    }
     else {
-        $self->{LOGGER}->warn( "Type \"" . $parameters->{type} . "\" was not recognized." );
-        return;
+        @dstPart = split( /:/, $dst );
     }
 
+    my $endPointPair = "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
     if ( $#srcPart > 0 ) {
-        $endPointPair .= "        <nmwgt:src type=\"ipv" . $choice . "\" value=\"" . $srcPart[0] . "\" port=\"" . $srcPart[1] . "\" />\n";
+        $endPointPair .= "        <nmwgt:src type=\"" . $self->addressType( { address => $srcPart[0] } ) . "\" value=\"" . $srcPart[0] . "\" port=\"" . $srcPart[1] . "\" />\n";
     }
     else {
-        $endPointPair .= "        <nmwgt:src type=\"ipv" . $choice . "\" value=\"" . $srcPart[0] . "\" />\n";
+        $endPointPair .= "        <nmwgt:src type=\"" . $self->addressType( { address => $srcPart[0] } ) . "\" value=\"" . $srcPart[0] . "\" />\n";
     }
 
     if ( $#dstPart > 0 ) {
-        $endPointPair .= "        <nmwgt:dst type=\"ipv" . $choice . "\" value=\"" . $dstPart[0] . "\" port=\"" . $dstPart[1] . "\" />\n";
+        $endPointPair .= "        <nmwgt:dst type=\"" . $self->addressType( { address => $dstPart[0] } ) . "\" value=\"" . $dstPart[0] . "\" port=\"" . $dstPart[1] . "\" />\n";
     }
     else {
-        $endPointPair .= "        <nmwgt:dst type=\"ipv" . $choice . "\" value=\"" . $dstPart[0] . "\" />\n";
+        $endPointPair .= "        <nmwgt:dst type=\"" . $self->addressType( { address => $dstPart[0] } ) . "\" value=\"" . $dstPart[0] . "\" />\n";
     }
     $endPointPair .= "      </nmwgt:endPointPair>\n";
     return $endPointPair;
 }
 
+=head2 addressType($self, {  address } )
+
+Return the proper type of address (ipv4, ipv6, hostname)
+
+=cut
+
+sub addressType {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { address => 1 } ); 
+    if ( is_ipv4( $parameters->{address} ) ) {
+        return "ipv4";
+    }
+    elsif ( &Net::IPv6Addr::is_ipv6( $parameters->{address} ) ) {
+        return "ipv6";
+    }
+    return "hostname";
+}
+
 =head2 confHierarchy($self, {  conf, type, variable } )
 
-Return the properl member from the conf Hierarchy.
+Return the propel member from the conf Hierarchy.
 
 =cut
 
@@ -812,7 +835,7 @@ sub registerLS {
 =head2 handleMessageBegin($self, { ret_message, messageId, messageType, msgParams, request, retMessageType, retMessageNamespaces })
 
 Stub function that is currently unused.  Will be used to interact with the 
-daemon's message handler.
+daemons message handler.
 
 =cut
 
@@ -837,7 +860,7 @@ sub handleMessageBegin {
 =head2 handleMessageEnd($self, { ret_message, messageId })
 
 Stub function that is currently unused.  Will be used to interact with the 
-daemon's message handler.
+daemons message handler.
 
 =cut
 
@@ -856,7 +879,7 @@ sub handleMessageEnd {
 
 =head2 handleEvent($self, { output, messageId, messageType, messageParameters, eventType, subject, filterChain, data, rawRequest, doOutputMetadata })
 
-Current workaround to the daemon's message handler.  All messages that enter
+Current workaround to the daemons message handler.  All messages that enter
 will be routed based on the message type.  The appropriate solution to this
 problem is to route on eventType and message type and will be implemented in
 future releases.
@@ -1234,15 +1257,11 @@ sub metadataKeyRetrieveMetadataData {
     my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
     foreach my $e ( $eventTypes->get_nodelist ) {
         my $value = extract( $e, 0 );
-        if ( $value ) {
-            $et{$value} = 1;
-        }
+        $et{$value} = 1 if $value;
     }
     foreach my $se ( $supportedEventTypes->get_nodelist ) {
         my $value = extract( $se, 0 );
-        if ( $value ) {
-            $et{$value} = 1;
-        }
+        $et{$value} = 1 if $value;
     }
 
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
@@ -1521,9 +1540,7 @@ sub setupDataRetrieveKey {
     my $l_supportedEventTypes = find( $storedKey, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
     foreach my $se ( $l_supportedEventTypes->get_nodelist ) {
         my $value = extract( $se, 0 );
-        if ( $value ) {
-            $l_et{$value} = 1;
-        }
+        $l_et{$value} = 1 if $value;
     }
 
     $mdId = "metadata." . genuid();
@@ -1598,15 +1615,11 @@ sub setupDataRetrieveMetadataData {
     my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
     foreach my $e ( $eventTypes->get_nodelist ) {
         my $value = extract( $e, 0 );
-        if ( $value ) {
-            $et{$value} = 1;
-        }
+        $et{$value} = 1 if $value;
     }
     foreach my $se ( $supportedEventTypes->get_nodelist ) {
         my $value = extract( $se, 0 );
-        if ( $value ) {
-            $et{$value} = 1;
-        }
+        $et{$value} = 1 if $value;
     }
 
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
@@ -1667,15 +1680,11 @@ sub setupDataRetrieveMetadataData {
             my $l_supportedEventTypes = find( $md, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
             foreach my $e ( $l_eventTypes->get_nodelist ) {
                 my $value = extract( $e, 0 );
-                if ( $value ) {
-                    $l_et{$value} = 1;
-                }
+                $l_et{$value} = 1 if $value;
             }
             foreach my $se ( $l_supportedEventTypes->get_nodelist ) {
                 my $value = extract( $se, 0 );
-                if ( $value ) {
-                    $l_et{$value} = 1;
-                }
+                $l_et{$value} = 1 if $value;
             }
 
             my %hash = ();
@@ -2061,12 +2070,12 @@ __END__
 
 L<Log::Log4perl>, L<Module::Load>, L<Digest::MD5>, L<English>,
 L<Params::Validate>, L<Sys::Hostname>, L<Fcntl>, L<Date::Manip>,
-L<Math::BigInt>, L<perfSONAR_PS::Config::OWP>,
-L<perfSONAR_PS::Config::OWP::Utils>, L<perfSONAR_PS::Services::MA::General>,
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>,
-L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::Error_compat>,
-L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::SQL>,
-L<perfSONAR_PS::Utils::ParameterValidation>
+L<Math::BigInt>, L<Data::Validate::IP>, L<Net::IPv6Addr>,
+L<perfSONAR_PS::Config::OWP>,L<perfSONAR_PS::Config::OWP::Utils>,
+L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
+L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>,
+L<perfSONAR_PS::Error_compat>, L<perfSONAR_PS::DB::File>,
+L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::Utils::ParameterValidation>
 
 To join the 'perfSONAR Users' mailing list, please visit:
 
