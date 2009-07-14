@@ -75,6 +75,7 @@ my %ls_namespaces = (
     nmtm          => "http://ggf.org/ns/nmwg/time/2.0/",
     ifevt         => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
     iperf         => "http://ggf.org/ns/nmwg/tools/iperf/2.0/",
+    achievable    => "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0",    
     bwctl         => "http://ggf.org/ns/nmwg/tools/bwctl/2.0/",
     owamp         => "http://ggf.org/ns/nmwg/tools/owamp/2.0/",
     netutil       => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",

@@ -62,27 +62,28 @@ use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::Utils::ParameterValidation;
 
 my %ma_namespaces = (
-    nmwg      => "http://ggf.org/ns/nmwg/base/2.0/",
-    nmtm      => "http://ggf.org/ns/nmwg/time/2.0/",
-    ifevt     => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
-    iperf     => "http://ggf.org/ns/nmwg/tools/iperf/2.0/",
-    bwctl     => "http://ggf.org/ns/nmwg/tools/bwctl/2.0/",
-    owd       => "http://ggf.org/ns/nmwg/characteristic/delay/one-way/20070914/",
-    summary   => "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921/",
-    owamp     => "http://ggf.org/ns/nmwg/tools/owamp/2.0/",
-    select    => "http://ggf.org/ns/nmwg/ops/select/2.0/",
-    average   => "http://ggf.org/ns/nmwg/ops/average/2.0/",
-    perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
-    psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/",
-    nmwgt     => "http://ggf.org/ns/nmwg/topology/2.0/",
-    nmwgtopo3 => "http://ggf.org/ns/nmwg/topology/base/3.0/",
-    nmtb      => "http://ogf.org/schema/network/topology/base/20070828/",
-    nmtl2     => "http://ogf.org/schema/network/topology/l2/20070828/",
-    nmtl3     => "http://ogf.org/schema/network/topology/l3/20070828/",
-    nmtl4     => "http://ogf.org/schema/network/topology/l4/20070828/",
-    nmtopo    => "http://ogf.org/schema/network/topology/base/20070828/",
-    nmtb      => "http://ogf.org/schema/network/topology/base/20070828/",
-    nmwgr     => "http://ggf.org/ns/nmwg/result/2.0/"
+    nmwg       => "http://ggf.org/ns/nmwg/base/2.0/",
+    nmtm       => "http://ggf.org/ns/nmwg/time/2.0/",
+    ifevt      => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
+    iperf      => "http://ggf.org/ns/nmwg/tools/iperf/2.0/",
+    bwctl      => "http://ggf.org/ns/nmwg/tools/bwctl/2.0/",
+    owd        => "http://ggf.org/ns/nmwg/characteristic/delay/one-way/20070914/",
+    summary    => "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921/",
+    achievable => "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0",
+    owamp      => "http://ggf.org/ns/nmwg/tools/owamp/2.0/",
+    select     => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+    average    => "http://ggf.org/ns/nmwg/ops/average/2.0/",
+    perfsonar  => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
+    psservice  => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/",
+    nmwgt      => "http://ggf.org/ns/nmwg/topology/2.0/",
+    nmwgtopo3  => "http://ggf.org/ns/nmwg/topology/base/3.0/",
+    nmtb       => "http://ogf.org/schema/network/topology/base/20070828/",
+    nmtl2      => "http://ogf.org/schema/network/topology/l2/20070828/",
+    nmtl3      => "http://ogf.org/schema/network/topology/l3/20070828/",
+    nmtl4      => "http://ogf.org/schema/network/topology/l4/20070828/",
+    nmtopo     => "http://ogf.org/schema/network/topology/base/20070828/",
+    nmtb       => "http://ogf.org/schema/network/topology/base/20070828/",
+    nmwgr      => "http://ggf.org/ns/nmwg/result/2.0/"
 );
 
 =head2 init($self, $handler)
@@ -424,7 +425,7 @@ sub createStorage {
                     
                     $metadata .= "    </iperf:subject>\n";
                     $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>\n";
-                    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0</nmwg:eventType>\n";
+                    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>\n";
 
                     my $test        = $conf->get_val( MEASUREMENTSET => $m,    ATTR => "TESTSPEC" );
                     my $testTypeTCP = $conf->get_val( TESTSPEC       => $test, ATTR => "BWTCP" );

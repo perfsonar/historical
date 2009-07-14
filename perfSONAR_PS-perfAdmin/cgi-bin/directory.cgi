@@ -33,7 +33,7 @@ my %serviceMap = (
         "TYPE"      => "SNMP"
     },
     "list.psb.bwctl" => {
-        "EVENTTYPE" => [ "http://ggf.org/ns/nmwg/tools/iperf/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0" ],
+        "EVENTTYPE" => [ "http://ggf.org/ns/nmwg/tools/iperf/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" ],
         "TYPE"      => "PSB_BWCTL"
     },
     "list.psb.owamp" => {

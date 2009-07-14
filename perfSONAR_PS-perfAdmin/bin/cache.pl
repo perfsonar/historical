@@ -350,11 +350,11 @@ foreach my $h ( keys %hls_results ) {
                     if ( $value eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" ) {
                         $value = "http://ggf.org/ns/nmwg/tools/pinger/2.0";
                     }
-                    if ( $value eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" ) {
-                        $value = "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0";
+                    if ( $value eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" or $value eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0" ) {
+                        $value = "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0";
                     }
                     if ( $value eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" ) {
-                        $value = "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0";
+                        $value = "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0";
                     }
                     # more eventTypes as needed...
 
@@ -494,7 +494,7 @@ foreach my $et ( keys %list ) {
     elsif ( $et eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" or $et eq "http://ggf.org/ns/nmwg/tools/pinger/2.0" ) {
         $file = "list.pinger";
     }
-    elsif ( $et eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" or $et eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0" or $et eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" ) {
+    elsif ( $et eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" or $et eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0" or $et eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" or $et eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" ) {
         $file = "list.psb.bwctl";
     }
     elsif ( $et eq "http://ggf.org/ns/nmwg/tools/owamp/2.0" ) {
