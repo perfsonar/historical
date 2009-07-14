@@ -67,7 +67,9 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=purple>_*migrating to next release - 7/14*_</font> 	 
      * Temp fix applied, will address further in next release.
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=157 157] - Enhancement - High - _*Jeff*_ - bwcollector debugging support 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=174 174] - Defect - High - _*Jason*_ - windowSize not reported correctly for pSB 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=174 174] - Defect - High - _*Jason*_ - windowSize not reported correctly for pSB 
+     * <font color=yellow>_*In Progress - 7/14*_</font> 
+     * Will not be solved before JTs, but is started	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - Enhancement - High - _*Jason*_ - Address/Name Normalization in pSB 	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=185 185] - Defect - Critical - _*Jeff*_ - pS-B backend database sometimes includes 'port' in the host portion - need to normalize.
      * <font color=yellow>_*In Progress - 7/11*_</font> 
