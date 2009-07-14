@@ -62,6 +62,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=130 130] - Defect - Critical - _*Jason*_ - pSB Store File generation: Star vs Mesh 	 
      * <font color=green>_*Done - 7/14*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=131 131] - Defect - Low - _*Jason*_ - achievable bandwidth event type is mis-spelled achieveable 
+     * <font color=green>_*Done - 7/14*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=152 152] - Defect - High - _*Jason*_ - pSB MA gLS ERRORS 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=157 157] - Enhancement - High - _*Jeff*_ - bwcollector debugging support 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=174 174] - Defect - High - _*Jason*_ - windowSize not reported correctly for pSB 	 
