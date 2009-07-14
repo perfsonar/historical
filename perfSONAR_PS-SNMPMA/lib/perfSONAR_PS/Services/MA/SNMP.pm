@@ -105,9 +105,20 @@ sub init {
     $self->{LOGGER}    = get_logger( "perfSONAR_PS::Services::MA::SNMP" );
     $self->{NETLOGGER} = get_logger( "NetLogger" );
 
-    unless ( exists $self->{CONF}->{"root_hints_url"} and $self->{CONF}->{"root_hints_url"} ) {
-        $self->{CONF}->{"root_hints_url"} = "http://www.perfsonar.net/gls.root.hints";
-        $self->{LOGGER}->warn( "gLS Hints file not set, using default at \"http://www.perfsonar.net/gls.root.hints\"." );
+    unless ( exists $self->{CONF}->{"root_hints_url"} ) {
+        $self->{CONF}->{"root_hints_url"} = q{};     
+        $self->{LOGGER}->info( "gLS Hints file was not set, automatic discovery of hLS instance disabled." );
+    }
+
+    if ( exists $self->{CONF}->{"root_hints_file"} and $self->{CONF}->{"root_hints_file"} ) {
+        unless ( $self->{CONF}->{"root_hints_file"} =~ "^/" ) {
+            $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"root_hints_file"};
+            $self->{LOGGER}->debug( "Setting full path to 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
+        }
+    }
+    else {
+        $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/gls.root.hints";
+        $self->{LOGGER}->info( "Setting 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
     }
 
     unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_type"}
