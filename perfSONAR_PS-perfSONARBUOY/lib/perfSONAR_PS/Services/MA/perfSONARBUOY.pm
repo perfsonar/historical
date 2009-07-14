@@ -393,34 +393,35 @@ sub createStorage {
     my $id = 0;
     foreach my $m ( @measurementsets ) {
 
-        my $addrType = $conf->get_val( MEASUREMENTSET => $m, ATTR => "ADDRTYPE" );
-        my $group    = $conf->get_val( MEASUREMENTSET => $m, ATTR => "GROUP" );
-
-        my $center = $conf->get_val( GROUP => $group, ATTR => "HAUPTNODE" );
-        my @cn = ( "", $center );
+        my $addrType = $conf->get_val( MEASUREMENTSET => $m,     ATTR => "ADDRTYPE" );
+        my $group    = $conf->get_val( MEASUREMENTSET => $m,     ATTR => "GROUP" );
+        my $measType = $conf->get_val( GROUP          => $group, ATTR => "GROUPTYPE" );
+        unless ( $measType eq "STAR" or $measType eq "MESH" ) {
+            $self->{LOGGER}->fatal( "Group has unsupported type '" . $measType . "', aborting." );
+            return -1;
+        }
         my @nodes = $conf->get_val( GROUP => $group, ATTR => "NODES" );
+        my $center = q{};
+        $center = $conf->get_val( GROUP => $group, ATTR => "HAUPTNODE" ) if $measType eq "STAR";
 
-        foreach my $c_n ( @cn ) {
+        foreach my $c_n ( @nodes ) {
             foreach my $n ( @nodes ) {
-                next if $n eq $center;
+                next if $c_n eq $n;
+
+                if ( $measType eq "STAR" ) {
+                    next unless $c_n eq $center or $n eq $center;
+                }
+
                 my $metadata = q{};
                 my $data     = q{};
 
                 $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
-
                 if ( $addrType =~ m/^BW/ ) {
-
-                    # bwctl metadata
-
                     $metadata .= "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject-" . $id . "\">\n";
-
-                    if ( not $c_n ) {
-                        $metadata .= $self->generateStoreEndPointPair( { conf => $conf, type => $addrType, center => $center, n => $n } );
-                    }
-                    else {
-                        $metadata .= $self->generateStoreEndPointPair( { conf => $conf, type => $addrType, center => $n, n => $center } );
-                    }
-
+                    
+                    
+                    $metadata .= $self->generateStoreEndPointPair( { conf => $conf, type => $addrType, center => $c_n, n => $n } );
+                    
                     $metadata .= "    </iperf:subject>\n";
                     $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>\n";
                     $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0</nmwg:eventType>\n";
@@ -449,29 +450,17 @@ sub createStorage {
                         $metadata .= $self->generateStoreParameters( { conf => $conf, paramHash => \%udpHash, test => $test, counter => $id } );
                     }
                     $metadata .= "  </nmwg:metadata>\n";
-
-                    $data .= "  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"data-" . $id . "\" metadataIdRef=\"metadata-" . $id . "\">\n";
-                    $data .= "    <nmwg:key id=\"key-" . $id . "\">\n";
-                    $data .= "      <nmwg:parameters id=\"parameters-key-" . $id . "\">\n";
-                    $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:parameter>\n";
-                    $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0</nmwg:parameter>\n";
-                    $data .= "        <nmwg:parameter name=\"db\">" . $dbsourceBW . "</nmwg:parameter>\n";
-                    $data .= "        <nmwg:parameter name=\"user\">" . $dbuserBW . "</nmwg:parameter>\n" if $dbuserBW;
-                    $data .= "        <nmwg:parameter name=\"pass\">" . $dbpassBW . "</nmwg:parameter>\n" if $dbpassBW;
+                    $data .= $self->generateData( { id => $id, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );                                         
                 }
                 elsif ( $addrType =~ m/^LAT/ ) {
-
-                    # owamp metadata
-
                     $metadata .= "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
-
-                    if ( not $c_n ) {
-                        $metadata .= $self->generateStoreEndPointPair( { conf => $conf, type => $addrType, center => $center, n => $n } );
+                    if ( $measType eq "STAR" ) {
+                        $metadata .= $self->generateStoreEndPointPair( { conf => $conf, type => $addrType, center => $c_n, n => $n } );
+                        $metadata .= $self->generateStoreEndPointPair( { conf => $conf, type => $addrType, center => $n,   n => $c_n } );
                     }
                     else {
-                        $metadata .= $self->generateStoreEndPointPair( { conf => $conf, type => $addrType, center => $n, n => $center } );
+                        $metadata .= $self->generateStoreEndPointPair( { conf => $conf, type => $addrType, center => $c_n, n => $n } );
                     }
-
                     $metadata .= "    </owamp:subject>\n";
                     $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>\n";
                     $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:eventType>\n";
@@ -480,21 +469,8 @@ sub createStorage {
                     my %hash = ();
                     $metadata .= $self->generateStoreParameters( { conf => $conf, paramHash => \%hash, test => $test, counter => $id } );
                     $metadata .= "  </nmwg:metadata>\n";
-
-                    $data .= "  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"data-" . $id . "\" metadataIdRef=\"metadata-" . $id . "\">\n";
-                    $data .= "    <nmwg:key id=\"key-" . $id . "\">\n";
-                    $data .= "      <nmwg:parameters id=\"parameters-key-" . $id . "\">\n";
-                    $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:parameter>\n";
-                    $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:parameter>\n";
-                    $data .= "        <nmwg:parameter name=\"db\">" . $dbsourceOWP . "</nmwg:parameter>\n";
-                    $data .= "        <nmwg:parameter name=\"user\">" . $dbuserOWP . "</nmwg:parameter>\n" if $dbuserOWP;
-                    $data .= "        <nmwg:parameter name=\"pass\">" . $dbpassOWP . "</nmwg:parameter>\n" if $dbpassOWP;
+                    $data .= $self->generateData( { id => $id, db => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
                 }
-
-                $data .= "        <nmwg:parameter name=\"type\">mysql</nmwg:parameter>\n";
-                $data .= "      </nmwg:parameters>\n";
-                $data .= "    </nmwg:key>\n";
-                $data .= "  </nmwg:data>\n";
 
                 if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
                     my $dHash  = md5_hex( $data );
@@ -527,7 +503,6 @@ sub createStorage {
                 $id++;
             }
         }
-
     }
 
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
@@ -566,6 +541,31 @@ sub createStorage {
         return -1;
     }
     return 0;
+}
+
+=head2 generateData( $self, { id => 1, db => 1, user => 0, pass => 0 } )
+
+Given some parameters for the key element, generate a data block.
+
+=cut
+
+sub generateData {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { id => 1, db => 1, user => 0, pass => 0 } );
+    my $data = q{};
+    $data .= "  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"data-" . $parameters->{id} . "\" metadataIdRef=\"metadata-" . $parameters->{id} . "\">\n";
+    $data .= "    <nmwg:key id=\"key-" . $parameters->{id} . "\">\n";
+    $data .= "      <nmwg:parameters id=\"parameters-key-" . $parameters->{id} . "\">\n";
+    $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:parameter>\n";
+    $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:parameter>\n";
+    $data .= "        <nmwg:parameter name=\"db\">" . $parameters->{db} . "</nmwg:parameter>\n";
+    $data .= "        <nmwg:parameter name=\"user\">" . $parameters->{user} . "</nmwg:parameter>\n" if exists $parameters->{user} and $parameters->{user};
+    $data .= "        <nmwg:parameter name=\"pass\">" . $parameters->{pass} . "</nmwg:parameter>\n" if exists $parameters->{pass} and $parameters->{pass};
+    $data .= "        <nmwg:parameter name=\"type\">mysql</nmwg:parameter>\n";
+    $data .= "      </nmwg:parameters>\n";
+    $data .= "    </nmwg:key>\n";
+    $data .= "  </nmwg:data>\n";
+    return $data;
 }
 
 =head2 generateStoreParameters($self, { conf, paramHash, test, counter } )
@@ -611,7 +611,7 @@ sub generateStoreEndPointPair {
 
     my @srcPart = ();
     my @dstPart = ();
-    my $src = $parameters->{conf}->get_val( NODE => $parameters->{center}, TYPE => $parameters->{type}, ATTR => "ADDR" );
+    my $src     = $parameters->{conf}->get_val( NODE => $parameters->{center}, TYPE => $parameters->{type}, ATTR => "ADDR" );
     if ( $src eq "1" ) {
         my @temp = $parameters->{conf}->get_val( NODE => $parameters->{center}, TYPE => $parameters->{type}, ATTR => "ADDR" );
         $src = $temp[0] if $temp[0];
@@ -619,7 +619,7 @@ sub generateStoreEndPointPair {
 
     my @cols = split( /:/, $src );
     if ( $#cols > 1 ) {
-        @srcPart = split( /\]/, $src );        
+        @srcPart = split( /\]/, $src );
         $srcPart[0] =~ s/^\[//;
         $srcPart[1] =~ s/^:// if $srcPart[1];
 
@@ -670,7 +670,7 @@ Return the proper type of address (ipv4, ipv6, hostname)
 
 sub addressType {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { address => 1 } ); 
+    my $parameters = validateParams( @args, { address => 1 } );
     if ( is_ipv4( $parameters->{address} ) ) {
         return "ipv4";
     }
