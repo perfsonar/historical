@@ -452,13 +452,13 @@ sub createStorage {
                     elsif ( $tspecSchema[ $b + 2 ] eq "report_interval" ) {
                         $content{"interval"}{"value"} = $result->[$a][$b];
                         $content{"interval"}{"units"} = "seconds";
-                    }                         
+                    }
                     elsif ( $tspecSchema[ $b + 2 ] eq "udp_bandwidth" ) {
                         $content{"bandwidthLimit"}{"value"} = $result->[$a][$b];
                         $content{"bandwidthLimit"}{"units"} = "bps";
                     }
                     elsif ( $tspecSchema[ $b + 2 ] eq "udp" ) {
-                        $content{"protocol"}{"units"} = q{};                    
+                        $content{"protocol"}{"units"} = q{};
                         if ( $result->[$a][$b] ) {
                             $content{"protocol"}{"value"} = "UDP";
                         }
@@ -466,13 +466,14 @@ sub createStorage {
                             $content{"protocol"}{"value"} = "TCP";
                         }
                     }
+
                     # XXX
                     # JZ - 7/14/09 - To be added when this is supported
                     #
                     #elsif ( $tspecSchema[ $b + 2 ] eq "test_interval" ) {
                     #    $content{"interval"}{"value"} = $result->[$a][$b];
                     #    $content{"interval"}{"units"} = "seconds";
-                    #}  
+                    #}
                 }
                 else {
                     $query2 .= $tspecSchema[ $b + 2 ] . " is NULL";
@@ -566,9 +567,9 @@ sub createStorage {
         $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
         $metadata .= $tspec{ $result->[$a][3] }{"xml"};
         $metadata .= "  </nmwg:metadata>\n";
-        
-        my @eT = ( "http://ggf.org/ns/nmwg/tools/iperf/2.0","http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" );        
-        $data     .= $self->generateData( { id => $id, testspec => $result->[$a][2],eT => \@eT, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
+
+        my @eT = ( "http://ggf.org/ns/nmwg/tools/iperf/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" );
+        $data .= $self->generateData( { id => $id, testspec => $result->[$a][2], eT => \@eT, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
 
         if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
             my $dHash  = md5_hex( $data );
@@ -653,7 +654,7 @@ sub generateParameters {
         foreach my $c ( keys %{ $parameters->{content} } ) {
             if ( exists $parameters->{content}->{$c}->{"value"} and $parameters->{content}->{$c}->{"value"} ) {
                 $p .= "      <nmwg:parameter name=\"" . $c . "\">" . $parameters->{content}->{$c}->{"value"} . "</nmwg:parameter>\n";
-                
+
                 # XXX
                 # JZ - 7/14/09 - do we want to cat the units on to this?
                 #
