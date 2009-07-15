@@ -397,10 +397,6 @@ sub createStorage {
     my $dbuserBW   = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBUSER" } );
     my $dbpassBW   = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBPASS" } );
 
-    my $dbsourceOWP = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBTYPE" } ) . ":" . $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBNAME" } ) . ":" . $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBHOST" } );
-    my $dbuserOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBUSER" } );
-    my $dbpassOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBPASS" } );
-
     my @dateSchema = ( "year", "month" );
     my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dateSchema, user => $dbuserBW, pass => $dbpassBW } );
     $datedb->openDB;
@@ -601,6 +597,22 @@ sub createStorage {
         }
         $id++;
     }
+
+
+
+
+# -----------------------------------
+# OWAMP section
+# -----------------------------------
+
+    my $dbsourceOWP = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBTYPE" } ) . ":" . $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBNAME" } ) . ":" . $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBHOST" } );
+    my $dbuserOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBUSER" } );
+    my $dbpassOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBPASS" } );
+
+
+
+
+
 
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         if ( $errorFlag ) {
