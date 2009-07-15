@@ -68,13 +68,15 @@ The following outline some exceptions to the overall release process.  Also see 
      * Temp fix applied, will address further in next release.
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=157 157] - Enhancement - High - _*Jeff*_ - bwcollector debugging support 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=174 174] - Defect - High - _*Jason*_ - windowSize not reported correctly for pSB 
-     * <font color=yellow>_*In Progress - 7/14*_</font> 
-     * Will not be solved before JTs, but is started	 
+     * <font color=purple>_*In Progress - 7/14*_</font> 
+     * Started - require some cleanup and need to restart the service periodically on the disk to recognize new data.
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - Enhancement - High - _*Jason*_ - Address/Name Normalization in pSB 	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=185 185] - Defect - Critical - _*Jeff*_ - pS-B backend database sometimes includes 'port' in the host portion - need to normalize.
      * <font color=yellow>_*In Progress - 7/11*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=192 192] - Defect - High - _*Jeff*_ - SIGHUP fails to restart powmaster
-     * <font color=yellow>_*In Progress - 7/13*_</font> 
+     * <font color=green>_*Done - 7/14*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=194 194] - Defect - High - _*Jeff*_ - signal handling needs to be corrected in bwcollector and bwmaster
+     * <font color=yellow>_*In progress - 7/14*_</font> 
  * _*PingER*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=181 181] - _*Maxim*_ - ~~PingER MA server errors~~
      * <font color=green>_*Fixed - 6/8*_</font>
