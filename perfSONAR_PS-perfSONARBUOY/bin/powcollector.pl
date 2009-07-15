@@ -1444,7 +1444,7 @@ REQ_LOOP:
         %req = read_req( $fh, $md5 );
         last if ( $die );
 
-        $req{'REQUEST_HOST'} = $nname;
+        $req{'REQUEST_HOST'} = $fh->peerhost;
         last if ( $die );
         die "\$@ = $@" if ( $@ );
 

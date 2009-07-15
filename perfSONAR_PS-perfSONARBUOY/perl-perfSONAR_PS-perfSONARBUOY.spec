@@ -3,8 +3,10 @@
 
 # init scripts must be located in the 'scripts' directory
 %define init_script_ma perfsonarbuoy_ma
-%define init_script_collector perfsonarbuoy_collector
-%define init_script_master perfsonarbuoy_master
+%define init_script_bw_collector perfsonarbuoy_bw_collector
+%define init_script_bw_master perfsonarbuoy_bw_master
+%define init_script_owp_collector perfsonarbuoy_owp_collector
+%define init_script_owp_master perfsonarbuoy_owp_master
 
 %define disttag pSPS
 
@@ -125,11 +127,17 @@ mkdir -p $RPM_BUILD_ROOT/etc/init.d
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_ma} > scripts/%{init_script_ma}.new
 install -m 755 scripts/%{init_script_ma}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_ma}
 
-awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_collector} > scripts/%{init_script_collector}.new
-install -m 755 scripts/%{init_script_collector}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_collector}
+awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_bw_collector} > scripts/%{init_script_bw_collector}.new
+install -m 755 scripts/%{init_script_bw_collector}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_bw_collector}
 
-awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_master} > scripts/%{init_script_master}.new
-install -m 755 scripts/%{init_script_master}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_master}
+awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_bw_master} > scripts/%{init_script_bw_master}.new
+install -m 755 scripts/%{init_script_bw_master}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_bw_master}
+
+awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_owp_collector} > scripts/%{init_script_owp_collector}.new
+install -m 755 scripts/%{init_script_owp_collector}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_owp_collector}
+
+awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_owp_master} > scripts/%{init_script_owp_master}.new
+install -m 755 scripts/%{init_script_owp_master}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_owp_master}
 
 %post server
 mkdir -p /var/log/perfsonar
@@ -140,7 +148,8 @@ mkdir -p /var/lib/perfsonar/perfsonarbuoy_ma/owamp
 chown -R perfsonar:perfsonar /var/lib/perfsonar
 
 /sbin/chkconfig --add perfsonarbuoy_ma
-/sbin/chkconfig --add perfsonarbuoy_collector
+/sbin/chkconfig --add perfsonarbuoy_bw_collector
+/sbin/chkconfig --add perfsonarbuoy_owp_collector
 
 %post client
 mkdir -p /var/log/perfsonar
@@ -149,7 +158,8 @@ chown perfsonar:perfsonar /var/log/perfsonar
 mkdir -p /var/lib/perfsonar/perfsonarbuoy_ma
 chown -R perfsonar:perfsonar /var/lib/perfsonar
 
-/sbin/chkconfig --add perfsonarbuoy_master
+/sbin/chkconfig --add perfsonarbuoy_bw_master
+/sbin/chkconfig --add perfsonarbuoy_owp_master
 
 %post config
 
@@ -162,15 +172,18 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{install_base}/etc/daemon.conf
 %config(noreplace) %{install_base}/etc/daemon_logger.conf
 %{install_base}/bin/bwcollector.pl
+%{install_base}/bin/powcollector.pl
 %{install_base}/bin/configureDaemon.pl
 %{install_base}/bin/makeDBConfig.pl
 %{install_base}/bin/bwdb.pl
+%{install_base}/bin/owdb.pl
 %{install_base}/bin/daemon.pl
 %{install_base}/scripts/install_dependencies.sh
 %{install_base}/scripts/prepare_environment_server.sh
 %{install_base}/lib/*
 /etc/init.d/perfsonarbuoy_ma
-/etc/init.d/perfsonarbuoy_collector
+/etc/init.d/perfsonarbuoy_bw_collector
+/etc/init.d/perfsonarbuoy_owp_collector
 
 %files client
 %defattr(-,perfsonar,perfsonar,-)
@@ -178,10 +191,12 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{install_base}/etc/requests
 %{install_base}/bin/client.pl
 %{install_base}/bin/bwmaster.pl
+%{install_base}/bin/powmaster.pl
 %{install_base}/scripts/install_dependencies.sh
 %{install_base}/scripts/prepare_environment_client.sh
 %{install_base}/lib/*
-/etc/init.d/perfsonarbuoy_master
+/etc/init.d/perfsonarbuoy_bw_master
+/etc/init.d/perfsonarbuoy_owp_master
 
 %files config
 %defattr(-,perfsonar,perfsonar,-)
@@ -192,15 +207,19 @@ rm -rf $RPM_BUILD_ROOT
 if [ $1 -eq 0 ]; then
     /sbin/chkconfig --del perfsonarbuoy_ma
     /sbin/service perfsonarbuoy_ma stop
-    /sbin/chkconfig --del perfsonarbuoy_collector
-    /sbin/service perfsonarbuoy_collector stop
+    /sbin/chkconfig --del perfsonarbuoy_bw_collector
+    /sbin/service perfsonarbuoy_bw_collector stop
+    /sbin/chkconfig --del perfsonarbuoy_owp_collector
+    /sbin/service perfsonarbuoy_owp_collector stop
 fi
 
 %preun client
 
 if [ $1 -eq 0 ]; then
-    /sbin/chkconfig --del perfsonarbuoy_master
-    /sbin/service perfsonarbuoy_master stop
+    /sbin/chkconfig --del perfsonarbuoy_bw_master
+    /sbin/service perfsonarbuoy_bw_master stop
+    /sbin/chkconfig --del perfsonarbuoy_owp_master
+    /sbin/service perfsonarbuoy_owp_master stop
 fi
 
 %changelog
