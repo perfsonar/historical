@@ -1,35 +1,23 @@
 #!/usr/bin/perl -w
 # ex: set tabstop=4 ai expandtab softtabstop=4 shiftwidth=4:
 # -*- mode: c-basic-indent: 4; tab-width: 4; indent-tabs-mode: nil -*-
-#
-#      $Id$
-#
-#########################################################################
-#                                                                       #
-#                       Copyright (C)  2009                             #
-#                           Internet2                                   #
-#                       All Rights Reserved                             #
-#                                                                       #
-#########################################################################
-#
-#    File:          owdb.pl
-#
-#    Author:        Jeff W. Boote
-#                   Internet2
-#
-#    Date:          Tue Jun 30 12:45:58 MDT 2009
-#
-#    Description:    
-#
-#    Usage:
-#
-#    Environment:
-#
-#    Files:
-#
-#    Options:
-#
+
 use strict;
+use warnings;
+
+our $VERSION = 3.1;
+
+=head1 NAME
+
+owdb.pl - Create OWAMP database for perfSONAR-BUOY
+
+=head1 DESCRIPTION
+
+Given some basic parameters, create the database for the OWAMP data portion of
+perfSONAR-BUOY collection.
+
+=cut
+
 use FindBin;
 
 # BEGIN FIXMORE HACK - DO NOT EDIT
@@ -71,26 +59,26 @@ my $options = join '', values %options;
 my %setopts;
 getopts( $options, \%setopts );
 
-foreach (keys %setopts){
-    $amidefaults{ $optnames{$_} } = $setopts{$_} if(defined($setopts{$_}));
+foreach ( keys %setopts ) {
+    $amidefaults{ $optnames{$_} } = $setopts{$_} if ( defined( $setopts{$_} ) );
 }
 
-if (!exists($amidefaults{'INITDB'}) && !exists($amidefaults{'DELETEDB'})){
+if ( !exists( $amidefaults{'INITDB'} ) && !exists( $amidefaults{'DELETEDB'} ) ) {
     die "$0: Must specify either -i or -x (argument is db admin account)\n";
 }
 
 # Now - fetch the full configuration
-my $conf = new OWP::Conf(%amidefaults);
+my $conf = new OWP::Conf( %amidefaults );
 
 #
 # Fetch values that *must* be set so we fail as early as possible.
 #
-my $dbuser   = $conf->must_get_val( ATTR => 'CentralDBUser',Type=>'OWP' );
-my $dbpass   = $conf->must_get_val( ATTR => 'CentralDBPass',Type=>'OWP' );
-my $dbdriver = $conf->must_get_val( ATTR => 'CentralDBType',Type=>'OWP' );
-my $dbname   = $conf->must_get_val( ATTR => 'CentralDBName',Type=>'OWP' );
+my $dbuser   = $conf->must_get_val( ATTR => 'CentralDBUser', Type => 'OWP' );
+my $dbpass   = $conf->must_get_val( ATTR => 'CentralDBPass', Type => 'OWP' );
+my $dbdriver = $conf->must_get_val( ATTR => 'CentralDBType', Type => 'OWP' );
+my $dbname   = $conf->must_get_val( ATTR => 'CentralDBName', Type => 'OWP' );
 my $dbsource = $dbdriver . ":" . $dbname;
-my $dbhost = $conf->get_val( ATTR => 'CentralDBHost',Type=>'OWP' ) || "localhost";
+my $dbhost = $conf->get_val( ATTR => 'CentralDBHost', Type => 'OWP' ) || "localhost";
 
 $dbsource .= ":" . $dbhost;
 
@@ -104,12 +92,16 @@ print "Initializing $dbsource\n";
 #
 # Connect to database
 #
-my $dbh = DBI->connect($dbsource,$dbuser, $dbpass,
-                        {   RaiseError => 0,
-                            PrintError => 1
-                        }) || die "Couldn't connect to database";
+my $dbh = DBI->connect(
+    $dbsource,
+    $dbuser, $dbpass,
+    {
+        RaiseError => 0,
+        PrintError => 1
+    }
+) || die "Couldn't connect to database";
 
-my ($sql);
+my ( $sql );
 
 #
 # Setup table to keep track of the tables (time periods) that are
@@ -121,9 +113,49 @@ $sql = "CREATE TABLE IF NOT EXISTS DATES (
         day INTEGER NOT NULL,
         PRIMARY KEY (year,month,day)
         )";
-$dbh->do($sql) || die "Creating Dates table";
-
+$dbh->do( $sql ) || die "Creating Dates table";
 
 $dbh->disconnect;
 
 exit;
+
+__END__
+
+=head1 SEE ALSO
+
+L<FindBin>, 
+
+To join the 'perfSONAR Users' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/perfsonar-ps-users
+
+The perfSONAR-PS subversion repository is located at:
+
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Jeff W. Boote <boote@internet2.edu>
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2004-2009, Internet2
+
+All rights reserved.
+
+=cut

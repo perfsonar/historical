@@ -1,32 +1,22 @@
 #!/usr/bin/perl -w
-#
-#      $Id$
-#
-#########################################################################
-#
-#			   Copyright (C)  2002-2009
-#	     			Internet2
-#			   All Rights Reserved
-#
-#########################################################################
-#
-#	File:		powmaster.pl
-#
-#	Author:		Jeff W. Boote  - Internet2
-#	                Jason Zurawski - Internet2
-#
-#	Date:		Mon Sep 30 16:38:32 MDT 2002
-#
-#	Description:
-#
-#	Usage:
-#
-#	Environment:
-#
-#	Files:
-#
-#	Options:
+
 use strict;
+use warnings;
+
+our $VERSION = 3.1;
+
+=head1 NAME
+
+powmaster.pl - Control OWAMP measurement in perfSONAR-BUOY
+
+=head1 DESCRIPTION
+
+Using the owmesh.conf file as a guide, perform specified measurements and store
+the results in a database.  This script is to be run on machines that will
+perform measurements.  
+
+=cut
+
 use FindBin;
 
 # BEGIN FIXMORE HACK - DO NOT EDIT
@@ -63,6 +53,7 @@ use Sys::Syslog;
 use Digest::MD5;
 use Socket;
 use IO::Socket;
+
 #use DB_File;
 use Fcntl qw(:flock);
 
@@ -102,25 +93,25 @@ if ( defined( $amidefaults{"LOCALNODES"} ) ) {
     $tnodes = $amidefaults{"LOCALNODES"};
     if ( $tnodes =~ /:/ ) {
         @tarr = split ':', $tnodes;
-        foreach (@tarr) {
+        foreach ( @tarr ) {
             tr/a-z/A-Z/;
         }
     }
     else {
         $tnodes =~ tr/a-z/A-Z/;
-        @tarr = ($tnodes);
+        @tarr = ( $tnodes );
     }
 
     $amidefaults{"LOCALNODES"} = \@tarr;
 }
 
-my $conf  = new OWP::Conf(%amidefaults);
+my $conf  = new OWP::Conf( %amidefaults );
 my $ttype = 'OWP';
 
 my @localnodes = $conf->get_val( ATTR => 'LOCALNODES' );
 if ( !defined( $localnodes[0] ) ) {
     my $me = $conf->must_get_val( ATTR => 'NODE' );
-    @localnodes = ($me);
+    @localnodes = ( $me );
 }
 
 my $datadir = $conf->must_get_val( ATTR => "DataDir", TYPE => $ttype );
@@ -133,16 +124,16 @@ my $hup  = $conf->get_val( ATTR => 'HUP' );
 if ( $kill || $hup ) {
     my $pidfile = new FileHandle "$datadir/powmaster.pid", O_RDONLY;
     die "Unable to open($datadir/powmaster.pid): $!"
-        unless ($pidfile);
+        unless ( $pidfile );
 
     my $pid = <$pidfile>;
     die "Unable to retrieve PID from $datadir/powmaster.pid"
-        if !defined($pid);
+        if !defined( $pid );
     chomp $pid;
-    my $sig = ($kill) ? 'TERM' : 'HUP';
+    my $sig = ( $kill ) ? 'TERM' : 'HUP';
     if ( kill( $sig, $pid ) ) {
         warn "Sent $sig to $pid\n";
-        exit(0);
+        exit( 0 );
     }
     die "Unable to send $sig to $pid: $!";
 }
@@ -158,14 +149,14 @@ setids(
 my $facility = $conf->must_get_val( ATTR => 'SyslogFacility', TYPE => $ttype );
 
 # setup syslog
-local (*MYLOG);
+local ( *MYLOG );
 my $slog = tie *MYLOG, 'OWP::Syslog',
     facility   => $facility,
     log_opts   => 'pid',
     setlogsock => 'unix';
 
 # make die/warn goto syslog, and also to STDERR.
-$slog->HandleDieWarn(*STDERR);
+$slog->HandleDieWarn( *STDERR );
 undef $slog;    # Don't keep tie'd ref's around unless you need them...
 
 #
@@ -181,23 +172,28 @@ my $sumsuffix = $conf->must_get_val( ATTR => "SummarySuffix", TYPE => $ttype );
 #
 # Central server values
 #
-my $secretname   = $conf->must_get_val(
-                                ATTR => 'SECRETNAME',
-                                TYPE => $ttype );
-my $secret       = $conf->must_get_val(
-                                ATTR => $secretname,
-                                TYPE => $ttype );
+my $secretname = $conf->must_get_val(
+    ATTR => 'SECRETNAME',
+    TYPE => $ttype
+);
+my $secret = $conf->must_get_val(
+    ATTR => $secretname,
+    TYPE => $ttype
+);
 my $fullcentral_host = $conf->must_get_val(
-                                ATTR => 'CentralHost',
-                                TYPE => $ttype );
-my $timeout      = $conf->must_get_val(
-                                ATTR => 'SendTimeout',
-                                TYPE => $ttype );
+    ATTR => 'CentralHost',
+    TYPE => $ttype
+);
+my $timeout = $conf->must_get_val(
+    ATTR => 'SendTimeout',
+    TYPE => $ttype
+);
 
-my ($central_host,$central_port) = split_addr($fullcentral_host);
-if (!defined($central_port)){
+my ( $central_host, $central_port ) = split_addr( $fullcentral_host );
+if ( !defined( $central_port ) ) {
     die "Invalid CentralHost value: $fullcentral_host";
 }
+
 #
 # local data/path information
 #
@@ -214,30 +210,31 @@ my ( %pid2info, $dir );
 # host.
 #
 my @powtests = $conf->get_list(
-    LIST    => 'TESTSPEC',
-    ATTR    => 'TOOL',
-    VALUE   => 'powstream');
+    LIST  => 'TESTSPEC',
+    ATTR  => 'TOOL',
+    VALUE => 'powstream'
+);
 
-if ( defined($debug) ) {
-    warn "Found " . scalar(@powtests) . " powstream related TESTSPEC blocks";
+if ( defined( $debug ) ) {
+    warn "Found " . scalar( @powtests ) . " powstream related TESTSPEC blocks";
 }
-
 
 #
 # now find the actual measurement sets
 #
-my (@meassets,$ttest);
-foreach $ttest (@powtests){
-    push @meassets, $conf->get_list(
-        LIST    => 'MEASUREMENTSET',
-        ATTR    => 'TESTSPEC',
-        VALUE   => $ttest);
+my ( @meassets, $ttest );
+foreach $ttest ( @powtests ) {
+    push @meassets,
+        $conf->get_list(
+        LIST  => 'MEASUREMENTSET',
+        ATTR  => 'TESTSPEC',
+        VALUE => $ttest
+        );
 }
 
-if ( defined($debug) ) {
-    warn "Found " . scalar(@meassets) . " powstream related MEASUREMENTSET blocks";
+if ( defined( $debug ) ) {
+    warn "Found " . scalar( @meassets ) . " powstream related MEASUREMENTSET blocks";
 }
-
 
 #
 # setup loop - build the directories needed for holding temporary data.
@@ -246,32 +243,33 @@ if ( defined($debug) ) {
 my ( $mset, $myaddr, $oaddr, $raddr, $saddr );
 my ( $recv, $send );
 my @dirlist;
-foreach $mset (@meassets) {
+foreach $mset ( @meassets ) {
     my $me;
 
     my $msetdesc = new OWP::MeasSet(
-        CONF            => $conf,
-        MEASUREMENTSET  => $mset);
+        CONF           => $conf,
+        MEASUREMENTSET => $mset
+    );
 
     # skip msets that are invoked centrally
     # XXX: Need to implement this in powcollector still!
-    next if ( $msetdesc->{'CENTRALLY_INVOLKED'});
+    next if ( $msetdesc->{'CENTRALLY_INVOLKED'} );
 
-    foreach $me (@localnodes) {
+    foreach $me ( @localnodes ) {
 
-        if(defined($conf->get_val(NODE=>$me,ATTR=>'NOAGENT'))){
+        if ( defined( $conf->get_val( NODE => $me, ATTR => 'NOAGENT' ) ) ) {
             die "configuration specifies NODE=$me should not run an agent";
         }
 
         # determine path for recv-relative tests started from this host
-        foreach $recv ( keys %{ $msetdesc->{'RECEIVERS'} }){
+        foreach $recv ( keys %{ $msetdesc->{'RECEIVERS'} } ) {
 
             #
             # If recv is not the localnode currently doing, skip.
             #
             next if ( $me ne $recv );
 
-            foreach $send ( @{ $msetdesc->{'RECEIVERS'}->{$recv}} ) {
+            foreach $send ( @{ $msetdesc->{'RECEIVERS'}->{$recv} } ) {
 
                 # bwctl always excludes self tests, but powstream doesn't.
                 # XXX: Need to add a 'tool' definition somewhere where
@@ -285,7 +283,7 @@ foreach $mset (@meassets) {
 
         # determine path for send-relative tests started from this host
         # (If the remote host does not run powmaster.)
-        foreach $send ( keys %{ $msetdesc->{'SENDERS'} }){
+        foreach $send ( keys %{ $msetdesc->{'SENDERS'} } ) {
 
             #
             #
@@ -293,14 +291,14 @@ foreach $mset (@meassets) {
             #
             next if ( $me ne $send );
 
-            foreach $recv ( @{ $msetdesc->{'SENDERS'}->{$send}} ) {
+            foreach $recv ( @{ $msetdesc->{'SENDERS'}->{$send} } ) {
 
                 # bwctl always excludes self tests, but powstream doesn't.
                 # XXX: tool def for self-tests again... see above.
                 #next if ( $recv eq $send );
 
                 # run 'sender' side tests for noagent receivers
-                next if (!defined($conf->get_val(NODE=>$recv,ATTR=>'NOAGENT')));
+                next if ( !defined( $conf->get_val( NODE => $recv, ATTR => 'NOAGENT' ) ) );
 
                 push @dirlist, "$mset/$recv/$send";
             }
@@ -312,10 +310,11 @@ die "No tests to be run by this host." if ( !scalar @dirlist );
 mkpath( [ map { join '/', $datadir, $_ } @dirlist ], 0, 0775 );
 
 chdir $datadir or die "Unable to chdir to $datadir";
+
 # Wait for chdir to $datadir to test powcmd -x so relative paths checked
 die "$powcmd not executable" if ( !-x $powcmd );
 
-my ($MD5) = new Digest::MD5
+my ( $MD5 ) = new Digest::MD5
     or die "Unable to create md5 context";
 
 if ( !$foreground ) {
@@ -326,18 +325,19 @@ if ( !$foreground ) {
 # setup pipe - read side used by send_data, write side used by all
 # powsteam children.
 my ( $rfd, $wfd ) = POSIX::pipe();
-local (*WRITEPIPE);
+local ( *WRITEPIPE );
 open( WRITEPIPE, ">&=$wfd" ) || die "Can't fdopen write end of pipe";
 
 # setup signal handling before starting child processes to catch
 # SIG_CHLD
 my ( $reset, $death, $sigchld ) = ( 0, 0, 0 );
+
 # interrupt var is used to make signal handler throw a 'die'
 # so that perl doesn't restart interrupted system calls.
 my $interrupt = 0;
 
 sub catch_sig {
-    my ($signame) = @_;
+    my ( $signame ) = @_;
 
     return if !defined $signame;
 
@@ -371,7 +371,7 @@ $SIG{PIPE} = 'IGNORE';
 # and returns. (As powsteam finishes files, send_data adds each file
 # to it's work que.)
 my $pid = send_data( $conf, $rfd, @dirlist );
-@{ $pid2info{$pid} } = ("send_data");
+@{ $pid2info{$pid} } = ( "send_data" );
 
 #
 # powstream setup loop - creates a powstream process for each path that should
@@ -383,29 +383,31 @@ my $pid = send_data( $conf, $rfd, @dirlist );
 # at the database.
 # (powstream outputs the filenames it produces on stdout.)
 #
-foreach $mset (@meassets) {
+foreach $mset ( @meassets ) {
     my $me;
 
     my $msetdesc = new OWP::MeasSet(
-        CONF            => $conf,
-        MEASUREMENTSET  => $mset);
+        CONF           => $conf,
+        MEASUREMENTSET => $mset
+    );
 
     # skip msets that are invoked centrally
     # XXX: Needs to be implemented in collector!
-    next if ( $msetdesc->{'CENTRALLY_INVOLKED'});
+    next if ( $msetdesc->{'CENTRALLY_INVOLKED'} );
 
-    if ( defined($debug) ) {
+    if ( defined( $debug ) ) {
         warn "Starting MeasurementSet=$mset\n";
     }
 
-    foreach $me (@localnodes) {
+    foreach $me ( @localnodes ) {
 
-        if(defined($conf->get_val(NODE=>$me,ATTR=>'NOAGENT'))){
+        if ( defined( $conf->get_val( NODE => $me, ATTR => 'NOAGENT' ) ) ) {
             die "configuration specifies NODE=$me should not run an agent";
         }
 
         # determine addresses for recv-relative tests started from this host
-        foreach $recv ( keys %{ $msetdesc->{'RECEIVERS'} }){
+        foreach $recv ( keys %{ $msetdesc->{'RECEIVERS'} } ) {
+
             #
             # If recv is not the localnode currently doing, skip.
             #
@@ -421,18 +423,18 @@ foreach $mset (@meassets) {
                 )
             );
 
-            my ($rhost,$rport) = split_addr($myaddr);
-            if (!defined($rhost)){
+            my ( $rhost, $rport ) = split_addr( $myaddr );
+            if ( !defined( $rhost ) ) {
                 die "Invalid owampd addr:port value: $myaddr";
             }
-            if (!defined($rport)){
+            if ( !defined( $rport ) ) {
                 $raddr = $rhost;
             }
-            else{
+            else {
                 $raddr = "[$rhost]:$rport";
             }
 
-            foreach $send ( @{ $msetdesc->{'RECEIVERS'}->{$recv}} ) {
+            foreach $send ( @{ $msetdesc->{'RECEIVERS'}->{$recv} } ) {
                 my $starttime;
 
                 # bwctl always excludes self tests, but powstream doesn't.
@@ -449,30 +451,29 @@ foreach $mset (@meassets) {
                     )
                 );
 
-                my ($shost,$sport) = split_addr($oaddr);
-                if (!defined($shost)){
+                my ( $shost, $sport ) = split_addr( $oaddr );
+                if ( !defined( $shost ) ) {
                     die "Invalid owampd addr:port value: $oaddr";
                 }
-                if (!defined($sport)){
+                if ( !defined( $sport ) ) {
                     $saddr = $shost;
                 }
-                else{
+                else {
                     $saddr = "[$shost]:$sport";
                 }
 
-                my($bindaddr) = $rhost;
+                my ( $bindaddr ) = $rhost;
 
-                warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined($debug) );
-                $starttime = OWP::Utils::time2owptime(time);
-                $pid = powstream($msetdesc, $me, $bindaddr, $send, $saddr, 0);
-                @{ $pid2info{$pid} } = ( "powstream", $starttime, $msetdesc,
-                    $bindaddr, $me, $raddr, $send, $saddr, 0 );
+                warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined( $debug ) );
+                $starttime = OWP::Utils::time2owptime( time );
+                $pid = powstream( $msetdesc, $me, $bindaddr, $send, $saddr, 0 );
+                @{ $pid2info{$pid} } = ( "powstream", $starttime, $msetdesc, $bindaddr, $me, $raddr, $send, $saddr, 0 );
             }
         }
 
         # determine path for send-relative tests started from this host
         # (If the remote host does not run bwmaster.)
-        foreach $send ( keys %{ $msetdesc->{'SENDERS'} }){
+        foreach $send ( keys %{ $msetdesc->{'SENDERS'} } ) {
 
             #
             # If send is not the localnode currently doing, skip.
@@ -490,18 +491,18 @@ foreach $mset (@meassets) {
                     )
                 )
             );
-            my ($shost,$sport) = split_addr($myaddr);
-            if (!defined($shost)){
+            my ( $shost, $sport ) = split_addr( $myaddr );
+            if ( !defined( $shost ) ) {
                 die "Invalid owampd addr:port value: $myaddr";
             }
-            if (!defined($sport)){
+            if ( !defined( $sport ) ) {
                 $saddr = $shost;
             }
-            else{
+            else {
                 $saddr = "[$shost]:$sport";
             }
 
-            foreach $recv ( @{ $msetdesc->{'SENDERS'}->{$send}} ) {
+            foreach $recv ( @{ $msetdesc->{'SENDERS'}->{$send} } ) {
                 my $starttime;
 
                 # bwctl always excludes self tests, but powstream doesn't.
@@ -509,7 +510,7 @@ foreach $mset (@meassets) {
                 # next if ( $recv eq $send );
 
                 # only run 'sender' side tests for noagent receivers
-                next if (!defined($conf->get_val(NODE=>$recv,ATTR=>'NOAGENT')));
+                next if ( !defined( $conf->get_val( NODE => $recv, ATTR => 'NOAGENT' ) ) );
 
                 next if (
                     !(
@@ -521,24 +522,23 @@ foreach $mset (@meassets) {
                     )
                 );
 
-                my ($rhost,$rport) = split_addr($oaddr);
-                if (!defined($rhost)){
+                my ( $rhost, $rport ) = split_addr( $oaddr );
+                if ( !defined( $rhost ) ) {
                     die "Invalid bwctld addr:port value: $oaddr";
                 }
-                if (!defined($rport)){
+                if ( !defined( $rport ) ) {
                     $raddr = $rhost;
                 }
-                else{
+                else {
                     $raddr = "[$rhost]:$rport";
                 }
 
-                my ($bindaddr) = $shost;
+                my ( $bindaddr ) = $shost;
 
-                warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined($debug) );
-                $starttime = OWP::Utils::time2owptime(time);
-                $pid = powstream($msetdesc, $me, $bindaddr, $recv, $raddr, 1);
-                @{ $pid2info{$pid} } = ( "powstream", $starttime, $msetdesc,
-                    $bindaddr, $me, $saddr, $recv, $raddr, 1 );
+                warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined( $debug ) );
+                $starttime = OWP::Utils::time2owptime( time );
+                $pid = powstream( $msetdesc, $me, $bindaddr, $recv, $raddr, 1 );
+                @{ $pid2info{$pid} } = ( "powstream", $starttime, $msetdesc, $bindaddr, $me, $saddr, $recv, $raddr, 1 );
 
             }
         }
@@ -551,7 +551,7 @@ foreach $mset (@meassets) {
 # a HUP to that powstream to make it reset tests with that node.
 # This loop also watches all child processes and restarts them as necessary.
 MESSAGE:
-while (1) {
+while ( 1 ) {
     my $funcname;
     my $fullmsg;
 
@@ -565,28 +565,25 @@ while (1) {
             $death++;
             warn "Exiting... Deleting sub-processes...\n";
             my $pidlist = join " ", keys %pid2info;
-            warn "Deleting: $pidlist" if ( defined($debug) );
+            warn "Deleting: $pidlist" if ( defined( $debug ) );
         }
-        $funcname = "kill";
+        $funcname  = "kill";
         $interrupt = 1;
-        eval {
-            kill 'TERM', keys %pid2info;
-        };
+        eval { kill 'TERM', keys %pid2info; };
         $interrupt = 0;
     }
-    elsif ($sigchld) {
+    elsif ( $sigchld ) {
         ;
     }
     else {
+
         # sleep until a signal wakes us
         $funcname  = "select";
         $interrupt = 1;
-        eval {
-            select(undef,undef,undef,undef);
-        };
+        eval { select( undef, undef, undef, undef ); };
         $interrupt = 0;
     }
-    for ($@) {
+    for ( $@ ) {
         last if ( /^$/ || /^SIG/ );
         last if ( $! == EINTR );
         die "$funcname(): $!";
@@ -599,11 +596,11 @@ while (1) {
         my $wpid;
         $sigchld = 0;
 
-        REAPLOOP: while ( ( $wpid = waitpid( -1, WNOHANG ) ) > 0 ) {
+    REAPLOOP: while ( ( $wpid = waitpid( -1, WNOHANG ) ) > 0 ) {
             next REAPLOOP unless ( exists $pid2info{$wpid} );
 
             my $info = $pid2info{$wpid};
-            warn ("$$info[0]:$wpid exited: $?") if($debug);
+            warn( "$$info[0]:$wpid exited: $?" ) if ( $debug );
 
             #
             # Remove old state for this pid
@@ -614,7 +611,7 @@ while (1) {
             # Now jump out if exiting, or restart
             # processes
             #
-            if ( $reset || $death ){
+            if ( $reset || $death ) {
                 next REAPLOOP;
             }
 
@@ -630,20 +627,20 @@ while (1) {
                 # $$info[2] is now "node"
                 warn "Restart powstream->$$info[2]:!";
 
-                my $starttime = OWP::Utils::time2owptime(time);
-                $pid = powstream(@$info);
+                my $starttime = OWP::Utils::time2owptime( time );
+                $pid = powstream( @$info );
                 @{ $pid2info{$pid} } = ( "powstream", $starttime, @$info );
             }
         }
     }
 
-    if ($death) {
+    if ( $death ) {
         if ( ( keys %pid2info ) > 0 ) {
             next;
         }
         die "Dead\n" if $debug;
     }
-    elsif ($reset) {
+    elsif ( $reset ) {
         next if ( ( keys %pid2info ) > 0 );
         warn "Restarting...\n";
         warn "exec $FindBin::Bin / $FindBin::Script (@SAVEARGV)";
@@ -652,7 +649,7 @@ while (1) {
     }
 }
 
-my ($SendServer) = undef;
+my ( $SendServer ) = undef;
 
 sub OpenServer {
     return if ( defined $SendServer );
@@ -669,7 +666,7 @@ sub OpenServer {
         );
     };
 
-    if ($@) {
+    if ( $@ ) {
         warn "Unable to contact Home($central_host):$@\n";
     }
 
@@ -690,15 +687,15 @@ sub fail_server {
 
 sub txfr {
     my ( $fh, %req ) = @_;
-    my (%resp);
+    my ( %resp );
 
     OpenServer;
     if ( !$SendServer ) {
-        warn "Server currently unreachable..." if defined($verbose);
+        warn "Server currently unreachable..." if defined( $verbose );
         return undef;
     }
 
-    my ($line) = "OWP 3.0";
+    my ( $line ) = "OWP 3.0";
     $MD5->reset;
     return undef if (
         !sys_writeline(
@@ -711,7 +708,7 @@ sub txfr {
     );
     foreach ( keys %req ) {
         my $val = $req{$_};
-        warn "req\{$_\} = $val" if($debug);
+        warn "req\{$_\} = $val" if ( $debug );
         return undef if (
             !sys_writeline(
                 FILEHANDLE => $SendServer,
@@ -729,7 +726,7 @@ sub txfr {
             CALLBACK   => \&fail_server
         )
     );
-    $MD5->add($secret);
+    $MD5->add( $secret );
     return undef if (
         !sys_writeline(
             FILEHANDLE => $SendServer,
@@ -745,12 +742,12 @@ sub txfr {
             CALLBACK   => \&fail_server
         )
     );
-    my ($len) = 0;
+    my ( $len ) = 0;
     if ( $req{'OP'} eq 'TXFR' ) {
         $len = $req{'FILESIZE'};
     }
 RLOOP:
-    while ($len) {
+    while ( $len ) {
 
         # local read errors are fatal
         my ( $written, $buf, $rlen, $offset );
@@ -762,7 +759,7 @@ RLOOP:
             $rlen = sysread $fh, $buf, $len;
             alarm 0;
         };
-        if ( !defined($rlen) ) {
+        if ( !defined( $rlen ) ) {
             if ( ( $! == EINTR ) && ( $@ ne "alarm\n" ) && ( $@ ne "pipe\n" ) ) {
                 next RLOOP;
             }
@@ -774,7 +771,7 @@ RLOOP:
         $len -= $rlen;
         $offset = 0;
     WLOOP:
-        while ($rlen) {
+        while ( $rlen ) {
 
             # socket write errors cause eventual retry.
             undef $written;
@@ -785,7 +782,7 @@ RLOOP:
                 $written = syswrite $SendServer, $buf, $rlen, $offset;
                 alarm 0;
             };
-            if ( !defined($written) ) {
+            if ( !defined( $written ) ) {
                 if ( ( $! == EINTR ) && ( $@ ne "alarm\n" ) && ( $@ ne "pipe\n" ) ) {
                     next WLOOP;
                 }
@@ -798,13 +795,13 @@ RLOOP:
 
     $MD5->reset;
     my ( $pname, $pval );
-    while (1) {
+    while ( 1 ) {
         $_ = sys_readline( FILEHANDLE => $SendServer );
         if ( defined $_ ) {
-            last if (/^$/);    # end of message
-            $MD5->add($_);
-            next if (/^\s*#/);    # comments
-            next if (/^\s*$/);    # blank lines
+            last if ( /^$/ );    # end of message
+            $MD5->add( $_ );
+            next if ( /^\s*#/ );    # comments
+            next if ( /^\s*$/ );    # blank lines
 
             if ( ( $pname, $pval ) = /^(\w+)\s+(.*)/o ) {
                 $pname =~ tr/a-z/A-Z/;
@@ -813,20 +810,20 @@ RLOOP:
             }
 
             # Invalid message!
-            warn("Invalid message \"$_\" from server!");
+            warn( "Invalid message \"$_\" from server!" );
         }
         else {
-            warn("Socket closed to server!");
+            warn( "Socket closed to server!" );
         }
         return fail_server;
     }
-    $MD5->add($secret);
+    $MD5->add( $secret );
     if ( $MD5->hexdigest ne sys_readline( FILEHANDLE => $SendServer, TIMEOUT => $timeout ) ) {
-        warn("Invalid MD5 for server response!");
+        warn( "Invalid MD5 for server response!" );
         return fail_server;
     }
     if ( "" ne sys_readline( FILEHANDLE => $SendServer, TIMEOUT => $timeout ) ) {
-        warn("Invalid End Message from Server!");
+        warn( "Invalid End Message from Server!" );
         return fail_server;
     }
 
@@ -836,33 +833,36 @@ RLOOP:
 my %mscache;
 
 sub send_file {
-    my ($fname) = @_;
+    my ( $fname ) = @_;
     my ( %req, $response );
     local *SENDFILE;
 
-    warn "SEND_FILE:$fname\n" if defined($verbose);
+    warn "SEND_FILE:$fname\n" if defined( $verbose );
 
     my ( $bname, $path, $suffix ) = fileparse( $fname, ( $owpsuffix, $sumsuffix ) );
-#    my ( $msname, $recv, $send ) = ( $path =~ m#(\w+)/(\w+)/(\w+)/$# );
+
+    #    my ( $msname, $recv, $send ) = ( $path =~ m#(\w+)/(\w+)/(\w+)/$# );
     my ( $msname, $recv, $send ) = ( $path =~ m#([^\/\s]+)/([^\/\s]+)/([^\/\s]+)/$# );
 
     die "Unable to decode Mesh-Path from filepath $path" if ( !$msname );
 
-    warn "Sending file from MeasurementSet $msname" if ($debug);
+    warn "Sending file from MeasurementSet $msname" if ( $debug );
     my $ms;
-    if ( !($ms = $mscache{$msname})){
+    if ( !( $ms = $mscache{$msname} ) ) {
         $ms = $mscache{$msname} = new OWP::MeasSet(
-                CONF            => $conf,
-                MEASUREMENTSET  => $msname);
+            CONF           => $conf,
+            MEASUREMENTSET => $msname
+        );
     }
-    die "Unable to create MeasSet for MEASUREMENTSET $msname" if !defined($ms);
+    die "Unable to create MeasSet for MEASUREMENTSET $msname" if !defined( $ms );
 
     $req{'MEASUREMENTSET'} = $msname;
-    $req{'DESCRIPTION'} = $ms->{'DESCRIPTION'} || $msname;
-    $req{'ADDRTYPE'} = $ms->{'ADDRTYPE'};
-    $req{'TOOL'} = $conf->must_get_val(
-                                TESTSPEC    => $ms->{'TESTSPEC'},
-                                ATTR        => 'TOOL');
+    $req{'DESCRIPTION'}    = $ms->{'DESCRIPTION'} || $msname;
+    $req{'ADDRTYPE'}       = $ms->{'ADDRTYPE'};
+    $req{'TOOL'}           = $conf->must_get_val(
+        TESTSPEC => $ms->{'TESTSPEC'},
+        ATTR     => 'TOOL'
+    );
     my ( $fstart, $fend ) = split /_/, $bname;
 
     $req{'START'} = $fstart;
@@ -872,25 +872,27 @@ sub send_file {
     # Plus - probably want to add some caching for all this stuff.
     $req{'RECVNODE'} = $recv;
     $req{'RECVADDR'} = $conf->must_get_val(
-                                NODE        => $recv,
-                                ATTR        => 'ADDR',
-                                TYPE        => $ms->{'ADDRTYPE'});
+        NODE => $recv,
+        ATTR => 'ADDR',
+        TYPE => $ms->{'ADDRTYPE'}
+    );
     $req{'RECVLONGNAME'} = $conf->get_val(
-                                NODE        => $recv,
-                                ATTR        => 'LONGNAME',
-                                TYPE        => $ms->{'ADDRTYPE'}) ||
-                            $req{'RECVNODE'};
+        NODE => $recv,
+        ATTR => 'LONGNAME',
+        TYPE => $ms->{'ADDRTYPE'}
+    ) || $req{'RECVNODE'};
 
     $req{'SENDNODE'} = $send;
     $req{'SENDADDR'} = $conf->must_get_val(
-                                NODE        => $send,
-                                ATTR        => 'ADDR',
-                                TYPE        => $ms->{'ADDRTYPE'});
+        NODE => $send,
+        ATTR => 'ADDR',
+        TYPE => $ms->{'ADDRTYPE'}
+    );
     $req{'SENDLONGNAME'} = $conf->get_val(
-                                NODE        => $send,
-                                ATTR        => 'LONGNAME',
-                                TYPE        => $ms->{'ADDRTYPE'}) ||
-                            $req{'SENDNODE'};
+        NODE => $send,
+        ATTR => 'LONGNAME',
+        TYPE => $ms->{'ADDRTYPE'}
+    ) || $req{'SENDNODE'};
 
     # XXX: Make this plugable... load a handler per tooltype. Each
     # 'tool' can add appropriate args into the transfer.
@@ -898,33 +900,33 @@ sub send_file {
 
     $req{'OWPSESSIONCOUNT'} = $conf->must_get_val(
         TESTSPEC => $ms->{'TESTSPEC'},
-        ATTR => 'OWPSESSIONCOUNT'
+        ATTR     => 'OWPSESSIONCOUNT'
     );
 
     $req{'OWPSAMPLECOUNT'} = $conf->get_val(
-            TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'OWPSAMPLECOUNT'
-        ) || $req{'OWPSESSIONCOUNT'};
+        TESTSPEC => $ms->{'TESTSPEC'},
+        ATTR     => 'OWPSAMPLECOUNT'
+    ) || $req{'OWPSESSIONCOUNT'};
 
     $req{'OWPINTERVAL'} = $conf->must_get_val(
         TESTSPEC => $ms->{'TESTSPEC'},
-        ATTR => 'OWPINTERVAL'
+        ATTR     => 'OWPINTERVAL'
     );
 
     $req{'OWPLOSSTHRESH'} = $conf->get_val(
-            TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'OWPLOSSTHRESH'
-        ) || 10; # powstream default
+        TESTSPEC => $ms->{'TESTSPEC'},
+        ATTR     => 'OWPLOSSTHRESH'
+    ) || 10;    # powstream default
 
     $req{'OWPPACKETPADDING'} = $conf->get_val(
-            TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'OWPPACKETPADDING'
-        ) || 0; # powstream default
+        TESTSPEC => $ms->{'TESTSPEC'},
+        ATTR     => 'OWPPACKETPADDING'
+    ) || 0;     # powstream default
 
     $req{'OWPBUCKETWIDTH'} = $conf->get_val(
-            TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'OWPBUCKETWIDTH'
-        ) || 0.0001; # powstream default
+        TESTSPEC => $ms->{'TESTSPEC'},
+        ATTR     => 'OWPBUCKETWIDTH'
+    ) || 0.0001;    # powstream default
 
     my $opname = $path . $bname . $owpsuffix;
     my $sfname = $path . $bname . $sumsuffix;
@@ -937,7 +939,7 @@ TRY:
 
             # compute the md5 of the file.
             $MD5->reset;
-            $MD5->addfile(*SENDFILE);
+            $MD5->addfile( *SENDFILE );
             $req{'FILEMD5'} = $MD5->hexdigest();
 
             $req{'FILESIZE'} = sysseek SENDFILE, 0, SEEK_END;
@@ -946,16 +948,17 @@ TRY:
             if ( !$req{'FILESIZE'} || !sysseek SENDFILE, 0, SEEK_SET ) {
                 return undef;
             }
-            $req{'OP'}     = 'TXFR';
-            $req{'FNAME'}  = $fname;
+            $req{'OP'}    = 'TXFR';
+            $req{'FNAME'} = $fname;
         }
         else {
+
             # Summary info only
             local *SUMFILE;
             if ( open( SUMFILE, "<" . $sfname ) ) {
                 if ( !parsesum( \*SUMFILE, \%req ) ) {
                     warn "Invalid Summary: $sfname";
-                    if ( defined($debug) ) {
+                    if ( defined( $debug ) ) {
                         warn "Start Invalid Summary: $sfname";
                         print_hash( "summary", %req );
                         warn "End Invalid Summary: $sfname";
@@ -967,8 +970,8 @@ TRY:
                 # Data validation - Only want to send sum sessions
                 # back if SAMPLE_PACKET_COUNT == OWPSAMPLECOUNT
                 #
-                if($req{'SAMPLE_PACKET_COUNT'} != $req{'OWPSAMPLECOUNT'}){
-                    if( defined($verbose) ){
+                if ( $req{'SAMPLE_PACKET_COUNT'} != $req{'OWPSAMPLECOUNT'} ) {
+                    if ( defined( $verbose ) ) {
                         warn "Skipping $sfname: (unneeded dataset)";
                     }
                     last TRY;
@@ -976,7 +979,7 @@ TRY:
                 $req{'OP'} = 'SUM';
             }
             else {
-                warn "Sum file $sfname unreadable: $!\n" if defined($verbose);
+                warn "Sum file $sfname unreadable: $!\n" if defined( $verbose );
                 undef $sfname;
                 last TRY;
             }
@@ -985,28 +988,32 @@ TRY:
         # Set all the req options.
         $req{'SECRETNAME'} = $secretname;
 
-        if ( !( $response = txfr( \*SENDFILE, %req ) ) ){
+        if ( !( $response = txfr( \*SENDFILE, %req ) ) ) {
             warn "txfr() failed to transfer information to $central_host";
-            return undef
+            return undef;
         }
 
-        if (exists $req{'FILEMD5'} && ( !exists $response->{'FILEMD5'}
-                || ( $response->{'FILEMD5'} ne $req{'FILEMD5'} ) ) ) {
+        if (
+            exists $req{'FILEMD5'}
+            && ( !exists $response->{'FILEMD5'}
+                || ( $response->{'FILEMD5'} ne $req{'FILEMD5'} ) )
+            )
+        {
             warn "MD5 data validation failed in transfer to $central_host";
             return undef;
         }
     }
 
-    if ( defined($opname) ) {
-        if ( defined($debug) && ( $debug > 1 ) ) {
+    if ( defined( $opname ) ) {
+        if ( defined( $debug ) && ( $debug > 1 ) ) {
             rename $opname, $opname . ".debug";
         }
         else {
             unlink $opname || warn "unlink: $!";
         }
     }
-    if ( defined($sfname) ) {
-        if ( defined($debug) && ( $debug > 1 ) ) {
+    if ( defined( $sfname ) ) {
+        if ( defined( $debug ) && ( $debug > 1 ) ) {
             rename $sfname, $sfname . ".debug";
         }
         else {
@@ -1014,7 +1021,7 @@ TRY:
         }
     }
 
-    warn "Done SEND_FILE:$fname\n" if defined($verbose);
+    warn "Done SEND_FILE:$fname\n" if defined( $verbose );
 
     return 1;
 }
@@ -1024,11 +1031,11 @@ sub send_data {
 
     # @flist is the workque.
     my ( @flist, $ldir );
-    foreach $ldir (@dirlist) {
+    foreach $ldir ( @dirlist ) {
         local *DIR;
         opendir( DIR, $ldir ) || die "can't opendir $_:$!";
         push @flist, map { join '/', $ldir, $_ }
-            grep {/($owpsuffix|$sumsuffix)$/} readdir(DIR);
+            grep {/($owpsuffix|$sumsuffix)$/} readdir( DIR );
         closedir DIR;
     }
 
@@ -1045,7 +1052,7 @@ sub send_data {
     #   sum owp     >
     #   sum sum     - 0 invalid (dbase will reject)
     #
-    if (@flist) {
+    if ( @flist ) {
 
         sub byend {
             my ( $aend, $asuffix ) = ( $a =~ m#/\d+_(\d+)($owpsuffix|$sumsuffix)$# );
@@ -1056,9 +1063,9 @@ sub send_data {
         @flist = sort byend @flist;
     }
 
-    if ( defined($debug) && ( $debug > 1 ) ) {
+    if ( defined( $debug ) && ( $debug > 1 ) ) {
         warn "Sorted file list:\n";
-        foreach (@flist) {
+        foreach ( @flist ) {
             warn "$_\n";
         }
         warn "End file list\n";
@@ -1066,10 +1073,10 @@ sub send_data {
     my $pid = fork;
 
     # error
-    die "Can't fork send_data: $!" if ( !defined($pid) );
+    die "Can't fork send_data: $!" if ( !defined( $pid ) );
 
     #parent
-    return $pid if ($pid);
+    return $pid if ( $pid );
 
     # child continues.
     $0 = "$scriptname:send_data";
@@ -1085,7 +1092,7 @@ sub send_data {
     $ein = $rin;
 
 SEND_DATA:
-    while (1) {
+    while ( 1 ) {
 
         if ( scalar @flist ) {
 
@@ -1097,7 +1104,7 @@ SEND_DATA:
         }
 
         warn "Calling select with tmout=", $tmout ? $tmout : "nil"
-            if ($debug);
+            if ( $debug );
         if ( $nfound = select( $rout = $rin, undef, $eout = $ein, $tmout ) ) {
             my $newfile = sys_readline();
             push @flist, $newfile;
@@ -1106,14 +1113,14 @@ SEND_DATA:
 
         next if ( !scalar @flist );
 
-        my ($nextfile) = ( $flist[0] =~ /^(.*)$/ );
-        if ( send_file($nextfile) ) {
+        my ( $nextfile ) = ( $flist[0] =~ /^(.*)$/ );
+        if ( send_file( $nextfile ) ) {
             shift @flist;
         }
         else {
 
             # upload not working.. wait before trying again.
-            warn "Unable to send $nextfile" if ($verbose || $debug);
+            warn "Unable to send $nextfile" if ( $verbose || $debug );
             sleep $timeout;
         }
     }
@@ -1129,38 +1136,38 @@ sub powstream {
 
     my $interval = $conf->must_get_val(
         TESTSPEC => $ms->{'TESTSPEC'},
-        ATTR => 'OWPINTERVAL'
+        ATTR     => 'OWPINTERVAL'
     );
-    if( $interval < 0 ){
+    if ( $interval < 0 ) {
         die "TestSpec($ms->{'TESTSPEC'}): OWPINTERVAL must be greater than 0";
     }
 
     my $packet_count = $conf->must_get_val(
         TESTSPEC => $ms->{'TESTSPEC'},
-        ATTR => 'OWPSESSIONCOUNT'
+        ATTR     => 'OWPSESSIONCOUNT'
     );
 
     my @cmd = ( $powcmd, "-e", $facility, "-p", "-S", $myaddr );
     push @cmd, ( "-i", $interval );
     push @cmd, ( "-c", $packet_count );
 
-    if ( $do_send ){
+    if ( $do_send ) {
         push @cmd, ( "-t" );
         push @cmd, ( "-d", "$ms->{'MEASUREMENTSET'}/$onode/$me" );
     }
-    else{
+    else {
         push @cmd, ( "-d", "$ms->{'MEASUREMENTSET'}/$me/$onode" );
     }
 
     my $sample_count = $conf->get_val(
         TESTSPEC => $ms->{'TESTSPEC'},
-        ATTR => 'OWPSAMPLECOUNT'
+        ATTR     => 'OWPSAMPLECOUNT'
     ) || $packet_count;
 
-    if( $packet_count % $sample_count ){
-            die "TestSpec($ms->{'TESTSPEC'}): OWPSAMPLECOUNT must be an even multiple of OWPSESSIONCOUNT";
+    if ( $packet_count % $sample_count ) {
+        die "TestSpec($ms->{'TESTSPEC'}): OWPSAMPLECOUNT must be an even multiple of OWPSESSIONCOUNT";
     }
-    if( $sample_count > $packet_count ){
+    if ( $sample_count > $packet_count ) {
         die "TestSpec($ms->{'TESTSPEC'}): OWPSESSIONCOUNT must be greater than OWPSAMPLECOUNT";
     }
 
@@ -1169,26 +1176,26 @@ sub powstream {
     push @cmd, ( "-L", $val ) if (
         $val = $conf->get_val(
             TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'OWPLOSSTHRESH'
+            ATTR     => 'OWPLOSSTHRESH'
         )
     );
     push @cmd, ( "-s", $val ) if (
         $val = $conf->get_val(
             TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'OWPPACKETPADDING'
+            ATTR     => 'OWPPACKETPADDING'
         )
     );
     push @cmd, ( "-b", $val ) if (
         $val = $conf->get_val(
             TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'OWPBUCKETWIDTH'
+            ATTR     => 'OWPBUCKETWIDTH'
         )
     );
 
     push @cmd, ( $oaddr );
 
     my $cmd = join " ", @cmd;
-    warn "Executing: $cmd" if ( defined($debug) );
+    warn "Executing: $cmd" if ( defined( $debug ) );
 
     open( \*CHWFD, ">&WRITEPIPE" ) || die "Can't dup pipe";
     open( \*CHRFD, "<$devnull" )   || die "Can't open $devnull";
@@ -1198,3 +1205,47 @@ sub powstream {
 }
 
 1;
+
+__END__
+
+=head1 SEE ALSO
+
+L<FindBin>, L<Getopt::Std>, L<POSIX>, L<IPC::Open3>, L<File::Path>,
+L<File::Basename>, L<FileHandle>, L<OWP>, L<OWP::Sum>, L<OWP::RawIO>,
+L<OWP::MeasSet>, L<OWP::Syslog>, L<OWP::Helper>, L<Sys::Syslog>,
+L<Digest::MD5>, L<Socket>, L<IO::Socket>, L<DB_File>, L<Fcntl>
+
+To join the 'perfSONAR Users' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/perfsonar-ps-users
+
+The perfSONAR-PS subversion repository is located at:
+
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Jeff W. Boote <boote@internet2.edu>
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2004-2009, Internet2
+
+All rights reserved.
+
+=cut

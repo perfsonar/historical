@@ -1,32 +1,23 @@
 #!/usr/bin/perl -w
 # ex: set tabstop=4 ai expandtab softtabstop=4 shiftwidth=4:
 # -*- mode: c-basic-indent: 4; tab-width: 4; indent-tabs-mode: nil -*-
-#
-#      $Id$
-#
-#########################################################################
-#
-#			   Copyright (C)  2003-2009
-#	     			Internet2
-#			   All Rights Reserved
-#
-#########################################################################
-#
-#	File:		bwcollector.pl
-#
-#	Author:     Jeff W. Boote  - Internet2
-#	            Jason Zurawski - Internet2
-#
-#	Date:		Wed Nov 12 17:43:12 MST 2003
-#
-#	Description:
-#
 
-=pod
+use strict;
+use warnings;
+
+our $VERSION = 3.1;
 
 =head1 NAME
 
-bwcollector.pl - program that collects owamp data
+bwcollector.pl - program that collects BWCTL data
+
+=head1 DESCRIPTION
+
+bwcollector.pl is a daemon process that listens on a socket and accepts
+connections from powmaster.pl. powmaster sends throughput session data.
+bwcollector.pl summarizes the throughput sessions and inserts the summaries into
+an SQL database using the DBI interface. It also saves the session file
+in an "archive" directory.
 
 =head1 SYNOPSIS
 
@@ -65,25 +56,8 @@ bwcollector.pl continues.
 
 =back
 
-=head1 DESCRIPTION
-
-bwcollector.pl is a daemon process that listens on a socket and accepts
-connections from powmaster.pl. powmaster sends throughput session data.
-bwcollector.pl summarizes the throughput sessions and inserts the summaries into
-an SQL database using the DBI interface. It also saves the session file
-in an "archive" directory.
-
-=head1 AUTHOR
-
-Jeff W. Boote <boote@internet2.edu>
-
-=head1 SEE ALSO
-
-L<bwmaster.pl>, L<OWP>
-
 =cut
 
-use strict;
 use Carp qw(cluck);
 use FindBin;
 
@@ -141,7 +115,7 @@ my %options = (
 
 my %optnames;
 foreach ( keys %options ) {
-    my $key = substr( $options{$_}, 0, 1);
+    my $key = substr( $options{$_}, 0, 1 );
     $optnames{$key} = $_;
 }
 my $options = join '', values %options;
@@ -155,7 +129,7 @@ foreach ( keys %optnames ) {
 push @SAVEARGV, "-Z" if ( !defined( $setopts{'Z'} ) );
 
 # Fetch configuration options.
-my $conf = new OWP::Conf(%amidefaults);
+my $conf = new OWP::Conf( %amidefaults );
 
 #
 # data path information
@@ -175,16 +149,16 @@ my $hup  = $conf->get_val( ATTR => 'HUP' );
 if ( $kill || $hup ) {
     my $pidfile = new FileHandle "$datadir/bwcollector.pid", O_RDONLY;
     die "Unable to open($datadir/bwcollector.pid): $!"
-        unless ($pidfile);
+        unless ( $pidfile );
 
     my $pid = <$pidfile>;
     die "Unable to retrieve PID from $datadir/bwcollector.pid"
-        if !defined($pid);
+        if !defined( $pid );
     chomp $pid;
-    my $sig = ($kill) ? 'TERM' : 'HUP';
+    my $sig = ( $kill ) ? 'TERM' : 'HUP';
     if ( kill( $sig, $pid ) ) {
         warn "Sent $sig to $pid\n";
-        exit(0);
+        exit( 0 );
     }
     die "Unable to send $sig to $pid: $!";
 }
@@ -195,7 +169,7 @@ setids(
     GROUP => $conf->get_val( ATTR => 'GroupName', TYPE => $ttype ) || undef
 );
 
-local (*MYLOG);
+local ( *MYLOG );
 
 # setup syslog
 my $slog = tie(
@@ -206,7 +180,7 @@ my $slog = tie(
 );
 
 # make die/warn goto syslog, and also to STDERR.
-$slog->HandleDieWarn(*STDERR);
+$slog->HandleDieWarn( *STDERR );
 
 # Don't need the ref anymore, and untie won't work if I keep the ref.
 undef $slog;
@@ -227,12 +201,12 @@ my @ignodes = $conf->get_sublist( LIST => 'NODE', ATTR => 'IGNORE' );
 my %ignodename;
 
 my $node;
-foreach $node (@ignodes) {
+foreach $node ( @ignodes ) {
     my $naddr = $conf->get_val( NODE => $node, ATTR => 'CONTACTADDR', TYPE => $ttype );
-    if( !$naddr){
+    if ( !$naddr ) {
         $naddr = $conf->get_val( NODE => $node, ATTR => 'ADDR', TYPE => $ttype );
     }
-    if ($naddr) {
+    if ( $naddr ) {
         $ignore_node{$naddr} = $node;
         $ignodename{$node}   = $naddr;
     }
@@ -247,18 +221,18 @@ foreach $node (@ignodes) {
 my %listen_nodes;
 my %listen_addrs;
 my $verify_addrs = $conf->get_val( ATTR => 'VERIFYPEERADDR', TYPE => $ttype );
-foreach $node (@nodes) {
+foreach $node ( @nodes ) {
     my $naddr = $conf->get_val( NODE => $node, ATTR => 'CONTACTADDR', TYPE => $ttype );
-    if( !$naddr){
+    if ( !$naddr ) {
         $naddr = $conf->get_val( NODE => $node, ATTR => 'ADDR', TYPE => $ttype );
     }
-    if ($naddr) {
+    if ( $naddr ) {
         $listen_nodes{$naddr} = $node;
         $listen_addrs{$node}  = $naddr;
     }
     else {
         warn "Unable to fetch CONTACTADDR for $node";
-        if ($verify_addrs) {
+        if ( $verify_addrs ) {
             warn "Unable to accept data from $node";
         }
     }
@@ -267,19 +241,18 @@ foreach $node (@nodes) {
 my @dbgnodes = $conf->get_sublist( LIST => 'NODE', ATTR => 'DEBUG' );
 my %debug_node;
 
-foreach $node (@dbgnodes) {
+foreach $node ( @dbgnodes ) {
     my $naddr = $conf->get_val( NODE => $node, ATTR => 'CONTACTADDR', TYPE => $ttype );
-    if( !$naddr){
+    if ( !$naddr ) {
         $naddr = $conf->get_val( NODE => $node, ATTR => 'ADDR', TYPE => $ttype );
     }
-    if ($naddr) {
+    if ( $naddr ) {
         $debug_node{$naddr} = $node;
     }
     else {
         warn "Unable to fetch addr for $node";
     }
 }
-
 
 # XXX: Add back in eventually?
 #
@@ -297,10 +270,11 @@ my $archive = undef;
 #
 my $foreground = $conf->get_val( ATTR => 'FOREGROUND' );
 my $full_central_host = $conf->must_get_val(
-                                    ATTR => 'CentralHost',
-                                    TYPE => $ttype );
-my ($serverhost,$serverport) = split_addr($full_central_host);
-die "Invalid CentralHost value: $full_central_host" if !defined($serverport);
+    ATTR => 'CentralHost',
+    TYPE => $ttype
+);
+my ( $serverhost, $serverport ) = split_addr( $full_central_host );
+die "Invalid CentralHost value: $full_central_host" if !defined( $serverport );
 
 my $timeout = $conf->must_get_val( ATTR => 'CentralHostTimeout', TYPE => $ttype );
 my $onereq = $conf->get_val( 'ATTR' => 'ONEREQ' );
@@ -361,13 +335,13 @@ if ( !$foreground ) {
         || die "Unable to daemonize process";
 }
 
-my (%children);
+my ( %children );
 
 my ( $reset, $die, $sigchld ) = ( 0, 0, 0 );
 my $interrupt = 0;
 
 sub catch {
-    my ($signame) = @_;
+    my ( $signame ) = @_;
 
     return if !defined $signame;
 
@@ -401,9 +375,9 @@ my $old_mask = new POSIX::SigSet;
 sigprocmask( SIG_BLOCK, $block_mask, $old_mask );
 $SIG{CHLD} = $SIG{HUP} = $SIG{TERM} = $SIG{INT} = \&catch;
 
-while (1) {
+while ( 1 ) {
     my $paddr;
-    my ($func);
+    my ( $func );
 
     $@ = '';
     undef $paddr;
@@ -425,7 +399,7 @@ while (1) {
             sigprocmask( SIG_BLOCK, $block_mask );
         };
     }
-    elsif ($sigchld) {
+    elsif ( $sigchld ) {
         ;
     }
     else {
@@ -438,7 +412,7 @@ while (1) {
         };
         $interrupt = 0;
     }
-    for ($@) {
+    for ( $@ ) {
         ( /^$/ || /^SIG/ )
             and $! = 0, last;
         die "$func(): $!";
@@ -447,7 +421,7 @@ while (1) {
     #
     # Not a connection - do error handling.
     #
-    if ( !defined($paddr) ) {
+    if ( !defined( $paddr ) ) {
         if ( $sigchld || $reset || $die ) {
             my $wpid;
             my $opts = 0;
@@ -456,14 +430,14 @@ while (1) {
                 next unless ( exists $children{$wpid} );
 
                 syslog( 'debug', "$children{$wpid}:$wpid exited: $?" );
-                $die++ if ($onereq);
+                $die++ if ( $onereq );
 
                 delete $children{$wpid};
             }
             $sigchld = 0;
         }
 
-        if ($reset) {
+        if ( $reset ) {
             next if ( ( keys %children ) > 0 );
             next if ( defined $Server );
             warn "Restarting...\n";
@@ -474,7 +448,7 @@ while (1) {
 
         if ( $die > 1 ) {
             if ( ( keys %children ) > 0 ) {
-                sleep(1);
+                sleep( 1 );
                 next;
             }
             die "Dead\n";
@@ -486,7 +460,7 @@ while (1) {
     #
     # Handle the new connection
     #
-    my $newpid = handle_req($paddr) || next;
+    my $newpid = handle_req( $paddr ) || next;
     $children{$newpid} = 'handle_req';
     undef $paddr;
 }
@@ -503,22 +477,22 @@ sub read_req {
     if ( !defined $_ ) {
         die "read_req: Connection Closed";
     }
-    if ( !( ($vers) = /BW\s+(\d+)/ ) ) {
-        die "Invalid request version: $_"
+    if ( !( ( $vers ) = /BW\s+(\d+)/ ) ) {
+        die "Invalid request version: $_";
     }
-    $md5->add($_);
+    $md5->add( $_ );
 
     while ( ( $_ = sys_readline( FILEHANDLE => $fh, TIMEOUT => $timeout ) ) ) {
         my ( $pname, $pval );
 
-        $md5->add($_);
-        next if (/^\s*#/);    # comments
-        next if (/^\s*$/);    # blank lines.
+        $md5->add( $_ );
+        next if ( /^\s*#/ );    # comments
+        next if ( /^\s*$/ );    # blank lines.
 
         if ( ( $pname, $pval ) = /^(\w+)\s+(.*)/o ) {
             $pname =~ tr/a-z/A-Z/;
             $req{$pname} = $pval;
-            warn "req\{$pname\} = $pval" if defined($debug);
+            warn "req\{$pname\} = $pval" if defined( $debug );
 
             next;
         }
@@ -550,15 +524,15 @@ my $ldiefile = undef;
 sub ldie {
     my $msg = shift;
     my ( $dummy, $fname, $line ) = caller;
-    unlink $ldiefile if ( defined($ldiefile) );
+    unlink $ldiefile if ( defined( $ldiefile ) );
     die "$msg :$fname\:$line\n";
 }
 
 sub print_table {
-    my (%args) = @_;
+    my ( %args ) = @_;
 
     my $sql = "SELECT * from $args{'TABLE'}";
-    my $sth = $args{'DBH'}->prepare($sql) || die "Can't prepare!";
+    my $sth = $args{'DBH'}->prepare( $sql ) || die "Can't prepare!";
     $sth->execute() || die "Can't execute SELECT of $args{'TABLE'}";
     warn "TABLE:$args{'TABLE'}\n";
     my ( $i, @row );
@@ -581,7 +555,7 @@ sub init_database {
             PrintError => 1
         }
     ) || die "Connecting to database";
-    if ($profile) {
+    if ( $profile ) {
 
         #		use DBI::Profile qw(DBIprofile_Statement);
         #		$dbh->{Profile} = DBI::ProfileDumper->new(
@@ -599,40 +573,38 @@ my %ca_month;
 sub get_tprefix {
     my $time = shift;
 
-    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-                                                        owpgmtime($time);
-    my @ret = (sprintf("%4.4d%2.2d", $year+1900, $mon+1),$year+1900,$mon+1);
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = owpgmtime( $time );
+    my @ret = ( sprintf( "%4.4d%2.2d", $year + 1900, $mon + 1 ), $year + 1900, $mon + 1 );
     return @ret;
 }
 
 sub get_prev_tprefix {
     my $time = shift;
 
-    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-                                                        owpgmtime($time);
-    if($mon < 1){
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = owpgmtime( $time );
+    if ( $mon < 1 ) {
         $mon = 11;
         $year -= 1;
     }
-    else{
+    else {
         $mon--;
     }
 
-    return (sprintf('%4.4d%2.2d', $year+1900, $mon+1),$year+1900,$mon+1);
+    return ( sprintf( '%4.4d%2.2d', $year + 1900, $mon + 1 ), $year + 1900, $mon + 1 );
 }
 
 sub init_month {
-    my (%args) = @_;
-    my (@mustargnames) = qw(DBH TIMESTAMP);
-    my (@argnames) = undef;
-    if( !(%args = owpverify_args(undef,\@mustargnames,%args))){
+    my ( %args )         = @_;
+    my ( @mustargnames ) = qw(DBH TIMESTAMP);
+    my ( @argnames )     = undef;
+    if ( !( %args = owpverify_args( undef, \@mustargnames, %args ) ) ) {
         ldie "init_month: Invalid args";
     }
 
     my $dbh = $args{'DBH'};
-    my ($lname,$year,$month) = get_tprefix($args{'TIMESTAMP'});
+    my ( $lname, $year, $month ) = get_tprefix( $args{'TIMESTAMP'} );
 
-    if($ca_month{$lname}){
+    if ( $ca_month{$lname} ) {
         return $lname;
     }
 
@@ -649,7 +621,7 @@ sub init_month {
         udp_bandwidth       BIGINT UNSIGNED,
         PRIMARY KEY(tspec_id)
         )";
-    $dbh->do($sql) || ldie "Creating ${lname}_TESTSPEC";
+    $dbh->do( $sql ) || ldie "Creating ${lname}_TESTSPEC";
 
     $sql = "CREATE TABLE IF NOT EXISTS ${lname}_NODES (
         node_id     INT UNSIGNED NOT NULL,
@@ -661,7 +633,7 @@ sub init_month {
         PRIMARY KEY(node_id),
         INDEX(last)
         )";
-    $dbh->do($sql) || ldie "Creating ${lname}_NODES";
+    $dbh->do( $sql ) || ldie "Creating ${lname}_NODES";
 
     $sql = "CREATE TABLE IF NOT EXISTS ${lname}_DATA (
         send_id     INT UNSIGNED NOT NULL,
@@ -678,11 +650,11 @@ sub init_month {
         INDEX(recv_id),
         INDEX(tspec_id)
     )";
-    $dbh->do($sql) || ldie "Creating ${lname}_DATA";
+    $dbh->do( $sql ) || ldie "Creating ${lname}_DATA";
 
     $sql = "INSERT IGNORE INTO DATES (year, month) VALUES(?,?)";
-    my $sth = $dbh->prepare($sql) || ldie "Prep: Insert DATES";
-    $sth->execute($year,$month) || ldie "Exec: Insert DATES";
+    my $sth = $dbh->prepare( $sql ) || ldie "Prep: Insert DATES";
+    $sth->execute( $year, $month ) || ldie "Exec: Insert DATES";
 
     return $ca_month{$lname} = $lname;
 }
@@ -692,30 +664,30 @@ sub init_month {
 # $req{'TOOL'} to determine what kind of 'tspec' to create.
 #
 sub save_tspec {
-    my (%args) = @_;
-    my (@mustargnames) = qw(DBH TIMESTAMP REQUEST);
-    my (@argnames) = undef;
-    if( !(%args = owpverify_args(undef,\@mustargnames,%args))){
+    my ( %args )         = @_;
+    my ( @mustargnames ) = qw(DBH TIMESTAMP REQUEST);
+    my ( @argnames )     = undef;
+    if ( !( %args = owpverify_args( undef, \@mustargnames, %args ) ) ) {
         ldie "save_tspec: Invalid args";
     }
 
     my $dbh = $args{'DBH'};
-    my ($lname,$year,$mon) = get_tprefix($args{'TIMESTAMP'});
+    my ( $lname, $year, $mon ) = get_tprefix( $args{'TIMESTAMP'} );
     my $req = $args{'REQUEST'};
 
     my $md5 = Digest::MD5->new;
     my $key;
 
     # compute an MD5 hash for this testspec
-    foreach $key (qw(DESCRIPTION BWTESTDURATION BWBUFFERLEN BWWINDOWSIZE BWTOS BWPARALLELSTREAMS BWTCP BWUDP BWUDPBANDWIDTHLIMIT)){
-        if(exists $req->{$key}){
-            $md5->add($key);
-            $md5->add($req->{$key});
+    foreach $key ( qw(DESCRIPTION BWTESTDURATION BWBUFFERLEN BWWINDOWSIZE BWTOS BWPARALLELSTREAMS BWTCP BWUDP BWUDPBANDWIDTHLIMIT) ) {
+        if ( exists $req->{$key} ) {
+            $md5->add( $key );
+            $md5->add( $req->{$key} );
         }
     }
 
     my $hexdigest = $md5->hexdigest;
-    my $digest = hex(substr($hexdigest,-8,8));
+    my $digest = hex( substr( $hexdigest, -8, 8 ) );
 
     my $sql = "INSERT IGNORE INTO ${lname}_TESTSPEC
             (
@@ -730,78 +702,71 @@ sub save_tspec {
             udp_bandwidth
             )
             VALUES(?,?,?,?,?,?,?,?,?)";
-    my $sth = $dbh->prepare($sql) || ldie "Prep: Insert ${lname}_TESTSPEC";
+    my $sth = $dbh->prepare( $sql ) || ldie "Prep: Insert ${lname}_TESTSPEC";
 
-    $sth->execute($digest,
-            $req->{'DESCRIPTION'},
-            $req->{'BWTESTDURATION'},
-            $req->{'BWBUFFERLEN'},
-            $req->{'BWWINDOWSIZE'},
-            $req->{'BWTOS'},
-            $req->{'BWPARALLELSTREAMS'} || 1,
-            ($req->{'BWUDP'})? 1: 0,
-            $req->{'BWUDPBANDWIDTHLIMIT'}) ||
-                                        ldie "Exec: Insert ${lname}_TESTSPEC";
+    $sth->execute( $digest, $req->{'DESCRIPTION'}, $req->{'BWTESTDURATION'}, $req->{'BWBUFFERLEN'}, $req->{'BWWINDOWSIZE'}, $req->{'BWTOS'}, $req->{'BWPARALLELSTREAMS'} || 1, ( $req->{'BWUDP'} ) ? 1 : 0, $req->{'BWUDPBANDWIDTHLIMIT'} )
+        || ldie "Exec: Insert ${lname}_TESTSPEC";
     return $digest;
 }
 
 my %ca_pnode;
+
 sub save_node {
-    my (%args) = @_;
-    my (@mustargnames) = qw(DBH TIMESTAMP NODE ADDR);
-    my (@argnames) = qw(LONGNAME);
-    if( !(%args = owpverify_args(\@argnames,\@mustargnames,%args))){
+    my ( %args )         = @_;
+    my ( @mustargnames ) = qw(DBH TIMESTAMP NODE ADDR);
+    my ( @argnames )     = qw(LONGNAME);
+    if ( !( %args = owpverify_args( \@argnames, \@mustargnames, %args ) ) ) {
         ldie "save_tspec: Invalid args";
     }
 
     my $dbh = $args{'DBH'};
-    my ($addr,$port) = split_addr($args{'ADDR'});
-    my ($lname,$year,$month) = get_tprefix($args{'TIMESTAMP'});
-    my ($plname,$pyear,$pmonth) = get_prev_tprefix($args{'TIMESTAMP'});
-    my ($sql,$i,$sth,@row,$first,$last);
+    my ( $addr, $port ) = split_addr( $args{'ADDR'} );
+    my ( $lname,  $year,  $month )  = get_tprefix( $args{'TIMESTAMP'} );
+    my ( $plname, $pyear, $pmonth ) = get_prev_tprefix( $args{'TIMESTAMP'} );
+    my ( $sql, $i, $sth, @row, $first, $last );
 
     # compute an MD5 hash for this testspec
     my $md5 = Digest::MD5->new;
-    $md5->add($addr);
-    $md5->add($args{'NODE'});
+    $md5->add( $addr );
+    $md5->add( $args{'NODE'} );
     my $hexdigest = $md5->hexdigest;
-    my $digest = hex(substr($hexdigest,-8,8));
+    my $digest = hex( substr( $hexdigest, -8, 8 ) );
 
     # Look for prev month (see if 'first' existed before this month)
-    $first = $last = owptime2time($args{'TIMESTAMP'});
-    if( $ca_pnode{$plname}){
+    $first = $last = owptime2time( $args{'TIMESTAMP'} );
+    if ( $ca_pnode{$plname} ) {
         $first = $ca_pnode{$plname};
     }
-    else{
+    else {
         $sql = "SELECT year,month
         FROM DATES
         WHERE year=? AND month=?";
-        $sth = $dbh->prepare($sql) || ldie "Prep: Select $plname from DATES";
-        $sth->execute($pyear,$pmonth) || ldie "Exec: Select $plname from DATES";
-        $i=0;
-        while(@row = $sth->fetchrow){$i++};
+        $sth = $dbh->prepare( $sql ) || ldie "Prep: Select $plname from DATES";
+        $sth->execute( $pyear, $pmonth ) || ldie "Exec: Select $plname from DATES";
+        $i = 0;
+        while ( @row = $sth->fetchrow ) { $i++ }
 
         # If prev month existed, see if this node has been defined before
         # and fetch the 'first' timestamp from it.
-        if($i > 0){
+        if ( $i > 0 ) {
             $sql = "SELECT first
             FROM ${plname}_NODES
             WHERE node_id=?";
-            $sth = $dbh->prepare($sql) ||
-            ldie "Prep: Select first from ${plname}_NODES";
-            $sth->execute($digest) ||
-            ldie "Exec: Select first from ${plname}_NODES";
-            $i=0;
-            while(@row = $sth->fetchrow){$i++};
-            if($i > 1){
+            $sth = $dbh->prepare( $sql )
+                || ldie "Prep: Select first from ${plname}_NODES";
+            $sth->execute( $digest )
+                || ldie "Exec: Select first from ${plname}_NODES";
+            $i = 0;
+            while ( @row = $sth->fetchrow ) { $i++ }
+            if ( $i > 1 ) {
                 warn "${plname}_NODES: Duplicate hash entry for $args{'NODE'}";
             }
-            if($i > 0){
+            if ( $i > 0 ) {
                 $first = $row[0];
             }
         }
     }
-    
+
     # Now update this months table with this node information
     #
     # First insert-ignore the full information, if this node_id already
@@ -818,51 +783,51 @@ sub save_node {
             last
             )
             VALUES(?,?,?,?,?,?)";
-    $sth = $dbh->prepare($sql) || ldie "Prep: Insert ${lname}_NODES";
+    $sth = $dbh->prepare( $sql ) || ldie "Prep: Insert ${lname}_NODES";
 
-    $sth->execute($digest,$args{'NODE'},$args{'LONGNAME'},$args{'ADDR'},
-            $first,$last) || ldie "Exec: Insert ${lname}_NODES";
+    $sth->execute( $digest, $args{'NODE'}, $args{'LONGNAME'}, $args{'ADDR'}, $first, $last ) || ldie "Exec: Insert ${lname}_NODES";
 
     $sql = "UPDATE ${lname}_NODES
             SET last = ?
             WHERE node_id = ? AND ? > last";
-    $sth = $dbh->prepare($sql) || ldie "Prep: UPDATE ${lname}_NODES";
+    $sth = $dbh->prepare( $sql ) || ldie "Prep: UPDATE ${lname}_NODES";
 
-    $sth->execute($last,$digest,$last) || ldie "Exec: UPDATE ${lname}_NODES";
+    $sth->execute( $last, $digest, $last ) || ldie "Exec: UPDATE ${lname}_NODES";
 
     return $digest;
 }
 
 sub add_session {
-    my (%args) = @_;
-    my (@mustargnames) = qw(DBH FNAME REQUEST);
-    my (@argnames) = undef;
-    if( !(%args = owpverify_args(\@argnames,\@mustargnames,%args))){
+    my ( %args )         = @_;
+    my ( @mustargnames ) = qw(DBH FNAME REQUEST);
+    my ( @argnames )     = undef;
+    if ( !( %args = owpverify_args( \@argnames, \@mustargnames, %args ) ) ) {
         ldie "add_session: Invalid args.";
     }
 
     my ( $sql, $sth, $rc, $i, @row );
-    my ( $dbh, $add_file, $reqh, $fttime);
-    my (%bwstats);
+    my ( $dbh, $add_file, $reqh, $fttime );
+    my ( %bwstats );
 
     $dbh      = $args{'DBH'};
     $add_file = $args{'FNAME'};
-    $reqh = $args{'REQUEST'};
-    $fttime = $reqh->{'TIMESTAMP'};
-    my $arch = undef;   # XXX: put back in after demo... 080720-jwb
-    # convert string to a bigint
-    $fttime = Math::BigInt->new($fttime);
+    $reqh     = $args{'REQUEST'};
+    $fttime   = $reqh->{'TIMESTAMP'};
+    my $arch = undef;    # XXX: put back in after demo... 080720-jwb
+                         # convert string to a bigint
+    $fttime = Math::BigInt->new( $fttime );
 
     my $tprefix;
     $tprefix = init_month(
-        DBH         => $dbh,
-        TIMESTAMP   => $fttime);
+        DBH       => $dbh,
+        TIMESTAMP => $fttime
+    );
 
     my $testname = $reqh->{'MEASUREMENTSET'} || "GENERAL";
-    $testname .= "_" .  $reqh->{'RECVNODE'} . "_" . $reqh->{'SENDNODE'};
+    $testname .= "_" . $reqh->{'RECVNODE'} . "_" . $reqh->{'SENDNODE'};
 
     warn "ADD_SESSION: Adding $fttime to $testname\n"
-        if defined($debug);
+        if defined( $debug );
 
     # parse iperf data
     my ( $sess_id, $min_si, $max_si, $max_ei );
@@ -871,18 +836,18 @@ sub add_session {
     local *SESS;
     open( SESS, "<$add_file" )
         || ldie "Unable to open $add_file";
-    while (<SESS>) {
+    while ( <SESS> ) {
         my ( $id, $si, $ei, $txfr, $bw, $jitter, $nlost, $nsent );
 
         ( $jitter, $nlost, $nsent ) = ( undef, undef, undef );
 
         # ignore bogus sessions
-        if (m#\(nan\%\)#) {       #"nan" displayed for number
+        if ( m#\(nan\%\)# ) {    #"nan" displayed for number
             warn "IGNORED: nan in $testname file = $add_file\n";
             %sess_summ = ();
             last;
         }
-        if (m#read failed: Connection refused#) {
+        if ( m#read failed: Connection refused# ) {
             warn "IGNORED: connrefused in $testname file = $add_file\n";
             %sess_summ = ();
             last;
@@ -891,22 +856,22 @@ sub add_session {
         if (   ( ( $id, $si, $ei, $txfr, $bw, $jitter, $nlost, $nsent ) = m#\[\s*(\d+)\s*\]\s+([0-9\.]+)\s*\-\s*([0-9\.]+)\s+sec\s+(\d+)\s+Bytes\s+(\d+)\s+bits/sec\s+([0-9\.]+)\s+ms\s+(\d+)/(\d+)\s+# )
             || ( ( $id, $si, $ei, $txfr, $bw ) = m#\[\s*(\d+)\s*\]\s+([0-9\.]+)\s*\-\s*([0-9\.]+)\s+sec\s+(\d+)\s+Bytes\s+(\d+)\s+bits/sec# ) )
         {
-            $sess_id = $id if ( !defined($sess_id) );
+            $sess_id = $id if ( !defined( $sess_id ) );
             next if ( $id != $sess_id );
 
-            if ( !defined($min_si) ) {
+            if ( !defined( $min_si ) ) {
                 $min_si = $si;
             }
             else {
                 $min_si = $si if ( $si < $min_si );
             }
-            if ( !defined($max_si) ) {
+            if ( !defined( $max_si ) ) {
                 $max_si = $si;
             }
             else {
                 $max_si = $si if ( $si > $max_si );
             }
-            if ( !defined($max_ei) ) {
+            if ( !defined( $max_ei ) ) {
                 $max_ei = $ei;
             }
             else {
@@ -920,7 +885,7 @@ sub add_session {
     if ( ( keys %sess_summ ) <= 0 ) {
         warn "BEGIN IGNORED: empty $testname file = $add_file";
         seek SESS, 0, 0;
-        while (<SESS>) {
+        while ( <SESS> ) {
             warn "$add_file: $_\n";
         }
         warn "END IGNORED: empty $testname file = $add_file";
@@ -929,7 +894,7 @@ sub add_session {
     if ( !exists( $sess_summ{"${min_si}_${max_ei}"} ) ) {
         warn "BEGIN IGNORED: NO SESS Summary: $testname: $add_file";
         seek SESS, 0, 0;
-        while (<SESS>) {
+        while ( <SESS> ) {
             warn "$add_file: $_\n";
         }
         warn "END IGNORED: NO SESS Summary: $testname: $add_file";
@@ -944,47 +909,62 @@ sub add_session {
 
     #data is good - now save session into the database.
 
-#    # XXX: Archiving needs to be redone...
-#    if ( defined($arch) ) {
-#        $arch->add(
-#            DBH      => $dbh,
-#            DATAFILE => $add_file,
-#            TESTID   => $testid_ca{$testname},
-#            MESH     => $mtype,
-#            RECV     => $recv,
-#            SEND     => $send,
-#            START    => $fttime,
-#            'END'    => $fttime
-#        ) || ldie "Unable to archive $add_file";
-#    }
+    #    # XXX: Archiving needs to be redone...
+    #    if ( defined($arch) ) {
+    #        $arch->add(
+    #            DBH      => $dbh,
+    #            DATAFILE => $add_file,
+    #            TESTID   => $testid_ca{$testname},
+    #            MESH     => $mtype,
+    #            RECV     => $recv,
+    #            SEND     => $send,
+    #            START    => $fttime,
+    #            'END'    => $fttime
+    #        ) || ldie "Unable to archive $add_file";
+    #    }
 
     # First save metadata (host and testspec info)
-    my ($tspec_id,$recv_id,$send_id);
-    if( !($tspec_id = save_tspec(
-            DBH         => $dbh,
-            TIMESTAMP   => $fttime,
-            REQUEST     => $reqh,
-            ))){
+    my ( $tspec_id, $recv_id, $send_id );
+    if (
+        !(
+            $tspec_id = save_tspec(
+                DBH       => $dbh,
+                TIMESTAMP => $fttime,
+                REQUEST   => $reqh,
+            )
+        )
+        )
+    {
         ldie "Unable to save testspec for test=$testname";
     }
 
-    if( !($recv_id = save_node(
-            DBH         => $dbh,
-            NODE        => $reqh->{'RECVNODE'},
-            ADDR        => $reqh->{'RECVADDR'},
-            LONGNAME    => $reqh->{'RECVLONGNAME'},
-            TIMESTAMP        => $fttime,
-            ))){
+    if (
+        !(
+            $recv_id = save_node(
+                DBH       => $dbh,
+                NODE      => $reqh->{'RECVNODE'},
+                ADDR      => $reqh->{'RECVADDR'},
+                LONGNAME  => $reqh->{'RECVLONGNAME'},
+                TIMESTAMP => $fttime,
+            )
+        )
+        )
+    {
         ldie "Unable to save NODE=$reqh->{'RECVNODE'}";
     }
 
-    if( !($send_id = save_node(
-            DBH         => $dbh,
-            NODE        => $reqh->{'SENDNODE'},
-            ADDR        => $reqh->{'SENDADDR'},
-            LONGNAME    => $reqh->{'SENDLONGNAME'},
-            TIMESTAMP        => $fttime,
-            ))){
+    if (
+        !(
+            $send_id = save_node(
+                DBH       => $dbh,
+                NODE      => $reqh->{'SENDNODE'},
+                ADDR      => $reqh->{'SENDADDR'},
+                LONGNAME  => $reqh->{'SENDLONGNAME'},
+                TIMESTAMP => $fttime,
+            )
+        )
+        )
+    {
         ldie "Unable to save NODE=$reqh->{'SENDNODE'}";
     }
 
@@ -1000,49 +980,49 @@ sub add_session {
 		sent
 	)
 	VALUES(?,?,?,?,?,?,?,?,?)";
-    if( !( $sth = $dbh->prepare($sql) ) ) {
+    if ( !( $sth = $dbh->prepare( $sql ) ) ) {
         ldie "Prep: Insert $testname";
     }
 
     my @vals = @{ $sess_summ{"${min_si}_${max_ei}"} };
     shift @vals;
     shift @vals;
-    if ( !( $rc = $sth->execute( $send_id, $recv_id, $tspec_id, owptstampi($fttime), $fttime, @vals ) ) ) {
+    if ( !( $rc = $sth->execute( $send_id, $recv_id, $tspec_id, owptstampi( $fttime ), $fttime, @vals ) ) ) {
         ldie "Insert $testname";
     }
 
     warn "ADD_SESSION: $testname: inserted $add_file"
-        if defined($verbose);
+        if defined( $verbose );
 
-#ERROR:
-#    if ( defined($arch) ) {
-#        if ( !$rollback ) {
-#            $arch->validate(
-#                DBH    => $dbh,
-#                TESTID => $testid_ca{$testname},
-#                TO     => $fttime
-#            );
-#        }
-#        else {
-#            $arch->rm(
-#                DBH      => $dbh,
-#                DATAFILE => $add_file,
-#                TESTID   => $testid_ca{$testname},
-#                MESH     => $mtype,
-#                RECV     => $recv,
-#                SEND     => $send,
-#                START    => $fttime,
-#                'END'    => $fttime
-#            );
-#        }
-#    }
+    #ERROR:
+    #    if ( defined($arch) ) {
+    #        if ( !$rollback ) {
+    #            $arch->validate(
+    #                DBH    => $dbh,
+    #                TESTID => $testid_ca{$testname},
+    #                TO     => $fttime
+    #            );
+    #        }
+    #        else {
+    #            $arch->rm(
+    #                DBH      => $dbh,
+    #                DATAFILE => $add_file,
+    #                TESTID   => $testid_ca{$testname},
+    #                MESH     => $mtype,
+    #                RECV     => $recv,
+    #                SEND     => $send,
+    #                START    => $fttime,
+    #                'END'    => $fttime
+    #            );
+    #        }
+    #    }
 
     return 1;
 }
 
 sub do_req {
     my ( $fh, $md5, $dbh, %req ) = @_;
-    my (%resp);
+    my ( %resp );
 
     die "Invalid OP request"
         if ( !exists $req{'OP'} || $req{'OP'} ne 'TXFR' );
@@ -1054,12 +1034,12 @@ sub do_req {
 
     my $len = $req{'FILESIZE'} + 0;
 
-    my ($tfh,$tfname) = tempfile( DIR => $datadir );
+    my ( $tfh, $tfname ) = tempfile( DIR => $datadir );
 
     $ldiefile = $tfname;
 
 RLOOP:
-    while ($len) {
+    while ( $len ) {
 
         # all read/write errors are fatal - make the client reconnect.
         my ( $written, $buf, $rlen, $offset );
@@ -1083,7 +1063,7 @@ RLOOP:
         $len -= $rlen;
         $offset = 0;
     WLOOP:
-        while ($rlen) {
+        while ( $rlen ) {
             undef $written;
             eval {
                 local $SIG{ALRM} = sub { die "alarm\n" };
@@ -1110,29 +1090,30 @@ RLOOP:
     # close and reopen to ensure flushing of file, and because
     # I don't want to try and mix read/sysread here.
     $tfh = new IO::File "<$tfname";
-    if ( !defined($tfh) ) {
+    if ( !defined( $tfh ) ) {
         ldie "Unable to open $tfname for md5 check: $!";
     }
 
     $md5->reset;
-    $md5->addfile($tfh);
+    $md5->addfile( $tfh );
     undef $tfh;
     if ( $md5->hexdigest ne $req{'FILEMD5'} ) {
         ldie "Failed File MD5!";
     }
 
     my %add_args = (
-        'DBH'      => $dbh,
-        'FNAME'    => $tfname,
-#        'SUFFIX'   => "$sessionsuffix.i",
-#        'ARCHFILE' => $req{'FNAME'},
-#        'ARCHIVE'  => $archive,
-        'REQUEST'  => \%req,
+        'DBH'   => $dbh,
+        'FNAME' => $tfname,
+
+        #        'SUFFIX'   => "$sessionsuffix.i",
+        #        'ARCHFILE' => $req{'FNAME'},
+        #        'ARCHIVE'  => $archive,
+        'REQUEST' => \%req,
     );
 
-    add_session(%add_args) || ldie "Unable to add $tfname";
+    add_session( %add_args ) || ldie "Unable to add $tfname";
 
-    if ($profile) {
+    if ( $profile ) {
         my $pfh = $dbh->{Profile};
         warn "Flushing profile to disk!\n";
     }
@@ -1180,7 +1161,7 @@ sub write_response {
             TIMEOUT    => $timeout
         )
     );
-    $md5->add($secret);
+    $md5->add( $secret );
     return if (
         !sys_writeline(
             FILEHANDLE => $fh,
@@ -1200,7 +1181,7 @@ sub write_response {
 }
 
 sub child_catch {
-    my ($signame) = @_;
+    my ( $signame ) = @_;
 
     return if ( $signame =~ /CHLD/ );
 
@@ -1210,7 +1191,7 @@ sub child_catch {
 }
 
 sub handle_req {
-    my ($fh) = @_;
+    my ( $fh ) = @_;
     my $nname;
 
     if ( $nname = $ignore_node{ $fh->peerhost } ) {
@@ -1228,10 +1209,10 @@ sub handle_req {
     my $pid = fork;
 
     # error
-    die "fork(): $!" if ( !defined($pid) );
+    die "fork(): $!" if ( !defined( $pid ) );
 
     # parent
-    return $pid if ($pid);
+    return $pid if ( $pid );
 
     # child continues
 
@@ -1263,24 +1244,24 @@ sub handle_req {
     vec( $rin, $fh->fileno, 1 ) = 1;
     $ein = $rin;
 
-    my ($nreqs) = 0;
+    my ( $nreqs ) = 0;
 
 REQ_LOOP:
-    while (1) {
+    while ( 1 ) {
         my ( %req, %response );
 
-        $die++ if ( ( $nreqs > 0 ) && ($onereq) );
+        $die++ if ( ( $nreqs > 0 ) && ( $onereq ) );
 
         #
         # accept signals during select
         #
-        last if ($die);
+        last if ( $die );
         eval { sigprocmask( SIG_SETMASK, $old_mask ); };
-        last if ($die);
-        die "\$@ = $@" if ($@);
-        eval { ($nfound) = select( $rout = $rin, undef, $eout = $ein, $timeout ); };
-        last           if ($die);
-        die "\$@ = $@" if ($@);
+        last if ( $die );
+        die "\$@ = $@" if ( $@ );
+        eval { ( $nfound ) = select( $rout = $rin, undef, $eout = $ein, $timeout ); };
+        last           if ( $die );
+        die "\$@ = $@" if ( $@ );
         last           if ( vec( $eout, $fh->fileno, 1 ) );
         last           if ( !vec( $rout, $fh->fileno, 1 ) );
 
@@ -1288,14 +1269,14 @@ REQ_LOOP:
 
         undef %req;
         %req = read_req( $fh, $md5 );
-        last if ($die);
+        last if ( $die );
 
         #
         # Once we start doing the request - we block sigs until
         # after the response is complete.
         eval { sigprocmask( SIG_BLOCK, $block_mask ); };
-        last if ($die);
-        die "\$@ = $@" if ($@);
+        last if ( $die );
+        die "\$@ = $@" if ( $@ );
 
         undef %response;
         if ( !( %response = do_req( $fh, $md5, $dbh, %req ) ) ) {
@@ -1316,3 +1297,47 @@ REQ_LOOP:
 }
 
 1;
+
+__END__
+
+=head1 SEE ALSO
+
+L<Carp>, L<FindBin>, L<Getopt::Std>, L<Socket>, L<POSIX>, L<File::Path>,
+L<Digest::MD5>, L<OWP>, L<OWP::Syslog>, L<OWP::RawIO>, L<OWP::Archive>,
+L<OWP::Utils>, L<OWP::Helper>, L<Sys::Syslog>, L<File::Basename>, L<File::Temp>,
+L<Fcntl>, L<FileHandle>, L<IO::Socket>, L<DB_File>, L<DBI>
+
+To join the 'perfSONAR Users' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/perfsonar-ps-users
+
+The perfSONAR-PS subversion repository is located at:
+
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Jeff W. Boote <boote@internet2.edu>
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2004-2009, Internet2
+
+All rights reserved.
+
+=cut

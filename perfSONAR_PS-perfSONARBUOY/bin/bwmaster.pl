@@ -1,34 +1,24 @@
 #!/usr/bin/perl -w
 # ex: set tabstop=4 ai expandtab softtabstop=4 shiftwidth=4:
 # -*- mode: c-basic-indent: 4; tab-width: 4; indent-tabs-mode: nil -*-
-#
-#      $Id$
-#
-#########################################################################
-#
-#			   Copyright (C)  2002-2008
-#	     			Internet2
-#			   All Rights Reserved
-#
-#########################################################################
-#
-#	File:		bwmaster.pl
-#
-#	Author:		Jeff W. Boote  - Internet2
-#	                Jason Zurawski - Internet2
-#
-#	Date:		Wed Nov 12 11:12:47 MST 2003
-#
-#	Description:
-#
-#	Usage:
-#
-#	Environment:
-#
-#	Files:
-#
-#	Options:
+
 use strict;
+use warnings;
+
+our $VERSION = 3.1;
+
+=head1 NAME
+
+bwmaster.pl - Control BWCTL measurement in perfSONAR-BUOY
+
+=head1 DESCRIPTION
+
+Using the owmesh.conf file as a guide, perform specified measurements and store
+the results in a database.  This script is to be run on machines that will
+perform measurements.  
+
+=cut
+
 use FindBin;
 
 # BEGIN FIXMORE HACK - DO NOT EDIT
@@ -71,7 +61,7 @@ my %options  = (
     CONFDIR    => "c:",
     LOCALNODES => "n:",
     FOREGROUND => "Z",
-    PAREXIT    => "x",  # Used to make script exit immediately after loading
+    PAREXIT    => "x",    # Used to make script exit immediately after loading
     HUP        => "h",
     KILL       => "k",
     DEBUG      => "d",
@@ -104,22 +94,22 @@ if ( defined( $amidefaults{"LOCALNODES"} ) ) {
     $tnodes = $amidefaults{"LOCALNODES"};
     if ( $tnodes =~ /:/ ) {
         @tarr = split ':', $tnodes;
-        foreach (@tarr) {
+        foreach ( @tarr ) {
             tr/a-z/A-Z/;
         }
     }
     else {
         $tnodes =~ tr/a-z/A-Z/;
-        @tarr = ($tnodes);
+        @tarr = ( $tnodes );
     }
 
     $amidefaults{"LOCALNODES"} = \@tarr;
 }
 
-my $conf  = new OWP::Conf(%amidefaults);
+my $conf = new OWP::Conf( %amidefaults );
 
 my $parexit = $conf->get_val( ATTR => 'PAREXIT' );
-if ( $parexit) {
+if ( $parexit ) {
     warn "Exiting just after loading everything... (-x specified)\n";
     exit 0;
 }
@@ -129,7 +119,7 @@ my $ttype = 'BW';
 my @localnodes = $conf->get_val( ATTR => 'LOCALNODES' );
 if ( !defined( $localnodes[0] ) ) {
     my $me = $conf->must_get_val( ATTR => 'NODE' );
-    @localnodes = ($me);
+    @localnodes = ( $me );
 }
 
 my $datadir = $conf->must_get_val( ATTR => "DataDir", TYPE => $ttype );
@@ -142,16 +132,16 @@ my $hup  = $conf->get_val( ATTR => 'HUP' );
 if ( $kill || $hup ) {
     my $pidfile = new FileHandle "$datadir/bwmaster.pid", O_RDONLY;
     die "Unable to open($datadir/bwmaster.pid): $!"
-        unless ($pidfile);
+        unless ( $pidfile );
 
     my $pid = <$pidfile>;
     die "Unable to retrieve PID from $datadir/bwmaster.pid"
-        if !defined($pid);
+        if !defined( $pid );
     chomp $pid;
-    my $sig = ($kill) ? 'TERM' : 'HUP';
+    my $sig = ( $kill ) ? 'TERM' : 'HUP';
     if ( kill( $sig, $pid ) ) {
         warn "Sent $sig to $pid\n";
-        exit(0);
+        exit( 0 );
     }
     die "Unable to send $sig to $pid: $!";
 }
@@ -165,14 +155,14 @@ setids(
 my $facility = $conf->must_get_val( ATTR => 'SyslogFacility', TYPE => $ttype );
 
 # setup syslog
-local (*MYLOG);
+local ( *MYLOG );
 my $slog = tie *MYLOG, 'OWP::Syslog',
     facility   => $facility,
     log_opts   => 'pid',
     setlogsock => 'unix';
 
 # make die/warn goto syslog, and also to STDERR.
-$slog->HandleDieWarn(*STDERR);
+$slog->HandleDieWarn( *STDERR );
 undef $slog;    # Don't keep tie'd ref's around unless you need them...
 
 #
@@ -187,21 +177,25 @@ my $suffix = $conf->must_get_val( ATTR => "SessionSuffix", TYPE => $ttype );
 #
 # Central server values
 #
-my $secretname   = $conf->must_get_val(
-                                ATTR => 'SECRETNAME',
-                                TYPE => $ttype );
-my $secret       = $conf->must_get_val(
-                                ATTR => $secretname,
-                                TYPE => $ttype );
+my $secretname = $conf->must_get_val(
+    ATTR => 'SECRETNAME',
+    TYPE => $ttype
+);
+my $secret = $conf->must_get_val(
+    ATTR => $secretname,
+    TYPE => $ttype
+);
 my $fullcentral_host = $conf->must_get_val(
-                                ATTR => 'CentralHost',
-                                TYPE => $ttype );
-my $timeout      = $conf->must_get_val(
-                                ATTR => 'SendTimeout',
-                                TYPE => $ttype );
+    ATTR => 'CentralHost',
+    TYPE => $ttype
+);
+my $timeout = $conf->must_get_val(
+    ATTR => 'SendTimeout',
+    TYPE => $ttype
+);
 
-my ($central_host,$central_port) = split_addr($fullcentral_host);
-if (!defined($central_port)){
+my ( $central_host, $central_port ) = split_addr( $fullcentral_host );
+if ( !defined( $central_port ) ) {
     die "Invalid CentralHost value: $fullcentral_host";
 }
 
@@ -221,19 +215,22 @@ my ( %pid2info, $dir );
 # host.
 #
 my @bwctltests = $conf->get_list(
-    LIST    => 'TESTSPEC',
-    ATTR    => 'TOOL',
-    VALUE   => 'bwctl/iperf');
+    LIST  => 'TESTSPEC',
+    ATTR  => 'TOOL',
+    VALUE => 'bwctl/iperf'
+);
 
 #
 # now find the actual measurement sets
 #
-my (@meassets,$ttest);
-foreach $ttest (@bwctltests){
-    push @meassets, $conf->get_list(
-        LIST    => 'MEASUREMENTSET',
-        ATTR    => 'TESTSPEC',
-        VALUE   => $ttest);
+my ( @meassets, $ttest );
+foreach $ttest ( @bwctltests ) {
+    push @meassets,
+        $conf->get_list(
+        LIST  => 'MEASUREMENTSET',
+        ATTR  => 'TESTSPEC',
+        VALUE => $ttest
+        );
 }
 
 #
@@ -243,24 +240,25 @@ foreach $ttest (@bwctltests){
 my ( $mset, $myaddr, $oaddr, $raddr, $saddr );
 my ( $recv, $send );
 my @dirlist;
-foreach $mset (@meassets) {
+foreach $mset ( @meassets ) {
     my $me;
 
     my $msetdesc = new OWP::MeasSet(
-        CONF            => $conf,
-        MEASUREMENTSET  => $mset);
+        CONF           => $conf,
+        MEASUREMENTSET => $mset
+    );
 
     # skip msets that are invoked centrally
-    next if ( $msetdesc->{'CENTRALLY_INVOLKED'});
+    next if ( $msetdesc->{'CENTRALLY_INVOLKED'} );
 
-    foreach $me (@localnodes) {
+    foreach $me ( @localnodes ) {
 
-        if(defined($conf->get_val(NODE=>$me,ATTR=>'NOAGENT'))){
+        if ( defined( $conf->get_val( NODE => $me, ATTR => 'NOAGENT' ) ) ) {
             die "configuration specifies NODE=$me should not run an agent";
         }
 
         # determine path for recv-relative tests started from this host
-        foreach $recv ( keys %{ $msetdesc->{'RECEIVERS'} }){
+        foreach $recv ( keys %{ $msetdesc->{'RECEIVERS'} } ) {
 
             #
             #
@@ -268,7 +266,7 @@ foreach $mset (@meassets) {
             #
             next if ( $me ne $recv );
 
-            foreach $send ( @{ $msetdesc->{'RECEIVERS'}->{$recv}} ) {
+            foreach $send ( @{ $msetdesc->{'RECEIVERS'}->{$recv} } ) {
 
                 # bwctl always excludes self tests.
                 next if ( $recv eq $send );
@@ -279,7 +277,7 @@ foreach $mset (@meassets) {
 
         # determine path for send-relative tests started from this host
         # (If the remote host does not run bwmaster.)
-        foreach $send ( keys %{ $msetdesc->{'SENDERS'} }){
+        foreach $send ( keys %{ $msetdesc->{'SENDERS'} } ) {
 
             #
             #
@@ -287,13 +285,13 @@ foreach $mset (@meassets) {
             #
             next if ( $me ne $send );
 
-            foreach $recv ( @{ $msetdesc->{'SENDERS'}->{$send}} ) {
+            foreach $recv ( @{ $msetdesc->{'SENDERS'}->{$send} } ) {
 
                 # bwctl always excludes self tests.
                 next if ( $recv eq $send );
 
                 # run 'sender' side tests for noagent receivers
-                next if (!defined($conf->get_val(NODE=>$recv,ATTR=>'NOAGENT')));
+                next if ( !defined( $conf->get_val( NODE => $recv, ATTR => 'NOAGENT' ) ) );
 
                 push @dirlist, "$mset/$recv/$send";
             }
@@ -307,7 +305,7 @@ mkpath( [ map { join '/', $datadir, $_ } @dirlist ], 0, 0775 );
 chdir $datadir || die "Unable to chdir to $datadir";
 die "$bwcmd not executable" if ( !-x $bwcmd );
 
-my ($MD5) = new Digest::MD5
+my ( $MD5 ) = new Digest::MD5
     || die "Unable to create md5 context";
 
 if ( !$foreground ) {
@@ -318,7 +316,7 @@ if ( !$foreground ) {
 # setup pipe - read side used by send_data, write side used by all
 # bwctl children.
 my ( $rfd, $wfd ) = POSIX::pipe();
-local (*WRITEPIPE);
+local ( *WRITEPIPE );
 open( WRITEPIPE, ">&=$wfd" ) || die "Can't fdopen write end of pipe";
 
 # setup signal handling before starting child processes to catch
@@ -327,7 +325,7 @@ my ( $reset, $die, $sigchld ) = ( 0, 0, 0 );
 my $interrupt = 0;
 
 sub catch_sig {
-    my ($signame) = @_;
+    my ( $signame ) = @_;
 
     return if !defined $signame;
 
@@ -356,7 +354,7 @@ $SIG{INT} = $SIG{TERM} = $SIG{HUP} = $SIG{CHLD} = \&catch_sig;
 # and returns. (As bwctl finishes files, send_data adds each file
 # to it's work que.)
 my $pid = send_data( $conf, $rfd, @dirlist );
-@{ $pid2info{$pid} } = ("send_data");
+@{ $pid2info{$pid} } = ( "send_data" );
 
 #
 # bwctl setup loop - creates a bwctl process for each path that should
@@ -368,28 +366,30 @@ my $pid = send_data( $conf, $rfd, @dirlist );
 # at the database.
 # (bwctl outputs the filenames it produces on stdout.)
 #
-foreach $mset (@meassets) {
+foreach $mset ( @meassets ) {
     my $me;
 
     my $msetdesc = new OWP::MeasSet(
-        CONF            => $conf,
-        MEASUREMENTSET  => $mset);
+        CONF           => $conf,
+        MEASUREMENTSET => $mset
+    );
 
     # skip msets that are invoked centrally
-    next if ( $msetdesc->{'CENTRALLY_INVOLKED'});
+    next if ( $msetdesc->{'CENTRALLY_INVOLKED'} );
 
-    if ( defined($debug) ) {
+    if ( defined( $debug ) ) {
         warn "Starting MeasurementSet=$mset\n";
     }
 
-    foreach $me (@localnodes) {
+    foreach $me ( @localnodes ) {
 
-        if(defined($conf->get_val(NODE=>$me,ATTR=>'NOAGENT'))){
+        if ( defined( $conf->get_val( NODE => $me, ATTR => 'NOAGENT' ) ) ) {
             die "configuration specifies NODE=$me should not run an agent";
         }
 
         # determine addresses for recv-relative tests started from this host
-        foreach $recv ( keys %{ $msetdesc->{'RECEIVERS'} }){
+        foreach $recv ( keys %{ $msetdesc->{'RECEIVERS'} } ) {
+
             #
             # If recv is not the localnode currently doing, skip.
             #
@@ -405,18 +405,18 @@ foreach $mset (@meassets) {
                 )
             );
 
-            my ($rhost,$rport) = split_addr($myaddr);
-            if (!defined($rhost)){
+            my ( $rhost, $rport ) = split_addr( $myaddr );
+            if ( !defined( $rhost ) ) {
                 die "Invalid bwctld addr:port value: $myaddr";
             }
-            if (!defined($rport)){
+            if ( !defined( $rport ) ) {
                 $raddr = $rhost;
             }
-            else{
+            else {
                 $raddr = "[$rhost]:$rport";
             }
 
-            foreach $send ( @{ $msetdesc->{'RECEIVERS'}->{$recv}} ) {
+            foreach $send ( @{ $msetdesc->{'RECEIVERS'}->{$recv} } ) {
                 my $starttime;
 
                 # bwctl always excludes self tests.
@@ -432,29 +432,29 @@ foreach $mset (@meassets) {
                     )
                 );
 
-                my ($shost,$sport) = split_addr($oaddr);
-                if (!defined($shost)){
+                my ( $shost, $sport ) = split_addr( $oaddr );
+                if ( !defined( $shost ) ) {
                     die "Invalid bwctld addr:port value: $oaddr";
                 }
-                if (!defined($sport)){
+                if ( !defined( $sport ) ) {
                     $saddr = $shost;
                 }
-                else{
+                else {
                     $saddr = "[$shost]:$sport";
                 }
 
-                my($bindaddr) = $rhost;
+                my ( $bindaddr ) = $rhost;
 
-                warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined($debug) );
-                $starttime = OWP::Utils::time2owptime(time);
-                $pid = bwctl($msetdesc, $bindaddr, $recv, $raddr, $send,$saddr);
+                warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined( $debug ) );
+                $starttime = OWP::Utils::time2owptime( time );
+                $pid = bwctl( $msetdesc, $bindaddr, $recv, $raddr, $send, $saddr );
                 @{ $pid2info{$pid} } = ( "bwctl", $starttime, $msetdesc, $bindaddr, $recv, $raddr, $send, $saddr );
             }
         }
 
         # determine path for send-relative tests started from this host
         # (If the remote host does not run bwmaster.)
-        foreach $send ( keys %{ $msetdesc->{'SENDERS'} }){
+        foreach $send ( keys %{ $msetdesc->{'SENDERS'} } ) {
 
             #
             # If send is not the localnode currently doing, skip.
@@ -472,25 +472,25 @@ foreach $mset (@meassets) {
                     )
                 )
             );
-            my ($shost,$sport) = split_addr($myaddr);
-            if (!defined($shost)){
+            my ( $shost, $sport ) = split_addr( $myaddr );
+            if ( !defined( $shost ) ) {
                 die "Invalid bwctld addr:port value: $myaddr";
             }
-            if (!defined($sport)){
+            if ( !defined( $sport ) ) {
                 $saddr = $shost;
             }
-            else{
+            else {
                 $saddr = "[$shost]:$sport";
             }
 
-            foreach $recv ( @{ $msetdesc->{'SENDERS'}->{$send}} ) {
+            foreach $recv ( @{ $msetdesc->{'SENDERS'}->{$send} } ) {
                 my $starttime;
 
                 # bwctl always excludes self tests.
                 next if ( $recv eq $send );
 
                 # only run 'sender' side tests for noagent receivers
-                next if (!defined($conf->get_val(NODE=>$recv,ATTR=>'NOAGENT')));
+                next if ( !defined( $conf->get_val( NODE => $recv, ATTR => 'NOAGENT' ) ) );
 
                 next if (
                     !(
@@ -502,22 +502,22 @@ foreach $mset (@meassets) {
                     )
                 );
 
-                my ($rhost,$rport) = split_addr($oaddr);
-                if (!defined($rhost)){
+                my ( $rhost, $rport ) = split_addr( $oaddr );
+                if ( !defined( $rhost ) ) {
                     die "Invalid bwctld addr:port value: $oaddr";
                 }
-                if (!defined($rport)){
+                if ( !defined( $rport ) ) {
                     $raddr = $rhost;
                 }
-                else{
+                else {
                     $raddr = "[$rhost]:$rport";
                 }
 
-                my ($bindaddr) = $shost;
+                my ( $bindaddr ) = $shost;
 
-                warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined($debug) );
-                $starttime = OWP::Utils::time2owptime(time);
-                $pid = bwctl($msetdesc, $bindaddr, $recv, $raddr, $send,$saddr);
+                warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined( $debug ) );
+                $starttime = OWP::Utils::time2owptime( time );
+                $pid = bwctl( $msetdesc, $bindaddr, $recv, $raddr, $send, $saddr );
                 @{ $pid2info{$pid} } = ( "bwctl", $starttime, $msetdesc, $bindaddr, $recv, $raddr, $send, $saddr );
 
             }
@@ -531,7 +531,7 @@ foreach $mset (@meassets) {
 # a HUP to that bwctl to make it reset tests with that node.
 # This loop also watches all child processes and restarts them as necessary.
 MESSAGE:
-while (1) {
+while ( 1 ) {
     my $funcname;
     my $fullmsg;
 
@@ -545,7 +545,7 @@ while (1) {
             $die++;
             warn "Exiting... Deleting sub-processes...\n";
             my $pidlist = join " ", keys %pid2info;
-            warn "Deleting: $pidlist" if ( defined($debug) );
+            warn "Deleting: $pidlist" if ( defined( $debug ) );
         }
         $funcname = "kill";
         eval {
@@ -557,16 +557,16 @@ while (1) {
             $sigchld++;
         };
     }
-    elsif ($sigchld) {
+    elsif ( $sigchld ) {
         ;
     }
     else {
         $funcname  = "sigsuspend";
         $interrupt = 1;
-        eval { sigsuspend($old_mask); };
+        eval { sigsuspend( $old_mask ); };
         $interrupt = 0;
     }
-    for ($@) {
+    for ( $@ ) {
         ( /^$/ || /^SIG/ ) and last;
         last if ( $! == EINTR );
         die "$funcname(): $!";
@@ -575,7 +575,7 @@ while (1) {
     #
     # Signal received - update run-state.
     #
-    if ($sigchld || $die || $reset ) {
+    if ( $sigchld || $die || $reset ) {
         my $wpid;
         $sigchld = 0;
 
@@ -608,14 +608,14 @@ while (1) {
                 # $$info[2] is now "node"
                 warn "Restart bwctl->$$info[2]:!";
 
-                my $starttime = OWP::Utils::time2owptime(time);
-                $pid = bwctl(@$info);
+                my $starttime = OWP::Utils::time2owptime( time );
+                $pid = bwctl( @$info );
                 @{ $pid2info{$pid} } = ( "bwctl", $starttime, @$info );
             }
         }
     }
 
-    if ($reset) {
+    if ( $reset ) {
         next if ( ( keys %pid2info ) > 0 );
         warn "Restarting...\n";
         die "Unable to exec!"
@@ -623,7 +623,7 @@ while (1) {
         exec $FindBin::Bin. "/" . $FindBin::Script, @SAVEARGV;
     }
 
-    if ($die) {
+    if ( $die ) {
         if ( ( keys %pid2info ) > 0 ) {
             sleep 1;
             next;
@@ -633,7 +633,7 @@ while (1) {
 
 }
 
-my ($SendServer) = undef;
+my ( $SendServer ) = undef;
 
 sub OpenServer {
     return if ( defined $SendServer );
@@ -650,7 +650,7 @@ sub OpenServer {
         );
     };
 
-    if ($@) {
+    if ( $@ ) {
         warn "Unable to contact Home($central_host):$@\n";
     }
 
@@ -671,15 +671,15 @@ sub fail_server {
 
 sub txfr {
     my ( $fh, $fname, %req ) = @_;
-    my (%resp);
+    my ( %resp );
 
     OpenServer;
-    if ( !$SendServer ){
-        warn "Server currently unreachable..." if defined($verbose);
+    if ( !$SendServer ) {
+        warn "Server currently unreachable..." if defined( $verbose );
         return undef;
     }
 
-    my ($line) = "BW 2.0";
+    my ( $line ) = "BW 2.0";
     $MD5->reset;
     return undef if (
         !sys_writeline(
@@ -692,7 +692,7 @@ sub txfr {
     );
     foreach ( keys %req ) {
         my $val = $req{$_};
-        warn "req\{$_\} = $val" if($debug);
+        warn "req\{$_\} = $val" if ( $debug );
         return undef if (
             !sys_writeline(
                 FILEHANDLE => $SendServer,
@@ -710,7 +710,7 @@ sub txfr {
             CALLBACK   => \&fail_server
         )
     );
-    $MD5->add($secret);
+    $MD5->add( $secret );
     return undef if (
         !sys_writeline(
             FILEHANDLE => $SendServer,
@@ -726,9 +726,9 @@ sub txfr {
             CALLBACK   => \&fail_server
         )
     );
-    my ($len) = $req{'FILESIZE'};
+    my ( $len ) = $req{'FILESIZE'};
 RLOOP:
-    while ($len) {
+    while ( $len ) {
 
         # local read errors are fatal
         my ( $written, $buf, $rlen, $offset );
@@ -740,7 +740,7 @@ RLOOP:
             $rlen = sysread $fh, $buf, $len;
             alarm 0;
         };
-        if ( !defined($rlen) ) {
+        if ( !defined( $rlen ) ) {
             if ( ( $! == EINTR ) && ( $@ ne "alarm\n" ) && ( $@ ne "pipe\n" ) ) {
                 next RLOOP;
             }
@@ -752,7 +752,7 @@ RLOOP:
         $len -= $rlen;
         $offset = 0;
     WLOOP:
-        while ($rlen) {
+        while ( $rlen ) {
 
             # socket write errors cause eventual retry.
             undef $written;
@@ -763,7 +763,7 @@ RLOOP:
                 $written = syswrite $SendServer, $buf, $rlen, $offset;
                 alarm 0;
             };
-            if ( !defined($written) ) {
+            if ( !defined( $written ) ) {
                 if ( ( $! == EINTR ) && ( $@ ne "alarm\n" ) && ( $@ ne "pipe\n" ) ) {
                     next WLOOP;
                 }
@@ -779,13 +779,13 @@ RLOOP:
 
     $MD5->reset;
     my ( $pname, $pval );
-    while (1) {
+    while ( 1 ) {
         $_ = sys_readline( FILEHANDLE => $SendServer, TIMEOUT => $timeout );
         if ( defined $_ ) {
-            last if (/^$/);    # end of message
-            $MD5->add($_);
-            next if (/^\s*#/);    # comments
-            next if (/^\s*$/);    # blank lines
+            last if ( /^$/ );    # end of message
+            $MD5->add( $_ );
+            next if ( /^\s*#/ );    # comments
+            next if ( /^\s*$/ );    # blank lines
 
             if ( ( $pname, $pval ) = /^(\w+)\s+(.*)/o ) {
                 $pname =~ tr/a-z/A-Z/;
@@ -794,20 +794,20 @@ RLOOP:
             }
 
             # Invalid message!
-            warn("Invalid message \"$_\" from server!");
+            warn( "Invalid message \"$_\" from server!" );
         }
         else {
-            warn("Socket closed to server!");
+            warn( "Socket closed to server!" );
         }
         return fail_server;
     }
-    $MD5->add($secret);
+    $MD5->add( $secret );
     if ( $MD5->hexdigest ne sys_readline( FILEHANDLE => $SendServer, TIMEOUT => $timeout ) ) {
-        warn("Invalid MD5 for server response!");
+        warn( "Invalid MD5 for server response!" );
         return fail_server;
     }
     if ( "" ne sys_readline( FILEHANDLE => $SendServer, TIMEOUT => $timeout ) ) {
-        warn("Invalid End Message from Server!");
+        warn( "Invalid End Message from Server!" );
         return fail_server;
     }
 
@@ -817,18 +817,18 @@ RLOOP:
 my %mscache;
 
 sub send_file {
-    my ($fname) = @_;
+    my ( $fname ) = @_;
     my ( %req, $response );
     local *SENDFILE;
 
-    warn "SEND_FILE:$fname\n" if defined($verbose);
+    warn "SEND_FILE:$fname\n" if defined( $verbose );
 
     open( SENDFILE, "<" . $fname ) || die "Unable to open $fname";
     binmode SENDFILE;
 
     # compute the md5 of the file.
     $MD5->reset;
-    $MD5->addfile(*SENDFILE);
+    $MD5->addfile( *SENDFILE );
     $req{'FILEMD5'} = $MD5->hexdigest();
 
     $req{'FILESIZE'} = sysseek SENDFILE, 0, SEEK_END;
@@ -837,7 +837,7 @@ sub send_file {
     return undef
         if ( !$req{'FILESIZE'} || !sysseek SENDFILE, 0, SEEK_SET );
 
-    if($req{'FILESIZE'} < 1){
+    if ( $req{'FILESIZE'} < 1 ) {
         warn "Ignoring empty file: $fname";
         goto DONE;
     }
@@ -848,103 +848,116 @@ sub send_file {
     #       protocol specific plugin to combine owamp/bwctl...
 
     # Send testspec information
-    my ( $fttime, $dir ) = fileparse( $fname, $suffix);
+    my ( $fttime, $dir ) = fileparse( $fname, $suffix );
     $dir =~ s#/$##;
-    my ( $msname, $recv, $send ) =
-            ( $dir =~ m#([^/]+)/([^/]+)/([^/]+)$# );
+    my ( $msname, $recv, $send ) = ( $dir =~ m#([^/]+)/([^/]+)/([^/]+)$# );
     die "Unable to decode Mesh-Path from filepath $dir" if ( !$msname );
 
     my $ms;
-    if ( !($ms = $mscache{$msname})){
+    if ( !( $ms = $mscache{$msname} ) ) {
         $ms = $mscache{$msname} = new OWP::MeasSet(
-                CONF            => $conf,
-                MEASUREMENTSET  => $msname);
+            CONF           => $conf,
+            MEASUREMENTSET => $msname
+        );
     }
-    die "Unable to create MeasSet for MEASUREMENTSET $msname" if !defined($ms);
+    die "Unable to create MeasSet for MEASUREMENTSET $msname" if !defined( $ms );
 
     $req{'MEASUREMENTSET'} = $msname;
-    $req{'DESCRIPTION'} = $ms->{'DESCRIPTION'} || $msname;
-    $req{'ADDRTYPE'} = $ms->{'ADDRTYPE'};
-    $req{'TOOL'} = $conf->must_get_val(
-                                TESTSPEC    => $ms->{'TESTSPEC'},
-                                ATTR        => 'TOOL');
+    $req{'DESCRIPTION'}    = $ms->{'DESCRIPTION'} || $msname;
+    $req{'ADDRTYPE'}       = $ms->{'ADDRTYPE'};
+    $req{'TOOL'}           = $conf->must_get_val(
+        TESTSPEC => $ms->{'TESTSPEC'},
+        ATTR     => 'TOOL'
+    );
     $req{'TIMESTAMP'} = $fttime;
 
     # XXX: Add RECVHOST/SENDHOST - need dns interaction so not yet...
     # Plus - probably want to add some caching for all this stuff.
     $req{'RECVNODE'} = $recv;
     $req{'RECVADDR'} = $conf->must_get_val(
-                                NODE        => $recv,
-                                ATTR        => 'ADDR',
-                                TYPE        => $ms->{'ADDRTYPE'});
+        NODE => $recv,
+        ATTR => 'ADDR',
+        TYPE => $ms->{'ADDRTYPE'}
+    );
     $req{'RECVLONGNAME'} = $conf->get_val(
-                                NODE        => $recv,
-                                ATTR        => 'LONGNAME',
-                                TYPE        => $ms->{'ADDRTYPE'}) ||
-                            $req{'RECVNODE'};
+        NODE => $recv,
+        ATTR => 'LONGNAME',
+        TYPE => $ms->{'ADDRTYPE'}
+    ) || $req{'RECVNODE'};
 
     $req{'SENDNODE'} = $send;
     $req{'SENDADDR'} = $conf->must_get_val(
-                                NODE        => $send,
-                                ATTR        => 'ADDR',
-                                TYPE        => $ms->{'ADDRTYPE'});
+        NODE => $send,
+        ATTR => 'ADDR',
+        TYPE => $ms->{'ADDRTYPE'}
+    );
     $req{'SENDLONGNAME'} = $conf->get_val(
-                                NODE        => $send,
-                                ATTR        => 'LONGNAME',
-                                TYPE        => $ms->{'ADDRTYPE'}) ||
-                            $req{'SENDNODE'};
-
+        NODE => $send,
+        ATTR => 'LONGNAME',
+        TYPE => $ms->{'ADDRTYPE'}
+    ) || $req{'SENDNODE'};
 
     #TODO: make this plugable - each 'tool' can add appropriate args
     my $val;
 
-    if( $val = $conf->get_val(
-            TESTSPEC    => $ms->{'TESTSPEC'},
-            ATTR        => 'BWTestDuration'
+    if (
+        $val = $conf->get_val(
+            TESTSPEC => $ms->{'TESTSPEC'},
+            ATTR     => 'BWTestDuration'
         )
-    ){
+        )
+    {
         $req{'BWTESTDURATION'} = $val;
     }
 
-    if( $conf->get_val(
-            TESTSPEC    => $ms->{'TESTSPEC'},
-            ATTR        => 'BWUDP'
+    if (
+        $conf->get_val(
+            TESTSPEC => $ms->{'TESTSPEC'},
+            ATTR     => 'BWUDP'
         )
-    ){
+        )
+    {
         $req{'BWUDP'} = 1;
-        if( $val = $conf->get_val(
-                TESTSPEC    => $ms->{'TESTSPEC'},
-                ATTR        => 'BWUDPBandwidthLimit'
+        if (
+            $val = $conf->get_val(
+                TESTSPEC => $ms->{'TESTSPEC'},
+                ATTR     => 'BWUDPBandwidthLimit'
             )
-        ){
+            )
+        {
             $req{'BWUDPBANDWIDTHLIMIT'} = $val;
         }
     }
 
-    if( $conf->get_val(
-            TESTSPEC    => $ms->{'TESTSPEC'},
-            ATTR        => 'BWTCP'
+    if (
+        $conf->get_val(
+            TESTSPEC => $ms->{'TESTSPEC'},
+            ATTR     => 'BWTCP'
         )
-    ){
+        )
+    {
         $req{'BWTCP'} = 1;
     }
 
-    if( $val = $conf->get_val(
-            TESTSPEC    => $ms->{'TESTSPEC'},
-            ATTR        => 'BWBufferLen'
+    if (
+        $val = $conf->get_val(
+            TESTSPEC => $ms->{'TESTSPEC'},
+            ATTR     => 'BWBufferLen'
         )
-    ){
+        )
+    {
         $req{'BWBUFFERLEN'} = $val;
     }
 
-    if( $val = $conf->get_val(
-            TESTSPEC    => $ms->{'TESTSPEC'},
-            ATTR        => 'BWWindowSize'
+    if (
+        $val = $conf->get_val(
+            TESTSPEC => $ms->{'TESTSPEC'},
+            ATTR     => 'BWWindowSize'
         )
-    ){
-        $req{'BWWINDOWSIZE'} = $val
+        )
+    {
+        $req{'BWWINDOWSIZE'} = $val;
     }
-
 
     # Set all the req options.
     $req{'OP'}         = 'TXFR';
@@ -968,11 +981,11 @@ sub send_data {
 
     # @flist is the workque.
     my ( @flist, $ldir );
-    foreach $ldir (@dirlist) {
+    foreach $ldir ( @dirlist ) {
         local *DIR;
         opendir( DIR, $ldir ) || die "can't opendir $_:$!";
         push @flist, map { join '/', $ldir, $_ }
-            grep {/$suffix$/} readdir(DIR);
+            grep {/$suffix$/} readdir( DIR );
         closedir DIR;
     }
 
@@ -981,11 +994,11 @@ sub send_data {
     # by directory so data is sent to central server in a more
     # time relevant way.
     #
-    if (@flist) {
+    if ( @flist ) {
 
         sub bystart {
-            my ($astart) = ( $a =~ m#/(\d+)$suffix$# );
-            my ($bstart) = ( $b =~ m#/(\d+)$suffix$# );
+            my ( $astart ) = ( $a =~ m#/(\d+)$suffix$# );
+            my ( $bstart ) = ( $b =~ m#/(\d+)$suffix$# );
 
             return $astart <=> $bstart;
         }
@@ -995,10 +1008,10 @@ sub send_data {
     my $pid = fork;
 
     # error
-    die "Can't fork send_data: $!" if ( !defined($pid) );
+    die "Can't fork send_data: $!" if ( !defined( $pid ) );
 
     #parent
-    return $pid if ($pid);
+    return $pid if ( $pid );
 
     # child continues.
     $0 = "$scriptname:send_data";
@@ -1009,7 +1022,7 @@ sub send_data {
 
     open( STDIN, "<&=$rfd" ) || die "Can't fdopen read end of pipe";
 
-    warn "Redirected STDIN from pipe" if ($debug);
+    warn "Redirected STDIN from pipe" if ( $debug );
     my ( $rin, $rout, $ein, $eout, $tmout, $nfound );
 
     $rin = '';
@@ -1017,7 +1030,7 @@ sub send_data {
     $ein = $rin;
 
 SEND_FILES:
-    while (1) {
+    while ( 1 ) {
 
         if ( scalar @flist ) {
 
@@ -1029,24 +1042,24 @@ SEND_FILES:
         }
 
         warn "Calling select with tmout=", $tmout ? $tmout : "nil"
-            if ($debug);
+            if ( $debug );
         if ( $nfound = select( $rout = $rin, undef, $eout = $ein, $tmout ) ) {
             my $newfile = sys_readline();
-            warn "push \@flist, $newfile" if ($debug);
+            warn "push \@flist, $newfile" if ( $debug );
             push @flist, $newfile;
             next SEND_FILES;
         }
 
         next if ( !scalar @flist );
 
-        my ($nextfile) = ( $flist[0] =~ /^(.*)$/ );
-        if ( send_file($nextfile) ) {
+        my ( $nextfile ) = ( $flist[0] =~ /^(.*)$/ );
+        if ( send_file( $nextfile ) ) {
             shift @flist;
         }
         else {
 
             # upload not working.. wait before trying again.
-            warn "Unable to send $nextfile" if ($verbose);
+            warn "Unable to send $nextfile" if ( $verbose );
             sleep $timeout;
         }
     }
@@ -1057,29 +1070,29 @@ sub bwctl {
     local ( *CHWFD, *CHRFD );
     my $val;
     my @cmd = ( $bwcmd, "-T", "iperf", "-e", $facility, "-p", "-B", $myaddr );
-    if ( defined($debug) ) {
-        push @cmd, ("-rvv");
+    if ( defined( $debug ) ) {
+        push @cmd, ( "-rvv" );
     }
     else {
-        push @cmd, ("-q");
+        push @cmd, ( "-q" );
     }
 
     push @cmd, ( "-R", $val ) if (
         $val = $conf->get_val(
             TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'BWTestIntervalStartAlpha'
+            ATTR     => 'BWTestIntervalStartAlpha'
         )
     );
     push @cmd, ( "-I", $val ) if (
         $val = $conf->get_val(
             TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'BWTestInterval'
+            ATTR     => 'BWTestInterval'
         )
     );
     push @cmd, ( "-i", $val ) if (
         $val = $conf->get_val(
             TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'BWReportInterval'
+            ATTR     => 'BWReportInterval'
         )
     );
 
@@ -1090,20 +1103,20 @@ sub bwctl {
     push @cmd, ( "-W", $val ) if (
         $val = $conf->get_val(
             TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'BWWindowSize'
+            ATTR     => 'BWWindowSize'
         )
     );
 
     if ( $conf->get_val( TESTSPEC => $ms->{'TESTSPEC'}, ATTR => 'BWUDP' ) ) {
-        if ( $conf->get_val( TESTSPEC => $ms->{'TESTSPEC'}, ATTR => 'BWTCP' )) {
+        if ( $conf->get_val( TESTSPEC => $ms->{'TESTSPEC'}, ATTR => 'BWTCP' ) ) {
             die "Conflicting BWTCP/BWUDP parameters TESTSPEC=$ms->{'TESTSPEC'}";
         }
 
-        push @cmd, ("-u");
+        push @cmd, ( "-u" );
         push @cmd, ( "-b", $val ) if (
             $val = $conf->get_val(
                 TESTSPEC => $ms->{'TESTSPEC'},
-                ATTR => 'BWUDPBandwidthLimit'
+                ATTR     => 'BWUDPBandwidthLimit'
             )
         );
     }
@@ -1111,26 +1124,26 @@ sub bwctl {
     push @cmd, ( "-S", $val ) if (
         $val = $conf->get_val(
             TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'BWTosBits'
+            ATTR     => 'BWTosBits'
         )
     );
 
     push @cmd, ( "-l", $val ) if (
         $val = $conf->get_val(
             TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'BWBufferLen'
+            ATTR     => 'BWBufferLen'
         )
     );
     push @cmd, ( "-t", $val ) if (
         $val = $conf->get_val(
             TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR => 'BWTestDuration'
+            ATTR     => 'BWTestDuration'
         )
     );
     push @cmd, ( "-d", "$ms->{'MEASUREMENTSET'}/$recv/$send", "-s", $saddr, "-c", $raddr );
 
     my $cmd = join " ", @cmd;
-    warn "Executing: $cmd" if ( defined($debug) );
+    warn "Executing: $cmd" if ( defined( $debug ) );
 
     open( \*CHWFD, ">&WRITEPIPE" ) || die "Can't dup pipe";
     open( \*CHRFD, "<$devnull" )   || die "Can't open $devnull";
@@ -1140,3 +1153,47 @@ sub bwctl {
 }
 
 1;
+
+__END__
+
+=head1 SEE ALSO
+
+L<FindBin>, L<Getopt::Std>, L<POSIX>, L<IPC::Open3>, L<File::Path>,
+L<File::Basename>, L<FileHandle>, L<OWP>, L<OWP::Helper>, L<OWP::MeasSet>,
+L<OWP::RawIO>, L<OWP::Syslog>, L<Sys::Syslog>, L<Digest::MD5>, L<Socket>,
+L<IO::Socket>, L<Fcntl>
+
+To join the 'perfSONAR Users' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/perfsonar-ps-users
+
+The perfSONAR-PS subversion repository is located at:
+
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Jeff W. Boote <boote@internet2.edu>
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2004-2009, Internet2
+
+All rights reserved.
+
+=cut
