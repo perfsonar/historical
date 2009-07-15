@@ -112,7 +112,7 @@ sub init {
     $self->{LOGGER} = get_logger( "perfSONAR_PS::Services::MA::perfSONARBUOY" );
 
     unless ( exists $self->{CONF}->{"root_hints_url"} ) {
-        $self->{CONF}->{"root_hints_url"} = q{};     
+        $self->{CONF}->{"root_hints_url"} = q{};
         $self->{LOGGER}->info( "gLS Hints file was not set, automatic discovery of hLS instance disabled." );
     }
 
@@ -401,120 +401,183 @@ sub createStorage {
     my $dbuserOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBUSER" } );
     my $dbpassOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBPASS" } );
 
-    my @measurementsets = $conf->get_sublist( LIST => 'MEASUREMENTSET' );
-    my $id = 0;
-    foreach my $m ( @measurementsets ) {
+    my @dateSchema = ( "year", "month" );
+    my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dateSchema, user => $dbuserBW, pass => $dbpassBW } );
+    $datedb->openDB;
+    my $result = $datedb->query( { query => "select * from DATES;" } );
+    $datedb->closeDB;
+    my $len      = $#{$result};
+    my @dateList = ();
+    for my $a ( 0 .. $len ) {
+        push @dateList, sprintf "%04d%02d", $result->[$a][0], $result->[$a][1];
+    }
 
-        my $addrType = $conf->get_val( MEASUREMENTSET => $m,     ATTR => "ADDRTYPE" );
-        my $group    = $conf->get_val( MEASUREMENTSET => $m,     ATTR => "GROUP" );
-        my $measType = $conf->get_val( GROUP          => $group, ATTR => "GROUPTYPE" );
-        unless ( $measType eq "STAR" or $measType eq "MESH" ) {
-            $self->{LOGGER}->fatal( "Group has unsupported type '" . $measType . "', aborting." );
-            return -1;
+    my $query = q{};
+    foreach my $date ( @dateList ) {
+        $query .= " union " if $query;
+        $query .= "select duration,len_buffer,window_size,tos,parallel_streams,udp,udp_bandwidth from " . $date . "_TESTSPEC";
+    }
+    $query .= ";";
+
+    my @tspecSchema = ( "tspec_id", "description", "duration", "len_buffer", "window_size", "tos", "parallel_streams", "udp", "udp_bandwidth" );
+    my $tspecdb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@tspecSchema, user => $dbuserBW, pass => $dbpassBW } );
+    $tspecdb->openDB;
+    $result = $tspecdb->query( { query => $query } );
+
+    my %tspec = ();
+    undef $len;
+    $len = $#{$result};
+    for my $a ( 0 .. $len ) {
+        $query = q{};
+        my %content = ();
+        foreach my $date ( @dateList ) {
+            $query .= " union " if $query;
+            $query .= "select tspec_id from " . $date . "_TESTSPEC where ";
+            my $query2 = q{};
+            for my $b ( 0 .. 6 ) {
+                if ( defined $result->[$a][$b] ) {
+                    $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
+                    if ( $tspecSchema[ $b + 2 ] eq "duration" ) {
+                        $content{"timeDuration"} = $result->[$a][$b];
+                    }
+                    elsif ( $tspecSchema[ $b + 2 ] eq "len_buffer" ) {
+                        $content{"bufferLength"} = $result->[$a][$b];
+                    }
+                    elsif ( $tspecSchema[ $b + 2 ] eq "window_size" ) {
+                        $content{"windowSize"} = $result->[$a][$b];
+                    }
+                    elsif ( $tspecSchema[ $b + 2 ] eq "udp" ) {
+                        if ( $result->[$a][$b] ) {
+                            $content{"protocol"} = "UDP";
+                        }
+                        else {
+                            $content{"protocol"} = "TCP";
+                        }
+                    }
+                }
+                else {
+                    $query2 .= $tspecSchema[ $b + 2 ] . " is NULL";
+                }
+                $query2 .= " and " unless $b == 6;
+            }
+            $query .= $query2;
         }
-        my @nodes = $conf->get_val( GROUP => $group, ATTR => "NODES" );
-        my $center = q{};
-        $center = $conf->get_val( GROUP => $group, ATTR => "HAUPTNODE" ) if $measType eq "STAR";
+        $query .= ";";
 
-        foreach my $c_n ( @nodes ) {
-            foreach my $n ( @nodes ) {
-                next if $c_n eq $n;
+        my $parameter = $self->generateParameters( { content => \%content } );
+        my $result2 = $tspecdb->query( { query => $query } );
+        my $len2 = $#{$result2};
+        $tspec{$a}{"xml"} = $parameter;
+        for my $b ( 0 .. $len2 ) {
+            $tspec{$a}{"id"}{ $result2->[$b][0] } = 1;
+        }
+    }
+    $tspecdb->closeDB;
 
-                if ( $measType eq "STAR" ) {
-                    next unless $c_n eq $center or $n eq $center;
-                }
+    my %node = ();
+    $query = q{};
+    foreach my $date ( @dateList ) {
+        $query .= " union " if $query;
+        $query .= "select node_id, addr from " . $date . "_NODES";
+    }
+    $query .= ";";
 
-                my $metadata = q{};
-                my $data     = q{};
+    my @nodeSchema = ( "node_id", "node_name", "longname", "addr", "first", "last" );
+    my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@nodeSchema, user => $dbuserBW, pass => $dbpassBW } );
+    $nodedb->openDB;
+    $result = $nodedb->query( { query => $query } );
+    $len = $#{$result};
+    for my $a ( 0 .. $len ) {
+        my $addr     = $result->[$a][1];
+        my @cols     = split( /:/, $addr );
+        my @nodePart = ();
+        if ( $#cols > 1 ) {
+            @nodePart = split( /\]/, $addr );
+            $nodePart[0] =~ s/^\[//;
+            $nodePart[1] =~ s/^:// if $nodePart[1];
+        }
+        else {
+            @nodePart = split( /:/, $addr );
+        }
+        $node{ $result->[$a][0] }{"name"} = $nodePart[0];
+        $node{ $result->[$a][0] }{"port"} = $nodePart[1];
+        $node{ $result->[$a][0] }{"type"} = $self->addressType( { address => $nodePart[0] } );
+    }
 
-                $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
-                if ( $addrType =~ m/^BW/ ) {
-                    $metadata .= "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject-" . $id . "\">\n";
-                    
-                    
-                    $metadata .= $self->generateStoreEndPointPair( { conf => $conf, type => $addrType, center => $c_n, n => $n } );
-                    
-                    $metadata .= "    </iperf:subject>\n";
-                    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>\n";
-                    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>\n";
-
-                    my $test        = $conf->get_val( MEASUREMENTSET => $m,    ATTR => "TESTSPEC" );
-                    my $testTypeTCP = $conf->get_val( TESTSPEC       => $test, ATTR => "BWTCP" );
-                    my $testTypeUDP = $conf->get_val( TESTSPEC       => $test, ATTR => "BWUDP" );
-
-                    if ( $testTypeTCP ) {
-                        my %tcpHash = (
-                            "BWWINDOWSIZE"     => "windowSize",
-                            "BWBUFFERLEN"      => "bufferLength",
-                            "BWTESTDURATION"   => "timeDuration",
-                            "BWREPORTINTERVAL" => "interval"
-                        );
-                        $metadata .= $self->generateStoreParameters( { conf => $conf, paramHash => \%tcpHash, test => $test, counter => $id } );
-                    }
-                    elsif ( $testTypeUDP ) {
-                        my %udpHash = (
-                            "BWWINDOWSIZE"        => "windowSize",
-                            "BWBUFFERLEN"         => "bufferLength",
-                            "BWTESTDURATION"      => "timeDuration",
-                            "BWREPORTINTERVAL"    => "interval",
-                            "BWUDPBANDWIDTHLIMIT" => "bandwidthLimit"
-                        );
-                        $metadata .= $self->generateStoreParameters( { conf => $conf, paramHash => \%udpHash, test => $test, counter => $id } );
-                    }
-                    $metadata .= "  </nmwg:metadata>\n";
-                    $data .= $self->generateData( { id => $id, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );                                         
-                }
-                elsif ( $addrType =~ m/^LAT/ ) {
-                    $metadata .= "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
-                    if ( $measType eq "STAR" ) {
-                        $metadata .= $self->generateStoreEndPointPair( { conf => $conf, type => $addrType, center => $c_n, n => $n } );
-                        $metadata .= $self->generateStoreEndPointPair( { conf => $conf, type => $addrType, center => $n,   n => $c_n } );
-                    }
-                    else {
-                        $metadata .= $self->generateStoreEndPointPair( { conf => $conf, type => $addrType, center => $c_n, n => $n } );
-                    }
-                    $metadata .= "    </owamp:subject>\n";
-                    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>\n";
-                    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:eventType>\n";
-
-                    my $test = $conf->get_val( MEASUREMENTSET => $m, ATTR => "TESTSPEC" );
-                    my %hash = ();
-                    $metadata .= $self->generateStoreParameters( { conf => $conf, paramHash => \%hash, test => $test, counter => $id } );
-                    $metadata .= "  </nmwg:metadata>\n";
-                    $data .= $self->generateData( { id => $id, db => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
-                }
-
-                if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-                    my $dHash  = md5_hex( $data );
-                    my $mdHash = md5_hex( $metadata );
-                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$error } );
-                    $errorFlag++ if $error;
-                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$error } );
-                    $errorFlag++ if $error;
-
-                    $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$dHash} = "data-" . $id;
-                    $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
-                    $self->{LOGGER}->debug( "Key id $dHash maps to data element data-" . $id );
-                }
-                elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
-                    my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
-                    if ( defined $fh ) {
-                        print $fh $metadata . "\n" . $data . "\n";
-                        $fh->close;
-                    }
-                    else {
-                        $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
-                        return -1;
-                    }
-
-                    my $dHash = md5_hex( $data );
-                    $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$dHash} = "data-" . $id;
-                    $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
-                    $self->{LOGGER}->debug( "Key id $dHash maps to data element data-" . $id );
-                }
-                $id++;
+    $query = q{};
+    foreach my $date ( @dateList ) {
+        $query .= " union " if $query;
+        $query .= "select distinct send_id, recv_id, case";
+        foreach my $id ( keys %tspec ) {
+            foreach my $id2 ( keys %{ $tspec{$id}{"id"} } ) {
+                $query .= " when tspec_id=" . $id2 . " then '" . $id . "' ";
             }
         }
+        $query .= "end as tid from " . $date . "_DATA";
+    }
+    $query .= ";";
+
+    my @dataSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
+    my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dataSchema, user => $dbuserBW, pass => $dbpassBW } );
+    $datadb->openDB;
+    $result = $datadb->query( { query => $query } );
+    $len = $#{$result};
+    my $id = 0;
+    for my $a ( 0 .. $len ) {
+        my $metadata = q{};
+        my $data     = q{};
+
+        $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
+        $metadata .= "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject-" . $id . "\">\n";
+        $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+        $metadata .= "        <nmwgt:src";
+        $metadata .= " value=\"" . $node{ $result->[$a][0] }{"name"} . "\"" if $node{ $result->[$a][0] }{"name"};
+        $metadata .= " port=\"" . $node{ $result->[$a][0] }{"port"} . "\"" if $node{ $result->[$a][0] }{"port"};
+        $metadata .= " type=\"" . $node{ $result->[$a][0] }{"type"} . "\"" if $node{ $result->[$a][0] }{"type"};
+        $metadata .= " />\n";
+        $metadata .= "        <nmwgt:dst";
+        $metadata .= " value=\"" . $node{ $result->[$a][1] }{"name"} . "\"" if $node{ $result->[$a][1] }{"name"};
+        $metadata .= " port=\"" . $node{ $result->[$a][1] }{"port"} . "\"" if $node{ $result->[$a][1] }{"port"};
+        $metadata .= " type=\"" . $node{ $result->[$a][1] }{"type"} . "\"" if $node{ $result->[$a][1] }{"type"};
+        $metadata .= " />\n";
+        $metadata .= "      </nmwgt:endPointPair>\n";
+        $metadata .= "    </iperf:subject>\n";
+        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>\n";
+        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>\n";
+        $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
+        $metadata .= $tspec{ $result->[$a][2] }{"xml"};
+        $metadata .= "  </nmwg:metadata>\n";
+        $data     .= $self->generateData( { id => $id, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
+
+        if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
+            my $dHash  = md5_hex( $data );
+            my $mdHash = md5_hex( $metadata );
+            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$error } );
+            $errorFlag++ if $error;
+            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$error } );
+            $errorFlag++ if $error;
+
+            $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$dHash} = "data-" . $id;
+            $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
+            $self->{LOGGER}->debug( "Key id $dHash maps to data element data-" . $id );
+        }
+        elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+            my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
+            if ( defined $fh ) {
+                print $fh $metadata . "\n" . $data . "\n";
+                $fh->close;
+            }
+            else {
+                $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
+                return -1;
+            }
+
+            my $dHash = md5_hex( $data );
+            $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$dHash} = "data-" . $id;
+            $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
+            $self->{LOGGER}->debug( "Key id $dHash maps to data element data-" . $id );
+        }
+        $id++;
     }
 
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
@@ -555,6 +618,25 @@ sub createStorage {
     return 0;
 }
 
+=head2 generateParameters( $self, { content => 1 } )
+
+Given some parameters, generate a block.
+
+=cut
+
+sub generateParameters {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { content => 1 } );
+    my $p = q{};
+    if ( keys %{ $parameters->{content} } > 0 ) {
+        foreach my $c ( keys %{ $parameters->{content} } ) {
+            $p .= "      <nmwg:parameter name=\"" . $c . "\">" . $parameters->{content}->{$c} . "</nmwg:parameter>\n";
+        }
+        $p .= "    </nmwg:parameters>\n";
+    }
+    return $p;
+}
+
 =head2 generateData( $self, { id => 1, db => 1, user => 0, pass => 0 } )
 
 Given some parameters for the key element, generate a data block.
@@ -578,37 +660,6 @@ sub generateData {
     $data .= "    </nmwg:key>\n";
     $data .= "  </nmwg:data>\n";
     return $data;
-}
-
-=head2 generateStoreParameters($self, { conf, paramHash, test, counter } )
-
-Given the parameters from an owmesh file, list these in nmwg form.
-
-=cut
-
-sub generateStoreParameters {
-    my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { conf => 1, paramHash => 1, test => 1, counter => 1 } );
-
-    my $param    = "    <nmwg:parameters id=\"parameters-" . $parameters->{counter} . "\"";
-    my $pCounter = 0;
-    foreach my $p ( keys %{ $parameters->{paramHash} } ) {
-        my $value = $parameters->{conf}->get_val( TESTSPEC => $parameters->{test}, ATTR => $p );
-        unless ( $value ) {
-            $value = $parameters->{conf}->get_val( ATTR => $p );
-        }
-        next unless $value;
-        $param .= ">\n" if not $pCounter;
-        $pCounter++;
-        $param .= "      <nmwg:parameter name=\"" . $parameters->{paramHash}->{$p} . "\">" . $value . "</nmwg:parameter>\n";
-    }
-    if ( $pCounter ) {
-        $param .= "    </nmwg:parameters>\n";
-    }
-    else {
-        $param .= " />\n";
-    }
-    return $param;
 }
 
 =head2 generateStoreEndPointPair($self, { conf, type, center, n } );
