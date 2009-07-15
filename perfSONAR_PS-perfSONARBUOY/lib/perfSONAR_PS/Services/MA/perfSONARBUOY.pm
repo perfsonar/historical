@@ -438,22 +438,41 @@ sub createStorage {
                 if ( defined $result->[$a][$b] ) {
                     $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
                     if ( $tspecSchema[ $b + 2 ] eq "duration" ) {
-                        $content{"timeDuration"} = $result->[$a][$b];
+                        $content{"timeDuration"}{"value"} = $result->[$a][$b];
+                        $content{"timeDuration"}{"units"} = "seconds";
                     }
                     elsif ( $tspecSchema[ $b + 2 ] eq "len_buffer" ) {
-                        $content{"bufferLength"} = $result->[$a][$b];
+                        $content{"bufferLength"}{"value"} = $result->[$a][$b];
+                        $content{"bufferLength"}{"units"} = "bytes";
                     }
                     elsif ( $tspecSchema[ $b + 2 ] eq "window_size" ) {
-                        $content{"windowSize"} = $result->[$a][$b];
+                        $content{"windowSize"}{"value"} = $result->[$a][$b];
+                        $content{"windowSize"}{"units"} = "bytes";
+                    }
+                    elsif ( $tspecSchema[ $b + 2 ] eq "report_interval" ) {
+                        $content{"interval"}{"value"} = $result->[$a][$b];
+                        $content{"interval"}{"units"} = "seconds";
+                    }                         
+                    elsif ( $tspecSchema[ $b + 2 ] eq "udp_bandwidth" ) {
+                        $content{"bandwidthLimit"}{"value"} = $result->[$a][$b];
+                        $content{"bandwidthLimit"}{"units"} = "bps";
                     }
                     elsif ( $tspecSchema[ $b + 2 ] eq "udp" ) {
+                        $content{"protocol"}{"units"} = q{};                    
                         if ( $result->[$a][$b] ) {
-                            $content{"protocol"} = "UDP";
+                            $content{"protocol"}{"value"} = "UDP";
                         }
                         else {
-                            $content{"protocol"} = "TCP";
+                            $content{"protocol"}{"value"} = "TCP";
                         }
                     }
+                    # XXX
+                    # JZ - 7/14/09 - To be added when this is supported
+                    #
+                    #elsif ( $tspecSchema[ $b + 2 ] eq "test_interval" ) {
+                    #    $content{"interval"}{"value"} = $result->[$a][$b];
+                    #    $content{"interval"}{"units"} = "seconds";
+                    #}  
                 }
                 else {
                     $query2 .= $tspecSchema[ $b + 2 ] . " is NULL";
@@ -507,7 +526,7 @@ sub createStorage {
     $query = q{};
     foreach my $date ( @dateList ) {
         $query .= " union " if $query;
-        $query .= "select distinct send_id, recv_id, case";
+        $query .= "select distinct send_id, recv_id, tspec_id, case";
         foreach my $id ( keys %tspec ) {
             foreach my $id2 ( keys %{ $tspec{$id}{"id"} } ) {
                 $query .= " when tspec_id=" . $id2 . " then '" . $id . "' ";
@@ -545,9 +564,11 @@ sub createStorage {
         $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>\n";
         $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>\n";
         $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
-        $metadata .= $tspec{ $result->[$a][2] }{"xml"};
+        $metadata .= $tspec{ $result->[$a][3] }{"xml"};
         $metadata .= "  </nmwg:metadata>\n";
-        $data     .= $self->generateData( { id => $id, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
+        
+        my @eT = ( "http://ggf.org/ns/nmwg/tools/iperf/2.0","http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" );        
+        $data     .= $self->generateData( { id => $id, testspec => $result->[$a][2],eT => \@eT, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
 
         if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
             my $dHash  = md5_hex( $data );
@@ -630,7 +651,14 @@ sub generateParameters {
     my $p = q{};
     if ( keys %{ $parameters->{content} } > 0 ) {
         foreach my $c ( keys %{ $parameters->{content} } ) {
-            $p .= "      <nmwg:parameter name=\"" . $c . "\">" . $parameters->{content}->{$c} . "</nmwg:parameter>\n";
+            if ( exists $parameters->{content}->{$c}->{"value"} and $parameters->{content}->{$c}->{"value"} ) {
+                $p .= "      <nmwg:parameter name=\"" . $c . "\">" . $parameters->{content}->{$c}->{"value"} . "</nmwg:parameter>\n";
+                
+                # XXX
+                # JZ - 7/14/09 - do we want to cat the units on to this?
+                #
+                #$p .= "      <nmwg:parameter name=\"" . $c . "\">" . $parameters->{content}->{$c}->{"value"} . " " . $parameters->{content}->{$c}->{"units"} . "</nmwg:parameter>\n";
+            }
         }
         $p .= "    </nmwg:parameters>\n";
     }
@@ -645,13 +673,15 @@ Given some parameters for the key element, generate a data block.
 
 sub generateData {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { id => 1, db => 1, user => 0, pass => 0 } );
+    my $parameters = validateParams( @args, { id => 1, testspec => 1, eT => 1, db => 1, user => 0, pass => 0 } );
     my $data = q{};
     $data .= "  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"data-" . $parameters->{id} . "\" metadataIdRef=\"metadata-" . $parameters->{id} . "\">\n";
     $data .= "    <nmwg:key id=\"key-" . $parameters->{id} . "\">\n";
     $data .= "      <nmwg:parameters id=\"parameters-key-" . $parameters->{id} . "\">\n";
-    $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:parameter>\n";
-    $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:parameter>\n";
+    foreach my $e ( @{ $parameters->{eT} } ) {
+        $data .= "        <nmwg:parameter name=\"eventType\">" . $e . "</nmwg:parameter>\n";
+    }
+    $data .= "        <nmwg:parameter name=\"testspec\">" . $parameters->{testspec} . "</nmwg:parameter>\n";
     $data .= "        <nmwg:parameter name=\"db\">" . $parameters->{db} . "</nmwg:parameter>\n";
     $data .= "        <nmwg:parameter name=\"user\">" . $parameters->{user} . "</nmwg:parameter>\n" if exists $parameters->{user} and $parameters->{user};
     $data .= "        <nmwg:parameter name=\"pass\">" . $parameters->{pass} . "</nmwg:parameter>\n" if exists $parameters->{pass} and $parameters->{pass};
@@ -660,69 +690,6 @@ sub generateData {
     $data .= "    </nmwg:key>\n";
     $data .= "  </nmwg:data>\n";
     return $data;
-}
-
-=head2 generateStoreEndPointPair($self, { conf, type, center, n } );
-
-Given two nodes (e.g. the src/dst) make an endPointPair element.
-
-=cut
-
-sub generateStoreEndPointPair {
-    my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { conf => 1, type => 1, center => 1, n => 1 } );
-
-    my @srcPart = ();
-    my @dstPart = ();
-    my $src     = $parameters->{conf}->get_val( NODE => $parameters->{center}, TYPE => $parameters->{type}, ATTR => "ADDR" );
-    if ( $src eq "1" ) {
-        my @temp = $parameters->{conf}->get_val( NODE => $parameters->{center}, TYPE => $parameters->{type}, ATTR => "ADDR" );
-        $src = $temp[0] if $temp[0];
-    }
-
-    my @cols = split( /:/, $src );
-    if ( $#cols > 1 ) {
-        @srcPart = split( /\]/, $src );
-        $srcPart[0] =~ s/^\[//;
-        $srcPart[1] =~ s/^:// if $srcPart[1];
-
-    }
-    else {
-        @srcPart = split( /:/, $src );
-    }
-
-    my $dst = $parameters->{conf}->get_val( NODE => $parameters->{n}, TYPE => $parameters->{type}, ATTR => "ADDR" );
-    if ( $dst eq "1" ) {
-        my @temp = $parameters->{conf}->get_val( NODE => $parameters->{n}, TYPE => $parameters->{type}, ATTR => "ADDR" );
-        $dst = $temp[0] if $temp[0];
-    }
-
-    @cols = split( /:/, $dst );
-    if ( $#cols > 1 ) {
-        @dstPart = split( /\]/, $dst );
-        $dstPart[0] =~ s/^\[//;
-        $dstPart[1] =~ s/^:// if $dstPart[1];
-    }
-    else {
-        @dstPart = split( /:/, $dst );
-    }
-
-    my $endPointPair = "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-    if ( $#srcPart > 0 ) {
-        $endPointPair .= "        <nmwgt:src type=\"" . $self->addressType( { address => $srcPart[0] } ) . "\" value=\"" . $srcPart[0] . "\" port=\"" . $srcPart[1] . "\" />\n";
-    }
-    else {
-        $endPointPair .= "        <nmwgt:src type=\"" . $self->addressType( { address => $srcPart[0] } ) . "\" value=\"" . $srcPart[0] . "\" />\n";
-    }
-
-    if ( $#dstPart > 0 ) {
-        $endPointPair .= "        <nmwgt:dst type=\"" . $self->addressType( { address => $dstPart[0] } ) . "\" value=\"" . $dstPart[0] . "\" port=\"" . $dstPart[1] . "\" />\n";
-    }
-    else {
-        $endPointPair .= "        <nmwgt:dst type=\"" . $self->addressType( { address => $dstPart[0] } ) . "\" value=\"" . $dstPart[0] . "\" />\n";
-    }
-    $endPointPair .= "      </nmwgt:endPointPair>\n";
-    return $endPointPair;
 }
 
 =head2 addressType($self, {  address } )
@@ -1879,10 +1846,11 @@ sub retrieveSQL {
         throw perfSONAR_PS::Error_compat( "error.ma.storage", "No data element found." );
     }
 
-    my $dbconnect = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"db\"]",    1 ), 1 );
-    my $dbuser    = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"user\"]",  1 ), 1 );
-    my $dbpass    = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"pass\"]",  1 ), 1 );
-    my $dbtable   = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"table\"]", 1 ), 1 );
+    my $testspec  = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"testspec\"]", 1 ), 1 );
+    my $dbconnect = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"db\"]",       1 ), 1 );
+    my $dbuser    = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"user\"]",     1 ), 1 );
+    my $dbpass    = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"pass\"]",     1 ), 1 );
+    my $dbtable   = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"table\"]",    1 ), 1 );
 
     unless ( $dbconnect ) {
         $self->{LOGGER}->error( "Data element " . $parameters->{d}->getAttribute( "id" ) . " is missing some SQL elements" );
@@ -1966,10 +1934,10 @@ sub retrieveSQL {
             @dbSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
             if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
                 if ( $query ) {
-                    $query = $query . " union select * from " . $year . $mon . "_DATA where send_id=\"" . $src_id . "\" and recv_id=\"" . $dst_id . "\" and";
+                    $query = $query . " union select * from " . $year . $mon . "_DATA where send_id=\"" . $src_id . "\" and recv_id=\"" . $dst_id . "\" and tspec_id=\"" . $testspec . "\" and";
                 }
                 else {
-                    $query = "select * from " . $year . $mon . "_DATA where send_id=\"" . $src_id . "\" and recv_id=\"" . $dst_id . "\" and";
+                    $query = "select * from " . $year . $mon . "_DATA where send_id=\"" . $src_id . "\" and recv_id=\"" . $dst_id . "\" and tspec_id=\"" . $testspec . "\" and";
                 }
 
                 my $queryCount = 0;
@@ -1988,10 +1956,10 @@ sub retrieveSQL {
             }
             else {
                 if ( $query ) {
-                    $query = $query . " union select * from " . $year . $mon . "_DATA where send_id=\"" . $src_id . "\" and recv_id=\"" . $dst_id . "\"";
+                    $query = $query . " union select * from " . $year . $mon . "_DATA where send_id=\"" . $src_id . "\" and recv_id=\"" . $dst_id . "\" and tspec_id=\"" . $testspec . "\"";
                 }
                 else {
-                    $query = "select * from " . $year . $mon . "_DATA where send_id=\"" . $src_id . "\" and recv_id=\"" . $dst_id . "\"";
+                    $query = "select * from " . $year . $mon . "_DATA where send_id=\"" . $src_id . "\" and recv_id=\"" . $dst_id . "\" and tspec_id=\"" . $testspec . "\"";
                 }
             }
         }
