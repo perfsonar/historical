@@ -691,9 +691,9 @@ sub init_date {
         num_session_packets BIGINT UNSIGNED NOT NULL,
         num_sample_packets  BIGINT UNSIGNED NOT NULL,
         wait_interval       FLOAT NOT NULL,
-        dscp                TINYINT UNSIGNED NOT NULL DEFAULT 0,
+        dscp                TINYINT UNSIGNED NOT NULL,
         loss_timeout        FLOAT NOT NULL,
-        packet_padding      INT UNSIGNED NOT NULL DEFAULT 0,
+        packet_padding      INT UNSIGNED NOT NULL,
         bucket_width        FLOAT NOT NULL,
         PRIMARY KEY(tspec_id)
         )";
@@ -729,13 +729,13 @@ sub init_date {
         end_time    TEXT(128),
         min		    FLOAT,
 		max		    FLOAT,
-        minttl      TINYINT UNSIGNED NOT NULL DEFAULT 0,
-        maxttl      TINYINT UNSIGNED NOT NULL DEFAULT 0,
+        minttl      TINYINT UNSIGNED,
+        maxttl      TINYINT UNSIGNED,
 		sent		BIGINT UNSIGNED,
 		lost		BIGINT UNSIGNED,
 		dups		BIGINT UNSIGNED,
 		maxerr		FLOAT,
-        finished    TINYINT UNSIGNED NOT NULL DEFAULT 0,
+        finished    TINYINT UNSIGNED DEFAULT 0,
 
         PRIMARY KEY (si,ei,send_id,recv_id,tspec_id),
         INDEX(send_id),
@@ -758,7 +758,7 @@ sub init_date {
         basei           INT NOT NULL,
         i               INT NOT NULL,
         n               BIGINT UNSIGNED NOT NULL,
-        finished        TINYINT UNSIGNED NOT NULL DEFAULT 0,
+        finished        TINYINT UNSIGNED DEFAULT 0,
 
         PRIMARY KEY (si,ei,send_id,recv_id,tspec_id,i),
         INDEX(send_id),
