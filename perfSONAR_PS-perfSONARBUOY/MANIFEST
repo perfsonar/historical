@@ -7,6 +7,9 @@ bin/client.pl
 bin/configureDaemon.pl
 bin/daemon.pl
 bin/makeDBConfig.pl
+bin/owdb.pl
+bin/powcollector.pl
+bin/powmaster.pl
 dependencies
 doc/Changes
 doc/INSTALL
@@ -18,6 +21,7 @@ etc/owmesh.conf
 etc/requests/EchoRequest.xml
 etc/requests/MetadataKeyRequest.xml
 etc/requests/SetupDataRequest.xml
+lib/owdb.pm
 lib/OWP.pm
 lib/OWP/Archive.pm
 lib/OWP/Conf.pm
@@ -25,6 +29,7 @@ lib/OWP/DB.pm
 lib/OWP/Helper.pm
 lib/OWP/MeasSet.pm
 lib/OWP/RawIO.pm
+lib/OWP/Sum.pm
 lib/OWP/Syslog.pm
 lib/OWP/Utils.pm
 lib/perfSONAR_PS/Client/Echo.pm
@@ -55,8 +60,10 @@ lib/perfSONAR_PS/XML/Document.pm
 modules.rules
 perl-perfSONAR_PS-perfSONARBUOY.spec
 scripts/install_dependencies.sh
-scripts/perfsonarbuoy_collector
+scripts/perfsonarbuoy_bw_collector
+scripts/perfsonarbuoy_bw_master
 scripts/perfsonarbuoy_ma
-scripts/perfsonarbuoy_master
+scripts/perfsonarbuoy_owp_collector
+scripts/perfsonarbuoy_owp_master
 scripts/prepare_environment_client.sh
 scripts/prepare_environment_server.sh

@@ -1,8 +1,9 @@
 Config::General
 Cwd
-DB_File
 DBI
+DB_File
 Data::UUID
+Data::Validate::IP
 Date::Manip
 Digest::MD5
 Error
@@ -22,6 +23,7 @@ Log::Log4perl
 Math::BigFloat
 Math::BigInt
 Module::Load
+Net::IPv6Addr
 Net::Ping
 Params::Validate
 Sys::Hostname
