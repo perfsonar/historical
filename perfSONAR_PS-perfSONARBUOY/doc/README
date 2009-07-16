@@ -48,6 +48,12 @@ for a specific use case:
       endpoint                 - Endpoint to contact the service
       ls_registration_interval - Length of time (minutes) between contacting LS 
       enable_registration      - Turn on or off LS registration
+      ls_instance              - Specific hLS to register data with
+      maintenance_interval     - Interval of time to re-generate the store.xml
+                                 file (N.B. doing this fast can be CPU expensive
+                                 but does make test data available faster)
+      owmesh                   - Directory that contains the owmesh.conf test
+                                 file
     
     The rest of the items are normally not to be adjusted.  See also the service
     wiki page for more information:
@@ -67,13 +73,13 @@ for a specific use case:
     
       http://code.google.com/p/perfsonar-ps/wiki/perfSONARBUOY
 
-  - owmesh.conf: 
+  - /var/lib/perfsonar/perfsonarbuoy_ma/store.xml: 
 
-      tbd
+    Under normal circumstances this file is not to be edited.
 
-    See the wiki page for more information:
-    
-      http://code.google.com/p/perfsonar-ps/wiki/perfSONARBUOY
+  - /opt/perfsonar_ps/perfsonarbuoy_ma/etc/owmesh.conf: 
+
+    This file is annotated with instructions on what to change.
 
 Starting/Stopping:
 ------------------
@@ -84,6 +90,13 @@ operation:
   /etc/init.d/perfsonarbuoy_ma start
   /etc/init.d/perfsonarbuoy_ma stop
   /etc/init.d/perfsonarbuoy_ma restart
+
+There are other scripts that manage the measurement and collection of data:
+
+ - perfsonarbuoy_bw_master      Script that performs BWCTL measurements
+ - perfsonarbuoy_bw_collector   Script to collect and store BWCTL measurements
+ - perfsonarbuoy_owp_master     Script that performs OWAMP measurements
+ - perfsonarbuoy_owp_collector  Script to collect and store OWAMP measurements
 
 The service can also be run in a manual fashion (useful for debugging):
 
@@ -97,12 +110,11 @@ Testing:
 
 The service comes with a client application and several test messages that can
 be used to test functionality.  There are many messages provided as examples, 
-to test the service there are four that are recommended:
+to test the service only one is recommended:
 
   etc/requests/EchoRequest.xml
-  etc/requests/
 
-These XXX will test the major functions of this service. To test:
+This will test the basic functionality of this service. To test:
 
   1) Ensure the service is started, it helps if you have configured logging to
      use the "Screen" so you may monitor the service's activities.

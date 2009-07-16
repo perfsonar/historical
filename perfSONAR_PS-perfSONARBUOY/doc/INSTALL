@@ -170,12 +170,12 @@ differences in package management.  The tools are listed below:
   * MYSQL
       * Debian/Ubuntu: mysql-server, mysql-client  
       * RedHat Systems: mysql-server, mysql
-    * OWAMP
+  * OWAMP
     - Source is available here: http://software.internet2.edu/sources/owamp/
     - Package management names:
       * Debian/Ubuntu: owamp-client, owamp-server
       * RedHat Systems: owamp-client, owamp-server
-    * BWCTL
+  * BWCTL
     - Source is available here: http://software.internet2.edu/sources/bwctl/
     - Package management names:
       * Debian/Ubuntu: bwctl-client, bwctl-server

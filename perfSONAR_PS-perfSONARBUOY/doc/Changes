@@ -32,12 +32,7 @@ version 3.1
       pSB MA gLS ERRORS 	
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=174
       windowSize not reported correctly for pSB
-
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=106
-      bwmaster/bwcontroller: better logging support	 	   
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=157
-      bwcollector debugging support 	 	 
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=183
-      Address/Name Normalization in pSB 	 
+      bwmaster/bwcontroller: better logging support	 	   	  
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=185
       pS-B backend database sometimes includes 'port' in the host portion - need to normalize. 

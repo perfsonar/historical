@@ -223,7 +223,7 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Mon Jul 13 2009 zurawski@internet2.edu 3.1-1
+* Mon Jul 16 2009 zurawski@internet2.edu 3.1-1
 - Support for BWCTL and OWAMP regular testing
 
 * Mon Feb 23 2009 zurawski@internet2.edu 0.10.4
