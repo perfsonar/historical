@@ -59,9 +59,9 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=115 115] - Defect - High - _*Jason*_ - pSB Metadata Generation 	 	 
      * <font color=green>_*Done - 7/14*_</font>   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=125 125] - Task - High - _*Jeff*_ - testconf.pl: Print out description of exactly what tests are configured to run by an owmesh.conf file	 
-     * <font color=yellow>_*In progress - 7/15*_</font> 
+     * <font color=purple>_*Started, will finish after release - 7/16*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=127 127] - Enhancement - High - _*Jeff*_ - Refactor bwmaster.pl to fetch addresses from 'conf' before forking
-     * <font color=red>_*No Status - 7/15*_</font>    	 
+     * <font color=purple>_*Moved to Next Release - 7/16*_</font>   	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=130 130] - Defect - Critical - _*Jason*_ - pSB Store File generation: Star vs Mesh 	 
      * <font color=green>_*Done - 7/14*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=131 131] - Defect - Low - _*Jason*_ - achievable bandwidth event type is mis-spelled achieveable 
@@ -70,12 +70,12 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=purple>_*migrating to next release - 7/14*_</font> 	 
      * Temp fix applied, will address further in next release.
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=157 157] - Enhancement - High - _*Jeff*_ - bwcollector debugging support 	 
-     * <font color=yellow>_*In progress - 7/15*_</font> 
+     * <font color=purple>_*Started, will finish after release - 7/16*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=174 174] - Defect - High - _*Jason*_ - windowSize not reported correctly for pSB 
-     * <font color=purple>_*In Progress - 7/14*_</font> 
-     * Started - require some cleanup and need to restart the service periodically on the disk to recognize new data.
+     * <font color=green>_*Done - 7/16*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - Enhancement - High - _*Jason*_ - Address/Name Normalization in pSB 	
-     * <font color=red>_*No Status - 7/15*_</font>   
+     * <font color=purple>_*Will not be addressed before release - 7/16*_</font>   
+     * Upstream issue was addressed too late
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=185 185] - Defect - Critical - _*Jeff*_ - pS-B backend database sometimes includes 'port' in the host portion - need to normalize.
      * <font color=green>_*Done - 7/15*_</font>   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=192 192] - Defect - High - _*Jeff*_ - SIGHUP fails to restart powmaster
