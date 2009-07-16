@@ -21,7 +21,20 @@ Installation:
 -------------
 
 Please read the INSTALL file for instructions
+
+Database Preparation:
+---------------------
+
+The MySQL database for the OWAMP and BWCTL data must be prepared before
+collection may begin.  Note that some options regarding the database can be
+adjusted in the 'owmesh.conf' file (see next section).  There are two scripts, 
+one for each data type:
+
+  /opt/perfsonar_ps/perfsonarbuoy_ma/bin/owdb.pl -c /opt/perfsonar_ps/perfsonarbuoy_ma/etc -i root
+  /opt/perfsonar_ps/perfsonarbuoy_ma/bin/bwdb.pl -c /opt/perfsonar_ps/perfsonarbuoy_ma/etc -i root
   
+Note that if you wish to delete an existing data base replace '-i' with '-x'.  
+     
 Configuration:
 --------------
 
