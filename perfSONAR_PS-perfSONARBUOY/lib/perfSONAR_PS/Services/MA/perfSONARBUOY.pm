@@ -382,7 +382,7 @@ sub maintenance {
 
 =head2 inline_maintenance($self {})
 
-...
+Stub function to run a function at the daemon level - results of these functions will be available to subsequent children.
 
 =cut
 
@@ -396,7 +396,7 @@ sub inline_maintenance {
 
 =head2 refresh_store_file($self {})
 
-...
+Check to see if a store file has been changed (via the MTIME).  
 
 =cut
 
@@ -806,10 +806,6 @@ sub createStorage {
                 $errorFlag++ if $parameters->{"error"};
                 $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
                 $errorFlag++ if $parameters->{"error"};
-
-                #                $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$dHash} = "data-" . $id;
-                #                $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
-                #                $self->{LOGGER}->debug( "Key id $dHash maps to data element data-" . $id );
             }
             elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
                 my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
@@ -821,12 +817,6 @@ sub createStorage {
                     $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
                     return -1;
                 }
-
-                my $dHash = md5_hex( $data );
-
-                #                $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$dHash} = "data-" . $id;
-                #                $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
-                #                $self->{LOGGER}->debug( "Key id $dHash maps to data element data-" . $id );
             }
             $id++;
         }
@@ -1038,10 +1028,6 @@ sub createStorage {
                 $errorFlag++ if $parameters->{"error"};
                 $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
                 $errorFlag++ if $parameters->{"error"};
-
-                #                $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$dHash} = "data-" . $id;
-                #                $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
-                #                $self->{LOGGER}->debug( "Key id $dHash maps to data element data-" . $id );
             }
             elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
                 my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
@@ -1053,12 +1039,6 @@ sub createStorage {
                     $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
                     return -1;
                 }
-
-                my $dHash = md5_hex( $data );
-
-                #                $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$dHash} = "data-" . $id;
-                #                $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
-                #                $self->{LOGGER}->debug( "Key id $dHash maps to data element data-" . $id );
             }
             $id++;
         }
@@ -1649,7 +1629,6 @@ sub metadataKeyRetrieveKey {
         return;
     }
 
-    #    my $hashId = $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$hashKey};
     my $hashId = $self->{HASH_TO_ID}->{$hashKey};
     unless ( $hashId ) {
         my $msg = "Key error in metadata storage: 'maKey' cannot be found.";
@@ -1783,9 +1762,7 @@ sub metadataKeyRetrieveMetadataData {
 
             $parameters->{output}->addExistingXMLElement( $md_temp );
 
-            my $hashId = $d->getAttribute( "id" );
-
-            #            my $hashKey = $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{$hashId};
+            my $hashId  = $d->getAttribute( "id" );
             my $hashKey = $self->{ID_TO_HASH}->{$hashId};
             unless ( $hashKey ) {
                 my $msg = "Key error in metadata storage: 'maKey' cannot be found.";
