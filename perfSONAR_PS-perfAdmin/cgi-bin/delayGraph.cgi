@@ -155,7 +155,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
                 $title = "Source: " . $cgi->param( 'shost' );
                 $title .= " (" . $cgi->param( 'src' ) . ") ";
                 $title .= " -- Destination: " . $cgi->param( 'dhost' );
-                $title .= " (" . $cgi->param( 'src' ) . ") ";
+                $title .= " (" . $cgi->param( 'dst' ) . ") ";
             }
             else {
                 my $display = $cgi->param( 'src' );
@@ -252,7 +252,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
         print "        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));\n";
         if ( $flag1 or $flag2 ) {
-            print "        chart.draw(data, {legendPosition: 'newRow', displayAnnotations: true, colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff']});\n";
+            print "        chart.draw(data, {legendPosition: 'newRow', displayAnnotations: true, colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff'], displayAnnotations: true});\n";
         }
         else {
             print "        chart.draw(data, {legendPosition: 'newRow', colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff']});\n";
