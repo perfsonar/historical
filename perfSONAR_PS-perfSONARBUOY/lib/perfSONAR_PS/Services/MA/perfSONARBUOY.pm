@@ -2217,9 +2217,24 @@ sub retrieveSQL {
             return;
         }
 
+
+        my $lowerBound = q{};
+        my $upperBound = q{};
+        if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
+            my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime(time);
+            $lowerBound = sprintf "%4d%02d%02d", ($year+1900), ($mon+1), ($mday);        
+        }
+        if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
+            my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime(time);
+            $upperBound = sprintf "%4d%02d%02d", ($year+1900), ($mon+1), ($mday); 
+        }
+
+        @dbSchema = ( "send_id", "recv_id", "tspec_id", "si", "ei", "stimestamp", "etimestamp", "start_time", "end_time", "min", "max", "minttl", "maxttl", "sent", "lost", "dups", "maxerr", "finished" );        
         foreach my $date ( @dateList ) {
-            @dbSchema = ( "send_id", "recv_id", "tspec_id", "si", "ei", "stimestamp", "etimestamp", "start_time", "end_time", "min", "max", "minttl", "maxttl", "sent", "lost", "dups", "maxerr", "finished" );
+
             if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
+                next if $lowerBound and $date < $lowerBound;
+                next if $upperBound and $date > $upperBound;                
                 if ( $query ) {
                     $query = $query . " union select * from " . $date . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and tspec_id=\"" . $testspec . "\" and";
                 }
@@ -2229,15 +2244,15 @@ sub retrieveSQL {
 
                 my $queryCount = 0;
                 if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
-                    $query = $query . " timestamp > " . $parameters->{time_settings}->{"START"}->{"internal"};
+                    $query = $query . " etimestamp > " . $parameters->{time_settings}->{"START"}->{"internal"};
                     $queryCount++;
                 }
                 if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
                     if ( $queryCount ) {
-                        $query = $query . " and timestamp < " . $parameters->{time_settings}->{"END"}->{"internal"};
+                        $query = $query . " and stimestamp < " . $parameters->{time_settings}->{"END"}->{"internal"};
                     }
                     else {
-                        $query = $query . " timestamp < " . $parameters->{time_settings}->{"END"}->{"internal"};
+                        $query = $query . " stimestamp < " . $parameters->{time_settings}->{"END"}->{"internal"};
                     }
                 }
             }
