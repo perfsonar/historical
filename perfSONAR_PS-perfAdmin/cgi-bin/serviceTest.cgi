@@ -336,7 +336,15 @@ else {
 
                 my $subject = "  <nmwg:key id=\"key-1\">\n";
                 $subject .= "    <nmwg:parameters id=\"parameters-key-1\">\n";
-                $subject .= "      <nmwg:parameter name=\"maKey\">" . $list{$src}{$dst}->{"key"} . "</nmwg:parameter>\n";
+                if ( exists $list{$src}{$dst}->{"key"} and $list{$src}{$dst}->{"key"} ) {
+                    $subject .= "      <nmwg:parameter name=\"maKey\">" . $list{$src}{$dst}->{"key"} . "</nmwg:parameter>\n";
+                }
+                elsif( exists $list{$src}{$dst}{"TCP"}->{"key"} and $list{$src}{$dst}{"TCP"}->{"key"} ) {
+                    $subject .= "      <nmwg:parameter name=\"maKey\">" . $list{$src}{$dst}{"TCP"}->{"key"} . "</nmwg:parameter>\n";
+                }
+                elsif( exists $list{$src}{$dst}{"UDP"}->{"key"} and $list{$src}{$dst}{"UDP"}->{"key"} ) {
+                    $subject .= "      <nmwg:parameter name=\"maKey\">" . $list{$src}{$dst}{"UDP"}->{"key"} . "</nmwg:parameter>\n";
+                }
                 $subject .= "    </nmwg:parameters>\n";
                 $subject .= "  </nmwg:key>  \n";
                 my $time = 86400;
@@ -389,13 +397,13 @@ else {
                         $mark{$dst}{$src} = 1 if exists $list{$dst}{$src}->{"key"} and $list{$dst}{$src}->{"key"};
                         push @pairs,
                             {
-                            SADDRESS => $list{$src}{$dst}->{"saddr"},
-                            SHOST    => $list{$src}{$dst}->{"src"},
+                            SADDRESS => $list{$src}{$dst}{$type}->{"saddr"},
+                            SHOST    => $list{$src}{$dst}{$type}->{"src"},
                             DADDRESS => $list{$src}{$dst}{$type}->{"daddr"},
                             DHOST    => $list{$src}{$dst}{$type}->{"dst"},
                             PROTOCOL => $list{$src}{$dst}{$type}->{"type"},
                             KEY      => $list{$src}{$dst}{$type}->{"key"},
-                            KEY2     => $list{$dst}{$src}->{"key"},
+                            KEY2     => $list{$dst}{$src}{$type}->{"key"},
                             COUNT    => $counter,
                             SERVICE  => $service
                             };
