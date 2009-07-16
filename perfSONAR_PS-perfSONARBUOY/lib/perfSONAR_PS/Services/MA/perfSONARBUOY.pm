@@ -715,7 +715,7 @@ sub createStorage {
     }
     $query .= ";";
 
-    @nodeSchema = ( "node_id", "node_name", "longname", "host", "addr", "first", "last" );
+    @nodeSchema = ( "node_id", "node_name", "longname", "host", "addr", "first", "last" );    
     $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@nodeSchema, user => $dbuserOWP, pass => $dbpassOWP } );
     $nodedb->openDB;
     $result = $nodedb->query( { query => $query } );
@@ -2090,20 +2090,13 @@ sub retrieveSQL {
     my $res;
     my $query = q{};
 
-    # XXX Jul 22, 2008
-    #
-    # New case, watch that the names of the tables have changed
-
     # XXX Sept 19, 2008
     #
     # Want to limit the max amount of data returned (e.g. set an artificial limit at 1000 for now)
     # we also need to worry about the joining of tables.  If we span multiple months this is a given,
-    # if we are trying to meet the 1000 limit this is also a givens
-
-    # new data format
+    # if we are trying to meet the 1000 limit this is also a given
 
     if ( $dataType eq "BWCTL" ) {
-
         my @nodeSchema = ( "node_id", "node_name", "longname", "addr", "first", "last" );
         my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@nodeSchema, user => $dbuser, pass => $dbpass } );
 
@@ -2179,6 +2172,86 @@ sub retrieveSQL {
         }
         $query = $query . ";" if $query;
     }
+    elsif ( $dataType eq "OWAMP" ) {
+
+        my @dateSchema = ( "year", "month". "day" );
+        my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@dateSchema, user => $dbuser, pass => $dbpass } );
+        $datedb->openDB;
+        my $result = $datedb->query( { query => "select * from DATES;" } );
+        $datedb->closeDB;        
+        my $len = $#{$result};        
+        unless ( $len > -1 ) {
+            my $msg = "No data in database";
+            $self->{LOGGER}->error( $msg );
+            getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            return;
+        }                
+        my @dateList = ();
+        for my $a ( 0 .. $len ) {
+            push @dateList, sprintf "%04d%02d%02d", $result->[$a][0], $result->[$a][1], $result->[$a][2];
+        }
+
+        my @nodeSchema = ( "node_id", "node_name", "longname", "host", "addr", "first", "last" );
+        my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@nodeSchema, user => $dbuser, pass => $dbpass } );
+
+        my $query1 = q{};
+        my $query2 = q{};        
+        foreach my $date ( @dateList ) {
+            $query1 .= " union " if $query1;
+            $query1 .= "select distinct node_id from " . $date . "_NODES where addr like \"" . $parameters->{src} . "%\"";
+            $query2 .= " union " if $query2;
+            $query2 .= "select distinct node_id from " . $date . "_NODES where addr like \"" . $parameters->{dst} . "%\"";
+        }
+        $query1 .= ";";
+        $query2 .= ";";
+
+        $nodedb->openDB;
+        my $result1 = $nodedb->query( { query => $query1 } );
+        my $result2 = $nodedb->query( { query => $query2 } );
+        $nodedb->closeDB;
+        
+        unless ( $#{$result1} == 0 and $#{$result2} == 0 ) {
+            my $msg = "Id error, found \"" . join( " - ", @{ $result1 } ) . "\" for SRC and \"" . join( " - ", @{ $result2 } ) . "\" for DST addresses.";
+            $self->{LOGGER}->error( $msg );
+            getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            return;
+        }
+
+        foreach my $date ( @dateList ) {
+            @dbSchema = ( "send_id", "recv_id", "tspec_id", "si", "ei", "stimestamp", "etimestamp", "start_time", "end_time", "min", "max", "minttl", "maxttl", "sent", "lost", "dups", "maxerr", "finished" );
+            if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
+                if ( $query ) {
+                    $query = $query . " union select * from " . $date . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and tspec_id=\"" . $testspec . "\" and";
+                }
+                else {
+                    $query = "select * from " . $date . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and tspec_id=\"" . $testspec . "\" and";
+                }
+
+                my $queryCount = 0;
+                if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
+                    $query = $query . " timestamp > " . $parameters->{time_settings}->{"START"}->{"internal"};
+                    $queryCount++;
+                }
+                if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
+                    if ( $queryCount ) {
+                        $query = $query . " and timestamp < " . $parameters->{time_settings}->{"END"}->{"internal"};
+                    }
+                    else {
+                        $query = $query . " timestamp < " . $parameters->{time_settings}->{"END"}->{"internal"};
+                    }
+                }
+            }
+            else {
+                if ( $query ) {
+                    $query = $query . " union select * from " . $date . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and tspec_id=\"" . $testspec . "\"";
+                }
+                else {
+                    $query = "select * from " . $date . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and tspec_id=\"" . $testspec . "\"";
+                }
+            }
+        }
+        $query = $query . ";" if $query;
+    }
     else {
         my $msg = "Improper eventType found.";
         $self->{LOGGER}->error( $msg );
@@ -2244,11 +2317,48 @@ sub retrieveSQL {
             startData( $parameters->{output}, $id, $parameters->{mid}, undef );
             my $len = $#{$result};
             for my $a ( 0 .. $len ) {
+                my %attrs = ();
+                if ( $timeType eq "unix" ) {
+                    $attrs{"timeType"}  = "unix";
+                    $attrs{"startTime"} = owptime2exacttime( $result->[$a][5] );
+                    $attrs{"endTime"}   = owptime2exacttime( $result->[$a][6] );
+                }
+                else {
+                    $attrs{"timeType"}  = "iso";
+                    $attrs{"startTime"} = owpexactgmstring( $result->[$a][5] );
+                    $attrs{"endTime"}   = owpexactgmstring( $result->[$a][6] );
+                }
 
-                # XXX Jul 22, 2008
-                #
-                # Owamp needs to be brought up to date.
+                #min
+                $attrs{"min_delay"} = $result->[$a][9] if defined $result->[$a][9];
 
+                # max
+                $attrs{"max_delay"} = $result->[$a][10] if defined $result->[$a][10];
+
+                # minTTL
+                $attrs{"minTTL"} = $result->[$a][11] if defined $result->[$a][11];
+                
+                # maxTTL
+                $attrs{"maxTTL"} = $result->[$a][12] if defined $result->[$a][12];
+
+                #sent
+                $attrs{ "sent" } = $result->[$a][13] if defined $result->[$a][13];
+
+                #lost
+                $attrs{"loss"} = $result->[$a][14] if defined $result->[$a][14];
+
+                #dups
+                $attrs{"duplicates"} = $result->[$a][15] if defined $result->[$a][15];
+
+                #err
+                $attrs{"maxError"} = $result->[$a][16] if defined $result->[$a][16];
+
+                $parameters->{output}->createElement(
+                    prefix     => $prefix,
+                    namespace  => $uri,
+                    tag        => "datum",
+                    attributes => \%attrs
+                );
             }
             endData( $parameters->{output} );
         }
