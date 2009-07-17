@@ -586,461 +586,476 @@ sub createStorage {
         return -1;
     }
 
-    my $dbsourceBW = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBTYPE" } ) . ":" . $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBNAME" } ) . ":" . $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBHOST" } );
-    my $dbuserBW   = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBUSER" } );
-    my $dbpassBW   = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBPASS" } );
-
-    my @dateSchema = ( "year", "month" );
-    my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dateSchema, user => $dbuserBW, pass => $dbpassBW } );
-    my $dbReturn = $datedb->openDB;
-    if ( $dbReturn == -1 ) {
-        $self->{LOGGER}->fatal( "Database error, aborting." );
-        return -1;
-    }
-
-    my $result = $datedb->query( { query => "select * from DATES order by year, month;" } );
-    $datedb->closeDB;
-
-    my $len      = $#{$result};
     my @dateList = ();
     my $query    = q{};
     my $id       = 0;
     my %tspec    = ();
     my %node     = ();
-    unless ( $len == -1 ) {
-        for my $a ( 0 .. $len ) {
-            push @dateList, sprintf "%04d%02d", $result->[$a][0], $result->[$a][1];
-        }
 
-        $query = q{};
-        foreach my $date ( @dateList ) {
-            $query .= " union " if $query;
-            $query .= "select duration,len_buffer,window_size,tos,parallel_streams,udp,udp_bandwidth from " . $date . "_TESTSPEC";
-        }
-        $query .= ";";
+    my $dbtypeBW = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBTYPE" } );
+    my $dbnameBW = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBNAME" } );
+    my $dbhostBW = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBHOST" } );
 
-        my @tspecSchema = ( "tspec_id", "description", "duration", "len_buffer", "window_size", "tos", "parallel_streams", "udp", "udp_bandwidth" );
-        my $tspecdb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@tspecSchema, user => $dbuserBW, pass => $dbpassBW } );
-        $dbReturn = $tspecdb->openDB;
+    if ( $dbtypeBW and $dbnameBW and $dbhostBW ) {
+
+        my $dbsourceBW = $dbtypeBW . ":" . $dbnameBW . ":" . $dbhostBW;
+        my $dbuserBW   = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBUSER" } );
+        my $dbpassBW   = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBPASS" } );
+
+        my @dateSchema = ( "year", "month" );
+        my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dateSchema, user => $dbuserBW, pass => $dbpassBW } );
+        my $dbReturn = $datedb->openDB;
         if ( $dbReturn == -1 ) {
             $self->{LOGGER}->fatal( "Database error, aborting." );
             return -1;
         }
-        $result = $tspecdb->query( { query => $query } );
-        $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
-        undef $len;
-        $len = $#{$result};
-        for my $a ( 0 .. $len ) {
+        my $result = $datedb->query( { query => "select * from DATES order by year, month;" } );
+        $datedb->closeDB;
+
+        my $len = $#{$result};
+        unless ( $len == -1 ) {
+            for my $a ( 0 .. $len ) {
+                push @dateList, sprintf "%04d%02d", $result->[$a][0], $result->[$a][1];
+            }
+
             $query = q{};
-            my %content = ();
             foreach my $date ( @dateList ) {
                 $query .= " union " if $query;
-                $query .= "select tspec_id from " . $date . "_TESTSPEC where ";
-                my $query2 = q{};
-                for my $b ( 0 .. 6 ) {
-                    if ( defined $result->[$a][$b] ) {
-                        if ( $tspecSchema[ $b + 2 ] eq "duration" ) {
-                            $content{"timeDuration"}{"value"} = $result->[$a][$b];
-                            $content{"timeDuration"}{"units"} = "seconds";
-                            $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
-                            $query2 .= " and " unless $b == 6;
-                        }
-                        elsif ( $tspecSchema[ $b + 2 ] eq "len_buffer" ) {
-                            $content{"bufferLength"}{"value"} = $result->[$a][$b];
-                            $content{"bufferLength"}{"units"} = "bytes";
-                            $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
-                            $query2 .= " and " unless $b == 6;
-                        }
-                        elsif ( $tspecSchema[ $b + 2 ] eq "window_size" ) {
-                            $content{"windowSize"}{"value"} = $result->[$a][$b];
-                            $content{"windowSize"}{"units"} = "bytes";
-                            $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
-                            $query2 .= " and " unless $b == 6;
-                        }
-                        elsif ( $tspecSchema[ $b + 2 ] eq "report_interval" ) {
-                            $content{"interval"}{"value"} = $result->[$a][$b];
-                            $content{"interval"}{"units"} = "seconds";
-                            $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
-                            $query2 .= " and " unless $b == 6;
-                        }
-                        elsif ( $tspecSchema[ $b + 2 ] eq "udp_bandwidth" ) {
-                            $content{"bandwidthLimit"}{"value"} = $result->[$a][$b];
-                            $content{"bandwidthLimit"}{"units"} = "bps";
-                            $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
-                            $query2 .= " and " unless $b == 6;
-                        }
-                        elsif ( $tspecSchema[ $b + 2 ] eq "udp" ) {
-                            $content{"protocol"}{"units"} = q{};
-                            if ( $result->[$a][$b] ) {
-                                $content{"protocol"}{"value"} = "UDP";
-                            }
-                            else {
-                                $content{"protocol"}{"value"} = "TCP";
-                            }
-                            $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
-                            $query2 .= " and " unless $b == 6;
-                        }
-
-                        # XXX
-                        # JZ - 7/14/09 - To be added when this is supported
-                        #
-                        #elsif ( $tspecSchema[ $b + 2 ] eq "test_interval" ) {
-                        #    $content{"interval"}{"value"} = $result->[$a][$b];
-                        #    $content{"interval"}{"units"} = "seconds";
-                        #}
-                    }
-                    else {
-                        $query2 .= $tspecSchema[ $b + 2 ] . " is NULL";
-                        $query2 .= " and " unless $b == 6;
-                    }
-                }
-                $query .= $query2;
+                $query .= "select duration,len_buffer,window_size,tos,parallel_streams,udp,udp_bandwidth from " . $date . "_TESTSPEC";
             }
             $query .= ";";
 
-            my $parameter = $self->generateParameters( { content => \%content } );
-            my $result2 = $tspecdb->query( { query => $query } );
-            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result2 ) == -1;
-
-            my $len2 = $#{$result2};
-            $tspec{$a}{"xml"} = $parameter;
-            for my $b ( 0 .. $len2 ) {
-                $tspec{$a}{"id"}{ $result2->[$b][0] } = 1;
+            my @tspecSchema = ( "tspec_id", "description", "duration", "len_buffer", "window_size", "tos", "parallel_streams", "udp", "udp_bandwidth" );
+            my $tspecdb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@tspecSchema, user => $dbuserBW, pass => $dbpassBW } );
+            $dbReturn = $tspecdb->openDB;
+            if ( $dbReturn == -1 ) {
+                $self->{LOGGER}->fatal( "Database error, aborting." );
+                return -1;
             }
-        }
-        $tspecdb->closeDB;
+            $result = $tspecdb->query( { query => $query } );
+            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
-        my %node = ();
-        $query = q{};
-        foreach my $date ( @dateList ) {
-            $query .= " union " if $query;
-            $query .= "select node_id, addr from " . $date . "_NODES";
-        }
-        $query .= ";";
+            undef $len;
+            $len = $#{$result};
+            for my $a ( 0 .. $len ) {
+                $query = q{};
+                my %content = ();
+                foreach my $date ( @dateList ) {
+                    $query .= " union " if $query;
+                    $query .= "select tspec_id from " . $date . "_TESTSPEC where ";
+                    my $query2 = q{};
+                    for my $b ( 0 .. 6 ) {
+                        if ( defined $result->[$a][$b] ) {
+                            if ( $tspecSchema[ $b + 2 ] eq "duration" ) {
+                                $content{"timeDuration"}{"value"} = $result->[$a][$b];
+                                $content{"timeDuration"}{"units"} = "seconds";
+                                $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= " and " unless $b == 6;
+                            }
+                            elsif ( $tspecSchema[ $b + 2 ] eq "len_buffer" ) {
+                                $content{"bufferLength"}{"value"} = $result->[$a][$b];
+                                $content{"bufferLength"}{"units"} = "bytes";
+                                $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= " and " unless $b == 6;
+                            }
+                            elsif ( $tspecSchema[ $b + 2 ] eq "window_size" ) {
+                                $content{"windowSize"}{"value"} = $result->[$a][$b];
+                                $content{"windowSize"}{"units"} = "bytes";
+                                $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= " and " unless $b == 6;
+                            }
+                            elsif ( $tspecSchema[ $b + 2 ] eq "report_interval" ) {
+                                $content{"interval"}{"value"} = $result->[$a][$b];
+                                $content{"interval"}{"units"} = "seconds";
+                                $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= " and " unless $b == 6;
+                            }
+                            elsif ( $tspecSchema[ $b + 2 ] eq "udp_bandwidth" ) {
+                                $content{"bandwidthLimit"}{"value"} = $result->[$a][$b];
+                                $content{"bandwidthLimit"}{"units"} = "bps";
+                                $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= " and " unless $b == 6;
+                            }
+                            elsif ( $tspecSchema[ $b + 2 ] eq "udp" ) {
+                                $content{"protocol"}{"units"} = q{};
+                                if ( $result->[$a][$b] ) {
+                                    $content{"protocol"}{"value"} = "UDP";
+                                }
+                                else {
+                                    $content{"protocol"}{"value"} = "TCP";
+                                }
+                                $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= " and " unless $b == 6;
+                            }
 
-        my @nodeSchema = ( "node_id", "node_name", "longname", "addr", "first", "last" );
-        my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@nodeSchema, user => $dbuserBW, pass => $dbpassBW } );
-        $dbReturn = $nodedb->openDB;
-        if ( $dbReturn == -1 ) {
-            $self->{LOGGER}->fatal( "Database error, aborting." );
-            return -1;
-        }
-        $result = $nodedb->query( { query => $query } );
-        $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+                            # XXX
+                            # JZ - 7/14/09 - To be added when this is supported
+                            #
+                            #elsif ( $tspecSchema[ $b + 2 ] eq "test_interval" ) {
+                            #    $content{"interval"}{"value"} = $result->[$a][$b];
+                            #    $content{"interval"}{"units"} = "seconds";
+                            #}
+                        }
+                        else {
+                            $query2 .= $tspecSchema[ $b + 2 ] . " is NULL";
+                            $query2 .= " and " unless $b == 6;
+                        }
+                    }
+                    $query .= $query2;
+                }
+                $query .= ";";
 
-        $len = $#{$result};
-        for my $a ( 0 .. $len ) {
-            my $addr     = $result->[$a][1];
-            my @cols     = split( /:/, $addr );
-            my @nodePart = ();
-            if ( $#cols > 1 ) {
-                @nodePart = split( /\]/, $addr );
-                $nodePart[0] =~ s/^\[//;
-                $nodePart[1] =~ s/^:// if $nodePart[1];
-            }
-            else {
-                @nodePart = split( /:/, $addr );
-            }
-            $node{ $result->[$a][0] }{"name"} = $nodePart[0];
-            $node{ $result->[$a][0] }{"port"} = $nodePart[1];
-            $node{ $result->[$a][0] }{"type"} = $self->addressType( { address => $nodePart[0] } );
-        }
+                my $parameter = $self->generateParameters( { content => \%content } );
+                my $result2 = $tspecdb->query( { query => $query } );
+                $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result2 ) == -1;
 
-        $query = q{};
-        foreach my $date ( @dateList ) {
-            $query .= " union " if $query;
-            $query .= "(select distinct send_id, recv_id, tspec_id, case";
-            foreach my $id ( keys %tspec ) {
-                foreach my $id2 ( keys %{ $tspec{$id}{"id"} } ) {
-                    $query .= " when tspec_id=" . $id2 . " then '" . $id . "' ";
+                my $len2 = $#{$result2};
+                $tspec{$a}{"xml"} = $parameter;
+                for my $b ( 0 .. $len2 ) {
+                    $tspec{$a}{"id"}{ $result2->[$b][0] } = 1;
                 }
             }
-            $query .= "end as tid from " . $date . "_DATA)";
-        }
-        $query .= " order by send_id, recv_id, tspec_id;";
+            $tspecdb->closeDB;
 
-        my @dataSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
-        my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dataSchema, user => $dbuserBW, pass => $dbpassBW } );
-        $dbReturn = $datadb->openDB;
-        if ( $dbReturn == -1 ) {
-            $self->{LOGGER}->fatal( "Database error, aborting." );
-            return -1;
-        }
-        $result = $datadb->query( { query => $query } );
-        $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
-
-        $len = $#{$result};
-        for my $a ( 0 .. $len ) {
-            my $metadata = q{};
-            my $data     = q{};
-
-            $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
-            $metadata .= "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject-" . $id . "\">\n";
-            $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-            $metadata .= "        <nmwgt:src";
-            $metadata .= " value=\"" . $node{ $result->[$a][0] }{"name"} . "\"" if $node{ $result->[$a][0] }{"name"};
-            $metadata .= " port=\"" . $node{ $result->[$a][0] }{"port"} . "\"" if $node{ $result->[$a][0] }{"port"};
-            $metadata .= " type=\"" . $node{ $result->[$a][0] }{"type"} . "\"" if $node{ $result->[$a][0] }{"type"};
-            $metadata .= " />\n";
-            $metadata .= "        <nmwgt:dst";
-            $metadata .= " value=\"" . $node{ $result->[$a][1] }{"name"} . "\"" if $node{ $result->[$a][1] }{"name"};
-            $metadata .= " port=\"" . $node{ $result->[$a][1] }{"port"} . "\"" if $node{ $result->[$a][1] }{"port"};
-            $metadata .= " type=\"" . $node{ $result->[$a][1] }{"type"} . "\"" if $node{ $result->[$a][1] }{"type"};
-            $metadata .= " />\n";
-            $metadata .= "      </nmwgt:endPointPair>\n";
-            $metadata .= "    </iperf:subject>\n";
-            $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>\n";
-            $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>\n";
-            $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
-            $metadata .= $tspec{ $result->[$a][3] }{"xml"};
-            $metadata .= "  </nmwg:metadata>\n";
-
-            my @eT = ( "http://ggf.org/ns/nmwg/tools/iperf/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" );
-            $data .= $self->generateData( { id => $id, testspec => $result->[$a][2], eT => \@eT, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
-
-            if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-                my $dHash  = md5_hex( $data );
-                my $mdHash = md5_hex( $metadata );
-                $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                $errorFlag++ if $parameters->{"error"};
-                $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                $errorFlag++ if $parameters->{"error"};
-            }
-            elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
-                my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
-                if ( defined $fh ) {
-                    print $fh $metadata . "\n" . $data . "\n";
-                    $fh->close;
-                }
-                else {
-                    $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
-                    return -1;
-                }
-            }
-            $id++;
-        }
-    }
-
-    my $dbsourceOWP = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBTYPE" } ) . ":" . $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBNAME" } ) . ":" . $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBHOST" } );
-    my $dbuserOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBUSER" } );
-    my $dbpassOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBPASS" } );
-
-    @dateSchema = ( "year", "month", "day" );
-    $datedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dateSchema, user => $dbuserOWP, pass => $dbpassOWP } );
-    $dbReturn = $datedb->openDB;
-    if ( $dbReturn == -1 ) {
-        $self->{LOGGER}->fatal( "Database error, aborting." );
-        return -1;
-    }
-    $result = $datedb->query( { query => "select * from DATES order by year, month, day;" } );
-    $datedb->closeDB;
-
-    $len = $#{$result};
-    unless ( $len == -1 ) {
-        @dateList = ();
-        for my $a ( 0 .. $len ) {
-            push @dateList, sprintf "%04d%02d%02d", $result->[$a][0], $result->[$a][1], $result->[$a][2];
-        }
-
-        $query = q{};
-        foreach my $date ( @dateList ) {
-            $query .= " union " if $query;
-            $query .= "select num_session_packets,num_sample_packets,wait_interval,dscp,loss_timeout,packet_padding,bucket_width from " . $date . "_TESTSPEC";
-        }
-        $query .= ";";
-
-        my @tspecSchema = ( "tspec_id", "description", "num_session_packets", "num_sample_packets", "wait_interval", "dscp", "loss_timeout", "packet_padding", "bucket_width" );
-        my $tspecdb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@tspecSchema, user => $dbuserOWP, pass => $dbpassOWP } );
-        $dbReturn = $tspecdb->openDB;
-        if ( $dbReturn == -1 ) {
-            $self->{LOGGER}->fatal( "Database error, aborting." );
-            return -1;
-        }
-        $result = $tspecdb->query( { query => $query } );
-        $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
-
-        %tspec = ();
-        undef $len;
-        $len = $#{$result};
-        for my $a ( 0 .. $len ) {
+            my %node = ();
             $query = q{};
-            my %content = ();
             foreach my $date ( @dateList ) {
                 $query .= " union " if $query;
-                $query .= "select tspec_id from " . $date . "_TESTSPEC where ";
-                my $query2 = q{};
-                for my $b ( 0 .. 6 ) {
-                    if ( defined $result->[$a][$b] ) {
-                        if ( $tspecSchema[ $b + 2 ] eq "bucket_width" ) {
-                            $content{"bucket_width"}{"value"} = $result->[$a][$b];
-                            $content{"bucket_width"}{"units"} = "seconds";
-                            $query2 .= "concat(" . $tspecSchema[ $b + 2 ] . ")=\"" . $result->[$a][$b] . "\"";
-                            $query2 .= " and " unless $b == 6;
-                        }
-                        elsif ( $tspecSchema[ $b + 2 ] eq "num_sample_packets" ) {
-                        }
-                        elsif ( $tspecSchema[ $b + 2 ] eq "num_session_packets" ) {
-                            $content{"count"}{"value"} = $result->[$a][$b];
-                            $content{"count"}{"units"} = "packets";
-                            $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
-                            $query2 .= " and " unless $b == 6;
-                        }
-                        elsif ( $tspecSchema[ $b + 2 ] eq "wait_interval" ) {
-                            $content{"schedule"}{"value"} = "\n        <interval type=\"exp\">" . $result->[$a][$b] . "</interval>\n      ";
-                            $content{"schedule"}{"units"} = "seconds";
-                            $query2 .= "concat(" . $tspecSchema[ $b + 2 ] . ")=\"" . $result->[$a][$b] . "\"";
-                            $query2 .= " and " unless $b == 6;
-                        }
-                        elsif ( $tspecSchema[ $b + 2 ] eq "dscp" ) {
-                            $content{"DSCP"}{"value"} = $result->[$a][$b];
-                            $content{"DSCP"}{"units"} = "";
-                            $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
-                            $query2 .= " and " unless $b == 6;
-                        }
-                        elsif ( $tspecSchema[ $b + 2 ] eq "loss_timeout" ) {
-                            $content{"timeout"}{"value"} = $result->[$a][$b];
-                            $content{"timeout"}{"units"} = "seconds";
-                            $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
-                            $query2 .= " and " unless $b == 6;
-                        }
-                        elsif ( $tspecSchema[ $b + 2 ] eq "packet_padding" ) {
-                            $content{"packet_padding"}{"value"} = $result->[$a][$b];
-                            $content{"packet_padding"}{"units"} = "bytes";
-                            $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
-                            $query2 .= " and " unless $b == 6;
-                        }
-                    }
-                    else {
-                        $query2 .= $tspecSchema[ $b + 2 ] . " is NULL";
-                        $query2 .= " and " unless $b == 6;
-                    }
-
-                }
-                $query .= $query2;
+                $query .= "select node_id, addr from " . $date . "_NODES";
             }
             $query .= ";";
 
-            my $parameter = $self->generateParameters( { content => \%content } );
-            my $result2 = $tspecdb->query( { query => $query } );
-            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result2 ) == -1;
-
-            my $len2 = $#{$result2};
-            $tspec{$a}{"xml"} = $parameter;
-            for my $b ( 0 .. $len2 ) {
-                $tspec{$a}{"id"}{ $result2->[$b][0] } = 1;
+            my @nodeSchema = ( "node_id", "node_name", "longname", "addr", "first", "last" );
+            my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@nodeSchema, user => $dbuserBW, pass => $dbpassBW } );
+            $dbReturn = $nodedb->openDB;
+            if ( $dbReturn == -1 ) {
+                $self->{LOGGER}->fatal( "Database error, aborting." );
+                return -1;
             }
-        }
-        $tspecdb->closeDB;
+            $result = $nodedb->query( { query => $query } );
+            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
-        %node  = ();
-        $query = q{};
-        foreach my $date ( @dateList ) {
-            $query .= " union " if $query;
-            $query .= "select node_id, addr from " . $date . "_NODES";
-        }
-        $query .= ";";
-
-        my @nodeSchema = ( "node_id", "node_name", "longname", "host", "addr", "first", "last" );
-        my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@nodeSchema, user => $dbuserOWP, pass => $dbpassOWP } );
-        $dbReturn = $nodedb->openDB;
-        if ( $dbReturn == -1 ) {
-            $self->{LOGGER}->fatal( "Database error, aborting." );
-            return -1;
-        }
-        $result = $nodedb->query( { query => $query } );
-        $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
-
-        $len = $#{$result};
-        for my $a ( 0 .. $len ) {
-            my $addr     = $result->[$a][1];
-            my @cols     = split( /:/, $addr );
-            my @nodePart = ();
-            if ( $#cols > 1 ) {
-                @nodePart = split( /\]/, $addr );
-                $nodePart[0] =~ s/^\[//;
-                $nodePart[1] =~ s/^:// if $nodePart[1];
-            }
-            else {
-                @nodePart = split( /:/, $addr );
-            }
-            $node{ $result->[$a][0] }{"name"} = $nodePart[0];
-            $node{ $result->[$a][0] }{"port"} = $nodePart[1];
-            $node{ $result->[$a][0] }{"type"} = $self->addressType( { address => $nodePart[0] } );
-        }
-
-        $query = q{};
-        foreach my $date ( @dateList ) {
-            $query .= " union " if $query;
-            $query .= "(select distinct send_id, recv_id, tspec_id, case";
-            foreach my $id ( keys %tspec ) {
-                foreach my $id2 ( keys %{ $tspec{$id}{"id"} } ) {
-                    $query .= " when tspec_id=" . $id2 . " then '" . $id . "' ";
-                }
-            }
-            $query .= "end as tid from " . $date . "_DATA)";
-        }
-        $query .= " order by send_id, recv_id, tspec_id;";
-
-        my @dataSchema = ( "send_id", "recv_id", "tspec_id", "si", "ei", "stimestamp", "etimestamp", "start_time", "end_time", "min", "max", "minttl", "maxttl", "sent", "lost", "dups", "maxerr", "finished" );
-        my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dataSchema, user => $dbuserOWP, pass => $dbpassOWP } );
-        $dbReturn = $datadb->openDB;
-        if ( $dbReturn == -1 ) {
-            $self->{LOGGER}->fatal( "Database error, aborting." );
-            return -1;
-        }
-        $result = $datadb->query( { query => $query } );
-        $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
-
-        $len = $#{$result};
-        for my $a ( 0 .. $len ) {
-            my $metadata = q{};
-            my $data     = q{};
-
-            $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
-            $metadata .= "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
-            $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-            $metadata .= "        <nmwgt:src";
-            $metadata .= " value=\"" . $node{ $result->[$a][0] }{"name"} . "\"" if $node{ $result->[$a][0] }{"name"};
-            $metadata .= " port=\"" . $node{ $result->[$a][0] }{"port"} . "\"" if $node{ $result->[$a][0] }{"port"};
-            $metadata .= " type=\"" . $node{ $result->[$a][0] }{"type"} . "\"" if $node{ $result->[$a][0] }{"type"};
-            $metadata .= " />\n";
-            $metadata .= "        <nmwgt:dst";
-            $metadata .= " value=\"" . $node{ $result->[$a][1] }{"name"} . "\"" if $node{ $result->[$a][1] }{"name"};
-            $metadata .= " port=\"" . $node{ $result->[$a][1] }{"port"} . "\"" if $node{ $result->[$a][1] }{"port"};
-            $metadata .= " type=\"" . $node{ $result->[$a][1] }{"type"} . "\"" if $node{ $result->[$a][1] }{"type"};
-            $metadata .= " />\n";
-            $metadata .= "      </nmwgt:endPointPair>\n";
-            $metadata .= "    </owamp:subject>\n";
-            $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>\n";
-            $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:eventType>\n";
-            $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
-            $metadata .= $tspec{ $result->[$a][3] }{"xml"};
-            $metadata .= "  </nmwg:metadata>\n";
-
-            my @eT = ( "http://ggf.org/ns/nmwg/tools/owamp/2.0", "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" );
-            $data .= $self->generateData( { id => $id, testspec => $result->[$a][2], eT => \@eT, db => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
-
-            if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-                my $dHash  = md5_hex( $data );
-                my $mdHash = md5_hex( $metadata );
-                $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                $errorFlag++ if $parameters->{"error"};
-                $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                $errorFlag++ if $parameters->{"error"};
-            }
-            elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
-                my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
-                if ( defined $fh ) {
-                    print $fh $metadata . "\n" . $data . "\n";
-                    $fh->close;
+            $len = $#{$result};
+            for my $a ( 0 .. $len ) {
+                my $addr     = $result->[$a][1];
+                my @cols     = split( /:/, $addr );
+                my @nodePart = ();
+                if ( $#cols > 1 ) {
+                    @nodePart = split( /\]/, $addr );
+                    $nodePart[0] =~ s/^\[//;
+                    $nodePart[1] =~ s/^:// if $nodePart[1];
                 }
                 else {
-                    $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
-                    return -1;
+                    @nodePart = split( /:/, $addr );
+                }
+                $node{ $result->[$a][0] }{"name"} = $nodePart[0];
+                $node{ $result->[$a][0] }{"port"} = $nodePart[1];
+                $node{ $result->[$a][0] }{"type"} = $self->addressType( { address => $nodePart[0] } );
+            }
+
+            $query = q{};
+            foreach my $date ( @dateList ) {
+                $query .= " union " if $query;
+                $query .= "(select distinct send_id, recv_id, tspec_id, case";
+                foreach my $id ( keys %tspec ) {
+                    foreach my $id2 ( keys %{ $tspec{$id}{"id"} } ) {
+                        $query .= " when tspec_id=" . $id2 . " then '" . $id . "' ";
+                    }
+                }
+                $query .= "end as tid from " . $date . "_DATA)";
+            }
+            $query .= " order by send_id, recv_id, tspec_id;";
+
+            my @dataSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
+            my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dataSchema, user => $dbuserBW, pass => $dbpassBW } );
+            $dbReturn = $datadb->openDB;
+            if ( $dbReturn == -1 ) {
+                $self->{LOGGER}->fatal( "Database error, aborting." );
+                return -1;
+            }
+            $result = $datadb->query( { query => $query } );
+            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+
+            $len = $#{$result};
+            for my $a ( 0 .. $len ) {
+                my $metadata = q{};
+                my $data     = q{};
+
+                $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
+                $metadata .= "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject-" . $id . "\">\n";
+                $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+                $metadata .= "        <nmwgt:src";
+                $metadata .= " value=\"" . $node{ $result->[$a][0] }{"name"} . "\"" if $node{ $result->[$a][0] }{"name"};
+                $metadata .= " port=\"" . $node{ $result->[$a][0] }{"port"} . "\"" if $node{ $result->[$a][0] }{"port"};
+                $metadata .= " type=\"" . $node{ $result->[$a][0] }{"type"} . "\"" if $node{ $result->[$a][0] }{"type"};
+                $metadata .= " />\n";
+                $metadata .= "        <nmwgt:dst";
+                $metadata .= " value=\"" . $node{ $result->[$a][1] }{"name"} . "\"" if $node{ $result->[$a][1] }{"name"};
+                $metadata .= " port=\"" . $node{ $result->[$a][1] }{"port"} . "\"" if $node{ $result->[$a][1] }{"port"};
+                $metadata .= " type=\"" . $node{ $result->[$a][1] }{"type"} . "\"" if $node{ $result->[$a][1] }{"type"};
+                $metadata .= " />\n";
+                $metadata .= "      </nmwgt:endPointPair>\n";
+                $metadata .= "    </iperf:subject>\n";
+                $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>\n";
+                $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>\n";
+                $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
+                $metadata .= $tspec{ $result->[$a][3] }{"xml"};
+                $metadata .= "  </nmwg:metadata>\n";
+
+                my @eT = ( "http://ggf.org/ns/nmwg/tools/iperf/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" );
+                $data .= $self->generateData( { id => $id, testspec => $result->[$a][2], eT => \@eT, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
+
+                if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
+                    my $dHash  = md5_hex( $data );
+                    my $mdHash = md5_hex( $metadata );
+                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                    $errorFlag++ if $parameters->{"error"};
+                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                    $errorFlag++ if $parameters->{"error"};
+                }
+                elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+                    my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
+                    if ( defined $fh ) {
+                        print $fh $metadata . "\n" . $data . "\n";
+                        $fh->close;
+                    }
+                    else {
+                        $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
+                        return -1;
+                    }
+                }
+                $id++;
+            }
+        }
+    }
+
+    my $dbtypeOWP = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBTYPE" } );
+    my $dbnameOWP = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBNAME" } );
+    my $dbhostOWP = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBHOST" } );
+
+    if ( $dbtypeOWP and $dbnameOWP and $dbhostOWP ) {
+
+        my $dbsourceOWP = $dbtypeOWP . ":" . $dbnameOWP . ":" . $dbhostOWP;
+        my $dbuserOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBUSER" } );
+        my $dbpassOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBPASS" } );
+
+        my @dateSchema = ( "year", "month", "day" );
+        my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dateSchema, user => $dbuserOWP, pass => $dbpassOWP } );
+        my $dbReturn = $datedb->openDB;
+        if ( $dbReturn == -1 ) {
+            $self->{LOGGER}->fatal( "Database error, aborting." );
+            return -1;
+        }
+        my $result = $datedb->query( { query => "select * from DATES order by year, month, day;" } );
+        $datedb->closeDB;
+
+        my $len = $#{$result};
+        unless ( $len == -1 ) {
+            @dateList = ();
+            for my $a ( 0 .. $len ) {
+                push @dateList, sprintf "%04d%02d%02d", $result->[$a][0], $result->[$a][1], $result->[$a][2];
+            }
+
+            $query = q{};
+            foreach my $date ( @dateList ) {
+                $query .= " union " if $query;
+                $query .= "select num_session_packets,num_sample_packets,wait_interval,dscp,loss_timeout,packet_padding,bucket_width from " . $date . "_TESTSPEC";
+            }
+            $query .= ";";
+
+            my @tspecSchema = ( "tspec_id", "description", "num_session_packets", "num_sample_packets", "wait_interval", "dscp", "loss_timeout", "packet_padding", "bucket_width" );
+            my $tspecdb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@tspecSchema, user => $dbuserOWP, pass => $dbpassOWP } );
+            $dbReturn = $tspecdb->openDB;
+            if ( $dbReturn == -1 ) {
+                $self->{LOGGER}->fatal( "Database error, aborting." );
+                return -1;
+            }
+            $result = $tspecdb->query( { query => $query } );
+            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+
+            %tspec = ();
+            undef $len;
+            $len = $#{$result};
+            for my $a ( 0 .. $len ) {
+                $query = q{};
+                my %content = ();
+                foreach my $date ( @dateList ) {
+                    $query .= " union " if $query;
+                    $query .= "select tspec_id from " . $date . "_TESTSPEC where ";
+                    my $query2 = q{};
+                    for my $b ( 0 .. 6 ) {
+                        if ( defined $result->[$a][$b] ) {
+                            if ( $tspecSchema[ $b + 2 ] eq "bucket_width" ) {
+                                $content{"bucket_width"}{"value"} = $result->[$a][$b];
+                                $content{"bucket_width"}{"units"} = "seconds";
+                                $query2 .= "concat(" . $tspecSchema[ $b + 2 ] . ")=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= " and " unless $b == 6;
+                            }
+                            elsif ( $tspecSchema[ $b + 2 ] eq "num_sample_packets" ) {
+                            }
+                            elsif ( $tspecSchema[ $b + 2 ] eq "num_session_packets" ) {
+                                $content{"count"}{"value"} = $result->[$a][$b];
+                                $content{"count"}{"units"} = "packets";
+                                $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= " and " unless $b == 6;
+                            }
+                            elsif ( $tspecSchema[ $b + 2 ] eq "wait_interval" ) {
+                                $content{"schedule"}{"value"} = "\n        <interval type=\"exp\">" . $result->[$a][$b] . "</interval>\n      ";
+                                $content{"schedule"}{"units"} = "seconds";
+                                $query2 .= "concat(" . $tspecSchema[ $b + 2 ] . ")=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= " and " unless $b == 6;
+                            }
+                            elsif ( $tspecSchema[ $b + 2 ] eq "dscp" ) {
+                                $content{"DSCP"}{"value"} = $result->[$a][$b];
+                                $content{"DSCP"}{"units"} = "";
+                                $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= " and " unless $b == 6;
+                            }
+                            elsif ( $tspecSchema[ $b + 2 ] eq "loss_timeout" ) {
+                                $content{"timeout"}{"value"} = $result->[$a][$b];
+                                $content{"timeout"}{"units"} = "seconds";
+                                $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= " and " unless $b == 6;
+                            }
+                            elsif ( $tspecSchema[ $b + 2 ] eq "packet_padding" ) {
+                                $content{"packet_padding"}{"value"} = $result->[$a][$b];
+                                $content{"packet_padding"}{"units"} = "bytes";
+                                $query2 .= $tspecSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= " and " unless $b == 6;
+                            }
+                        }
+                        else {
+                            $query2 .= $tspecSchema[ $b + 2 ] . " is NULL";
+                            $query2 .= " and " unless $b == 6;
+                        }
+
+                    }
+                    $query .= $query2;
+                }
+                $query .= ";";
+
+                my $parameter = $self->generateParameters( { content => \%content } );
+                my $result2 = $tspecdb->query( { query => $query } );
+                $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result2 ) == -1;
+
+                my $len2 = $#{$result2};
+                $tspec{$a}{"xml"} = $parameter;
+                for my $b ( 0 .. $len2 ) {
+                    $tspec{$a}{"id"}{ $result2->[$b][0] } = 1;
                 }
             }
-            $id++;
+            $tspecdb->closeDB;
+
+            %node  = ();
+            $query = q{};
+            foreach my $date ( @dateList ) {
+                $query .= " union " if $query;
+                $query .= "select node_id, addr from " . $date . "_NODES";
+            }
+            $query .= ";";
+
+            my @nodeSchema = ( "node_id", "node_name", "longname", "host", "addr", "first", "last" );
+            my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@nodeSchema, user => $dbuserOWP, pass => $dbpassOWP } );
+            $dbReturn = $nodedb->openDB;
+            if ( $dbReturn == -1 ) {
+                $self->{LOGGER}->fatal( "Database error, aborting." );
+                return -1;
+            }
+            $result = $nodedb->query( { query => $query } );
+            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+
+            $len = $#{$result};
+            for my $a ( 0 .. $len ) {
+                my $addr     = $result->[$a][1];
+                my @cols     = split( /:/, $addr );
+                my @nodePart = ();
+                if ( $#cols > 1 ) {
+                    @nodePart = split( /\]/, $addr );
+                    $nodePart[0] =~ s/^\[//;
+                    $nodePart[1] =~ s/^:// if $nodePart[1];
+                }
+                else {
+                    @nodePart = split( /:/, $addr );
+                }
+                $node{ $result->[$a][0] }{"name"} = $nodePart[0];
+                $node{ $result->[$a][0] }{"port"} = $nodePart[1];
+                $node{ $result->[$a][0] }{"type"} = $self->addressType( { address => $nodePart[0] } );
+            }
+
+            $query = q{};
+            foreach my $date ( @dateList ) {
+                $query .= " union " if $query;
+                $query .= "(select distinct send_id, recv_id, tspec_id, case";
+                foreach my $id ( keys %tspec ) {
+                    foreach my $id2 ( keys %{ $tspec{$id}{"id"} } ) {
+                        $query .= " when tspec_id=" . $id2 . " then '" . $id . "' ";
+                    }
+                }
+                $query .= "end as tid from " . $date . "_DATA)";
+            }
+            $query .= " order by send_id, recv_id, tspec_id;";
+
+            my @dataSchema = ( "send_id", "recv_id", "tspec_id", "si", "ei", "stimestamp", "etimestamp", "start_time", "end_time", "min", "max", "minttl", "maxttl", "sent", "lost", "dups", "maxerr", "finished" );
+            my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dataSchema, user => $dbuserOWP, pass => $dbpassOWP } );
+            $dbReturn = $datadb->openDB;
+            if ( $dbReturn == -1 ) {
+                $self->{LOGGER}->fatal( "Database error, aborting." );
+                return -1;
+            }
+            $result = $datadb->query( { query => $query } );
+            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+
+            $len = $#{$result};
+            for my $a ( 0 .. $len ) {
+                my $metadata = q{};
+                my $data     = q{};
+
+                $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
+                $metadata .= "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
+                $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+                $metadata .= "        <nmwgt:src";
+                $metadata .= " value=\"" . $node{ $result->[$a][0] }{"name"} . "\"" if $node{ $result->[$a][0] }{"name"};
+                $metadata .= " port=\"" . $node{ $result->[$a][0] }{"port"} . "\"" if $node{ $result->[$a][0] }{"port"};
+                $metadata .= " type=\"" . $node{ $result->[$a][0] }{"type"} . "\"" if $node{ $result->[$a][0] }{"type"};
+                $metadata .= " />\n";
+                $metadata .= "        <nmwgt:dst";
+                $metadata .= " value=\"" . $node{ $result->[$a][1] }{"name"} . "\"" if $node{ $result->[$a][1] }{"name"};
+                $metadata .= " port=\"" . $node{ $result->[$a][1] }{"port"} . "\"" if $node{ $result->[$a][1] }{"port"};
+                $metadata .= " type=\"" . $node{ $result->[$a][1] }{"type"} . "\"" if $node{ $result->[$a][1] }{"type"};
+                $metadata .= " />\n";
+                $metadata .= "      </nmwgt:endPointPair>\n";
+                $metadata .= "    </owamp:subject>\n";
+                $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>\n";
+                $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:eventType>\n";
+                $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
+                $metadata .= $tspec{ $result->[$a][3] }{"xml"};
+                $metadata .= "  </nmwg:metadata>\n";
+
+                my @eT = ( "http://ggf.org/ns/nmwg/tools/owamp/2.0", "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" );
+                $data .= $self->generateData( { id => $id, testspec => $result->[$a][2], eT => \@eT, db => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
+
+                if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
+                    my $dHash  = md5_hex( $data );
+                    my $mdHash = md5_hex( $metadata );
+                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                    $errorFlag++ if $parameters->{"error"};
+                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                    $errorFlag++ if $parameters->{"error"};
+                }
+                elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+                    my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
+                    if ( defined $fh ) {
+                        print $fh $metadata . "\n" . $data . "\n";
+                        $fh->close;
+                    }
+                    else {
+                        $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
+                        return -1;
+                    }
+                }
+                $id++;
+            }
         }
     }
 
@@ -1925,7 +1940,6 @@ sub setupDataRetrieveKey {
         return;
     }
 
-    my $hashId = $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$hashKey};
     my $hashId = $self->{HASH_TO_ID}->{$hashKey};
     $self->{LOGGER}->debug( "Received hash key $hashKey which maps to $hashId" );
     unless ( $hashId ) {
