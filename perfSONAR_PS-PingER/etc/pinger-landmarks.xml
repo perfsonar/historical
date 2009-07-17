@@ -18,7 +18,7 @@
         <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>
         <nmwg:parameter name="measurementOffset">0</nmwg:parameter>
       </nmwg:parameters>
-      <nmtl3:port id="urn:ogf:network:domain=slac.stanford.edu:node=pinger:port=134.79.18.163">
+      <nmtl3:port id="urn:ogf:network:domain=slac.stanford.edu:node=pinger:port=134.79.240.163">
         <nmtl3:ipAddress type="IPv4">134.79.240.30</nmtl3:ipAddress>
       </nmtl3:port>
     </pingertopo:node>
@@ -77,7 +77,7 @@
       </nmtl3:port>
     </pingertopo:node>
   </pingertopo:domain>
-   <pingertopo:domain id="urn:ogf:network:domain=purdue.edu">
+   <pingertopo:domain id="urn:ogf:network:domain=rcac.purdue.edu">
     <pingertopo:node id="urn:ogf:network:domain=rcac.purdue.edu:node=Purdue-T2">
       <nmtb:name type="string">Purdue-T2</nmtb:name>
       <nmtb:hostName>phedex.rcac.purdue.edu</nmtb:hostName>
@@ -113,7 +113,7 @@
       </nmtl3:port>
     </pingertopo:node>
   </pingertopo:domain>
-   <pingertopo:domain id="urn:ogf:network:domain=wisc.edu">
+   <pingertopo:domain id="urn:ogf:network:domain=hep.wisc.edu">
     <pingertopo:node id="urn:ogf:network:domain=hep.wisc.edu:node=WISC-T2">
       <nmtb:name type="string">WISC-T2</nmtb:name>
       <nmtb:hostName>cmssrm.hep.wisc.edu</nmtb:hostName>
@@ -149,7 +149,7 @@
       </nmtl3:port>
     </pingertopo:node>
   </pingertopo:domain>
-   <pingertopo:domain id="urn:ogf:network:domain=ufl.edu">
+   <pingertopo:domain id="urn:ogf:network:domain=ihepa.ufl.edu">
     <pingertopo:node id="urn:ogf:network:domain=ihepa.ufl.edu:node=UFL-T2">
       <nmtb:name type="string">UFL-T2</nmtb:name>
       <nmtb:hostName>tier2.ihepa.ufl.edu</nmtb:hostName>
@@ -167,7 +167,7 @@
       </nmtl3:port>
     </pingertopo:node>
   </pingertopo:domain>
-     <pingertopo:domain id="urn:ogf:network:domain=mit.edu">
+     <pingertopo:domain id="urn:ogf:network:domain=cmsaf.mit.edu">
     <pingertopo:node id="urn:ogf:network:domain=cmsaf.mit.edu:node=MIT-T2">
       <nmtb:name type="string">MIT-T2</nmtb:name>
       <nmtb:hostName>www.cmsaf.mit.edu</nmtb:hostName>
