@@ -95,16 +95,16 @@ Due to the time constraints placed on release team members, the Joint Techs Conf
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=106 106] - Enhancement - Medium - _*Jeff*_ - ~~bwmaster/bwcontroller: better logging support~~
      * <font color=purple>_*Moved to Next Release - 7/15*_</font>	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=125 125] - Task - High - _*Jeff*_ - testconf.pl: Print out description of exactly what tests are configured to run by an owmesh.conf file	 
-     * <font color=purple>_*Started, will finish after release - 7/16*_</font> 
+     * <font color=yellow>_*Started, will finish after release - 7/16*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=127 127] - Enhancement - High - _*Jeff*_ - ~~Refactor bwmaster.pl to fetch addresses from 'conf' before forking~~
      * <font color=purple>_*Moved to Next Release - 7/16*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=152 152] - Defect - High - _*Jason*_ - ~~pSB MA gLS ERRORS~~
      * <font color=purple>_*migrating to next release - 7/14*_</font> 	 
      * Temp fix applied, will address further in next release.
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=157 157] - Enhancement - High - _*Jeff*_ - bwcollector debugging support 	 
-     * <font color=purple>_*Started, will finish after release - 7/16*_</font> 
+     * <font color=yellow>_*Started, will finish after release - 7/16*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - Enhancement - High - _*Jason*_ - Address/Name Normalization in pSB 	
-     * <font color=purple>_*Will not be addressed before release - 7/16*_</font>   
+     * <font color=yellow>_*Will not be addressed before release - 7/16*_</font>   
      * Upstream issue was addressed too late
  * _*perfAdmin*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - Enhancement - Medium - _*Jason*_ - ~~disable buttons on the stats grpahs page for empty graphs~~
