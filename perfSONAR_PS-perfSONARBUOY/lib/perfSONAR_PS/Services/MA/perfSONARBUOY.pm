@@ -777,56 +777,66 @@ sub createStorage {
             $result = $datadb->query( { query => $query } );
             $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
+            my %resSet = ();
             $len = $#{$result};
             for my $a ( 0 .. $len ) {
-                my $metadata = q{};
-                my $data     = q{};
-
-                $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
-                $metadata .= "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject-" . $id . "\">\n";
-                $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-                $metadata .= "        <nmwgt:src";
-                $metadata .= " value=\"" . $node{ $result->[$a][0] }{"name"} . "\"" if $node{ $result->[$a][0] }{"name"};
-                $metadata .= " port=\"" . $node{ $result->[$a][0] }{"port"} . "\"" if $node{ $result->[$a][0] }{"port"};
-                $metadata .= " type=\"" . $node{ $result->[$a][0] }{"type"} . "\"" if $node{ $result->[$a][0] }{"type"};
-                $metadata .= " />\n";
-                $metadata .= "        <nmwgt:dst";
-                $metadata .= " value=\"" . $node{ $result->[$a][1] }{"name"} . "\"" if $node{ $result->[$a][1] }{"name"};
-                $metadata .= " port=\"" . $node{ $result->[$a][1] }{"port"} . "\"" if $node{ $result->[$a][1] }{"port"};
-                $metadata .= " type=\"" . $node{ $result->[$a][1] }{"type"} . "\"" if $node{ $result->[$a][1] }{"type"};
-                $metadata .= " />\n";
-                $metadata .= "      </nmwgt:endPointPair>\n";
-                $metadata .= "    </iperf:subject>\n";
-                $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>\n";
-                $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>\n";
-                $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
-                $metadata .= $tspec{ $result->[$a][3] }{"xml"};
-                $metadata .= "  </nmwg:metadata>\n";
-
-                my @eT = ( "http://ggf.org/ns/nmwg/tools/iperf/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" );
-                $data .= $self->generateData( { id => $id, testspec => $result->[$a][2], eT => \@eT, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
-
-                if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-                    my $dHash  = md5_hex( $data );
-                    my $mdHash = md5_hex( $metadata );
-                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                    $errorFlag++ if $parameters->{"error"};
-                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                    $errorFlag++ if $parameters->{"error"};
-                }
-                elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
-                    my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
-                    if ( defined $fh ) {
-                        print $fh $metadata . "\n" . $data . "\n";
-                        $fh->close;
-                    }
-                    else {
-                        $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
-                        return -1;
-                    }
-                }
-                $id++;
+                push @{ $resSet{ $result->[$a][0] }{ $result->[$a][1] }{ $result->[$a][3] } }, $result->[$a][2];
             }
+
+            foreach my $src ( keys %resSet ) {
+                foreach my $dst ( keys %{ $resSet{$src} } ) {
+                    foreach my $fakeid ( keys %{ $resSet{$src}{$dst} } ) {
+                        my $metadata = q{};
+                        my $data     = q{};
+
+                        $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
+                        $metadata .= "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject-" . $id . "\">\n";
+                        $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+                        $metadata .= "        <nmwgt:src";
+                        $metadata .= " value=\"" . $node{$src}{"name"} . "\"" if $node{$src}{"name"};
+                        $metadata .= " port=\"" . $node{$src}{"port"} . "\"" if $node{$src}{"port"};
+                        $metadata .= " type=\"" . $node{$src}{"type"} . "\"" if $node{$src}{"type"};
+                        $metadata .= " />\n";
+                        $metadata .= "        <nmwgt:dst";
+                        $metadata .= " value=\"" . $node{$dst}{"name"} . "\"" if $node{$dst}{"name"};
+                        $metadata .= " port=\"" . $node{$dst}{"port"} . "\"" if $node{$dst}{"port"};
+                        $metadata .= " type=\"" . $node{$dst}{"type"} . "\"" if $node{$dst}{"type"};
+                        $metadata .= " />\n";
+                        $metadata .= "      </nmwgt:endPointPair>\n";
+                        $metadata .= "    </iperf:subject>\n";
+                        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>\n";
+                        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>\n";
+                        $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
+                        $metadata .= $tspec{$fakeid}{"xml"};
+                        $metadata .= "  </nmwg:metadata>\n";
+
+                        my @eT = ( "http://ggf.org/ns/nmwg/tools/iperf/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" );
+                        $data .= $self->generateData( { id => $id, testspec => $resSet{$src}{$dst}{$fakeid}, eT => \@eT, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
+
+                        if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
+                            my $dHash  = md5_hex( $data );
+                            my $mdHash = md5_hex( $metadata );
+                            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                            $errorFlag++ if $parameters->{"error"};
+                            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                            $errorFlag++ if $parameters->{"error"};
+                        }
+                        elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+                            my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
+                            if ( defined $fh ) {
+                                print $fh $metadata . "\n" . $data . "\n";
+                                $fh->close;
+                            }
+                            else {
+                                $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
+                                return -1;
+                            }
+                        }
+                        $id++;
+                    }
+                }
+            }
+
         }
     }
 
@@ -1006,56 +1016,67 @@ sub createStorage {
             $result = $datadb->query( { query => $query } );
             $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
+            my %resSet = ();
             $len = $#{$result};
             for my $a ( 0 .. $len ) {
-                my $metadata = q{};
-                my $data     = q{};
-
-                $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
-                $metadata .= "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
-                $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-                $metadata .= "        <nmwgt:src";
-                $metadata .= " value=\"" . $node{ $result->[$a][0] }{"name"} . "\"" if $node{ $result->[$a][0] }{"name"};
-                $metadata .= " port=\"" . $node{ $result->[$a][0] }{"port"} . "\"" if $node{ $result->[$a][0] }{"port"};
-                $metadata .= " type=\"" . $node{ $result->[$a][0] }{"type"} . "\"" if $node{ $result->[$a][0] }{"type"};
-                $metadata .= " />\n";
-                $metadata .= "        <nmwgt:dst";
-                $metadata .= " value=\"" . $node{ $result->[$a][1] }{"name"} . "\"" if $node{ $result->[$a][1] }{"name"};
-                $metadata .= " port=\"" . $node{ $result->[$a][1] }{"port"} . "\"" if $node{ $result->[$a][1] }{"port"};
-                $metadata .= " type=\"" . $node{ $result->[$a][1] }{"type"} . "\"" if $node{ $result->[$a][1] }{"type"};
-                $metadata .= " />\n";
-                $metadata .= "      </nmwgt:endPointPair>\n";
-                $metadata .= "    </owamp:subject>\n";
-                $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>\n";
-                $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:eventType>\n";
-                $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
-                $metadata .= $tspec{ $result->[$a][3] }{"xml"};
-                $metadata .= "  </nmwg:metadata>\n";
-
-                my @eT = ( "http://ggf.org/ns/nmwg/tools/owamp/2.0", "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" );
-                $data .= $self->generateData( { id => $id, testspec => $result->[$a][2], eT => \@eT, db => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
-
-                if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-                    my $dHash  = md5_hex( $data );
-                    my $mdHash = md5_hex( $metadata );
-                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                    $errorFlag++ if $parameters->{"error"};
-                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                    $errorFlag++ if $parameters->{"error"};
-                }
-                elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
-                    my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
-                    if ( defined $fh ) {
-                        print $fh $metadata . "\n" . $data . "\n";
-                        $fh->close;
-                    }
-                    else {
-                        $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
-                        return -1;
-                    }
-                }
-                $id++;
+                push @{ $resSet{ $result->[$a][0] }{ $result->[$a][1] }{ $result->[$a][3] } }, $result->[$a][2];
             }
+
+            foreach my $src ( keys %resSet ) {
+                foreach my $dst ( keys %{ $resSet{$src} } ) {
+                    foreach my $fakeid ( keys %{ $resSet{$src}{$dst} } ) {
+                        my $metadata = q{};
+                        my $data     = q{};
+
+                        $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
+                        $metadata .= "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
+                        $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+                        $metadata .= "        <nmwgt:src";
+                        $metadata .= " value=\"" . $node{$src}{"name"} . "\"" if $node{$src}{"name"};
+                        $metadata .= " port=\"" . $node{$src}{"port"} . "\"" if $node{$src}{"port"};
+                        $metadata .= " type=\"" . $node{$src}{"type"} . "\"" if $node{$src}{"type"};
+                        $metadata .= " />\n";
+                        $metadata .= "        <nmwgt:dst";
+                        $metadata .= " value=\"" . $node{$dst}{"name"} . "\"" if $node{$dst}{"name"};
+                        $metadata .= " port=\"" . $node{$dst}{"port"} . "\"" if $node{$dst}{"port"};
+                        $metadata .= " type=\"" . $node{$dst}{"type"} . "\"" if $node{$dst}{"type"};
+                        $metadata .= " />\n";
+                        $metadata .= "      </nmwgt:endPointPair>\n";
+                        $metadata .= "    </owamp:subject>\n";
+                        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>\n";
+                        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:eventType>\n";
+                        $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
+                        $metadata .= $tspec{$fakeid}{"xml"};
+                        $metadata .= "  </nmwg:metadata>\n";
+
+                        my @eT = ( "http://ggf.org/ns/nmwg/tools/owamp/2.0", "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" );
+                        $data .= $self->generateData( { id => $id, testspec => $resSet{$src}{$dst}{$fakeid}, eT => \@eT, db => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
+
+                        if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
+                            my $dHash  = md5_hex( $data );
+                            my $mdHash = md5_hex( $metadata );
+                            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                            $errorFlag++ if $parameters->{"error"};
+                            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                            $errorFlag++ if $parameters->{"error"};
+                        }
+                        elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+                            my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
+                            if ( defined $fh ) {
+                                print $fh $metadata . "\n" . $data . "\n";
+                                $fh->close;
+                            }
+                            else {
+                                $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
+                                return -1;
+                            }
+                        }
+                        $id++;
+
+                    }
+                }
+            }
+
         }
     }
 
@@ -1139,7 +1160,9 @@ sub generateData {
     foreach my $e ( @{ $parameters->{eT} } ) {
         $data .= "        <nmwg:parameter name=\"eventType\">" . $e . "</nmwg:parameter>\n";
     }
-    $data .= "        <nmwg:parameter name=\"testspec\">" . $parameters->{testspec} . "</nmwg:parameter>\n";
+    foreach my $t ( @{ $parameters->{testspec} } ) {
+        $data .= "        <nmwg:parameter name=\"testspec\">" . $t . "</nmwg:parameter>\n";
+    }
     $data .= "        <nmwg:parameter name=\"db\">" . $parameters->{db} . "</nmwg:parameter>\n";
     $data .= "        <nmwg:parameter name=\"user\">" . $parameters->{user} . "</nmwg:parameter>\n" if exists $parameters->{user} and $parameters->{user};
     $data .= "        <nmwg:parameter name=\"pass\">" . $parameters->{pass} . "</nmwg:parameter>\n" if exists $parameters->{pass} and $parameters->{pass};
@@ -2288,11 +2311,23 @@ sub retrieveSQL {
         throw perfSONAR_PS::Error_compat( "error.ma.storage", "No data element found." );
     }
 
-    my $testspec  = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"testspec\"]", 1 ), 1 );
-    my $dbconnect = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"db\"]",       1 ), 1 );
-    my $dbuser    = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"user\"]",     1 ), 1 );
-    my $dbpass    = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"pass\"]",     1 ), 1 );
-    my $dbtable   = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"table\"]",    1 ), 1 );
+    my $testspecList = find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"testspec\"]", 0 );
+    my @tspec = ();
+    foreach my $t ( $testspecList->get_nodelist ) {
+        my $value = extract( $t, 0 );
+        push @tspec, $value if $value;
+    }
+
+    my $testspec = q{};
+    foreach my $t ( @tspec ) {
+        $testspec .= " or " if $testspec;
+        $testspec .= " tspec_id=\"" . $t . "\"";
+    }
+
+    my $dbconnect = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"db\"]",    1 ), 1 );
+    my $dbuser    = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"user\"]",  1 ), 1 );
+    my $dbpass    = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"pass\"]",  1 ), 1 );
+    my $dbtable   = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"table\"]", 1 ), 1 );
 
     unless ( $dbconnect ) {
         $self->{LOGGER}->error( "Data element " . $parameters->{d}->getAttribute( "id" ) . " is missing some SQL elements" );
@@ -2324,8 +2359,43 @@ sub retrieveSQL {
     # If we were to limt the data, here is the place to do so (see the owamp section for more notes)
 
     if ( $dataType eq "BWCTL" ) {
+        my @dateSchema = ( "year", "month" );
+        my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@dateSchema, user => $dbuser, pass => $dbpass } );
+        $dbReturn = $datedb->openDB;
+        if ( $dbReturn == -1 ) {
+            my $msg = "Database error, could not complete request.";
+            $self->{LOGGER}->error( $msg );
+            getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            return;
+        }
+
+        my $result = $datedb->query( { query => "select * from DATES;" } );
+        $datedb->closeDB;
+        my $len = $#{$result};
+        unless ( $len > -1 ) {
+            my $msg = "No data in database";
+            $self->{LOGGER}->error( $msg );
+            getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            return;
+        }
+        my @dateList = ();
+        for my $a ( 0 .. $len ) {
+            push @dateList, sprintf "%04d%02d", $result->[$a][0], $result->[$a][1];
+        }
+
         my @nodeSchema = ( "node_id", "node_name", "longname", "addr", "first", "last" );
         my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@nodeSchema, user => $dbuser, pass => $dbpass } );
+
+        my $query1 = q{};
+        my $query2 = q{};
+        foreach my $date ( @dateList ) {
+            $query1 .= " union " if $query1;
+            $query1 .= "select distinct node_id from " . $date . "_NODES where addr like \"" . $parameters->{src} . "%\"";
+            $query2 .= " union " if $query2;
+            $query2 .= "select distinct node_id from " . $date . "_NODES where addr like \"" . $parameters->{dst} . "%\"";
+        }
+        $query1 .= ";";
+        $query2 .= ";";
 
         $dbReturn = $nodedb->openDB;
         if ( $dbReturn == -1 ) {
@@ -2335,57 +2405,60 @@ sub retrieveSQL {
             return;
         }
 
-        my $result_d = $nodedb->query( { query => "select * from DATES;" } );
+        my $result1 = $nodedb->query( { query => $query1 } );
+        my $result2 = $nodedb->query( { query => $query2 } );
         $nodedb->closeDB;
-        unless ( $#{$result_d} > -1 ) {
-            my $msg = "No data in database";
+
+        if ( $#{$result1} < 0 and $#{$result2} < 0 ) {
+            my $msg = "Id error, found \"" . join( " - ", @{$result1} ) . "\" for SRC and \"" . join( " - ", @{$result2} ) . "\" for DST addresses.";
             $self->{LOGGER}->error( $msg );
             getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
             return;
         }
 
-        my $src_id = q{};
-        my $dst_id = q{};
-        foreach my $row ( @{$result_d} ) {
-            my $year = $row->[0];
-            my $mon  = $row->[1];
-            $mon = "0" . $mon if $mon =~ m/^\d$/;
-
-            $dbReturn = $nodedb->openDB;
-            if ( $dbReturn == -1 ) {
-                my $msg = "Database error, could not complete request.";
-                $self->{LOGGER}->error( $msg );
-                getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
-                return;
+        my $sendSQL = q{};
+        if ( $#{$result1} >= 0 ) {
+            foreach my $s ( @{$result1} ) {
+                $sendSQL .= " or " if $sendSQL;
+                $sendSQL .= " send_id=\"" . $s->[0] . "\"";
             }
-
-            my $result1 = $nodedb->query( { query => "select distinct node_id from " . $year . $mon . "_NODES where addr like \"" . $parameters->{src} . "%\";" } );
-            my $result2 = $nodedb->query( { query => "select distinct node_id from " . $year . $mon . "_NODES where addr like \"" . $parameters->{dst} . "%\";" } );
-            $nodedb->closeDB;
-
-            $src_id = $result1->[0][0] if not $src_id and $result1->[0][0];
-            $dst_id = $result2->[0][0] if not $dst_id and $result2->[0][0];
         }
 
-        unless ( $src_id and $dst_id ) {
-            my $msg = "Cannot find node IDs in database, aborting.";
-            $self->{LOGGER}->error( $msg );
-            getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
-            return;
+        my $recvSQL = q{};
+        if ( $#{$result2} >= 0 ) {
+            foreach my $r ( @{$result2} ) {
+                $recvSQL .= " or " if $recvSQL;
+                $recvSQL .= " recv_id=\"" . $r->[0] . "\"";
+            }
         }
 
-        foreach my $row ( @{$result_d} ) {
-            my $year = $row->[0];
-            my $mon  = $row->[1];
-            $mon = "0" . $mon if $mon =~ m/^\d$/;
+        # XXX JZ - 7/15/2009
+        #
+        # If we were to limt the data, here is the place to do so.  We can set
+        #   a 'lower bound' to be some amount of time < now().
 
-            @dbSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
+        my $lowerBound = q{};
+        my $upperBound = q{};
+        if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
+            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( time );
+            $lowerBound = sprintf "%4d%02d", ( $year + 1900 ), ( $mon + 1 );
+        }
+        if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
+            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( time );
+            $upperBound = sprintf "%4d%02d", ( $year + 1900 ), ( $mon + 1 );
+        }
+
+        @dbSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
+        foreach my $date ( @dateList ) {
+
             if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
+                next if $lowerBound and $date < $lowerBound;
+                next if $upperBound and $date > $upperBound;
                 if ( $query ) {
-                    $query = $query . " union select * from " . $year . $mon . "_DATA where send_id=\"" . $src_id . "\" and recv_id=\"" . $dst_id . "\" and tspec_id=\"" . $testspec . "\" and";
+                    $query = $query . " union select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec . " and";
                 }
                 else {
-                    $query = "select * from " . $year . $mon . "_DATA where send_id=\"" . $src_id . "\" and recv_id=\"" . $dst_id . "\" and tspec_id=\"" . $testspec . "\" and";
+                    $query = "select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec . " and";
                 }
 
                 my $queryCount = 0;
@@ -2404,10 +2477,10 @@ sub retrieveSQL {
             }
             else {
                 if ( $query ) {
-                    $query = $query . " union select * from " . $year . $mon . "_DATA where send_id=\"" . $src_id . "\" and recv_id=\"" . $dst_id . "\" and tspec_id=\"" . $testspec . "\"";
+                    $query = $query . " union select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec;
                 }
                 else {
-                    $query = "select * from " . $year . $mon . "_DATA where send_id=\"" . $src_id . "\" and recv_id=\"" . $dst_id . "\" and tspec_id=\"" . $testspec . "\"";
+                    $query = "select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec;
                 }
             }
         }
@@ -2511,10 +2584,10 @@ sub retrieveSQL {
                 next if $lowerBound and $date < $lowerBound;
                 next if $upperBound and $date > $upperBound;
                 if ( $query ) {
-                    $query = $query . " union select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and tspec_id=\"" . $testspec . "\" and";
+                    $query = $query . " union select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec . " and";
                 }
                 else {
-                    $query = "select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and tspec_id=\"" . $testspec . "\" and";
+                    $query = "select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec . " and";
                 }
 
                 my $queryCount = 0;
@@ -2533,10 +2606,10 @@ sub retrieveSQL {
             }
             else {
                 if ( $query ) {
-                    $query = $query . " union select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and tspec_id=\"" . $testspec . "\"";
+                    $query = $query . " union select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec;
                 }
                 else {
-                    $query = "select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and tspec_id=\"" . $testspec . "\"";
+                    $query = "select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec;
                 }
             }
         }
