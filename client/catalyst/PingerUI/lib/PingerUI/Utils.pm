@@ -21,19 +21,241 @@ use version; our $VERSION = '3.2';
 use Exporter (); 
 use base qw(Exporter);
 our @EXPORT = ();
-our @EXPORT_OK = qw(check_time   get_time_hash $SCRATCH_DIR $MYPATH max min $BUILD_IN_KEY validURL getURL  fix_regexp);
+our @EXPORT_OK = qw(check_time isParam   updateNodeId updateDomainId get_params_obj %pinger_keys 
+                    get_time_hash findNode max min  validURL getURL csv2xml_landmarks fix_regexp);
 use Time::Local; 
 use POSIX qw(strftime);  
 use Date::Manip;
+use Data::Dumper;
+use File::Slurp qw( slurp ) ;
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::pingertopo::Topology';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::pingertopo::Topology::Domain';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::nmtb::Topology::Domain::Node::Description';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::pingertopo::Topology::Domain::Node';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::nmtb::Topology::Domain::Node::Name';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::nmtb::Topology::Domain::Node::HostName';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::nmwg::Topology::Domain::Node::Parameters';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::nmwg::Topology::Domain::Node::Parameters::Parameter';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::nmtl3::Topology::Domain::Node::Port';
+use Text::CSV_XS;
+use perfSONAR_PS::Utils::DNS qw/reverse_dns resolve_address/;
+use constant URNBASE => 'urn:ogf:network'; 
 
-use Log::Log4perl  qw(get_logger); 
+our %pinger_keys = (packetSize => '1000', count => '10',  packetInterval => '1', ttl => '255',
+                       measurementPeriod => '60', measurementOffset => '0', project => 'USCMS');
+our %dns_cache= ();
+our %reverse_dns_cache = ();
+=head2 csv2xml_landmarks
 
-our $BUILD_IN_KEY = 'jh34587wuhlkh789hbyf78343gort03idjuhf3785t0gfgofbf78o4348orgofg7o4fg7';
-our $MYPATH = '/home/netadmin/LHCOPN/perfSONAR-PS/trunk/client/catalyst/PingerUI';
-our $SCRATCH_DIR =  '/tmp';
+   convert CSV landmarks file int othe XML
+
+=cut
+
+sub csv2xml_landmarks {
+    my ($clog, $file) = @_;
+    my  %options;
+ 
+    ### parameter position in the row 
+    my %lookup_row = (description => 4, packetSize => 5, count =>  6,  packetInterval => 7, ttl => 8,
+                       measurementPeriod => 9, measurementOffset => 10, project => 11);
+    my $io_file = IO::File->new($file);
+    my $csv_obj = Text::CSV_XS->new ();  
+    my $landmark_obj = Topology->new();
+    (my $xml_file = $file) =~ s/\.csv$/\.xml/i;
+    my $num = 1;
+    while(my $row = $csv_obj->getline($io_file)) {
+	unless($row->[0] && $row->[1] && ($row->[2] || $row->[3])) {
+	   $clog->error(" Skipping Malformed row: domain=$row->[0]  node=$row->[1] hostname=$row->[2] ip=$row->[3]");
+	   next;
+	} 
+	check_row($row, \%lookup_row ); 
+	my $domain_id = URNBASE . ":domain=$row->[0]";
+	my $domain_obj = $landmark_obj->getDomainById($domain_id);
+	unless($domain_obj) {
+    	    $domain_obj = Domain->new({id => $domain_id});
+	    $landmark_obj->addDomain($domain_obj);		      
+	}   
+	my $node_id =  "$domain_id:node=$row->[1]";
+	my $node_obj =  $domain_obj->getNodeById($node_id);
+	$domain_obj->removeNodeById($node_id)  if($node_obj);
+	eval {
+     	     $node_obj = Node->new({
+    				 id =>  $node_id,
+				 name =>  Name->new(  { type => 'string', text =>  $row->[1]} ),
+				 hostName =>  HostName->new( { text => $row->[2] } ),   
+				 description => Description->new( { text => $row->[4] }),
+    				 port =>  Port->new(
+    					     { xml =>  qq{
+    <nmtl3:port xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070707/" id="$node_id:port=$row->[3]">
+	<nmtl3:ipAddress type="IPv4">$row->[3]</nmtl3:ipAddress>
+    </nmtl3:port>
+    }
+    					     }
+    				       ),
+    				parameters =>  get_params_obj({packetSize => $row->[5], 
+				                               count =>$row->[6],
+							       packetInterval=>$row->[7],
+							       ttl=>$row->[8],
+							       measurementPeriod=>$row->[9],
+							       measurementOffset=>$row->[10],
+							       project=>$row->[11]}, 
+							       "paramid$num")
+			    });
+    	      $domain_obj->addNode($node_obj);
+	      $num++;
+	};
+	if($EVAL_ERROR) {
+    	    $clog->fatal(" Node create failed $EVAL_ERROR");
+	}
+    }
+    my $fd  = new IO::File(">$xml_file")  or $clog->fatal( "Failed to open file $xml_file" . $! );
+    eval {
+        print $fd $landmark_obj->asString;
+        $fd->close;   
+    };
+    if($EVAL_ERROR) {
+        die $clog->fatal( "Failed to store $xml_file landmarks file  $EVAL_ERROR ");
+    }
+    return $xml_file;
+}
+
+=head2 get_params_obj
+   
+      build Parameters object and set defaults
+
+=cut
+
+sub get_params_obj {
+    my ($params, $id) = @_;    
+    my $obj = Parameters->new({ id =>  $id });
+    foreach my $key (keys %pinger_keys){
+        my $value = $params && $params->{$key}?$params->{$key}:$pinger_keys{$key};
+        $obj->addParameter(Parameter->new({name => $key, value => $value}));
+    }
+    return $obj;
+}
+ 
+=head2 check_row 
+
+     set missing values from defaults, resolve DNS name or IP address
+
+=cut
+
+sub check_row {
+    my( $row,  $lookup_row_h) = @_;
+    unless($row->[2]) {
+        unless($reverse_dns_cache{$row->[3]}) {
+            $row->[2] = reverse_dns($row->[3]);
+	     $reverse_dns_cache{$row->[3]} =  $row->[2];
+        } else {
+	    $row->[2] = $reverse_dns_cache{$row->[3]}; 
+	}
+    }
+    unless($row->[3]) {
+        unless($dns_cache{$row->[2]}) {
+            ($row->[3]) =  resolve_address($row->[2]);
+            $dns_cache{$row->[2]} =  $row->[3];
+        } else {
+	    $row->[3] = $dns_cache{$row->[2]};
+	}
+    }
+    foreach my $key (keys %{$lookup_row_h}) {
+        $row->[$lookup_row_h->{$key}] = $pinger_keys{$key}  unless $row->[$lookup_row_h->{$key}];
+    }
+}
+
+ 
+
+=head2 updateDomainId 
+
+  updates domain id and everything inside of domain element ( nodes id , ports  id )
+
+=cut
+
+sub updateDomainId {
+    my ( $domain_obj, $new_domain_urn ) = @_;
+    my ($domain_part) = $new_domain_urn =~ /domain\=([^\:]+)/;
+    $domain_obj->set_id($new_domain_urn);
+    foreach my $in_node ( @{ $domain_obj->get_node } ) {
+        my $node_id = $in_node->get_id;
+        $node_id =~ s/domain\=([^\:]+)\:/domain\=$domain_part\:/;
+        $in_node->set_id($node_id);
+        my $port    = $in_node->get_port;
+        my $port_id = $port->get_id;
+        $port_id =~ s/domain\=([^\:]+)\:/domain\=$domain_part\:/;
+        $port->set_id($port_id);
+    }
+    return $domain_obj;
+}
+
+=head2 updateNodeId 
+
+  updates   node  id , port   id 
+
+=cut
+
+sub updateNodeId {
+    my ( $node_obj, $new_node_urn ) = @_;
+    my ($node_part) = $new_node_urn =~ /node\=([^\:]+)/;
+    $node_obj->set_name( Name->new( { type => 'string', text => $node_part } ) );
+    $node_obj->set_id($new_node_urn);
+    my $port    = $node_obj->get_port;
+    my $port_id = $port->get_id;
+    $port_id =~ s/node\=([^\:]+)\:/node\=$node_part\:/;
+    $port->set_id($port_id);
+    ##$node_obj->port($port);
+    return $node_obj;
+}
+
+=head2 findNode
+
+   find node by domain urn and nodename or urn, returns $domain, $node pair
+   
+=cut
+
+sub findNode {
+    my ($topology, $params, $clog) = @_;
+    if ( $params && ( ref $params ne 'HASH' || !( $params->{urn} || ( $params->{domain} && $params->{name} ) ) ) ) {
+        $clog->fatal(" Failed, only hashref parmaeter is accepted and 'domain' and 'urn' or 'name' must be supplied" . Dumper $params);
+    }
+    my ( $domain_query, $node_query ) = ( $params->{domain}, $params->{name} );
+    if ( $params->{urn} ) {
+        ( $domain_query, $node_query ) = $params->{urn} =~ /^.+\:domain\=([^\:]+)\:node\=(.+)$/;
+    }
+    foreach my $domain ( @{ $topology->get_domain } ) {
+        my $id =  $domain->get_id;
+	$clog->debug(" FIND NODE: $domain_query = $node_query = $id  ");
+        my ($domain_part) = $domain->get_id =~ /domain\=([^\:]+)$/;
+        if ( $domain_part eq $domain_query ) {
+            foreach my $node ( @{ $domain->get_node } ) {
+                my ($node_part) = $node->get_id =~ /node\=([^\:]+)$/;
+                $clog->debug(" quering for ::  $domain_query :: $node_query ---> $domain_part :: $node_part ");
+                if ( $node_part eq $node_query ) {
+                    $clog->debug(" Found node");
+                    return ( $domain, $node );
+                }
+            }
+            return;
+        }
+    }
+    return;
+}
 
 
-our $LOGGER = get_logger(__PACKAGE__);
+=head2  isParam 
+
+  returns true if argument string among supported pigner test parameters
+  otherwise returns undef
+
+=cut
+
+sub  isParam  {
+    my ($name) = @_;
+    return 1 if $name =~ /^(packetSize|count|packetInterval|measurementPeriod|ttl|measurementOffset|ipAddress|type|hostName)/;
+    return;
+}
+ 
+
 
 =head2 validURL 
 
@@ -124,9 +346,8 @@ sub get_time_hash {
 
 
 sub check_time {
-    my( $start_time,  $end_time, $gmt_off) = @_;
-     
-    
+    my($clog, $start_time,  $end_time, $gmt_off) = @_;
+        
     (my $ret_gmt = $gmt_off) =~ s/(curr)?//;
     if($ret_gmt && $ret_gmt > 0) {
         $ret_gmt = 'GMT+' . $ret_gmt ;
@@ -144,7 +365,7 @@ sub check_time {
         $tm_d = UnixDate(ParseDate("$end_time"), "%s");
     };
     if($EVAL_ERROR) {
-        $LOGGER->logdie("   ParseDate failed to parse: $start_time  $end_time". $EVAL_ERROR);
+        $clog->fatal("   ParseDate failed to parse: $start_time  $end_time". $EVAL_ERROR);
     }
    
     return ($tm_s, $tm_d,  $gmt_off, $ret_gmt);
@@ -179,7 +400,7 @@ __END__
 
 =head1   AUTHOR
 
-    Maxim Grigoriev, 2001-2009, maxim@fnal.gov
+    Maxim Grigoriev, 2001-2009, maxim_at_fnal_dot_gov
          
 
 =head1 COPYRIGHT

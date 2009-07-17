@@ -39,6 +39,20 @@ sub default :Path {
     $c->response->status(404);
 }
 
+
+ # called after all actions are finished
+sub end : Private {
+   my ( $self, $c ) = @_;
+   $c->response->header('Cache-Control' => 'no-cache');
+
+   if ( scalar @{ $c->error } ) {
+        $c->stash->{message} =  $c->error; 
+        $c->stash->{template} = 'gui/error.tmpl';
+   } # handle errors
+   return if $c->res->body; # already have a response
+}
+
+
 =head2 end
 
 Attempt to render a view, if needed.

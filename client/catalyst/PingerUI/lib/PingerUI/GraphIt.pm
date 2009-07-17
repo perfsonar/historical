@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use English qw( -no_match_vars );
 use version; our $VERSION = '0.09'; 
-use PingerUI::Utils qw($MYPATH);
+
 
 =head1 NAME
 
@@ -18,7 +18,7 @@ use PingerUI::Utils qw($MYPATH);
 =head1 EXPORTED 
 
 =cut
-use lib "$MYPATH/lib/PingerUI/ChartDirector/lib";
+##use lib "$MYPATH/lib/PingerUI/ChartDirector/lib";
 
 use perlchartdir; 
 use Exporter (); 

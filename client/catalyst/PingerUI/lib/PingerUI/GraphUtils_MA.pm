@@ -41,7 +41,7 @@ our @EXPORT_OK = qw(build_graph);
 use Time::gmtime;
 use File::Path;
 use perfSONAR_PS::Client::PingER;
-use PingerUI::Utils qw(max min get_time_hash getURL validURL $SCRATCH_DIR $MYPATH);
+use PingerUI::Utils qw(max min get_time_hash getURL validURL);
 use POSIX qw(strftime);
 # OY labels 
  
@@ -139,14 +139,14 @@ sub build_graph {
     my @datums = qw/meanRtt minRtt maxRtt meanIpd minIpd maxIpd iqrIpd clp lossPercent duplicates/;
     ## main cycle for every link
     my $ssid = sprintf("%d", 1E6*rand());
-    my $localpath =  "$SCRATCH_DIR/$GOUT_DIR";
+    my $localpath =  "$c->config->{SCRATCH_DIR}/$GOUT_DIR";
     mkpath([$localpath], undef, 0777);
-    system("ln -s $localpath $MYPATH/root/") unless -l "$MYPATH/root/$GOUT_DIR";
+    system("ln -s $localpath $c->config->{MYPATH}/root/") unless -l "$c->config->{MYPATH}/root/$GOUT_DIR";
     for ( my $i = 0; $i < $num_grs; $i++ ) {
         my $metaID_key=  $c->stash->{links}->[$i];
         my($src_name, $dst_name, $packet_size) = split ':', $metaID_key;
 	my $local_filename = "/$GOUT_DIR/$GFN_BASE-$ssid-$metaID_key";  
-        my $filename       = "$SCRATCH_DIR/$local_filename";
+        my $filename       = "$c->config->{SCRATCH_DIR}/$local_filename";
         $local_filename .=  '.png';
         my %o_y_max = ( rt => 1, loss => 1, ipdv => 1, dupl => 1 );
          

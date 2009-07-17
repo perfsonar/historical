@@ -14,9 +14,22 @@ use Catalyst::Runtime '5.70';
 #                 directory
 
 use parent qw/Catalyst/;
-use Catalyst qw/ConfigLoader
-                Static::Simple/;
-our $VERSION = '0.01';
+use Catalyst qw/-Debug
+                ConfigLoader
+                Static::Simple
+		Session
+		RequireSSL
+		Session::Store::File
+		Session::State::Cookie
+		Authentication
+		Authentication::Credential::Password
+                Authentication::Store::Minimal
+                Authorization::Roles
+		StackTrace 
+		/;
+our $VERSION = '3.1.4';
+use Catalyst::Log::Log4perl;
+use Catalyst::Request::Upload;
 
 # Configure the application.
 #
@@ -26,12 +39,10 @@ our $VERSION = '0.01';
 # details given here can function as a default configuration,
 # with an external configuration file acting as an override for
 # local deployment.
-
-__PACKAGE__->config( name => 'PingerUI' );
-
+__PACKAGE__->config( 'Plugin::ConfigLoader' => { file => 'pingerui.yaml' } );  
+##__PACKAGE__->log(Catalyst::Log::Log4perl->new('logger.conf'));
 # Start the application
 __PACKAGE__->setup();
-
 
 =head1 NAME
 
@@ -43,7 +54,7 @@ PingerUI - Catalyst based application
 
 =head1 DESCRIPTION
 
-[enter your description here]
+ top most module for the catalyst based pinger UI
 
 =head1 SEE ALSO
 

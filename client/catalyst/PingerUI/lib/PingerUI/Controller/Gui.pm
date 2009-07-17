@@ -3,15 +3,13 @@ package PingerUI::Controller::Gui;
 use strict;
 use warnings;
 
-use PingerUI::Utils qw(check_time validURL   $BUILD_IN_KEY $SCRATCH_DIR fix_regexp);
+use PingerUI::Utils qw(check_time validURL  fix_regexp);
 use PingerUI::GraphUtils_MA  qw(build_graph);
-use perfSONAR_PS::Utils::DNS qw/reverse_dns resolve_address/;
 use JSON::XS;
 use Data::Dumper;
 use perfSONAR_PS::Client::PingER; 
 use parent 'Catalyst::Controller';
 use English qw( -no_match_vars );
-use Log::Log4perl  qw(:easy);
 use File::Slurp qw( slurp ) ;
 
 =head1 NAME
@@ -31,7 +29,6 @@ Catalyst Controller.for PingER UI
 
 =cut
 
-Log::Log4perl->easy_init($ERROR);
 
 
 sub index :Path :Args(0) {
@@ -41,7 +38,7 @@ sub index :Path :Args(0) {
 
 =head2 display
     
-       render pigner UI web interface
+       render pinger UI web interface
 
 =cut
 
@@ -54,16 +51,16 @@ sub display : Local {
  
 
 sub _process_params : Private {
-   my ( $self,   $c ) = @_;
+    my ( $self,   $c ) = @_;
   
-   foreach my $name (qw/src_regexp get_it ma  filter_project dst_regexp packetsize ma_urls select_url start_time end_time gmt_offset gtype upper_rt gpresent links/) {
+    foreach my $name (qw/src_regexp get_it ma  filter_project dst_regexp packetsize ma_urls select_url start_time end_time gmt_offset gtype upper_rt gpresent links/) {
         $c->stash->{$name} = $c->request->parameters->{$name};
-   }
-   if( !$c->stash->{'stored_links'} &&  $c->request->parameters->{stored_links} ) {
+    }
+    if( !$c->stash->{'stored_links'} &&  $c->request->parameters->{stored_links} ) {
         $c->stash->{'stored_links'}   =  $c->request->parameters->{stored_links} ;
         $c->stash->{'stored_links'}   =~ s/'/"/gm;
-        $c->stash->{'stored_links'} = decode_json     $c->stash->{'stored_links'}  ;
-   }
+        $c->stash->{'stored_links'} = decode_json $c->stash->{'stored_links'}  ;
+    }
 }
 
 sub _set_defaults : Private {
@@ -276,7 +273,7 @@ sub displayGraph : Local {
     if($c->stash->{start_time} && $c->stash->{end_time}) {
         $c->forward('_updateParams');
         ( $c->stash->{time_start}, $c->stash->{time_end}, 
-	  $c->stash->{gmt_off}, $c->stash->{time_label})     =    check_time($c->stash->{start_time}, 
+	  $c->stash->{gmt_off}, $c->stash->{time_label})     =    check_time($c->log, $c->stash->{start_time}, 
 	                                                                  $c->stash->{end_time},
 								          $c->stash->{gmt_offset});
         $graphs  = build_graph($c);
@@ -300,7 +297,7 @@ sub getGraph : Local {
     my ( $self, $c ) = @_;
     $c->forward('_process_params');
     $c->log->logdie(" Keys is not supplied   ") unless $c->stash->{get_it} &&
-                                                       $c->stash->{get_it} eq $BUILD_IN_KEY &&
+                                                       $c->stash->{get_it} eq $c->config->{BUILD_IN_KEY} &&
 						       $c->stash->{links} &&
 						       $c->stash->{ma} ;
     $c->stash->{get_stream} = 1;
