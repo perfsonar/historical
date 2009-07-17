@@ -2451,11 +2451,27 @@ sub retrieveSQL {
         my $result2 = $nodedb->query( { query => $query2 } );
         $nodedb->closeDB;
 
-        unless ( $#{$result1} == 0 and $#{$result2} == 0 ) {
+        if ( $#{$result1} < 0 and $#{$result2} < 0 ) {
             my $msg = "Id error, found \"" . join( " - ", @{$result1} ) . "\" for SRC and \"" . join( " - ", @{$result2} ) . "\" for DST addresses.";
             $self->{LOGGER}->error( $msg );
             getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
             return;
+        }
+
+        my $sendSQL = q{};
+        if ( $#{$result1} >= 0 ) {
+            foreach my $s ( @{$result1} ) {
+                $sendSQL .= " or " if $sendSQL;
+                $sendSQL .= " send_id=\"" . $s->[0] . "\"";
+            }
+        }
+
+        my $recvSQL = q{};
+        if ( $#{$result2} >= 0 ) {
+            foreach my $r ( @{$result2} ) {
+                $recvSQL .= " or " if $recvSQL;
+                $recvSQL .= " recv_id=\"" . $r->[0] . "\"";
+            }
         }
 
         # XXX JZ - 7/15/2009
@@ -2481,10 +2497,10 @@ sub retrieveSQL {
                 next if $lowerBound and $date < $lowerBound;
                 next if $upperBound and $date > $upperBound;
                 if ( $query ) {
-                    $query = $query . " union select * from " . $date . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and tspec_id=\"" . $testspec . "\" and";
+                    $query = $query . " union select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and tspec_id=\"" . $testspec . "\" and";
                 }
                 else {
-                    $query = "select * from " . $date . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and tspec_id=\"" . $testspec . "\" and";
+                    $query = "select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and tspec_id=\"" . $testspec . "\" and";
                 }
 
                 my $queryCount = 0;
@@ -2503,10 +2519,10 @@ sub retrieveSQL {
             }
             else {
                 if ( $query ) {
-                    $query = $query . " union select * from " . $date . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and tspec_id=\"" . $testspec . "\"";
+                    $query = $query . " union select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and tspec_id=\"" . $testspec . "\"";
                 }
                 else {
-                    $query = "select * from " . $date . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and tspec_id=\"" . $testspec . "\"";
+                    $query = "select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and tspec_id=\"" . $testspec . "\"";
                 }
             }
         }
