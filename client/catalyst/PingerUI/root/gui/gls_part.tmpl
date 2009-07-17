@@ -1,4 +1,4 @@
- <TABLE class="gls_table" cols="6"> 
+ <TABLE class="main" cols="6"> 
  [% IF project_table.size > 0 %]  
    <tr> 
    <td colspan="6"> 
@@ -19,9 +19,11 @@
 	[% END %]
   </TD>
  </tr> 
-  [% END %]     		 
+  [% END %]     		
+ 
    <tr> 
-   <TD   colspan="6">     
+   <TD   colspan="6">
+      
        <div id="filtered_ma" name="filtered_ma" style="display:[% UNLESS remote_urls.size > 0; 'none'; END %];">          
          <SELECT NAME="select_url" ID="select_url" SIZE="7" MULTIPLE class="fc_st">    
 	   [% FOREACH url IN  remote_urls %]	
