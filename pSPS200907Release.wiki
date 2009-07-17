@@ -47,57 +47,66 @@ The following outline some exceptions to the overall release process.  Also see 
 
 === Bugs Related to This Release ===
 
+Due to the time constraints placed on release team members, the Joint Techs Conference (Mid July 2009) was used as a dividing line: most critical functionality should be ready before a first RC followed by a short period of time used to close any remaining bugs and test the final products.
+
+==== Pre RC1 Bugs ====
+
  * _*hLS*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=187 187] - Defect - Critical - _*Jason*_ - perl-Clone needed by hLS (other?) RPM 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=187 187] - Defect - Critical - _*Jason*_ - ~~perl-Clone needed by hLS (other?) RPM~~ 
      * <font color=green>_*Done - 7/6*_</font>
- * _*LS Registration Daemon*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=182 182] - Defect - High - _*Aaron*_ - ~~need better error checking on ls_instance string in ls_registration_daemon~~
-     * <font color=purple>_*Moved to Next Release - 7/2*_</font>
  * _*pSB*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=106 106] - Enhancement - Medium - _*Jeff*_ - bwmaster/bwcontroller: better logging support
-     * <font color=purple>_*Moved to Next Release - 7/15*_</font>	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=115 115] - Defect - High - _*Jason*_ - pSB Metadata Generation 	 	 
-     * <font color=green>_*Done - 7/14*_</font>   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=125 125] - Task - High - _*Jeff*_ - testconf.pl: Print out description of exactly what tests are configured to run by an owmesh.conf file	 
-     * <font color=purple>_*Started, will finish after release - 7/16*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=127 127] - Enhancement - High - _*Jeff*_ - Refactor bwmaster.pl to fetch addresses from 'conf' before forking
-     * <font color=purple>_*Moved to Next Release - 7/16*_</font>   	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=130 130] - Defect - Critical - _*Jason*_ - pSB Store File generation: Star vs Mesh 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=115 115] - Defect - High - _*Jason*_ - ~~pSB Metadata Generation~~
+     * <font color=green>_*Done - 7/14*_</font>   	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=130 130] - Defect - Critical - _*Jason*_ - ~~pSB Store File generation: Star vs Mesh~~
      * <font color=green>_*Done - 7/14*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=131 131] - Defect - Low - _*Jason*_ - achievable bandwidth event type is mis-spelled achieveable 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=131 131] - Defect - Low - _*Jason*_ - ~~achievable bandwidth event type is mis-spelled achieveable~~
      * <font color=green>_*Done - 7/14*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=152 152] - Defect - High - _*Jason*_ - pSB MA gLS ERRORS 
-     * <font color=purple>_*migrating to next release - 7/14*_</font> 	 
-     * Temp fix applied, will address further in next release.
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=157 157] - Enhancement - High - _*Jeff*_ - bwcollector debugging support 	 
-     * <font color=purple>_*Started, will finish after release - 7/16*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=174 174] - Defect - High - _*Jason*_ - windowSize not reported correctly for pSB 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=174 174] - Defect - High - _*Jason*_ - ~~windowSize not reported correctly for pSB~~
      * <font color=green>_*Done - 7/16*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - Enhancement - High - _*Jason*_ - Address/Name Normalization in pSB 	
-     * <font color=purple>_*Will not be addressed before release - 7/16*_</font>   
-     * Upstream issue was addressed too late
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=185 185] - Defect - Critical - _*Jeff*_ - pS-B backend database sometimes includes 'port' in the host portion - need to normalize.
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=185 185] - Defect - Critical - _*Jeff*_ - ~~pS-B backend database sometimes includes 'port' in the host portion - need to normalize.~~
      * <font color=green>_*Done - 7/15*_</font>   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=192 192] - Defect - High - _*Jeff*_ - SIGHUP fails to restart powmaster
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=192 192] - Defect - High - _*Jeff*_ - ~~SIGHUP fails to restart powmaster~~
      * <font color=green>_*Done - 7/14*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=194 194] - Defect - High - _*Jeff*_ - signal handling needs to be corrected in bwcollector and bwmaster
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=194 194] - Defect - High - _*Jeff*_ - ~~signal handling needs to be corrected in bwcollector and bwmaster~~
      * <font color=green>_*Done - 7/15*_</font>   
  * _*PingER*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=181 181] - _*Maxim*_ - ~~PingER MA server errors~~
      * <font color=green>_*Fixed - 6/8*_</font>
  * _*PingER GUI*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=19 19] - Enhancement - High - _*Maxim*_ - PingER GUI gLS pingable hosts 	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=19 19] - Enhancement - High - _*Maxim*_ - ~~PingER GUI gLS pingable hosts~~
      * <font color=green>_*Fixed - 7/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=107 107] - _*Maxim*_ - ~~PingER LandMarks GUI Displays All Pingable Hosts - Selectable by Community~~
      * <font color=green>_*Merged into 19 - 6/8*_</font>
  * _*perfAdmin*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=136 136] - Defect - High - _*Jason*_ - Units displayed in perfAdmin should correspond with service definition 	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=136 136] - Defect - High - _*Jason*_ - ~~Units displayed in perfAdmin should correspond with service definition~~
      * <font color=green>_*Done - 7/10*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=141 141] - Enhancement - High - _*Jason*_ - bandwidthGraph.cgi plots are missleading for data is missing 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=141 141] - Enhancement - High - _*Jason*_ - ~~bandwidthGraph.cgi plots are missleading for data is missing~~
      * <font color=green>_*Done - 7/10*_</font>
      * Open a new bug to discuss larger issue.
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=143 143] - Defect - High - _*Jason*_ - graphs are not coming up under IE 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=143 143] - Defect - High - _*Jason*_ - ~~graphs are not coming up under IE~~
      * <font color=green>_*Done - 7/2*_</font>
+
+==== Post RC1 Bugs ====
+
+ * _*LS Registration Daemon*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=182 182] - Defect - High - _*Aaron*_ - ~~need better error checking on ls_instance string in ls_registration_daemon~~
+     * <font color=purple>_*Moved to Next Release - 7/2*_</font>
+ * _*pSB*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=106 106] - Enhancement - Medium - _*Jeff*_ - ~~bwmaster/bwcontroller: better logging support~~
+     * <font color=purple>_*Moved to Next Release - 7/15*_</font>	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=125 125] - Task - High - _*Jeff*_ - testconf.pl: Print out description of exactly what tests are configured to run by an owmesh.conf file	 
+     * <font color=purple>_*Started, will finish after release - 7/16*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=127 127] - Enhancement - High - _*Jeff*_ - ~~Refactor bwmaster.pl to fetch addresses from 'conf' before forking~~
+     * <font color=purple>_*Moved to Next Release - 7/16*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=152 152] - Defect - High - _*Jason*_ - pSB MA gLS ERRORS 
+     * <font color=purple>_*migrating to next release - 7/14*_</font> 	 
+     * Temp fix applied, will address further in next release.
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=157 157] - Enhancement - High - _*Jeff*_ - bwcollector debugging support 	 
+     * <font color=purple>_*Started, will finish after release - 7/16*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - Enhancement - High - _*Jason*_ - Address/Name Normalization in pSB 	
+     * <font color=purple>_*Will not be addressed before release - 7/16*_</font>   
+     * Upstream issue was addressed too late
+ * _*perfAdmin*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - Enhancement - Medium - _*Jason*_ - disable buttons on the stats grpahs page for empty graphs 
      * <font color=purple>_*Pushing off till 3.2 - 7/10*_</font>
 
