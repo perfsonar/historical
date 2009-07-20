@@ -216,8 +216,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             my @time  = split( /:/, $array[1] );
             if ( $#year > 1 and $#time > 1 ) {
                 if ( exists $store{$time}{"min"}{"src"} and $store{$time}{"min"}{"src"} ) {
-                    print "        data.setValue(" . $counter . ", 0, new Date(" . $year[0] . "," . ( $year[1] - 1 ) . ",";
-                    print $year[2] . "," . $time[0] . "," . $time[1] . "," . $time[2] . "));\n";
+                    print "        data.setValue(" . $counter . ", 0, new Date(" . $year[0] . "," . ( $year[1] - 1 ) . "," . print $year[2] . "," . $time[0] . "," . $time[1] . "," . $time[2] . "));\n";
 
                     print "        data.setValue(" . $counter . ", 1, " . $store{$time}{"min"}{"src"} . ");\n" if $store{$time}{"min"}{"src"};
                     print "        data.setValue(" . $counter . ", 2, " . $store{$time}{"max"}{"src"} . ");\n" if $store{$time}{"max"}{"src"};
