@@ -417,12 +417,13 @@ else {
         my $datacounter = 0;
         my $max = 0;
         foreach my $d ( sort keys %data ) {
-            my $di = 0, $do = 0;
-            $di = ( $data{$d}{"in"}{"total"} / $data{$d}{"in"}{"count"} ) if $data{$d}{"in"}{"count"};
-            $do = ( $data{$d}{"out"}{"total"} / $data{$d}{"out"}{"count"} ) if $data{$d}{"out"}{"count"};            
-            $max = $di if $di > $max;
-            $max = $do if $do > $max;
-            push @graph, { C => $datacounter, LOCATION => $d, IN => $di, OUT => $do };
+            my $din = 0;
+            my $dout = 0;
+            $din = ( $data{$d}{"in"}{"total"} / $data{$d}{"in"}{"count"} ) if $data{$d}{"in"}{"count"};
+            $dout = ( $data{$d}{"out"}{"total"} / $data{$d}{"out"}{"count"} ) if $data{$d}{"out"}{"count"};        
+            $max = $din if $din > $max;
+            $max = $dout if $dout > $max;
+            push @graph, { c => $datacounter, location => $d, in => $din, out => $dout };
             $datacounter++;
         }
         my $temp = scaleValue( { value => $max } );
