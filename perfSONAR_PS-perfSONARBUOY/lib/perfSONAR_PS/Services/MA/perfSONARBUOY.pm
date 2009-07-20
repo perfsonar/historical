@@ -415,7 +415,7 @@ sub refresh_store_file {
             return -1;
         }
 
-        $self->{LOGGER}->debug( "New: $mtime Old: " . $self->{STORE_FILE_MTIME} );
+        $self->{LOGGER}->debug( "New: $mtime Old: " . $self->{STORE_FILE_MTIME} ) if exists $self->{STORE_FILE_MTIME};
 
         unless ( $self->{STORE_FILE_MTIME} and $self->{STORE_FILE_MTIME} == $mtime ) {
             my $error = q{};
@@ -718,6 +718,78 @@ sub createStorage {
             }
             $tspecdb->closeDB;
 
+            # ------------------------------------------------------------------
+            # XXX
+            # JZ 7/19/09
+            # Changes based on node resolution bug
+            # ------------------------------------------------------------------
+
+            $query = q{};
+            foreach my $date ( @dateList ) {
+                $query .= " union " if $query;
+                $query .= "select longname, addr from " . $date . "_NODES";
+            }
+            $query .= ";";
+
+            my @nodeSchema = ( "node_id", "node_name", "longname", "addr", "first", "last" );
+            my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@nodeSchema, user => $dbuserBW, pass => $dbpassBW } );
+            $dbReturn = $nodedb->openDB;
+            if ( $dbReturn == -1 ) {
+                $self->{LOGGER}->fatal( "Database error, aborting." );
+                return -1;
+            }
+            $result = $nodedb->query( { query => $query } );
+            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+
+            my %tnode = ();
+            undef $len;
+            $len = $#{$result};
+            for my $a ( 0 .. $len ) {
+                $query = q{};
+                foreach my $date ( @dateList ) {
+                    $query .= " union " if $query;
+                    $query .= "select node_id from " . $date . "_NODES where ";
+                    my $query2 = q{};
+                    for my $b ( 0 .. 1 ) {
+                        if ( defined $result->[$a][$b] ) {
+                            $query2 .= $nodeSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
+                            $query2 .= " and " unless $b == 1;
+                        }
+                        else {
+                            $query2 .= $nodeSchema[ $b + 2 ] . " is NULL";
+                            $query2 .= " and " unless $b == 1;
+                        }
+                    }
+                    $query .= $query2;
+                }
+                $query .= ";";
+
+                my $result2 = $nodedb->query( { query => $query } );
+                $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result2 ) == -1;
+
+                my $len2 = $#{$result2};
+                for my $b ( 0 .. $len2 ) {
+                    for my $b2 ( 0 .. $len2 ) {
+                        if ( $len2 == 0 ) {
+                            $tnode{ $result2->[$b][0] }{ $result2->[$b2][0] } = 1;
+                        }
+                        else {
+                            next if $result2->[$b][0] eq $result2->[$b2][0];
+                            $tnode{ $result2->[$b][0] }{ $result2->[$b2][0] } = 1;
+                        }
+                    }
+                }
+            }
+            $nodedb->closeDB;
+
+            # ------------------------------------------------------------------
+
+            # ------------------------------------------------------------------
+            # XXX
+            # JZ 7/19/09
+            # duplicate node code...
+            # ------------------------------------------------------------------
+
             my %node = ();
             $query = q{};
             foreach my $date ( @dateList ) {
@@ -726,8 +798,8 @@ sub createStorage {
             }
             $query .= ";";
 
-            my @nodeSchema = ( "node_id", "node_name", "longname", "addr", "first", "last" );
-            my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@nodeSchema, user => $dbuserBW, pass => $dbpassBW } );
+            @nodeSchema = ( "node_id", "node_name", "longname", "addr", "first", "last" );
+            $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@nodeSchema, user => $dbuserBW, pass => $dbpassBW } );
             $dbReturn = $nodedb->openDB;
             if ( $dbReturn == -1 ) {
                 $self->{LOGGER}->fatal( "Database error, aborting." );
@@ -753,6 +825,8 @@ sub createStorage {
                 $node{ $result->[$a][0] }{"port"} = $nodePart[1];
                 $node{ $result->[$a][0] }{"type"} = $self->addressType( { address => $nodePart[0] } );
             }
+
+            # ------------------------------------------------------------------
 
             $query = q{};
             foreach my $date ( @dateList ) {
@@ -783,9 +857,27 @@ sub createStorage {
                 push @{ $resSet{ $result->[$a][0] }{ $result->[$a][1] }{ $result->[$a][3] } }, $result->[$a][2];
             }
 
+            my %mark = ();
             foreach my $src ( keys %resSet ) {
                 foreach my $dst ( keys %{ $resSet{$src} } ) {
                     foreach my $fakeid ( keys %{ $resSet{$src}{$dst} } ) {
+
+                        # ------------------------------------------------------
+                        # XXX
+                        # JZ 7/19/09
+                        # Changes based on node resolution bug
+                        # ------------------------------------------------------
+
+                        next if $mark{$src}{$dst}{$fakeid};
+                        $mark{$src}{$dst}{$fakeid} = 1;
+                        foreach my $otherS ( keys %{ $tnode{$src} } ) {
+                            foreach my $otherD ( keys %{ $tnode{$dst} } ) {
+                                $mark{$otherS}{$otherD}{$fakeid} = 1;
+                            }
+                        }
+
+                        # ------------------------------------------------------
+
                         my $metadata = q{};
                         my $data     = q{};
 
@@ -810,8 +902,26 @@ sub createStorage {
                         $metadata .= $tspec{$fakeid}{"xml"};
                         $metadata .= "  </nmwg:metadata>\n";
 
+                        # ------------------------------------------------------
+                        # XXX
+                        # JZ 7/19/09
+                        # Changes based on node resolution bug
+                        # ------------------------------------------------------
+                        my %tList = ();
+                        foreach my $ts ( @{ $resSet{$src}{$dst}{$fakeid} } ) {
+                            $tList{$ts} = 1;
+                        }
+                        foreach my $otherS ( keys %{ $tnode{$src} } ) {
+                            foreach my $otherD ( keys %{ $tnode{$dst} } ) {
+                                foreach my $ts ( @{ $resSet{$otherS}{$otherD}{$fakeid} } ) {
+                                    $tList{$ts} = 1;
+                                }
+                            }
+                        }
+                        my @temp = keys %tList;
+
                         my @eT = ( "http://ggf.org/ns/nmwg/tools/iperf/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" );
-                        $data .= $self->generateData( { id => $id, testspec => $resSet{$src}{$dst}{$fakeid}, eT => \@eT, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
+                        $data .= $self->generateData( { id => $id, testspec => \@temp, eT => \@eT, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
 
                         if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
                             my $dHash  = md5_hex( $data );
@@ -840,12 +950,15 @@ sub createStorage {
         }
     }
 
+    # bwctl
+    # --------------------------------------------------------------------------
+    # owamp
+
     my $dbtypeOWP = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBTYPE" } );
     my $dbnameOWP = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBNAME" } );
     my $dbhostOWP = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBHOST" } );
 
     if ( $dbtypeOWP and $dbnameOWP and $dbhostOWP ) {
-
         my $dbsourceOWP = $dbtypeOWP . ":" . $dbnameOWP . ":" . $dbhostOWP;
         my $dbuserOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBUSER" } );
         my $dbpassOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBPASS" } );
@@ -957,6 +1070,77 @@ sub createStorage {
             }
             $tspecdb->closeDB;
 
+            # ------------------------------------------------------------------
+            # XXX
+            # JZ 7/19/09
+            # Changes based on node resolution bug
+            # ------------------------------------------------------------------
+
+            $query = q{};
+            foreach my $date ( @dateList ) {
+                $query .= " union " if $query;
+                $query .= "select longname, host, addr from " . $date . "_NODES";
+            }
+            $query .= ";";
+
+            my @nodeSchema = ( "node_id", "node_name", "longname", "host", "addr", "first", "last" );
+            my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@nodeSchema, user => $dbuserOWP, pass => $dbpassOWP } );
+            $dbReturn = $nodedb->openDB;
+            if ( $dbReturn == -1 ) {
+                $self->{LOGGER}->fatal( "Database error, aborting." );
+                return -1;
+            }
+            $result = $nodedb->query( { query => $query } );
+            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+
+            my %tnode = ();
+            undef $len;
+            $len = $#{$result};
+            for my $a ( 0 .. $len ) {
+                $query = q{};
+                foreach my $date ( @dateList ) {
+                    $query .= " union " if $query;
+                    $query .= "select node_id from " . $date . "_NODES where ";
+                    my $query2 = q{};
+                    for my $b ( 0 .. 2 ) {
+                        if ( defined $result->[$a][$b] ) {
+                            $query2 .= $nodeSchema[ $b + 2 ] . "=\"" . $result->[$a][$b] . "\"";
+                            $query2 .= " and " unless $b == 2;
+                        }
+                        else {
+                            $query2 .= $nodeSchema[ $b + 2 ] . " is NULL";
+                            $query2 .= " and " unless $b == 2;
+                        }
+                    }
+                    $query .= $query2;
+                }
+                $query .= ";";
+
+                my $result2 = $nodedb->query( { query => $query } );
+                $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result2 ) == -1;
+
+                my $len2 = $#{$result2};
+                for my $b ( 0 .. $len2 ) {
+                    for my $b2 ( 0 .. $len2 ) {
+                        if ( $len2 == 0 ) {
+                            $tnode{ $result2->[$b][0] }{ $result2->[$b2][0] } = 1;
+                        }
+                        else {
+                            next if $result2->[$b][0] eq $result2->[$b2][0];
+                            $tnode{ $result2->[$b][0] }{ $result2->[$b2][0] } = 1;
+                        }
+                    }
+                }
+            }
+            $nodedb->closeDB;
+
+            # ------------------------------------------------------------------
+
+            # ------------------------------------------------------------------
+            # XXX
+            # JZ 7/19/09
+            # duplicate node code...
+            # ------------------------------------------------------------------
             %node  = ();
             $query = q{};
             foreach my $date ( @dateList ) {
@@ -965,8 +1149,8 @@ sub createStorage {
             }
             $query .= ";";
 
-            my @nodeSchema = ( "node_id", "node_name", "longname", "host", "addr", "first", "last" );
-            my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@nodeSchema, user => $dbuserOWP, pass => $dbpassOWP } );
+            @nodeSchema = ( "node_id", "node_name", "longname", "host", "addr", "first", "last" );
+            $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@nodeSchema, user => $dbuserOWP, pass => $dbpassOWP } );
             $dbReturn = $nodedb->openDB;
             if ( $dbReturn == -1 ) {
                 $self->{LOGGER}->fatal( "Database error, aborting." );
@@ -992,6 +1176,8 @@ sub createStorage {
                 $node{ $result->[$a][0] }{"port"} = $nodePart[1];
                 $node{ $result->[$a][0] }{"type"} = $self->addressType( { address => $nodePart[0] } );
             }
+
+            # ------------------------------------------------------------------
 
             $query = q{};
             foreach my $date ( @dateList ) {
@@ -1022,9 +1208,27 @@ sub createStorage {
                 push @{ $resSet{ $result->[$a][0] }{ $result->[$a][1] }{ $result->[$a][3] } }, $result->[$a][2];
             }
 
+            my %mark = ();
             foreach my $src ( keys %resSet ) {
                 foreach my $dst ( keys %{ $resSet{$src} } ) {
                     foreach my $fakeid ( keys %{ $resSet{$src}{$dst} } ) {
+
+                        # ------------------------------------------------------
+                        # XXX
+                        # JZ 7/19/09
+                        # Changes based on node resolution bug
+                        # ------------------------------------------------------
+
+                        next if $mark{$src}{$dst}{$fakeid};
+                        $mark{$src}{$dst}{$fakeid} = 1;
+                        foreach my $otherS ( keys %{ $tnode{$src} } ) {
+                            foreach my $otherD ( keys %{ $tnode{$dst} } ) {
+                                $mark{$otherS}{$otherD}{$fakeid} = 1;
+                            }
+                        }
+
+                        # ------------------------------------------------------
+
                         my $metadata = q{};
                         my $data     = q{};
 
@@ -1049,8 +1253,28 @@ sub createStorage {
                         $metadata .= $tspec{$fakeid}{"xml"};
                         $metadata .= "  </nmwg:metadata>\n";
 
+                        # ------------------------------------------------------
+                        # XXX
+                        # JZ 7/19/09
+                        # Changes based on node resolution bug
+                        # ------------------------------------------------------
+                        my %tList = ();
+                        foreach my $ts ( @{ $resSet{$src}{$dst}{$fakeid} } ) {
+                            $tList{$ts} = 1;
+                        }
+                        foreach my $otherS ( keys %{ $tnode{$src} } ) {
+                            foreach my $otherD ( keys %{ $tnode{$dst} } ) {
+                                foreach my $ts ( @{ $resSet{$otherS}{$otherD}{$fakeid} } ) {
+                                    $tList{$ts} = 1;
+                                }
+                            }
+                        }
+                        my @temp = keys %tList;
+
+                        # ------------------------------------------------------
+
                         my @eT = ( "http://ggf.org/ns/nmwg/tools/owamp/2.0", "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" );
-                        $data .= $self->generateData( { id => $id, testspec => $resSet{$src}{$dst}{$fakeid}, eT => \@eT, db => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
+                        $data .= $self->generateData( { id => $id, testspec => \@temp, eT => \@eT, db => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
 
                         if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
                             my $dHash  = md5_hex( $data );
