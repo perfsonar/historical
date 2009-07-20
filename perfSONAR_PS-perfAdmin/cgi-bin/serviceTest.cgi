@@ -427,8 +427,8 @@ else {
         }
         my $temp = scaleValue( { value => $max } );
         foreach my $g ( @graph ) {
-            $g->{"IN"} /= $temp->{"scale"};
-            $g->{"OUT"} /= $temp->{"scale"};
+            $g->{"in"} /= $temp->{"scale"};
+            $g->{"out"} /= $temp->{"scale"};
         }
 
         $template->param(
