@@ -9,7 +9,7 @@
 
 Name:           perl-perfSONAR_PS-perfAdmin
 Version:        3.1
-Release:        1.%{disttag}
+Release:        2.%{disttag}
 Summary:        perfSONAR_PS perfAdmin
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -96,6 +96,8 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/*
 
 %changelog
+* Thu Jul 21 2009 zurawski@internet2.edu 3.1-2
+- Bugfixes in several graphs.
+
 * Thu Jul 9 2009 zurawski@internet2.edu 3.1-1
 - Initial release as an RPM
-
