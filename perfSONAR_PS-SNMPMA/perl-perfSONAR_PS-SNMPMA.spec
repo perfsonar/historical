@@ -10,7 +10,7 @@ Autoreq: 0
 
 Name:           perl-perfSONAR_PS-SNMPMA
 Version:        3.1
-Release:        5.%{disttag}
+Release:        6.%{disttag}
 Summary:        perfSONAR_PS SNMP Measurement Archive
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -134,6 +134,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Tue Jul 21 2009 zurawski@internet2.edu 3.1-6
+- Shared library upgrades.
+
 * Fri Jul 10 2009 zurawski@internet2.edu 3.1-5
 - Documentation updates
 

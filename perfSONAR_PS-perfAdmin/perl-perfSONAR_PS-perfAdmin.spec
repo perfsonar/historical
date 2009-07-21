@@ -96,7 +96,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/*
 
 %changelog
-* Thu Jul 21 2009 zurawski@internet2.edu 3.1-2
+* Tue Jul 21 2009 zurawski@internet2.edu 3.1-2
 - Bugfixes in several graphs.
 
 * Thu Jul 9 2009 zurawski@internet2.edu 3.1-1

@@ -8,7 +8,7 @@
 
 Name:           perl-perfSONAR_PS-LookupService
 Version:        3.1
-Release:        4.%{disttag}
+Release:        5.%{disttag}
 Summary:        perfSONAR_PS Lookup Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -99,6 +99,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Tue Jul 21 2009 zurawski@internet2.edu 3.1-5
+- Shared library upgrades.
+
 * Fri Jul 10 2009 zurawski@internet2.edu 3.1-4
 - Documentation updates, DCN use case bug fixes.
 
