@@ -14,7 +14,7 @@
   		  margin-right: 3px; }
      .arn {font-family: Arial, serif; color:  #463E41; }
      .arn_black {font-family: Arial, serif;  }
-     .bbuttons_filter_ma, .bbuttons {  
+    .bbuttons_filter_domain,   .bbuttons_filter_ma, .bbuttons {  
                   		  
 		  font-family: Verdana, Geneva, Arial, Helvetica; 
 		  font-size: 14px; 
@@ -28,8 +28,8 @@
   		  margin-left: 3px;
   		  margin-right: 3px;
 		  text-align: left} 
-    .bbuttons_filter_ma_selected {  font-family: Verdana, Geneva, Arial, Helvetica; font-size: 14px; 
-                  	
+ .bbuttons_filter_domain_selected, .bbuttons_filter_ma_selected {  
+               font-family: Verdana, Geneva, Arial, Helvetica; font-size: 14px;   	
 		    border:1px solid #999999;  
 		   font-weight: bolder;               
   		  background-color: #CDEFDF; 
@@ -58,15 +58,13 @@
   		  margin-left: 3px;
   		  margin-right: 3px;
 		  text-align: left}   
-      table.main { background-color: #F8F8FF;  color: #000000;width: 750px;  z-index: 1008; 
-                          border: 1px solid  #737CA1; border-collapse: collapse; } 
-      table.params { background-color: #F8F8FF;  color: #000000;width: 100px;   z-index: 1006;
+      table.main { background-color: #F8F8F8;  color: #000000;width: 750px;  z-index: 1008; 
+                          border: 0px solid  #737CA1; border-collapse: collapse; } 
+      table.params { background-color: #F8FFF8; margin-left: 3px; color: #000000;width: 100px;   z-index: 1006;
                       border: 2px solid  #737CA1; border-collapse: collapse; } 
       .gls_table {    color: #000000; width: 750px;  
-                       position: absolute;     top: 300px;  left: 0;  
-		       height: 200px;  z-index: 9999; 
-		       background-color: #cccccc!important;
-		       border: 2px solid  #737CA1;   } 
+                       background-color:  #cccccc;
+		       border: 0px solid  #737CA1;   } 
      
       td {  border: 0px solid #D7E5F2; padding-left: 2px; padding-right: 2px;}
       .orange_tr  {color: orange; font-family: Verdana, Times, serif; font-style: normal; 
@@ -81,8 +79,9 @@
               margin-right: 0px; padding-right: 0px;   } 
      .fc_st { background-color: #F2F7FB; color: #000000;  text-align:   left;
               border: 1px solid #A5A5A5; 
-	      width: 197px;
+	      width: 45em; margin-left: 3px;
               margin-right: 0px; padding-right: 0px;   } 
+     .fc_st_short {    width: 25em;   }       
     .fc_st_links { background-color: #F2F7FB; color: #000000;  text-align:   left;
               border: 1px solid #A5A5A5; 
 	      width: 25em;
@@ -98,7 +97,7 @@
                     text-align: left;  margin-left: 2px;
   		     background-color: #D7E5F2; color: #102132;   border: 1px solid #284279; 
 		                  margin-right: 2px; } 
-      .fc_st  input { width:50px; font: 10px Verdana, Geneva, Arial, Helvetica, sans-serif; 
+      .fc_st  input { width:300px; font: 10px Verdana, Geneva, Arial, Helvetica, sans-serif; 
                       text-align: left; margin-left: 3px; 
   		     background-color: #D7E5F2; color: #102132;   border: 1px solid #284279;  
 		                    margin-right: 0px; } 
@@ -119,6 +118,13 @@
     
      h3 {height:20px;line-height:20px;margin:0; padding-left: 16px; 
                    font: 16px Verdana, Arial, serif; width: 600px;  }
+       
+      div#gls_selection  { background-color: #ccc;  color: inherit; position: absolute;
+                           width:  750px;  height: 750px;  z-index: 9998; 
+                           
+       }
+      div#gls_selection_content     {    position:  absolute;  top: 70px; left: 0px;
+		        z-index: 9999;     } 
     
  #spinner {
  z-index: 10000;

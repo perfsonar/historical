@@ -1,24 +1,34 @@
  
-function filterMAs(name,index) {
-      $$('input.bbuttons_filter_ma_selected').each(function(name){
-                $(name).removeClassName('bbuttons_filter_ma_selected');
-		 
-      });
-      $('params_table').hide();
-      $('get_graph2').removeClassName('bbuttons_filter_ma_selected'); 
-      $('get_links').removeClassName('bbuttons_filter_ma_selected');
-      $('filter_project' + index).addClassName('bbuttons_filter_ma_selected');
-      new Ajax.Updater({ success: 'filtered_ma', failure: 'statusDiv'}, '/gui/filter_links', {
-                      parameters: { filter_project : name }
-     });
+function filterMAs(name, index, api) {
+    $$('input.bbuttons_filter_ma_selected').each(function(name){
+        $(name).removeClassName('bbuttons_filter_ma_selected');
+               
+    });
+    if($('params_table')) {
+        $('params_table').hide()
+    };
+    if($('get_graph2')) {
+        $('get_graph2').removeClassName('bbuttons_filter_ma_selected'); 
+    }
+    if($('get_links')) {
+        $('get_links').removeClassName('bbuttons_filter_ma_selected');
+    }
+    $('filter_project' + index).addClassName('bbuttons_filter_ma_selected');
+    new Ajax.Updater({ success: 'filtered_ma', failure: 'statusDiv'}, '/' + api + '/filter_links', {
+		    parameters: { filter_project : name }
+   });
 }     
 
 function displayLinks() {
-   var params = {};
+    var params = {};
   
-   $('get_graph2').removeClassName('bbuttons_filter_ma_selected'); 
-   $('get_links').addClassName('bbuttons_filter_ma_selected');
-   ['ma_urls', 'src_regexp', 'dst_regexp', 'filter_project', 'packetsize', 'stored_links', 'select_url'].each(function(name) {
+    if($('get_graph2')) {
+        $('get_graph2').removeClassName('bbuttons_filter_ma_selected'); 
+    }
+    if($('get_links')) {
+        $('get_links').addClassName('bbuttons_filter_ma_selected');
+    }
+    ['ma_urls', 'src_regexp', 'dst_regexp', 'filter_project', 'packetsize', 'stored_links', 'select_url'].each(function(name) {
        if($(name)  && $F(name)) {
           this[name] = $F(name);
        }

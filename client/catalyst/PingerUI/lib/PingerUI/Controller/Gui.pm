@@ -3,7 +3,7 @@ package PingerUI::Controller::Gui;
 use strict;
 use warnings;
 
-use PingerUI::Utils qw(check_time validURL  fix_regexp);
+use PingerUI::Utils qw(check_time validURL  get_links_ends fix_regexp);
 use PingerUI::GraphUtils_MA  qw(build_graph);
 use JSON::XS;
 use Data::Dumper;
@@ -28,9 +28,7 @@ Catalyst Controller.for PingER UI
 =head2 index
 
 =cut
-
-
-
+ 
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
     $c->response->body('Matched PingerUI::Controller::Gui in Gui.');
@@ -88,7 +86,7 @@ sub _set_defaults : Private {
 
 =head2  filter_links
     
-    return only links ofr the project
+    return only links for the project
 
 =cut
 
@@ -101,46 +99,11 @@ sub filter_links : Local {
     $c->stash->{template} =  'gui/filtered_ma.tmpl'; 
 }
 
-
 sub _get_local_cache : Private { 
     my ( $self,   $c ) = @_;
-    my @tmp = ();
+    
     #$c->log->debug("" . Dumper $c->stash->{projects});
-    if(-e '/var/lib/perfsonar/list.pinger') {
-        my $string =  slurp('/var/lib/perfsonar/list.pinger', err_mode => 'croak');
-	return unless $string; 	 
-	#$c->log->debug(" JOSN:: $string ");
-        my $data_struct = decode_json $string;
-	foreach my $ma (@{$data_struct}) {
-	    my $url;
-   	    foreach my $key (keys %{$ma}) {
-	        if($key !~ /^(name|type|desc|keywords)/) {
-		   $url =  $key;
-		   last;
-		}
-	    }
-	    my ($domain) =  $url  =~ /http\:\/\/([^\/]+)\//xsm;
-            $ma->{desc}  =~ s/^.+\ at\ (.+)$/$1/xsm;
-            if($ma->{keywords} && ref $ma->{keywords} eq 'ARRAY') {
-	         foreach my $keyword (@{$ma->{keywords}}) {
-		      $keyword =~ s/^project\://;
-		      $c->stash->{projects}{$url}{'ALL PROJECTS'}++;
-                      $c->stash->{projects}{$url}{$keyword}++;
-		      push @{$c->stash->{project_table}{$keyword}}, $url;
-		      push @{$c->stash->{project_table}{'ALL PROJECTS'}}, $url; 
-		 }
-	     }
-	     if(!$c->stash->{filter_project} ||
-	         ($c->stash->{filter_project} && 
-		  $c->stash->{project_table}{$c->stash->{filter_project}})) {
-		  $c->stash->{remote_ma}{$url} = $ma->{$url} if exists $c->stash->{remote_ma}{$url} &&
-		                                               $ma->{$url} && 
-							       ref $ma->{$url} eq 'HASH' && 
-							       %{$ma->{$url}};
-   	        push  @tmp, {url => $url, url_label => $ma->{desc} . "($domain)"} if $url;
-	     } 
-        }
-    }
+    my @tmp =  @{get_links_ends($c)};
     if(!$c->stash->{filter_project} || $c->stash->{filter_project} =~ /^(LHC|LHCOPN|USCMS|ALL PROJECTS)$/i) {
 	foreach my $local_koi (qw|http://lhc-cms-latency.fnal.gov:8075/perfSONAR_PS/services/pinger/ma 
                         	  http://lhc-dmz-latency.deemz.net:8075/perfSONAR_PS/services/pinger/ma|) {   
@@ -149,7 +112,6 @@ sub _get_local_cache : Private {
             foreach my $project_key ('LHC', 'LHCOPN', 'USCMS', 'ALL PROJECTS') {
         	$c->stash->{projects}{$local_koi}{$project_key}++;
             }
-
 	}
     }
     @{$c->stash->{remote_urls}} = sort {$a->{url_label} cmp $b->{url_label}} @tmp  if @tmp;  

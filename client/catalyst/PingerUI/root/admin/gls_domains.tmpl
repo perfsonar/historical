@@ -1,0 +1,12 @@
+<div id="remote_ma" class="gls_table"> 
+[% INCLUDE gui/gls_part.tmpl 
+   get_type = 'get_ends' 
+   api = 'admin'
+   get_description = 'Monitored End Hosts' 
+%]
+<div style="position: absolute; top: 3px; right: 20px;">
+<button class="buttons" id="close_gls_btn" 
+onClick="$('gls_selection').hide()">Close</button>
+</div>
+<div id="linksdiv" name="linksdiv"></div>
+</div> 

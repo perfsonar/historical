@@ -1,0 +1,56 @@
+ <TABLE   class="main">   
+ <TR>
+   <th>
+   <span class="arn_black">Remote domains and nodes monitored by PingER</span>
+    </th>
+     </TR> 
+       <tr>
+    <td> 
+    [% IF  domains && domains.size > 0 %] 
+      [% SET index = 1 %]  
+      <span class="arn_black">Add Domain with all Nodes from the list:</span></br>  
+         [% FOREACH domain IN   domains %]	
+	  <input type="button"  class="bbuttons_filter_domain" 
+	  	        name="add_domain[% index %]"  
+		        id="add_domain[%  index %]"
+                        value="[% domain %]"
+			onClick="updateDiv('', 'updateGlobal', 'add_domain_nodes', 'add_domain[% index %]', 'menu')"/> 
+	  [%  index = index + 1 %] 
+	 [% END %]
+     [% END %]
+  </TD>
+ </tr> 
+ </table>
+
+
+[% IF  ends && ends.size > 0 %]    
+ <TABLE   class="main">
+     <TR>
+        <Th>
+	  <span class="arn_black">Add Node(s) from the list:</span>
+        </th>
+     </tr>
+     <tr>
+        <td>     
+           <SELECT NAME="ends" ID="ends" SIZE="10" MULTIPLE class="fc_st_links">    
+	    [% FOREACH end IN ends %]	
+	      <OPTION class="smver_1" VALUE="[% end.urn %]">[% end.label  %] 
+	    [% END %]
+	   </SELECT>
+            [% ELSE %]
+            <h2> No remote hosts were found </h3>
+            [% END %]
+        </TD>
+  </TR>
+  <tr>
+   <TD> 
+        <input type="button"  class="bbuttons" 
+	  	        name="add_domains_nodes_btn"  
+		        id="add_domains_nodes_btn"
+			onmouseover="return overlib('Domains for selected Nodes and ALL Nodes for selected Domains will be added automatically');" 
+                        onmouseout="return nd();"	
+			onClick="updateDiv('', 'updateGlobal', 'add_node_nodes', 'ends', 'menu')"	 
+                        value="Add selected  Nodes"/>
+   </TD>
+  </tr>
+</TABLE>

@@ -11,6 +11,7 @@ URNBASE : urn:ogf:network
 RECAPTCHA_PUBLIC : 6LdTUgcAAAAAABHU1RVTh_yJAaKWZ38hudqbb3E8
 RECAPTCHA_PRIVATE : 6LdTUgcAAAAAAGiuY2Xio1X7phk6fIOrOoThPXWN
 uploadtmp : /tmp/
+gls_cache : /var/lib/perfsonar/list.pinger
 RequireSSL :
    https : localhost
 Plugin::Authentication :

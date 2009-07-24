@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml2/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:v="urn:schemas-microsoft-com:vml" xml:lang="en"> 
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+ <noscript><b>JavaScript must be enabled in order for you to use this webpage.
+    </noscript>
+   <script type="text/javascript" src="/js/overlib/overlib.js"></script>   
+   <script type="text/javascript" src="/js/prototype.js"></script> 
+  <script type="text/javascript" src="/js/gui.js"></script> 
+   <script type="text/javascript" src="/js/spinner.js"></script> 
+   <!--  <LINK HREF="/cdincludes/style.css" TYPE="text/css" REL="stylesheet"> -->
+    <LINK HREF="/css/admin.css" TYPE="text/css" REL="stylesheet"> 
+    <title>[% title %]</title>
+    <LINK HREF="/css/menu.css" TYPE="text/css" REL="stylesheet">
+</head> 
+<BODY>
+<script type="text/javascript">
+function updateDiv  (urn, command, action, arg, div_id, extra) {
+    var params = {}; 
+    params.urn = urn;
+    params.command = command;
+    params.action = action;
+    params.input =  $F(arg);
+    params.extra = extra;
+    if((action == 'add_domain' || action == 'add_node') &&  $('gls_selection')) {
+       $('gls_selection').hide();
+    }
+    new Ajax.Updater({ success:  div_id, failure: 'statusDiv'},   command , {
+		     parameters: params
+    })
+}
+      
+function displayEnds() {
+   var params = {};
+   
+   $('get_ends').addClassName('bbuttons_filter_ma_selected');
+   ['ma_urls',   'filter_project',  'select_url'].each(function(name) {
+       if($(name)  && $F(name)) {
+          this[name] = $F(name);
+       }
+   }, params); 
+   new Ajax.Updater({ success: 'linksdiv', failure: 'statusDiv'}, '/admin/display_ends', {
+                      parameters: params
+   }); 
+}
+</script>
+<div id="overDiv" style="position:absolute; visibility:hidden;z-index:2000;"></div>
+<div id="spinner" name="spinner"   style="display:none">
+   <div style="background-color: white; position: absolute; top: 0px; right: 0px; width: 1px; height: 1px; cursor:pointer;"
+   onclick="$('spinner').hide()">
+    </div>
+</div>
+<div id="header"><h2 id="header">[% title %]</h2>
+<div id="statusDiv">&nbsp;</div>
+</div>
+<div id="wrapper" name="wrapper">
+   <div id="gls_selection" name="gls_selection" style="display: none">
+      <div id="gls_selection_content" name="gls_selection_content">
+       [% INCLUDE admin/gls_domains.tmpl %]
+      </div> 
+    </div>
+   <div id="domainPage" name="domainPage"></div>
+</div>
+<div id="domain_table" name="domain_table">
+<h3>Monitored Domains (will be stored in the MP landmarks config file)</h3>
+<div id="menu"  class="menu">
+[% INCLUDE admin/domains.tmpl %] 
+</div>
+<h3>Add new Domain</h3>
+       <input type="text" 
+            name="add_domain"  size="20" class="fc_st fc_st_short"  
+            id="add_domain" 
+            onmouseover="return overlib('Add new Domain Name and id will be created as &quot;urn:ogf:network:domain=&lt;Domain Name&gt;&quot;');" 
+            onmouseout="return nd();"
+            onChange="updateDiv(' ', 'updateGlobal', 'add_domain', 'add_domain', 'menu');" 
+            value="">
+</p>
+<input type="button"
+       class="buttons" 
+       onClick="$('gls_selection').show();" value="Open Global Lookup Service Interface to add monitoring nodes or domains"/>
+</p>
+<form id="upload_file" action=""
+       method="post"
+       enctype="multipart/form-data"
+       onsubmit=" new Ajax.Updater({ success:  'domain_table', failure: 'statusDiv'},   
+                                     'upload_file' , {
+                                     parameters: this.serialize(true)
+        })">  
+     <table class="params">
+	 <tr><th>Set PingER MA/MP config by uploading it in CSV or XML format</th></tr>
+	 <tr><td>	    
+	  <input type="file" name="file_id" id="file_id" 
+	    onmouseover="return overlib('Enter landmarks file in XML format or in CSV format, please see docs for the order of fields');" 
+            onmouseout="return nd();">	   
+          </td>
+	 </tr>
+     	 <tr><td>
+	 <input class="buttons" value="Get File" type="submit" id="submit_file_upload_btn"/>
+     	  </td></tr>
+     </table>
+</form>     
+<p>
+<input type="button" class="buttons"  name="saveXML"  id="saveXML" 
+            onClick="updateDiv(' ', 'saveConfigs', 'saveXML', 'saveXML', 'statusDiv');"
+	    value="Save MP landmarks XML">
+  <p>
+<input type="button" class="buttons"  name="Reset"  id="Reset" 
+       onClick="updateDiv(' ', 'resetit', 'Reset', 'Reset', 'body');"  value="Reset">
+       <input type="button" class="buttons"  name="restart_mp"  id="restart_mp" 
+          onmouseover="return overlib('Restart local PingER MA/MP, local user: [% local_user %] must be listed as sudo user, check docs');" 
+            onmouseout="return nd();"	  
+         onClick="updateDiv(' ', 'restart_mp', 'Restart', 'restart_mp', 'statusDiv');"  value="Restart MP">
+
+</div>
+</body>
+</html>

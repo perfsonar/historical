@@ -1,0 +1,11 @@
+ <form action="/admin/login" method="POST" name="login_form">
+    [% message %]<br />
+    <label for="username">username:</label><br />
+    <input type="text" id="username" name="username" /><br />
+
+    <label for="password">password:</label><br />
+    <input type="password" id="password" name="password" /><br />
+    [% captcha %]
+    
+    <input type="submit" value="log in" name="form_submit" />
+  </form>

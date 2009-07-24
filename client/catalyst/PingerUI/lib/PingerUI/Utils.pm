@@ -21,8 +21,8 @@ use version; our $VERSION = '3.2';
 use Exporter (); 
 use base qw(Exporter);
 our @EXPORT = ();
-our @EXPORT_OK = qw(check_time isParam   updateNodeId updateDomainId get_params_obj %pinger_keys 
-                    get_time_hash findNode max min  validURL getURL csv2xml_landmarks fix_regexp);
+our @EXPORT_OK = qw(check_time isParam   updateNodeId updateDomainId get_links_ends get_params_obj %pinger_keys 
+                    get_time_hash findNode max min URNBASE  validURL getURL csv2xml_landmarks fix_regexp);
 use Time::Local; 
 use POSIX qw(strftime);  
 use Date::Manip;
@@ -38,6 +38,7 @@ use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::nmwg::Topology::Domain::N
 use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::nmwg::Topology::Domain::Node::Parameters::Parameter';
 use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::nmtl3::Topology::Domain::Node::Port';
 use Text::CSV_XS;
+use JSON::XS;
 use perfSONAR_PS::Utils::DNS qw/reverse_dns resolve_address/;
 use constant URNBASE => 'urn:ogf:network'; 
 
@@ -45,6 +46,58 @@ our %pinger_keys = (packetSize => '1000', count => '10',  packetInterval => '1',
                        measurementPeriod => '60', measurementOffset => '0', project => 'USCMS');
 our %dns_cache= ();
 our %reverse_dns_cache = ();
+
+
+
+=head2 get_links_ends 
+
+    set $c->stash->{projects} and $c->stash->{project_table} with remote based on GLS pinger metadata
+   returns arrray ref
+   
+=cut
+
+sub get_links_ends {
+    my $c = shift;
+    my @tmp = ();
+    if(-e  $c->config->{gls_cache}) {
+        my $string =  slurp($c->config->{gls_cache}, err_mode => 'croak');
+	return unless $string; 	 
+	#$c->log->debug(" JSON:: $string ");
+        my $data_struct = decode_json $string;
+	foreach my $ma (@{$data_struct}) {
+	    my $url;
+   	    foreach my $key (keys %{$ma}) {
+	        if($key !~ /^(name|type|desc|keywords)/) {
+		   $url =  $key;
+		   last;
+		}
+	    }
+	    my ($domain) =  $url  =~ /http\:\/\/([^\/]+)\//xsm;
+            $ma->{desc}  =~ s/^.+\ at\ (.+)$/$1/xsm;
+            if($ma->{keywords} && ref $ma->{keywords} eq 'ARRAY') {
+	         foreach my $keyword (@{$ma->{keywords}}) {
+		      $keyword =~ s/^project\://;
+		      $c->stash->{projects}{$url}{'ALL PROJECTS'}++;
+                      $c->stash->{projects}{$url}{$keyword}++;
+		      push @{$c->stash->{project_table}{$keyword}}, $url;
+		      push @{$c->stash->{project_table}{'ALL PROJECTS'}}, $url; 
+		 }
+	     }
+	     if(!$c->stash->{filter_project} ||
+	         ($c->stash->{filter_project} && 
+		  $c->stash->{project_table}{$c->stash->{filter_project}})) {
+		  $c->stash->{remote_ma}{$url} = $ma->{$url} if exists $c->stash->{remote_ma}{$url} &&
+		                                               $ma->{$url} && 
+							       ref $ma->{$url} eq 'HASH' && 
+							       %{$ma->{$url}};
+   	        push  @tmp, {url => $url, url_label => $ma->{desc} . "($domain)"} if $url;
+	     } 
+        }
+    }
+    return \@tmp;
+}
+
+ 
 =head2 csv2xml_landmarks
 
    convert CSV landmarks file int othe XML

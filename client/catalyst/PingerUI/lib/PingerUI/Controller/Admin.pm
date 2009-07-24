@@ -21,7 +21,7 @@ PingER administrative GUI, implemented as Catalyst Controller.
 =head1 METHODS
 
 =cut
-use PingerUI::Utils qw(isParam   updateNodeId updateDomainId get_params_obj %pinger_keys csv2xml_landmarks findNode );
+use PingerUI::Utils qw(isParam  URNBASE  validURL get_links_ends updateNodeId updateDomainId get_params_obj %pinger_keys csv2xml_landmarks findNode);
  
 =head2 index 
 
@@ -154,7 +154,10 @@ sub _set_defaults : Private {
     my ( $self,   $c ) = @_;
     my $string =  slurp($c->config->{LANDMARKS}, err_mode => 'croak');
     $c->stash->{topology} = Topology->new( { xml => $string  } );
-    $c->session->{topology} =   $c->stash->{topology}->asString;
+    $c->session->{topology} =   $c->stash->{topology}->asString;    
+    $c->stash->{projects} = {};
+    $c->stash->{project_table} = {};
+    $c->stash->{projects} = {};
 }
 
 =head2  restart_mp
@@ -186,8 +189,9 @@ sub resetit : Local {
     $c->forward('_process_params');
     $c->forward('_set_defaults');
     $c->forward('_displayGlobal');
-    $c->stash->{status} = ' Session contents has been reset ';
-    $c->stash->{template} = 'admin/domains.tmpl';
+    $c->log->debug(" Stash project_table : " . Dumper $c->stash->{project_table});
+    $c->stash->{status} = ' Session content has been reset ';
+    $c->stash->{template} = 'admin/admin_header.tmpl';
 
 }
 =head2  saveConfigs
@@ -232,6 +236,95 @@ sub configureNode : Local {
         $c->res->output('Failed parameters input='. $c->stash->{input} . ' urn=' .  $c->stash->{urn}); 
         $c->error('Failed parameters input='. $c->stash->{input} . ' urn=' .  $c->stash->{urn});
     }
+}
+
+=head2 display_ends 
+
+    display selection of the end hosts, based on GLS
+
+=cut
+
+sub display_ends : Local {
+    my ( $self, $c ) = @_;
+    $c->forward('_process_params'); 
+    my %truncated=();
+    $c->stash->{remote_ma}  = {};
+    if($c->stash->{ma_urls}) {
+        my @ma_url_array = split /\s+/,  $c->stash->{ma_urls};
+        $c->log->debug('entered URLS: ' . Dumper \@ma_url_array);
+	my %ma_hash = map { $_ => {}  }  @ma_url_array;
+        $c->stash->{remote_ma} =  \%ma_hash; 
+    }
+    if($c->stash->{select_url}) {
+        $c->stash->{select_url} = [  $c->stash->{select_url} ] if $c->stash->{select_url} && !(ref $c->stash->{select_url});
+        my %ma_hash =  map { $_ => {}  }  @{$c->stash->{select_url}};
+        $c->stash->{remote_ma} = \%ma_hash; 
+    }   
+    $c->forward('_get_local_cache');    
+    foreach my $url (keys %{$c->stash->{remote_ma}}) {
+        
+	unless(validURL($url)) {
+	    $c->log->warn(" Malformed remote MA URL: $url ");
+	    next;
+	}
+	my $metaids = {};
+	unless(%{$c->stash->{remote_ma}{$url}} ) {
+	    eval {
+        	my $ma = new perfSONAR_PS::Client::PingER( { instance => $url } );
+		$c->log->debug(" MA $url  connected: " . Dumper $ma);
+        	my $result = $ma->metadataKeyRequest();
+		$c->log->debug(' result from ma: ' . Dumper $result); 
+		$metaids = $ma->getMetaData($result);
+	    };
+	    if($EVAL_ERROR) {
+		$c->log->fatal(" Problem with MA $EVAL_ERROR ");
+	    }
+	    $c->stash->{remote_ma}{$url} = $metaids; 
+	}   	 
+        foreach  my $meta  (keys %{$c->stash->{remote_ma}{$url}}) {
+            $truncated{$c->stash->{remote_ma}{$url}{$meta}{src_name}}++ unless $c->stash->{remote_ma}{$url}{$meta}{src_name} eq '-1';
+	    $truncated{$c->stash->{remote_ma}{$url}{$meta}{dst_name}}++ unless $c->stash->{remote_ma}{$url}{$meta}{dst_name} eq '-1';
+        } 
+    }
+    $c->session->{remote_ma} = $c->stash->{remote_ma};
+    my @hosts = (); 
+    my @domains  = ();
+    my %domain_hash = ();      
+    foreach my $host (sort {$a  cmp $b} keys %truncated) {      
+        my ($node, $domain) = $host   =~ /^(.+)\.([\w\-]+\.\w+)$/; 
+	$domain ||= $host;
+	push @hosts, {  urn =>  URNBASE . ":domain=$domain:node=$node", 
+	                label =>  $host
+		     };
+	$domain_hash{$domain}?next:push @domains,  $domain;
+	$domain_hash{$domain}++;
+       	     
+    } 
+    $c->stash->{domains} = \@domains;
+    $c->stash->{ends} = \@hosts; 
+    $c->stash->{template} =  'admin/ends.tmpl'; 
+}
+
+=head2  filter_links
+    
+    return only links for the project
+
+=cut
+
+sub filter_links : Local {
+    my ( $self, $c ) = @_;
+    $c->forward('_process_params');
+    if($c->stash->{filter_project}) {
+       $c->forward('_get_local_cache');  
+    }
+    $c->stash->{template} =  'gui/filtered_ma.tmpl'; 
+}
+
+sub _get_local_cache : Private { 
+    my ( $self,   $c ) = @_;  
+    #$c->log->debug("" . Dumper $c->stash->{projects});
+    my @tmp =  @{get_links_ends($c)}; 
+    @{$c->stash->{remote_urls}} = sort {$a->{url_label} cmp $b->{url_label}} @tmp  if @tmp;  
 }
 
 =head2 displayNode
@@ -289,9 +382,9 @@ sub _displayNode : Private{
 sub _displayGlobal : Private {
     my ( $self,   $c ) = @_;   
     my %domain_names         = ();
-    my %gls_display_projects = ();
-    $c->stash->{domains} = [];  
    
+    $c->stash->{domains} = [];  
+    $c->forward('_get_local_cache');  
     return unless $c->stash->{topology} && blessed $c->stash->{topology} && $c->stash->{topology}->get_domain;
     foreach my $domain ( @{$c->stash->{topology}->get_domain} )  {
         my $urn = $domain->get_id;
@@ -345,14 +438,16 @@ sub updateGlobal : Local {
     $c->forward('_process_params');  
     my $response = "OK";
     
-    die $c->error(" updateGlobal missing action or urn parameter") unless $c->stash->{action} &&  $c->stash->{urn};
+    die $c->error(" updateGlobal missing action or urn parameter") unless $c->stash->{action} && 
+                                                                          ($c->stash->{urn} || $c->stash->{input});
     my $action = $c->stash->{action};
     my $urn =  $c->stash->{urn};
     my $new_name = $c->stash->{input};
-    my ( $act, $what ) = $action =~ /^(update|remove|add)\_(domain|addr|node(?:name)?)?/;
+ 
+    my ( $act, $what, $multi ) = $action =~ /^(update|remove|add)\_(domain|addr|node(?:name)?)?(_nodes)?/;
     my ( $domain_urn, $node_name, $addr ) = $urn =~ /^(.+\:domain\=[\w\-\.]+)(?:\:node\=([\w\-\.]+))?(?:\:port\=([\w\-\.]+))?$/;
     $c->log->debug("action=$action   domain_urn=$domain_urn node_name=$node_name port_address=$addr newname=$new_name");
-  
+    
     if ( $what =~ /domain/ ) {
         my $new_urn
             = ( $new_name =~ /^[\w\-\.]+$/ )
@@ -361,12 +456,32 @@ sub updateGlobal : Local {
 
         if ( $act eq 'add' && $new_urn ) {
             my $domain_obj = $c->stash->{topology}->getDomainById($new_urn);
-            if ($domain_obj) {
-                $response = " !!!ADD DOMAIN FAILED:  DOMAIN $new_name EXISTS !!!";
-            }
-            else {
-                $c->stash->{topology}->addDomain( Domain->new( { id => $new_urn } ) );
-            }
+            unless ($domain_obj) {
+                $domain_obj = Domain->new( { id => $new_urn } );
+	        $c->stash->{topology}->addDomain(  $domain_obj);	
+            }	    
+	    if($multi) {      
+		$c->stash->{remote_ma} =  $c->session->{remote_ma};
+		## adding all nodes 
+		my ($project_url) = keys %{$c->stash->{remote_ma}};
+	        if( $c->stash->{remote_ma}{$project_url} ) {
+	             $c->stash->{topology}->removeDomainById($domain_urn);  
+		     my %lookup_host =();           
+	             foreach  my $meta  (keys %{$c->stash->{remote_ma}{$project_url}}) {
+		        foreach my $ipname ($c->stash->{remote_ma}{$project_url}{$meta}{src_name}, $c->stash->{remote_ma}{$project_url}{$meta}{dst_name}) {
+	                    if($ipname =~ /^(.+)\.$new_name$/ && !$lookup_host{$ipname}) {
+			        $lookup_host{$ipname}++;
+			        my $host_part = $1;
+			        my $new_node_urn   = ( $host_part =~ /^[\w\-\.]+$/ )  ? 
+				                  $new_urn . ":node=$host_part"
+                                                 : undef;
+				$c->forward('_add_node', [$domain_obj,  $new_urn, $new_node_urn, $host_part]) if $new_node_urn;
+			    }
+			}
+	            }
+		   $c->stash->{topology}->addDomain($domain_obj);		    
+	        }
+	    }
         }
         elsif ( $act eq 'remove' && $domain_urn ) {
             $c->stash->{topology}->removeDomainById($urn);
@@ -393,42 +508,7 @@ sub updateGlobal : Local {
                 : undef;
             $c->log->debug("action=$action - new_urn=$new_urn");
             if ( $act eq 'add' && $new_urn ) {
-                eval {
-                    my ($dname) = $urn =~ /\:domain\=([^\:]+)/;
-
-                    my ($ip_resolved) = resolve_address($new_name.".".$dname);
-                    $ip_resolved = "255.255.255.255" if (not $ip_resolved or $ip_resolved eq $new_name.".".$dname);
-
-                    my $ip_type;
-                    if ($ip_resolved =~ /:/) {
-                        $ip_type = "IPv6";
-                    } else {
-                        $ip_type = "IPv4";
-                    }
-
-                    $node_obj = Node->new(
-                        {
-                            id   => $new_urn,
-                            name => Name->new( { type => 'string', text => $new_name } ),
-                            hostName => HostName->new( { text => $new_name.".".$dname } ),
-                            port     => Port->new(
-                                {
-                                    xml => "<nmtl3:port xmlns:nmtl3=\"http://ogf.org/schema/network/topology/l3/20070707/\" id=\"$new_urn:port=255.255.255.255\">
-                      <nmtl3:ipAddress type=\"$ip_type\">$ip_resolved</nmtl3:ipAddress>
-                   </nmtl3:port>"
-                                }
-                            ),
-                            parameters => get_params_obj({}, 'paramid1')
-                        }
-                    );
-                    $c->log->debug( " new node will be added " . $node_obj->asString );
-                    $domain_obj->addNode($node_obj);
-		    $c->log->debug( " Added Domain :\n" .  $domain_obj->asString );		    
-                   
-                };
-                if ($EVAL_ERROR) {
-                    die $c->error(" New node  failed: $EVAL_ERROR ");
-                } 		  
+                $c->forward('_add_node', [ $domain_obj, $urn, $new_urn, $new_name] );
             }
             elsif ( $act eq 'remove' && $node_name ) {
                 $domain_obj->removeNodeById($urn);
@@ -440,7 +520,7 @@ sub updateGlobal : Local {
                     $domain_obj->addNode($node_obj);                  
                 };
                 if ($EVAL_ERROR) {
-                    die $c->error("Update global node failed $EVAL_ERROR  ");
+                     $c->log->fatal("Update global node failed $EVAL_ERROR  ");
                 }
             }
 	    $c->stash->{urn} = $new_urn;       
@@ -448,8 +528,23 @@ sub updateGlobal : Local {
 	    return ($action =~ /(update|add)_node/?$c->forward('_displayNode'):$c->forward('_displayGlobal')); 
         }
         else {
-            $c->error(" !!!ADD NODE FAILED:  DOMAIN  $urn not found !!!");
+            $c->log->fatal(" !!!ADD NODE FAILED:  DOMAIN  $urn not found !!!");
         }
+    }
+    elsif ( $what =~ /node/ && $multi  ) {
+            $new_name = [ $new_name ] if $new_name && !(ref $new_name);
+            foreach my $urn_id (@{$new_name}) {
+	        my ( $domain_urn, $node_name ) = $urn_id =~ /^(.+\:domain\=[\w\-\.]+)(?:\:node\=([\w\-\.]+))/;
+                my $domain_obj = $c->stash->{topology}->getDomainById($domain_urn);
+	        if($domain_obj) {
+                   $c->stash->{topology}->removeDomainById($domain_urn); 	        
+                }
+		else {
+		   $domain_obj = Domain->new( { id =>  $domain_urn} );  
+		}
+		$c->forward('_add_node', [$domain_obj,  $domain_urn,  $urn_id ,  $node_name]);
+		$c->stash->{topology}->addDomain($domain_obj);		    	         	
+	    }      
     }
     elsif ( $what =~ /addr/ && $node_name && $domain_urn ) {
         my $domain_obj = $c->stash->{topology}->getDomainById($domain_urn);
@@ -489,7 +584,7 @@ sub updateGlobal : Local {
                 $domain_obj->addNode($node_obj); 
             };
             if ($EVAL_ERROR) {
-                  $c->error(" New node  failed: $EVAL_ERROR ");
+                  $c->log->fatal(" New node  failed: $EVAL_ERROR ");
             }
             else {
                   $c->log->debug( " Added Domain :\n" . Dumper $domain_obj);
@@ -511,6 +606,44 @@ sub updateGlobal : Local {
         $c->forward('_displayGlobal'); 
     }
 }
+
+sub _add_node : Private {
+   my ($self, $c, $domain_obj,  $urn, $new_urn, $new_name) = @_;
+   eval {
+      my ($dname) = $urn =~ /\:domain\=([^\:]+)/;
+      my ($ip_resolved) = resolve_address($new_name.".".$dname);
+      $ip_resolved = "255.255.255.255" if (not $ip_resolved or $ip_resolved eq $new_name.".".$dname);
+
+      my $ip_type;
+      if ($ip_resolved =~ /:/) {
+  	  $ip_type = "IPv6";
+      } else {
+  	  $ip_type = "IPv4";
+      }
+      my  $node_obj = Node->new(
+  	  {
+  	      id   => $new_urn,
+  	      name => Name->new( { type => 'string', text => $new_name } ),
+  	      hostName => HostName->new( { text => $new_name.".".$dname } ),
+  	      port     => Port->new(
+  		  {
+  		      xml => "<nmtl3:port xmlns:nmtl3=\"http://ogf.org/schema/network/topology/l3/20070707/\" id=\"$new_urn:port=$ip_resolved\">
+  	 <nmtl3:ipAddress type=\"$ip_type\">$ip_resolved</nmtl3:ipAddress>
+         </nmtl3:port>"
+  		  }
+  	      ),
+  	      parameters => get_params_obj({}, 'paramid1')
+  	  }
+      );
+      $c->log->debug( " new node will be added " . $node_obj->asString);
+      $domain_obj->addNode($node_obj);
+      $c->log->debug( " Added Domain :\n" .  $domain_obj->asString );		          
+  };
+  if ($EVAL_ERROR) {
+       $c->log->fatal(" New node  failed: $EVAL_ERROR ");
+  }		    
+}
+
 
 =head2 updateNode
 
