@@ -120,10 +120,10 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=189 188] - _*Aaron*_ - Add RNP NTP servers to NPToolkit 
      * <font color=yellow>_*In Progress - 7/10*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=200 200] - _*Aaron*_ - Upgrade script create owamp database if not present 
-
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=201 201] - _*Aaron*_ - Upgrade Script Behavior
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - Colors in console configuration 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=203 203] - _*Aaron*_ - Error messages when IS cannot be contacted for portions of the Admin GUIs 
  
-
-
 === Code Reviews ===
 
 There will be no code reviews for this release.  
