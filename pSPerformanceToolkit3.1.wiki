@@ -1,0 +1,124 @@
+#summary pS Performance Toolkit 3.1
+
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+The following guide describes in detail the steps required to set up version 3.1 of the perfSONAR performance Toolkit ([http://internet2.edu/performance/pS-PerformanceToolkit/ pS Performance Toolkit 3.1]).  It is important to follow each step in order.  Upon getting stuck, consult the [pSPerformanceToolkit3.1#FAQ FAQ] at the end of this document.  
+
+=== First Steps ===
+
+  # Download the the latest from:
+    * [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.1rc1.iso]
+    * [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.1rc1.iso.md5]
+  # Verify the MD5 sum:
+    * md5sum -c pS-Performance_Toolkit-3.1rc1.iso 
+  # Burn the ISO to a CD-ROM
+  # Configure the computer to boot from CD
+    * This may require changes to the computer's BIOS to ensure the CD is recognized before an existing harddisk
+    * The BIOS may be entered when the computer boots by using a key combination (*F12* in some cases, *Del* in others - consult a manual if unsure or pay close attention to the boot process to enter _setup_).  
+  # Insert the CD-ROM into the tray and boot the system
+    * The computer will boot with some typical messages, after this it will enter the boot and customization process.
+      * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit3.1/BootScreen_1.png
+    * The boot process will proceed after this screen where typical linux startup messages will be seen.  This may take some time, particularlly to resolve the host address and set up basic networking.  If all goes well, a login prompt will appear.  
+      * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit3.1/LoginPrompt_2.png
+
+=== Console Configuration ===
+
+There are several important steps that must be configured via the console.  The instructions for each is outlined below.  Note that this process differs from the historic instructions for previous releases.  
+
+==== Step 1 ==== 
+
+The first step is to login to the system.  The username that begins the process is _*knoppix*_.  The password will vary depending on the environment:
+
+ * If this is the _*first time*_ the system is being setup (e.g. no prior use for the pS Performance Toolkit) the password will be blank.  
+ * If this sytem has been used for for the pS Performance toolkit prior (or the NPToolkit) the _*knoppix*_ user will contain the password previously configured.
+ 
+An image of the sytem after login is pictured below:
+
+ * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit3.1/LoggedIn_3.png
+ 
+Note that the _*knoppix*_ user has sudo permission.  The console is now fully functional and the sytem, in practice, is ready to perform simple network diagnostic and measurement tasks:
+
+ * NPAD is started
+ * NDT is started
+ * The BWCTL daemon is started
+ * The OWAMP daemon is started
+ * Apache is running, and all web content (e.g. pS Performance Toolkit Administration, Reverse Traceroute, Cacti) are available. 
+ 
+The sytem is not perfSONAR enabled unless steps are taken to customize and configure some of the tools.  
+
+==== Step 2 ==== 
+
+After loggin, the _Message of the Day_ (_*MOTD*_) is configured to display information on configuration.  The console configuration can be accomplished by running:
+
+ * _*sudo nptoolkit-configure.py*_
+ 
+If this is your first time invoking sudo, it may be necessary to enter the knoppix user's password:
+
+ * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit3.1/ConfigureMenu_4.png
+
+As shown in the image, a menu will appear describing configuration options:
+
+ # Configure drive to hold data/customizations
+ # Set built-in account passwords
+ # Manage Users
+ # Configure Networking
+ # Change Timezone
+
+The following steps will describe configuration of each.  Note that a color scheme is used to help quickly identify customizations:
+
+ * <font color="red">RED</font> - Required configuration step
+ * <font color="purple">MAGENTA</font> - Optional configuration step (not completed)
+ * <font color="green">GREEN</font> - Completed step
+ * <font color="gray">GRAY</font> - Nuetral step (neither required nor optional)
+
+==== Step 3 ==== 
+
+To take advantage of many of the perfSONAR tools a storage device must be present to store measurement data.  In most situations the internal hard drive (or optionally an external storage device such as a USB thumb drive) should be configured to perform this task.  
+
+Selecting _*Option 1*_ in the menu will start the configuration process:
+
+ * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit3.1/ConfigureMenu-DriveOptions1_5.png
+
+After selecting a drive to use it may be necessary to format the drive (if no filesystem is preset or the filesystem is unreadable):
+
+ * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit3.1/ConfigureMenu-DriveOptions1_6.png
+
+After completing the menu will indicate this step has been visited.   
+
+==== Step 4 ==== 
+
+To configure the passwords for the existing users (_*knoppix*_ and _*root*_) _*Option 2*_ is used:
+
+ * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit3.1/ConfigureMenu-Passwd_7.png
+
+==== Step 5 ==== 
+
+Adding new users to the system (beyond _*knoppix*_ and _*root*_) is compled in _*Option 3*_:
+
+ * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit3.1/ConfigureMenu-Users_8.png
+
+==== Step 6 ==== 
+
+To adjust the networking options of the host (e.g. static vs dynamic address, hostname, advertised interface) use _*Option 4*_:
+
+ * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit3.1/ConfigureMenu-Network_9.png
+
+==== Step 7 ==== 
+
+Changing the timezone of the system (currently set to Eastern Time) use _*Option 5*_:
+
+ * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit3.1/ConfigureMenu-TimeZone_10.png
+
+== Known Bugs ==
+
+TBD
+
+== FAQ ==
+
+TBD
+
+== Last Updated ==
+
+$Id$
