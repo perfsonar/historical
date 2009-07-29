@@ -85,9 +85,13 @@ The following outline some exceptions to the overall release process.  Also see 
 
 ==== Post RC1 Bugs ====
 
+ * _*LSRegistrationDaemon*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=210] - _*Aaron*_ - LSRegistration daemon start/restart on information change 
  * _*pSB*_ 
  * _*PingER*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=217] - _*Aaron*_ - Upgrade from older NPToolkit will transfer saved landmarks file	 
  * _*SNMP MA*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=215] - _*Jason*_ - Cacti database should 'exit' the SNMP MA service if no data is present. 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - Defect - High - _*Aaron*_ - Cacti Configuration on NPToolkit 
      * <font color=yellow>_*Mostly Done, Needs Testing - 6/23*_</font>
  * _*OWAMP/BWCTL*_ 
@@ -98,6 +102,9 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Done for now - 6/10*_</font>
      * Need to do testing after first RC (after JTs)
  * _*GUIs*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=214] - _*Aaron*_ - GUIs should clearly reflect the decission to set up a 'latency host' vs a 'bandwidth' host 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=216] - _*Aaron*_ - Community handling in pS Performance Toolkit GUIs 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=209] - _*Aaron*_ - Scheduled Testing GUI   
  * _*Disc Misc.*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=10 10] - Enhancement - Critical - _*Jeff*_ - Splash screen 	
      * <font color=yellow>_*In Progress - 6/30*_</font>
@@ -124,7 +131,15 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - Colors in console configuration 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=203 203] - _*Aaron*_ - Error messages when IS cannot be contacted for portions of the Admin GUIs 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=204 204] - _*Aaron*_ - pre-load gLS cache on ISO 
- 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=206 206] - _*Aaron*_ - non-rfc1918 addresses were getting flagged as local addresses 
+     * <font color=yellow>_*In Progress - 7/28*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=207] - _*Aaron*_ - pS Performance Toolit Bootup Suggestions   	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=208] - _*Aaron*_ - MTU Options in Console Config 	   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=212] - _*Aaron*_ - Simplify prompt for advertised interface 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=213] - _*Aaron*_ - Delete hLS-XMLDB on upgrade/reboot 	   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218] - _*Aaron*_ - NTP Server Selection 
+
 === Code Reviews ===
 
 There will be no code reviews for this release.  
