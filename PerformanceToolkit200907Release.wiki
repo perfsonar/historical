@@ -89,7 +89,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=210] - _*Aaron*_ - LSRegistration daemon start/restart on information change 
  * _*pSB*_ 
  * _*PingER*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=217] - _*Aaron*_ - Upgrade from older NPToolkit will transfer saved landmarks file	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=217] - _*Aaron*_ - Scheduled Test GUI Reports PingER tests when none configured 
  * _*SNMP MA*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=215] - _*Jason*_ - Cacti database should 'exit' the SNMP MA service if no data is present. 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - Defect - High - _*Aaron*_ - Cacti Configuration on NPToolkit 
