@@ -134,11 +134,12 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=206 206] - _*Aaron*_ - non-rfc1918 addresses were getting flagged as local addresses 
      * <font color=yellow>_*In Progress - 7/28*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=207] - _*Aaron*_ - pS Performance Toolit Bootup Suggestions   	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=208] - _*Aaron*_ - MTU Options in Console Config 	   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=212] - _*Aaron*_ - Simplify prompt for advertised interface 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=213] - _*Aaron*_ - Delete hLS-XMLDB on upgrade/reboot 	   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218] - _*Aaron*_ - NTP Server Selection 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=207 207] - _*Aaron*_ - pS Performance Toolit Bootup Suggestions   	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=208 208] - _*Aaron*_ - MTU Options in Console Config 	   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=212 212] - _*Aaron*_ - Simplify prompt for advertised interface 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=213 213] - _*Aaron*_ - Delete hLS-XMLDB on upgrade/reboot 	   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218 218] - _*Aaron*_ - NTP Server Selection 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=222 222] - _*Aaron*_ - hostname and hosts.[allow|deny] must be preserved 
 
 === Code Reviews ===
 
