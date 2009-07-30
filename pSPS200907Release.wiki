@@ -106,11 +106,25 @@ Due to the time constraints placed on release team members, the Joint Techs Conf
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - Enhancement - High - _*Jason*_ - Address/Name Normalization in pSB 	
      * <font color=yellow>_*Will not be addressed before release - 7/16*_</font>   
      * Upstream issue was addressed too late
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=198 198] - _*Jeff*_ - pS-B node equivalence     
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=198 198] - _*Jeff*_ - pS-B node equivalence
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=225 225] - _*Jason*_ - make install does not update paths in scripts/ in perfsonar-buoy distro   	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=226 226] - _*Jason*_ - source tarball does not untar into directory with version number
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=232 232] - _*Jason*_ - perfsonar-buoy daemon.conf wants a directory for "owmesh"; complains "not defined" if a file is entered instead 	        
  * _*perfAdmin*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - Enhancement - Medium - _*Jason*_ - ~~disable buttons on the stats grpahs page for empty graphs~~
      * <font color=purple>_*Pushing off till 3.2 - 7/10*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=197  197] - _*Jeff*_ - bwctl plots: Verify X axis is scaled by time, and not array index   	 
+
+
+
+
+
+
+
+    	 
+
+
+
 
 === Code Reviews ===
 
