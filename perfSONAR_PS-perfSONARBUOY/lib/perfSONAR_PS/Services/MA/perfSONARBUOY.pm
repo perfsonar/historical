@@ -2644,17 +2644,22 @@ sub retrieveSQL {
         if ( $#{$result1} >= 0 ) {
             foreach my $s ( @{$result1} ) {
                 $sendSQL .= " or " if $sendSQL;
+                $sendSQL .= " ( " unless $sendSQL;
                 $sendSQL .= " send_id=\"" . $s->[0] . "\"";
             }
+            $sendSQL .= " ) ";
         }
-
+                
         my $recvSQL = q{};
         if ( $#{$result2} >= 0 ) {
             foreach my $r ( @{$result2} ) {
                 $recvSQL .= " or " if $recvSQL;
+                $recvSQL .= " ( " unless $recvSQL;
                 $recvSQL .= " recv_id=\"" . $r->[0] . "\"";
             }
+            $recvSQL .= " ) ";
         }
+
 
         # XXX JZ - 7/15/2009
         #
@@ -2773,17 +2778,22 @@ sub retrieveSQL {
         if ( $#{$result1} >= 0 ) {
             foreach my $s ( @{$result1} ) {
                 $sendSQL .= " or " if $sendSQL;
+                $sendSQL .= " ( " unless $sendSQL;
                 $sendSQL .= " send_id=\"" . $s->[0] . "\"";
             }
+            $sendSQL .= " ) ";
         }
-
+                
         my $recvSQL = q{};
         if ( $#{$result2} >= 0 ) {
             foreach my $r ( @{$result2} ) {
                 $recvSQL .= " or " if $recvSQL;
+                $recvSQL .= " ( " unless $recvSQL;
                 $recvSQL .= " recv_id=\"" . $r->[0] . "\"";
             }
+            $recvSQL .= " ) ";
         }
+
 
         # XXX JZ - 7/15/2009
         #
