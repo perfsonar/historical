@@ -9,6 +9,7 @@ default:
 dist:
 	mkdir /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
 	tar ch -T MANIFEST | tar x -C /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
+	cd /tmp/$(PACKAGE)-$(VERSION).$(RELEASE) && ln -s doc/LICENSE LICENSE
 	cd /tmp/$(PACKAGE)-$(VERSION).$(RELEASE) && ln -s doc/INSTALL INSTALL
 	cd /tmp/$(PACKAGE)-$(VERSION).$(RELEASE) && ln -s doc/README README
 	tar czf $(PACKAGE)-$(VERSION).$(RELEASE).tar.gz -C /tmp $(PACKAGE)-$(VERSION).$(RELEASE)
