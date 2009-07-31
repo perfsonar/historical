@@ -5,16 +5,17 @@
 %define crontab perfAdmin.cron
 %define apacheconf perfAdmin.conf
 
+%define relnum 3
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfAdmin
 Version:        3.1
-Release:        2.%{disttag}
+Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS perfAdmin
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-perfAdmin
-Source0:        perfSONAR_PS-perfAdmin-%{version}.tar.gz
+Source0:        perfSONAR_PS-perfAdmin-%{version}.%{relnum}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:		perl(AnyEvent) >= 4.81
@@ -49,7 +50,7 @@ The perfSONAR-PS perfAdmin package is a series of simple web-based GUIs that int
 /usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
-%setup -q -n perfSONAR_PS-perfAdmin
+%setup -q -n perfSONAR_PS-perfAdmin-%{version}.%{relnum}
 
 %build
 
@@ -96,6 +97,9 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/*
 
 %changelog
+* Fri Jul 31 2009 zurawski@internet2.edu 3.1-3
+- Fixes to to documentation and package structure.  
+
 * Tue Jul 21 2009 zurawski@internet2.edu 3.1-2
 - Bugfixes in several graphs.
 
