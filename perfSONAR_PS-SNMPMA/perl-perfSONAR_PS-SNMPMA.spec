@@ -6,16 +6,17 @@ Autoreq: 0
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 snmp_ma
 
+%define relnum 7
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-SNMPMA
 Version:        3.1
-Release:        6.%{disttag}
+Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS SNMP Measurement Archive
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-SNMPMA
-Source0:        perfSONAR_PS-SNMPMA-%{version}.tar.gz
+Source0:        perfSONAR_PS-SNMPMA-%{version}.%{relnum}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:		perl(Clone)
@@ -88,7 +89,7 @@ The perfSONAR-PS SNMP MA is a measurement archive that is able to deliver gather
 /usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
-%setup -q -n perfSONAR_PS-SNMPMA
+%setup -q -n perfSONAR_PS-SNMPMA-%{version}.%{relnum}
 
 %build
 
@@ -134,6 +135,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Fri Jul 31 2009 zurawski@internet2.edu 3.1-7
+- Fixes to to documentation and package structure.  
+
 * Tue Jul 21 2009 zurawski@internet2.edu 3.1-6
 - Shared library upgrades.
 

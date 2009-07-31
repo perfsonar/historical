@@ -20,3 +20,5 @@ then
 fi
 
 $MAKEROOT chown -R perfsonar:perfsonar /var/lib/perfsonar/snmp_ma
+
+$MAKEROOT ln -s /opt/perfsonar_ps/snmp_ma/scripts/snmp_ma /etc/init.d/snmp_ma
