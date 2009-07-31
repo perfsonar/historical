@@ -15,7 +15,7 @@ License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-LookupService/
 Source0:        perfSONAR_PS-LookupService-%{version}.%{relnum}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}.%{relnum}-root-%(%{__id_u} -n)
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:		perl(Clone)
 Requires:		perl(Config::General)
