@@ -14,3 +14,6 @@ $MAKEROOT chown perfsonar:perfsonar /var/log/perfsonar
 
 $MAKEROOT mkdir -p /var/lib/perfsonar/perfsonarbuoy_ma
 $MAKEROOT chown -R perfsonar:perfsonar /var/lib/perfsonar/perfsonarbuoy_ma
+
+$MAKEROOT ln -s /opt/perfsonar_ps/perfsonarbuoy_ma/scripts/perfsonarbuoy_owp_master /etc/init.d/perfsonarbuoy_owp_master
+$MAKEROOT ln -s /opt/perfsonar_ps/perfsonarbuoy_ma/scripts/perfsonarbuoy_bw_master /etc/init.d/perfsonarbuoy_bw_master

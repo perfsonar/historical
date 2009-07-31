@@ -30,10 +30,13 @@ collection may begin.  Note that some options regarding the database can be
 adjusted in the 'owmesh.conf' file (see next section).  There are two scripts, 
 one for each data type:
 
-  /opt/perfsonar_ps/perfsonarbuoy_ma/bin/owdb.pl -c /opt/perfsonar_ps/perfsonarbuoy_ma/etc -i root
-  /opt/perfsonar_ps/perfsonarbuoy_ma/bin/bwdb.pl -c /opt/perfsonar_ps/perfsonarbuoy_ma/etc -i root
+  /opt/perfsonar_ps/perfsonarbuoy_ma/bin/owdb.pl -c /opt/perfsonar_ps/perfsonarbuoy_ma/etc -i ADMIN_USER_NAME
+  /opt/perfsonar_ps/perfsonarbuoy_ma/bin/bwdb.pl -c /opt/perfsonar_ps/perfsonarbuoy_ma/etc -i ADMIN_USER_NAME
   
-Note that if you wish to delete an existing data base replace '-i' with '-x'.  
+Note that if you wish to delete an existing data base replace '-i' with '-x'.
+Replace ADMIN_USER_NAME with the name of the MySQL admin (this is normally
+'root').  Before starting the script a prompt will appear for this user's
+password, if there is no password press enter.  
      
 Configuration:
 --------------
@@ -65,8 +68,9 @@ for a specific use case:
       maintenance_interval     - Interval of time to re-generate the store.xml
                                  file (N.B. doing this fast can be CPU expensive
                                  but does make test data available faster)
-      owmesh                   - Directory that contains the owmesh.conf test
-                                 file
+      owmesh                   - This is the *DIRECTORY* that contains the
+                                 owmesh.conf file.  *DO NOT* place the full path
+                                 to the file or the service will not start.
     
     The rest of the items are normally not to be adjusted.  See also the service
     wiki page for more information:
@@ -171,4 +175,4 @@ Finally, check the following websites for news of software releases:
 
 --------------------------------------------------------------------------------
 
-Tue Jul 21 09:47:53 EDT 2009
+Thu Jul 30 23:39:03 EDT 2009

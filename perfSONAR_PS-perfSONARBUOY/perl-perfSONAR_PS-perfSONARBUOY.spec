@@ -8,17 +8,18 @@
 %define init_script_owp_collector perfsonarbuoy_owp_collector
 %define init_script_owp_master perfsonarbuoy_owp_master
 
+%define relnum 2
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfSONARBUOY
 Version:        3.1
-Release:        1.%{disttag}
+Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS perfSONAR-BUOY Measurement Archive and Collection System
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-perfSONAR-BUOY/
-Source0:        perfSONAR_PS-perfSONARBUOY-%{version}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Source0:        perfSONAR_PS-perfSONARBUOY-%{version}.%{relnum}.tar.gz
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}.%{relnum}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       perl
 #Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
@@ -113,7 +114,7 @@ The perfSONARBUOY config package contains a configuration file that both the ser
 /usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
-%setup -q -n perfSONAR_PS-perfSONARBUOY
+%setup -q -n perfSONAR_PS-perfSONARBUOY-%{version}.%{relnum}
 
 %build
 
@@ -223,6 +224,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Fri Jul 31 2009 zurawski@internet2.edu 3.1-2
+- Fixes to to documentation and package structure.  
+
 * Tue Jul 21 2009 zurawski@internet2.edu 3.1-1
 - Support for BWCTL and OWAMP regular testing
 
