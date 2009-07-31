@@ -19,3 +19,5 @@ then
 fi
 
 $MAKEROOT chown -R perfsonar:perfsonar /var/lib/perfsonar/lookup_service
+
+$MAKEROOT ln -s /opt/perfsonar_ps/lookup_service/scripts/lookup_service /etc/init.d/lookup_service

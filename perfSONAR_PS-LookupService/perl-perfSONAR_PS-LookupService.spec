@@ -4,17 +4,18 @@
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 lookup_service
 
+%define relnum 6
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-LookupService
 Version:        3.1
-Release:        5.%{disttag}
+Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS Lookup Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-LookupService/
-Source0:        perfSONAR_PS-LookupService-%{version}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Source0:        perfSONAR_PS-LookupService-%{version}.%{relnum}.tar.gz
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}.%{relnum}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:		perl(Clone)
 Requires:		perl(Config::General)
@@ -54,7 +55,7 @@ The perfSONAR-PS Lookup Service can function in one of two roles: global root or
 /usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
-%setup -q -n perfSONAR_PS-LookupService
+%setup -q -n perfSONAR_PS-LookupService-%{version}.%{relnum}
 
 %build
 
@@ -99,6 +100,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Fri Jul 31 2009 zurawski@internet2.edu 3.1-6
+- Fixes to to documentation and package structure.  
+
 * Tue Jul 21 2009 zurawski@internet2.edu 3.1-5
 - Shared library upgrades.
 
