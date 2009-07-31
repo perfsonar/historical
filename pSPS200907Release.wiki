@@ -71,6 +71,8 @@ Due to the time constraints placed on release team members, the Joint Techs Conf
      * <font color=green>_*Done - 7/15*_</font>   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=226 226] - _*Jason*_ - source tarball does not untar into directory with version number
      * <font color=green>_*Done - 7/31*_</font>  
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=225 225] - _*Jason*_ - make install does not update paths in scripts/ in perfsonar-buoy distro   	
+     * <font color=green>_*Done - 7/31*_</font> 
  * _*PingER*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=181 181] - _*Maxim*_ - ~~PingER MA server errors~~
      * <font color=green>_*Fixed - 6/8*_</font>
@@ -108,8 +110,7 @@ Due to the time constraints placed on release team members, the Joint Techs Conf
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - Enhancement - High - _*Jason*_ - Address/Name Normalization in pSB 	
      * <font color=yellow>_*Will not be addressed before release - 7/16*_</font>   
      * Upstream issue was addressed too late
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=198 198] - _*Jeff*_ - pS-B node equivalence
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=225 225] - _*Jason*_ - make install does not update paths in scripts/ in perfsonar-buoy distro   	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=198 198] - _*Jeff*_ - pS-B node equivalence 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=232 232] - _*Jason*_ - perfsonar-buoy daemon.conf wants a directory for "owmesh"; complains "not defined" if a file is entered instead 	        
  * _*perfAdmin*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - Enhancement - Medium - _*Jason*_ - ~~disable buttons on the stats grpahs page for empty graphs~~
