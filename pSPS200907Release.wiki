@@ -92,30 +92,23 @@ Due to the time constraints placed on release team members, the Joint Techs Conf
 
 ==== Post RC1 Bugs ====
 
- * _*LS Registration Daemon*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=182 182] - Defect - High - _*Aaron*_ - ~~need better error checking on ls_instance string in ls_registration_daemon~~
-     * <font color=purple>_*Moved to Next Release - 7/2*_</font>
- * _*pSB*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=106 106] - Enhancement - Medium - _*Jeff*_ - ~~bwmaster/bwcontroller: better logging support~~
-     * <font color=purple>_*Moved to Next Release - 7/15*_</font>	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=125 125] - Task - High - _*Jeff*_ - testconf.pl: Print out description of exactly what tests are configured to run by an owmesh.conf file	 
+ * _*pSB*_	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=125 125] - _*Jeff*_ - testconf.pl: Print out description of exactly what tests are configured to run by an owmesh.conf file 	 
      * <font color=yellow>_*Started, will finish after release - 7/16*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=127 127] - Enhancement - High - _*Jeff*_ - ~~Refactor bwmaster.pl to fetch addresses from 'conf' before forking~~
-     * <font color=purple>_*Moved to Next Release - 7/16*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=152 152] - Defect - High - _*Jason*_ - ~~pSB MA gLS ERRORS~~
-     * <font color=purple>_*migrating to next release - 7/14*_</font> 	 
-     * Temp fix applied, will address further in next release.
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=157 157] - Enhancement - High - _*Jeff*_ - bwcollector debugging support 	 
-     * <font color=yellow>_*Started, will finish after release - 7/16*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - Enhancement - High - _*Jason*_ - Address/Name Normalization in pSB 	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=127 127] - _*Jeff*_ - Refactor bwmaster.pl to fetch addresses from 'conf' before forking 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=157 157] - _*Jeff*_ - bwcollector debugging support 	  	 
+      * <font color=yellow>_*Started, will finish after release - 7/16*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - _*Jason*_ - Address/Name Normalization in pSB
      * <font color=yellow>_*Will not be addressed before release - 7/16*_</font>   
      * Upstream issue was addressed too late
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=198 198] - _*Jeff*_ - pS-B node equivalence 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=232 232] - _*Jason*_ - perfsonar-buoy daemon.conf wants a directory for "owmesh"; complains "not defined" if a file is entered instead 	        
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=198 198] - _*Jeff*_ - pS-B node equivalence 	 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=232 232] - _*Jason*_ - perfsonar-buoy daemon.conf wants a directory for "owmesh"; complains "not defined" if a file is entered instead    
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=241 241] - _*Jeff*_ - ps-buoy endpoint doesn't seem to store/upload owamp measurements; throws perl uninit value warning in data validation code 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=247 247] - _*Jeff*_ - /etc/init.d/perfsonarbuoy_owp_master script will start multiple instances of powmaster; have to kill manually 	       
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=248 248] - _*Jason*_ - improvements for perfsonar-buoy README file 	          
  * _*perfAdmin*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - Enhancement - Medium - _*Jason*_ - ~~disable buttons on the stats grpahs page for empty graphs~~
-     * <font color=purple>_*Pushing off till 3.2 - 7/10*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=197  197] - _*Jeff*_ - bwctl plots: Verify X axis is scaled by time, and not array index   	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=243 243] - _*Jason*_ - empty rows in ps-buoy report 	   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=244 244] - _*Jason*_ - 4 lines in graphs; graph title suggests should only be one.
 
 === Code Reviews ===
 

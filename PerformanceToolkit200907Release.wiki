@@ -68,6 +68,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - Enhancement - New - Medium - _*Aaron*_ - ~~ability to set peer_port and iperf_port using web config GUI~~
      * <font color=purple>_*Moved to Next Release - 7/2*_</font>
  * _*Disc Misc.*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=10 10] - Enhancement - Critical - _*Jeff*_ - Splash screen 	
+     * <font color=green>_*Done - 7/31*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=24 24] - _*Aaron*_ - ~~Automated MOTD generation~~
      * <font color=green>_*Fixed - 6/23*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=57 57] - _*Aaron*_ - ~~Console Configuration Issues~~ 	 
@@ -86,67 +88,68 @@ The following outline some exceptions to the overall release process.  Also see 
 ==== Post RC1 Bugs ====
 
  * _*NPAD*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=227] - _*Aaron*_ - AaronMatthewBrown 	  	NPAD listed as not runing when running in Admin GUI
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=227 227] - _*Aaron*_ - NPAD listed as not runing when running in Admin GUI 	
  * _*LSRegistrationDaemon*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=210] - _*Aaron*_ - LSRegistration daemon start/restart on information change 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=210 210] - _*Aaron*_ - LSRegistration daemon start/restart on information change	 
  * _*pSB*_ 
  * _*PingER*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=217] - _*Aaron*_ - Scheduled Test GUI Reports PingER tests when none configured 
- * _*SNMP MA*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=215] - _*Jason*_ - Cacti database should 'exit' the SNMP MA service if no data is present. 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - Defect - High - _*Aaron*_ - Cacti Configuration on NPToolkit 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=228 228] - _*Aaron*_ - pinger tests are running but not showed on the GUI as scheduled 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=233 233] - _*Aaron*_ - there is no pinger data charts gui and there is no link to any external instance 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=237 237] - _*Aaron*_ - pinger daemon have not restarted when clicked on Save 
+ * _*SNMP MA*_    
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - _*Aaron*_ - Cacti Configuration on NPToolkit 
      * <font color=yellow>_*Mostly Done, Needs Testing - 6/23*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=228] - _*Aaron*_ - pinger tests are running but not showed on the GUI as scheduled	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=233] - _*Aaron*_ - there is no pinger data charts gui and there is no link to any external instance 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=237] - _*Aaron*_ - pinger daemon have not restarted when clicked on Save      
- * _*OWAMP/BWCTL*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - Defect - Critical - _*Aaron*_ - owamp/bwctl defaults for LHC sites
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=215 215] - _*Jason*_ - Cacti database should 'exit' the SNMP MA service if no data is present. 	 
+ * _*OWAMP/BWCTL*_ 	      
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - _*Aaron*_ - owamp/bwctl defaults for LHC sites 
      * <font color=yellow>_*In Progress - 7/2*_</font>	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=235] - _*Aaron*_ - simplified and documented options needed for configuring OWAMP tests 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=236] - _*Aaron*_ - the Regular Testing interface is confusing 	      
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=200 200] - _*Aaron*_ - Upgrade script create owamp database if not present
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=235 235] - _*Aaron*_ - simplified and documented options needed for configuring OWAMP tests 
  * _*Testing*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - Task - Critical - _*Jason*_ - Automated Nessus Evaluation of Software    
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - _*Brian*_ - Automated Nessus Evaluation of Software 
      * <font color=green>_*Done for now - 6/10*_</font>
      * Need to do testing after first RC (after JTs)
- * _*GUIs*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=214] - _*Aaron*_ - GUIs should clearly reflect the decission to set up a 'latency host' vs a 'bandwidth' host 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=216] - _*Aaron*_ - Community handling in pS Performance Toolkit GUIs 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=209] - _*Aaron*_ - Scheduled Testing GUI   
- * _*Disc Misc.*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=10 10] - Enhancement - Critical - _*Jeff*_ - Splash screen 	
-     * <font color=yellow>_*In Progress - 6/30*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=17 17] - Enhancement - Critical - _*Aaron*_ - Java plugin/homepage for KDE env  
-     * <font color=yellow>_*Mostly Done - 6/23*_</font>: Needs link to firefox on desktop or modify Konqueror to accept plugin
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=26 26] - Enhancement - High - _*Aaron*_ - kernel nic drivers 	 
-     * <font color=purple>_*Post Beta (needs user feedback) - 7/2*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=83 83] - Defect - High - _*Aaron*_ - Live CD Network Card Drivers (Broadcom) 	 
-     * <font color=yellow>_*In Progress - 6/23*_</font>: Most up to date drivers are included, needs testing on host with broadcom
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=98 98] - Defect - Critical - _*Jason*_ - Ensure all service packages have init.d scripts 
-     * <font color=yellow>_*In Progress - 7/10*_</font>	
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=140 140] - Defect - High - _*Aaron*_ - Upgrades of NPToolkit may miss key file changes 
-     * <font color=yellow>_*In Progress - 7/2*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=164 164] - Enhancement - High - _*Aaron*_ - Add option to completely clear disk/partition table and all 
-     * <font color=yellow>_*In Progress - 6/23*_</font>: The better sorting of the partitions may obviate this need
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=165 165] - Enhancement - Medium - _*Aaron*_ - Explore syslog-ng, and potential loghost setup 	 
-     * <font color=yellow>_*In Progress - 6/23*_</font>: Need to document how to add loghost into /etc/syslog-ng/syslog-ng.conf
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - Enhancement - Medium - _*Aaron*_ - Add vmxnet module 	
-     * <font color=purple>_*Post Beta (needs user feedback) - 7/2*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=189 188] - _*Aaron*_ - Add RNP NTP servers to NPToolkit 
-     * <font color=yellow>_*In Progress - 7/10*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=200 200] - _*Aaron*_ - Upgrade script create owamp database if not present 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=201 201] - _*Aaron*_ - Upgrade Script Behavior
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - Colors in console configuration 
+ * _*GUIs*_  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=203 203] - _*Aaron*_ - Error messages when IS cannot be contacted for portions of the Admin GUIs 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=204 204] - _*Aaron*_ - pre-load gLS cache on ISO 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=206 206] - _*Aaron*_ - non-rfc1918 addresses were getting flagged as local addresses 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=208 208] - _*Aaron*_ - MTU Options in Console Config 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=209 209] - _*Aaron*_ - Scheduled Testing GUI 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=214 214] - _*Aaron*_ - GUIs should clearly reflect the decission to set up a 'latency host' vs a 'bandwidth' host 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=216 216] - _*Aaron*_ - Community handling in pS Performance Toolkit GUIs 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=217 217] - _*Aaron*_ - Scheduled Test GUI Reports PingER tests when none configured 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=236 236] - _*Aaron*_ - the Regular Testing interface is confusing 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=240 240] - _*Rich*_ - BWCTL Graphs Include unrelated data 
+ * _*Steering*_        
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
+     * <font color=yellow>_*In Progress - 7/31*_</font>	
+ * _*Disc Misc.*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=17 17] - _*Aaron*_ - Java plugin/homepage for KDE env 
+     * <font color=yellow>_*Mostly Done - 6/23*_</font>: Needs link to firefox on desktop or modify Konqueror to accept plugin
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=26 26] - _*Aaron*_ - kernel nic drivers 	 	 
+     * <font color=purple>_*Post Beta (needs user feedback) - 7/2*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=83 83] - _*Aaron*_ - Live CD Network Card Drivers (Broadcom)
+     * <font color=yellow>_*In Progress - 6/23*_</font>: Most up to date drivers are included, needs testing on host with broadcom
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=98 98] - _*Jason*_ - Ensure all service packages have init.d scripts
+     * <font color=yellow>_*In Progress - 7/10*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=140 140] - _*Aaron*_ - Upgrades of NPToolkit may miss key file changes 	 	
+     * <font color=yellow>_*In Progress - 7/2*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=164 164] - _*Aaron*_ - Add option to completely clear disk/partition table and all
+     * <font color=yellow>_*In Progress - 6/23*_</font>: The better sorting of the partitions may obviate this need
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=165 165] - _*Aaron*_ - Explore syslog-ng, and potential loghost setup 	 
+     * <font color=yellow>_*In Progress - 6/23*_</font>: Need to document how to add loghost into /etc/syslog-ng/syslog-ng.conf
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - _*Aaron*_ - Add vmxnet module 	 	 	 
+     * <font color=purple>_*Post Beta (needs user feedback) - 7/2*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=189 189] - _*Aaron*_ - Add RNP NTP servers to NPToolkit   	
+     * <font color=yellow>_*In Progress - 7/10*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=201 201] - _*Aaron*_ - Upgrade Script Behavior 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - Colors in console configuration 	 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=204 204] - _*Aaron*_ - pre-load gLS cache on ISO 	     
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=206 206] - _*Aaron*_ - non-rfc1918 addresses were getting flagged as local addresses 	 
      * <font color=yellow>_*In Progress - 7/28*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=207 207] - _*Aaron*_ - pS Performance Toolit Bootup Suggestions   	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=208 208] - _*Aaron*_ - MTU Options in Console Config 	   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=207 207] - _*Aaron*_ - pS Performance Toolit Bootup Suggestions	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=212 212] - _*Aaron*_ - Simplify prompt for advertised interface 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=213 213] - _*Aaron*_ - Delete hLS-XMLDB on upgrade/reboot 	   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218 218] - _*Aaron*_ - NTP Server Selection 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=222 222] - _*Aaron*_ - hostname and hosts.[allow|deny] must be preserved 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=213 213] - _*Aaron*_ - Delete hLS-XMLDB on upgrade/reboot 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218 218] - _*Aaron*_ - NTP Server Selection 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=222 222] - _*Aaron*_ - hostname and hosts.[allow|deny] must be preserved 	 
 
 === Code Reviews ===
 
