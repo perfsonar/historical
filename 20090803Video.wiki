@@ -1,0 +1,37 @@
+=  Aug 3 2009 Conference Call 2:30 pm EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+ # Teamp Updates
+ # Review _*Actions*_ and _*Issues*_
+   * _*Jason*_ - ~~will update release pages as needed~~
+   * _*Jason*_ - ~~will contact Marcos about IP Summarization~~
+   * _*Jason/Martin/Jeff*_ - Finish editing OGF documents
+   * _*Jason/Martin/Jeff*_ - Complete/Upload NML document
+   * _*Aaron/Maxim*_ - Review admin GUIs and unify as much as possible.
+   * _*Joe*_ - Suggest interim steps to improve LS user experience, that don't require new software deployments.
+   * _*All*_ - Review release pages
+ # Toolkit 'branding'
+ # Release Activities
+   * pS-PerformanceTK
+     * RC2 out this morning
+     * Testing issues - anything huge we need to worry about? Or normal churn?
+   * Update Your Bug Status!
+ # LHC/Atlas deployments (status update)
+ # Future topics:
+  * Status collection for low-level device PMs
+    The DCN status page that was put together for the monitoring is a relatively simple collector that grabs various performance counters and other data about elements on the Cienas. Right now, it confines itself to things that look like interfaces. There's a similar project that Jon Dugan has been working on for ESnet called ESxSNMP that grabs performance counters for SNMP hosts. It would be good to have a discussion about how these two monitoring infrastructures might work together. At minimum, it might be feasible to get the TL1 monitoring components to use the same metadata database and counter databases, and, implicitly, perfsonar interface.
+    = =
+    Another possible area of discussion include how the monitoring above can be extended to support collection and storage of topological information. The topology information could include how interfaces are connected together internally in the switch/router (via cross-connects, adaptation or whatever). It might also be good to think about how to collect information about how switches/routers are wired together.
+    = =
+    It'd be feasible to grab and store TL1/SNMP alarms as part of the collection framework. Though, that might be more reasonably done via nagios plugins.
+ # Next VC will be 8/10 2:30 EDT.
+
+=== ACTIONS ===
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
