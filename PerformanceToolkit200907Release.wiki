@@ -150,6 +150,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=213 213] - _*Aaron*_ - Delete hLS-XMLDB on upgrade/reboot 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218 218] - _*Aaron*_ - NTP Server Selection 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=222 222] - _*Aaron*_ - hostname and hosts.[allow|deny] must be preserved 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=249 249] - _*Aaron*_ - minimum memory script issues 
 
 === Code Reviews ===
 
