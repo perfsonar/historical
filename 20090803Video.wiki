@@ -18,6 +18,8 @@
      * RC2 out this morning
      * Testing issues - anything huge we need to worry about? Or normal churn?
    * Update Your Bug Status!
+ # Service Monitoring and Config management
+   * gLS 'monitoring'
  # LHC/Atlas deployments (status update)
  # Future topics:
   * Status collection for low-level device PMs
