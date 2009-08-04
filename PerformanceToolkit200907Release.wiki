@@ -143,17 +143,20 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 7/10*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=201 201] - _*Aaron*_ - Upgrade Script Behavior 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - Colors in console configuration 	 	 
+     * <font color=yellow>_*In Progress - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=204 204] - _*Aaron*_ - pre-load gLS cache on ISO 	     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=206 206] - _*Aaron*_ - non-rfc1918 addresses were getting flagged as local addresses 	 
-     * <font color=yellow>_*In Progress - 7/28*_</font>
+     * <font color=green>_*Done - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=207 207] - _*Aaron*_ - pS Performance Toolit Bootup Suggestions	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=212 212] - _*Aaron*_ - Simplify prompt for advertised interface 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=213 213] - _*Aaron*_ - Delete hLS-XMLDB on upgrade/reboot 	 
+     * <font color=yellow>_*In Progress - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218 218] - _*Aaron*_ - NTP Server Selection 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=222 222] - _*Aaron*_ - hostname and hosts.[allow|deny] must be preserved 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=249 249] - _*Aaron*_ - minimum memory script issues   	 
+     * <font color=green>_*Done - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=250 250] - _*Aaron*_ - NTP Server Section Fails 	 
-
+     * <font color=yellow>_*In Progress - 8/4*_</font>
 
 === Code Reviews ===
 
