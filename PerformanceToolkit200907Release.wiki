@@ -89,6 +89,7 @@ The following outline some exceptions to the overall release process.  Also see 
 
  * _*NPAD*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=227 227] - _*Aaron*_ - NPAD listed as not runing when running in Admin GUI 	
+     * <font color=green>_*Fixed - 8/5*_</font>
  * _*LSRegistrationDaemon*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=210 210] - _*Aaron*_ - LSRegistration daemon start/restart on information change	 
  * _*pSB*_ 
