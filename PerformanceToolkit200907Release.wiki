@@ -160,7 +160,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Done - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=250 250] - _*Aaron*_ - NTP Server Section Fails 	 
      * <font color=yellow>_*In Progress - 8/4*_</font>
-
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=252 252] - _*Aaron*_ - have to click "Save" in the Enabled Services menu to kill BWCTL daemon 
+ 	
 === Code Reviews ===
 
 There will be no code reviews for this release.  
