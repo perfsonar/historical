@@ -113,6 +113,7 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*GUIs*_  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=203 203] - _*Aaron*_ - Error messages when IS cannot be contacted for portions of the Admin GUIs 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=208 208] - _*Aaron*_ - MTU Options in Console Config 	 
+     * <font color=green>_*Done - 8/5*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=209 209] - _*Aaron*_ - Scheduled Testing GUI 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=214 214] - _*Aaron*_ - GUIs should clearly reflect the decission to set up a 'latency host' vs a 'bandwidth' host 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=216 216] - _*Aaron*_ - Community handling in pS Performance Toolkit GUIs 	 
@@ -148,6 +149,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=206 206] - _*Aaron*_ - non-rfc1918 addresses were getting flagged as local addresses 	 
      * <font color=green>_*Done - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=207 207] - _*Aaron*_ - pS Performance Toolit Bootup Suggestions	
+     * <font color=yellow>_*In Progress - 8/5*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=212 212] - _*Aaron*_ - Simplify prompt for advertised interface 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=213 213] - _*Aaron*_ - Delete hLS-XMLDB on upgrade/reboot 	 
      * <font color=yellow>_*In Progress - 8/4*_</font>
