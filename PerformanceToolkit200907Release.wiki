@@ -51,7 +51,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=179 179] - Enhancement - Low - _*Jeff*_ - Add scripts to clean/migrate SQL data in pS-B 
      * <font color=purple>_*Pushed Off till 3.2 - 7/15*_</font>
  * _*PingER*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=180 180] - Enhancement - Low - _*Maxim*_ - Add scripts to clean/migrate SQL data in pingER 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=180 180] - Enhancement - Low - _*Maxim*_ - ~~Add scripts to clean/migrate SQL data in pingER~~
      * <font color=green>_*Fixed - 6/24*_</font>
  * _*SNMP MA*_ 
  * _*OWAMP/BWCTL*_ 
@@ -63,12 +63,12 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 6/8*_</font>
  * _*Testing*_ 
  * _*GUIs*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=47 47] - Enhancement - High - _*Aaron*_ - Manual BWCTL/OWAMP host add to pSB Admin
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=47 47] - Enhancement - High - _*Aaron*_ - ~~Manual BWCTL/OWAMP host add to pSB Admin~~
      * <font color=green>_*Fixed - 7/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - Enhancement - New - Medium - _*Aaron*_ - ~~ability to set peer_port and iperf_port using web config GUI~~
      * <font color=purple>_*Moved to Next Release - 7/2*_</font>
  * _*Disc Misc.*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=10 10] - Enhancement - Critical - _*Jeff*_ - Splash screen 	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=10 10] - Enhancement - Critical - _*Jeff*_ - ~~Splash screen~~
      * <font color=green>_*Done - 7/31*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=24 24] - _*Aaron*_ - ~~Automated MOTD generation~~
      * <font color=green>_*Fixed - 6/23*_</font>	
@@ -88,7 +88,7 @@ The following outline some exceptions to the overall release process.  Also see 
 ==== Post RC1 Bugs ====
 
  * _*NPAD*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=227 227] - _*Aaron*_ - NPAD listed as not runing when running in Admin GUI 	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=227 227] - _*Aaron*_ - ~~NPAD listed as not runing when running in Admin GUI~~
      * <font color=green>_*Fixed - 8/5*_</font>
  * _*LSRegistrationDaemon*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=210 210] - _*Aaron*_ - LSRegistration daemon start/restart on information change	 
@@ -113,7 +113,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * Need to do testing after first RC (after JTs)
  * _*GUIs*_  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=203 203] - _*Aaron*_ - Error messages when IS cannot be contacted for portions of the Admin GUIs 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=208 208] - _*Aaron*_ - MTU Options in Console Config 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=208 208] - _*Aaron*_ - ~~MTU Options in Console Config~~ 	 
      * <font color=green>_*Done - 8/5*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=209 209] - _*Aaron*_ - Scheduled Testing GUI 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=214 214] - _*Aaron*_ - GUIs should clearly reflect the decission to set up a 'latency host' vs a 'bandwidth' host 	 
@@ -147,7 +147,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - Colors in console configuration 	 	 
      * <font color=yellow>_*In Progress - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=204 204] - _*Aaron*_ - pre-load gLS cache on ISO 	     
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=206 206] - _*Aaron*_ - non-rfc1918 addresses were getting flagged as local addresses 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=206 206] - _*Aaron*_ - ~~non-rfc1918 addresses were getting flagged as local addresses~~ 	 
      * <font color=green>_*Done - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=207 207] - _*Aaron*_ - pS Performance Toolit Bootup Suggestions	
      * <font color=yellow>_*In Progress - 8/5*_</font>	
@@ -156,7 +156,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218 218] - _*Aaron*_ - NTP Server Selection 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=222 222] - _*Aaron*_ - hostname and hosts.[allow|deny] must be preserved 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=249 249] - _*Aaron*_ - minimum memory script issues   	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=249 249] - _*Aaron*_ - ~~minimum memory script issues~~   	 
      * <font color=green>_*Done - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=250 250] - _*Aaron*_ - NTP Server Section Fails 	 
      * <font color=yellow>_*In Progress - 8/4*_</font>
