@@ -98,6 +98,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=233 233] - _*Aaron*_ - there is no pinger data charts gui and there is no link to any external instance 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=237 237] - _*Aaron*_ - pinger daemon have not restarted when clicked on Save 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=251 251] - _*Aaron*_ - PingER Scheduled Test GUI Manual Add    
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=253 253] - _*Aaron*_ - Update PingER GUI 
  * _*SNMP MA*_    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - _*Aaron*_ - Cacti Configuration on NPToolkit 
      * <font color=yellow>_*Mostly Done, Needs Testing - 6/23*_</font>
