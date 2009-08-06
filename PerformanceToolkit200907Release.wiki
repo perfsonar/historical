@@ -95,7 +95,8 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*pSB*_ 
  * _*PingER*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=228 228] - _*Aaron*_ - pinger tests are running but not showed on the GUI as scheduled 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=233 233] - _*Aaron*_ - there is no pinger data charts gui and there is no link to any external instance 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=233 233] - _*Aaron*_ - ~~there is no pinger data charts gui and there is no link to any external instance~~
+     * <font color=green>_*Fixed - 8/5*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=237 237] - _*Aaron*_ - pinger daemon have not restarted when clicked on Save 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=251 251] - _*Aaron*_ - PingER Scheduled Test GUI Manual Add    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=253 253] - _*Aaron*_ - Update PingER GUI 
@@ -157,6 +158,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218 218] - _*Aaron*_ - NTP Server Selection 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=222 222] - _*Aaron*_ - hostname and hosts.[allow|deny] must be preserved 	 
+     * <font color=yellow>_*In Progress - 8/6*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=249 249] - _*Aaron*_ - ~~minimum memory script issues~~   	 
      * <font color=green>_*Done - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=250 250] - _*Aaron*_ - NTP Server Section Fails 	 
