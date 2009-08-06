@@ -95,11 +95,14 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*pSB*_ 
  * _*PingER*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=228 228] - _*Aaron*_ - pinger tests are running but not showed on the GUI as scheduled 	 
+     * <font color=yellow>_*In Progress - 8/6*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=233 233] - _*Aaron*_ - ~~there is no pinger data charts gui and there is no link to any external instance~~
      * <font color=green>_*Fixed - 8/5*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=237 237] - _*Aaron*_ - pinger daemon have not restarted when clicked on Save 
+     * <font color=yellow>_*In Progress - 8/6*_</font>   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=251 251] - _*Aaron*_ - PingER Scheduled Test GUI Manual Add    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=253 253] - _*Aaron*_ - Update PingER GUI 
+     * <font color=yellow>_*In Progress - 8/6*_</font>	   
  * _*SNMP MA*_    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - _*Aaron*_ - Cacti Configuration on NPToolkit 
      * <font color=yellow>_*Mostly Done, Needs Testing - 6/23*_</font>
@@ -123,6 +126,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=217 217] - _*Aaron*_ - Scheduled Test GUI Reports PingER tests when none configured 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=236 236] - _*Aaron*_ - the Regular Testing interface is confusing 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=240 240] - _*Rich*_ - BWCTL Graphs Include unrelated data 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=257 257] - _*Aaron*_ - check that cross-browser js library is used with support for FF/IE/Safari
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
@@ -145,15 +149,18 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=purple>_*Post Beta (needs user feedback) - 7/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=189 189] - _*Aaron*_ - Add RNP NTP servers to NPToolkit   	
      * <font color=yellow>_*In Progress - 7/10*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=201 201] - _*Aaron*_ - Upgrade Script Behavior 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=201 201] - _*Aaron*_ - Upgrade Script Behavior 	
+     * <font color=yellow>_*In Progress - 8/6*_</font>	    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - Colors in console configuration 	 	 
      * <font color=yellow>_*In Progress - 8/4*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=204 204] - _*Aaron*_ - pre-load gLS cache on ISO 	     
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=204 204] - _*Aaron*_ - pre-load gLS cache on ISO 	
+     * <font color=yellow>_*In Progress - 8/6*_</font>     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=206 206] - _*Aaron*_ - ~~non-rfc1918 addresses were getting flagged as local addresses~~ 	 
      * <font color=green>_*Done - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=207 207] - _*Aaron*_ - pS Performance Toolit Bootup Suggestions	
      * <font color=yellow>_*In Progress - 8/5*_</font>	
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=212 212] - _*Aaron*_ - Simplify prompt for advertised interface 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=212 212] - _*Aaron*_ - Simplify prompt for advertised interface 	
+     * <font color=yellow>_*In Progress - 8/6*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=213 213] - _*Aaron*_ - ~~Delete hLS-XMLDB on upgrade/reboot~~ 	 
      * <font color=green>_*Done - 8/6*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218 218] - _*Aaron*_ - NTP Server Selection 	 
@@ -165,7 +172,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Done - 8/6*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=252 252] - _*Aaron*_ - ~~have to click "Save" in the Enabled Services menu to kill BWCTL daemon~~ 
      * <font color=green>_*Done - 8/6*_</font>
- 	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=254 254] - _*Aaron*_ - gLs lookup does not work after upgrade   	 
+
 === Code Reviews ===
 
 There will be no code reviews for this release.  
