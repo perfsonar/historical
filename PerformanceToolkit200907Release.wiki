@@ -114,6 +114,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - _*Aaron*_ - owamp/bwctl defaults for LHC sites 
      * <font color=yellow>_*In Progress - 7/2*_</font>	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=200 200] - _*Aaron*_ - Upgrade script create owamp database if not present
+     * <font color=yellow>_*In Progress - 8/7*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=235 235] - _*Aaron*_ - simplified and documented options needed for configuring OWAMP tests 
  * _*Testing*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - _*Brian*_ - Automated Nessus Evaluation of Software 
@@ -157,7 +158,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - Colors in console configuration 	 	 
      * <font color=yellow>_*In Progress - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=204 204] - _*Aaron*_ - pre-load gLS cache on ISO 	
-     * <font color=yellow>_*In Progress - 8/6*_</font>     
+     * <font color=green>_*Done - 8/7*_</font>     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=206 206] - _*Aaron*_ - ~~non-rfc1918 addresses were getting flagged as local addresses~~ 	 
      * <font color=green>_*Done - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=207 207] - _*Aaron*_ - pS Performance Toolit Bootup Suggestions	
