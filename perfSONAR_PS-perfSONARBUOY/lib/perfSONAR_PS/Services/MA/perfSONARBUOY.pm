@@ -2669,12 +2669,13 @@ sub retrieveSQL {
         my $lowerBound = q{};
         my $upperBound = q{};
         if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
-            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( time );
-            $lowerBound = sprintf "%4d%02d", ( $year + 1900 ), ( $mon + 1 );
+            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = owpgmtime( $parameters->{time_settings}->{"START"}->{"internal"} );
+            $lowerBound = sprintf "%4d%02d", ( $year + 1900 ), ( $mon + 1 );            
         }
         if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
-            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( time );
+            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = owpgmtime( $parameters->{time_settings}->{"END"}->{"internal"} );
             $upperBound = sprintf "%4d%02d", ( $year + 1900 ), ( $mon + 1 );
+           
         }
 
         @dbSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
@@ -2857,6 +2858,14 @@ sub retrieveSQL {
     }
 
     $self->{LOGGER}->info( "Query \"" . $query . "\" formed." );
+
+    unless ( $query ) {
+        my $msg = "Query returned 0 results";
+        $self->{LOGGER}->error( $msg );
+        getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+        return;
+    }    
+            
     my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@dbSchema, user => $dbuser, pass => $dbpass } );
 
     $dbReturn = $datadb->openDB;
