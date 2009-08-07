@@ -194,11 +194,11 @@ sub init {
             open( CONF, ">" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/DB_CONFIG" );
             print CONF "set_lock_timeout 5000\n";
             print CONF "set_txn_timeout 5000\n";
-            print CONF "set_lk_max_lockers 500000\n";
-            print CONF "set_lk_max_locks 500000\n";
-            print CONF "set_lk_max_objects 500000\n";
+            print CONF "set_lk_max_lockers 250000\n";
+            print CONF "set_lk_max_locks 250000\n";
+            print CONF "set_lk_max_objects 250000\n";
             print CONF "set_lk_detect DB_LOCK_MINLOCKS\n";
-            print CONF "set_cachesize 0 33554432 0\n";
+            print CONF "set_cachesize 0 33554432 0\n";s
             print CONF "set_flags DB_LOG_AUTOREMOVE\n";
             print CONF "set_lg_regionmax 2097152\n";
             close( CONF );
