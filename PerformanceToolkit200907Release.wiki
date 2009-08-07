@@ -87,6 +87,9 @@ The following outline some exceptions to the overall release process.  Also see 
 
 ==== Post RC1 Bugs ====
 
+ * _*hLS/gLS*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=254 254] - _*Jason*_ - gLs lookup does not work after upgrade   	 
+     * <font color=yellow>_*In Progress - 8/7*_</font> 
  * _*NPAD*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=227 227] - _*Aaron*_ - ~~NPAD listed as not runing when running in Admin GUI~~
      * <font color=green>_*Fixed - 8/5*_</font>
@@ -173,7 +176,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=252 252] - _*Aaron*_ - ~~have to click "Save" in the Enabled Services menu to kill BWCTL daemon~~ 
      * <font color=green>_*Done - 8/6*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=254 254] - _*Aaron*_ - gLs lookup does not work after upgrade   	 
-
+     * <font color=yellow>_*In Progress - 8/7*_</font> 
+     
 === Code Reviews ===
 
 There will be no code reviews for this release.  
