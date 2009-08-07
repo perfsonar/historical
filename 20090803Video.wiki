@@ -2,8 +2,14 @@
 
 == Agenda/Minutes ==
 
- # Attendees:
- # Teamp Updates
+ # Attendees: Rich, Maxim, Jason, Aaron, Jeff, Marcos
+ # Team Updates:
+   * _*Jason*_: Working on proposals. First round of testers - lots of bug reports. RC2 released this morning. Major fixes for networking scripts and backing-store fixes. Added link to pingER GUI, added fix for pS-B.
+   * _*Aaron*_: Working on propoosals. Working on bugs as they come up.
+   * _*Maxim*_: Finished admin-gui for pingER. Unfortunately not unified like aaron's version. Feature set is different. It would be nice to have both. Would like to discuss GUI architecture going forward, and how full functionality can be implemented for all services. Also testing new toolkit on KOI boxes.
+   * _*Rich*_: Email from Bigrow - has RC2 in.
+   * _*Jeff*_: Working on proposals and toolkit bugs.
+   * _*Marcos*_: Working on statistical anomoly detection that he hopes can grow into an eventual pS service.
  # Review _*Actions*_ and _*Issues*_
    * _*Jason*_ - ~~will update release pages as needed~~
    * _*Jason*_ - ~~will contact Marcos about IP Summarization~~
@@ -13,22 +19,23 @@
    * _*Joe*_ - Suggest interim steps to improve LS user experience, that don't require new software deployments.
    * _*All*_ - Review release pages
  # Toolkit 'branding'
+   * Maxim is unhappy about any organizational branding. Current 'plan' is in issue 205. (Jeff - my intent is to slightly brand the toolkit as Internet2 just as the NPToolkit has always been. Likewise, individual tools on the toolkit have had some organizational branding: NPAD from PSC, pingER from SLAC/FNAL. If there is serious concern about this I'm happy to discuss it with anyone and I'm willing to concider changes. But please consider the fact that the only way some of the organizations can stay involved in developing these tools is if they can publicly get some credit for having done something for the communities they serve. It is extremely important to me that no groups are slighted here - so please review and speak up when public announcements are sent out for review. Thanks.)
  # Release Activities
    * pS-PerformanceTK
      * RC2 out this morning
      * Testing issues - anything huge we need to worry about? Or normal churn?
    * Update Your Bug Status!
- # Service Monitoring and Config management
-   * gLS 'monitoring'
  # LHC/Atlas deployments (status update)
  # Future topics:
+   * Service Monitoring and Config management
+     * gLS 'monitoring'
   * Status collection for low-level device PMs
     The DCN status page that was put together for the monitoring is a relatively simple collector that grabs various performance counters and other data about elements on the Cienas. Right now, it confines itself to things that look like interfaces. There's a similar project that Jon Dugan has been working on for ESnet called ESxSNMP that grabs performance counters for SNMP hosts. It would be good to have a discussion about how these two monitoring infrastructures might work together. At minimum, it might be feasible to get the TL1 monitoring components to use the same metadata database and counter databases, and, implicitly, perfsonar interface.
     = =
     Another possible area of discussion include how the monitoring above can be extended to support collection and storage of topological information. The topology information could include how interfaces are connected together internally in the switch/router (via cross-connects, adaptation or whatever). It might also be good to think about how to collect information about how switches/routers are wired together.
     = =
     It'd be feasible to grab and store TL1/SNMP alarms as part of the collection framework. Though, that might be more reasonably done via nagios plugins.
- # Next VC will be 8/10 2:30 EDT.
+ # Next VC will be 8/17 2:30 EDT.
 
 === ACTIONS ===
 
