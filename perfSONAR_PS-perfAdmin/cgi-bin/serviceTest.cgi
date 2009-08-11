@@ -519,11 +519,8 @@ else {
 
         my @pairs   = ();
         my $counter = 0;
-        my %mark    = ();
         foreach my $src ( sort keys %list ) {
             foreach my $dst ( sort keys %{ $list{$src} } ) {
-                next if exists $mark{$src}{$dst} and $mark{$src}{$dst};
-                $mark{$dst}{$src} = 1 if exists $list{$dst}{$src}->{"key"} and $list{$dst}{$src}->{"key"};
                 push @pairs, { SADDRESS => $list{$src}{$dst}->{"saddr"}, SHOST => $list{$src}{$dst}->{"src"}, DADDRESS => $list{$src}{$dst}->{"daddr"}, DHOST => $list{$src}{$dst}->{"dst"}, KEY => $list{$src}{$dst}->{"key"}, COUNT => $counter, SERVICE => $service };
                 $counter++;
             }
