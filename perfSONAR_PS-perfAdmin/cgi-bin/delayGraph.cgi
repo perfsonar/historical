@@ -154,6 +154,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
         }
     }
 
+
     my $counter = 0;
     foreach my $time ( keys %store ) {
         $counter++;
@@ -163,146 +164,154 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
     print "  <head>\n";
     print "    <title>perfSONAR-PS perfAdmin Delay Graph</title>\n";
 
-    if ( scalar keys %store > 0 ) {
-        my $title = q{};
-        if ( $cgi->param( 'src' ) and $cgi->param( 'dst' ) ) {
+    if ( $flags[0] or $flags[3] ) {
+        if ( scalar keys %store > 0 ) {
+            my $title = q{};
+            if ( $cgi->param( 'src' ) and $cgi->param( 'dst' ) ) {
 
-            if ( $cgi->param( 'shost' ) and $cgi->param( 'dhost' ) ) {
-                $title = "Source: " . $cgi->param( 'shost' );
-                $title .= " (" . $cgi->param( 'src' ) . ") ";
-                $title .= " -- Destination: " . $cgi->param( 'dhost' );
-                $title .= " (" . $cgi->param( 'dst' ) . ") ";
+                if ( $cgi->param( 'shost' ) and $cgi->param( 'dhost' ) ) {
+                    $title = "Source: " . $cgi->param( 'shost' );
+                    $title .= " (" . $cgi->param( 'src' ) . ") ";
+                    $title .= " -- Destination: " . $cgi->param( 'dhost' );
+                    $title .= " (" . $cgi->param( 'dst' ) . ") ";
+                }
+                else {
+                    my $display = $cgi->param( 'src' );
+                    my $iaddr   = Socket::inet_aton( $display );
+                    my $shost   = gethostbyaddr( $iaddr, Socket::AF_INET );
+                    $display = $cgi->param( 'dst' );
+                    $iaddr   = Socket::inet_aton( $display );
+                    my $dhost = gethostbyaddr( $iaddr, Socket::AF_INET );
+                    $title = "Source: " . $shost;
+                    $title .= " (" . $cgi->param( 'src' ) . ") " if $shost;
+                    $title .= " -- Destination: " . $dhost;
+                    $title .= " (" . $cgi->param( 'dst' ) . ") " if $dhost;
+                }
             }
             else {
-                my $display = $cgi->param( 'src' );
-                my $iaddr   = Socket::inet_aton( $display );
-                my $shost   = gethostbyaddr( $iaddr, Socket::AF_INET );
-                $display = $cgi->param( 'dst' );
-                $iaddr   = Socket::inet_aton( $display );
-                my $dhost = gethostbyaddr( $iaddr, Socket::AF_INET );
-                $title = "Source: " . $shost;
-                $title .= " (" . $cgi->param( 'src' ) . ") " if $shost;
-                $title .= " -- Destination: " . $dhost;
-                $title .= " (" . $cgi->param( 'dst' ) . ") " if $dhost;
+                $title = "Observed Latency";
             }
-        }
-        else {
-            $title = "Observed Latency";
-        }
 
-        my $posCounter = 1;
-        my @pos        = ( "src-min", "src-max", "src-loss", "src-loss2", "src-dups", "src-dups2", "dst-min", "dst-max", "dst-loss", "dst-loss2", "dst-dups", "dst-dups2" );
-        my %posMap     = ();
+            my $posCounter = 1;
+            my @pos        = ( "src-min", "src-max", "src-loss", "src-loss2", "src-dups", "src-dups2", "dst-min", "dst-max", "dst-loss", "dst-loss2", "dst-dups", "dst-dups2" );
+            my %posMap     = ();
 
-        print "    <script type=\"text/javascript\" src=\"http://www.google.com/jsapi\"></script>\n";
-        print "    <script type=\"text/javascript\">\n";
-        print "      google.load(\"visualization\", \"1\", {packages:[\"annotatedtimeline\"]});\n";
-        print "      google.setOnLoadCallback(drawChart);\n";
-        print "      function drawChart() {\n";
-        print "        var data = new google.visualization.DataTable();\n";
+            print "    <script type=\"text/javascript\" src=\"http://www.google.com/jsapi\"></script>\n";
+            print "    <script type=\"text/javascript\">\n";
+            print "      google.load(\"visualization\", \"1\", {packages:[\"annotatedtimeline\"]});\n";
+            print "      google.setOnLoadCallback(drawChart);\n";
+            print "      function drawChart() {\n";
+            print "        var data = new google.visualization.DataTable();\n";
 
-        print "        data.addColumn('datetime', 'Time');\n";
+            print "        data.addColumn('datetime', 'Time');\n";
 
-        if ( $flags[0] ) {
-            print "        data.addColumn('number', '[Src to Dst] Min Delay (Sec)');\n";
-            print "        data.addColumn('number', '[Src to Dst] Max Delay (Sec)');\n";
-            $posMap{ $pos[0] } = $posCounter++;
-            $posMap{ $pos[1] } = $posCounter++;
-        }
-        if ( $flags[1] ) {
-            print "        data.addColumn('string', '[Src to Dst] Observed Loss');\n";
-            print "        data.addColumn('string', 'text1');\n";
-            $posMap{ $pos[2] } = $posCounter++;
-            $posMap{ $pos[3] } = $posCounter++;
-        }
-        if ( $flags[2] ) {
-            print "        data.addColumn('string', '[Src to Dst] Observed Duplicates');\n";
-            print "        data.addColumn('string', 'text2');\n";
-            $posMap{ $pos[4] } = $posCounter++;
-            $posMap{ $pos[5] } = $posCounter++;
-        }
-
-        if ( $cgi->param( 'key2' ) ) {
-            if ( $flags[3] ) {
-                print "        data.addColumn('number', '[Dst to Src] Min Delay (Sec)');\n";
-                print "        data.addColumn('number', '[Dst to Src] Max Delay (Sec)');\n";
-                $posMap{ $pos[6] } = $posCounter++;
-                $posMap{ $pos[7] } = $posCounter++;
+            if ( $flags[0] ) {
+                print "        data.addColumn('number', '[Src to Dst] Min Delay (Sec)');\n";
+                print "        data.addColumn('number', '[Src to Dst] Max Delay (Sec)');\n";
+                $posMap{ $pos[0] } = $posCounter++;
+                $posMap{ $pos[1] } = $posCounter++;
             }
-            if ( $flags[4] ) {
-                print "        data.addColumn('string', '[Dst to Src] Observed Loss');\n";
+            if ( $flags[1] ) {
+                print "        data.addColumn('string', '[Src to Dst] Observed Loss');\n";
                 print "        data.addColumn('string', 'text1');\n";
-                $posMap{ $pos[8] } = $posCounter++;
-                $posMap{ $pos[9] } = $posCounter++;
+                $posMap{ $pos[2] } = $posCounter++;
+                $posMap{ $pos[3] } = $posCounter++;
             }
-            if ( $flags[5] ) {
-                print "        data.addColumn('string', '[Dst to Src] Observed Duplicates');\n";
+            if ( $flags[2] ) {
+                print "        data.addColumn('string', '[Src to Dst] Observed Duplicates');\n";
                 print "        data.addColumn('string', 'text2');\n";
-                $posMap{ $pos[10] } = $posCounter++;
-                $posMap{ $pos[11] } = $posCounter++;
+                $posMap{ $pos[4] } = $posCounter++;
+                $posMap{ $pos[5] } = $posCounter++;
             }
-        }
 
-        print "        data.addRows(" . $counter . ");\n";
+            if ( $cgi->param( 'key2' ) ) {
+                if ( $flags[3] ) {
+                    print "        data.addColumn('number', '[Dst to Src] Min Delay (Sec)');\n";
+                    print "        data.addColumn('number', '[Dst to Src] Max Delay (Sec)');\n";
+                    $posMap{ $pos[6] } = $posCounter++;
+                    $posMap{ $pos[7] } = $posCounter++;
+                }
+                if ( $flags[4] ) {
+                    print "        data.addColumn('string', '[Dst to Src] Observed Loss');\n";
+                    print "        data.addColumn('string', 'text1');\n";
+                    $posMap{ $pos[8] } = $posCounter++;
+                    $posMap{ $pos[9] } = $posCounter++;
+                }
+                if ( $flags[5] ) {
+                    print "        data.addColumn('string', '[Dst to Src] Observed Duplicates');\n";
+                    print "        data.addColumn('string', 'text2');\n";
+                    $posMap{ $pos[10] } = $posCounter++;
+                    $posMap{ $pos[11] } = $posCounter++;
+                }
+            }
 
-        $counter = 0;
-        foreach my $time ( sort keys %store ) {
-            my $date  = ParseDateString( "epoch " . $time );
-            my $date2 = UnixDate( $date, "%Y-%m-%d %H:%M:%S" );
-            my @array = split( / /, $date2 );
-            my @year  = split( /-/, $array[0] );
-            my @time  = split( /:/, $array[1] );
-            if ( $#year > 1 and $#time > 1 ) {
-                if ( exists $store{$time}{"min"}{"src"} and $store{$time}{"min"}{"src"} ) {
+            print "        data.addRows(" . $counter . ");\n";
+
+            $counter = 0;
+            foreach my $time ( sort keys %store ) {
+                my $date  = ParseDateString( "epoch " . $time );
+                my $date2 = UnixDate( $date, "%Y-%m-%d %H:%M:%S" );
+                my @array = split( / /, $date2 );
+                my @year  = split( /-/, $array[0] );
+                my @time  = split( /:/, $array[1] );
+                if ( $#year > 1 and $#time > 1 ) {
                     print "        data.setValue(" . $counter . ", 0, new Date(" . $year[0] . "," . ( $year[1] - 1 ) . "," . $year[2] . "," . $time[0] . "," . $time[1] . "," . $time[2] . "));\n";
-                    print "        data.setValue(" . $counter . ", " . $posMap{ $pos[0] } . ", " . $store{$time}{"min"}{"src"} . ");\n" if $store{$time}{"min"}{"src"};
-                    print "        data.setValue(" . $counter . ", " . $posMap{ $pos[1] } . ", " . $store{$time}{"max"}{"src"} . ");\n" if $store{$time}{"max"}{"src"};
-                }
-                if ( $store{$time}{"loss"}{"src"} ) {
-                    print "        data.setValue(" . $counter . ", " . $posMap{ $pos[2] } . ", 'Loss Observed');\n";
-                    print "        data.setValue(" . $counter . ", " . $posMap{ $pos[3] } . ", 'Lost " . $store{$time}{"loss"}{"src"} . " packets out of " . $store{$time}{"sent"}{"src"} . "');\n";
-                }
-                if ( $store{$time}{"dups"}{"src"} ) {
-                    print "        data.setValue(" . $counter . ", " . $posMap{ $pos[4] } . ", 'Duplicates Observed');\n";
-                    print "        data.setValue(" . $counter . ", " . $posMap{ $pos[5] } . ", '" . $store{$time}{"dups"}{"src"} . " duplicate packets out of " . $store{$time}{"sent"}{"src"} . "');\n";
-                }
+                    if ( exists $store{$time}{"min"}{"src"} and $store{$time}{"min"}{"src"} ) {
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[0] } . ", " . $store{$time}{"min"}{"src"} . ");\n" if $store{$time}{"min"}{"src"};
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[1] } . ", " . $store{$time}{"max"}{"src"} . ");\n" if $store{$time}{"max"}{"src"};
+                    }
+                    if ( $store{$time}{"loss"}{"src"} ) {
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[2] } . ", 'Loss Observed');\n";
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[3] } . ", 'Lost " . $store{$time}{"loss"}{"src"} . " packets out of " . $store{$time}{"sent"}{"src"} . "');\n";
+                    }
+                    if ( $store{$time}{"dups"}{"src"} ) {
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[4] } . ", 'Duplicates Observed');\n";
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[5] } . ", '" . $store{$time}{"dups"}{"src"} . " duplicate packets out of " . $store{$time}{"sent"}{"src"} . "');\n";
+                    }
 
-                if ( exists $store{$time}{"min"}{"dst"} and $store{$time}{"min"}{"dst"} ) {
-                    print "        data.setValue(" . $counter . ", 0, new Date(" . $year[0] . "," . ( $year[1] - 1 ) . "," . $year[2] . "," . $time[0] . "," . $time[1] . "," . $time[2] . "));\n" unless ( exists $store{$time}{"min"}{"src"} and $store{$time}{"min"}{"src"} );
-                    print "        data.setValue(" . $counter . ", " . $posMap{ $pos[6] } . ", " . $store{$time}{"min"}{"dst"} . ");\n" if $store{$time}{"min"}{"dst"};
-                    print "        data.setValue(" . $counter . ", " . $posMap{ $pos[7] } . ", " . $store{$time}{"max"}{"dst"} . ");\n" if $store{$time}{"max"}{"dst"};
+                    if ( exists $store{$time}{"min"}{"dst"} and $store{$time}{"min"}{"dst"} ) {
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[6] } . ", " . $store{$time}{"min"}{"dst"} . ");\n" if $store{$time}{"min"}{"dst"};
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[7] } . ", " . $store{$time}{"max"}{"dst"} . ");\n" if $store{$time}{"max"}{"dst"};
+                    }
+                    if ( $store{$time}{"loss"}{"dst"} ) {
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[8] } . ", 'Loss Observed');\n";
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[9] } . ", 'Lost " . $store{$time}{"loss"}{"dst"} . " packets out of " . $store{$time}{"sent"}{"dst"} . "');\n";
+                    }
+                    if ( $store{$time}{"dups"}{"dst"} ) {
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[10] } . ", 'Duplicates Observed');\n";
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[11] } . ", '" . $store{$time}{"dups"}{"dst"} . " duplicate packets out of " . $store{$time}{"sent"}{"dst"} . "');\n";
+                    }
                 }
-                if ( $store{$time}{"loss"}{"dst"} ) {
-                    print "        data.setValue(" . $counter . ", " . $posMap{ $pos[8] } . ", 'Loss Observed');\n";
-                    print "        data.setValue(" . $counter . ", " . $posMap{ $pos[9] } . ", 'Lost " . $store{$time}{"loss"}{"dst"} . " packets out of " . $store{$time}{"sent"}{"dst"} . "');\n";
-                }
-                if ( $store{$time}{"dups"}{"dst"} ) {
-                    print "        data.setValue(" . $counter . ", " . $posMap{ $pos[10] } . ", 'Duplicates Observed');\n";
-                    print "        data.setValue(" . $counter . ", " . $posMap{ $pos[11] } . ", '" . $store{$time}{"dups"}{"dst"} . " duplicate packets out of " . $store{$time}{"sent"}{"dst"} . "');\n";
-                }
+                $counter++;
             }
-            $counter++;
-        }
 
-        print "        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));\n";
-        if ( $flags[1] or $flags[2] or $flags[4] or $flags[5] ) {
-            print "        chart.draw(data, {legendPosition: 'newRow', displayAnnotations: true, colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff']});\n";
+            print "        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));\n";
+            if ( $flags[1] or $flags[2] or $flags[4] or $flags[5] ) {
+                print "        chart.draw(data, {legendPosition: 'newRow', displayAnnotations: true, colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff']});\n";
+            }
+            else {
+                print "        chart.draw(data, {legendPosition: 'newRow', colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff'], displayAnnotations: true});\n";
+            }
+            print "      }\n";
+            print "    </script>\n";
+            print "  </head>\n";
+            print "  <body>\n";
+            print "    <h4 align=\"center\">" . $title . "</h4>\n";
+            print "    <div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div>\n";
         }
         else {
-            print "        chart.draw(data, {legendPosition: 'newRow', colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff'], displayAnnotations: true});\n";
+            print "  </head>\n";
+            print "  <body>\n";
+            print "    <br><br>\n";
+            print "    <h2 align=\"center\">Internal Error - Service could not find data to plot for this measurement pair.</h2>\n";
+            print "    <br><br>\n";
         }
-        print "      }\n";
-        print "    </script>\n";
-        print "  </head>\n";
-        print "  <body>\n";
-        print "    <h4 align=\"center\">" . $title . "</h4>\n";
-        print "    <div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div>\n";
     }
     else {
         print "  </head>\n";
         print "  <body>\n";
         print "    <br><br>\n";
-        print "    <h2 align=\"center\">Internal Error - Try again later.</h2>\n";
+        print "    <h2 align=\"center\">Internal Error - Service returned data, but it is not plotable for this measurement pair.  </h2>\n";
         print "    <br><br>\n";
     }
 
@@ -336,7 +345,7 @@ Bugs, feature requests, and improvements can be directed here:
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 
