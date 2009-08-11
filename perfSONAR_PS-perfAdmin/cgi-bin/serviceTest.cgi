@@ -67,7 +67,11 @@ if ( $eventType eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" ) {
     $subject .= "      <nmwgt:interface xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\" />\n";
     $subject .= "    </netutil:subject>\n";
 }
-elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" ) {
+elsif ($eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0"
+    or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0"
+    or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0"
+    or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" )
+{
     $subject = "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject\">\n";
     $subject .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\" />\n";
     $subject .= "    </iperf:subject>\n";
@@ -229,7 +233,11 @@ else {
         );
 
     }
-    elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" ) {
+    elsif ($eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0"
+        or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0"
+        or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0"
+        or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" )
+    {
         $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_psb_bwctl.tmpl" );
 
         my %lookup = ();
@@ -313,21 +321,21 @@ else {
         my @pairs   = ();
         my %mark    = ();
         my $counter = 0;
-        my %data = ();
+        my %data    = ();
 
         foreach my $src ( sort keys %list ) {
             unless ( exists $data{$src} ) {
                 $data{$src}{"out"}{"total"} = 0;
-                $data{$src}{"in"}{"total"} = 0;
+                $data{$src}{"in"}{"total"}  = 0;
                 $data{$src}{"out"}{"count"} = 0;
-                $data{$src}{"in"}{"count"} = 0;
+                $data{$src}{"in"}{"count"}  = 0;
             }
             foreach my $dst ( sort keys %{ $list{$src} } ) {
                 unless ( exists $data{$dst} ) {
                     $data{$dst}{"out"}{"total"} = 0;
-                    $data{$dst}{"in"}{"total"} = 0;
+                    $data{$dst}{"in"}{"total"}  = 0;
                     $data{$dst}{"out"}{"count"} = 0;
-                    $data{$dst}{"in"}{"count"} = 0;
+                    $data{$dst}{"in"}{"count"}  = 0;
                 }
 
                 my @eventTypes = ();
@@ -339,10 +347,10 @@ else {
                 if ( exists $list{$src}{$dst}->{"key"} and $list{$src}{$dst}->{"key"} ) {
                     $subject .= "      <nmwg:parameter name=\"maKey\">" . $list{$src}{$dst}->{"key"} . "</nmwg:parameter>\n";
                 }
-                elsif( exists $list{$src}{$dst}{"TCP"}->{"key"} and $list{$src}{$dst}{"TCP"}->{"key"} ) {
+                elsif ( exists $list{$src}{$dst}{"TCP"}->{"key"} and $list{$src}{$dst}{"TCP"}->{"key"} ) {
                     $subject .= "      <nmwg:parameter name=\"maKey\">" . $list{$src}{$dst}{"TCP"}->{"key"} . "</nmwg:parameter>\n";
                 }
-                elsif( exists $list{$src}{$dst}{"UDP"}->{"key"} and $list{$src}{$dst}{"UDP"}->{"key"} ) {
+                elsif ( exists $list{$src}{$dst}{"UDP"}->{"key"} and $list{$src}{$dst}{"UDP"}->{"key"} ) {
                     $subject .= "      <nmwg:parameter name=\"maKey\">" . $list{$src}{$dst}{"UDP"}->{"key"} . "</nmwg:parameter>\n";
                 }
                 $subject .= "    </nmwg:parameters>\n";
@@ -362,19 +370,19 @@ else {
                 my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
                 if ( $datum1 ) {
                     my $counter = 0;
-                    my $total = 0;
+                    my $total   = 0;
                     foreach my $dt ( $datum1->get_nodelist ) {
                         if ( $dt->getAttribute( "throughput" ) ) {
                             $total += $dt->getAttribute( "throughput" );
                             $counter++;
                         }
-                    }                   
+                    }
                     $data{$src}{"out"}{"total"} += ( $total / $counter ) if $counter;
-                    $data{$dst}{"in"}{"total"} += ( $total / $counter ) if $counter;
+                    $data{$dst}{"in"}{"total"}  += ( $total / $counter ) if $counter;
                     $data{$src}{"out"}{"count"}++;
                     $data{$dst}{"in"}{"count"}++;
                 }
-            
+
                 next if exists $mark{$src}{$dst} and $mark{$src}{$dst};
                 if ( exists $list{$src}{$dst}->{"src"} and exists $list{$src}{$dst}->{"dst"} and exists $list{$src}{$dst}->{"key"} ) {
                     $mark{$dst}{$src} = 1 if exists $list{$dst}{$src}->{"key"} and $list{$dst}{$src}->{"key"};
@@ -413,22 +421,22 @@ else {
             }
         }
 
-        my @graph = ();
+        my @graph       = ();
         my $datacounter = 0;
-        my $max = 0;
+        my $max         = 0;
         foreach my $d ( sort keys %data ) {
-            my $din = 0;
+            my $din  = 0;
             my $dout = 0;
-            $din = ( $data{$d}{"in"}{"total"} / $data{$d}{"in"}{"count"} ) if $data{$d}{"in"}{"count"};
-            $dout = ( $data{$d}{"out"}{"total"} / $data{$d}{"out"}{"count"} ) if $data{$d}{"out"}{"count"};        
-            $max = $din if $din > $max;
-            $max = $dout if $dout > $max;
+            $din  = ( $data{$d}{"in"}{"total"} / $data{$d}{"in"}{"count"} )   if $data{$d}{"in"}{"count"};
+            $dout = ( $data{$d}{"out"}{"total"} / $data{$d}{"out"}{"count"} ) if $data{$d}{"out"}{"count"};
+            $max  = $din                                                      if $din > $max;
+            $max  = $dout                                                     if $dout > $max;
             push @graph, { c => $datacounter, location => $d, in => $din, out => $dout };
             $datacounter++;
         }
         my $temp = scaleValue( { value => $max } );
         foreach my $g ( @graph ) {
-            $g->{"in"} /= $temp->{"scale"};
+            $g->{"in"}  /= $temp->{"scale"};
             $g->{"out"} /= $temp->{"scale"};
         }
 
@@ -457,9 +465,9 @@ else {
             my $metadata   = $parser->parse_string( $md );
             my $metadataId = $metadata->getDocumentElement->getAttribute( "id" );
 
-            my $src = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
-            my $saddr;
-            my $shost;
+            my $src   = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
+            my $saddr = q{};
+            my $shost = q{};
 
             if ( is_ipv4( $src ) ) {
                 $saddr = $src;
@@ -482,9 +490,9 @@ else {
                 }
             }
 
-            my $dst = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst", 1 ), 0 );
-            my $daddr;
-            my $dhost;
+            my $dst   = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst", 1 ), 0 );
+            my $daddr = q{};
+            my $dhost = q{};
             if ( is_ipv4( $dst ) ) {
                 $daddr = $dst;
                 my $iaddr = Socket::inet_aton( $dst );
@@ -506,14 +514,7 @@ else {
                 }
             }
 
-            my %temp = ();
-            $temp{"key"}   = $lookup{$metadataId};
-            $temp{"src"}   = $shost;
-            $temp{"dst"}   = $dhost;
-            $temp{"saddr"} = $saddr;
-            $temp{"daddr"} = $daddr;
-
-            $list{$shost}{$dhost} = \%temp;
+            $list{$shost}{$dhost} = { "key" => $lookup{$metadataId}, "src" => $shost, "dst" => $dhost, "saddr" => $saddr, "daddr" => $daddr };
         }
 
         my @pairs   = ();
@@ -523,8 +524,7 @@ else {
             foreach my $dst ( sort keys %{ $list{$src} } ) {
                 next if exists $mark{$src}{$dst} and $mark{$src}{$dst};
                 $mark{$dst}{$src} = 1 if exists $list{$dst}{$src}->{"key"} and $list{$dst}{$src}->{"key"};
-                push @pairs,
-                    { SADDRESS => $list{$src}{$dst}->{"saddr"}, SHOST => $list{$src}{$dst}->{"src"}, DADDRESS => $list{$src}{$dst}->{"daddr"}, DHOST => $list{$src}{$dst}->{"dst"}, KEY => $list{$src}{$dst}->{"key"}, KEY2 => $list{$dst}{$src}->{"key"}, COUNT => $counter, SERVICE => $service };
+                push @pairs, { SADDRESS => $list{$src}{$dst}->{"saddr"}, SHOST => $list{$src}{$dst}->{"src"}, DADDRESS => $list{$src}{$dst}->{"daddr"}, DHOST => $list{$src}{$dst}->{"dst"}, KEY => $list{$src}{$dst}->{"key"}, COUNT => $counter, SERVICE => $service };
                 $counter++;
             }
         }
