@@ -88,8 +88,8 @@ The following outline some exceptions to the overall release process.  Also see 
 ==== Post RC1 Bugs ====
 
  * _*hLS/gLS*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=254 254] - _*Jason*_ - gLs lookup does not work after upgrade   	 
-     * <font color=yellow>_*In Progress - 8/7*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=254 254] - _*Jason*_ - ~~gLs lookup does not work after upgrade~~
+     * <font color=pruple>_*Duplicate - 8/11*_</font> 
  * _*NPAD*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=227 227] - _*Aaron*_ - ~~NPAD listed as not runing when running in Admin GUI~~
      * <font color=green>_*Fixed - 8/5*_</font>
@@ -130,6 +130,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=217 217] - _*Aaron*_ - Scheduled Test GUI Reports PingER tests when none configured 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=236 236] - _*Aaron*_ - the Regular Testing interface is confusing 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=240 240] - _*Rich*_ - BWCTL Graphs Include unrelated data 
+     * <font color=yellow>_*In Progress - 8/11*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=257 257] - _*Aaron*_ - check that cross-browser js library is used with support for FF/IE/Safari
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
@@ -141,8 +142,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=purple>_*Post Beta (needs user feedback) - 7/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=83 83] - _*Aaron*_ - Live CD Network Card Drivers (Broadcom)
      * <font color=yellow>_*In Progress - 6/23*_</font>: Most up to date drivers are included, needs testing on host with broadcom
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=98 98] - _*Jason*_ - Ensure all service packages have init.d scripts
-     * <font color=yellow>_*In Progress - 7/10*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=98 98] - _*Jason*_ - ~~Ensure all service packages have init.d scripts~~
+     * <font color=green>_*Done - 8/11*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=140 140] - _*Aaron*_ - Upgrades of NPToolkit may miss key file changes 	 	
      * <font color=yellow>_*In Progress - 7/2*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=164 164] - _*Aaron*_ - Add option to completely clear disk/partition table and all
