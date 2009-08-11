@@ -198,7 +198,7 @@ sub init {
             print CONF "set_lk_max_locks 250000\n";
             print CONF "set_lk_max_objects 250000\n";
             print CONF "set_lk_detect DB_LOCK_MINLOCKS\n";
-            print CONF "set_cachesize 0 33554432 0\n";s
+            print CONF "set_cachesize 0 33554432 0\n";
             print CONF "set_flags DB_LOG_AUTOREMOVE\n";
             print CONF "set_lg_regionmax 2097152\n";
             close( CONF );
@@ -233,26 +233,21 @@ sub init {
         $self->{CONF}->{"gls"}->{"ls_ttl"} = 172800;
     }
 
-    if ( exists $self->{CONF}->{"ls_registration_interval"} ) {
-        $self->{CONF}->{"ls_registration_interval"} *= 60;
-        if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
-            $self->{CONF}->{"gls"}->{"ls_registration_interval"} *= 60;
-        }
-        else {
-            $self->{CONF}->{"gls"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
-        }
+    if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
+         # takes precedent
+         $self->{CONF}->{"gls"}->{"ls_registration_interval"} = $self->{CONF}->{"gls"}->{"ls_registration_interval"} * 60;
+         $self->{CONF}->{"ls_registration_interval"} = $self->{CONF}->{"gls"}->{"ls_registration_interval"}
+    }
+    elsif ( exists $self->{CONF}->{"ls_registration_interval"} ) {
+        $self->{CONF}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"} * 60;
+        $self->{CONF}->{"gls"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
     }
     else {
-        if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
-            $self->{CONF}->{"gls"}->{"ls_registration_interval"} *= 60;
-            $self->{CONF}->{"ls_registration_interval"} = $self->{CONF}->{"gls"}->{"ls_registration_interval"};
-        }
-        else {
-            $self->{LOGGER}->debug( "Setting 'ls_registration_interval' to 1 hour." );
-            $self->{CONF}->{"ls_registration_interval"} = 3600;
-        }
+        $self->{LOGGER}->debug( "Value not found for 'ls_registration_interval'." );
+        $self->{CONF}->{"ls_registration_interval"} = 3600;
+        $self->{CONF}->{"gls"}->{"ls_registration_interval"} = 3600;
     }
-    $self->{LOGGER}->debug( "Setting 'ls_registration_interval' to " . $self->{CONF}->{"gls"}->{"ls_registration_interval"} );
+    $self->{LOGGER}->debug( "Setting 'ls_registration_interval' to " . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . " seconds" );
 
     unless ( exists $self->{CONF}->{"gls"}->{"maintenance_interval"} ) {
         $self->{LOGGER}->debug( "Configuration value 'maintenance_interval' not present.  Searching for other values..." );
