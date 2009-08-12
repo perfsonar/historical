@@ -96,6 +96,7 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*LSRegistrationDaemon*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=210 210] - _*Aaron*_ - LSRegistration daemon start/restart on information change	 
  * _*pSB*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=273 273] - _*Jeff*_ - Stale .bwctlock files in pSB data collection 
  * _*PingER*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=228 228] - _*Aaron*_ - pinger tests are running but not showed on the GUI as scheduled 	 
      * <font color=yellow>_*In Progress - 8/6*_</font>
@@ -106,6 +107,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=251 251] - _*Aaron*_ - PingER Scheduled Test GUI Manual Add    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=253 253] - _*Aaron*_ - Update PingER GUI 
      * <font color=yellow>_*In Progress - 8/6*_</font>	   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=278 278] - _*Maxim*_ - PingER Error Message Improvement      
  * _*SNMP MA*_    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - _*Aaron*_ - Cacti Configuration on NPToolkit 
      * <font color=yellow>_*Mostly Done, Needs Testing - 6/23*_</font>
@@ -116,6 +118,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=200 200] - _*Aaron*_ - Upgrade script create owamp database if not present
      * <font color=yellow>_*In Progress - 8/7*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=235 235] - _*Aaron*_ - simplified and documented options needed for configuring OWAMP tests 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=261 261] - _*Aaron*_ - JOWAMP requires hostname in .jnlp file    
  * _*Testing*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - _*Brian*_ - Automated Nessus Evaluation of Software 
      * <font color=green>_*Done for now - 6/10*_</font>
@@ -132,9 +135,12 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=240 240] - _*Rich*_ - BWCTL Graphs Include unrelated data 
      * <font color=yellow>_*In Progress - 8/11*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=257 257] - _*Aaron*_ - check that cross-browser js library is used with support for FF/IE/Safari
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=262 262] - _*Aaron*_ - Include Footnote describing communities 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=270 270] - _*Aaron*_ - Administrative Screen Correction   
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=275 275] - _*Jeff*_ - Should we be re-distributing the JDK on the knoppix disk
  * _*Disc Misc.*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=17 17] - _*Aaron*_ - Java plugin/homepage for KDE env 
      * <font color=yellow>_*Mostly Done - 6/23*_</font>: Needs link to firefox on desktop or modify Konqueror to accept plugin
@@ -181,6 +187,17 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 8/7*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=259 259] - _*Aaron*_ - Add iptables REDIRECT to kernel 
      * <font color=yellow>_*In Progress - 8/10*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=260 260] - _*Aaron*_ - SSH access after console configuration   	    	 
+     * <font color=yellow>_*In Progress - 8/12*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=263 263] - _*Jason*_ - pSB Log Location 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=264 264] - _*Aaron*_ - Enabled Services Screen 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=265 265] - _*Aaron*_ - Clean Out Disk Prior to Release 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=267 267] - _*Aaron*_ - Error reporting on pS Performance Toolkit 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=268 268] - _*Aaron*_ - NPAD Customization 	 	 	 
+     * <font color=yellow>_*In Progress - 8/12*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=271 271] - _*Aaron*_ - Consistency when setting service address/name	 	 	 
+     * <font color=yellow>_*In Progress - 8/12*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=279 279] - _*Aaron*_ - Cacti restarting SNMP MA 
      
 === Code Reviews ===
 
