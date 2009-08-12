@@ -49,6 +49,9 @@ sub load {
     if ( $confFile ) {
         $self->configFile( $confFile );
     }
+    unless($self->{CONFFILE}) {
+        $logger->logdie( "Landmarks file '$self->{CONFFILE}' is not defined" );
+    }
     $logger->debug( "loading mp config file '" . $self->{CONFFILE} . "'" );
     if ( !-e $self->{CONFFILE} ) {
         $logger->error( "Landmarks file '$self->{CONFFILE}' does not exist" );
