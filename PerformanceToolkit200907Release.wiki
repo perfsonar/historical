@@ -108,6 +108,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=253 253] - _*Aaron*_ - Update PingER GUI 
      * <font color=yellow>_*In Progress - 8/6*_</font>	   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=278 278] - _*Maxim*_ - PingER Error Message Improvement      
+     * <font color=green>_*Fixed - 8/12*_</font>
  * _*SNMP MA*_    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - _*Aaron*_ - Cacti Configuration on NPToolkit 
      * <font color=yellow>_*Mostly Done, Needs Testing - 6/23*_</font>
@@ -200,7 +201,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 8/12*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=279 279] - _*Aaron*_ - Cacti restarting SNMP MA 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=281 281] - _*Aaron*_ - Cacti Graph View Policy
-     
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - _*Aaron*_ - LinuxPPS Support
+	     
 === Code Reviews ===
 
 There will be no code reviews for this release.  
