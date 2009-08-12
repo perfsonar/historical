@@ -85,7 +85,7 @@ After selecting a drive to use it may be necessary to format the drive (if no fi
 
  * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/ConfigureMenu-DriveOptions1_6.png
 
-After completing the menu will indicate this step has been visited.   
+After completing the menu will indicate this step has been visited.   Also note that a *Reboot* will be required after adjusting the disk configuration. 
 
 ==== Step 4 - User Passwords ==== 
 
@@ -111,17 +111,31 @@ Changing the timezone of the system (currently set to Eastern Time) use _*Option
 
  * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/ConfigureMenu-TimeZone_10.png
 
+==== Final Step ==== 
+
+Also note that a *Reboot* will be required once this menu is exited if any changes were made to the disk configuration.  
+
 === Web Configuration ===
 
 This version of the pS Performance Toolkit features a web-based _wizard_ interface for configuring many aspects of the system.  The following sections describe each option.
 
-==== Step 1 - Web View ==== 
+==== Access Control ====
+
+Several screens in the web interface are password protected, and a user with appropriate privledges must be entered:
+
+ * _*root*_: *cannot* log in through the web interface
+ * _*knoppix*_: can log in - provided the password has been set
+ * _*others users*_: can log in - provided the password has been set and they they are in the _*admin*_ group as specified in [pSPerformanceToolkit31#Step_5_-_User_Management User Management]
+
+Steps that require a password will be noted.  
+
+==== Step 1 - Services On This Node ==== 
 
 When visiting the the toolkit via web browser (HTTP or HTTPS) the following screen will be visible:
 
  * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Home_11.png
 
-This screen acts as the _dashboard_ for configuring information or viewing measurement data on this host.  Some important things to note:
+Note that your experience may vary, some services may not be active due to configuration reasons or unrelated errors.  As the configuration proceeds these services may restart automatically based on user actions.  This screen acts as the _dashboard_ for configuring information or viewing measurement data on this host.  Some important things to note:
 
  * When viewing with a web browser, a security certificate warning may be triggered.  The HTTPS certificate is not signed by a trusted source.
  * Some sections require a password to edit/view
@@ -154,6 +168,8 @@ An image of the tool is pictured below:
 
 ==== Step 4 - Administrative Information ==== 
 
+<font color=red size=-1>This screen is password protected, see [pSPerformanceToolkit31#Access_Control Access Control] for more information.</font>
+
 The pS Performance Toolkit has several perfSONAR services, many of which will not function unless properly configured.  The Administrative Information screen allows the user to enter information:
 
  * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/AdminInfo_14.png
@@ -164,6 +180,8 @@ After saving (at the bottom of the page) the information will stick around:
 
 ==== Step 5 - BWCTL Limits ==== 
 
+<font color=red size=-1>This screen is password protected, see [pSPerformanceToolkit31#Access_Control Access Control] for more information.</font>
+
 To limit the access to the BWCTL tool, a screen that allows restrictions to be placed on access is available:
 
  * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/BWCTLLimits_16.png
@@ -171,6 +189,8 @@ To limit the access to the BWCTL tool, a screen that allows restrictions to be p
 Note this is the same as configuring the _bwctld.limits_ file by hand. 
 
 ==== Step 6 - OWAMP Limits ==== 
+
+<font color=red size=-1>This screen is password protected, see [pSPerformanceToolkit31#Access_Control Access Control] for more information.</font>
 
 To limit the access to the OWAMP tool, a screen that allows restrictions to be placed on access is available:
 
@@ -180,6 +200,8 @@ Note this is the same as configuring the _owampd.limits_ file by hand.
 
 ==== Step 7 - Enabled Services ==== 
 
+<font color=red size=-1>This screen is password protected, see [pSPerformanceToolkit31#Access_Control Access Control] for more information.</font>
+
 Services on the disk (e.g. NTP, SSH, HTTP) can be enabled and disabled via this screen:
 
  * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/EnabledServices_18.png
@@ -187,6 +209,8 @@ Services on the disk (e.g. NTP, SSH, HTTP) can be enabled and disabled via this 
 Note that if a service is _disabled_ it will be stopped immediately and will not start on boot.  
 
 ==== Step 8 - NTP Configuration ==== 
+
+<font color=red size=-1>This screen is password protected, see [pSPerformanceToolkit31#Access_Control Access Control] for more information.</font>
 
 To select alternative NTP services, visit this screen:
 
@@ -200,6 +224,8 @@ NTP configuration should consist of:
  * On divergent network paths (prevents problems with failed network paths or asymetric congestion)
 
 ==== Step 9 - Scheduled Testing ==== 
+
+<font color=red size=-1>This screen is password protected, see [pSPerformanceToolkit31#Access_Control Access Control] for more information.</font>
 
 There are three types of scheduled testing available on the pS Performance Toolkit:
 
@@ -237,6 +263,8 @@ Lastly, OWAMP:
 
 ==== Step 10 - Cacti Administration ==== 
 
+<font color=red size=-1>This screen is password protected, see [pSPerformanceToolkit31#Access_Control Access Control] for more information.</font>
+
 Consult [http://cacti.net/ documentation for the Cacti tool] for instructions on use.  
 
 ==== Step 11 - Throughput Results ==== 
@@ -273,7 +301,7 @@ Clicking on one of the host pairs and selecting a time range will display a grap
 
 TBD
 
-==== Step 13 - Cacti Graphs ==== 
+==== Step 14 - Cacti Graphs ==== 
 
 TBD
 
