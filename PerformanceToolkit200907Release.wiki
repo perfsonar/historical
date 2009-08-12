@@ -136,7 +136,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 8/11*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=257 257] - _*Aaron*_ - check that cross-browser js library is used with support for FF/IE/Safari
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=262 262] - _*Aaron*_ - Include Footnote describing communities 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=270 270] - _*Aaron*_ - Administrative Screen Correction   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=270 270] - _*Aaron*_ - Administrative Screen Correction
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=280 280] - _*Aaron*_ - Administrative Screen - Add Community Error
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
