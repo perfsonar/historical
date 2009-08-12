@@ -215,8 +215,6 @@ To limit the access to the BWCTL tool, a screen that allows restrictions to be p
 
  * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/BWCTLLimits_16.png
 
-Note this is the same as configuring the _bwctld.limits_ file by hand. 
-
 ==== Step 6 - OWAMP Limits ==== 
 
 <font color=red size=-1>This screen is password protected, see [pSPerformanceToolkit31#Access_Control Access Control] for more information.</font>
@@ -224,8 +222,6 @@ Note this is the same as configuring the _bwctld.limits_ file by hand.
 To limit the access to the OWAMP tool, a screen that allows restrictions to be placed on access is available:
 
  * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/OWAMPLimits_17.png
-
-Note this is the same as configuring the _owampd.limits_ file by hand. 
 
 ==== Step 7 - Enabled Services ==== 
 
