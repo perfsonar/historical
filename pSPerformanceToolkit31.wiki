@@ -6,6 +6,16 @@
 
 The following guide describes in detail the steps required to set up version 3.1 of the perfSONAR performance Toolkit ([http://internet2.edu/performance/pS-PerformanceToolkit/ pS Performance Toolkit 3.1]).  It is important to follow each step in order.  Upon getting stuck, consult the [pSPerformanceToolkit31#FAQ FAQ] at the end of this document.  
 
+== System Requirements ==
+
+The pS Performance Toolkit requires modern hardware to function properly.  The following are basic requirements for the disk to function at peak performance.  
+
+ * CPU: Intel Processor, Single Core or greater, 1 Ghz or greater
+ * Main Memory: 512M or greater
+ * Disk Size: 10G or greater
+
+It is recommended that for peak performance the requirements be exceeded.  
+
 === First Steps ===
 
   # Download the the latest from:
@@ -177,6 +187,25 @@ The pS Performance Toolkit has several perfSONAR services, many of which will no
 After saving (at the bottom of the page) the information will stick around:
 
  * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/AdminInfoFilled_15.png
+
+===== Communities ===== 
+
+Selecting which _*communities*_ to identify this installation can be confusing to answer for new users.  This particular question is trying to associate some _loosely coupled_ labels to the data that the perfSONAR NPToolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music (e.g. a photo of a dog might have labels: _Dog_, _Rover_, etc. but someone else may choose different labels).  In general there is no _wrong way_ to choose a keyword.  Choose keywords that best describe the circumstances that surround this installation.  
+
+Some examples of valid answers are:
+
+ * *Internet2* - The data made available somehow connects the Intesrnet2 backbone
+ * *LHC* (*CMS*, *ATLAS*, etc.) - The disk is part of the LHC deployment structure
+ * *eVLBI* - The disk is a part of the larger telescope community
+ * *MAX* - A connector of member of the MAX gigapop
+
+We would recommend choosing keywords that:
+
+ * Describe the location/installation (e.g. the name of the organization installing): *MCNC*, *UDel*
+ * Network connections: *ESnet*, *GEANT*, *Internet2*, *NLR*, *RNP*
+ * Virtual Organizations (VOs): *CMS*, *ATLAS*
+
+Use as many community names as necessary to properly categorize the data from the installation.
 
 ==== Step 5 - BWCTL Limits ==== 
 
