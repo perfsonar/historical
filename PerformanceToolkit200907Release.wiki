@@ -139,6 +139,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=262 262] - _*Aaron*_ - Include Footnote describing communities 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=270 270] - _*Aaron*_ - Administrative Screen Correction
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=280 280] - _*Aaron*_ - Administrative Screen - Add Community Error
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=286 286] - _*Jason*_ - Readability in OWAMP/BWCTL Graphs   
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
@@ -205,7 +206,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=283 283] - _*Jason*_ - pS Performance Toolkit Documentation
      * <font color=yellow>_*In Progress - 8/12*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff*_ - Create organized web-site for pS-Performance-Toolkit    Documentation
-	     
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=285 285] - _*Aaron*_ - Upgrade from older NPToolkit doesn't import tests   	 
+
 === Code Reviews ===
 
 There will be no code reviews for this release.  
