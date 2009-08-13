@@ -195,6 +195,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=260 260] - _*Aaron*_ - SSH access after console configuration   	    	 
      * <font color=yellow>_*In Progress - 8/12*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=263 263] - _*Jason*_ - pSB Log Location 	 
+     * <font color=green>_*Done - 8/13*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=264 264] - _*Aaron*_ - Enabled Services Screen 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=265 265] - _*Aaron*_ - Clean Out Disk Prior to Release 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=267 267] - _*Aaron*_ - Error reporting on pS Performance Toolkit 	 
