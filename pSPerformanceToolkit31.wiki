@@ -375,7 +375,7 @@ TBD
 
 *Symptom*: After configuring OWAMP tests, the _*perfSONAR-BUOY Regular Testing (One-Way Latency)*_ section may be in a _*Not Running*_ state
 
-*Symptom*: _/var/log/pSB.log_ may contain: 
+*Symptom*: _/var/log/perfSONAR/pSB.log_ may contain: 
 
 {{{2009/07/27 15:11:26 (9029) ERROR> SQL.pm:161 perfSONAR_PS::DB::SQL::openDB - Open error "DBI connect('owamp:localhost','LHCAmi',...) failed: Access denied for user 'XXXXXX'@'localhost' to database 'owamp' at /UNIONFS/usr/local/perfSONAR-PS/perfSONAR_PS-perfSONARBUOY/bin/../lib/perfSONAR_PS/DB/SQL.pm line 158".2009/07/27 15:11:26 (9029) FATAL> perfSONARBUOY.pm:970 perfSONAR_PS::Services::MA::perfSONARBUOY::createStorage - Database error, aborting.2009/07/27 15:11:26 (9029) FATAL> perfSONARBUOY.pm:311 perfSONAR_PS::Services::MA::perfSONARBUOY::init - Couldn't load the store file - service cannot start2009/07/27 15:11:26 (9029) ERROR> daemon.pl:342 main:: - Failed to initialize module perfSONAR_PS::Services::MA::perfSONARBUOY on 8085:/perfSONAR_PS/services/pSB}}}
 
