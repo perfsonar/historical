@@ -211,6 +211,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 8/12*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff*_ - Create organized web-site for pS-Performance-Toolkit    Documentation
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=285 285] - _*Aaron*_ - Upgrade from older NPToolkit doesn't import tests   	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=290 290] - _*Aaron*_ - Scheduled testing - 'invalid test' error
 
 === Code Reviews ===
 
