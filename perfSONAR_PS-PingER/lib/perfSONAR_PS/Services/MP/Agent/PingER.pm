@@ -108,7 +108,7 @@ sub collectMeasurements {
 
     #$logger->debug( "DEST: " . $self->destination() . " / " . $self->destinationIp() );
     if ( $self->destinationIp() ) {
-        $logger->debug( "using destination ip '" . $self->destinationIp() . "' instead of '" . $self->destination() . "'" );
+        ### $logger->debug( "using destination ip '" . $self->destinationIp() . "' instead of '" . $self->destination() . "'" );
         $cmd =~ s/\%destination\%/\%destinationIp\%/xg;
     }
     elsif ( !defined $self->destination() ) {
