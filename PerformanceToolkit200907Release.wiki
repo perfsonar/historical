@@ -204,6 +204,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - _*Aaron*_ - LinuxPPS Support
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=283 283] - _*Jason*_ - pS Performance Toolkit Documentation
      * <font color=yellow>_*In Progress - 8/12*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff*_ - Create organized web-site for pS-Performance-Toolkit    Documentation
 	     
 === Code Reviews ===
 
