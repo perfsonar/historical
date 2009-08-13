@@ -8,13 +8,50 @@ The following guide describes in detail the steps required to set up version 3.1
 
 == System Requirements ==
 
-The pS Performance Toolkit requires modern hardware to function properly.  The following are basic requirements for the disk to function at peak performance.  
+The pS Performance Toolkit requires modern hardware to function properly.  The following are basic guidelines to selecting hardware to power the measurement tools.
 
- * CPU: Intel Processor, Single Core or greater, 1 Ghz or greater
- * Main Memory: 512M or greater
- * Disk Size: 10G or greater
+ * _*CPU*_
+   * x86 or x86_64 Architecture
+   * _*Single Core*_
+     * 2.4Ghz or better
+   * _*Dual Core*_
+     * 1.6Ghz or better
+ * _*Main Memory*_
+   * 1G or better
+ * _*Disk Size*_
+   * 100G or better
+ * _*Network Card*_
+   * External NIC prefered to NIC located on the Motherboard
+   * Speed depends on intended use
+   * NIC choice is dependent on Linux driver availability, suggestions:
+     * Intel Chipset (uses the e1000 driver)
+       * PRO/1000 PT PCI-Express
+       * PRO/1000 MT PCI-X.
+       * PRO/1000 GT
+     * Linksys/Netgear (uses the ns83820 driver)
+       * 1GE PCI-X card
+     * Myricom 10G Cards
+       * Up to date drivers with each pS Performance Toolkit Release
 
-It is recommended that for peak performance the requirements be exceeded.  
+Further recommendations for specific test situations and environments are available below.  These should be used to supplement the basic information.  
+
+=== Virtual Machines ===
+
+Use of the pS Performance Toolkit as a virtual machine is not recommended.  Due to the emulation of virtual hardware, measurement tools may not feature a completely accurate result.  Observations have shown the following tools and services behave in unexpected ways when used in a VM environment:
+
+ * _*NTP*_: Virtual Machines (depending on software implementation) may receive a clock signal from the host they are running upon.  This may be delayed and is never as accurate as a true hardware clock; because of this NTP can suffer high jitter and delay characteristics.
+ * _*OWAMP*_: OWAMP depends on accurate NTP results to properly measure the packets used in testing.  
+ * _*BWCTL*_: BWCTL depends on accurate NTP results to properly measure the packets used in testing.  Additionally, virtual NIC support does not deliver the maximum available bandwidth as the guest machine often must fight with the host for access to the physical network.  
+
+=== Throughput Recommendations === 
+
+Long term storage of throughput data will require more disk space than recommended in the base.  We recommend upping the size of the primary disk to greater than or equal to 200G.  
+
+Minimization of _*Jitter*_ is a common goal when performing latency tests.  In general most CPU and Motherboard combinations work well on modern hardware.   It is also *highly recommended* that combination Motherboard and NIC be avoided.
+
+=== Bandwidth Recommendations === 
+
+Bandwidth testing often requires that the CPU, Motherboard, and Network card work in harmony to achieve promised speeds.  Testing has shown that using a CPU (Single or Dual Core) with a higher clock speed will work better when managing the needs of the rest of the machine during bandwidth testing.  It is also *highly recommended* that combination Motherboard and NIC be avoided.  
 
 === First Steps ===
 
