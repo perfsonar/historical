@@ -140,6 +140,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=257 257] - _*Aaron*_ - check that cross-browser js library is used with support for FF/IE/Safari
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=262 262] - _*Aaron*_ - Include Footnote describing communities 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=270 270] - _*Aaron*_ - Administrative Screen Correction
+     * <font color=yellow>_*In Progress - 8/13*_</font>    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=280 280] - _*Aaron*_ - Administrative Screen - Add Community Error
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=286 286] - _*Jason*_ - Readability in OWAMP/BWCTL Graphs 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=288 288] - _*Jason*_ - Alter perfAdmin display to hide (or reposition) measurement sets that are not 'active'   	   
@@ -181,6 +182,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=213 213] - _*Aaron*_ - ~~Delete hLS-XMLDB on upgrade/reboot~~ 	 
      * <font color=green>_*Done - 8/6*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218 218] - _*Aaron*_ - NTP Server Selection 	 
+     * <font color=yellow>_*In Progress - 8/13*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=222 222] - _*Aaron*_ - ~~hostname and hosts.[allow|deny] must be preserved~~ 	 
      * <font color=green>_*Done - 8/6*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=249 249] - _*Aaron*_ - ~~minimum memory script issues~~   	 
@@ -212,6 +214,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff*_ - Create organized web-site for pS-Performance-Toolkit    Documentation
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=285 285] - _*Aaron*_ - Upgrade from older NPToolkit doesn't import tests   	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=290 290] - _*Aaron*_ - Scheduled testing - 'invalid test' error
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=291 291] - _*Aaron*_ - Scheduled Test Screen Shows Hosts Twice	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=292 292] - _*Aaron*_ - GUI Display Consistency
 
 === Code Reviews ===
 
