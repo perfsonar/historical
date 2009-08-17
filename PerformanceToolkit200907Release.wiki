@@ -144,7 +144,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=280 280] - _*Aaron*_ - Administrative Screen - Add Community Error
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=286 286] - _*Jason*_ - Readability in OWAMP/BWCTL Graphs 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=288 288] - _*Jason*_ - Alter perfAdmin display to hide (or reposition) measurement sets that are not 'active'   	   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=293 293] - _*Jason*_ - Normalize perfAdmin PingER graphs with pS Performance Toolkit 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=293 293] - _*Aaron*_ - Normalize perfAdmin PingER graphs with pS Performance Toolkit 
+     * <font color=yellow>_*In Progress - 8/17*_</font> 
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
