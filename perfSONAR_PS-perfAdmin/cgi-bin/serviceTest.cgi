@@ -538,8 +538,7 @@ else {
         my %lookup = ();
         foreach my $d ( @{ $result->{"data"} } ) {
             my $data          = $parser->parse_string( $d );
-            my $metadataIdRef = $data->getDocumentElement->getAttribute( "metadataId
-Ref" );
+            my $metadataIdRef = $data->getDocumentElement->getAttribute( "metadataIdRef" );
             next unless $metadataIdRef;
 
             my $nmwg_key      = find( $data->getDocumentElement, ".//nmwg:key", 1 );
