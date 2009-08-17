@@ -582,15 +582,13 @@ else {
 
                 push @pairs,
                     {
-                    PACKETSIZE => $list{$src}{$dst}->{"packetsize"},
+                    KEY        => $list{$src}{$dst}->{"key"},
                     SHOST      => $list{$src}{$dst}->{"src"},
                     SADDRESS   => $sip_address,
                     DHOST      => $list{$src}{$dst}->{"dst"},
                     DADDRESS   => $dip_address,
                     COUNT      => $counter,
-                    SERVICE    => $service,
-                    STARTTIME  => $p_start,
-                    ENDTIME    => $p_end
+                    SERVICE    => $service
                     };
                 $counter++;
             }
