@@ -319,7 +319,6 @@ else {
         }
 
         my @pairs   = ();
-        my %mark    = ();
         my $counter = 0;
         my %data    = ();
 
@@ -383,9 +382,7 @@ else {
                     $data{$dst}{"in"}{"count"}++;
                 }
 
-                next if exists $mark{$src}{$dst} and $mark{$src}{$dst};
                 if ( exists $list{$src}{$dst}->{"src"} and exists $list{$src}{$dst}->{"dst"} and exists $list{$src}{$dst}->{"key"} ) {
-                    $mark{$dst}{$src} = 1 if exists $list{$dst}{$src}->{"key"} and $list{$dst}{$src}->{"key"};
                     push @pairs,
                         {
                         SADDRESS => $list{$src}{$dst}->{"saddr"},
@@ -402,7 +399,6 @@ else {
                 }
                 else {
                     foreach my $type ( sort keys %{ $list{$src}{$dst} } ) {
-                        $mark{$dst}{$src} = 1 if exists $list{$dst}{$src}->{"key"} and $list{$dst}{$src}->{"key"};
                         push @pairs,
                             {
                             SADDRESS => $list{$src}{$dst}{$type}->{"saddr"},
