@@ -538,9 +538,15 @@ else {
         my %lookup = ();
         foreach my $d ( @{ $result->{"data"} } ) {
             my $data          = $parser->parse_string( $d );
-            my $metadataIdRef = $data->getDocumentElement->getAttribute( "metadataIdRef" );
-            my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
-            $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
+            my $metadataIdRef = $data->getDocumentElement->getAttribute( "metadataId
+Ref" );
+            next unless $metadataIdRef;
+
+            my $nmwg_key      = find( $data->getDocumentElement, ".//nmwg:key", 1 );
+            next unless ($nmwg_key);
+
+            my $key           = $nmwg_key->getAttribute("id");
+            $lookup{$metadataIdRef} = $key if $key;
         }
 
         my %list = ();

@@ -26,7 +26,7 @@ use FindBin qw($RealBin);
 my $basedir = "$RealBin/";
 use lib "$RealBin/../lib";
 
-use perfSONAR_PS::Client::MA;
+use perfSONAR_PS::Client::PingER;
 use perfSONAR_PS::Common qw( extract find );
 
 my $cgi = new CGI;
