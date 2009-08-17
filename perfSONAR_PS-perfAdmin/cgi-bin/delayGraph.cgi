@@ -257,8 +257,8 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
                 if ( $#year > 1 and $#time > 1 ) {
                     print "        data.setValue(" . $counter . ", 0, new Date(" . $year[0] . "," . ( $year[1] - 1 ) . "," . $year[2] . "," . $time[0] . "," . $time[1] . "," . $time[2] . "));\n";
                     if ( exists $store{$time}{"min"}{"src"} and $store{$time}{"min"}{"src"} ) {
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[0] } . ", " . ( $store{$time}{"min"}{"src"} / 1000 ) . ");\n" if $store{$time}{"min"}{"src"};
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[1] } . ", " . ( $store{$time}{"max"}{"src"} / 1000 ) . ");\n" if $store{$time}{"max"}{"src"};
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[0] } . ", " . ( $store{$time}{"min"}{"src"} * 1000 ) . ");\n" if $store{$time}{"min"}{"src"};
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[1] } . ", " . ( $store{$time}{"max"}{"src"} * 1000 ) . ");\n" if $store{$time}{"max"}{"src"};
                     }
                     if ( $store{$time}{"loss"}{"src"} ) {
                         print "        data.setValue(" . $counter . ", " . $posMap{ $pos[2] } . ", 'Loss Observed');\n";
@@ -270,8 +270,8 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
                     }
 
                     if ( exists $store{$time}{"min"}{"dst"} and $store{$time}{"min"}{"dst"} ) {
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[6] } . ", " . ( $store{$time}{"min"}{"dst"} / 1000 ) . ");\n" if $store{$time}{"min"}{"dst"};
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[7] } . ", " . ( $store{$time}{"max"}{"dst"} / 1000 ) . ");\n" if $store{$time}{"max"}{"dst"};
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[6] } . ", " . ( $store{$time}{"min"}{"dst"} * 1000 ) . ");\n" if $store{$time}{"min"}{"dst"};
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[7] } . ", " . ( $store{$time}{"max"}{"dst"} * 1000 ) . ");\n" if $store{$time}{"max"}{"dst"};
                     }
                     if ( $store{$time}{"loss"}{"dst"} ) {
                         print "        data.setValue(" . $counter . ", " . $posMap{ $pos[8] } . ", 'Loss Observed');\n";
