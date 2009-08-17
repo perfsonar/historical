@@ -5,12 +5,12 @@ use warnings;
 
 =head1 NAME
 
-delayGraph.cgi - CGI script that graphs the output of a perfSONAR MA that
-delivers delay data.  
+pingerGraph.cgi - CGI script that graphs the output of a perfSONAR MA that
+delivers pinger data.  
 
 =head1 DESCRIPTION
 
-Given a url of an MA, and a key value (corresponds to a specific delay
+Given a url of an MA, and a key value (corresponds to a specific pinger
 result) graph using the Google graph API.  Note this instance is powered by
 flash, so browsers will require that a flash player be installed and available.
 
@@ -21,10 +21,11 @@ use XML::LibXML;
 use Date::Manip;
 use Socket;
 use POSIX;
+use Config::General;
 
 use FindBin qw($RealBin);
 my $basedir = "$RealBin/";
-use lib "$RealBin/../lib";
+use lib "$RealBin/../lib";                     
 
 use perfSONAR_PS::Client::PingER;
 use perfSONAR_PS::Common qw( extract find );
@@ -35,10 +36,8 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
     my $ma = new perfSONAR_PS::Client::PingER( { instance => $cgi->param( 'url' ) } );
 
-    my @eventTypes = ();
-    my $parser     = XML::LibXML->new();
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
-    
+
     my $time;
     if ( $cgi->param( 'length' ) ) {
         $time = $cgi->param( 'length' );
@@ -52,29 +51,10 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             start      => ( $sec - $time ),
             end        => $sec,
             keys       => [ $cgi->param('key') ],
-            cf         => "AVERAGE"
+            # resolution => 5,
+            cf         => "AVERAGE",
         }
     );
-
-    my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
-    my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
-
-    my $doc2;
-    my $datum2;
-    my $result2;
-    if ( $cgi->param( 'key2' ) ) {
-        $result2 = $ma->setupDataRequest(
-            {
-                start      => ( $sec - $time ),
-                end        => $sec,
-                keys       => [ $cgi->param('key2') ],
-                cf         => "AVERAGE"
-            }
-        );
-
-        $doc2 = $parser->parse_string( $result2->{"data"}->[0] );
-        $datum2 = find( $doc2->getDocumentElement, "./*[local-name()='datum']", 0 );
-    }
 
     my %store = ();
 
@@ -108,7 +88,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
     print "<html>\n";
     print "  <head>\n";
-    print "    <title>perfSONAR-PS perfAdmin PingER Graph</title>\n";
+    print "    <title>perfSONAR-PS perfAdmin Delay Graph</title>\n";
 
     if ( scalar keys %store > 0 ) {
 
@@ -175,7 +155,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
         }
 
         print "        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));\n";
-	    print "        chart.draw(data, {legendPosition: 'newRow', colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff'], displayAnnotations: true});\n";
+	print "        chart.draw(data, {legendPosition: 'newRow', colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff'], displayAnnotations: true});\n";
         print "      }\n";
         print "    </script>\n";
         print "  </head>\n";
@@ -196,7 +176,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 }
 else {
     print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
-    print "<body><h2 align=\"center\">Graph error, cannot find 'key' or 'URL' to contacts; Close window and try again.</h2></body></html>";
+    print "<body><h2 align=\"center\">Graph error; Close window and try again.</h2></body></html>";
 }
 
 __END__
@@ -240,44 +220,4 @@ Copyright (c) 2007-2009, Internet2
 All rights reserved.
 
 =cut
-__END__
 
-=head1 SEE ALSO
-
-L<CGI>, L<XML::LibXML>, L<Date::Manip>, L<Socket>, L<POSIX>,
-L<perfSONAR_PS::Client::MA>, L<perfSONAR_PS::Common>
-
-To join the 'perfSONAR-PS' mailing list, please visit:
-
-  https://mail.internet2.edu/wws/info/i2-perfsonar
-
-The perfSONAR-PS subversion repository is located at:
-
-  https://svn.internet2.edu/svn/perfSONAR-PS
-
-Questions and comments can be directed to the author, or the mailing list.
-Bugs, feature requests, and improvements can be directed here:
-
-  http://code.google.com/p/perfsonar-ps/issues/list
-
-=head1 VERSION
-
-$Id$
-
-=head1 AUTHOR
-
-Jason Zurawski, zurawski@internet2.edu
-
-=head1 LICENSE
-
-You should have received a copy of the Internet2 Intellectual Property Framework
-along with this software.  If not, see
-<http://www.internet2.edu/membership/ip.html>
-
-=head1 COPYRIGHT
-
-Copyright (c) 2007-2009, Internet2
-
-All rights reserved.
-
-=cut
