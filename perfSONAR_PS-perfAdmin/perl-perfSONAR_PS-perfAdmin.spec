@@ -97,8 +97,9 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/*
 
 %changelog
-* Fri Jul 31 2009 zurawski@internet2.edu 3.1-3
-- Fixes to to documentation and package structure.  
+* Fri Aug 17 2009 zurawski@internet2.edu 3.1-3
+- Fixes to to documentation and package structure. 
+- Adding new graph support for PingER 
 
 * Tue Jul 21 2009 zurawski@internet2.edu 3.1-2
 - Bugfixes in several graphs.

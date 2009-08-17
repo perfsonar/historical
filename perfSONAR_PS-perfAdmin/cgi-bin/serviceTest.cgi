@@ -573,9 +573,6 @@ else {
                 my $dip_address = $list{$src}{$dst}->{"dst"};
                 $dip_address = inet_ntoa( $packed_ip ) if defined $packed_ip;
 
-                my $present = 0;
-                $present++ if -f "./pinger/index.cgi";
-
                 my $p_time = time - 43200;
                 my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( $p_time );
                 my $p_start = sprintf "%04d-%02d-%02dT%02d:%02d:%02d", ( $year + 1900 ), ( $mon + 1 ), $mday, $hour, $min, $sec;
@@ -592,7 +589,6 @@ else {
                     DADDRESS   => $dip_address,
                     COUNT      => $counter,
                     SERVICE    => $service,
-                    PRESENT    => $present,
                     STARTTIME  => $p_start,
                     ENDTIME    => $p_end
                     };

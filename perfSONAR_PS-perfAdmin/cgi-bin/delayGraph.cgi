@@ -320,7 +320,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 }
 else {
     print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
-    print "<body><h2 align=\"center\">Graph error; Close window and try again.</h2></body></html>";
+    print "<body><h2 align=\"center\">Graph error, cannot find 'key' or 'URL' to contacts; Close window and try again.</h2></body></html>";
 }
 
 __END__
