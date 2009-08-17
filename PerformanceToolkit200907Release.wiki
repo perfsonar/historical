@@ -98,8 +98,9 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*pSB*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=273 273] - _*Jeff*_ - Stale .bwctlock files in pSB data collection 
  * _*PingER*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=228 228] - _*Aaron*_ - pinger tests are running but not showed on the GUI as scheduled 	 
-     * <font color=yellow>_*In Progress - 8/6*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=228 228] - _*Aaron*_ - ~~pinger tests are running but not showed on the GUI as scheduled~~
+     * <font color=purple>_*Merged- 8/17*_</font>
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=285 285]
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=233 233] - _*Aaron*_ - ~~there is no pinger data charts gui and there is no link to any external instance~~
      * <font color=green>_*Fixed - 8/5*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=237 237] - _*Aaron*_ - pinger daemon have not restarted when clicked on Save 
@@ -133,8 +134,10 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=209 209] - _*Aaron*_ - Scheduled Testing GUI 
      * <font color=yellow>_*In Progress - 8/17*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=214 214] - _*Aaron*_ - GUIs should clearly reflect the decission to set up a 'latency host' vs a 'bandwidth' host 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=216 216] - _*Aaron*_ - Community handling in pS Performance Toolkit GUIs 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=217 217] - _*Aaron*_ - Scheduled Test GUI Reports PingER tests when none configured 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=216 216] - _*Aaron*_ - Community handling in pS Performance Toolkit GUIs
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=217 217] - _*Aaron*_ - ~~Scheduled Test GUI Reports PingER tests when none configured~~ 	 
+     * <font color=purple>_*Merged- 8/17*_</font>   
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=236 236]  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=236 236] - _*Aaron*_ - the Regular Testing interface is confusing 	 
      * <font color=yellow>_*In Progress - 8/17*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=240 240] - _*Rich*_ - BWCTL Graphs Include unrelated data 
@@ -147,7 +150,10 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*Needs Testing - 8/17*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=286 286] - _*Jason*_ - Readability in OWAMP/BWCTL Graphs 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=288 288] - _*Jason*_ - Alter perfAdmin display to hide (or reposition) measurement sets that are not 'active'   	   
+     * <font color=yellow>_*In Progress - 8/17*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=293 293] - _*Aaron*_ - Normalize perfAdmin PingER graphs with pS Performance Toolkit 
+     * <font color=yellow>_*In Progress - 8/17*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=295 295] - _*Aaron*_ - when changing size of the browser window smaller the Ping Latency table is jumping under the left pane menu
      * <font color=yellow>_*In Progress - 8/17*_</font> 
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
