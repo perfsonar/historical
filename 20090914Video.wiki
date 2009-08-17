@@ -22,7 +22,7 @@
     Another possible area of discussion include how the monitoring above can be extended to support collection and storage of topological information. The topology information could include how interfaces are connected together internally in the switch/router (via cross-connects, adaptation or whatever). It might also be good to think about how to collect information about how switches/routers are wired together.
     = =
     It'd be feasible to grab and store TL1/SNMP alarms as part of the collection framework. Though, that might be more reasonably done via nagios plugins.
- # Next VC will be 8/24 2:30 EDT.
+ # Next VC will be 9/21 2:30 EDT.
 
 === ACTIONS ===
 
