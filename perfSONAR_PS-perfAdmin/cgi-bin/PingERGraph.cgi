@@ -33,7 +33,7 @@ my $cgi = new CGI;
 print "Content-type: text/html\n\n";
 if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
-    my $ma = new perfSONAR_PS::Client::MA( { instance => $cgi->param( 'url' ) } );
+    my $ma = new perfSONAR_PS::Client::PingER( { instance => $cgi->param( 'url' ) } );
 
     my @eventTypes = ();
     my $parser     = XML::LibXML->new();
