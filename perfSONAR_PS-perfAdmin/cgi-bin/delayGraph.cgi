@@ -206,8 +206,8 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             print "        data.addColumn('datetime', 'Time');\n";
 
             if ( $flags[0] ) {
-                print "        data.addColumn('number', '[Src to Dst] Min Delay (Sec)');\n";
-                print "        data.addColumn('number', '[Src to Dst] Max Delay (Sec)');\n";
+                print "        data.addColumn('number', '[Src to Dst] Min Delay (MSec)');\n";
+                print "        data.addColumn('number', '[Src to Dst] Max Delay (MSec)');\n";
                 $posMap{ $pos[0] } = $posCounter++;
                 $posMap{ $pos[1] } = $posCounter++;
             }
@@ -226,8 +226,8 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
             if ( $cgi->param( 'key2' ) ) {
                 if ( $flags[3] ) {
-                    print "        data.addColumn('number', '[Dst to Src] Min Delay (Sec)');\n";
-                    print "        data.addColumn('number', '[Dst to Src] Max Delay (Sec)');\n";
+                    print "        data.addColumn('number', '[Dst to Src] Min Delay (MSec)');\n";
+                    print "        data.addColumn('number', '[Dst to Src] Max Delay (MSec)');\n";
                     $posMap{ $pos[6] } = $posCounter++;
                     $posMap{ $pos[7] } = $posCounter++;
                 }
@@ -257,8 +257,8 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
                 if ( $#year > 1 and $#time > 1 ) {
                     print "        data.setValue(" . $counter . ", 0, new Date(" . $year[0] . "," . ( $year[1] - 1 ) . "," . $year[2] . "," . $time[0] . "," . $time[1] . "," . $time[2] . "));\n";
                     if ( exists $store{$time}{"min"}{"src"} and $store{$time}{"min"}{"src"} ) {
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[0] } . ", " . $store{$time}{"min"}{"src"} . ");\n" if $store{$time}{"min"}{"src"};
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[1] } . ", " . $store{$time}{"max"}{"src"} . ");\n" if $store{$time}{"max"}{"src"};
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[0] } . ", " . ( $store{$time}{"min"}{"src"} / 1000 ) . ");\n" if $store{$time}{"min"}{"src"};
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[1] } . ", " . ( $store{$time}{"max"}{"src"} / 1000 ) . ");\n" if $store{$time}{"max"}{"src"};
                     }
                     if ( $store{$time}{"loss"}{"src"} ) {
                         print "        data.setValue(" . $counter . ", " . $posMap{ $pos[2] } . ", 'Loss Observed');\n";
@@ -270,8 +270,8 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
                     }
 
                     if ( exists $store{$time}{"min"}{"dst"} and $store{$time}{"min"}{"dst"} ) {
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[6] } . ", " . $store{$time}{"min"}{"dst"} . ");\n" if $store{$time}{"min"}{"dst"};
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[7] } . ", " . $store{$time}{"max"}{"dst"} . ");\n" if $store{$time}{"max"}{"dst"};
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[6] } . ", " . ( $store{$time}{"min"}{"dst"} / 1000 ) . ");\n" if $store{$time}{"min"}{"dst"};
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[7] } . ", " . ( $store{$time}{"max"}{"dst"} / 1000 ) . ");\n" if $store{$time}{"max"}{"dst"};
                     }
                     if ( $store{$time}{"loss"}{"dst"} ) {
                         print "        data.setValue(" . $counter . ", " . $posMap{ $pos[8] } . ", 'Loss Observed');\n";
@@ -320,7 +320,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 }
 else {
     print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
-    print "<body><h2 align=\"center\">Graph error, cannot find 'key' or 'URL' to contacts; Close window and try again.</h2></body></html>";
+    print "<body><h2 align=\"center\">Graph error, cannot find 'key' or 'URL' to contact; Close window and try again.</h2></body></html>";
 }
 
 __END__

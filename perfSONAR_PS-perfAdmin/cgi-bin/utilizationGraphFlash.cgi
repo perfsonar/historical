@@ -300,8 +300,8 @@ if ( ( $cgi->param( 'key1_type' ) or $cgi->param( 'key2_type' ) ) and $cgi->para
     print "</html>\n";
 }
 else {
-    print "<html><head><title>perfSONAR-PS perfAdmin Utilization Graph</title></head>";
-    print "<body><h2 align=\"center\">Graph error; Close window and try again.</h2></body></html>";
+    print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
+    print "<body><h2 align=\"center\">Graph error, cannot find 'key1_type', 'key2_type', or 'URL' to contact; Close window and try again.</h2></body></html>";
 }
 
 =head2 scaleValue ( { value, units } )

@@ -128,10 +128,10 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
         print "        data.addColumn('datetime', 'Time');\n";
 
-        print "        data.addColumn('number', 'Min Delay (Sec)');\n";
-        print "        data.addColumn('number', 'Median Delay (Sec)');\n";
-        print "        data.addColumn('number', 'Mean Delay (Sec)');\n";
-        print "        data.addColumn('number', 'Max Delay (Sec)');\n";
+        print "        data.addColumn('number', 'Min Delay (MSec)');\n";
+        print "        data.addColumn('number', 'Median Delay (MSec)');\n";
+        print "        data.addColumn('number', 'Mean Delay (MSec)');\n";
+        print "        data.addColumn('number', 'Max Delay (MSec)');\n";
         print "        data.addRows(" . $counter . ");\n";
 
         $counter = 0;
@@ -177,7 +177,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 }
 else {
     print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
-    print "<body><h2 align=\"center\">Graph error, cannot find 'key' or 'URL' to contacts; Close window and try again.</h2></body></html>";
+    print "<body><h2 align=\"center\">Graph error, cannot find 'key' or 'URL' to contact; Close window and try again.</h2></body></html>";
 }
 
 __END__

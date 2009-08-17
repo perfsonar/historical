@@ -283,8 +283,8 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
     print "</html>\n";
 }
 else {
-    print "<html><head><title>perfSONAR-PS perfAdmin Bandwidth Graph</title></head>";
-    print "<body><h2 align=\"center\">Graph error; Close window and try again.</h2></body></html>";
+    print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
+    print "<body><h2 align=\"center\">Graph error, cannot find 'key' or 'URL' to contact; Close window and try again.</h2></body></html>";
 }
 
 =head2 scaleValue ( { value } )
