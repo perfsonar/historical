@@ -5,7 +5,7 @@ use warnings;
 
 =head1 NAME
 
-pingerGraph.cgi - CGI script that graphs the output of a perfSONAR MA that
+PingERGraph.cgi - CGI script that graphs the output of a perfSONAR MA that
 delivers pinger data.  
 
 =head1 DESCRIPTION
@@ -25,7 +25,7 @@ use Config::General;
 
 use FindBin qw($RealBin);
 my $basedir = "$RealBin/";
-use lib "$RealBin/../lib";                     
+use lib "$RealBin/../lib";
 
 use perfSONAR_PS::Client::PingER;
 use perfSONAR_PS::Common qw( extract find );
@@ -48,37 +48,38 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
     my $result = $ma->setupDataRequest(
         {
-            start      => ( $sec - $time ),
-            end        => $sec,
-            keys       => [ $cgi->param('key') ],
+            start => ( $sec - $time ),
+            end   => $sec,
+            keys  => [ $cgi->param( 'key' ) ],
+
             # resolution => 5,
-            cf         => "AVERAGE",
+            cf => "AVERAGE",
         }
     );
 
     my %store = ();
 
-    if ($result) {
-	    my $data_md = $ma->getData( $result );
-	    foreach my $key_id ( keys %{$data_md} ) {
-		    foreach my $id ( keys %{ $data_md->{$key_id}{data} } ) {
-			    foreach my $timev ( keys %{ $data_md->{$key_id}{data}{$id} } ) {
+    if ( $result ) {
+        my $data_md = $ma->getData( $result );
+        foreach my $key_id ( keys %{$data_md} ) {
+            foreach my $id ( keys %{ $data_md->{$key_id}{data} } ) {
+                foreach my $timev ( keys %{ $data_md->{$key_id}{data}{$id} } ) {
 
-				    my $datum = $data_md->{$key_id}{data}{$id}{$timev};
+                    my $datum = $data_md->{$key_id}{data}{$id}{$timev};
 
-				    my $time   = UnixDate( $timev );
-				    my $min    = $datum->{minRtt};
-				    my $med    = $datum->{medianRtt};
-				    my $mean   = $datum->{meanRtt};
-				    my $max    = $datum->{maxRtt};
+                    my $time = UnixDate( $timev );
+                    my $min  = $datum->{minRtt};
+                    my $med  = $datum->{medianRtt};
+                    my $mean = $datum->{meanRtt};
+                    my $max  = $datum->{maxRtt};
 
-				    $store{$timev}{"min"}  = $min if (defined $min);
-				    $store{$timev}{"max"}  = $max  if (defined $max);
-				    $store{$timev}{"median"} = $med if (defined $med);
-				    $store{$timev}{"mean"} = $mean if (defined $mean);
-			    }
-		    }
-	    }
+                    $store{$timev}{"min"}    = $min  if ( defined $min );
+                    $store{$timev}{"max"}    = $max  if ( defined $max );
+                    $store{$timev}{"median"} = $med  if ( defined $med );
+                    $store{$timev}{"mean"}   = $mean if ( defined $mean );
+                }
+            }
+        }
     }
 
     my $counter = 0;
@@ -145,17 +146,17 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
                     print "        data.setValue(" . $counter . ", 0, new Date(" . $year[0] . "," . ( $year[1] - 1 ) . ",";
                     print $year[2] . "," . $time[0] . "," . $time[1] . "," . $time[2] . "));\n";
 
-                    print "        data.setValue(" . $counter . ", 1, " . $store{$time}{"min"} . ");\n" if $store{$time}{"min"};
+                    print "        data.setValue(" . $counter . ", 1, " . $store{$time}{"min"} . ");\n"    if $store{$time}{"min"};
                     print "        data.setValue(" . $counter . ", 2, " . $store{$time}{"median"} . ");\n" if $store{$time}{"median"};
-                    print "        data.setValue(" . $counter . ", 3, " . $store{$time}{"mean"} . ");\n" if $store{$time}{"mean"};
-                    print "        data.setValue(" . $counter . ", 4, " . $store{$time}{"max"} . ");\n" if $store{$time}{"max"};
+                    print "        data.setValue(" . $counter . ", 3, " . $store{$time}{"mean"} . ");\n"   if $store{$time}{"mean"};
+                    print "        data.setValue(" . $counter . ", 4, " . $store{$time}{"max"} . ");\n"    if $store{$time}{"max"};
                 }
             }
             $counter++;
         }
 
         print "        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));\n";
-	print "        chart.draw(data, {legendPosition: 'newRow', colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff'], displayAnnotations: true});\n";
+        print "        chart.draw(data, {legendPosition: 'newRow', colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff'], displayAnnotations: true});\n";
         print "      }\n";
         print "    </script>\n";
         print "  </head>\n";
@@ -176,15 +177,15 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 }
 else {
     print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
-    print "<body><h2 align=\"center\">Graph error; Close window and try again.</h2></body></html>";
+    print "<body><h2 align=\"center\">Graph error, cannot find 'key' or 'URL' to contacts; Close window and try again.</h2></body></html>";
 }
 
 __END__
 
 =head1 SEE ALSO
 
-L<CGI>, L<XML::LibXML>, L<Date::Manip>, L<Socket>, L<POSIX>,
-L<perfSONAR_PS::Client::MA>, L<perfSONAR_PS::Common>
+L<CGI>, L<XML::LibXML>, L<Date::Manip>, L<Socket>, L<POSIX>, L<Config::General>,
+L<perfSONAR_PS::Client::PingER>, L<perfSONAR_PS::Common>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
