@@ -6,11 +6,13 @@ applicable.
 
 == Future Events ==
 
-   * [20090817Video] - Video Conference for Aug 17, 2009
+   * [20090824Video] - Video Conference (pS-PerfTK Release 3.1 RC3) for Aug 24, 2009
+   * [20090914Video] - Video Conference for Sept 14, 2009
 
 == Past Events ==
 
  * 2009
+   * [20090817Video] - Video Conference for Aug 17, 2009
    * [20090803Video] - Video Conference for Aug 3, 2009
    * [20090720Meet] - Meeting at Joint Techs, Indianapolis *date is tentative*
    * [20090713Video] - Video Conference for July 13, 2009

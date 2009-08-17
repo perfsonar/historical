@@ -1,25 +1,18 @@
-=  Aug 17 2009 Conference Call 2:30 pm EDT =
+=  Sept 14 2009 Conference Call 2:30 pm EDT =
 
 == Agenda/Minutes ==
 
- # Attendees: Marcos, Brian, Aaron, Jason, Joe, Jeff, Prasilla
+ # Attendees:
+ # Review previous actions
+    * Joe will send request for implementation specific web sites in perfsonar.net space.
+    * Joe will send email to EU participants to find out who will be at DICE meeting.
+    * Brian will work with Marcos, Martin and perhaps Joe on scalability testing of the hLS/gLS.
  # Team Updates:
-    * Marcos: Researching fault analysis.
-    * Brian: Testing new releases. Found a few minor things. Strange things on ESnet measurements. hLS registration bug. Wants more testing before final release.
-    * Aaron: Working on the toolkit - adding in dojo for web-gui to add cross-browser compatibility and tooltips.
-    * Jason: Release activities - bug tracking. Late next week.
-    * Joe: Gave feedback on an early RC and nothing since. Joe will send a request for psps.perfsonar.net and mdm.perfsonar.net.
-    * Jeff: Release/bug activities. Mostly working on proposals.
-    * Prasilla: Joining to hear how things are going.
  # Release Activities
-   * pS-PerformanceTK
-        * Getting good feedback, lots of bugs to followup on.
-        * Will likely have at least two more RCs given the number of bugs. (Next one late next week.)
- # Testing
-    * Brian will work with Marcos, Martin and perhaps Joe on gLS/hLS testing for scaling.
+    * pS-PerformanceTK
+    * pS-PS 3.1
+ # Testing Progress hLS/gLS scaling
  # LHC/Atlas deployments (status update)
-    * Giving good feedback.
-    * GridFTP archive service from SLAC is on the horizon.
  # Future topics:
    * Service Monitoring and Config management
      * gLS 'monitoring'
@@ -33,9 +26,6 @@
 
 === ACTIONS ===
 
-    * Joe will send request for implementation specific web sites in perfsonar.net space.
-    * Joe will send email to EU participants to find out who will be at DICE meeting.
-    * Brian will work with Marcos, Martin and perhaps Joe on scalability testing of the hLS/gLS.
 
 == Where ==
 
