@@ -242,33 +242,66 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
         print "    <div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div>\n";
 
         print "    <table border=\"0\" cellpadding=\"0\" width=\"85%\" align=\"center\">";
+        
         print "      <tr>\n";
-        print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Maximum <b>" . $cgi->param( 'shost' ) . "</b> -> <b>" . $cgi->param( 'dhost' ) . "</b></font></td>\n";
-        my $temp = scaleValue( { value => $SStats{"max"} } );
-        printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
-        print "        <td align=\"right\" width=\"10%\"><br></td>\n";
-        print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Maximum <b>" . $cgi->param( 'dhost' ) . "</b> -> <b>" . $cgi->param( 'shost' ) . "</b></font></td>\n";
-        $temp = scaleValue( { value => $DStats{"max"} } );
-        printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
+        my $temp = q{};
+        if ( $DStats{"max"} and $DStats{"average"} and $DStats{"current"} ) {
+            print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Maximum <b>" . $cgi->param( 'shost' ) . "</b> -> <b>" . $cgi->param( 'dhost' ) . "</b></font></td>\n";
+            $temp = scaleValue( { value => $SStats{"max"} } );
+            printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
+            print "        <td align=\"right\" width=\"10%\"><br></td>\n";
+            print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Maximum <b>" . $cgi->param( 'dhost' ) . "</b> -> <b>" . $cgi->param( 'shost' ) . "</b></font></td>\n";
+            $temp = scaleValue( { value => $DStats{"max"} } );
+            printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
+        }
+        else {
+            print "        <td align=\"right\" width=\"20%\"><br></td>\n";
+            print "        <td align=\"left\" width=\"45%\"><font size=\"-1\">Maximum <b>" . $cgi->param( 'shost' ) . "</b> -> <b>" . $cgi->param( 'dhost' ) . "</b></font></td>\n";
+            $temp = scaleValue( { value => $SStats{"max"} } );
+            printf( "        <td align=\"left\" width=\"35%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
+        }
+        print "      </tr>\n";
+        
         print "      <tr>\n";
+        if ( $DStats{"max"} and $DStats{"average"} and $DStats{"current"} ) {
+            
+            print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Average <b>" . $cgi->param( 'shost' ) . "</b> -> <b>" . $cgi->param( 'dhost' ) . "</b></font></td>\n";
+            $temp = scaleValue( { value => $SStats{"average"} } );
+            printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
+            print "        <td align=\"right\" width=\"10%\"><br></td>\n";
+            print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Average <b>" . $cgi->param( 'dhost' ) . "</b> -> <b>" . $cgi->param( 'shost' ) . "</b></font></td>\n";
+            $temp = scaleValue( { value => $DStats{"average"} } );
+            printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
+            
+        }
+        else {
+            print "        <td align=\"right\" width=\"20%\"><br></td>\n";
+            print "        <td align=\"left\" width=\"45%\"><font size=\"-1\">Average <b>" . $cgi->param( 'shost' ) . "</b> -> <b>" . $cgi->param( 'dhost' ) . "</b></font></td>\n";
+            $temp = scaleValue( { value => $SStats{"average"} } );
+            printf( "        <td align=\"left\" width=\"35%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
+        }
+        print "      </tr>\n";
+        
         print "      <tr>\n";
-        print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Average <b>" . $cgi->param( 'shost' ) . "</b> -> <b>" . $cgi->param( 'dhost' ) . "</b></font></td>\n";
-        $temp = scaleValue( { value => $SStats{"average"} } );
-        printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
-        print "        <td align=\"right\" width=\"10%\"><br></td>\n";
-        print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Average <b>" . $cgi->param( 'dhost' ) . "</b> -> <b>" . $cgi->param( 'shost' ) . "</b></font></td>\n";
-        $temp = scaleValue( { value => $DStats{"average"} } );
-        printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
-        print "      <tr>\n";
-        print "      <tr>\n";
-        print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Last <b>" . $cgi->param( 'shost' ) . "</b> -> <b>" . $cgi->param( 'dhost' ) . "</b></font></td>\n";
-        $temp = scaleValue( { value => $SStats{"current"} } );
-        printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
-        print "        <td align=\"right\" width=\"10%\"><br></td>\n";
-        print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Last <b>" . $cgi->param( 'dhost' ) . "</b> -> <b>" . $cgi->param( 'shost' ) . "</b></font></td>\n";
-        $temp = scaleValue( { value => $DStats{"current"} } );
-        printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
-        print "      <tr>\n";
+        if ( $DStats{"max"} and $DStats{"average"} and $DStats{"current"} ) {
+            
+            print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Last <b>" . $cgi->param( 'shost' ) . "</b> -> <b>" . $cgi->param( 'dhost' ) . "</b></font></td>\n";
+            $temp = scaleValue( { value => $SStats{"current"} } );
+            printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
+            print "        <td align=\"right\" width=\"10%\"><br></td>\n";
+            print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Last <b>" . $cgi->param( 'dhost' ) . "</b> -> <b>" . $cgi->param( 'shost' ) . "</b></font></td>\n";
+            $temp = scaleValue( { value => $DStats{"current"} } );
+            printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
+            
+        }
+        else {
+            print "        <td align=\"right\" width=\"20%\"><br></td>\n";
+            print "        <td align=\"left\" width=\"45%\"><font size=\"-1\">Last <b>" . $cgi->param( 'shost' ) . "</b> -> <b>" . $cgi->param( 'dhost' ) . "</b></font></td>\n";
+            $temp = scaleValue( { value => $SStats{"current"} } );
+            printf( "        <td align=\"left\" width=\"35%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
+        }
+        print "      </tr>\n";
+        
         print "    </table>\n";
     }
     else {

@@ -238,6 +238,7 @@ else {
         or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0"
         or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" )
     {
+        my $sec        = time;
         $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_psb_bwctl.tmpl" );
 
         my %lookup = ();
@@ -248,7 +249,8 @@ else {
             $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
         }
 
-        my %list = ();
+        my %list = ();        
+        my %data    = ();
         foreach my $md ( @{ $result->{"metadata"} } ) {
             my $metadata   = $parser->parse_string( $md );
             my $metadataId = $metadata->getDocumentElement->getAttribute( "id" );
@@ -319,106 +321,136 @@ else {
             $temp{"dst"}   = $dhost;
             $temp{"saddr"} = $saddr;
             $temp{"daddr"} = $daddr;
+
+            unless ( exists $data{$shost} ) {
+                $data{$shost}{"out"}{"total"} = 0;
+                $data{$shost}{"in"}{"total"}  = 0;
+                $data{$shost}{"out"}{"count"} = 0;
+                $data{$shost}{"in"}{"count"}  = 0;
+            }
+            unless ( exists $data{$dhost} ) {
+                $data{$dhost}{"out"}{"total"} = 0;
+                $data{$dhost}{"in"}{"total"}  = 0;
+                $data{$dhost}{"out"}{"count"} = 0;
+                $data{$dhost}{"in"}{"count"}  = 0;
+            }
+
+            my @eventTypes = ();
+            my $parser     = XML::LibXML->new();
+
+            my $subject = "<nmwg:key id=\"key-1\"><nmwg:parameters id=\"parameters-key-1\"><nmwg:parameter name=\"maKey\">" . $lookup{$metadataId} . "</nmwg:parameter></nmwg:parameters></nmwg:key>";
+            my $time = 86400;
+
+            my $result = $ma->setupDataRequest(
+                {
+                    start      => ( $sec - $time ),
+                    end        => $sec,
+                    subject    => $subject,
+                    eventTypes => \@eventTypes
+                }
+            );
+
+            my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
+            my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
+            if ( $datum1 ) {
+                my $dcounter = 0;
+                my $total   = 0;
+                foreach my $dt ( $datum1->get_nodelist ) {
+                    if ( $dt->getAttribute( "throughput" ) ) {
+                        $total += $dt->getAttribute( "throughput" );
+                        $dcounter++;
+                    }
+                }
+                
+                if ( $dcounter ) {
+                    $data{$shost}{"out"}{"total"} += ( $total / $dcounter ) if $dcounter;
+                    $data{$dhost}{"in"}{"total"}  += ( $total / $dcounter ) if $dcounter;
+                    $data{$shost}{"out"}{"count"}++;
+                    $data{$dhost}{"in"}{"count"}++;
+                    $temp{"active"} = 1;
+                    $temp{"out"} = ( $total / $dcounter ) if $dcounter;
+                }               
+            }
             push @{ $list{$shost}{$dhost} }, \%temp;
         }
-
-        my @pairs   = ();
-        my @histPairs   = ();
-        my $counter = 0;
-        my %data    = ();
-
+         
+        my %hostMap = ();
         foreach my $src ( sort keys %list ) {
-            unless ( exists $data{$src} ) {
-                $data{$src}{"out"}{"total"} = 0;
-                $data{$src}{"in"}{"total"}  = 0;
-                $data{$src}{"out"}{"count"} = 0;
-                $data{$src}{"in"}{"count"}  = 0;
-            }
             foreach my $dst ( sort keys %{ $list{$src} } ) {
-                unless ( exists $data{$dst} ) {
-                    $data{$dst}{"out"}{"total"} = 0;
-                    $data{$dst}{"in"}{"total"}  = 0;
-                    $data{$dst}{"out"}{"count"} = 0;
-                    $data{$dst}{"in"}{"count"}  = 0;
-                }
-
                 foreach my $set ( @{ $list{$src}{$dst} } ) {
-                    my @eventTypes = ();
-                    my $parser     = XML::LibXML->new();
-                    my $sec        = time;
+                    if ( $#{ $list{$src}{$dst} } > -1 and $#{ $list{$dst}{$src} } > -1 ) {
+                        foreach my $set2 ( @{ $list{$dst}{$src} } ) {
+                            if ( $set->{"src"} eq $set2->{"dst"} and $set->{"dst"} eq $set2->{"src"} and $set->{"saddr"} eq $set2->{"daddr"} and $set->{"daddr"} eq $set2->{"saddr"} ) {                                 
+                                my @type = ( q{}, q{} );
+                                $type[0] = $set->{"type"} if $set->{"type"};
+                                $type[1] = $set2->{"type"} if $set2->{"type"};
+                                next unless $type[0] eq $type[1];
 
-                    my $subject = "  <nmwg:key id=\"key-1\">\n";
-                    $subject .= "    <nmwg:parameters id=\"parameters-key-1\">\n";
-                    $subject .= "      <nmwg:parameter name=\"maKey\">" . $set->{"key"} . "</nmwg:parameter>\n";
-                    $subject .= "    </nmwg:parameters>\n";
-                    $subject .= "  </nmwg:key>  \n";
-                    my $time = 86400;
+                                my @timeDuration = ( q{}, q{} );
+                                $timeDuration[0] = $set->{"timeDuration"} if $set->{"timeDuration"};
+                                $timeDuration[1] = $set2->{"timeDuration"} if $set2->{"timeDuration"};
+                                next unless $timeDuration[0] eq $timeDuration[1];
 
-                    my $result = $ma->setupDataRequest(
-                        {
-                            start      => ( $sec - $time ),
-                            end        => $sec,
-                            subject    => $subject,
-                            eventTypes => \@eventTypes
-                        }
-                    );
+                                my @windowSize = ( q{}, q{} );
+                                $windowSize[0] = $set->{"windowSize"} if $set->{"windowSize"};
+                                $windowSize[1] = $set2->{"windowSize"} if $set2->{"windowSize"};
+                                next unless $windowSize[0] eq $windowSize[1];
 
-                    my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
-                    my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
-                    if ( $datum1 ) {
-                        my $dcounter = 0;
-                        my $total   = 0;
-                        foreach my $dt ( $datum1->get_nodelist ) {
-                            if ( $dt->getAttribute( "throughput" ) ) {
-                                $total += $dt->getAttribute( "throughput" );
-                                $dcounter++;
+                                my @bufferLength = ( q{}, q{} );
+                                $bufferLength[0] = $set->{"bufferLength"} if $set->{"bufferLength"};
+                                $bufferLength[1] = $set2->{"bufferLength"} if $set2->{"bufferLength"};
+                                next unless $bufferLength[0] eq $bufferLength[1];
+                                 
+                                my @interval = ( q{}, q{} );
+                                $interval[0] = $set->{"interval"} if $set->{"interval"};
+                                $interval[1] = $set2->{"interval"} if $set2->{"interval"};
+                                next unless $interval[0] eq $interval[1];
+
+                                my @bandwidthLimit = ( q{}, q{} );
+                                $bandwidthLimit[0] = $set->{"bandwidthLimit"} if $set->{"bandwidthLimit"};
+                                $bandwidthLimit[1] = $set2->{"bandwidthLimit"} if $set2->{"bandwidthLimit"};
+                                next unless $bandwidthLimit[0] eq $bandwidthLimit[1];
+
+                                my @active = ( q{}, q{} );
+                                $active[0] = $set->{"active"} if $set->{"active"};
+                                $active[1] = $set2->{"active"} if $set2->{"active"};
+                                next unless $active[0] eq $active[1];
+                                
+                                $hostMap{ $set->{"key"} } = $set2->{"key"};
                             }
-                        }
-                        
-                        if ( $dcounter ) {
-                        
-                            $data{$src}{"out"}{"total"} += ( $total / $dcounter ) if $dcounter;
-                            $data{$dst}{"in"}{"total"}  += ( $total / $dcounter ) if $dcounter;
-                            $data{$src}{"out"}{"count"}++;
-                            $data{$dst}{"in"}{"count"}++;
-
-                            push @pairs,
-                                {
-                                SADDRESS       => $set->{"saddr"},
-                                SHOST          => $set->{"src"},
-                                DADDRESS       => $set->{"daddr"},
-                                DHOST          => $set->{"dst"},
-                                PROTOCOL       => $set->{"type"},
-                                TIMEDURATION   => $set->{"timeDuration"},
-                                BUFFERLENGTH   => $set->{"bufferLength"},
-                                WINDOWSIZE     => $set->{"windowSize"}, 
-                                INTERVAL       => $set->{"interval"}, 
-                                BANDWIDTHLIMIT => $set->{"bandwidthLimit"},                                
-                                KEY            => $set->{"key"},
-                                COUNT          => $counter,
-                                SERVICE        => $service
-                                };
-                            $counter++; 
-                        }
-                        else {
-                            push @histPairs,
-                                {
-                                SADDRESS       => $set->{"saddr"},
-                                SHOST          => $set->{"src"},
-                                DADDRESS       => $set->{"daddr"},
-                                DHOST          => $set->{"dst"},
-                                PROTOCOL       => $set->{"type"},
-                                TIMEDURATION   => $set->{"timeDuration"},
-                                BUFFERLENGTH   => $set->{"bufferLength"},
-                                WINDOWSIZE     => $set->{"windowSize"}, 
-                                INTERVAL       => $set->{"interval"}, 
-                                BANDWIDTHLIMIT => $set->{"bandwidthLimit"},                                
-                                KEY            => $set->{"key"},
-                                COUNT          => $counter,
-                                SERVICE        => $service
-                                };
-                            $counter++;
-                        }
+                        }                       
+                    }
+                }
+            }
+        }                          
+               
+        my @pairs = ();
+        my @histPairs = ();
+        my $counter = 0;
+        my %mark = ();
+        foreach my $src ( sort keys %list ) {
+            foreach my $dst ( sort keys %{ $list{$src} } ) {
+                foreach my $set ( @{ $list{$src}{$dst} } ) {
+                    next if $mark{ $set->{"key"} };                    
+                    if ( exists $set->{"active"} and $set->{"active"} ) {
+                        push @pairs,
+                            {
+                            SADDRESS       => $set->{"saddr"},
+                            SHOST          => $set->{"src"},
+                            DADDRESS       => $set->{"daddr"},
+                            DHOST          => $set->{"dst"},
+                            PROTOCOL       => $set->{"type"},
+                            TIMEDURATION   => $set->{"timeDuration"},
+                            BUFFERLENGTH   => $set->{"bufferLength"},
+                            WINDOWSIZE     => $set->{"windowSize"}, 
+                            INTERVAL       => $set->{"interval"}, 
+                            BANDWIDTHLIMIT => $set->{"bandwidthLimit"},                                
+                            KEY            => $set->{"key"},
+                            COUNT          => $counter,
+                            SERVICE        => $service,
+                            KEY2           => $hostMap{ $set->{"key"} }
+                            };
+                        $counter++; 
                     }
                     else {
                         push @histPairs,
@@ -435,12 +467,12 @@ else {
                             BANDWIDTHLIMIT => $set->{"bandwidthLimit"},
                             KEY            => $set->{"key"},
                             COUNT          => $counter,
-                            SERVICE        => $service
+                            SERVICE        => $service,
+                            KEY2           => $hostMap{ $set->{"key"} }
                             };
                         $counter++; 
-                    }
-
-                              
+                    }        
+                    $mark{ $hostMap{ $set->{"key"} } } = 1 if $hostMap{ $set->{"key"} }; 
                 }                               
             }
         }
