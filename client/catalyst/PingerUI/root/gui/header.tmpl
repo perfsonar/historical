@@ -6,14 +6,31 @@
  <noscript><b>JavaScript must be enabled in order for you to use this webpage.
  </noscript>
    <!--  <LINK HREF="/cdincludes/style.css" TYPE="text/css" REL="stylesheet"> -->
-    <LINK HREF="/css/gui.css" TYPE="text/css" REL="stylesheet"> 
-    <style type="text/css">@import url(/js/jscalendar-1.0/calendar-win2k-1.css);</style>
-    <script type="text/javascript" src="/js/jscalendar-1.0/calendar.js"></script>
-    <script type="text/javascript" src="/js/jscalendar-1.0/lang/calendar-en.js"></script>
-    <script type="text/javascript" src="/js/jscalendar-1.0/calendar-setup.js"></script>
-    <script type="text/javascript" src="/js/prototype.js"></script> 
-    <script type="text/javascript" src="/js/gui.js"></script> 
-    <script type="text/javascript" src="/js/spinner.js"></script> 
+    <LINK HREF="[% c.uri_for('/') %]css/gui.css" TYPE="text/css" REL="stylesheet">
+    <style type="text/css">
+    #spinner {
+ z-index: 100;
+ position: absolute;
+ top: 12px;
+ left: 680px;
+ background-image: url("[% c.uri_for('/') %]static/images/spinner.gif");
+ background-repeat: no-repeat;
+ background-position: 5px;
+ padding-left: 10px;
+ padding-top: 10px;
+ border: 0;
+ width: 24px;
+ height: 24px; 
+ font-weight: bolder;
+}
+</style>
+    <style type="text/css">@import url([% c.uri_for('/') %]js/jscalendar-1.0/calendar-win2k-1.css);</style>
+    <script type="text/javascript" src="[% c.uri_for('/') %]js/jscalendar-1.0/calendar.js"></script>
+    <script type="text/javascript" src="[% c.uri_for('/') %]js/jscalendar-1.0/lang/calendar-en.js"></script>
+    <script type="text/javascript" src="[% c.uri_for('/') %]js/jscalendar-1.0/calendar-setup.js"></script>
+    <script type="text/javascript" src="[% c.uri_for('/') %]js/prototype.js"></script> 
+    [% INCLUDE gui/gui_js.tmpl %]
+    <script type="text/javascript" src="[% c.uri_for('/') %]js/spinner.js"></script> 
 <title>[% title %]</title>
   
 </head> 

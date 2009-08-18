@@ -102,15 +102,18 @@ function displayEnds() {
 </form>     
 <p>
 <input type="button" class="buttons"  name="saveXML"  id="saveXML" 
-            onClick="updateDiv(' ', 'saveConfigs', 'saveXML', 'saveXML', 'statusDiv');"
+            onClick="alert('This action is Disabled');"
+        
 	    value="Save MP landmarks XML">
+<!--   onClick="updateDiv(' ', 'saveConfigs', 'saveXML', 'saveXML', 'statusDiv');"   --> 
   <p>
-<input type="button" class="buttons"  name="Reset"  id="Reset" 
+<input type="button" class="buttons"  name="Reset" style="disabled"  id="Reset" 
        onClick="updateDiv(' ', 'resetit', 'Reset', 'Reset', 'body');"  value="Reset">
-       <input type="button" class="buttons"  name="restart_mp"  id="restart_mp" 
+ <input type="button" class="buttons"  name="restart_mp"  id="restart_mp" 
           onmouseover="return overlib('Restart local PingER MA/MP, local user: [% local_user %] must be listed as sudo user, check docs');" 
             onmouseout="return nd();"	  
-         onClick="updateDiv(' ', 'restart_mp', 'Restart', 'restart_mp', 'statusDiv');"  value="Restart MP">
+         onClick="alert('This action is Disabled');" value="Restart MP" />
+ <!-- updateDiv(' ', 'restart_mp', 'Restart', 'restart_mp', 'statusDiv');"  value="Restart MP" -->
 
 </div>
 </body>

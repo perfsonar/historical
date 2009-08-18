@@ -1,4 +1,4 @@
- 
+<script type="text/javascript">
 function filterMAs(name, index, api) {
     $$('input.bbuttons_filter_ma_selected').each(function(name){
         $(name).removeClassName('bbuttons_filter_ma_selected');
@@ -14,7 +14,7 @@ function filterMAs(name, index, api) {
         $('get_links').removeClassName('bbuttons_filter_ma_selected');
     }
     $('filter_project' + index).addClassName('bbuttons_filter_ma_selected');
-    new Ajax.Updater({ success: 'filtered_ma', failure: 'statusDiv'}, '/' + api + '/filter_links', {
+    new Ajax.Updater({ success: 'filtered_ma', failure: 'statusDiv'}, '[% c.uri_for("/") %]' + api + '/filter_links', {
 		    parameters: { filter_project : name }
    });
 }     
@@ -33,7 +33,7 @@ function displayLinks() {
           this[name] = $F(name);
        }
    }, params); 
-   new Ajax.Updater({ success: 'linksdiv', failure: 'statusDiv'}, '/gui/displayLinks', {
+   new Ajax.Updater({ success: 'linksdiv', failure: 'statusDiv'}, '[% c.uri_for("/") %]gui/displayLinks', {
                       parameters: params
    }); 
    $('params_table').show();
@@ -51,7 +51,7 @@ function displayGraph() {
           this[name] = $(name).value;
        }
    }, params); 
-   new Ajax.Updater({ success: 'graph', failure: 'statusDiv'}, '/gui/displayGraph', {
+   new Ajax.Updater({ success: 'graph', failure: 'statusDiv'}, '[% c.uri_for("/") %]gui/displayGraph', {
                       parameters: params
    });
    
@@ -60,6 +60,6 @@ function displayGraph() {
 
 function resetSession() {
    var params = {};
-   new Ajax.Updater({ success: 'wrapper', failure: 'statusDiv'}, '/gui/display');
+   new Ajax.Updater({ success: 'wrapper', failure: 'statusDiv'}, '[% c.uri_for("/") %]gui/display');
 } 
- 
+</script> 
