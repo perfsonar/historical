@@ -165,9 +165,14 @@ foreach my $h ( keys %hls ) {
     if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
         print "\tEventType:\t" , $result->{eventType} , "\n" if $DEBUGFLAG;
         $result->{response} = unescapeString( $result->{response} );
-
-        my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
-
+        my $doc;
+	eval {
+            $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
+        };
+        if($EVAL_ERROR) {
+	   print "This hls $h failed, skipping";
+           next;
+        }
         my $md = find( $doc->getDocumentElement, "./nmwg:store/nmwg:metadata", 0 );
         my $d  = find( $doc->getDocumentElement, "./nmwg:store/nmwg:data",     0 );
         my %keyword_hash = ();
