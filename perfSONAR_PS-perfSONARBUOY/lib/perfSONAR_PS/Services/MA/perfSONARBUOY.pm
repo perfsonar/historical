@@ -2545,8 +2545,10 @@ sub retrieveSQL {
     my $testspec = q{};
     foreach my $t ( @tspec ) {
         $testspec .= " or " if $testspec;
+        $testspec .= " ( " unless $testspec;
         $testspec .= " tspec_id=\"" . $t . "\"";
     }
+    $testspec .= " ) ";
 
     my $dbconnect = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"db\"]",    1 ), 1 );
     my $dbuser    = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"user\"]",  1 ), 1 );
