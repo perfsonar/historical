@@ -98,7 +98,7 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*pSB*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=273 273] - _*Jeff*_ - Stale .bwctlock files in pSB data collection 
  * _*PingER*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=228 228] - _*Aaron*_ - ~~pinger tests are running but not showed on the GUI as scheduled~~
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=228 228] - _*Aaron*_ - pinger tests are running but not showed on the GUI as scheduled
      * <font color=yellow>_*In progress- 8/17*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=233 233] - _*Aaron*_ - ~~there is no pinger data charts gui and there is no link to any external instance~~
      * <font color=green>_*Fixed - 8/5*_</font>
