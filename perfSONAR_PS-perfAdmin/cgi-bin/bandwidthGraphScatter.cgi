@@ -125,7 +125,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
                 $title = "Source: " . $cgi->param( 'shost' );
                 $title .= " (" . $cgi->param( 'src' ) . ") ";
                 $title .= " -- Destination: " . $cgi->param( 'dhost' );
-                $title .= " (" . $cgi->param( 'src' ) . ") ";
+                $title .= " (" . $cgi->param( 'dst' ) . ") ";
             }
             else {
                 my $display = $cgi->param( 'src' );
