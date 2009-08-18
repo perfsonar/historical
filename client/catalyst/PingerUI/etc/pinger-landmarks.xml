@@ -1,0 +1,216 @@
+<pingertopo:topology xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070707" xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070707/" xmlns:pingertopo="http://ogf.org/ns/nmwg/tools/pinger/landmarks/1.0/">
+  <pingertopo:domain id="urn:ogf:network:domain=slac.stanford.edu">
+    <pingertopo:node id="urn:ogf:network:domain=slac.stanford.edu:node=pinger">
+      <nmtb:name type="string">pinger</nmtb:name>
+      <nmtb:hostName>pinger.slac.stanford.edu</nmtb:hostName>
+      <nmtb:description/>
+      <nmwg:parameters id="1000B">
+        <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+        <nmwg:parameter name="count">10</nmwg:parameter>
+        <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+        <nmwg:parameter name="ttl">255</nmwg:parameter>
+        <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>
+        <nmwg:parameter name="measurementOffset"/>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=slac.stanford.edu:node=pinger:port=134.79.240.32">
+        <nmtl3:ipAddress type="IPv4">134.79.240.32</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+  </pingertopo:domain>
+  <pingertopo:domain id="urn:ogf:network:domain=fnal.gov">
+    <pingertopo:node id="urn:ogf:network:domain=fnal.gov:node=pinger">
+      <nmtb:name type="string">pinger</nmtb:name>
+      <nmtb:hostName>pinger.fnal.gov</nmtb:hostName>
+      <nmtb:description/>
+      <nmwg:parameters id="1000B">
+        <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+        <nmwg:parameter name="count">10</nmwg:parameter>
+        <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+        <nmwg:parameter name="ttl">255</nmwg:parameter>
+        <nmwg:parameter name="measurementPeriod">45</nmwg:parameter>
+        <nmwg:parameter name="measurementOffset"/>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=fnal.gov:node=pinger:node=www:port=131.225.110.18">
+        <nmtl3:ipAddress type="IPv4">131.225.110.18</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+  </pingertopo:domain>
+  <pingertopo:domain id="urn:ogf:network:domain=cern.ch">
+    <pingertopo:node id="urn:ogf:network:domain=cern.ch:node=www">
+      <nmtb:name type="string">www</nmtb:name>
+      <nmtb:hostName>www.cern.ch</nmtb:hostName>
+      <nmtb:description/>
+      <nmwg:parameters id="1000B">
+        <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+        <nmwg:parameter name="count">10</nmwg:parameter>
+        <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+        <nmwg:parameter name="ttl">255</nmwg:parameter>
+        <nmwg:parameter name="measurementPeriod">30</nmwg:parameter>
+        <nmwg:parameter name="measurementOffset"/>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=cern.ch:node=www:port=137.138.137.177">
+        <nmtl3:ipAddress type="IPv4">137.138.137.177</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+  </pingertopo:domain>
+  <pingertopo:domain id="urn:ogf:network:domain=unl.edu">
+    <pingertopo:node id="urn:ogf:network:domain=unl.edu:node=UNL-T2">
+      <nmtb:name type="string">UNL-T2</nmtb:name>
+      <nmtb:hostName>t2.unl.edu</nmtb:hostName>
+      <nmtb:description/>
+      <nmwg:parameters id="1000B">
+        <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+        <nmwg:parameter name="count">10</nmwg:parameter>
+        <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+        <nmwg:parameter name="ttl">255</nmwg:parameter>
+        <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>
+        <nmwg:parameter name="measurementOffset"/>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=unl.edu:node=UNL-T2:port=129.93.239.162">
+        <nmtl3:ipAddress type="IPv4">129.93.239.162</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+  </pingertopo:domain>
+  <pingertopo:domain id="urn:ogf:network:domain=ucsd.edu">
+    <pingertopo:node id="urn:ogf:network:domain=ucsd.edu:node=UCSD-T2">
+      <nmtb:name type="string">UCSD-T2</nmtb:name>
+      <nmtb:hostName>tier2.ucsd.edu</nmtb:hostName>
+      <nmtb:description/>
+      <nmwg:parameters id="1000B">
+        <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+        <nmwg:parameter name="count">10</nmwg:parameter>
+        <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+        <nmwg:parameter name="ttl">255</nmwg:parameter>
+        <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>
+        <nmwg:parameter name="measurementOffset"/>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=ucsd.edu:node=UCSD-T2:port=132.239.27.8">
+        <nmtl3:ipAddress type="IPv4">132.239.27.8</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+  </pingertopo:domain>
+  <pingertopo:domain id="urn:ogf:network:domain=wisc.edu">
+    <pingertopo:node id="urn:ogf:network:domain=wisc.edu:node=WISC-T2">
+      <nmtb:name type="string">WISC-T2</nmtb:name>
+      <nmtb:hostName>cmssrm.hep.wisc.edu</nmtb:hostName>
+      <nmtb:description/>
+      <nmwg:parameters id="1000B">
+        <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+        <nmwg:parameter name="count">10</nmwg:parameter>
+        <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+        <nmwg:parameter name="ttl">255</nmwg:parameter>
+        <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>
+        <nmwg:parameter name="measurementOffset"/>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=wisc.edu:node=WISC-T2:port=144.92.180.16">
+        <nmtl3:ipAddress type="IPv4">144.92.180.16</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+  </pingertopo:domain>
+  <pingertopo:domain id="urn:ogf:network:domain=ufl.edu">
+    <pingertopo:node id="urn:ogf:network:domain=ufl.edu:node=UFL-T2">
+      <nmtb:name type="string">UFL-T2</nmtb:name>
+      <nmtb:hostName>tier2.ihepa.ufl.edu</nmtb:hostName>
+      <nmtb:description/>
+      <nmwg:parameters id="1000B">
+        <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+        <nmwg:parameter name="count">10</nmwg:parameter>
+        <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+        <nmwg:parameter name="ttl">255</nmwg:parameter>
+        <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>
+        <nmwg:parameter name="measurementOffset"/>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=ufl.edu:node=UFL-T2:port=128.227.221.3">
+        <nmtl3:ipAddress type="IPv4">128.227.221.3</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+  </pingertopo:domain>
+  <pingertopo:domain id="urn:ogf:network:domain=mit.edu">
+    <pingertopo:node id="urn:ogf:network:domain=mit.edu:node=MIT-T2">
+      <nmtb:name type="string">MIT-T2</nmtb:name>
+      <nmtb:hostName>www.cmsaf.mit.edu</nmtb:hostName>
+      <nmtb:description/>
+      <nmwg:parameters id="1000B">
+        <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+        <nmwg:parameter name="count">10</nmwg:parameter>
+        <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+        <nmwg:parameter name="ttl">255</nmwg:parameter>
+        <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>
+        <nmwg:parameter name="measurementOffset"/>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=mit.edu:node=MIT-T2:port=18.7.24.91">
+        <nmtl3:ipAddress type="IPv4">18.7.24.91</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+  </pingertopo:domain>
+  <pingertopo:domain id="urn:ogf:network:domain=bnl.gov">
+    <pingertopo:node id="urn:ogf:network:domain=bnl.gov:node=BNL-T1">
+      <nmtb:name type="string">BNL-T1</nmtb:name>
+      <nmtb:hostName>newmon.bnl.gov</nmtb:hostName>
+      <nmtb:description/>
+      <nmwg:parameters id="1000B">
+        <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+        <nmwg:parameter name="count">10</nmwg:parameter>
+        <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+        <nmwg:parameter name="ttl">255</nmwg:parameter>
+        <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>
+        <nmwg:parameter name="measurementOffset"/>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=bnl.gov:node=BNL-T1:port=130.199.3.7">
+        <nmtl3:ipAddress type="IPv4">130.199.3.7</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+  </pingertopo:domain>
+  <pingertopo:domain id="urn:ogf:network:domain=ultralight.org">
+    <pingertopo:node id="urn:ogf:network:domain=ultralight.org:node=Caltech-T223">
+      <nmtb:name type="string">Caltech-T223</nmtb:name>
+      <nmtb:hostName>cithep1301.ultralight.org</nmtb:hostName>
+      <nmtb:description/>
+      <nmwg:parameters id="1000B">
+        <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+        <nmwg:parameter name="count">100</nmwg:parameter>
+        <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+        <nmwg:parameter name="ttl">255</nmwg:parameter>
+        <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>
+        <nmwg:parameter name="measurementOffset">23</nmwg:parameter>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=ultralight.org:node=Caltech-T223:port=198.32.44.130">
+        <nmtl3:ipAddress type="IPv4">198.32.44.130</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+  </pingertopo:domain>
+  <pingertopo:domain id="urn:ogf:network:domain=phy.purdue.edu">
+    <pingertopo:node id="urn:ogf:network:domain=phy.purdue.edu:node=Purdue-T2">
+      <nmtb:name type="string">Purdue-T2</nmtb:name>
+      <nmtb:hostName>phedex.rcac.purdue.edu</nmtb:hostName>
+      <nmtb:description/>
+      <nmwg:parameters id="1000B">
+        <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+        <nmwg:parameter name="count">10</nmwg:parameter>
+        <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+        <nmwg:parameter name="ttl">255</nmwg:parameter>
+        <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>
+        <nmwg:parameter name="measurementOffset"/>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=phy.purdue.edu:node=Purdue-T2:port=128.211.128.12">
+        <nmtl3:ipAddress type="IPv4">128.211.128.12</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+    <pingertopo:node id="urn:ogf:network:domain=phy.purdue.edu:node=node2">
+      <nmtb:name type="string">node2</nmtb:name>
+      <nmtb:hostName>node2.purdue.edu</nmtb:hostName>
+      <nmwg:parameters id="paramid1">
+        <nmwg:parameter value="10" name="count"/>
+        <nmwg:parameter value="1000" name="packetSize"/>
+        <nmwg:parameter value="USCMS" name="project"/>
+        <nmwg:parameter value="255" name="ttl"/>
+        <nmwg:parameter value="60" name="measurementPeriod"/>
+        <nmwg:parameter name="measurementOffset"/>
+        <nmwg:parameter value="1" name="packetInterval"/>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=phy.purdue.edu:node=node2:port=255.255.255.255">
+        <nmtl3:ipAddress type="IPv4">255.255.255.255</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+  </pingertopo:domain>
+</pingertopo:topology>
