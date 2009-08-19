@@ -256,8 +256,8 @@ else {
             my $metadataId = $metadata->getDocumentElement->getAttribute( "id" );
 
             my $src = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
-            my $saddr;
-            my $shost;
+            my $saddr = q{};
+            my $shost = q{};
             if ( is_ipv4( $src ) ) {
                 $saddr = $src;
                 my $iaddr = Socket::inet_aton( $src );
@@ -280,8 +280,8 @@ else {
             }
 
             my $dst = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst", 1 ), 0 );
-            my $daddr;
-            my $dhost;
+            my $daddr = q{};
+            my $dhost = q{};
             if ( is_ipv4( $dst ) ) {
                 $daddr = $dst;
                 my $iaddr = Socket::inet_aton( $dst );
@@ -308,12 +308,7 @@ else {
             foreach my $p ( $params->get_nodelist ) {
                 my $pName = $p->getAttribute( "name" );
                 my $pValue = extract( $p, 0 );
-                if ( $pName and ( lc ( $pName ) eq "protocol" ) ) {
-                    $temp{"type"} = $pValue if $pValue;
-                }
-                else {
-                    $temp{$pName} = $pValue if $pName and $pValue;
-                }
+                $temp{$pName} = $pValue if $pName and $pValue;                
             }
 
             $temp{"key"}   = $lookup{$metadataId};
@@ -339,7 +334,7 @@ else {
             my $parser     = XML::LibXML->new();
 
             my $subject = "<nmwg:key id=\"key-1\"><nmwg:parameters id=\"parameters-key-1\"><nmwg:parameter name=\"maKey\">" . $lookup{$metadataId} . "</nmwg:parameter></nmwg:parameters></nmwg:key>";
-            my $time = 86400;
+            my $time = 604800;
 
             my $result = $ma->setupDataRequest(
                 {
@@ -369,11 +364,18 @@ else {
                     $data{$dhost}{"in"}{"count"}++;
                     $temp{"active"} = 1;
                     $temp{"out"} = ( $total / $dcounter ) if $dcounter;
-                }               
+                }     
+                else {
+                    $temp{"active"} = 0;
+                }          
             }
+            else {
+                $temp{"active"} = 0;
+            } 
             push @{ $list{$shost}{$dhost} }, \%temp;
         }
          
+        # figure out if hosts are equal - requires unrolling all of the options and comparing (ugh) 
         my %hostMap = ();
         foreach my $src ( sort keys %list ) {
             foreach my $dst ( sort keys %{ $list{$src} } ) {
@@ -439,7 +441,7 @@ else {
                             SHOST          => $set->{"src"},
                             DADDRESS       => $set->{"daddr"},
                             DHOST          => $set->{"dst"},
-                            PROTOCOL       => $set->{"type"},
+                            PROTOCOL       => $set->{"protocol"},
                             TIMEDURATION   => $set->{"timeDuration"},
                             BUFFERLENGTH   => $set->{"bufferLength"},
                             WINDOWSIZE     => $set->{"windowSize"}, 
@@ -459,7 +461,7 @@ else {
                             SHOST          => $set->{"src"},
                             DADDRESS       => $set->{"daddr"},
                             DHOST          => $set->{"dst"},
-                            PROTOCOL       => $set->{"type"},
+                            PROTOCOL       => $set->{"protocol"},
                             TIMEDURATION   => $set->{"timeDuration"},
                             BUFFERLENGTH   => $set->{"bufferLength"},
                             WINDOWSIZE     => $set->{"windowSize"}, 
@@ -507,6 +509,7 @@ else {
         );
     }
     elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/owamp/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" ) {
+        my $sec        = time;
         $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_psb_owamp.tmpl" );
 
         my %lookup = ();
@@ -518,6 +521,7 @@ else {
         }
 
         my %list = ();
+        my %data    = ();
         foreach my $md ( @{ $result->{"metadata"} } ) {
             my $metadata   = $parser->parse_string( $md );
             my $metadataId = $metadata->getDocumentElement->getAttribute( "id" );
@@ -571,22 +575,125 @@ else {
                 }
             }
 
-            $list{$shost}{$dhost} = { "key" => $lookup{$metadataId}, "src" => $shost, "dst" => $dhost, "saddr" => $saddr, "daddr" => $daddr };
+            my %temp = ();
+            my $params = find( $metadata->getDocumentElement, "./*[local-name()='parameters']/*[local-name()='parameter']", 0 );
+            foreach my $p ( $params->get_nodelist ) {
+                my $pName = $p->getAttribute( "name" );
+                my $pValue = q{};
+                if ( lc( $pName ) eq "schedule" ) {
+                    $pValue = extract( find( $p, ".//interval[\@type=\"exp\"]", 1 ), 0 );
+                }
+                else {
+                    $pValue = extract( $p, 0 );                                    
+                }
+                $temp{$pName} = $pValue if $pName and $pValue;
+            }
+
+            $temp{"key"}   = $lookup{$metadataId};
+            $temp{"src"}   = $shost;
+            $temp{"dst"}   = $dhost;
+            $temp{"saddr"} = $saddr;
+            $temp{"daddr"} = $daddr;
+
+            unless ( exists $data{$shost} ) {
+                $data{$shost}{"out"}{"total"} = 0;
+                $data{$shost}{"in"}{"total"}  = 0;
+                $data{$shost}{"out"}{"count"} = 0;
+                $data{$shost}{"in"}{"count"}  = 0;
+            }
+            unless ( exists $data{$dhost} ) {
+                $data{$dhost}{"out"}{"total"} = 0;
+                $data{$dhost}{"in"}{"total"}  = 0;
+                $data{$dhost}{"out"}{"count"} = 0;
+                $data{$dhost}{"in"}{"count"}  = 0;
+            }
+            
+            
+            # add in ability to get recent measurements.  
+            
+           
+            push @{ $list{$shost}{$dhost} }, \%temp;
         }
 
-        my @pairs   = ();
-        my $counter = 0;
+        # figure out if hosts are equal - requires unrolling all of the options and comparing (ugh) 
+        my %hostMap = ();
         foreach my $src ( sort keys %list ) {
             foreach my $dst ( sort keys %{ $list{$src} } ) {
-                push @pairs, { SADDRESS => $list{$src}{$dst}->{"saddr"}, SHOST => $list{$src}{$dst}->{"src"}, DADDRESS => $list{$src}{$dst}->{"daddr"}, DHOST => $list{$src}{$dst}->{"dst"}, KEY => $list{$src}{$dst}->{"key"}, COUNT => $counter, SERVICE => $service };
-                $counter++;
+                foreach my $set ( @{ $list{$src}{$dst} } ) {
+                    if ( $#{ $list{$src}{$dst} } > -1 and $#{ $list{$dst}{$src} } > -1 ) {
+                        foreach my $set2 ( @{ $list{$dst}{$src} } ) {
+                            if ( $set->{"src"} eq $set2->{"dst"} and $set->{"dst"} eq $set2->{"src"} and $set->{"saddr"} eq $set2->{"daddr"} and $set->{"daddr"} eq $set2->{"saddr"} ) {                                 
+                                my @bucket_width = ( q{}, q{} );
+                                $bucket_width[0] = $set->{"bucket_width"} if $set->{"bucket_width"};
+                                $bucket_width[1] = $set2->{"bucket_width"} if $set2->{"bucket_width"};
+                                next unless $bucket_width[0] eq $bucket_width[1];
+                                
+                                my @count = ( q{}, q{} );
+                                $count[0] = $set->{"count"} if $set->{"count"};
+                                $count[1] = $set2->{"count"} if $set2->{"count"};
+                                next unless $count[0] eq $count[1];
+                                
+                                my @schedule = ( q{}, q{} );
+                                $schedule[0] = $set->{"schedule"} if $set->{"schedule"};
+                                $schedule[1] = $set2->{"schedule"} if $set2->{"schedule"};
+                                next unless $schedule[0] eq $schedule[1];
+                                
+                                my @DSCP = ( q{}, q{} );
+                                $DSCP[0] = $set->{"DSCP"} if $set->{"DSCP"};
+                                $DSCP[1] = $set2->{"DSCP"} if $set2->{"DSCP"};
+                                next unless $DSCP[0] eq $DSCP[1];
+                                
+                                my @timeout = ( q{}, q{} );
+                                $timeout[0] = $set->{"timeout"} if $set->{"timeout"};
+                                $timeout[1] = $set2->{"timeout"} if $set2->{"timeout"};
+                                next unless $timeout[0] eq $timeout[1];
+                                
+                                my @packet_padding = ( q{}, q{} );
+                                $packet_padding[0] = $set->{"packet_padding"} if $set->{"packet_padding"};
+                                $packet_padding[1] = $set2->{"packet_padding"} if $set2->{"packet_padding"};
+                                next unless $packet_padding[0] eq $packet_padding[1];
+
+                                my @active = ( q{}, q{} );
+                                $active[0] = $set->{"active"} if $set->{"active"};
+                                $active[1] = $set2->{"active"} if $set2->{"active"};
+                                next unless $active[0] eq $active[1];
+                                
+                                $hostMap{ $set->{"key"} } = $set2->{"key"};
+                            }
+                        }                       
+                    }
+                }
+            }
+        } 
+        
+        my @pairs = ();
+        my @histPairs = ();
+        my $counter = 0;
+        my %mark = ();
+        foreach my $src ( sort keys %list ) {
+            foreach my $dst ( sort keys %{ $list{$src} } ) {
+                foreach my $set ( @{ $list{$src}{$dst} } ) {
+                    next if $mark{ $set->{"key"} };                    
+                    if ( exists $set->{"active"} and $set->{"active"} ) {
+                        push @pairs, { SADDRESS => $set->{"saddr"}, SHOST => $set->{"src"}, DADDRESS => $set->{"daddr"}, DHOST => $set->{"dst"}, KEY => $set->{"key"}, COUNT => $counter, SERVICE => $service, KEY2 => $hostMap{ $set->{"key"} } };
+                        $counter++;
+                    }
+                    else {
+                        push @histPairs, { SADDRESS => $set->{"saddr"}, SHOST => $set->{"src"}, DADDRESS => $set->{"daddr"}, DHOST =>$set->{"dst"}, KEY => $set->{"key"}, COUNT => $counter, SERVICE => $service, KEY2 => $hostMap{ $set->{"key"} } };
+                        $counter++;
+                    }        
+                    $mark{ $hostMap{ $set->{"key"} } } = 1 if $hostMap{ $set->{"key"} }; 
+                }                               
             }
         }
+
+        # add in ability to make graph
 
         $template->param(
             EVENTTYPE => $eventType,
             SERVICE   => $service,
-            PAIRS     => \@pairs
+            PAIRS     => \@pairs,
+            HISTPAIRS => \@histPairs
         );
     }
     elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" or $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0" ) {
