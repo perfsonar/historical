@@ -95,6 +95,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 8/5*_</font>
  * _*LSRegistrationDaemon*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=210 210] - _*Aaron*_ - LSRegistration daemon start/restart on information change	 
+     * <font color=yellow>_*In progress- 8/18*_</font>
  * _*pSB*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=273 273] - _*Jeff*_ - Stale .bwctlock files in pSB data collection 
  * _*PingER*_ 
@@ -154,6 +155,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 8/17*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=295 295] - _*Aaron*_ - when changing size of the browser window smaller the Ping Latency table is jumping under the left pane menu
      * <font color=yellow>_*In Progress - 8/17*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=297 297] - _*Jason*_ - gls cache script is failing on the remote hls
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
