@@ -167,8 +167,8 @@ undef $slog;    # Don't keep tie'd ref's around unless you need them...
 #
 my $debug   = $conf->get_val( ATTR => 'DEBUG',   TYPE => $ttype );
 my $verbose = $conf->get_val( ATTR => 'VERBOSE', TYPE => $ttype );
-my $foreground = $conf->get_val( ATTR => 'FOREGROUND' );
-my $devnull = $conf->must_get_val( ATTR => "devnull" );
+my $foreground = $conf->get_val( ATTR      => 'FOREGROUND' );
+my $devnull    = $conf->must_get_val( ATTR => "devnull" );
 my $suffix = $conf->must_get_val( ATTR => "SessionSuffix", TYPE => $ttype );
 
 #
@@ -612,7 +612,7 @@ while ( 1 ) {
 
             # restart everything if send_data died.
             if ( $$info[0] =~ /send_data/ ) {
-                warn "send_data died, restarting!";
+                warn "send_data($wpid) died, restarting!";
                 kill 'HUP', $$;
             }
             elsif ( $$info[0] =~ /bwctl/ ) {
@@ -702,7 +702,7 @@ sub txfr {
     foreach ( keys %req ) {
         my $val = $req{$_};
         warn "req\{$_\} = $val" if ( $debug );
-        return undef if (
+        return undef            if (
             !sys_writeline(
                 FILEHANDLE => $SendServer,
                 LINE       => "$_\t$req{$_}",

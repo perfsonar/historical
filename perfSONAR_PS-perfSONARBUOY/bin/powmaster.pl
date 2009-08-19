@@ -160,8 +160,8 @@ undef $slog;    # Don't keep tie'd ref's around unless you need them...
 #
 my $debug   = $conf->get_val( ATTR => 'DEBUG',   TYPE => $ttype );
 my $verbose = $conf->get_val( ATTR => 'VERBOSE', TYPE => $ttype );
-my $foreground = $conf->get_val( ATTR => 'FOREGROUND' );
-my $devnull   = $conf->must_get_val( ATTR => "devnull" );
+my $foreground = $conf->get_val( ATTR      => 'FOREGROUND' );
+my $devnull    = $conf->must_get_val( ATTR => "devnull" );
 my $owpsuffix = $conf->must_get_val( ATTR => "SessionSuffix", TYPE => $ttype );
 my $sumsuffix = $conf->must_get_val( ATTR => "SummarySuffix", TYPE => $ttype );
 
@@ -702,7 +702,7 @@ sub txfr {
     foreach ( keys %req ) {
         my $val = $req{$_};
         warn "req\{$_\} = $val" if ( $debug );
-        return undef if (
+        return undef            if (
             !sys_writeline(
                 FILEHANDLE => $SendServer,
                 LINE       => "$_\t$req{$_}",
@@ -960,9 +960,25 @@ TRY:
                 }
 
                 #
-                # Data validation - Only want to send sum sessions
+                # Data validation
+                #
+                if ( !defined( $req{'SUMMARY'} ) ) {
+                    if ( defined( $verbose ) ) {
+                        warn "Skipping $sfname: Invalid summary information";
+                    }
+                    last TRY;
+                }
+                if ( $req{'SUMMARY'} < 3.0 ) {
+                    if ( defined( $verbose ) ) {
+                        warn "Skipping $sfname: Invalid summary - upgrade owamp (powstream)? ";
+                    }
+                    last TRY;
+                }
+
+                # Only want to send sum sessions
                 # back if SAMPLE_PACKET_COUNT == OWPSAMPLECOUNT
                 #
+
                 if ( $req{'SAMPLE_PACKET_COUNT'} != $req{'OWPSAMPLECOUNT'} ) {
                     if ( defined( $verbose ) ) {
                         warn "Skipping $sfname: (unneeded dataset)";
