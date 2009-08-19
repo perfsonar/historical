@@ -17,15 +17,14 @@
         data.setValue(<tmpl_var name=C>, 2, <tmpl_var name=OUT>); 
         </tmpl_loop>        
         var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-        chart.draw(data, {width: <tmpl_var name=GRAPHTOTAL>*100, height: 250, is3D: false, title: '1 Day Average Bandwidth in <tmpl_var name=GRAPHPREFIX>bps', legendFontSize: 8, axisFontSize: 10, titleFontSize: 14, colors: ['#0000ff', '#00cc00'], legend: 'bottom' });
+        chart.draw(data, {width: <tmpl_var name=GRAPHTOTAL>*100, height: 250, is3D: false, title: '1 Week Average Bandwidth in <tmpl_var name=GRAPHPREFIX>bps', legendFontSize: 8, axisFontSize: 10, titleFontSize: 14, colors: ['#0000ff', '#00cc00'], legend: 'bottom' });
       }
     </script>
   </head>
   <body>
-    <br>
-    <h2 align="center">Current Data Sets</h2>
+    <h3 align="center">Current Data Sets</h3>
     <hr size=2 width="85%" />
-    <br><br>
+    <br>
     <table width="95%" align="center" cellpadding="1" border="2">
       <tr>
         <th align="center" colspan="10"><tmpl_var name=EVENTTYPE> @ <tmpl_var name=SERVICE></th>
@@ -116,15 +115,16 @@
       </tr>
       </tmpl_loop>
     </table>
+    
     <br><br>
     <center>
       <div id="chart_div"></div>
-    </center>
-        
+    </center>        
     <br><br>
-    <h2 align="center">Historic Data Sets</h2>
+    
+    <h3 align="center">Historic Data Sets</h3>
     <hr size=2 width="85%" />
-    <br><br>
+    <br>
     <table width="95%" align="center" cellpadding="1" border="2">
       <tr>
         <th align="center" colspan="11"><tmpl_var name=EVENTTYPE> @ <tmpl_var name=SERVICE></th>
@@ -214,11 +214,7 @@
         </td>
       </tr>
       </tmpl_loop>
-    </table>
-    <br><br>    
-    
-    
-    
+    </table>   
   </body>
 </html>
 
