@@ -230,7 +230,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=291 291] - _*Aaron*_ - Scheduled Test Screen Shows Hosts Twice	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=292 292] - _*Aaron*_ - GUI Display Consistency
      * <font color=yellow>_*Needs Testing - 8/17*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=298 298] - _*Jason*_ - Advanced Cacti data collection for localhost 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=298 298] - _*Jason*_ - Advanced Cacti data collection for localhost
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=299 299] - _*Aaron*_ - pS Performance Toolit w/ HP Raid Controller  
 
 === Code Reviews ===
 
