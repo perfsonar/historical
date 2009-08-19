@@ -7,7 +7,7 @@
 
 Name:           perl-perfSONAR_PS-PingER-server
 Version:        3.1
-Release:        3.%{disttag}
+Release:        6.%{disttag}
 Summary:        perfSONAR_PS PingER  Measurement Archive and Collection System
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -17,7 +17,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-Requires:       perl(Module::Build) >= 0.2808
 Requires:       perl(DateTime) >= 0.41
 Requires:       perl(DateTime::Format::Builder) >= 0.7901
 Requires:       perl(Carp) >= 0.41
@@ -148,6 +147,17 @@ echo "    /opt/perfsonar_ps/PingER/doc/INSTALL file                    "
 echo "-----------------------------------------------------------------"
 
 %changelog
+* Thu Aug 13 2009 maxim@fnal.gov v3.1.6
+- left only empty pinger landmarks file
+- suppressed error messages in case of empty landmarks file 
+- suppressed error messages when unresolved ip
+
+* Fri Jul 17 2009 maxim@fnal.gov v3.1.5
+- pinger landmarks file got fixed
+
+* Mon Jun 24 2009 maxim@fnal.gov v3.1.4
+- pinger CLI was enhanced with DB cleanup
+
 * Mon Jun 06 2009 maxim@fnal.gov v3.1.3
 - fixed CLP bugs and unresolved source hostname bug
 
