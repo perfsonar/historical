@@ -193,9 +193,9 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             $scale = 1000000000;
         }
 
-        print "        data.addColumn('number', '" . $cgi->param( 'shost' ) . " -> " . $cgi->param( 'dhost' ) . " in " . $mod . "bps');\n";
+        print "        data.addColumn('number', 'Source -> Destination in " . $mod . "bps');\n";
         if ( $cgi->param( 'key2' ) ) {
-            print "        data.addColumn('number', '" . $cgi->param( 'dhost' ) . " -> " . $cgi->param( 'shost' ) . " in " . $mod . "bps');\n";
+            print "        data.addColumn('number', 'Destination -> Source in " . $mod . "bps');\n";
         }
 
         my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
