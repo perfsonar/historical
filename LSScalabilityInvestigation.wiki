@@ -28,11 +28,15 @@
   *  _moonshine_.damsl.cis.udel.edu
   *  _stout_.damsl.cis.udel.edu
 
- *  Create a new gLS 'cloud', i.e., a new hints file.  The current hints file is located at http://dc211.internet2.edu/gls.root.hints .  Make a new hints file like this that includes the gLS instances created for this testing, and place it on _stout_'s web server.
+ *  Create a new gLS 'cloud', i.e., a new hints file.  The current hints file is located at http://dc211.internet2.edu/gls.root.hints .  Make a new hints file like this that includes the gLS instances created for this testing, and place it on _stout_'s web server.  The contents of the file will be:
+
+{{{
+  http://ale.damsl.cis.udel.edu:9990/perfSONAR_PS/services/gLS
+}}}
 
  *  Install the !LookupService package:
-  *  one gLS in _ale_:  in the daemon.conf set '`root 1`'.
-  *  one hLS in _moonshine_:  in the daemon.conf set '`root 0`'.
+  *  one gLS in _ale_, port 9990:  in the daemon.conf set '`root 1`'.
+  *  one hLS in _moonshine_, standard port:  in the daemon.conf set '`root 0`'.
 
  *  After initial setup and testing:
   *  Install a total of 2 - 3 gLSs:  one at UDel, one at LBL, one somewhere else (could be UDel/LBL, or one in Ann Arbor).
