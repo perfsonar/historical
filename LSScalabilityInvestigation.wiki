@@ -96,3 +96,5 @@ Compilation failed in require at /opt/perfsonar_ps/lookup_service/bin/daemon.pl 
 BEGIN failed--compilation aborted at /opt/perfsonar_ps/lookup_service/bin/daemon.pl line 84.
 ./lookup_service start: perfSONAR Lookup Service could not be started
 }}}
+
+Clearly, `libxml2` must be updated on _ale_ prior to installing the LS service.
