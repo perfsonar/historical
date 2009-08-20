@@ -429,6 +429,74 @@ else {
                 }
             }
         }                          
+
+        my ( $stsec, $stmin, $sthour, $stday, $stmonth, $styear ) = localtime();
+        $stmonth += 1;
+        $styear += 1900;
+
+        # add in date flipping stuff to go back 2 months...
+
+        my ( $dtsec, $dtmin, $dthour, $dtday, $dtmonth, $dtyear ) = localtime();       
+        $dtmonth += 1;
+        $dtyear += 1900;
+ 
+        my @mon = ( "" , "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" );
+        my @sday = ();
+        my @smon = ();
+        my @syear = ();
+        my @dday = ();
+        my @dmon = ();
+        my @dyear = ();
+        my $selected = 0;
+        for ( my $x = 1; $x < 13; $x++ ) {
+            if ( $stmonth == $x ) {
+                push @smon, { VALUE => $x, NAME => $mon[$x], SELECTED => 1 };
+            }
+            else {
+                push @smon, { VALUE => $x, NAME => $mon[$x] };
+            }   
+        }
+        for ( my $x = 1; $x < 32; $x++ ) {
+            if ( $stday == $x ) {
+                push @sday, { VALUE => $x, NAME => $x, SELECTED => 1 };
+            }
+            else {
+                push @sday, { VALUE => $x, NAME => $x };
+            }
+        }        
+        for ( my $x = 2000; $x < 2016; $x++ ) {
+            if ( $styear == $x ) {
+                push @syear, { VALUE => $x, NAME => $x, SELECTED => 1 };
+            }
+            else {
+                push @syear, { VALUE => $x, NAME => $x };
+            }
+        }        
+        
+        for ( my $x = 1; $x < 13; $x++ ) {
+            if ( $dtmonth == $x ) {
+                push @dmon, { VALUE => $x, NAME => $mon[$x], SELECTED => 1 };
+            }
+            else {
+                push @dmon, { VALUE => $x, NAME => $mon[$x] };
+            }
+        }
+        for ( my $x = 1; $x < 32; $x++ ) {
+            if ( $dtday == $x ) {
+                push @dday, { VALUE => $x, NAME => $x, SELECTED => 1 };
+            }
+            else {
+                push @dday, { VALUE => $x, NAME => $x };
+            }
+        }
+        for ( my $x = 2000; $x < 2016; $x++ ) {
+            if ( $dtyear == $x ) {
+                push @dyear, { VALUE => $x, NAME => $x, SELECTED => 1 };
+            }
+            else {
+                push @dyear, { VALUE => $x, NAME => $x };
+            }
+        }    
                
         my @pairs = ();
         my @histPairs = ();
@@ -474,7 +542,13 @@ else {
                             KEY            => $set->{"key"},
                             COUNT          => $counter,
                             SERVICE        => $service,
-                            KEY2           => $hostMap{ $set->{"key"} }
+                            KEY2           => $hostMap{ $set->{"key"} },
+                            SMON           => \@smon,
+                            SDAY           => \@sday,
+                            SYEAR          => \@syear,
+                            DMON           => \@dmon,
+                            DDAY           => \@dday,
+                            DYEAR          => \@dyear
                             };
                         $counter++; 
                     }        
@@ -501,7 +575,7 @@ else {
             $g->{"in"}  /= $temp->{"scale"};
             $g->{"out"} /= $temp->{"scale"};
         }
-
+     
         $template->param(
             EVENTTYPE   => $eventType,
             SERVICE     => $service,
