@@ -44,6 +44,15 @@
   *  Coordinate deployment of !FakeService on ESnet hosts on additional LSs.
  
 
-== Findings ==
+== Findings and Report ==
 
-Pending.
+_ale_
+
+ * Checked out perfSONAR repository into home directory.
+ * In perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService, ran
+{{{
+sudo make install
+cd scripts
+sudo ./install_dependencies.sh
+sudo ./prepare_environment.sh 
+}}}
