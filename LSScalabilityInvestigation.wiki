@@ -56,7 +56,7 @@ and/or
 
  `uname -a`
 
-=== Instructions ===
+=== Instructions:  Sources ===
 
 Using these sources for instructions on installation and configuration:
 
