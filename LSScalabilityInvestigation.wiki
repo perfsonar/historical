@@ -46,6 +46,14 @@
 
 == Findings and Report ==
 
+=== Note ===
+
+To obtain the current OS version, type:
+
+{{{
+cat /etc/issue
+}}}
+
 === Preparing _ale_ ===
 
 Checked out perfSONAR repository into home directory.
