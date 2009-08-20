@@ -28,7 +28,7 @@
   *  _moonshine_.damsl.cis.udel.edu
   *  _stout_.damsl.cis.udel.edu
 
- *  Create a new gLS 'cloud', i.e., a new hints file.  The current hints file is located at http://dc211.internet2.edu/gls.root.hints .  Make a new hints file like this that includes the gLS instances created for this testing, and place it on _stout_'s web server.  The contents of the file will be:
+ *  Create a new gLS 'cloud', i.e., a new hints file.  The current hints file is located at http://dc211.internet2.edu/gls.root.hints .  Make a new hints file like this that includes the gLS instances created for this testing, and place it on _stout_'s web server (/var/www/external).  The contents of the file will be:
 
 {{{
   http://ale.damsl.cis.udel.edu:9990/perfSONAR_PS/services/gLS
