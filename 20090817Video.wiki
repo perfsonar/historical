@@ -2,7 +2,7 @@
 
 == Agenda/Minutes ==
 
- # Attendees: Marcos, Brian, Aaron, Jason, Joe, Jeff, Prasilla
+ # Attendees: Marcos, Brian, Aaron, Jason, Joe, Jeff, Priscilla
  # Team Updates:
     * Marcos: Researching fault analysis.
     * Brian: Testing new releases. Found a few minor things. Strange things on ESnet measurements. hLS registration bug. Wants more testing before final release.
@@ -10,7 +10,7 @@
     * Jason: Release activities - bug tracking. Late next week.
     * Joe: Gave feedback on an early RC and nothing since. Joe will send a request for psps.perfsonar.net and mdm.perfsonar.net.
     * Jeff: Release/bug activities. Mostly working on proposals.
-    * Prasilla: Joining to hear how things are going.
+    * Priscilla: Joining to hear how things are going.
  # Release Activities
    * pS-PerformanceTK
         * Getting good feedback, lots of bugs to followup on.
