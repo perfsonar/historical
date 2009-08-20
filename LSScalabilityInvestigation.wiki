@@ -66,6 +66,8 @@ Using these sources for instructions on installation and configuration:
 
 === Preparing _ale_ ===
 
+This server _ale_ is Fedora Core release 4 (Stentz).
+
 Checked out perfSONAR repository into home directory (must have permission):
 
  `svn co https://svn.internet2.edu/svn/perfSONAR-PS/`
