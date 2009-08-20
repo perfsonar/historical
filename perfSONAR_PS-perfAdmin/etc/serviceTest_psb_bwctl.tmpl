@@ -127,7 +127,7 @@
     <br>
     <table width="95%" align="center" cellpadding="1" border="2">
       <tr>
-        <th align="center" colspan="11"><tmpl_var name=EVENTTYPE> @ <tmpl_var name=SERVICE></th>
+        <th align="center" colspan="10"><tmpl_var name=EVENTTYPE> @ <tmpl_var name=SERVICE></th>
       </tr>
       <tr>
         <th align="center">Source Host</th>
@@ -145,9 +145,6 @@
 -->
         <th align="center">Bandwidth Limit</th>
         <th align="center">Line Graph</th>
-<!--        
-        <th align="center">Flash Graph</th>
--->
         <th align="center">Scatter Graph</th>
       </tr>
       <tmpl_loop name=HISTPAIRS>
@@ -187,30 +184,228 @@
           <tmpl_var name=BANDWIDTHLIMIT>&nbsp;
         </td>
         <td align="center">
-          <select value="Graph" id="graph1_<tmpl_var name=COUNT>" name="graph1_<tmpl_var name=COUNT>" onChange="window.open(options[selectedIndex].value,'graph1_<tmpl_var name=COUNT>','width=950,height=500,status=yes,scrollbars=yes,resizable=yes')">
-            <option selected value="./bandwidthGraph.cgi">-- Select --</option>
-            <option value="./bandwidthGraph.cgi?url=<tmpl_var name=SERVICE>&key=<tmpl_var name=KEY>&key2=<tmpl_var name=KEY2>&dst=<tmpl_var name=DADDRESS>&src=<tmpl_var name=SADDRESS>&dhost=<tmpl_var name=DHOST>&shost=<tmpl_var name=SHOST>&type=<tmpl_var name=PROTOCOL>&length=86400">1 Day</option>
-            <option value="./bandwidthGraph.cgi?url=<tmpl_var name=SERVICE>&key=<tmpl_var name=KEY>&key2=<tmpl_var name=KEY2>&dst=<tmpl_var name=DADDRESS>&src=<tmpl_var name=SADDRESS>&dhost=<tmpl_var name=DHOST>&shost=<tmpl_var name=SHOST>&type=<tmpl_var name=PROTOCOL>&length=604800">1 Week</option>
-            <option value="./bandwidthGraph.cgi?url=<tmpl_var name=SERVICE>&key=<tmpl_var name=KEY>&key2=<tmpl_var name=KEY2>&dst=<tmpl_var name=DADDRESS>&src=<tmpl_var name=SADDRESS>&dhost=<tmpl_var name=DHOST>&shost=<tmpl_var name=SHOST>&type=<tmpl_var name=PROTOCOL>&length=2592000">1 Month</option>
-          </select>
+          <form method="GET" name="form_<tmpl_var name=COUNT>" target="_blank" action="./bandwidthGraph.cgi">
+            <input type="hidden" name="url" value="<tmpl_var name=SERVICE>" />
+            <input type="hidden" name="key" value="<tmpl_var name=KEY>" />
+            <input type="hidden" name="key2" value="<tmpl_var name=KEY2>" />
+            <input type="hidden" name="dst" value="<tmpl_var name=DADDRESS>" />
+            <input type="hidden" name="src" value="<tmpl_var name=SADDRESS>" />
+            <input type="hidden" name="dhost" value="<tmpl_var name=DHOST>" />
+            <input type="hidden" name="shost" value="<tmpl_var name=SHOST>" />
+            <input type="hidden" name="type" value="<tmpl_var name=PROTOCOL>" />                            
+            
+            Start: <select id="smon" name="smon">
+              <option selected value="1">Jan</option>
+              <option value="2">Feb</option>
+              <option value="3">Mar</option>
+              <option value="4">Apr</option>
+              <option value="5">May</option>
+              <option value="6">Jun</option>
+              <option value="7">Jul</option>
+              <option value="8">Aug</option>
+              <option value="9">Sep</option>
+              <option value="10">Oct</option>
+              <option value="11">Nov</option>
+              <option value="12">Dec</option>
+            </select>
+            <select id="sday" name="sday">
+              <option selected value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>              
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23">23</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+              <option value="26">26</option>
+              <option value="27">27</option>
+              <option value="28">28</option>
+              <option value="29">29</option>
+              <option value="30">30</option>
+              <option value="31">31</option>
+            </select>            
+            <input name="syear" size="4" /><br>
+              
+            End: &nbsp;<select id="dmon" name="dmon">
+              <option selected value="1">Jan</option>
+              <option value="2">Feb</option>
+              <option value="3">Mar</option>
+              <option value="4">Apr</option>
+              <option value="5">May</option>
+              <option value="6">Jun</option>
+              <option value="7">Jul</option>
+              <option value="8">Aug</option>
+              <option value="9">Sep</option>
+              <option value="10">Oct</option>
+              <option value="11">Nov</option>
+              <option value="12">Dec</option>
+            </select>
+            <select id="dday" name="dday">
+              <option selected value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>              
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23">23</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+              <option value="26">26</option>
+              <option value="27">27</option>
+              <option value="28">28</option>
+              <option value="29">29</option>
+              <option value="30">30</option>
+              <option value="31">31</option>
+            </select>           
+            <input name="dyear" size="4" /><br>
+
+            <input type="submit" name="Graph" value="Graph" />
+          </form>
         </td>
-<!--        
         <td align="center">
-          <select value="Graph" id="graph2_<tmpl_var name=COUNT>" name="graph2_<tmpl_var name=COUNT>" onChange="window.open(options[selectedIndex].value,'graph2_<tmpl_var name=COUNT>','width=950,height=550,status=yes,scrollbars=yes,resizable=yes')">
-            <option selected value="./bandwidthGraphFlash.cgi">-- Select --</option>
-            <option value="./bandwidthGraphFlash.cgi?url=<tmpl_var name=SERVICE>&key=<tmpl_var name=KEY>&key2=<tmpl_var name=KEY2>&dst=<tmpl_var name=DADDRESS>&src=<tmpl_var name=SADDRESS>&dhost=<tmpl_var name=DHOST>&shost=<tmpl_var name=SHOST>&type=<tmpl_var name=PROTOCOL>&length=86400">1 Day</option>
-            <option value="./bandwidthGraphFlash.cgi?url=<tmpl_var name=SERVICE>&key=<tmpl_var name=KEY>&key2=<tmpl_var name=KEY2>&dst=<tmpl_var name=DADDRESS>&src=<tmpl_var name=SADDRESS>&dhost=<tmpl_var name=DHOST>&shost=<tmpl_var name=SHOST>&type=<tmpl_var name=PROTOCOL>&length=604800">1 Week</option>
-            <option value="./bandwidthGraphFlash.cgi?url=<tmpl_var name=SERVICE>&key=<tmpl_var name=KEY>&key2=<tmpl_var name=KEY2>&dst=<tmpl_var name=DADDRESS>&src=<tmpl_var name=SADDRESS>&dhost=<tmpl_var name=DHOST>&shost=<tmpl_var name=SHOST>&type=<tmpl_var name=PROTOCOL>&length=2592000">1 Month</option>
-          </select>
-        </td>
--->        
-        <td align="center">
-          <select value="Graph" id="graph3_<tmpl_var name=COUNT>" name="graph3_<tmpl_var name=COUNT>" onChange="window.open(options[selectedIndex].value,'graph3_<tmpl_var name=COUNT>','width=950,height=500,status=yes,scrollbars=yes,resizable=yes')">
-            <option selected value="./bandwidthGraphScatter.cgi">-- Select --</option>
-            <option value="./bandwidthGraphScatter.cgi?url=<tmpl_var name=SERVICE>&key=<tmpl_var name=KEY>&key2=<tmpl_var name=KEY2>&dst=<tmpl_var name=DADDRESS>&src=<tmpl_var name=SADDRESS>&dhost=<tmpl_var name=DHOST>&shost=<tmpl_var name=SHOST>&type=<tmpl_var name=PROTOCOL>&length=86400">1 Day</option>
-            <option value="./bandwidthGraphScatter.cgi?url=<tmpl_var name=SERVICE>&key=<tmpl_var name=KEY>&key2=<tmpl_var name=KEY2>&dst=<tmpl_var name=DADDRESS>&src=<tmpl_var name=SADDRESS>&dhost=<tmpl_var name=DHOST>&shost=<tmpl_var name=SHOST>&type=<tmpl_var name=PROTOCOL>&length=604800">1 Week</option>
-            <option value="./bandwidthGraphScatter.cgi?url=<tmpl_var name=SERVICE>&key=<tmpl_var name=KEY>&key2=<tmpl_var name=KEY2>&dst=<tmpl_var name=DADDRESS>&src=<tmpl_var name=SADDRESS>&dhost=<tmpl_var name=DHOST>&shost=<tmpl_var name=SHOST>&type=<tmpl_var name=PROTOCOL>&length=2592000">1 Month</option>
-          </select>
+          <form method="GET" name="forms_<tmpl_var name=COUNT>" target="_blank" action="./bandwidthGraphScatter.cgi">
+            <input type="hidden" name="url" value="<tmpl_var name=SERVICE>" />
+            <input type="hidden" name="key" value="<tmpl_var name=KEY>" />
+            <input type="hidden" name="key2" value="<tmpl_var name=KEY2>" />
+            <input type="hidden" name="dst" value="<tmpl_var name=DADDRESS>" />
+            <input type="hidden" name="src" value="<tmpl_var name=SADDRESS>" />
+            <input type="hidden" name="dhost" value="<tmpl_var name=DHOST>" />
+            <input type="hidden" name="shost" value="<tmpl_var name=SHOST>" />
+            <input type="hidden" name="type" value="<tmpl_var name=PROTOCOL>" />                            
+            
+            Start: <select id="smon" name="smon">
+              <option selected value="1">Jan</option>
+              <option value="2">Feb</option>
+              <option value="3">Mar</option>
+              <option value="4">Apr</option>
+              <option value="5">May</option>
+              <option value="6">Jun</option>
+              <option value="7">Jul</option>
+              <option value="8">Aug</option>
+              <option value="9">Sep</option>
+              <option value="10">Oct</option>
+              <option value="11">Nov</option>
+              <option value="12">Dec</option>
+            </select>
+            <select id="sday" name="sday">
+              <option selected value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>              
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23">23</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+              <option value="26">26</option>
+              <option value="27">27</option>
+              <option value="28">28</option>
+              <option value="29">29</option>
+              <option value="30">30</option>
+              <option value="31">31</option>
+            </select>            
+            <input name="syear" size="4" /><br>
+              
+            End: &nbsp;<select id="dmon" name="dmon">
+              <option selected value="1">Jan</option>
+              <option value="2">Feb</option>
+              <option value="3">Mar</option>
+              <option value="4">Apr</option>
+              <option value="5">May</option>
+              <option value="6">Jun</option>
+              <option value="7">Jul</option>
+              <option value="8">Aug</option>
+              <option value="9">Sep</option>
+              <option value="10">Oct</option>
+              <option value="11">Nov</option>
+              <option value="12">Dec</option>
+            </select>
+            <select id="dday" name="dday">
+              <option selected value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>              
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23">23</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+              <option value="26">26</option>
+              <option value="27">27</option>
+              <option value="28">28</option>
+              <option value="29">29</option>
+              <option value="30">30</option>
+              <option value="31">31</option>
+            </select>           
+            <input name="dyear" size="4" /><br>
+
+            <input type="submit" name="Graph" value="Graph" />
+          </form>
         </td>
       </tr>
       </tmpl_loop>

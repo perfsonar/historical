@@ -264,6 +264,7 @@ else {
                 if ( defined $iaddr and $iaddr ) {
                     $shost = gethostbyaddr( $iaddr, Socket::AF_INET );
                 }
+                $shost = $src unless $shost
             }
             elsif ( &Net::IPv6Addr::is_ipv6( $src ) ) {
                 $saddr = $src;
@@ -277,6 +278,7 @@ else {
                 if ( defined $packed_ip and $packed_ip ) {
                     $saddr = inet_ntoa( $packed_ip );
                 }
+                $saddr = $src unless $saddr;                
             }
 
             my $dst = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst", 1 ), 0 );
@@ -288,6 +290,7 @@ else {
                 if ( defined $iaddr and $iaddr ) {
                     $dhost = gethostbyaddr( $iaddr, Socket::AF_INET );
                 }
+                $dhost = $dst unless $dhost;              
             }
             elsif ( &Net::IPv6Addr::is_ipv6( $dst ) ) {
                 $daddr = $dst;
@@ -301,6 +304,7 @@ else {
                 if ( defined $packed_ip and $packed_ip ) {
                     $daddr = inet_ntoa( $packed_ip );
                 }
+                $daddr = $dst unless $daddr;                
             }
 
             my %temp = ();
@@ -536,6 +540,7 @@ else {
                 if ( defined $iaddr and $iaddr ) {
                     $shost = gethostbyaddr( $iaddr, Socket::AF_INET );
                 }
+                $shost = $src unless $shost;                
             }
             elsif ( &Net::IPv6Addr::is_ipv6( $src ) ) {
                 $saddr = $src;
@@ -549,6 +554,7 @@ else {
                 if ( defined $packed_ip and $packed_ip ) {
                     $saddr = inet_ntoa( $packed_ip );
                 }
+                $saddr = $src unless $saddr;
             }
 
             my $dst   = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst", 1 ), 0 );
@@ -560,6 +566,7 @@ else {
                 if ( defined $iaddr and $iaddr ) {
                     $dhost = gethostbyaddr( $iaddr, Socket::AF_INET );
                 }
+                $dhost = $dst unless $dhost;                
             }
             elsif ( &Net::IPv6Addr::is_ipv6( $dst ) ) {
                 $daddr = $dst;
@@ -573,6 +580,7 @@ else {
                 if ( defined $packed_ip and $packed_ip ) {
                     $daddr = inet_ntoa( $packed_ip );
                 }
+                $daddr = $dst unless $daddr;              
             }
 
             my %temp = ();
@@ -693,7 +701,7 @@ else {
                 }
             }
         } 
-        
+
         my @pairs = ();
         my @histPairs = ();
         my $counter = 0;

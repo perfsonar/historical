@@ -21,6 +21,7 @@ use XML::LibXML;
 use Date::Manip;
 use Socket;
 use POSIX;
+use Time::Local 'timelocal_nocheck';
 
 use FindBin qw($RealBin);
 my $basedir = "$RealBin/";
@@ -46,18 +47,32 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
     $subject .= "    </nmwg:parameters>\n";
     $subject .= "  </nmwg:key>  \n";
 
-    my $time;
+    my $start;
+    my $end;
     if ( $cgi->param( 'length' ) ) {
-        $time = $cgi->param( 'length' );
+        $start = $sec - $cgi->param( 'length' );
+        $end = $sec;
+    }
+    elsif ( $cgi->param( 'smon' ) or $cgi->param( 'sday' ) or $cgi->param( 'syear' ) or $cgi->param( 'dmon' ) or $cgi->param( 'dday' ) or $cgi->param( 'dyear' ) ) {       
+        if ( $cgi->param( 'smon' ) and $cgi->param( 'sday' ) and $cgi->param( 'syear' ) and $cgi->param( 'dmon' ) and $cgi->param( 'dday' ) and $cgi->param( 'dyear' ) ) {        
+            $start = timelocal_nocheck 0,0,0, ( $cgi->param( 'sday' ) - 1 ), ( $cgi->param( 'smon' ) - 1 ), ( $cgi->param( 'syear' ) - 1900 );
+            $end = timelocal_nocheck 0,0,0, ( $cgi->param( 'dday' ) - 1 ), ( $cgi->param( 'dmon' ) - 1 ), ( $cgi->param( 'dyear' ) - 1900 );
+        }
+        else {
+            print "<html><head><title>perfSONAR-PS perfAdmin Bandwidth Graph</title></head>";
+            print "<body><h2 align=\"center\">Graph error; Date not correctly entered.</h2></body></html>";
+            exit(1);
+        }
     }
     else {
-        $time = 86400;
+        $start = $sec - 86400;
+        $end = $sec;
     }
 
     my $result = $ma->setupDataRequest(
         {
-            start      => ( $sec - $time ),
-            end        => $sec,
+            start      => $start,
+            end        => $end,
             subject    => $subject,
             eventTypes => \@eventTypes
         }
@@ -78,8 +93,8 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
         $result2 = $ma->setupDataRequest(
             {
-                start      => ( $sec - $time ),
-                end        => $sec,
+                start      => $start,
+                end        => $end,
                 subject    => $subject2,
                 eventTypes => \@eventTypes
             }
@@ -239,7 +254,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
         print "  </head>\n";
         print "  <body>\n";
 
-        print "    <div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div>\n";
+        print "    <center><div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div></center>\n";
 
         print "    <table border=\"0\" cellpadding=\"0\" width=\"85%\" align=\"center\">";
         print "      <tr>\n";
@@ -309,10 +324,12 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
     print "  </body>\n";
     print "</html>\n";
+    exit(1);
 }
 else {
-    print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
+    print "<html><head><title>perfSONAR-PS perfAdmin Bandwidth Graph</title></head>";
     print "<body><h2 align=\"center\">Graph error, cannot find 'key' or 'URL' to contact; Close window and try again.</h2></body></html>";
+    exit(1);
 }
 
 =head2 scaleValue ( { value } )
@@ -347,7 +364,7 @@ __END__
 
 =head1 SEE ALSO
 
-L<CGI>, L<XML::LibXML>, L<Date::Manip>, L<Socket>, L<POSIX>,
+L<CGI>, L<XML::LibXML>, L<Date::Manip>, L<Socket>, L<POSIX>, L<Time::Local>,
 L<perfSONAR_PS::Client::MA>, L<perfSONAR_PS::Common>,
 L<perfSONAR_PS::Utils::ParameterValidation>
 
