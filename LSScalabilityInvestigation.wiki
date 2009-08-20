@@ -73,6 +73,7 @@ Checked out perfSONAR repository into home directory (must have permission):
 In perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-!LookupService, must now run
  
 {{{
+cd perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService
 sudo make install
 cd scripts
 sudo ./install_dependencies.sh
