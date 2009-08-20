@@ -604,7 +604,7 @@ else {
             my $parser     = XML::LibXML->new();
 
             my $subject = "<nmwg:key id=\"key-1\"><nmwg:parameters id=\"parameters-key-1\"><nmwg:parameter name=\"maKey\">" . $lookup{$metadataId} . "</nmwg:parameter></nmwg:parameters></nmwg:key>";
-            my $time = 86400;
+            my $time = 43200;
 
             my $result = $ma->setupDataRequest(
                 {
@@ -627,10 +627,10 @@ else {
                     my $minval = $dt->getAttribute( "min_delay" );
                     $min = $minval if $minval and $minval < $min; 
                 }                
-                if ( $max ) {
-                    $data{$shost}{$dhost}{"max"} = sprintf( "%.4f", ( $max * 1000 ) );
-                    $data{$shost}{$dhost}{"min"} = sprintf( "%.4f", ( $min * 1000 ) );
-                    $temp{"active"} = 1;
+                if ( $max or ( $min < 999999 ) ) {
+                    $temp{"active"} = 1;            
+                    $data{$shost}{$dhost}{"max"} = sprintf( "%.4f", ( $max * 1000 ) ) if $max;
+                    $data{$shost}{$dhost}{"min"} = sprintf( "%.4f", ( $min * 1000 ) ) if $min < 999999;                    
                 }     
                 else {
                     $temp{"active"} = 0;
