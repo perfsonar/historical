@@ -56,6 +56,14 @@ and/or
 
  `uname -a`
 
+=== Instructions ===
+
+Using these sources for instructions on installation and configuration:
+
+ http://www.internet2.edu/performance/pS-PS/lookup.html
+
+ http://code.google.com/p/perfsonar-ps/wiki/LS
+
 === Preparing _ale_ ===
 
 Checked out perfSONAR repository into home directory (must have permission):
