@@ -48,11 +48,35 @@
 
 === Preparing _ale_ ===
 
- * Checked out perfSONAR repository into home directory.
- * In perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-!LookupService, ran
+Checked out perfSONAR repository into home directory.
+
+In perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-!LookupService, ran
+ 
 {{{
 sudo make install
 cd scripts
 sudo ./install_dependencies.sh
-sudo ./prepare_environment.sh 
+}}}
+
+After this last command, got the following error message:
+
+{{{
+running xml2-config...failed
+The installed version of libxml2 not compatible with XML::LibXML.
+
+You may continue at your own risk, but:
+
+  - don't expect XML::LibXML to build or work correctly!
+  - don't report errors!
+  - don't send patches!
+
+Check the README file for more information on versions
+that are tested with XML::LibXML
+
+  PAJAS/XML-LibXML-1.69.tar.gz
+  /usr/local/bin/perl Makefile.PL -- NO Makefile created
+Running make test
+  Make had some problems, won't test
+Running make install
+  Make had some problems, won't install
 }}}
