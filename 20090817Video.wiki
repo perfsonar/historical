@@ -16,7 +16,7 @@
         * Getting good feedback, lots of bugs to followup on.
         * Will likely have at least two more RCs given the number of bugs. (Next one late next week.)
  # Testing
-    * Brian will work with Marcos, Martin and perhaps Joe on gLS/hLS testing for scaling.
+    * Brian will work with Marcos, Martin and perhaps Joe on [LSScalabilityInvestigation scalability testing] of the gLS/hLS.
  # LHC/Atlas deployments (status update)
     * Giving good feedback.
     * GridFTP archive service from SLAC is on the horizon.
@@ -35,7 +35,7 @@
 
     * Joe will send request for implementation specific web sites in perfsonar.net space.
     * Joe will send email to EU participants to find out who will be at DICE meeting.
-    * Brian will work with Marcos, Martin and perhaps Joe on scalability testing of the hLS/gLS.
+    * Brian will work with Marcos, Martin and perhaps Joe on [LSScalabilityInvestigation scalability testing] of the hLS/gLS.
 
 == Where ==
 
