@@ -50,15 +50,16 @@
 
 Checked out perfSONAR repository into home directory.
 
-In perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-!LookupService, ran
+In perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-!LookupService, must now run
  
 {{{
 sudo make install
 cd scripts
 sudo ./install_dependencies.sh
+sudo ./install_dependencies.sh
 }}}
 
-After this last command, got the following error message:
+After `sudo ./install_dependencies.sh` command, got the following error message:
 
 {{{
 running xml2-config...failed
@@ -79,4 +80,19 @@ Running make test
   Make had some problems, won't test
 Running make install
   Make had some problems, won't install
+}}}
+
+The next installation command, `sudo ./install_dependencies.sh`, does not report anything, which is suspicious and corroborates that the environment must not be healthy.
+
+Trying to start the Lookup Service (`sudo /etc/init.d/lookup_service start`) yields the following error.
+
+{{{
+/opt/perfsonar_ps/lookup_service/bin/daemon.pl --config=/opt/perfsonar_ps/lookup_service/etc/daemon.conf --pidfile=lookup_service.pid --piddir=/var/run --logger=/opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf --user=perfsonar --group=perfsonar
+Can't locate Data/UUID.pm in @INC (@INC contains: /opt/perfsonar_ps/lookup_service/bin/../lib  ./lib ../lib /usr/lib/perl5/site_perl/5.8.6/i386-linux-thread-multi /usr/lib/perl5/site_perl/5.8.5/i386-linux-thread-multi /usr/lib/perl5/site_perl/5.8.4/i386-linux-thread-multi /usr/lib/perl5/site_perl/5.8.3/i386-linux-thread-multi /usr/lib/perl5/site_perl/5.8.6 /usr/lib/perl5/site_perl/5.8.5 /usr/lib/perl5/site_perl/5.8.4 /usr/lib/perl5/site_perl/5.8.3 /usr/lib/perl5/site_perl /usr/lib/perl5/vendor_perl/5.8.6/i386-linux-thread-multi /usr/lib/perl5/vendor_perl/5.8.5/i386-linux-thread-multi /usr/lib/perl5/vendor_perl/5.8.4/i386-linux-thread-multi /usr/lib/perl5/vendor_perl/5.8.3/i386-linux-thread-multi /usr/lib/perl5/vendor_perl/5.8.6 /usr/lib/perl5/vendor_perl/5.8.5 /usr/lib/perl5/vendor_perl/5.8.4 /usr/lib/perl5/vendor_perl/5.8.3 /usr/lib/perl5/vendor_perl /usr/lib/perl5/5.8.6/i386-linux-thread-multi /usr/lib/perl5/5.8.6 . ./lib ../lib/5.8.6/i386-linux-thread-multi ./lib ../lib/5.8.6 ./lib ../lib/i386-linux-thread-multi ./lib ../lib/5.8.5 ./lib ../lib/5.8.4 ./lib ../lib/5.8.3 ./lib ../lib) at /opt/perfsonar_ps/lookup_service/bin/../lib/perfSONAR_PS/Utils/NetLogger.pm line 28.
+BEGIN failed--compilation aborted at /opt/perfsonar_ps/lookup_service/bin/../lib/perfSONAR_PS/Utils/NetLogger.pm line 28.
+Compilation failed in require at /opt/perfsonar_ps/lookup_service/bin/../lib/perfSONAR_PS/Request.pm line 28.
+BEGIN failed--compilation aborted at /opt/perfsonar_ps/lookup_service/bin/../lib/perfSONAR_PS/Request.pm line 28.
+Compilation failed in require at /opt/perfsonar_ps/lookup_service/bin/daemon.pl line 84.
+BEGIN failed--compilation aborted at /opt/perfsonar_ps/lookup_service/bin/daemon.pl line 84.
+./lookup_service start: perfSONAR Lookup Service could not be started
 }}}
