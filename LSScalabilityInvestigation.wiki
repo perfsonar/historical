@@ -1,8 +1,7 @@
-= perfSONAR Lookup Service (LS) Scalability Investigation =
+= perfSONAR Lookup Service (LS) Scalability Tests =
 
 <wiki:toc max_depth="6">
-
-       
+      
 == Current Issues to Investigate in gLS/hLS Services ==
 
  *  Unknown scalability limits
@@ -10,35 +9,35 @@
  *  Failure modes are obscure and hard to debug
  *  Sometimes hLS registers empty summary data
  *  Possible XMLDB locking issues
- *  Behavior when using different values in configuration key "ls_registration_interval"
- *  Behavior when using different values in configuration key "maintenance_interval"
+ *  Behavior when using different values in configuration key "`ls_registration_interval`"
+ *  Behavior when using different values in configuration key "`maintenance_interval`"
 
 
 == Suggested tests ==
 
- *  Use ls_registration_daemon to temporarily register 'fake services'.  Jason has a [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/fakeService/ service emulator] that should help.
- *  Set up a test gLS and hLS, and then play with Jason's "FakeService" tool to see when and how things break.
+ *  Use `ls_registration_daemon` to temporarily register 'fake services'.  Jason has a service emulator [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/fakeService/ FakeService] that should help.
+ *  Set up a test gLS and hLS, and then play with Jason's "!FakeService" tool to see when and how things break.
  *  Query the gLS and verify that everything what was registered is returned in the query. 
- *  Deploy the FakeService on 50 ESnet hosts and see what happens.
+ *  Deploy the !FakeService on 50 ESnet hosts and see what happens.
 
 
 == Testbed ==
 
  #  University of Delaware's Distributed and Meta-Systems Lab (DAMSL) will participate with 3 servers:
-  *  ale.damsl.cis.udel.edu
-  *  moonshine.damsl.cis.udel.edu
-  *  stout.damsl.cis.udel.edu
+  *  _ale_.damsl.cis.udel.edu
+  *  _moonshine_.damsl.cis.udel.edu
+  *  _stout_.damsl.cis.udel.edu
 
- #  Create a new gLS 'cloud', i.e., a new hints file.  The current hints file is located at http://dc211.internet2.edu/gls.root.hints .  Make a new hints file like this that includes the gLS instances created for this testing, and place it on moonshine's web server.
+ #  Create a new gLS 'cloud', i.e., a new hints file.  The current hints file is located at http://dc211.internet2.edu/gls.root.hints .  Make a new hints file like this that includes the gLS instances created for this testing, and place it on _stout_'s web server.
 
- #  Install the LookupService package:
-  *  one gLS in ale:  in the daemon.conf set 'root 1'.
-  *  one hLS in moonshine:  in the daemon.conf set 'root 0'.
+ #  Install the !LookupService package:
+  *  one gLS in _ale_:  in the daemon.conf set '`root 1`'.
+  *  one hLS in _moonshine_:  in the daemon.conf set '`root 0`'.
 
  #  After initial setup and testing:
   *  Install a total of 2 - 3 gLSs:  one at UDel, one at LBL, one somewhere else (could be UDel/LBL, or one in Ann Arbor).
   *  Install at least 3 hLS and probably more.
-  *  Coordinate deployment of FakeService on ESnet hosts on additional LSs.
+  *  Coordinate deployment of !FakeService on ESnet hosts on additional LSs.
  
 
 == Findings ==
