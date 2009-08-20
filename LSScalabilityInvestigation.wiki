@@ -46,10 +46,10 @@
 
 == Findings and Report ==
 
-_ale_
+=== Preparing _ale_ ===
 
  * Checked out perfSONAR repository into home directory.
- * In perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService, ran
+ * In perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-!LookupService, ran
 {{{
 sudo make install
 cd scripts
