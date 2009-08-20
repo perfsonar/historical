@@ -58,7 +58,9 @@ and/or
 
 === Preparing _ale_ ===
 
-Checked out perfSONAR repository into home directory.
+Checked out perfSONAR repository into home directory (must have permission):
+
+ `svn co https://svn.internet2.edu/svn/perfSONAR-PS/`
 
 In perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-!LookupService, must now run
  
