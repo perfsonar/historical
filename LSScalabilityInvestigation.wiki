@@ -50,9 +50,11 @@
 
 To obtain the current OS version, type:
 
-{{{
-cat /etc/issue
-}}}
+ `cat /etc/issue`
+
+and/or
+
+ `uname -a`
 
 === Preparing _ale_ ===
 
