@@ -595,22 +595,50 @@ else {
             $temp{"saddr"} = $saddr;
             $temp{"daddr"} = $daddr;
 
-            unless ( exists $data{$shost} ) {
-                $data{$shost}{"out"}{"total"} = 0;
-                $data{$shost}{"in"}{"total"}  = 0;
-                $data{$shost}{"out"}{"count"} = 0;
-                $data{$shost}{"in"}{"count"}  = 0;
-            }
-            unless ( exists $data{$dhost} ) {
-                $data{$dhost}{"out"}{"total"} = 0;
-                $data{$dhost}{"in"}{"total"}  = 0;
-                $data{$dhost}{"out"}{"count"} = 0;
-                $data{$dhost}{"in"}{"count"}  = 0;
+            unless ( exists $data{$shost}{$dhost} ) {
+                $data{$shost}{$dhost}{"max"} = 0;
+                $data{$shost}{$dhost}{"min"} = 0;
             }
             
-            
-            # add in ability to get recent measurements.  
-            
+            my @eventTypes = ();
+            my $parser     = XML::LibXML->new();
+
+            my $subject = "<nmwg:key id=\"key-1\"><nmwg:parameters id=\"parameters-key-1\"><nmwg:parameter name=\"maKey\">" . $lookup{$metadataId} . "</nmwg:parameter></nmwg:parameters></nmwg:key>";
+            my $time = 86400;
+
+            my $result = $ma->setupDataRequest(
+                {
+                    start      => ( $sec - $time ),
+                    end        => $sec,
+                    subject    => $subject,
+                    eventTypes => \@eventTypes
+                }
+            );
+
+            my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
+            my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
+            if ( $datum1 ) {
+                my $max = 0;
+                my $min = 999999;
+                foreach my $dt ( $datum1->get_nodelist ) {
+                    my $maxval = $dt->getAttribute( "max_delay" );
+                    $max = $maxval if $maxval and $maxval > $max;   
+                                     
+                    my $minval = $dt->getAttribute( "min_delay" );
+                    $min = $minval if $minval and $minval < $min; 
+                }                
+                if ( $max ) {
+                    $data{$shost}{$dhost}{"max"} = sprintf( "%.4f", ( $max * 1000 ) );
+                    $data{$shost}{$dhost}{"min"} = sprintf( "%.4f", ( $min * 1000 ) );
+                    $temp{"active"} = 1;
+                }     
+                else {
+                    $temp{"active"} = 0;
+                }          
+            }
+            else {
+                $temp{"active"} = 0;
+            } 
            
             push @{ $list{$shost}{$dhost} }, \%temp;
         }
@@ -687,13 +715,35 @@ else {
             }
         }
 
-        # add in ability to make graph
-
+        my %colspan = ();
+        foreach my $src ( sort keys %data ) {
+            $colspan{$src} = 1;
+            foreach my $dst ( sort keys %{ $data{$src} } ) {
+                $colspan{$dst} = 1;                
+            }
+        }
+        
+        my @matrixHeader = ();
+        my @matrix = ();
+        foreach my $h1 ( sort keys %colspan ) {
+            push @matrixHeader, { NAME => $h1 };
+            my @temp = ();
+            foreach my $h2 ( sort keys %colspan ) {
+                $data{$h1}{$h2}{"min"} = "*" unless $data{$h1}{$h2}{"min"};
+                $data{$h1}{$h2}{"max"} = "*" unless $data{$h1}{$h2}{"max"};
+                push @temp, { MINVALUE => $data{$h1}{$h2}{"min"}, MAXVALUE => $data{$h1}{$h2}{"max"} };
+            }
+            push @matrix, { NAME => $h1, MATRIXCOLS => \@temp };
+        }
+            
         $template->param(
-            EVENTTYPE => $eventType,
-            SERVICE   => $service,
-            PAIRS     => \@pairs,
-            HISTPAIRS => \@histPairs
+            EVENTTYPE     => $eventType,
+            SERVICE       => $service,
+            PAIRS         => \@pairs,
+            HISTPAIRS     => \@histPairs,
+            MATRIXCOLSPAN => ( scalar( keys %colspan )  + 1 ),
+            MATRIXHEADER  => \@matrixHeader,
+            MATRIX        => \@matrix
         );
     }
     elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" or $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0" ) {
