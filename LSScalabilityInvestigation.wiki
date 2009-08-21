@@ -123,3 +123,22 @@ BEGIN failed--compilation aborted at /opt/perfsonar_ps/lookup_service/bin/daemon
 }}}
 
 Clearly, `libxml2` must be updated on _ale_ prior to installing the LS service.
+
+Trying now to update libxml2 using `sudo yum update libxml2`.  Here's the new error.
+
+{{{
+Setting up Update Process
+Setting up repositories
+updates-released          100% |=========================|  951 B    00:00     
+vlc                       100% |=========================|  951 B    00:00     
+vlc-contrib               100% |=========================|  951 B    00:00     
+http://192.168.0.1/yum/4/extras/i386/repodata/repomd.xml: [Errno 4] IOError: HTTP Error 404: Date: Thu, 20 Aug 2009 23:59:02 GMT
+Server: Apache/2.0.54 (Fedora)
+Content-Length: 312
+Connection: close
+Content-Type: text/html; charset=iso-8859-1
+Trying other mirror.
+Cannot open/read repomd.xml file for repository: extras
+failure: repodata/repomd.xml from extras: [Errno 256] No more mirrors to try.
+Error: failure: repodata/repomd.xml from extras: [Errno 256] No more mirrors to try.
+}}}
