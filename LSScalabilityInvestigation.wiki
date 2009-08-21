@@ -20,6 +20,7 @@
  *  Query the gLS and verify that everything what was registered is returned in the query. 
   *  perfSONAR_PS-perfAdmin/cgi-bin/view.cgi is a program that provides an example of how to query an hLS.  Use, for instance: http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://ps-bw.es.net:8095/perfSONAR_PS/services/hLS
   *  Also useful:  `perfSONAR_PS-perfAdmin/bin/cache.pl`
+  *  For perl client, use examples in etc/requests.  Consult design document for information on how to form the queries and use the eventTypes of the service.
   *  For python, there is a wrapper for the generic perl client (`Shared/client/client.pl`) at:  `test_harness/test_PS.py` 
  *  Deploy the !FakeService on 50 ESnet hosts and see what happens.
 
