@@ -148,3 +148,84 @@ Error: failure: repodata/repomd.xml from extras: [Errno 256] No more mirrors to 
 }}}
 
 The _yum_ tool failed, probably due to a missing `repomd.xml` file (as hinted by the error message), or because there are insufficient mirror sites listed somewhere.  Now, we need to find out how to fix this by surveying _yum_ sites.
+
+From the error message, the URL used to access the file `repomd.xml` seems weird (192.168.0.1, which is a local address).
+
+The directory `/etc/yum.repos.d` contains the configuration files _yum_ uses to access mirror sites for repositories.  The listing is:
+
+{{{
+fedora-devel.repo         fedora.repo                  vlc-contrib.repo
+fedora-extras-devel.repo  fedora-updates.repo          vlc.repo
+fedora-extras.repo        fedora-updates-testing.repo
+}}}
+
+Several of these files contain a reference to the address 192.168.0.1, such as the file `fedora-extras.repo`:
+
+{{{
+[extras]
+name=Fedora Extras $releasever - $basearch
+baseurl=http://192.168.0.1/yum/$releasever/extras/$basearch/
+#mirrorlist=http://fedora.redhat.com/download/mirrors/fedora-extras-$releasever
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-extras
+gpgcheck=1
+}}}
+
+Searching for information on https://fedoraproject.org/wiki/Yum, as of August 20, 2009, at 20:29h EDT (8:29pm EDT), we are welcomed with an empty page with *Yum* written as title.
+
+Searching a bit more aggressively yields the page https://fedoraproject.org/wiki/Extras/Mirrors, where several mirror sites are listed for the _extras_ files.  Now, we need to find mirrors for the other files.
+
+More research produces the URL http://download.fedora.redhat.com/pub/fedora/linux/extras/.  But the subdirectory for Fedora 4 is no longer available under this address.  A README file in this location states that this Fedora version is not maintained (since the current version is Fedora 11).  `libxml2` has to be updated manually.  Turned to http://xmlsoft.org/ for more details on how to do this.
+
+Downloaded the following files in attempt to update libxml2:
+
+ `libxml2-2.7.3-1.x86_64.rpm`
+
+ `libxml2-devel-2.7.3-1.x86_64.rpm`
+ 
+Running a check before attempting any update:
+
+ `rpm -F --test libxml2-2.7.3-1.x86_64.rpm`
+ 
+We get the dependency errors:
+
+{{{
+warning: libxml2-2.7.3-1.x86_64.rpm: Header V3 DSA signature: NOKEY, key ID de95bc1f
+error: Failed dependencies:
+        libc.so.6()(64bit) is needed by libxml2-2.7.3-1.x86_64
+        libc.so.6(GLIBC_2.2.5)(64bit) is needed by libxml2-2.7.3-1.x86_64
+        libc.so.6(GLIBC_2.3)(64bit) is needed by libxml2-2.7.3-1.x86_64
+        libc.so.6(GLIBC_2.3.2)(64bit) is needed by libxml2-2.7.3-1.x86_64
+        libc.so.6(GLIBC_2.3.4)(64bit) is needed by libxml2-2.7.3-1.x86_64
+        libc.so.6(GLIBC_2.4)(64bit) is needed by libxml2-2.7.3-1.x86_64
+        libdl.so.2()(64bit) is needed by libxml2-2.7.3-1.x86_64
+        libdl.so.2(GLIBC_2.2.5)(64bit) is needed by libxml2-2.7.3-1.x86_64
+        libm.so.6()(64bit) is needed by libxml2-2.7.3-1.x86_64
+        libm.so.6(GLIBC_2.2.5)(64bit) is needed by libxml2-2.7.3-1.x86_64
+        libz.so.1()(64bit) is needed by libxml2-2.7.3-1.x86_64
+        rtld(GNU_HASH) is needed by libxml2-2.7.3-1.x86_64
+        libxml2.so.2 is needed by (installed) perl-XML-LibXML-Common-0.13-8.i386
+        libxml2.so.2 is needed by (installed) perl-XML-LibXML-1.58-2.i386
+        libxml2.so.2 is needed by (installed) libxml2-python-2.6.20-1.FC4.i386
+        libxml2.so.2 is needed by (installed) shared-mime-info-0.16-3.i386
+        libxml2.so.2 is needed by (installed) GConf2-2.10.0-4.i386
+        libxml2.so.2 is needed by (installed) libbonobo-2.8.1-1.i386
+        libxml2.so.2 is needed by (installed) gnome-vfs2-2.10.0-5.i386
+        libxml2.so.2 is needed by (installed) libglade2-2.5.1-2.i386
+        libxml2.so.2 is needed by (installed) libgnomecanvas-2.10.0-1.i386
+        libxml2.so.2 is needed by (installed) libxslt-1.1.14-2.i386
+        libxml2.so.2 is needed by (installed) libbonoboui-2.8.1-4.i386
+        libxml2.so.2 is needed by (installed) libgnomeui-2.10.0-1.i386
+        libxml2.so.2 is needed by (installed) firefox-1.0.8-1.1.fc4.i386
+        libxml2.so.2 is needed by (installed) apt-0.5.15lorg3.2-9.fc4.i386
+        libxml2.so.2 is needed by (installed) libcroco-0.6.0-5.i386
+        libxml2.so.2 is needed by (installed) libgsf-1.11.1-2.i386
+        libxml2.so.2 is needed by (installed) libgnomeprint22-2.10.3-1.i386
+        libxml2.so.2 is needed by (installed) libgnomeprintui22-2.10.1-1.i386
+        libxml2.so.2 is needed by (installed) librsvg2-2.9.5-2.i386
+        libxml2.so.2 is needed by (installed) vlc-0.8.5-1.i386
+        libxml2 = 2.6.20 is needed by (installed) libxml2-python-2.6.20-1.FC4.i386
+        libxml2 = 2.6.20 is needed by (installed) libxml2-devel-2.6.20-1.FC4.i386
+}}}
+
+These dependencies need to be resolved before proceeding.
