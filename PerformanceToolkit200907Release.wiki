@@ -125,8 +125,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=261 261] - _*Aaron*_ - JOWAMP requires hostname in .jnlp file    
  * _*Testing*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - _*Brian*_ - Automated Nessus Evaluation of Software 
-     * <font color=yellow>_*In Progress - 8/13*_</font>
-     * Need to do testing after first RC (after JTs)
+     * <font color=yellow>_*In Progress - 8/21*_</font>
+     * RC2 has pased tests
  * _*GUIs*_  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=203 203] - _*Aaron*_ - Error messages when IS cannot be contacted for portions of the Admin GUIs 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=208 208] - _*Aaron*_ - ~~MTU Options in Console Config~~ 	 
@@ -148,7 +148,9 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 8/13*_</font>    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=280 280] - _*Aaron*_ - Administrative Screen - Add Community Error
      * <font color=yellow>_*Needs Testing - 8/17*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=286 286] - _*Jason*_ - Readability in OWAMP/BWCTL Graphs 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=286 286] - _*Aaron*_ - Readability in OWAMP/BWCTL Graphs 
+     * <font color=yellow>_*Coding Done - 8/19*_</font>
+     * Needs to be imported into pS P T
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=288 288] - _*Jason*_ - Alter perfAdmin display to hide (or reposition) measurement sets that are not 'active'   	   
      * <font color=yellow>_*In Progress - 8/17*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=293 293] - _*Aaron*_ - Normalize perfAdmin PingER graphs with pS Performance Toolkit 
