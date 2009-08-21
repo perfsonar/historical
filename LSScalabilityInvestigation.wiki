@@ -228,4 +228,4 @@ error: Failed dependencies:
         libxml2 = 2.6.20 is needed by (installed) libxml2-devel-2.6.20-1.FC4.i386
 }}}
 
-These dependencies need to be resolved before proceeding.
+These dependencies need to be resolved before proceeding.  However, it is likely that updating some other dependency will generate more dependency errors (cascading effect), since the system is 7 versions behind the most current one.
