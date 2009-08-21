@@ -124,7 +124,7 @@ BEGIN failed--compilation aborted at /opt/perfsonar_ps/lookup_service/bin/daemon
 
 Clearly, `libxml2` must be updated on _ale_ prior to installing the LS service.
 
-Trying now to update libxml2 using:
+Trying now to update libxml2 using the _yum_ tool for Fedora:
 
  `sudo yum update libxml2`
 
@@ -146,3 +146,5 @@ Cannot open/read repomd.xml file for repository: extras
 failure: repodata/repomd.xml from extras: [Errno 256] No more mirrors to try.
 Error: failure: repodata/repomd.xml from extras: [Errno 256] No more mirrors to try.
 }}}
+
+The _yum_ tool failed, probably due to a missing `repomd.xml` file (as hinted by the error message), or because there are insufficient mirror sites listed somewhere.  Now, we need to find out how to fix this by surveying _yum_ sites.
