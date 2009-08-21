@@ -124,7 +124,11 @@ BEGIN failed--compilation aborted at /opt/perfsonar_ps/lookup_service/bin/daemon
 
 Clearly, `libxml2` must be updated on _ale_ prior to installing the LS service.
 
-Trying now to update libxml2 using `sudo yum update libxml2`.  Here's the new error.
+Trying now to update libxml2 using:
+
+ `sudo yum update libxml2`
+
+Here's the new error.
 
 {{{
 Setting up Update Process
