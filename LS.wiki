@@ -189,8 +189,8 @@ wget -c http://software.internet2.edu/source/perl-perfSONAR_PS-LookupService-3.1
 tar -zxfv perl-perfSONAR_PS-LookupService-3.1-1.tar.gz
 make install
 cd perl-perfSONAR_PS-LookupService-3.1-1/scripts
-./prepare_environment.sh
 ./install_dependencies.sh
+./prepare_environment.sh
 }}}
 
 These two included scripts will configure the machine's users and startup
