@@ -126,7 +126,7 @@ BEGIN failed--compilation aborted at /opt/perfsonar_ps/lookup_service/bin/daemon
 ./lookup_service start: perfSONAR Lookup Service could not be started
 }}}
 
-Clearly, `libxml2` must be updated on _ale_ prior to installing the LS service.
+Clearly, `libxml2` must be updated on _ale_ prior to installing the LS service.  <i><strong><font color="red">(This assumption is actually wrong.  As pointed out by Jason Zurawski, the error message states </font><font color="purple">Can't locate Data/UUID.pm</font><font color="red">, a Perl problem.  The wrong attempt to solve libxml2 will be maintained here as reference, but the correct solution can be followed through the next section [LSScalabilityInvestigation#Attempt_2].</font></strong></i>
 
 Trying now to update libxml2 using the _yum_ tool for Fedora:
 
@@ -232,4 +232,8 @@ error: Failed dependencies:
         libxml2 = 2.6.20 is needed by (installed) libxml2-devel-2.6.20-1.FC4.i386
 }}}
 
-These dependencies need to be resolved before proceeding.  However, it is likely that updating some other dependency will generate more dependency errors (cascading effect), since the system is 7 versions behind the most current one.
+Stuck at this point.  Too many dependencies to resolve in a system.  Let's continue through another venue below, since it was pointed by Jason Zurawski that the installation problem does not reside specifically in libxml2, but in Perl's Data/UUID.pm.
+
+==== Attempt 2 ====
+
+Detected that Perl's Data/UUID.pm is generating the installation problem.
