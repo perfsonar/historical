@@ -111,7 +111,7 @@ Running make install
 
 This suggests problems with the current version of `libxml2` installed on _ale_.
 
-The next installation command, `sudo ./install_dependencies.sh`, does not report anything, which is suspicious and corroborates that the environment must not be healthy.
+The next installation command, `sudo ./prepare_environment.sh`, does not report anything, which is suspicious and corroborates that the environment must not be healthy.
 
 Trying to start the Lookup Service (`sudo /etc/init.d/lookup_service start`) yields the following error.
 
