@@ -618,8 +618,9 @@ else {
         my $datacounter = 0;
         my $max         = 0;
         foreach my $d ( sort keys %data ) {
+            next if $data{$d}{"out"}{"count"} == 0 and $data{$d}{"in"}{"count"} == 0;           
             my $din  = 0;
-            my $dout = 0;
+            my $dout = 0;            
             $din  = ( $data{$d}{"in"}{"total"} / $data{$d}{"in"}{"count"} )   if $data{$d}{"in"}{"count"};
             $dout = ( $data{$d}{"out"}{"total"} / $data{$d}{"out"}{"count"} ) if $data{$d}{"out"}{"count"};
             $max  = $din                                                      if $din > $max;
