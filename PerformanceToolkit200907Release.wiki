@@ -122,6 +122,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=200 200] - _*Aaron*_ - Upgrade script create owamp database if not present
      * <font color=yellow>_*In Progress - 8/7*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=235 235] - _*Aaron*_ - simplified and documented options needed for configuring OWAMP tests 
+     * <font color=yellow>_*In Progress - 8/24*_</font>   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=261 261] - _*Aaron*_ - JOWAMP requires hostname in .jnlp file    
  * _*Testing*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - _*Brian*_ - Automated Nessus Evaluation of Software 
@@ -152,12 +153,13 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*Coding Done - 8/19*_</font>
      * Needs to be imported into pS P T
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=288 288] - _*Jason*_ - Alter perfAdmin display to hide (or reposition) measurement sets that are not 'active'   	   
-     * <font color=yellow>_*In Progress - 8/17*_</font> 
+     * <font color=green>_*Done - 8/24*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=293 293] - _*Aaron*_ - Normalize perfAdmin PingER graphs with pS Performance Toolkit 
-     * <font color=yellow>_*In Progress - 8/17*_</font> 
+     * <font color=green>_*Done - 8/24*_</font>	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=295 295] - _*Aaron*_ - when changing size of the browser window smaller the Ping Latency table is jumping under the left pane menu
      * <font color=yellow>_*In Progress - 8/17*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=297 297] - _*Jason*_ - gls cache script is failing on the remote hls
+     * <font color=green>_*Done - 8/24*_</font>	
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
@@ -227,7 +229,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=283 283] - _*Jason*_ - pS Performance Toolkit Documentation
      * <font color=yellow>_*In Progress - 8/12*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff*_ - Create organized web-site for pS-Performance-Toolkit    Documentation
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=285 285] - _*Aaron*_ - Upgrade from older NPToolkit doesn't import tests   	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=285 285] - _*Aaron*_ - Upgrade from older NPToolkit doesn't import tests
+     * <font color=yellow>_*In Progress - 8/24*_</font>    	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=290 290] - _*Aaron*_ - Scheduled testing - 'invalid test' error
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=291 291] - _*Aaron*_ - Scheduled Test Screen Shows Hosts Twice	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=292 292] - _*Aaron*_ - GUI Display Consistency
