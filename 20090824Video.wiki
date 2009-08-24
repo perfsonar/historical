@@ -4,7 +4,17 @@
 
  # Attendees:
  # Release Activities for RC3
-
+   * Open Bugs (See Jason's Note from 8/20)
+   * Release Schedule
+     * Bugs Addressed/Tested by Weds (8/26)
+     * Disk Generated/Tested by Thurs (8/27)
+     * Release to Testers by Fri (8/28)
+ # Release Schedule Post RC3
+   * RC4 - 9/11
+   * Release - 9/23
+   * Dates may slide depending on bugs/staff availability
+ # SVN Update (Aaron)  
+ 
 == Where ==
 
 ESnet conference bridge:
