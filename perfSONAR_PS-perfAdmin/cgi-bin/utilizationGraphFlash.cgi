@@ -315,7 +315,7 @@ sub scaleValue {
     my %result = ();
     if ( exists $parameters->{"units"} and $parameters->{"units"} =~ m/^unknown/ ) {
         $result{"value"} = $parameters->{"value"};
-        $result{"mod"}   = q{};        
+        $result{"mod"}   = q{};
     }
     else {
         if ( $parameters->{"value"} < 1000 ) {

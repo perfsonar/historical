@@ -51,22 +51,22 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
     my $end;
     if ( $cgi->param( 'length' ) ) {
         $start = $sec - $cgi->param( 'length' );
-        $end = $sec;
+        $end   = $sec;
     }
-    elsif ( $cgi->param( 'smon' ) or $cgi->param( 'sday' ) or $cgi->param( 'syear' ) or $cgi->param( 'dmon' ) or $cgi->param( 'dday' ) or $cgi->param( 'dyear' ) ) {       
-        if ( $cgi->param( 'smon' ) and $cgi->param( 'sday' ) and $cgi->param( 'syear' ) and $cgi->param( 'dmon' ) and $cgi->param( 'dday' ) and $cgi->param( 'dyear' ) ) {        
-            $start = timelocal_nocheck 0,0,0, ( $cgi->param( 'sday' ) - 1 ), ( $cgi->param( 'smon' ) - 1 ), ( $cgi->param( 'syear' ) - 1900 );
-            $end = timelocal_nocheck 0,0,0, ( $cgi->param( 'dday' ) - 1 ), ( $cgi->param( 'dmon' ) - 1 ), ( $cgi->param( 'dyear' ) - 1900 );
+    elsif ( $cgi->param( 'smon' ) or $cgi->param( 'sday' ) or $cgi->param( 'syear' ) or $cgi->param( 'dmon' ) or $cgi->param( 'dday' ) or $cgi->param( 'dyear' ) ) {
+        if ( $cgi->param( 'smon' ) and $cgi->param( 'sday' ) and $cgi->param( 'syear' ) and $cgi->param( 'dmon' ) and $cgi->param( 'dday' ) and $cgi->param( 'dyear' ) ) {
+            $start = timelocal_nocheck 0, 0, 0, ( $cgi->param( 'sday' ) - 1 ), ( $cgi->param( 'smon' ) - 1 ), ( $cgi->param( 'syear' ) - 1900 );
+            $end   = timelocal_nocheck 0, 0, 0, ( $cgi->param( 'dday' ) - 1 ), ( $cgi->param( 'dmon' ) - 1 ), ( $cgi->param( 'dyear' ) - 1900 );
         }
         else {
             print "<html><head><title>perfSONAR-PS perfAdmin Bandwidth Graph</title></head>";
             print "<body><h2 align=\"center\">Graph error; Date not correctly entered.</h2></body></html>";
-            exit(1);
+            exit( 1 );
         }
     }
     else {
         $start = $sec - 86400;
-        $end = $sec;
+        $end   = $sec;
     }
 
     my $result = $ma->setupDataRequest(
@@ -257,7 +257,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
         print "    <center><div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div></center>\n";
 
         print "    <table border=\"0\" cellpadding=\"0\" width=\"85%\" align=\"center\">";
-        
+
         print "      <tr>\n";
         my $temp = q{};
         if ( $DStats{"max"} and $DStats{"average"} and $DStats{"current"} ) {
@@ -276,10 +276,10 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             printf( "        <td align=\"left\" width=\"35%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
         }
         print "      </tr>\n";
-        
+
         print "      <tr>\n";
         if ( $DStats{"max"} and $DStats{"average"} and $DStats{"current"} ) {
-            
+
             print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Average <b>" . $cgi->param( 'shost' ) . "</b> -> <b>" . $cgi->param( 'dhost' ) . "</b></font></td>\n";
             $temp = scaleValue( { value => $SStats{"average"} } );
             printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
@@ -287,7 +287,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Average <b>" . $cgi->param( 'dhost' ) . "</b> -> <b>" . $cgi->param( 'shost' ) . "</b></font></td>\n";
             $temp = scaleValue( { value => $DStats{"average"} } );
             printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
-            
+
         }
         else {
             print "        <td align=\"right\" width=\"20%\"><br></td>\n";
@@ -296,10 +296,10 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             printf( "        <td align=\"left\" width=\"35%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
         }
         print "      </tr>\n";
-        
+
         print "      <tr>\n";
         if ( $DStats{"max"} and $DStats{"average"} and $DStats{"current"} ) {
-            
+
             print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Last <b>" . $cgi->param( 'shost' ) . "</b> -> <b>" . $cgi->param( 'dhost' ) . "</b></font></td>\n";
             $temp = scaleValue( { value => $SStats{"current"} } );
             printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
@@ -307,7 +307,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             print "        <td align=\"left\" width=\"35%\"><font size=\"-1\">Last <b>" . $cgi->param( 'dhost' ) . "</b> -> <b>" . $cgi->param( 'shost' ) . "</b></font></td>\n";
             $temp = scaleValue( { value => $DStats{"current"} } );
             printf( "        <td align=\"right\" width=\"10%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
-            
+
         }
         else {
             print "        <td align=\"right\" width=\"20%\"><br></td>\n";
@@ -316,7 +316,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             printf( "        <td align=\"left\" width=\"35%\"><font size=\"-1\">%.2f " . $temp->{"mod"} . "bps</font></td>\n", $temp->{"value"} );
         }
         print "      </tr>\n";
-        
+
         print "    </table>\n";
     }
     else {
@@ -329,12 +329,12 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
     print "  </body>\n";
     print "</html>\n";
-    exit(1);
+    exit( 1 );
 }
 else {
     print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
     print "<body><h2 align=\"center\">Graph error, cannot find 'key' or 'URL' to contact; Close window and try again.</h2></body></html>";
-    exit(1);
+    exit( 1 );
 }
 
 =head2 scaleValue ( { value } )

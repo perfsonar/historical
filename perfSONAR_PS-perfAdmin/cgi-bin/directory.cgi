@@ -48,31 +48,31 @@ my %serviceMap = (
 
 my %daemonMap = (
     "list.owamp" => {
-        "EVENTTYPE" => [ "http://ggf.org/ns/nmwg/tools/owamp/1.0" ],
+        "EVENTTYPE" => ["http://ggf.org/ns/nmwg/tools/owamp/1.0"],
         "TYPE"      => "OWAMP"
     },
     "list.traceroute" => {
-        "EVENTTYPE" => [ "http://ggf.org/ns/nmwg/tools/traceroute/1.0" ],
+        "EVENTTYPE" => ["http://ggf.org/ns/nmwg/tools/traceroute/1.0"],
         "TYPE"      => "TRACEROUTE"
     },
     "list.ping" => {
-        "EVENTTYPE" => [ "http://ggf.org/ns/nmwg/tools/ping/1.0" ],
+        "EVENTTYPE" => ["http://ggf.org/ns/nmwg/tools/ping/1.0"],
         "TYPE"      => "PING"
     },
     "list.npad" => {
-        "EVENTTYPE" => [ "http://ggf.org/ns/nmwg/tools/npad/1.0" ],
+        "EVENTTYPE" => ["http://ggf.org/ns/nmwg/tools/npad/1.0"],
         "TYPE"      => "NPAD"
     },
     "list.ndt" => {
-        "EVENTTYPE" => [ "http://ggf.org/ns/nmwg/tools/ndt/1.0" ],
+        "EVENTTYPE" => ["http://ggf.org/ns/nmwg/tools/ndt/1.0"],
         "TYPE"      => "NDT"
     },
     "list.bwctl" => {
-        "EVENTTYPE" => [ "http://ggf.org/ns/nmwg/tools/bwctl/1.0" ],
+        "EVENTTYPE" => ["http://ggf.org/ns/nmwg/tools/bwctl/1.0"],
         "TYPE"      => "BWCTL"
     },
     "list.phoebus" => {
-        "EVENTTYPE" => [ "http://ggf.org/ns/nmwg/tools/phoebus/1.0" ],
+        "EVENTTYPE" => ["http://ggf.org/ns/nmwg/tools/phoebus/1.0"],
         "TYPE"      => "PHOEBUS"
     }
 );

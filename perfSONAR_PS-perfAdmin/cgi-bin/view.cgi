@@ -25,37 +25,37 @@ use lib "$RealBin/../lib";
 use perfSONAR_PS::Client::DCN;
 use perfSONAR_PS::Common qw( unescapeString escapeString find extract );
 
-my $cgi = new CGI;
+my $cgi    = new CGI;
 my $parser = XML::LibXML->new();
 
-croak "hLS instance not provided unless " unless $cgi->param('hls');
+croak "hLS instance not provided unless " unless $cgi->param( 'hls' );
 
-my $INSTANCE = $cgi->param('hls');
+my $INSTANCE = $cgi->param( 'hls' );
 my $template = HTML::Template->new( filename => "$RealBin/../etc/view.tmpl" );
 
-my @data = ();
-my $ls = new perfSONAR_PS::Client::LS( { instance => $INSTANCE } );
-my @eT = ( "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/2.0", "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0" );
+my @data  = ();
+my $ls    = new perfSONAR_PS::Client::LS( { instance => $INSTANCE } );
+my @eT    = ( "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/2.0", "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0" );
 my @store = ( "LSStore", "LSStore-summary", "LSStore-control" );
 
 foreach my $e ( @eT ) {
     foreach my $s ( @store ) {
         my $METADATA = q{};
-        my $q = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n/nmwg:store[\@type=\"".$s."\"]/nmwg:metadata\n";
-        my $result = $ls->queryRequestLS( { query => $q, eventType => $e, format => 1 } );
-        if ( exists $result->{"eventType"} and not ( $result->{"eventType"} =~ m/^error/ ) ) {
-            my $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"};        
+        my $q        = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n/nmwg:store[\@type=\"" . $s . "\"]/nmwg:metadata\n";
+        my $result   = $ls->queryRequestLS( { query => $q, eventType => $e, format => 1 } );
+        if ( exists $result->{"eventType"} and not( $result->{"eventType"} =~ m/^error/ ) ) {
+            my $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"};
             my $md = find( $doc->getDocumentElement, ".//nmwg:metadata", 0 );
             foreach my $m ( $md->get_nodelist ) {
                 $METADATA .= escapeString( $m->toString ) . "\n";
             }
         }
         else {
-            if( exists $result->{"eventType"} and $result->{"eventType"} eq "error.ls.query.ls_output_not_accepted" ) {
+            if ( exists $result->{"eventType"} and $result->{"eventType"} eq "error.ls.query.ls_output_not_accepted" ) {
                 $result = $ls->queryRequestLS( { query => $q, eventType => $e, format => 0 } );
                 $result->{"response"} = unescapeString( $result->{"response"} );
-                if ( exists $result->{"eventType"} and not ( $result->{"eventType"} =~ m/^error/ ) ) {
-                    my $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"};        
+                if ( exists $result->{"eventType"} and not( $result->{"eventType"} =~ m/^error/ ) ) {
+                    my $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"};
                     my $md = find( $doc->getDocumentElement, ".//nmwg:metadata", 0 );
                     foreach my $m ( $md->get_nodelist ) {
                         $METADATA .= escapeString( $m->toString ) . "\n";
@@ -71,21 +71,21 @@ foreach my $e ( @eT ) {
         }
 
         my $DATA = q{};
-        $q = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n/nmwg:store[\@type=\"".$s."\"]/nmwg:data\n";
+        $q = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n/nmwg:store[\@type=\"" . $s . "\"]/nmwg:data\n";
         $result = $ls->queryRequestLS( { query => $q, eventType => $e, format => 1 } );
-        if ( exists $result->{eventType} and not ( $result->{eventType} =~ m/^error/ ) ) {
-            my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
+        if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
+            my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
             my $data = find( $doc->getDocumentElement, ".//nmwg:data", 0 );
             foreach my $d ( $data->get_nodelist ) {
                 $DATA .= escapeString( $d->toString ) . "\n";
             }
         }
         else {
-            if( exists $result->{"eventType"} and $result->{"eventType"} eq "error.ls.query.ls_output_not_accepted" ) {
+            if ( exists $result->{"eventType"} and $result->{"eventType"} eq "error.ls.query.ls_output_not_accepted" ) {
                 $result = $ls->queryRequestLS( { query => $q, eventType => $e, format => 0 } );
                 $result->{"response"} = unescapeString( $result->{"response"} );
-                if ( exists $result->{"eventType"} and not ( $result->{"eventType"} =~ m/^error/ ) ) {
-                    my $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"};        
+                if ( exists $result->{"eventType"} and not( $result->{"eventType"} =~ m/^error/ ) ) {
+                    my $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"};
                     my $data = find( $doc->getDocumentElement, ".//nmwg:data", 0 );
                     foreach my $d ( $data->get_nodelist ) {
                         $DATA .= escapeString( $d->toString ) . "\n";
@@ -99,7 +99,7 @@ foreach my $e ( @eT ) {
                 $DATA = "EventType:\t" . $result->{'eventType'} . "\nResponse:\t" . $result->{"response"};
             }
         }
-        
+
         push @data, { COLLECTION => $e, STORE => $s, METADATA => $METADATA, DATA => $DATA };
     }
 }
@@ -108,7 +108,7 @@ print $cgi->header();
 
 $template->param(
     INSTANCE => $INSTANCE,
-    DATA => \@data
+    DATA     => \@data
 );
 
 print $template->output;

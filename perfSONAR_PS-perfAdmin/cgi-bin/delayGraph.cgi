@@ -50,22 +50,22 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
     my $end;
     if ( $cgi->param( 'length' ) ) {
         $start = $sec - $cgi->param( 'length' );
-        $end = $sec;
+        $end   = $sec;
     }
-    elsif ( $cgi->param( 'smon' ) or $cgi->param( 'sday' ) or $cgi->param( 'syear' ) or $cgi->param( 'dmon' ) or $cgi->param( 'dday' ) or $cgi->param( 'dyear' ) ) {       
-        if ( $cgi->param( 'smon' ) and $cgi->param( 'sday' ) and $cgi->param( 'syear' ) and $cgi->param( 'dmon' ) and $cgi->param( 'dday' ) and $cgi->param( 'dyear' ) ) {        
-            $start = timelocal_nocheck 0,0,0, ( $cgi->param( 'sday' ) - 1 ), ( $cgi->param( 'smon' ) - 1 ), ( $cgi->param( 'syear' ) - 1900 );
-            $end = timelocal_nocheck 0,0,0, ( $cgi->param( 'dday' ) - 1 ), ( $cgi->param( 'dmon' ) - 1 ), ( $cgi->param( 'dyear' ) - 1900 );
+    elsif ( $cgi->param( 'smon' ) or $cgi->param( 'sday' ) or $cgi->param( 'syear' ) or $cgi->param( 'dmon' ) or $cgi->param( 'dday' ) or $cgi->param( 'dyear' ) ) {
+        if ( $cgi->param( 'smon' ) and $cgi->param( 'sday' ) and $cgi->param( 'syear' ) and $cgi->param( 'dmon' ) and $cgi->param( 'dday' ) and $cgi->param( 'dyear' ) ) {
+            $start = timelocal_nocheck 0, 0, 0, ( $cgi->param( 'sday' ) - 1 ), ( $cgi->param( 'smon' ) - 1 ), ( $cgi->param( 'syear' ) - 1900 );
+            $end   = timelocal_nocheck 0, 0, 0, ( $cgi->param( 'dday' ) - 1 ), ( $cgi->param( 'dmon' ) - 1 ), ( $cgi->param( 'dyear' ) - 1900 );
         }
         else {
             print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
             print "<body><h2 align=\"center\">Graph error; Date not correctly entered.</h2></body></html>";
-            exit(1);
+            exit( 1 );
         }
     }
     else {
         $start = $sec - 7200;
-        $end = $sec;
+        $end   = $sec;
     }
 
     my $result = $ma->setupDataRequest(
@@ -168,7 +168,6 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             $store{$e_secs}{"sent"}{"dst"} = $sent if $e_secs and $sent;
         }
     }
-
 
     my $counter = 0;
     foreach my $time ( keys %store ) {
@@ -332,12 +331,12 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
     print "  </body>\n";
     print "</html>\n";
-    exit(1);
+    exit( 1 );
 }
 else {
     print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
     print "<body><h2 align=\"center\">Graph error, cannot find 'key' or 'URL' to contact; Close window and try again.</h2></body></html>";
-    exit(1);
+    exit( 1 );
 }
 
 __END__

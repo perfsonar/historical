@@ -13,6 +13,7 @@ For each gLS instance, dump it's known knowledge of hLS isntance, and then dump
 each hLS's knowledge of registered services.
 
 =cut
+
 use HTML::Template;
 use CGI;
 use CGI::Carp;
@@ -21,20 +22,20 @@ use FindBin qw($RealBin);
 my $basedir = "$RealBin/";
 use lib "$RealBin/../lib";
 
-my $base = "/var/lib/perfsonar/perfAdmin/cache";
+my $base     = "/var/lib/perfsonar/perfAdmin/cache";
 my $template = HTML::Template->new( filename => "$RealBin/../etc/tree.tmpl" );
-my $CGI = CGI->new();
+my $CGI      = CGI->new();
 
 my $lastMod = "at an unknown time...";
 
-my $gLSFile = $base . "/list.glsmap";
+my $gLSFile    = $base . "/list.glsmap";
 my $hLSMapFile = $base . "/list.hlsmap";
-my $hLSFile = $base . "/list.hls";
-my @glslist = ();
-my @hlslist = ();
-my @list = ();
-if ( -f $gLSFile and $hLSMapFile  and $hLSFile ) {
-    my ($mtime) = (stat ( $gLSFile ) )[9];
+my $hLSFile    = $base . "/list.hls";
+my @glslist    = ();
+my @hlslist    = ();
+my @list       = ();
+if ( -f $gLSFile and $hLSMapFile and $hLSFile ) {
+    my ( $mtime ) = ( stat( $gLSFile ) )[9];
     $lastMod = "on " . gmtime( $mtime ) . " UTC";
 
     open( READ, "<" . $gLSFile ) or croak "Can't open gLS Map File";
@@ -48,22 +49,22 @@ if ( -f $gLSFile and $hLSMapFile  and $hLSFile ) {
     open( READ3, "<" . $hLSFile ) or croak "Can't open hLS File";
     my @hlscontent2 = <READ3>;
     close( READ3 );
-    
+
     my $counter = 1;
     foreach my $c ( @glscontent ) {
         $c =~ s/\n//g;
-        my @gls = split(/\|/, $c);
-        my @hls = split(/,/, $gls[1]);
+        my @gls = split( /\|/, $c );
+        my @hls = split( /,/,  $gls[1] );
         my @hls_list = ();
         foreach my $h ( @hls ) {
-            my @service_list  = ();
+            my @service_list = ();
             foreach my $c2 ( @hlscontent ) {
                 $c2 =~ s/\n//g;
-                my @hls2 = split(/\|/, $c2);
+                my @hls2 = split( /\|/, $c2 );
                 next unless $h eq $hls2[0];
-                my @services = split(/,/, $hls2[1]);
-                foreach my $s ( @services ) {          
-                    next unless $s =~ m/^http:\/\//;      
+                my @services = split( /,/, $hls2[1] );
+                foreach my $s ( @services ) {
+                    next unless $s =~ m/^http:\/\//;
                     push @service_list, { NAME => $s };
                 }
                 last;
@@ -71,28 +72,29 @@ if ( -f $gLSFile and $hLSMapFile  and $hLSFile ) {
             push @hls_list, { NAME => $h, SERVICES => \@service_list };
         }
         push @glslist, { NAME => $gls[0], COUNT => $counter };
-        push @list, { NAME => $gls[0], HLS => \@hls_list };
+        push @list,    { NAME => $gls[0], HLS   => \@hls_list };
         $counter++;
     }
 
     $counter = 1;
     foreach my $c ( @hlscontent2 ) {
         $c =~ s/\n//g;
-        my @fields = split(/\|/, $c);
+        my @fields = split( /\|/, $c );
         push @hlslist, { NAME => $fields[0], COUNT => $counter, DESC => $fields[3] };
         $counter++;
     }
 
 }
 else {
+
     # do something...
 }
 
 print $CGI->header();
 
 $template->param(
-    MOD => $lastMod,
-    GLS => \@list,
+    MOD          => $lastMod,
+    GLS          => \@list,
     GLSINSTANCES => \@glslist,
     HLSINSTANCES => \@hlslist
 );
