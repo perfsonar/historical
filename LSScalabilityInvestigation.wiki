@@ -35,11 +35,11 @@
  *  Create a new gLS 'cloud', i.e., a new hints file.  The current hints file is located at http://dc211.internet2.edu/gls.root.hints .  Make a new hints file like this that includes the gLS instances created for this testing, and place it on _stout_'s web server (/var/www/external).  The contents of the file will be:
 
 {{{
-  http://ale.damsl.cis.udel.edu:9990/perfSONAR_PS/services/gLS
+  http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
 }}}
 
  *  Install the !LookupService package:
-  *  one gLS in _ale_, port 9990:  in the daemon.conf set '`root 1`'.
+  *  one gLS in _ale_, port ~~9990~~ 7000:  in the daemon.conf set '`root 1`'.
   *  one hLS in _moonshine_, standard port:  in the daemon.conf set '`root 0`'.
 
  *  After initial setup and testing:
@@ -110,6 +110,46 @@ Running make install
 }}}
 
 This suggests problems with the current version of `libxml2` installed on _ale_.
+
+	 <strong><font color="red">Note:  For <i>ale</i>, there is not much that can be done about this error.  XML::LibXML is designed to work with only certain versions of libxml2, it has explicit entries in the module makefile because of this.  Checking libxml version numbers at <i>ale</i>:
+
+	{{{
+	$ rpm -qa | grep xml
+	libxml-devel-1.8.17-13
+	libxml-1.8.17-13
+	libxml2-2.6.20-1.FC4
+	libxml2-python-2.6.20-1.FC4
+	libxml2-devel-2.6.20-1.FC4
+	perl-libxml-perl-0.08-1
+	dbxml-2.3.10-2
+	}}}
+
+	The libxml2 version is 'recent' enough, just not what the latest XML::LibXML wants to see.  Now, entering the CPAN shell:
+
+	  `perl -MCPAN -e shell`
+
+	Then running this command:
+
+	  `cpan[2]> m XML::LibXML`
+
+	Yields:
+
+	{{{
+	Going to write /home/mportnoi/.cpan/Metadata
+	Module id = XML::LibXML
+		DESCRIPTION  Interface to the libxml library
+		CPAN_USERID  PHISH (Christian Glahn <phish@cpan.org>)
+		CPAN_VERSION 1.69
+		CPAN_FILE    P/PA/PAJAS/XML-LibXML-1.69.tar.gz
+		DSLIP_STATUS RmhOp (released,mailing-list,hybrid,object-oriented,Standard-Perl)
+		MANPAGE      XML::LibXML - Perl Binding for libxml2
+		INST_FILE    /usr/local/lib/perl5/site_perl/5.8.8/i686-linux/XML/LibXML.pm
+		INST_VERSION 1.66
+	}}}
+
+	The installed version of LibXML is 1.66, which is new enough for the current purposes.</font></strong>
+ 
+
 
 The next installation command, `sudo ./prepare_environment.sh`, does not report anything, which is suspicious and corroborates that the environment must not be healthy.
 
@@ -236,4 +276,27 @@ Stuck at this point.  Too many dependencies to resolve in a system.  Let's conti
 
 ==== Attempt 2 ====
 
-Detected that Perl's Data/UUID.pm is generating the installation problem.
+Detected that Perl's Data/UUID.pm is generating the installation problem.  Let us try a different install approach, per instructed by Jason.
+
+First, checkout or update the SVN repository.
+
+ `svn co https://svn.internet2.edu/svn/perfSONAR-PS/`
+ 
+The Makefile at `perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService`, as well as the installation scripts (`install_dependencies.sh` and `prepare_environment.sh`) and `lookup_service` start/stop scripts at directory `scripts` all consider that the Lookup Service will be installed at `/opt/perfsonar_ps`.  If this is not desirable, these files can be altered to reflect the new install directory.  But, in this attempt, we will not run the install scripts, also considering that there is already a Lookup Service running on _ale_.  We will run the LS directly from the checked out repository directory.
+
+To facilitate starting and stopping the service, let us edit the `lookup_service` start/stop script at `scripts`.  Basically, we need to change the variable `PREFIX` to reflect the correct directory.  Thus, we edit as follows:
+
+{{{
+#!/bin/bash
+#
+# Init file for perfSONAR Lookup Service
+#
+# chkconfig: 2345 60 20
+# description: perfSONAR Lookup Service
+#
+
+PREFIX=/home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService
+#PREFIX=/opt/perfsonar_ps/lookup_service
+BINDIR=${PREFIX}/bin
+...
+}}}
