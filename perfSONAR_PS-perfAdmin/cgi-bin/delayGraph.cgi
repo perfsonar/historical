@@ -21,6 +21,7 @@ use XML::LibXML;
 use Date::Manip;
 use Socket;
 use POSIX;
+use Time::Local 'timelocal_nocheck';
 
 use FindBin qw($RealBin);
 my $basedir = "$RealBin/";
@@ -45,18 +46,32 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
     $subject .= "    </nmwg:parameters>\n";
     $subject .= "  </nmwg:key>  \n";
 
-    my $time;
+    my $start;
+    my $end;
     if ( $cgi->param( 'length' ) ) {
-        $time = $cgi->param( 'length' );
+        $start = $sec - $cgi->param( 'length' );
+        $end = $sec;
+    }
+    elsif ( $cgi->param( 'smon' ) or $cgi->param( 'sday' ) or $cgi->param( 'syear' ) or $cgi->param( 'dmon' ) or $cgi->param( 'dday' ) or $cgi->param( 'dyear' ) ) {       
+        if ( $cgi->param( 'smon' ) and $cgi->param( 'sday' ) and $cgi->param( 'syear' ) and $cgi->param( 'dmon' ) and $cgi->param( 'dday' ) and $cgi->param( 'dyear' ) ) {        
+            $start = timelocal_nocheck 0,0,0, ( $cgi->param( 'sday' ) - 1 ), ( $cgi->param( 'smon' ) - 1 ), ( $cgi->param( 'syear' ) - 1900 );
+            $end = timelocal_nocheck 0,0,0, ( $cgi->param( 'dday' ) - 1 ), ( $cgi->param( 'dmon' ) - 1 ), ( $cgi->param( 'dyear' ) - 1900 );
+        }
+        else {
+            print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
+            print "<body><h2 align=\"center\">Graph error; Date not correctly entered.</h2></body></html>";
+            exit(1);
+        }
     }
     else {
-        $time = 7200;
+        $start = $sec - 7200;
+        $end = $sec;
     }
 
     my $result = $ma->setupDataRequest(
         {
-            start      => ( $sec - $time ),
-            end        => $sec,
+            start      => $start,
+            end        => $end,
             resolution => 5,
             subject    => $subject,
             eventTypes => \@eventTypes
@@ -78,8 +93,8 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
         $result2 = $ma->setupDataRequest(
             {
-                start      => ( $sec - $time ),
-                end        => $sec,
+                start      => $start,
+                end        => $end,
                 resolution => 5,
                 subject    => $subject2,
                 eventTypes => \@eventTypes
@@ -317,17 +332,19 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
     print "  </body>\n";
     print "</html>\n";
+    exit(1);
 }
 else {
     print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
     print "<body><h2 align=\"center\">Graph error, cannot find 'key' or 'URL' to contact; Close window and try again.</h2></body></html>";
+    exit(1);
 }
 
 __END__
 
 =head1 SEE ALSO
 
-L<CGI>, L<XML::LibXML>, L<Date::Manip>, L<Socket>, L<POSIX>,
+L<CGI>, L<XML::LibXML>, L<Date::Manip>, L<Socket>, L<POSIX>, L<Time::Local>, 
 L<perfSONAR_PS::Client::MA>, L<perfSONAR_PS::Common>
 
 To join the 'perfSONAR-PS' mailing list, please visit:

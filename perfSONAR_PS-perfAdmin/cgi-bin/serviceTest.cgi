@@ -433,8 +433,15 @@ else {
         my ( $stsec, $stmin, $sthour, $stday, $stmonth, $styear ) = localtime();
         $stmonth += 1;
         $styear += 1900;
-
-        # add in date flipping stuff to go back 2 months...
+        
+        # XXX
+        # JZ 8/24 - until we can get a date range from the service, start
+        #           2 months back...
+        $stmonth -= 2; 
+        if ( $stmonth <= 0 ) {
+            $stmonth += 12;
+            $styear -= 1;
+        }
 
         my ( $dtsec, $dtmin, $dthour, $dtday, $dtmonth, $dtyear ) = localtime();       
         $dtmonth += 1;
@@ -686,7 +693,7 @@ else {
             my $parser     = XML::LibXML->new();
 
             my $subject = "<nmwg:key id=\"key-1\"><nmwg:parameters id=\"parameters-key-1\"><nmwg:parameter name=\"maKey\">" . $lookup{$metadataId} . "</nmwg:parameter></nmwg:parameters></nmwg:key>";
-            my $time = 43200;
+            my $time = 86400;
 
             my $result = $ma->setupDataRequest(
                 {
@@ -776,6 +783,81 @@ else {
             }
         } 
 
+        my ( $stsec, $stmin, $sthour, $stday, $stmonth, $styear ) = localtime();
+        $stmonth += 1;
+        $styear += 1900;
+        
+        # XXX
+        # JZ 8/24 - until we can get a date range from the service, start
+        #           2 months back...
+        $stmonth -= 2; 
+        if ( $stmonth <= 0 ) {
+            $stmonth += 12;
+            $styear -= 1;
+        }
+
+        my ( $dtsec, $dtmin, $dthour, $dtday, $dtmonth, $dtyear ) = localtime();       
+        $dtmonth += 1;
+        $dtyear += 1900;
+ 
+        my @mon = ( "" , "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" );
+        my @sday = ();
+        my @smon = ();
+        my @syear = ();
+        my @dday = ();
+        my @dmon = ();
+        my @dyear = ();
+        my $selected = 0;
+        for ( my $x = 1; $x < 13; $x++ ) {
+            if ( $stmonth == $x ) {
+                push @smon, { VALUE => $x, NAME => $mon[$x], SELECTED => 1 };
+            }
+            else {
+                push @smon, { VALUE => $x, NAME => $mon[$x] };
+            }   
+        }
+        for ( my $x = 1; $x < 32; $x++ ) {
+            if ( $stday == $x ) {
+                push @sday, { VALUE => $x, NAME => $x, SELECTED => 1 };
+            }
+            else {
+                push @sday, { VALUE => $x, NAME => $x };
+            }
+        }        
+        for ( my $x = 2000; $x < 2016; $x++ ) {
+            if ( $styear == $x ) {
+                push @syear, { VALUE => $x, NAME => $x, SELECTED => 1 };
+            }
+            else {
+                push @syear, { VALUE => $x, NAME => $x };
+            }
+        }        
+        
+        for ( my $x = 1; $x < 13; $x++ ) {
+            if ( $dtmonth == $x ) {
+                push @dmon, { VALUE => $x, NAME => $mon[$x], SELECTED => 1 };
+            }
+            else {
+                push @dmon, { VALUE => $x, NAME => $mon[$x] };
+            }
+        }
+        for ( my $x = 1; $x < 32; $x++ ) {
+            if ( $dtday == $x ) {
+                push @dday, { VALUE => $x, NAME => $x, SELECTED => 1 };
+            }
+            else {
+                push @dday, { VALUE => $x, NAME => $x };
+            }
+        }
+        for ( my $x = 2000; $x < 2016; $x++ ) {
+            if ( $dtyear == $x ) {
+                push @dyear, { VALUE => $x, NAME => $x, SELECTED => 1 };
+            }
+            else {
+                push @dyear, { VALUE => $x, NAME => $x };
+            }
+        }    
+
         my @pairs = ();
         my @histPairs = ();
         my $counter = 0;
@@ -785,11 +867,37 @@ else {
                 foreach my $set ( @{ $list{$src}{$dst} } ) {
                     next if $mark{ $set->{"key"} };                    
                     if ( exists $set->{"active"} and $set->{"active"} ) {
-                        push @pairs, { SADDRESS => $set->{"saddr"}, SHOST => $set->{"src"}, DADDRESS => $set->{"daddr"}, DHOST => $set->{"dst"}, KEY => $set->{"key"}, COUNT => $counter, SERVICE => $service, KEY2 => $hostMap{ $set->{"key"} } };
+                        push @pairs, 
+                            { 
+                            SADDRESS => $set->{"saddr"}, 
+                            SHOST    => $set->{"src"}, 
+                            DADDRESS => $set->{"daddr"}, 
+                            DHOST    => $set->{"dst"}, 
+                            KEY      => $set->{"key"}, 
+                            COUNT    => $counter, 
+                            SERVICE  => $service, 
+                            KEY2     => $hostMap{ $set->{"key"} } 
+                            };
                         $counter++;
                     }
                     else {
-                        push @histPairs, { SADDRESS => $set->{"saddr"}, SHOST => $set->{"src"}, DADDRESS => $set->{"daddr"}, DHOST =>$set->{"dst"}, KEY => $set->{"key"}, COUNT => $counter, SERVICE => $service, KEY2 => $hostMap{ $set->{"key"} } };
+                        push @histPairs, 
+                            { 
+                            SADDRESS => $set->{"saddr"}, 
+                            SHOST    => $set->{"src"}, 
+                            DADDRESS => $set->{"daddr"}, 
+                            DHOST    =>$set->{"dst"}, 
+                            KEY      => $set->{"key"}, 
+                            COUNT    => $counter, 
+                            SERVICE  => $service, 
+                            KEY2     => $hostMap{ $set->{"key"} },
+                            SMON     => \@smon,
+                            SDAY     => \@sday,
+                            SYEAR    => \@syear,
+                            DMON     => \@dmon,
+                            DDAY     => \@dday,
+                            DYEAR    => \@dyear 
+                            };
                         $counter++;
                     }        
                     $mark{ $hostMap{ $set->{"key"} } } = 1 if $hostMap{ $set->{"key"} }; 
