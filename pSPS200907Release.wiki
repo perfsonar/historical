@@ -109,10 +109,10 @@ Due to the time constraints placed on release team members, the Joint Techs Conf
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=247 247] - _*Jeff*_ - /etc/init.d/perfsonarbuoy_owp_master script will start multiple instances of powmaster; have to kill manually 	       
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=248 248] - _*Jason*_ - improvements for perfsonar-buoy README file 	          
  * _*perfAdmin*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=243 243] - _*Jason*_ - empty rows in ps-buoy report 	   
-     * <font color=green>_*Done - 8/24*_</font>	
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=244 244] - _*Jason*_ - 4 lines in graphs; graph title suggests should only be one.
-     * <font color=green>_*Done - 8/24*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=243 243] - _*Jason*_ - ~~empty rows in ps-buoy report~~ 	   
+     * <font color=green>_*Fixed - 8/24*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=244 244] - _*Jason*_ - ~~4 lines in graphs; graph title suggests should only be one.~~
+     * <font color=green>_*Fixed - 8/24*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=300 300] - _*Jeff*_ - localhost connection between bwmaster and bwcollector failing    Usability
      
 === Code Reviews ===

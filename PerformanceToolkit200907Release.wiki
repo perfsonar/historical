@@ -131,7 +131,7 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*GUIs*_  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=203 203] - _*Aaron*_ - Error messages when IS cannot be contacted for portions of the Admin GUIs 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=208 208] - _*Aaron*_ - ~~MTU Options in Console Config~~ 	 
-     * <font color=green>_*Done - 8/5*_</font>
+     * <font color=green>_*Fixed - 8/5*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=209 209] - _*Aaron*_ - Scheduled Testing GUI 
      * <font color=yellow>_*In Progress - 8/17*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=214 214] - _*Aaron*_ - GUIs should clearly reflect the decission to set up a 'latency host' vs a 'bandwidth' host 	 
@@ -152,14 +152,14 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=286 286] - _*Aaron*_ - Readability in OWAMP/BWCTL Graphs 
      * <font color=yellow>_*Coding Done - 8/19*_</font>
      * Needs to be imported into pS P T
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=288 288] - _*Jason*_ - Alter perfAdmin display to hide (or reposition) measurement sets that are not 'active'   	   
-     * <font color=green>_*Done - 8/24*_</font>	
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=293 293] - _*Aaron*_ - Normalize perfAdmin PingER graphs with pS Performance Toolkit 
-     * <font color=green>_*Done - 8/24*_</font>	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=288 288] - _*Jason*_ - ~~Alter perfAdmin display to hide (or reposition) measurement sets that are not 'active'~~   	   
+     * <font color=green>_*Fixed - 8/24*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=293 293] - _*Aaron*_ - ~~Normalize perfAdmin PingER graphs with pS Performance Toolkit~~ 
+     * <font color=green>_*Fixed - 8/24*_</font>	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=295 295] - _*Aaron*_ - when changing size of the browser window smaller the Ping Latency table is jumping under the left pane menu
      * <font color=yellow>_*In Progress - 8/17*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=297 297] - _*Jason*_ - gls cache script is failing on the remote hls
-     * <font color=green>_*Done - 8/24*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=297 297] - _*Jason*_ - ~~gls cache script is failing on the remote hls~~
+     * <font color=green>_*Fixed - 8/24*_</font>	
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
@@ -172,7 +172,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=83 83] - _*Aaron*_ - Live CD Network Card Drivers (Broadcom)
      * <font color=yellow>_*In Progress - 6/23*_</font>: Most up to date drivers are included, needs testing on host with broadcom
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=98 98] - _*Jason*_ - ~~Ensure all service packages have init.d scripts~~
-     * <font color=green>_*Done - 8/11*_</font>	
+     * <font color=green>_*Fixed - 8/11*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=140 140] - _*Aaron*_ - Upgrades of NPToolkit may miss key file changes 	 	
      * <font color=yellow>_*In Progress - 7/2*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=164 164] - _*Aaron*_ - Add option to completely clear disk/partition table and all
@@ -188,25 +188,25 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - Colors in console configuration 	 	 
      * <font color=yellow>_*In Progress - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=204 204] - _*Aaron*_ - ~~pre-load gLS cache on ISO~~
-     * <font color=green>_*Done - 8/7*_</font>     
+     * <font color=green>_*Fixed - 8/7*_</font>     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=206 206] - _*Aaron*_ - ~~non-rfc1918 addresses were getting flagged as local addresses~~ 	 
-     * <font color=green>_*Done - 8/4*_</font>
+     * <font color=green>_*Fixed - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=207 207] - _*Aaron*_ - pS Performance Toolit Bootup Suggestions	
      * <font color=yellow>_*In Progress - 8/5*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=212 212] - _*Aaron*_ - Simplify prompt for advertised interface 	
      * <font color=yellow>_*In Progress - 8/6*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=213 213] - _*Aaron*_ - ~~Delete hLS-XMLDB on upgrade/reboot~~ 	 
-     * <font color=green>_*Done - 8/6*_</font>
+     * <font color=green>_*Fixed - 8/6*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218 218] - _*Aaron*_ - NTP Server Selection 	 
      * <font color=yellow>_*In Progress - 8/13*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=222 222] - _*Aaron*_ - ~~hostname and hosts.[allow|deny] must be preserved~~ 	 
-     * <font color=green>_*Done - 8/6*_</font>	
+     * <font color=green>_*Fixed - 8/6*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=249 249] - _*Aaron*_ - ~~minimum memory script issues~~   	 
-     * <font color=green>_*Done - 8/4*_</font>
+     * <font color=green>_*Fixed - 8/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=250 250] - _*Aaron*_ - ~~NTP Server Section Fails~~ 	 
-     * <font color=green>_*Done - 8/6*_</font>
+     * <font color=green>_*Fixed - 8/6*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=252 252] - _*Aaron*_ - ~~have to click "Save" in the Enabled Services menu to kill BWCTL daemon~~ 
-     * <font color=green>_*Done - 8/6*_</font>
+     * <font color=green>_*Fixed - 8/6*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=254 254] - _*Aaron*_ - gLs lookup does not work after upgrade   	 
      * <font color=yellow>_*In Progress - 8/7*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=259 259] - _*Aaron*_ - Add iptables REDIRECT to kernel 
@@ -214,7 +214,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=260 260] - _*Aaron*_ - SSH access after console configuration   	    	 
      * <font color=yellow>_*In Progress - 8/12*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=263 263] - _*Jason*_ - ~~pSB Log Location~~
-     * <font color=green>_*Done - 8/13*_</font>
+     * <font color=green>_*Fixed - 8/13*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=264 264] - _*Aaron*_ - Enabled Services Screen 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=265 265] - _*Aaron*_ - Clean Out Disk Prior to Release 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=267 267] - _*Aaron*_ - Error reporting on pS Performance Toolkit 	 
@@ -237,6 +237,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*Needs Testing - 8/17*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=298 298] - _*Jason*_ - Advanced Cacti data collection for localhost
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=299 299] - _*Aaron*_ - pS Performance Toolit w/ HP Raid Controller  
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=301 301] - _*Aaron*_ - Update perfSONAR Services + GUIs from Release Branch   
 
 === Code Reviews ===
 
