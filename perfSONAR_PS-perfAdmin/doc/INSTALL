@@ -78,6 +78,7 @@ the following Perl libraries, libraries, and external tools to function:
     - Data::Validate::IP
     - Date::Manip 
     - Digest::MD5
+    - English
     - Exporter
     - Getopt::Long
     - HTML::Template
@@ -89,6 +90,7 @@ the following Perl libraries, libraries, and external tools to function:
     - Net::IPv6Addr
     - Params::Validate
     - Time::HiRes
+    - Time::Local
     - XML::LibXML
   * Libraries
     - LibXML2
@@ -222,5 +224,5 @@ and
 
 --------------------------------------------------------------------------------
 
-Fri Jul 31 12:09:30 EDT 2009
+Mon Aug 24 14:45:05 EDT 2009
 

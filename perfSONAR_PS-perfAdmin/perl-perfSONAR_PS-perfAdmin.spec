@@ -38,6 +38,7 @@ Requires:		perl(Net::CIDR)
 Requires:		perl(Net::IPv6Addr)
 Requires:		perl(Params::Validate)
 Requires:		perl(Time::HiRes)
+Requires:		perl(Time::Local)
 Requires:		perl(XML::LibXML) >= 1.60
 #Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:       perl
@@ -97,12 +98,24 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/*
 
 %changelog
-* Fri Aug 17 2009 zurawski@internet2.edu 3.1-3
+* Mon Aug 24 2009 zurawski@internet2.edu 3.1-3
 - Fixes to to documentation and package structure. 
-- Adding new graph support for PingER 
+- Adding new graph support for PingER
+- Bugfixes
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=297
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=288
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=286
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=244
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=243
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=226
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=225
 
 * Tue Jul 21 2009 zurawski@internet2.edu 3.1-2
 - Bugfixes in several graphs.
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=143
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=141
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=136
 
 * Thu Jul 9 2009 zurawski@internet2.edu 3.1-1
 - Initial release as an RPM
+

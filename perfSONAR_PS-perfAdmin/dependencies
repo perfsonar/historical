@@ -27,6 +27,7 @@ Readonly
 Scalar::Util
 Socket
 Time::HiRes
+Time::Local
 XML::LibXML
 aliased
 base
