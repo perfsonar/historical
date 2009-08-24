@@ -759,7 +759,7 @@ else {
             my $parser     = XML::LibXML->new();
 
             my $subject = "<nmwg:key id=\"key-1\"><nmwg:parameters id=\"parameters-key-1\"><nmwg:parameter name=\"maKey\">" . $lookup{$metadataId} . "</nmwg:parameter></nmwg:parameters></nmwg:key>";
-            my $time    = 86400;
+            my $time    = 43200;
 
             my $result = $ma->setupDataRequest(
                 {
