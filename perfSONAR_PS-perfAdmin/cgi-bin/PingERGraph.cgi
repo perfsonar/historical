@@ -22,6 +22,7 @@ use Date::Manip;
 use Socket;
 use POSIX;
 use Config::General;
+use English qw( -no_match_vars );
 
 use FindBin qw($RealBin);
 my $basedir = "$RealBin/";
@@ -89,7 +90,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
     print "<html>\n";
     print "  <head>\n";
-    print "    <title>perfSONAR-PS perfAdmin Delay Graph</title>\n";
+    print "    <title>perfSONAR-PS perfAdmin PingER Graph</title>\n";
 
     if ( scalar keys %store > 0 ) {
 
@@ -176,7 +177,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
     print "</html>\n";
 }
 else {
-    print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
+    print "<html><head><title>perfSONAR-PS perfAdmin PingER Graph</title></head>";
     print "<body><h2 align=\"center\">Graph error, cannot find 'key' or 'URL' to contact; Close window and try again.</h2></body></html>";
 }
 
@@ -185,7 +186,7 @@ __END__
 =head1 SEE ALSO
 
 L<CGI>, L<XML::LibXML>, L<Date::Manip>, L<Socket>, L<POSIX>, L<Config::General>,
-L<perfSONAR_PS::Client::PingER>, L<perfSONAR_PS::Common>
+L<English>, L<perfSONAR_PS::Client::PingER>, L<perfSONAR_PS::Common>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

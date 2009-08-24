@@ -21,6 +21,7 @@ use Date::Manip;
 use Socket;
 use POSIX;
 use Data::Validate::IP qw(is_ipv4);
+use English qw( -no_match_vars );
 
 use FindBin qw($RealBin);
 my $basedir = "$RealBin/";
@@ -115,10 +116,22 @@ if ( ( $cgi->param( 'key1_type' ) or $cgi->param( 'key2_type' ) ) and $cgi->para
         }
     );
 
-    my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
+    my $doc1 = q{};
+    eval { $doc1 = $parser->parse_string( $result->{"data"}->[0] ); };
+    if ( $EVAL_ERROR ) {
+        print "<html><head><title>perfSONAR-PS perfAdmin Utilization Graph</title></head>";
+        print "<body><h2 align=\"center\">Cannot parse XML response from service.</h2></body></html>";
+        exit( 1 );
+    }
     my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
 
-    my $doc2 = $parser->parse_string( $result2->{"data"}->[0] );
+    my $doc2 = q{};
+    eval { $doc2 = $parser->parse_string( $result2->{"data"}->[0] ); };
+    if ( $EVAL_ERROR ) {
+        print "<html><head><title>perfSONAR-PS perfAdmin Utilization Graph</title></head>";
+        print "<body><h2 align=\"center\">Cannot parse XML response from service.</h2></body></html>";
+        exit( 1 );
+    }
     my $datum2 = find( $doc2->getDocumentElement, "./*[local-name()='datum']", 0 );
 
     my %store   = ();
@@ -299,7 +312,7 @@ if ( ( $cgi->param( 'key1_type' ) or $cgi->param( 'key2_type' ) ) and $cgi->para
     print "</html>\n";
 }
 else {
-    print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
+    print "<html><head><title>perfSONAR-PS perfAdmin Utilization Graph</title></head>";
     print "<body><h2 align=\"center\">Graph error, cannot find 'key1_type', 'key2_type', or 'URL' to contact; Close window and try again.</h2></body></html>";
 }
 
@@ -341,7 +354,7 @@ __END__
 
 =head1 SEE ALSO
 
-L<CGI>, L<XML::LibXML>, L<Date::Manip>, L<Socket>, L<POSIX>,
+L<CGI>, L<XML::LibXML>, L<Date::Manip>, L<Socket>, L<POSIX>, L<English>,
 L<perfSONAR_PS::Client::MA>, L<perfSONAR_PS::Common>,
 L<perfSONAR_PS::Utils::ParameterValidation>
 

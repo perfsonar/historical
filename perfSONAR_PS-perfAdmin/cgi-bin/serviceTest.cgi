@@ -21,6 +21,7 @@ use XML::LibXML;
 use Socket;
 use Data::Validate::IP qw(is_ipv4);
 use Net::IPv6Addr;
+use English qw( -no_match_vars );
 
 use FindBin qw($RealBin);
 my $basedir = "$RealBin/";
@@ -108,7 +109,15 @@ unless ( $#{ $result->{"metadata"} } > -1 ) {
     exit( 1 );
 }
 
-my $metadata = $parser->parse_string( $result->{"metadata"}->[0] );
+my $metadata = q{};
+eval { $metadata = $parser->parse_string( $result->{"metadata"}->[0] ); };
+if ( $EVAL_ERROR ) {
+    $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
+    $template->param( ERROR => "Could not parse XML response from MA <b><i>" . $service . "</i></b>." );
+    print $template->output;
+    exit( 1 );
+}
+
 my $et = extract( find( $metadata->getDocumentElement, ".//nmwg:eventType", 1 ), 0 );
 
 if ( $et eq "error.ma.storage" ) {
@@ -121,7 +130,15 @@ else {
 
         my %lookup = ();
         foreach my $d ( @{ $result->{"data"} } ) {
-            my $data          = $parser->parse_string( $d );
+            my $data = q{};
+            eval { $data = $parser->parse_string( $d ); };
+            if ( $EVAL_ERROR ) {
+                $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
+                $template->param( ERROR => "Could not parse XML response from MA <b><i>" . $service . "</i></b>." );
+                print $template->output;
+                exit( 1 );
+            }
+
             my $metadataIdRef = $data->getDocumentElement->getAttribute( "metadataIdRef" );
             my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
             if ( $key ) {
@@ -140,7 +157,15 @@ else {
 
         my %list = ();
         foreach my $md ( @{ $result->{"metadata"} } ) {
-            my $metadata   = $parser->parse_string( $md );
+            my $metadata = q{};
+            eval { $metadata = $parser->parse_string( $md ); };
+            if ( $EVAL_ERROR ) {
+                $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
+                $template->param( ERROR => "Could not parse XML response from MA <b><i>" . $service . "</i></b>." );
+                print $template->output;
+                exit( 1 );
+            }
+
             my $metadataId = $metadata->getDocumentElement->getAttribute( "id" );
             my $dir        = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:direction", 1 ), 0 );
             my $host       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:hostName", 1 ), 0 );
@@ -243,7 +268,15 @@ else {
 
         my %lookup = ();
         foreach my $d ( @{ $result->{"data"} } ) {
-            my $data          = $parser->parse_string( $d );
+            my $data = q{};
+            eval { $data = $parser->parse_string( $d ); };
+            if ( $EVAL_ERROR ) {
+                $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
+                $template->param( ERROR => "Could not parse XML response from MA <b><i>" . $service . "</i></b>." );
+                print $template->output;
+                exit( 1 );
+            }
+
             my $metadataIdRef = $data->getDocumentElement->getAttribute( "metadataIdRef" );
             my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
             $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
@@ -252,7 +285,15 @@ else {
         my %list = ();
         my %data = ();
         foreach my $md ( @{ $result->{"metadata"} } ) {
-            my $metadata   = $parser->parse_string( $md );
+            my $metadata = q{};
+            eval { $metadata = $parser->parse_string( $md ); };
+            if ( $EVAL_ERROR ) {
+                $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
+                $template->param( ERROR => "Could not parse XML response from MA <b><i>" . $service . "</i></b>." );
+                print $template->output;
+                exit( 1 );
+            }
+
             my $metadataId = $metadata->getDocumentElement->getAttribute( "id" );
 
             my $src   = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
@@ -349,7 +390,15 @@ else {
                 }
             );
 
-            my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
+            my $doc1 = q{};
+            eval { $doc1 = $parser->parse_string( $result->{"data"}->[0] ); };
+            if ( $EVAL_ERROR ) {
+                $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
+                $template->param( ERROR => "Could not parse XML response from MA <b><i>" . $service . "</i></b>." );
+                print $template->output;
+                exit( 1 );
+            }
+
             my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
             if ( $datum1 ) {
                 my $dcounter = 0;
@@ -600,7 +649,15 @@ else {
 
         my %lookup = ();
         foreach my $d ( @{ $result->{"data"} } ) {
-            my $data          = $parser->parse_string( $d );
+            my $data = q{};
+            eval { $data = $parser->parse_string( $d ); };
+            if ( $EVAL_ERROR ) {
+                $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
+                $template->param( ERROR => "Could not parse XML response from MA <b><i>" . $service . "</i></b>." );
+                print $template->output;
+                exit( 1 );
+            }
+
             my $metadataIdRef = $data->getDocumentElement->getAttribute( "metadataIdRef" );
             my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
             $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
@@ -609,7 +666,15 @@ else {
         my %list = ();
         my %data = ();
         foreach my $md ( @{ $result->{"metadata"} } ) {
-            my $metadata   = $parser->parse_string( $md );
+            my $metadata = q{};
+            eval { $metadata = $parser->parse_string( $md ); };
+            if ( $EVAL_ERROR ) {
+                $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
+                $template->param( ERROR => "Could not parse XML response from MA <b><i>" . $service . "</i></b>." );
+                print $template->output;
+                exit( 1 );
+            }
+
             my $metadataId = $metadata->getDocumentElement->getAttribute( "id" );
 
             my $src   = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
@@ -705,7 +770,15 @@ else {
                 }
             );
 
-            my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
+            my $doc1 = q{};
+            eval { $doc1 = $parser->parse_string( $result->{"data"}->[0] ); };
+            if ( $EVAL_ERROR ) {
+                $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
+                $template->param( ERROR => "Could not parse XML response from MA <b><i>" . $service . "</i></b>." );
+                print $template->output;
+                exit( 1 );
+            }
+
             my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
             if ( $datum1 ) {
                 my $max = 0;
@@ -943,7 +1016,15 @@ else {
 
         my %lookup = ();
         foreach my $d ( @{ $result->{"data"} } ) {
-            my $data          = $parser->parse_string( $d );
+            my $data = q{};
+            eval { $data = $parser->parse_string( $d ); };
+            if ( $EVAL_ERROR ) {
+                $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
+                $template->param( ERROR => "Could not parse XML response from MA <b><i>" . $service . "</i></b>." );
+                print $template->output;
+                exit( 1 );
+            }
+
             my $metadataIdRef = $data->getDocumentElement->getAttribute( "metadataIdRef" );
             next unless $metadataIdRef;
 
@@ -956,7 +1037,15 @@ else {
 
         my %list = ();
         foreach my $md ( @{ $result->{"metadata"} } ) {
-            my $metadata   = $parser->parse_string( $md );
+            my $metadata = q{};
+            eval { $metadata = $parser->parse_string( $md ); };
+            if ( $EVAL_ERROR ) {
+                $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
+                $template->param( ERROR => "Could not parse XML response from MA <b><i>" . $service . "</i></b>." );
+                print $template->output;
+                exit( 1 );
+            }
+
             my $metadataId = $metadata->getDocumentElement->getAttribute( "id" );
 
             my $src        = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src",             1 ), 0 );
@@ -1052,8 +1141,8 @@ __END__
 =head1 SEE ALSO
 
 L<CGI>, L<HTML::Template>, L<XML::LibXML>, L<Socket>, L<Data::Validate::IP>,
-L<Net::IPv6Addr>, L<perfSONAR_PS::Client::MA>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Utils::ParameterValidation>
+L<English>, L<Net::IPv6Addr>, L<perfSONAR_PS::Client::MA>,
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::Utils::ParameterValidation>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

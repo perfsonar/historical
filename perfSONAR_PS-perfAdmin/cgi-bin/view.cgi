@@ -17,6 +17,7 @@ use CGI;
 use HTML::Template;
 use XML::LibXML;
 use CGI::Carp qw(fatalsToBrowser);
+use English qw( -no_match_vars );
 
 use FindBin qw($RealBin);
 my $basedir = "$RealBin/";
@@ -44,10 +45,16 @@ foreach my $e ( @eT ) {
         my $q        = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n/nmwg:store[\@type=\"" . $s . "\"]/nmwg:metadata\n";
         my $result   = $ls->queryRequestLS( { query => $q, eventType => $e, format => 1 } );
         if ( exists $result->{"eventType"} and not( $result->{"eventType"} =~ m/^error/ ) ) {
-            my $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"};
-            my $md = find( $doc->getDocumentElement, ".//nmwg:metadata", 0 );
-            foreach my $m ( $md->get_nodelist ) {
-                $METADATA .= escapeString( $m->toString ) . "\n";
+            my $doc = q{};
+            eval { $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"}; };
+            if ( $EVAL_ERROR ) {
+                $METADATA .= "Cannot parse XML output from service.";
+            }
+            else {
+                my $md = find( $doc->getDocumentElement, ".//nmwg:metadata", 0 );
+                foreach my $m ( $md->get_nodelist ) {
+                    $METADATA .= escapeString( $m->toString ) . "\n";
+                }
             }
         }
         else {
@@ -55,10 +62,16 @@ foreach my $e ( @eT ) {
                 $result = $ls->queryRequestLS( { query => $q, eventType => $e, format => 0 } );
                 $result->{"response"} = unescapeString( $result->{"response"} );
                 if ( exists $result->{"eventType"} and not( $result->{"eventType"} =~ m/^error/ ) ) {
-                    my $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"};
-                    my $md = find( $doc->getDocumentElement, ".//nmwg:metadata", 0 );
-                    foreach my $m ( $md->get_nodelist ) {
-                        $METADATA .= escapeString( $m->toString ) . "\n";
+                    my $doc = q{};
+                    eval { $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"}; };
+                    if ( $EVAL_ERROR ) {
+                        $METADATA .= "Cannot parse XML output from service.";
+                    }
+                    else {
+                        my $md = find( $doc->getDocumentElement, ".//nmwg:metadata", 0 );
+                        foreach my $m ( $md->get_nodelist ) {
+                            $METADATA .= escapeString( $m->toString ) . "\n";
+                        }
                     }
                 }
                 else {
@@ -74,10 +87,16 @@ foreach my $e ( @eT ) {
         $q = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n/nmwg:store[\@type=\"" . $s . "\"]/nmwg:data\n";
         $result = $ls->queryRequestLS( { query => $q, eventType => $e, format => 1 } );
         if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
-            my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
-            my $data = find( $doc->getDocumentElement, ".//nmwg:data", 0 );
-            foreach my $d ( $data->get_nodelist ) {
-                $DATA .= escapeString( $d->toString ) . "\n";
+            my $doc = q{};
+            eval { $doc = $parser->parse_string( $result->{response} ) if exists $result->{response}; };
+            if ( $EVAL_ERROR ) {
+                $DATA .= "Cannot parse XML output from service.";
+            }
+            else {
+                my $data = find( $doc->getDocumentElement, ".//nmwg:data", 0 );
+                foreach my $d ( $data->get_nodelist ) {
+                    $DATA .= escapeString( $d->toString ) . "\n";
+                }
             }
         }
         else {
@@ -85,10 +104,16 @@ foreach my $e ( @eT ) {
                 $result = $ls->queryRequestLS( { query => $q, eventType => $e, format => 0 } );
                 $result->{"response"} = unescapeString( $result->{"response"} );
                 if ( exists $result->{"eventType"} and not( $result->{"eventType"} =~ m/^error/ ) ) {
-                    my $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"};
-                    my $data = find( $doc->getDocumentElement, ".//nmwg:data", 0 );
-                    foreach my $d ( $data->get_nodelist ) {
-                        $DATA .= escapeString( $d->toString ) . "\n";
+                    my $doc = q{};
+                    eval { $doc = $parser->parse_string( $result->{"response"} ) if exists $result->{"response"}; };
+                    if ( $EVAL_ERROR ) {
+                        $DATA .= "Cannot parse XML output from service.";
+                    }
+                    else {
+                        my $data = find( $doc->getDocumentElement, ".//nmwg:data", 0 );
+                        foreach my $d ( $data->get_nodelist ) {
+                            $DATA .= escapeString( $d->toString ) . "\n";
+                        }
                     }
                 }
                 else {
@@ -117,7 +142,7 @@ __END__
 
 =head1 SEE ALSO
 
-L<CGI>, L<HTML::Template>, L<XML::LibXML>, L<CGI::Carp>, L<FindBin>,
+L<CGI>, L<HTML::Template>, L<XML::LibXML>, L<CGI::Carp>, L<FindBin>, L<English>,
 L<perfSONAR_PS::Client::DCN>, L<perfSONAR_PS::Common>
 
 To join the 'perfSONAR-PS' mailing list, please visit:

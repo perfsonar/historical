@@ -22,6 +22,7 @@ use Date::Manip;
 use Socket;
 use POSIX;
 use Time::Local 'timelocal_nocheck';
+use English qw( -no_match_vars );
 
 use FindBin qw($RealBin);
 my $basedir = "$RealBin/";
@@ -78,7 +79,14 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
         }
     );
 
-    my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
+    my $doc1 = q{};
+    eval { $doc1 = $parser->parse_string( $result->{"data"}->[0] ); };
+    if ( $EVAL_ERROR ) {
+        print "<html><head><title>perfSONAR-PS perfAdmin Bandwidth Graph</title></head>";
+        print "<body><h2 align=\"center\">Cannot parse XML response from service.</h2></body></html>";
+        exit( 1 );
+    }
+    
     my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
 
     my $doc2;
@@ -100,7 +108,13 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             }
         );
 
-        $doc2 = $parser->parse_string( $result2->{"data"}->[0] );
+        eval { $doc2 = $parser->parse_string( $result2->{"data"}->[0] ); };
+        if ( $EVAL_ERROR ) {
+            print "<html><head><title>perfSONAR-PS perfAdmin Bandwidth Graph</title></head>";
+            print "<body><h2 align=\"center\">Cannot parse XML response from service.</h2></body></html>";
+            exit( 1 );
+        }
+        
         $datum2 = find( $doc2->getDocumentElement, "./*[local-name()='datum']", 0 );
     }
 
@@ -365,7 +379,7 @@ __END__
 =head1 SEE ALSO
 
 L<CGI>, L<XML::LibXML>, L<Date::Manip>, L<Socket>, L<POSIX>, L<Time::Local>,
-L<perfSONAR_PS::Client::MA>, L<perfSONAR_PS::Common>,
+L<English>, L<perfSONAR_PS::Client::MA>, L<perfSONAR_PS::Common>,
 L<perfSONAR_PS::Utils::ParameterValidation>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
