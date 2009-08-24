@@ -2668,24 +2668,23 @@ sub retrieveSQL {
         # If we were to limt the data, here is the place to do so.  We can set
         #   a 'lower bound' to be some amount of time < now().
 
-        my $lowerBound = q{};
-        my $upperBound = q{};
-        if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
-            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = owpgmtime( $parameters->{time_settings}->{"START"}->{"internal"} );
-            $lowerBound = sprintf "%4d%02d", ( $year + 1900 ), ( $mon + 1 );            
-        }
-        if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
-            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = owpgmtime( $parameters->{time_settings}->{"END"}->{"internal"} );
-            $upperBound = sprintf "%4d%02d", ( $year + 1900 ), ( $mon + 1 );
-           
-        }
+#        my $lowerBound = q{};
+#        my $upperBound = q{};
+#        if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
+#            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = owpgmtime( $parameters->{time_settings}->{"START"}->{"internal"} );
+#            $lowerBound = sprintf "%4d%02d", ( $year + 1900 ), ( $mon + 1 );            
+#        }
+#        if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
+#            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = owpgmtime( $parameters->{time_settings}->{"END"}->{"internal"} );
+#            $upperBound = sprintf "%4d%02d", ( $year + 1900 ), ( $mon + 1 );          
+#        }
 
         @dbSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
         foreach my $date ( @dateList ) {
 
             if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
-                next if $lowerBound and $date < $lowerBound;
-                next if $upperBound and $date > $upperBound;
+#                next if $lowerBound and $date < $lowerBound;
+#                next if $upperBound and $date > $upperBound;
                 if ( $query ) {
                     $query = $query . " union select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec . " and";
                 }
@@ -2797,29 +2796,27 @@ sub retrieveSQL {
             $recvSQL .= " ) ";
         }
 
-
         # XXX JZ - 7/15/2009
         #
         # If we were to limt the data, here is the place to do so.  We can set
         #   a 'lower bound' to be some amount of time < now().
 
-        my $lowerBound = q{};
-        my $upperBound = q{};
-        if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
-            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( time );
-            $lowerBound = sprintf "%4d%02d%02d", ( $year + 1900 ), ( $mon + 1 ), ( $mday );
-        }
-        if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
-            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( time );
-            $upperBound = sprintf "%4d%02d%02d", ( $year + 1900 ), ( $mon + 1 ), ( $mday );
-        }
+#        my $lowerBound = q{};
+#        my $upperBound = q{};
+#        if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
+#            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( time );
+#            $lowerBound = sprintf "%4d%02d%02d", ( $year + 1900 ), ( $mon + 1 ), ( $mday );
+#        }
+#        if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
+#            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( time );
+#            $upperBound = sprintf "%4d%02d%02d", ( $year + 1900 ), ( $mon + 1 ), ( $mday );
+#        }
 
         @dbSchema = ( "send_id", "recv_id", "tspec_id", "si", "ei", "stimestamp", "etimestamp", "start_time", "end_time", "min", "max", "minttl", "maxttl", "sent", "lost", "dups", "maxerr", "finished" );
         foreach my $date ( @dateList ) {
-
             if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
-                next if $lowerBound and $date < $lowerBound;
-                next if $upperBound and $date > $upperBound;
+#                next if $lowerBound and $date < $lowerBound;
+#                next if $upperBound and $date > $upperBound;
                 if ( $query ) {
                     $query = $query . " union select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec . " and";
                 }
