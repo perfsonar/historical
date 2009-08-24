@@ -341,8 +341,7 @@ sub _clp {
     }
     $logger->debug( "Determining Conditional Loss Probability where lost_packets=$lost_packets" );
     $self->{clp} = sprintf( "%0.3f", $consecutive_packet_loss * 100. /  $lost_packets  );
-    $self->{plg} = sprintf( "%0.3f",  1./(1 -  $self->{clp}/100.));
-    
+    $self->{plg} = sprintf( "%0.3f",  1./(1 -  $self->{clp}/100.)) if $self->{clp} < 100;    
     return $self->{clp};
 }
 
