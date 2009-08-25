@@ -103,7 +103,8 @@ Due to the time constraints placed on release team members, the Joint Techs Conf
      * Upstream issue was addressed too late
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=198 198] - _*Jeff*_ - ~~pS-B node equivalence~~ 	 	 
      * <font color=purple>_*Pushed to 3.2 - 8/19*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=232 232] - _*Jason*_ - perfsonar-buoy daemon.conf wants a directory for "owmesh"; complains "not defined" if a file is entered instead    
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=232 232] - _*Jason*_ - ~~perfsonar-buoy daemon.conf wants a directory for "owmesh"; complains "not defined" if a file is entered instead~~  
+     * <font color=green>_*Fixed - 8/25*_</font>  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=241 241] - _*Jeff*_ - ~~ps-buoy endpoint doesn't seem to store/upload owamp measurements; throws perl uninit value warning in data validation code~~
      * <font color=green>_*Fixed - 8/19*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=247 247] - _*Jeff*_ - /etc/init.d/perfsonarbuoy_owp_master script will start multiple instances of powmaster; have to kill manually 	       
