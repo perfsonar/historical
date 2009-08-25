@@ -49,6 +49,7 @@ use Date::Manip;
 use Math::BigInt;
 use Data::Validate::IP qw(is_ipv4);
 use Net::IPv6Addr;
+use File::Basename;
 
 use perfSONAR_PS::Config::OWP;
 use perfSONAR_PS::Config::OWP::Utils;
@@ -127,13 +128,24 @@ sub init {
         $self->{LOGGER}->info( "Setting 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
     }
 
-    if ( exists $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} and $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} and -d $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} ) {
+    if ( exists $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} and $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} ) {
+        unless ( -d $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} ) {           
+            my($filename, $dirname) = fileparse( $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} );
+            if ( $filename and lc( $filename ) eq "owmesh.conf" ) {
+                $self->{LOGGER}->info( "The 'owmesh' value was set to '" . $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} . "', which is not a directory; converting to '" . $dirname . "'." );
+                $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} = $dirname;
+            }
+            else {
+                $self->{LOGGER}->fatal( "Value for 'owmesh' is '" . $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} . "', please set to the *directory* that contains the owmesh.conf file" );
+                return -1;
+            }
+        }
         if ( exists $self->{DIRECTORY} and $self->{DIRECTORY} and -d $self->{DIRECTORY} ) {
             unless ( $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} =~ "^/" ) {
                 $self->{LOGGER}->warn( "Setting value for 'owmesn' to \"" . $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} . "\"" );
                 $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"};
             }
-        }
+        }        
     }
     else {
         $self->{LOGGER}->fatal( "Value for 'owmesh' is not set." );
@@ -3037,7 +3049,7 @@ __END__
 
 L<Log::Log4perl>, L<Module::Load>, L<Digest::MD5>, L<English>,
 L<Params::Validate>, L<Sys::Hostname>, L<Fcntl>, L<Date::Manip>,
-L<Math::BigInt>, L<Data::Validate::IP>, L<Net::IPv6Addr>,
+L<Math::BigInt>, L<Data::Validate::IP>, L<Net::IPv6Addr>, L<File::Basename>,
 L<perfSONAR_PS::Config::OWP>,L<perfSONAR_PS::Config::OWP::Utils>,
 L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
 L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>,
