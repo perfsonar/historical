@@ -107,7 +107,8 @@ Due to the time constraints placed on release team members, the Joint Techs Conf
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=241 241] - _*Jeff*_ - ~~ps-buoy endpoint doesn't seem to store/upload owamp measurements; throws perl uninit value warning in data validation code~~
      * <font color=green>_*Fixed - 8/19*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=247 247] - _*Jeff*_ - /etc/init.d/perfsonarbuoy_owp_master script will start multiple instances of powmaster; have to kill manually 	       
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=248 248] - _*Jason*_ - improvements for perfsonar-buoy README file 	          
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=248 248] - _*Jason*_ - ~~improvements for perfsonar-buoy README file~~ 	          
+     * <font color=green>_*Fixed - 8/25*_</font>
  * _*perfAdmin*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=243 243] - _*Jason*_ - ~~empty rows in ps-buoy report~~ 	   
      * <font color=green>_*Fixed - 8/24*_</font>	
