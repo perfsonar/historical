@@ -6,7 +6,6 @@ Carp
 Class::Accessor
 Class::Fields
 Config::General
-Data::Dumper
 Data::Validate::Domain,0.09
 Data::Validate::IP,0.08
 Date::Manip

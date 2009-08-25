@@ -22,6 +22,7 @@ Requires:		perl(AnyEvent) >= 4.81
 Requires:		perl(AnyEvent::HTTP)
 Requires:		perl(CGI)
 Requires:		perl(CGI::Carp)
+Requires:		perl(Config::General)
 Requires:		perl(Data::Dumper)
 Requires:		perl(Data::Validate::Domain)
 Requires:		perl(Data::Validate::IP)
