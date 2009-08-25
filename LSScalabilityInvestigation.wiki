@@ -15,13 +15,17 @@
 
 == Suggested tests ==
 
- *  Use `ls_registration_daemon` to temporarily register 'fake services'.  Jason has a service emulator [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/fakeService/ FakeService] that should help.
+ *  Use `ls_registration_daemon` to temporarily register 'fake services'.  Jason has a service emulator
+ [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/fakeService/ FakeService] that should help.
  *  Set up a test gLS and hLS, and then play with Jason's "!FakeService" tool to see when and how things break.
  *  Query the gLS and verify that everything what was registered is returned in the query. 
-  *  perfSONAR_PS-perfAdmin/cgi-bin/view.cgi is a program that provides an example of how to query an hLS.  Use, for instance: http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://ps-bw.es.net:8095/perfSONAR_PS/services/hLS
+  *  perfSONAR_PS-perfAdmin/cgi-bin/view.cgi is a program that provides an example of how to query an hLS.
+ Use, for instance: http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://ps-bw.es.net:8095/perfSONAR_PS/services/hLS
   *  Also useful:  `perfSONAR_PS-perfAdmin/bin/cache.pl`
-  *  For perl client, use examples in etc/requests.  Consult design document for information on how to form the queries and use the eventTypes of the service.
-  *  For python, there is a wrapper for the generic perl client (`Shared/client/client.pl`) at:  `test_harness/test_PS.py` 
+  *  For perl client, use examples in etc/requests.  Consult design document for information on how to form the
+ queries and use the eventTypes of the service.
+  *  For python, there is a wrapper for the generic perl client (`Shared/client/client.pl`) at:
+ `test_harness/test_PS.py` 
  *  Deploy the !FakeService on 50 ESnet hosts and see what happens.
 
 
@@ -32,7 +36,8 @@
   *  _moonshine_.damsl.cis.udel.edu
   *  _stout_.damsl.cis.udel.edu
 
- *  Create a new gLS 'cloud', i.e., a new hints file.  The current hints file is located at http://dc211.internet2.edu/gls.root.hints .  Make a new hints file like this that includes the gLS instances created for this testing, and place it on _stout_'s web server (/var/www/external).  The contents of the file will be:
+ *  Create a new gLS 'cloud', i.e., a new hints file.  The current hints file is located at
+ http://dc211.internet2.edu/gls.root.hints .  Make a new hints file like this that includes the gLS instances created for this testing, and place it on _stout_'s web server (/var/www/external).  The contents of the file will be:
 
 {{{
   http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
@@ -111,7 +116,9 @@ Running make install
 
 This suggests problems with the current version of `libxml2` installed on _ale_.
 
-	 <strong><font color="red">Note:  For <i>ale</i>, there is not much that can be done about this error.  XML::LibXML is designed to work with only certain versions of libxml2, it has explicit entries in the module makefile because of this.  Checking libxml version numbers at <i>ale</i>:
+	 <strong><font color="red">Note:  For <i>ale</i>, there is not much that can be done about this error.
+ XML::LibXML is designed to work with only certain versions of libxml2, it has explicit entries in the module
+ makefile because of this.  Checking libxml version numbers at <i>ale</i>:
 
 	{{{
 	$ rpm -qa | grep xml
@@ -124,7 +131,8 @@ This suggests problems with the current version of `libxml2` installed on _ale_.
 	dbxml-2.3.10-2
 	}}}
 
-	The libxml2 version is 'recent' enough, just not what the latest XML::LibXML wants to see.  Now, entering the CPAN shell:
+	The libxml2 version is 'recent' enough, just not what the latest XML::LibXML wants to see.  Now, entering the
+ CPAN shell:
 
 	  `perl -MCPAN -e shell`
 
@@ -151,14 +159,29 @@ This suggests problems with the current version of `libxml2` installed on _ale_.
  
 
 
-The next installation command, `sudo ./prepare_environment.sh`, does not report anything, which is suspicious and corroborates that the environment must not be healthy.
+The next installation command, `sudo ./prepare_environment.sh`, does not report anything, which is suspicious and
+corroborates that the environment must not be healthy.
 
 Trying to start the Lookup Service (`sudo /etc/init.d/lookup_service start`) yields the following error.
 
 {{{
-/opt/perfsonar_ps/lookup_service/bin/daemon.pl --config=/opt/perfsonar_ps/lookup_service/etc/daemon.conf --pidfile=lookup_service.pid --piddir=/var/run --logger=/opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf --user=perfsonar --group=perfsonar
-Can't locate Data/UUID.pm in @INC (@INC contains: /opt/perfsonar_ps/lookup_service/bin/../lib  ./lib ../lib /usr/lib/perl5/site_perl/5.8.6/i386-linux-thread-multi /usr/lib/perl5/site_perl/5.8.5/i386-linux-thread-multi /usr/lib/perl5/site_perl/5.8.4/i386-linux-thread-multi /usr/lib/perl5/site_perl/5.8.3/i386-linux-thread-multi /usr/lib/perl5/site_perl/5.8.6 /usr/lib/perl5/site_perl/5.8.5 /usr/lib/perl5/site_perl/5.8.4 /usr/lib/perl5/site_perl/5.8.3 /usr/lib/perl5/site_perl /usr/lib/perl5/vendor_perl/5.8.6/i386-linux-thread-multi /usr/lib/perl5/vendor_perl/5.8.5/i386-linux-thread-multi /usr/lib/perl5/vendor_perl/5.8.4/i386-linux-thread-multi /usr/lib/perl5/vendor_perl/5.8.3/i386-linux-thread-multi /usr/lib/perl5/vendor_perl/5.8.6 /usr/lib/perl5/vendor_perl/5.8.5 /usr/lib/perl5/vendor_perl/5.8.4 /usr/lib/perl5/vendor_perl/5.8.3 /usr/lib/perl5/vendor_perl /usr/lib/perl5/5.8.6/i386-linux-thread-multi /usr/lib/perl5/5.8.6 . ./lib ../lib/5.8.6/i386-linux-thread-multi ./lib ../lib/5.8.6 ./lib ../lib/i386-linux-thread-multi ./lib ../lib/5.8.5 ./lib ../lib/5.8.4 ./lib ../lib/5.8.3 ./lib ../lib) at /opt/perfsonar_ps/lookup_service/bin/../lib/perfSONAR_PS/Utils/NetLogger.pm line 28.
-BEGIN failed--compilation aborted at /opt/perfsonar_ps/lookup_service/bin/../lib/perfSONAR_PS/Utils/NetLogger.pm line 28.
+/opt/perfsonar_ps/lookup_service/bin/daemon.pl --config=/opt/perfsonar_ps/lookup_service/etc/daemon.conf 
+ --pidfile=lookup_service.pid --piddir=/var/run --logger=/opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf --user=
+ perfsonar --group=perfsonar
+Can't locate Data/UUID.pm in @INC (@INC contains: /opt/perfsonar_ps/lookup_service/bin/../lib  ./lib ../lib
+ /usr/lib/perl5/site_perl/5.8.6/i386-linux-thread-multi /usr/lib/perl5/site_perl/5.8.5/i386-linux-thread-multi
+ /usr/lib/perl5/site_perl/5.8.4/i386-linux-thread-multi /usr/lib/perl5/site_perl/5.8.3/i386-linux-thread-multi
+ /usr/lib/perl5/site_perl/5.8.6 /usr/lib/perl5/site_perl/5.8.5 /usr/lib/perl5/site_perl/5.8.4
+ /usr/lib/perl5/site_perl/5.8.3 /usr/lib/perl5/site_perl /usr/lib/perl5/vendor_perl/5.8.6/i386-linux-thread-multi
+ /usr/lib/perl5/vendor_perl/5.8.5/i386-linux-thread-multi /usr/lib/perl5/vendor_perl/5.8.4/i386-linux-thread-multi
+ /usr/lib/perl5/vendor_perl/5.8.3/i386-linux-thread-multi /usr/lib/perl5/vendor_perl/5.8.6
+ /usr/lib/perl5/vendor_perl/5.8.5 /usr/lib/perl5/vendor_perl/5.8.4 /usr/lib/perl5/vendor_perl/5.8.3
+ /usr/lib/perl5/vendor_perl /usr/lib/perl5/5.8.6/i386-linux-thread-multi /usr/lib/perl5/5.8.6 . ./lib
+ ../lib/5.8.6/i386-linux-thread-multi ./lib ../lib/5.8.6 ./lib ../lib/i386-linux-thread-multi ./lib
+ ../lib/5.8.5 ./lib ../lib/5.8.4 ./lib ../lib/5.8.3 ./lib ../lib) at /opt/perfsonar_ps/lookup_service/bin/..
+ /lib/perfSONAR_PS/Utils/NetLogger.pm line 28.
+BEGIN failed--compilation aborted at /opt/perfsonar_ps/lookup_service/bin/../lib/perfSONAR_PS/Utils/NetLogger.pm
+ line 28.
 Compilation failed in require at /opt/perfsonar_ps/lookup_service/bin/../lib/perfSONAR_PS/Request.pm line 28.
 BEGIN failed--compilation aborted at /opt/perfsonar_ps/lookup_service/bin/../lib/perfSONAR_PS/Request.pm line 28.
 Compilation failed in require at /opt/perfsonar_ps/lookup_service/bin/daemon.pl line 84.
@@ -166,7 +189,11 @@ BEGIN failed--compilation aborted at /opt/perfsonar_ps/lookup_service/bin/daemon
 ./lookup_service start: perfSONAR Lookup Service could not be started
 }}}
 
-Clearly, `libxml2` must be updated on _ale_ prior to installing the LS service.  <i><strong><font color="red">(This assumption is actually inaccurate.  As pointed out by Jason Zurawski, the error message states </font><font color="purple">Can't locate Data/UUID.pm</font><font color="red">, a Perl problem.  The misplaced attempt to solve libxml2 will be maintained here as reference, but the correct solution can be followed through the next section [LSScalabilityInvestigation#Attempt_2].</font></strong></i>
+Clearly, `libxml2` must be updated on _ale_ prior to installing the LS service.  <i><strong><font color="red">
+(This assumption is actually inaccurate.  As pointed out by Jason Zurawski, the error message states
+</font><font color="purple">Can't locate Data/UUID.pm</font><font color="red">, a Perl problem.  The misplaced
+attempt to solve libxml2 will be maintained here as reference, but the correct solution can be followed through
+the next section [LSScalabilityInvestigation#Attempt_2].</font></strong></i>
 
 Trying now to update libxml2 using the _yum_ tool for Fedora:
 
@@ -180,7 +207,8 @@ Setting up repositories
 updates-released          100% |=========================|  951 B    00:00     
 vlc                       100% |=========================|  951 B    00:00     
 vlc-contrib               100% |=========================|  951 B    00:00     
-http://192.168.0.1/yum/4/extras/i386/repodata/repomd.xml: [Errno 4] IOError: HTTP Error 404: Date: Thu, 20 Aug 2009 23:59:02 GMT
+http://192.168.0.1/yum/4/extras/i386/repodata/repomd.xml: [Errno 4] IOError: HTTP Error 404: Date: Thu, 20 Aug 2009
+ 23:59:02 GMT
 Server: Apache/2.0.54 (Fedora)
 Content-Length: 312
 Connection: close
@@ -191,11 +219,13 @@ failure: repodata/repomd.xml from extras: [Errno 256] No more mirrors to try.
 Error: failure: repodata/repomd.xml from extras: [Errno 256] No more mirrors to try.
 }}}
 
-The _yum_ tool failed, probably due to a missing `repomd.xml` file (as hinted by the error message), or because there are insufficient mirror sites listed somewhere.  Now, we need to find out how to fix this by surveying _yum_ sites.
+The _yum_ tool failed, probably due to a missing `repomd.xml` file (as hinted by the error message), or because there
+are insufficient mirror sites listed somewhere.  Now, we need to find out how to fix this by surveying _yum_ sites.
 
 From the error message, the URL used to access the file `repomd.xml` seems weird (192.168.0.1, which is a local address).
 
-The directory `/etc/yum.repos.d` contains the configuration files _yum_ uses to access mirror sites for repositories.  The listing is:
+The directory `/etc/yum.repos.d` contains the configuration files _yum_ uses to access mirror sites for repositories.
+The listing is:
 
 {{{
 fedora-devel.repo         fedora.repo                  vlc-contrib.repo
@@ -215,11 +245,16 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-extras
 gpgcheck=1
 }}}
 
-Searching for information on https://fedoraproject.org/wiki/Yum, as of August 20, 2009, at 20:29h EDT (8:29pm EDT), we are welcomed with an empty page with *Yum* written as title.
+Searching for information on https://fedoraproject.org/wiki/Yum, as of August 20, 2009, at 20:29h EDT (8:29pm EDT),
+we are welcomed with an empty page with *Yum* written as title.
 
-Searching a bit more aggressively yields the page https://fedoraproject.org/wiki/Extras/Mirrors, where several mirror sites are listed for the _extras_ files.  Now, we need to find mirrors for the other files.
+Searching a bit more aggressively yields the page https://fedoraproject.org/wiki/Extras/Mirrors, where several mirror
+sites are listed for the _extras_ files.  Now, we need to find mirrors for the other files.
 
-More research produces the URL http://download.fedora.redhat.com/pub/fedora/linux/extras/.  But the subdirectory for Fedora 4 is no longer available under this address.  A README file in this location states that this Fedora version is not maintained (since the current version is Fedora 11).  `libxml2` has to be updated manually.  Turned to http://xmlsoft.org/ for more details on how to do this.
+More research produces the URL http://download.fedora.redhat.com/pub/fedora/linux/extras/.  But the subdirectory for
+Fedora 4 is no longer available under this address.  A README file in this location states that this Fedora version is
+not maintained (since the current version is Fedora 11).  `libxml2` has to be updated manually.  Turned to 
+http://xmlsoft.org/ for more details on how to do this.
 
 Downloaded the following files in attempt to update libxml2:
 
@@ -272,19 +307,28 @@ error: Failed dependencies:
         libxml2 = 2.6.20 is needed by (installed) libxml2-devel-2.6.20-1.FC4.i386
 }}}
 
-Stuck at this point.  Too many dependencies to resolve in a system.  Let's continue through another venue below, since it was pointed by Jason Zurawski that the installation problem does not reside specifically in libxml2, but in Perl's Data/UUID.pm.
+Stuck at this point.  Too many dependencies to resolve in a system.  Let's continue through another venue below, since
+it was pointed by Jason Zurawski that the installation problem does not reside specifically in libxml2, but in Perl's
+Data/UUID.pm.
 
 ==== Attempt 2 ====
 
-Detected that Perl's Data/UUID.pm is generating the installation problem.  Let us try a different install approach, per instructed by Jason.
+Detected that Perl's Data/UUID.pm is generating the installation problem.  Let us try a different install approach, per
+instructed by Jason.
 
 First, checkout or update the SVN repository.
 
  `svn co https://svn.internet2.edu/svn/perfSONAR-PS/`
  
-The Makefile at `perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService`, as well as the installation scripts (`install_dependencies.sh` and `prepare_environment.sh`) and `lookup_service` start/stop scripts at directory `scripts` all consider that the Lookup Service will be installed at `/opt/perfsonar_ps`.  If this is not desirable, these files can be altered to reflect the new install directory.  But, in this attempt, we will not run the install scripts, also considering that there is already a Lookup Service running on _ale_.  We will run the LS directly from the checked out repository directory.
+The Makefile at `perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService`, as well as the installation scripts
+(`install_dependencies.sh` and `prepare_environment.sh`) and `lookup_service` start/stop scripts at directory `scripts`
+all consider that the Lookup Service will be installed at `/opt/perfsonar_ps`.  If this is not desirable, these files
+can be altered to reflect the new install directory.  But, in this attempt, we will not run the install scripts, also
+considering that there is already a Lookup Service running on _ale_.  We will run the LS directly from the checked out
+repository directory.
 
-To facilitate starting and stopping the service, let us edit the `lookup_service` start/stop script at `scripts`.  Basically, we need to change the variable `PREFIX` to reflect the correct directory.  Thus, we edit as follows:
+To facilitate starting and stopping the service, let us edit the `lookup_service` start/stop script at `scripts`.
+Basically, we need to change the variable `PREFIX` to reflect the correct directory.  Thus, we edit as follows:
 
 {{{
 #!/bin/bash
@@ -299,4 +343,17 @@ PREFIX=/home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupServi
 #PREFIX=/opt/perfsonar_ps/lookup_service
 BINDIR=${PREFIX}/bin
 ...
+}}}
+
+Now running:
+
+{{{
+[mportnoi@ale perfSONAR_PS-LookupService]$ scripts/lookup_service start
+/home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/bin/daemon.pl --config=/home/mportnoi/
+ perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/etc/daemon.conf --pidfile=lookup_service.pid --piddir=
+ /var/run --logger=/home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/etc/daemon_logger.conf
+ --user=perfsonar --group=perfsonar
+Can't locate Data/UUID.pm in @INC (@INC contains: /home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-Lookup
+ Service/bin/../lib  ./lib ../lib /usr/lib/perl5/site_perl/5.8.6/i386-linux-thread-multi /usr/lib/perl5/site_perl/5.8.5/
+ i386
 }}}
