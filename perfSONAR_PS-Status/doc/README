@@ -132,8 +132,8 @@ The service comes with a client application and several test messages that can
 be used to test functionality once the service and collector have been
 configured:
 
-  etc/requests/EchoRequest.xml
-  etc/requests/PathStatusSetupDataRequest_now.xml
+  doc/requests/EchoRequest.xml
+  doc/requests/PathStatusSetupDataRequest_now.xml
 
 To test:
 

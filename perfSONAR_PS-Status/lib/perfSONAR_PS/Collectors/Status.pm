@@ -320,25 +320,28 @@ sub create_database_client {
         $dbistring = "DBI:SQLite:dbname=" . $file;
     }
     elsif ( lc( $config->{"db_type"} ) eq "mysql" ) {
-        my $dbi_string = "dbi:mysql";
+        $dbistring = "dbi:mysql";
 
         unless ( $config->{"db_name"} ) {
             my $msg = "Specified a MySQL Database, but did not specify which database (db_name)";
             return ( -1, $msg );
         }
 
-        $dbi_string .= ":" . $config->{"db_name"};
+        $dbistring .= ":" . $config->{"db_name"};
 
         unless ( $config->{"db_host"} ) {
             my $msg = "Specified a MySQL Database, but did not specify which database host (db_host)";
             return ( -1, $msg );
         }
 
-        $dbi_string .= ":" . $config->{"db_host"};
+        $dbistring .= ":" . $config->{"db_host"};
 
         if ( $config->{"db_port"} ) {
-            $dbi_string .= ":" . $config->{"db_port"};
+            $dbistring .= ":" . $config->{"db_port"};
         }
+
+	$username = $config->{db_username};
+	$password = $config->{db_password};
     }
     else {
         my $msg = "Unknown database type: " . $config->{db_type};
@@ -346,6 +349,8 @@ sub create_database_client {
     }
 
     $prefix = $config->{db_prefix};
+
+    $self->{LOGGER}->debug("DBISTRING: $dbistring");
 
     my $data_client = perfSONAR_PS::DB::Status->new();
     if ( $data_client->init( { dbistring => $dbistring, username => $username, password => $password, table_prefix => $prefix } ) ) {

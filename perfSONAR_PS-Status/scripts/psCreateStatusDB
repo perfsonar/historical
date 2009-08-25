@@ -102,6 +102,7 @@ if ( $CONFIG_FILE ) {
 
     $DB_FILE = $conf{db_file} if ( $conf{db_file} );
 
+    $DB_NAME     = $conf{db_name}     if ( $conf{db_name} );
     $DB_HOST     = $conf{db_host}     if ( $conf{db_host} );
     $DB_PORT     = $conf{db_port}     if ( $conf{db_port} );
     $DB_USERNAME = $conf{db_username} if ( $conf{db_username} );
@@ -152,13 +153,26 @@ elsif ( $DB_TYPE eq "mysql" ) {
 
     $mysql_create_status_table =~ s/TABLEPREFIX/$DB_PREFIX/gm;
 
-    $dbi_string .= ":database=" . $DB_NAME;
     $dbi_string .= ":host=" . $DB_HOST if $DB_HOST;
     $dbi_string .= ":port=" . $DB_PORT if $DB_PORT;
 
     my $dbh = DBI->connect( $dbi_string );
-    my $sth2 = $dbh->prepare( $mysql_create_status_table, $DB_USERNAME, $DB_PASSWORD ) or croak "Couldn't prepare statement: " . $dbh->errstr;
-    $sth2->execute();
+    my $sth = $dbh->prepare( "CREATE DATABASE $DB_NAME" ) or croak "Couldn't prepare statement: " . $dbh->errstr;
+    $sth->execute();
+    $sth = $dbh->prepare( "USE $DB_NAME" ) or croak "Couldn't prepare statement: " . $dbh->errstr;
+    $sth->execute();
+    $sth = $dbh->prepare( $mysql_create_status_table ) or croak "Couldn't prepare statement: " . $dbh->errstr;
+    $sth->execute();
+
+    if ($DB_USERNAME) {
+        my $sql = "GRANT ALL PRIVILEGES ON *.* TO '$DB_USERNAME'\@'%'";
+	if ($DB_PASSWORD) {
+	    $sql .= "IDENTIFIED BY '".$DB_PASSWORD."'";
+	}
+	$sql .= ";";
+	$sth = $dbh->prepare( $sql ) or croak "Couldn't prepare statement: " . $dbh->errstr;
+	$sth->execute();
+    }
 }
 
 __END__
