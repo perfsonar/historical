@@ -2,7 +2,40 @@
 
 use strict;
 use warnings;
+
+=head1 NAME
+
+package_dependencies.pl - Script to locate the library dependencies of a
+package.  
+
+=head1 DESCRIPTION
+
+Script to locate the library dependencies of a package.  
+
+=head1 SYNOPSIS
+
+./package_dependencies.pl [--verbose --versions --help]\n";
+
+=cut
+
 use File::Basename;
+use Getopt::Long;
+
+my $DEBUGFLAG   = q{};
+my $VERSIONFLAG = q{};
+my $HELP        = q{};
+
+my $status = GetOptions(
+    'verbose'   => \$DEBUGFLAG,
+    'help'      => \$HELP,
+    'versions'  => \$VERSIONFLAG
+);
+
+if ( $HELP ) {
+    print "$0: starts the dependency analysis.\n";
+    print "\t$0 ./package_dependencies.pl [--verbose --versions --help]\n";
+    exit( 1 );
+}
 
 my $path_to_root = dirname($0);
 
@@ -171,7 +204,13 @@ while ($files_left) {
 					print "Linking $link_path -> $module_path\n";
 					symlink($link_path, $module_path);
 				} else {
-					$dependencies{$module} = 1;
+				    $dependencies{$module} = 0;
+				    if ( $VERSIONFLAG ) {
+					    eval "require $module"; 
+					    my $ver = q{};
+					    $ver = $module->VERSION unless ( $@ );
+					    $dependencies{$module} = $ver if $ver;
+				    }
 				}
 			}
         }
@@ -195,6 +234,52 @@ close(MANIFEST);
 open(DEPENDS, ">dependencies");
 foreach my $depend (sort keys %dependencies) {
 	print "Adding dependency $depend\n";
-    print DEPENDS $depend."\n";
+	print DEPENDS $depend;
+	if ( $VERSIONFLAG ) {
+	    print DEPENDS "," . $dependencies{$depend} if $dependencies{$depend};
+	}
+    print DEPENDS "\n";
 }
 close(DEPENDS);
+
+__END__
+
+=head1 SEE ALSO
+
+L<Getopt::Long>, L<File::Basename>
+
+To join the 'perfSONAR Users' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/perfsonar-user
+
+The perfSONAR-PS subversion repository is located at:
+
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Aaron Brown, aaron@internet2.edu
+Jason Zurawski, zurawski@internet2.edu
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2004-2009, Internet2
+
+All rights reserved.
+
+=cut
