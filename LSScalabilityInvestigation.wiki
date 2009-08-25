@@ -420,5 +420,55 @@ Data::UUID under CPAN.
  }}}
  
 We try to run the `sudo lookup_service start` and we get the same error.  So, `Data::UUID` must be being installed
-in some place where the LS scripts cannot find:  it is installed under `.cpan` subdirectory under the home directory,
-and this subdirectory does not appear in the `@INC` array.
+in some place where the LS scripts cannot find.  The array `@INC` controls the directories where Perl look for libraries.
+To find out where `UUID.pm` is actually installed:
+
+ `sudo find / -name UUID.pm -print`
+ 
+We get:
+
+{{{
+...
+/usr/local/lib/perl5/site_perl/5.8.8/i686-linux/Data/UUID.pm
+}}}
+
+We must make Perl search this directory, i.e., include this directory into `@INC` array.  There are a number of ways
+to perform this, per several documents in the internet.  Basically:
+
+ # Add the directory to the PERL5LIB environment variable.
+ # Add use lib 'directory'; in your Perl script.
+ # Construct a symbolic link in the directory already included in `@INC` and make it point to the directory where UUID.pm is actually installed.  This solution actually does nothing to `@INC` and seems untidy, since the result is effectively mixing different library versions.  But we will not comment on Linux "tideness". :)
+ 
+Let us try the first approach.  Edit the `.bashrc` file in the home directory and include:
+
+{{{
+PERL5LIB=/usr/local/lib/perl5/site_perl/5.8.8/i686-linux:$PERL5LIB
+export PERL5LIB
+}}}
+
+Logoff, login again, trying to run `lookup_service start` script, we obtain this new error:
+
+{{{
+/home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/bin/daemon.pl --config=/home/mportnoi/
+ perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/etc/daemon.conf --pidfile=lookup_service.pid
+ --piddir=/var/run --logger=/home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/etc/
+ daemon_logger.conf --user=perfsonar --group=perfsonar
+Can't load '/usr/local/lib/perl5/site_perl/5.8.8/i686-linux/auto/XML/LibXML/Common/Common.so' for module
+ XML::LibXML::Common: /usr/local/lib/perl5/site_perl/5.8.8/i686-linux/auto/XML/LibXML/Common/Common.so: undefined
+ symbol: PL_sv_undef at /usr/lib/perl5/5.8.6/i386-linux-thread-multi/DynaLoader.pm line 230.
+ at /usr/local/lib/perl5/site_perl/5.8.8/i686-linux/XML/LibXML.pm line 12
+Compilation failed in require at /usr/local/lib/perl5/site_perl/5.8.8/i686-linux/XML/LibXML.pm line 12.
+BEGIN failed--compilation aborted at /usr/local/lib/perl5/site_perl/5.8.8/i686-linux/XML/LibXML.pm line 12.
+Compilation failed in require at /home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/bin/../
+ lib/perfSONAR_PS/Common.pm line 26.
+BEGIN failed--compilation aborted at /home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/bin/
+ ../lib/perfSONAR_PS/Common.pm line 26.
+Compilation failed in require at /home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/bin/
+ daemon.pl line 82.
+BEGIN failed--compilation aborted at /home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/bin/
+ daemon.pl line 82.
+./lookup_service start: perfSONAR Lookup Service could not be started
+}}}
+
+The hint seems to be:
+ `undefined symbol: PL_sv_undef at /usr/lib/perl5/5.8.6/i386-linux-thread-multi/DynaLoader.pm line 230`
