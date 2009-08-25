@@ -349,7 +349,10 @@ sub init {
                         hints   => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_hints"}
                     }
                 );
-                $cricket->openDB();
+                unless ( $cricket->openDB() > -1 ) {
+                    $self->{LOGGER}->fatal( "Cricket database is empty, stopping service." );
+                    return -1;
+                }
                 $cricket->closeDB();
             }
         }
@@ -363,8 +366,11 @@ sub init {
             }
             else {
                 my $cacti = new perfSONAR_PS::DB::Cacti( { conf => $self->{CONF}->{"snmp"}->{"metadata_db_external_source"}, file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
-                $cacti->openDB();
-                $cacti->closeDB();
+                unless ( $cacti->openDB() > -1 ) {
+                    $self->{LOGGER}->fatal( "Cacti database is empty, stopping service." );
+                    return -1;
+                }                
+                $cacti->closeDB();                
             }
         }
         else {
