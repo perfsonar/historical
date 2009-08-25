@@ -472,3 +472,5 @@ BEGIN failed--compilation aborted at /home/mportnoi/perfSONAR-PS/branches/RELEAS
 
 The hint seems to be:
  `undefined symbol: PL_sv_undef at /usr/lib/perl5/5.8.6/i386-linux-thread-multi/DynaLoader.pm line 230`
+ 
+It appears that by running <font color=purple>`perl Makefile.PL POLLUTE=1`</font> would solve this sort of problem.
