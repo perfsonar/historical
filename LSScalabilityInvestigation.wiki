@@ -473,4 +473,43 @@ BEGIN failed--compilation aborted at /home/mportnoi/perfSONAR-PS/branches/RELEAS
 The hint seems to be:
  `undefined symbol: PL_sv_undef at /usr/lib/perl5/5.8.6/i386-linux-thread-multi/DynaLoader.pm line 230`
  
-It appears that by running <font color=purple>`perl Makefile.PL POLLUTE=1`</font> would solve this sort of problem.
+It appears that by running <font color=purple>`perl Makefile.PL POLLUTE=1`</font> would solve this sort of problem.  The
+sources fail to explain exactly which `Makefile.pl` is to be used.
+
+Searching for `DynaLoader.pm` yields:
+
+{{{
+sudo find / -name DynaLoader.pm -print
+/var/lib/systemimager/images/cognac_image/usr/lib/perl5/5.8.6/i386-linux-thread-multi/DynaLoader.pm
+/usr/local/lib/perl5/5.8.8/i686-linux/DynaLoader.pm
+/usr/lib/perl5/5.8.6/i386-linux-thread-multi/DynaLoader.pm
+}}}
+
+Since the error message relates to a `DynaLoader.pm` under version 5.8.6, and the rest of the Perl libraries are under
+5.8.8, let us try to force the use of `DynaLoader.pm` 5.8.8 by editing PERL5LIB again in `.bashrc`.
+
+{{{
+PERL5LIB=/usr/local/lib/perl5/5.8.8/i686-linux:/usr/local/lib/perl5/site_perl/5.8.8/i686-linux:$PERL5LIB
+export PERL5LIB
+}}}
+
+Run `lookup_service start` again and check what new error presents itself.  Effectively:
+
+{{{
+/home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/bin/daemon.pl 
+ --config=/home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/etc/daemon.conf
+ --pidfile=lookup_service.pid --piddir=/var/run --logger=/home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/
+ perfSONAR_PS-LookupService/etc/daemon_logger.conf --user=perfsonar --group=perfsonar
+Perl lib version (v5.8.8) doesn't match executable version (v5.8.6) at /usr/local/lib/perl5/5.8.8/i686-linux/Config.pm
+ line 46.
+Compilation failed in require at /usr/local/lib/perl5/5.8.8/i686-linux/DynaLoader.pm line 25.
+BEGIN failed--compilation aborted at /usr/local/lib/perl5/5.8.8/i686-linux/DynaLoader.pm line 25.
+Compilation failed in require at /usr/local/lib/perl5/5.8.8/i686-linux/Time/HiRes.pm line 7.
+Compilation failed in require at /home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/bin/
+ daemon.pl line 24.
+BEGIN failed--compilation aborted at /home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/bin/
+ daemon.pl line 24.
+./lookup_service start: perfSONAR Lookup Service could not be started
+}}}
+
+This last attempt just creates another version conflict.
