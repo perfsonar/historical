@@ -19,7 +19,6 @@ applications.
 use XML::LibXML;
 use Carp;
 use Getopt::Long;
-use Data::Dumper;
 use Data::Validate::IP qw(is_ipv4);
 use Data::Validate::Domain qw( is_domain );
 use Net::IPv6Addr;
@@ -587,10 +586,10 @@ sub query_hlses {
 
 =head1 SEE ALSO
 
-L<XML::LibXML>, L<Carp>, L<Getopt::Long>, L<Data::Dumper>,
-L<Data::Validate::IP>, L<Data::Validate::Domain>, L<Net::IPv6Addr>,
-L<Net::CIDR>, L<LWP::Simple>, L<FindBin>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Client::gLS>, L<perfSONAR_PS::Utils::ParameterValidation>,
+L<XML::LibXML>, L<Carp>, L<Getopt::Long>, L<Data::Validate::IP>,
+L<Data::Validate::Domain>, L<Net::IPv6Addr>, L<Net::CIDR>, L<LWP::Simple>,
+L<FindBin>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Client::gLS>,
+L<perfSONAR_PS::Utils::ParameterValidation>,
 L<perfSONAR_PS::Client::Parallel::LS>
 
 To join the 'perfSONAR-PS' mailing list, please visit:

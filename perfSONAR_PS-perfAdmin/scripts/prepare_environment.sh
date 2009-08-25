@@ -30,13 +30,11 @@ $MAKEROOT mv $DIRECTORY/perfAdmin.conf /etc/httpd/conf.d
 $MAKEROOT chown root:root /etc/httpd/conf.d/perfAdmin.conf
 $MAKEROOT chmod 644 /etc/httpd/conf.d/perfAdmin.conf
 
-echo "Creating '/opt/perfsonar_ps/perfAdmin' and subdirectories..."
-$MAKEROOT mkdir -p /opt/perfsonar_ps/perfAdmin
-$MAKEROOT mv $DIRECTORY/../bin /opt/perfsonar_ps/perfAdmin
-$MAKEROOT mv $DIRECTORY/../cgi-bin /opt/perfsonar_ps/perfAdmin
-$MAKEROOT mv $DIRECTORY/../doc /opt/perfsonar_ps/perfAdmin
-$MAKEROOT mv $DIRECTORY/../etc /opt/perfsonar_ps/perfAdmin
-$MAKEROOT mv $DIRECTORY/../lib /opt/perfsonar_ps/perfAdmin
+echo "Removing temporary files..."
+$MAKEROOT rm -f /opt/perfsonar_ps/perfAdmin/dependencies
+$MAKEROOT rm -frd /opt/perfsonar_ps/perfAdmin/scripts
+
+echo "Setting permissions in '/opt/perfsonar_ps/perfAdmin'"
 $MAKEROOT chown -R perfsonar:perfsonar /opt/perfsonar_ps/perfAdmin
 $MAKEROOT chown -R apache:apache /opt/perfsonar_ps/perfAdmin/etc
 

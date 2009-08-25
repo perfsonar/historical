@@ -73,13 +73,14 @@ the following Perl libraries, libraries, and external tools to function:
     - AnyEvent::HTTP
     - CGI
     - CGI::Carp
-    - Data::Dumper
+    - Carp
+    - Class::Accessor
+    - Class::Fields
+    - Config::General
     - Data::Validate::Domain
     - Data::Validate::IP
-    - Date::Manip 
+    - Date::Manip
     - Digest::MD5
-    - English
-    - Exporter
     - Getopt::Long
     - HTML::Template
     - IO::File
@@ -89,6 +90,9 @@ the following Perl libraries, libraries, and external tools to function:
     - Net::CIDR
     - Net::IPv6Addr
     - Params::Validate
+    - Readonly
+    - Scalar::Util
+    - Socket
     - Time::HiRes
     - Time::Local
     - XML::LibXML
@@ -162,7 +166,7 @@ that may be used to download the necessary prerequisite software packages:
   wget -c http://software.internet2.edu/source/perfSONAR-PS/perfSONAR_PS-perfAdmin-3.1.3.tar.gz
   tar -zxfv perfSONAR_PS-perfAdmin-3.1.3.tar.gz
   cd perfSONAR_PS-perfAdmin-3.1.3
-  make install
+  (sudo) make install
   cd scripts
   ./install_dependencies.sh
   ./prepare_environment.sh
