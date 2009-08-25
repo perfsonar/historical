@@ -28,6 +28,9 @@ $MAKEROOT /sbin/chkconfig --add perfsonarbuoy_bw_collector
 $MAKEROOT /sbin/chkconfig --add perfsonarbuoy_owp_collector
 $MAKEROOT /sbin/chkconfig --add perfsonarbuoy_ma
 
+echo "Starting pSB..."
+$MAKEROOT /etc/init.d/perfsonarbuoy_ma start
+
 echo "Removing temporary files..."
 $MAKEROOT rm -f /opt/perfsonar_ps/perfsonarbuoy_ma/dependencies
 $MAKEROOT rm -f /opt/perfsonar_ps/perfsonarbuoy_ma/modules.rules
