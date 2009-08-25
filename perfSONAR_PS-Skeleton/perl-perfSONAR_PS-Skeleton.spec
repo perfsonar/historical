@@ -5,16 +5,17 @@
 %define init_script_1 skeleton
 # %define init_script_2 ls_registration_daemon
 
+%define relnum 1
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-Skeleton
 Version:        3.1
-Release:        1.%{disttag}
+Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS Skeleton Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-Skeleton/
-Source0:        perfSONAR_PS-Skeleton.tar.gz
+Source0:        perfSONAR_PS-Skeleton-%{version}.%{relnum}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 # XXX Add your perl requirements here. e.g.
@@ -29,7 +30,7 @@ XXX ADD A DESCRIPTION OF THE PACKAGE XXX
 /usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
-%setup -q -n perfSONAR_PS-Skeleton
+%setup -q -n perfSONAR_PS-Skeleton-%{version}.%{relnum}
 
 %build
 
