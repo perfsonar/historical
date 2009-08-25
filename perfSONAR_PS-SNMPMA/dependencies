@@ -1,6 +1,7 @@
 Config::General
 Cwd
 DBI
+DBD::mysql
 Data::UUID
 Date::Manip
 Digest::MD5
@@ -13,14 +14,16 @@ HTTP::Daemon
 IO::File
 LWP::Simple
 LWP::UserAgent
+Log::Log4perl
 Log::Dispatch
 Log::Dispatch::FileRotate
-Log::Log4perl
+Log::Dispatch::Screen
 Module::Load
 Net::Ping
 Params::Validate
-RRDp
 Socket
 Sys::Hostname
+Term::ReadKey
 Time::HiRes
-XML::LibXML
+XML::LibXML,1.66
+base

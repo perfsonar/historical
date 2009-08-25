@@ -18,3 +18,5 @@ version 3.1
       - RRD.pm cannot read RRD File 
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=159
       - makeDBConf Missing from LS package
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=187
+      - perl-Clone needed by hLS (other?) RPM 

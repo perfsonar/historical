@@ -53,6 +53,7 @@ the following Perl libraries, libraries, and external tools to function:
     - Config::General
     - Cwd
     - DBI
+    - DBD::mysql
     - Data::UUID
     - Date::Manip
     - Digest::MD5
@@ -65,15 +66,17 @@ the following Perl libraries, libraries, and external tools to function:
     - IO::File
     - LWP::Simple
     - LWP::UserAgent
+    - Log::Log4perl
     - Log::Dispatch
     - Log::Dispatch::FileRotate
-    - Log::Log4perl
+    - Log::Dispatch::Screen
     - Module::Load
     - Net::Ping
     - Params::Validate
     - RRDp
     - Socket
     - Sys::Hostname
+    - Term::ReadKey
     - Time::HiRes
     - XML::LibXML
   * Libraries
@@ -146,7 +149,8 @@ that may be used to download the necessary prerequisite software packages:
   wget -c http://software.internet2.edu/source/perfSONAR-PS/perfSONAR_PS-SNMPMA-3.1.7.tar.gz
   tar -zxfv perfSONAR_PS-SNMPMA-3.1.7.tar.gz
   cd perfSONAR_PS-SNMPMA-3.1.7
-  make install
+  (sudo) make install
+    *Edit all configuration files - See README*
   cd scripts
   ./install_dependencies.sh
   ./prepare_environment.sh
@@ -209,4 +213,4 @@ and
 
 --------------------------------------------------------------------------------
 
-Fri Jul 31 12:09:30 EDT 2009
+Tue Aug 25 09:22:49 EDT 2009

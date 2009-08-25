@@ -135,7 +135,7 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Fri Jul 31 2009 zurawski@internet2.edu 3.1-7
+* Tue Aug 25 2009 zurawski@internet2.edu 3.1-7
 - Fixes to to documentation and package structure.  
 
 * Tue Jul 21 2009 zurawski@internet2.edu 3.1-6
@@ -145,10 +145,12 @@ fi
 - Documentation updates
 
 * Mon Jul 6 2009 zurawski@internet2.edu 3.1-4
-- Bugfix to inclcude perl(Clone) as a dep.
+- Bugfix
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=187
 
 * Thu May 16 2009 zurawski@internet2.edu 3.1-3
-- Bugfix to include the makeDBConf script
+- Bugfix
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=159
 
 * Tue Apr 21 2009 zurawski@internet2.edu 3.1-2
 - Bugfix to the RRD.pm library

@@ -12,9 +12,9 @@ doc/LICENSE
 doc/README
 etc/daemon.conf
 etc/daemon_logger.conf
-etc/requests/EchoRequest.xml
 etc/requests/DataInfoRequest-1.xml
 etc/requests/DataInfoRequest-2.xml
+etc/requests/EchoRequest.xml
 etc/requests/MetadataKeyRequest-1.xml
 etc/requests/MetadataKeyRequest-2.xml
 etc/requests/MetadataKeyRequest-3.xml
