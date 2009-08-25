@@ -21,7 +21,6 @@ etc/owmesh.conf
 etc/requests/EchoRequest.xml
 etc/requests/MetadataKeyRequest.xml
 etc/requests/SetupDataRequest.xml
-lib/owdb.pm
 lib/OWP.pm
 lib/OWP/Archive.pm
 lib/OWP/Conf.pm
@@ -32,6 +31,7 @@ lib/OWP/RawIO.pm
 lib/OWP/Sum.pm
 lib/OWP/Syslog.pm
 lib/OWP/Utils.pm
+lib/owdb.pm
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
 lib/perfSONAR_PS/Client/LS/Remote.pm

@@ -224,12 +224,19 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Fri Jul 31 2009 zurawski@internet2.edu 3.1-2
+* Tue Aug 25 2009 zurawski@internet2.edu 3.1-2
 - Fixes to to documentation and package structure.  
+- Bugfixes
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=241
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=194
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=192
 
 * Tue Jul 21 2009 zurawski@internet2.edu 3.1-1
 - Support for BWCTL and OWAMP regular testing
-
+- Bugfixes
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=185
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=147
+  
 * Mon Feb 23 2009 zurawski@internet2.edu 0.10.4
 - Fixing bug in bwmaster.
 

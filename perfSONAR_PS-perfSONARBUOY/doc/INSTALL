@@ -49,16 +49,20 @@ Package)" and "Installation (SVN)" sections for more details.  This tool uses
 the following Perl libraries, libraries, and external tools to function:
 
   * Perl Libraries
+    - CGI::Carp
+    - Carp
     - Config::General
     - Cwd
     - DBI
     - DB_File
+    - DBD::mysql
     - Data::UUID
     - Data::Validate::IP
     - Date::Manip
     - Digest::MD5
     - Error
-    - Exporter
+    - Fcntl
+    - File::Basename
     - File::Path
     - File::Temp
     - FileHandle
@@ -71,12 +75,16 @@ the following Perl libraries, libraries, and external tools to function:
     - LWP::Simple
     - LWP::UserAgent
     - Log::Log4perl
+    - Log::Dispatch
+    - Log::Dispatch::FileRotate
+    - Log::Dispatch::Screen
     - Math::BigFloat
     - Math::BigInt
     - Module::Load
     - Net::IPv6Addr
     - Net::Ping
     - Params::Validate
+    - Socket
     - Sys::Hostname
     - Sys::Syslog
     - Term::ReadKey
@@ -154,7 +162,7 @@ that may be used to download the necessary prerequisite software packages:
   wget -c http://software.internet2.edu/source/perfSONAR-PS/perfSONAR_PS-perfSONAR-BUOY-3.1.2.tar.gz
   tar -zxfv perfSONAR_PS-perfSONAR-BUOY-3.1.2.tar.gz
   cd perfSONAR_PS-perfSONAR-BUOY-3.1.2
-  make install
+  (sudo) make install
   cd scripts
   ./install_dependencies.sh
   ./prepare_environment.sh
@@ -167,9 +175,13 @@ In addition to perl requirements, there are other software requirements that
 should be installed.  These are not controlled via the dependency scripts due to
 differences in package management.  The tools are listed below:
 
+  * DB4
+      * Debian/Ubuntu (replace X with proper version): libdb4.X, libdb4.X-dev, 
+                                                       db4.X-util  
+      * RedHat Systems: db4, db4-devel, db4-utils
   * MYSQL
       * Debian/Ubuntu: mysql-server, mysql-client  
-      * RedHat Systems: mysql-server, mysql
+      * RedHat Systems: mysql-server, mysql, mysql-devel
   * OWAMP
     - Source is available here: http://software.internet2.edu/sources/owamp/
     - Package management names:
@@ -225,4 +237,4 @@ and
 
 --------------------------------------------------------------------------------
 
-Thu Jul 30 23:39:03 EDT 2009
+Tue Aug 25 09:22:49 EDT 2009
