@@ -1,13 +1,14 @@
-AnyEvent
-AnyEvent::HTTP
+AnyEvent,4.81
+AnyEvent::HTTP,1.4
 CGI
 CGI::Carp
 Carp
 Class::Accessor
 Class::Fields
+Config::General
 Data::Dumper
-Data::Validate::Domain
-Data::Validate::IP
+Data::Validate::Domain,0.09
+Data::Validate::IP,0.08
 Date::Manip
 Digest::MD5
 English
@@ -19,7 +20,7 @@ IO::File
 LWP::Simple
 LWP::UserAgent
 Log::Log4perl
-Net::CIDR
+Net::CIDR,0.13
 Net::IPv6Addr
 POSIX
 Params::Validate
@@ -28,7 +29,7 @@ Scalar::Util
 Socket
 Time::HiRes
 Time::Local
-XML::LibXML
+XML::LibXML,1.66
 aliased
 base
 lib
