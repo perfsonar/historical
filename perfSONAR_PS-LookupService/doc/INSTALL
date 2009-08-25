@@ -72,6 +72,10 @@ the following Perl libraries, libraries, and external tools to function:
     - LWP::Simple
     - LWP::UserAgent
     - Log::Log4perl
+    - Log::Dispatch
+    - Log::Dispatch::FileRotate
+    - Log::Dispatch::Screen
+    - Module::Build::Compat
     - Module::Load
     - Net::CIDR
     - Net::IPTrie
@@ -81,7 +85,7 @@ the following Perl libraries, libraries, and external tools to function:
     - Sys::Hostname
     - Term::ReadKey
     - Time::HiRes
-    - XML::LibXML    
+    - XML::LibXML
   * Libraries
     - LibXML2
   * Tools
