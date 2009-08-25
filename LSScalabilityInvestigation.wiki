@@ -420,5 +420,6 @@ Data::UUID under CPAN.
  }}}
  
 We try to run the `sudo lookup_service start` and we get the same error.  So, Data::UUID must be being installed
-in some place where the LS scripts cannot find.
+in some place where the LS scripts cannot find:  it is installed under `.cpan` subdirectory under the home directory,
+and this subdirectory does not appear in the @INC array.
 
