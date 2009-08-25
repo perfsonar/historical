@@ -231,11 +231,6 @@ sub init {
     }
 
     unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} ) {
-        $self->{LOGGER}->warn( "Setting \"enable_registration\" to \"" . $self->{CONF}->{enable_registration} . "\" for legacy reasons." );
-        $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} = $self->{CONF}->{enable_registration};
-    }
-
-    unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} ) {
         if ( exists $self->{CONF}->{enable_registration} and $self->{CONF}->{enable_registration} ) {
             $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} = $self->{CONF}->{enable_registration};
         }
