@@ -48,14 +48,14 @@ The following outline some exceptions to the overall release process.  Also see 
 === Bugs Related to This Release ===
 
  * _*pSB*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=179 179] - Enhancement - Low - _*Jeff*_ - Add scripts to clean/migrate SQL data in pS-B 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=179 179] - Enhancement - Low - _*Jeff*_ - ~~Add scripts to clean/migrate SQL data in pS-B~~
      * <font color=purple>_*Pushed Off till 3.2 - 7/15*_</font>
  * _*PingER*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=180 180] - Enhancement - Low - _*Maxim*_ - ~~Add scripts to clean/migrate SQL data in pingER~~
      * <font color=green>_*Fixed - 6/24*_</font>
  * _*SNMP MA*_ 
  * _*OWAMP/BWCTL*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=49 49] - Enhancement - High - _*Jason*_ - Daemon job to automatically add BWCTL/OWAMP isntances 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=49 49] - Enhancement - High - _*Jason*_ - ~~Daemon job to automatically add BWCTL/OWAMP isntances~~
      * <font color=purple>_*Pushing back to 3.2 - 7/10*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=146 146] - _*Aaron*_ - ~~bwctld.limits should be updated as well~~
      * <font color=green>_*Fixed - 6/8*_</font>
