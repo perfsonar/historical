@@ -345,10 +345,53 @@ BINDIR=${PREFIX}/bin
 ...
 }}}
 
-Now running:
+Before running the service, let us edit the `etc/daemon.conf` file.  The resulting file is as follows:
 
 {{{
-[mportnoi@ale perfSONAR_PS-LookupService]$ scripts/lookup_service start
+[mportnoi@ale etc]$ cat daemon.conf 
+<port 7000>
+    <endpoint /perfSONAR_PS/services/hLS>
+        <gls>
+                                                                # just an hLS ... (ORG, CITY, STATE, COUNTRY)
+                        root                            1
+                                                                # data TTL = 4 days
+                        ls_ttl                          5760
+                                                                # 180 minute (3hr) registaration window
+                        ls_registration_interval        180
+                                                                # 120 miute cleaning/summary window
+                        maintenance_interval            120
+                                                                # Database options (only change path)
+                        metadata_db_file                    glsstore.dbxml
+                        metadata_summary_db_file            glsstore-summary.dbxml
+                        metadata_db_name                    /var/lib/perfsonar/lookup_service/xmldb
+                                                                # Service options (please customize)
+                        service_accesspoint                 http://localhost:7000/perfSONAR_PS/services/gLS
+                        service_description             ORG Global Lookup Service (CITY, STATE, COUNTRY)
+                        service_name                    ORG GlobaL Lookup Service
+                        service_type                    gLS
+                </gls>
+                disable                             0
+                module                              perfSONAR_PS::Services::LS::gLS
+        </endpoint>
+</port>
+                                                    # 180 minute (3hr) registaration window
+ls_registration_interval                        180
+disable_echo                                0
+                                                    # Root hints info, url + local copy location
+root_hints_url                              http://damsl.cis.udel.edu/gls.root.hints
+root_hints_file                             /var/lib/perfsonar/lookup_service/hls.root.hints
+                                                    # Daemon management, shouldn't need changing
+reaper_interval                             20
+max_worker_lifetime                             300
+max_worker_processes                        30
+pid_dir                                     /var/run
+pid_file                                        lookup_service.pid
+}}}
+
+Now running `lookup_service start` under `scripts`, we get:
+
+{{{
+[mportnoi@ale perfSONAR_PS-LookupService]$ sudo scripts/lookup_service start
 /home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/bin/daemon.pl --config=/home/mportnoi/
  perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/etc/daemon.conf --pidfile=lookup_service.pid --piddir=
  /var/run --logger=/home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/etc/daemon_logger.conf
@@ -356,4 +399,22 @@ Now running:
 Can't locate Data/UUID.pm in @INC (@INC contains: /home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-Lookup
  Service/bin/../lib  ./lib ../lib /usr/lib/perl5/site_perl/5.8.6/i386-linux-thread-multi /usr/lib/perl5/site_perl/5.8.5/
  i386
+ ...
 }}}
+
+The error message states that Data/UUID.pm was not found, a Perl problem.  Using CPAN to download and install this
+package:
+
+ `sudo perl -MCPAN -e 'install Data::UUID' (to enter CPAN and run the command `install Data::UUID`)
+ 
+We get:
+
+ `Data::UUID is up to date (1.202).`
+ 
+Running the `lookup_service start`, we get the same Data/UUID missing error again.  Let us try to force install
+Data::UUID under CPAN.
+
+ `sudo perl -MCPAN -e shell`
+ 
+And we get the same error.  So, Data::UUID must be being installed in some place where the LS scripts cannot find.
+
