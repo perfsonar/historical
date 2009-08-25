@@ -6,7 +6,7 @@ then
 	MAKEROOT="sudo"
 fi
 
-for i in `cat dependencies`
+for i in `cat ../dependencies`
 do
 	NAME=`echo $i | awk '{ split($0, a, ",");print a[1] }'`
 	VER=`echo $i | awk '{ split($0, a, ",");print a[2] }'`
@@ -41,3 +41,6 @@ do
 		fi
 	fi
 done
+
+echo "Exiting install_dependencies.sh"
+
