@@ -100,8 +100,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Fri Jul 31 2009 zurawski@internet2.edu 3.1-6
+* Tue Aug 25 2009 zurawski@internet2.edu 3.1-6
 - Fixes to to documentation and package structure.  
+- Adding DCN utilities
 
 * Tue Jul 21 2009 zurawski@internet2.edu 3.1-5
 - Shared library upgrades.
@@ -113,7 +114,8 @@ fi
 - Bugfix to inclcude perl(Clone) as a dep.
 
 * Thu May 7 2009 zurawski@internet2.edu 3.1-2
-- Bugfix to inclcude makeDBConf script
+- Bugfixes
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=159
 
 * Thu Mar 12 2009 zurawski@internet2.edu 3.1-1
 - Initial release as an RPM

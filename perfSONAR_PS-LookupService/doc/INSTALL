@@ -61,9 +61,7 @@ the following Perl libraries, libraries, and external tools to function:
     - Data::UUID
     - Data::Validate::IP
     - Digest::MD5
-    - English
     - Error
-    - Exporter
     - File::Basename
     - File::Temp
     - File::stat
@@ -73,8 +71,6 @@ the following Perl libraries, libraries, and external tools to function:
     - IO::File
     - LWP::Simple
     - LWP::UserAgent
-    - Log::Dispatch
-    - Log::Dispatch::FileRotate
     - Log::Log4perl
     - Module::Load
     - Net::CIDR
@@ -82,10 +78,10 @@ the following Perl libraries, libraries, and external tools to function:
     - Net::IPv6Addr
     - Net::Ping
     - Params::Validate
-    - Sleepycat::DbXml    
     - Sys::Hostname
+    - Term::ReadKey
     - Time::HiRes
-    - XML::LibXML
+    - XML::LibXML    
   * Libraries
     - LibXML2
   * Tools
@@ -156,7 +152,7 @@ that may be used to download the necessary prerequisite software packages:
   wget -c http://software.internet2.edu/source/perfSONAR-PS/perfSONAR_PS-LookupService-3.1.6.tar.gz
   tar -zxfv perfSONAR_PS-LookupService-3.1.6.tar.gz
   cd perfSONAR_PS-LookupService-3.1.6
-  make install
+  (sudo) make install
   cd scripts
   ./install_dependencies.sh
   ./prepare_environment.sh
@@ -219,5 +215,5 @@ and
 
 --------------------------------------------------------------------------------
 
-Fri Jul 31 09:19:07 EDT 2009
+Tue Aug 25 09:22:49 EDT 2009
 
