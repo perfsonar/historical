@@ -10,7 +10,7 @@ collected via variables from the Simple Network Management Protocol (SNMP)
 protocol found on networked devices and stored in Round Robin Databases (RRD)
 archives. The measurements are collected through external means, normally
 through software such as MRTG, CACTI, or Cricket, and is commonly stored in RRD
-archives. External access to commonly requested data items, remains challening
+archives. External access to commonly requested data items, remains challenging
 due to physical and political boundaries.
 
 The SNMP MA provides a simple interface that is cable of exposing these files
@@ -91,13 +91,13 @@ Starting/Stopping:
 The service comes with init scripts that may be used to start and stop
 operation:
 
-  /etc/init.d/snmp_ma start
-  /etc/init.d/snmp_ma stop
-  /etc/init.d/snmp_ma restart
+  (sudo) /etc/init.d/snmp_ma start
+  (sudo) /etc/init.d/snmp_ma stop
+  (sudo) /etc/init.d/snmp_ma restart
 
 The service can also be run in a manual fashion (useful for debugging):
 
-  perl bin/daemon.pl --verbose --conf=etc/daemon.conf --logger=etc/daemon_logger.conf
+  (sudo) perl bin/daemon.pl --verbose --conf=etc/daemon.conf --logger=etc/daemon_logger.conf
   
 Before doing this, be sure to edit "etc/daemon_logger.conf" to enable "Screen"
 debugging.
@@ -145,11 +145,11 @@ will also be sent to these locations
 Also if you are using package management software and have installed the
 Internet2 software repository, a typical upgrade should download new releases:
 
-  yum update
+  (sudo) yum update
 
 or
 
-  apt-get dist-upgrade
+  (sudo) apt-get upgrade
   
 Finally, check the following websites for news of software releases:
 

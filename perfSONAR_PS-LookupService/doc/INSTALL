@@ -7,7 +7,7 @@ gathered from other perfSONAR services in a domain.  Every perfSONAR-PS service
 is capable of registering location and metadata information with the LS.  The 
 LS then stores, summarizes, and shares this information with the global
 Information Services (IS) framework.  This information may then be searched for
-in numerous ways, making it easier to locate resourses without asking services
+in numerous ways, making it easier to locate resources without asking services
 for information directly.  
 
 The LS relies on an XML database (e.g. the Oracle DBXML) to store information.
@@ -18,7 +18,7 @@ Prerequisites:
 --------------
 
 The LS is packaged as an RPM - an installation format geared towards use on Red
-Hat linux based systems.  Examples include Fedora, Red Hat Enterprise Linux,
+Hat Linux based systems.  Examples include Fedora, Red Hat Enterprise Linux,
 CentOS, White Box, Scientific Linux, and possibly others.  
 
 These Linux distributions normally rely on "Package Management" tools to install
@@ -33,11 +33,11 @@ can be found here:
   
 To install this RPM first import the signing key:
 
-  rpm --import http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2
+  (sudo) rpm --import http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2
 
 Then install the RPM:
 
-  rpm -ivh Internet2-repo-0.1-2.noarch.rpm
+  (sudo) rpm -ivh Internet2-repo-0.1-2.noarch.rpm
 
 It is also recommended that an additional repository be installed for hard to 
 find prerequisite software that may not be available in traditional repositories
@@ -99,7 +99,7 @@ Installation (YUM):
 Installation using YUM lets the package manager do the work of finding and
 installing the dependencies.  The following command is all that is needed:
 
-  yum install perl-perfSONAR_PS-LookupService-3.1-6.pSPS.noarch.rpm
+  (sudo) yum install perl-perfSONAR_PS-LookupService-3.1-6.pSPS.noarch.rpm
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -113,8 +113,8 @@ Installation (APT-RPM):
 Like YUM, installation with APT-RPM also manages the task of finding
 dependencies.  The following commands will install is needed:
 
-  apt-get update
-  apt-get install perl-perfSONAR_PS-LookupService-3.1-6.pSPS.noarch.rpm
+  (sudo) apt-get update
+  (sudo) apt-get install perl-perfSONAR_PS-LookupService-3.1-6.pSPS.noarch.rpm
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -133,14 +133,14 @@ For example if you are on an "i386" architecture:
   
 To install without package manager help:
 
-  rpm -ivh perl-perfSONAR_PS-LookupService-3.1-6.pSPS.noarch.rpm
+  (sudo) rpm -ivh perl-perfSONAR_PS-LookupService-3.1-6.pSPS.noarch.rpm
   
 Note that this RPM may need other packages to install correctly: if these
 packages are not found on your system, you will need to manually download and
 install them before proceeding.  An alternate method is to still use a package
 manager in a "local" way (YUM only):
 
-  yum localinstall perl-perfSONAR_PS-LookupService-3.1-6.pSPS.noarch.rpm
+  (sudo) yum localinstall perl-perfSONAR_PS-LookupService-3.1-6.pSPS.noarch.rpm
   
 This will search the available repositories for any necessary packages.
 

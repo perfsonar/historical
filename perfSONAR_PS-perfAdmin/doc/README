@@ -71,7 +71,7 @@ The directory should be viewable (N.B. to alter this disable 'Indexes' in the
 'entry' pages that can be used for testing:
 
     1) http://YOURHOST/perfAdmin/directory.cgi - View of active services
-       seperated by type.  Note that only certain types are supported, so if
+       separated by type.  Note that only certain types are supported, so if
        you are looking for a specific service please check to be sure it is of a
        supported type.  
     
@@ -98,11 +98,11 @@ will also be sent to these locations
 Also if you are using package management software and have installed the
 Internet2 software repository, a typical upgrade should download new releases:
 
-  yum update
+  (sudo) yum update
 
 or
 
-  apt-get dist-upgrade
+  (sudo) apt-get upgrade
   
 Finally, check the following websites for news of software releases:
 

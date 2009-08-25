@@ -10,7 +10,7 @@ storage facility and a regular testing framework in conjunction with the BWCTL
 and OWAMP measurement tools.  These archived measurements, stored in a MySQL
 database, are exposed through a web services interface.  
 
-The perfSONAR-BUOY MA provides a simple interface that is cable of exposing
+The perfSONAR-BUOY MA provides a simple interface that is capable of exposing
 these files after basic configuration for consumption by perfSONAR client
 applications and services alike. The Web Service front end provides a uniform
 method of access using the perfSONAR XML protocols and delivers the data in an
@@ -30,8 +30,8 @@ collection may begin.  Note that some options regarding the database can be
 adjusted in the 'owmesh.conf' file (see next section).  There are two scripts, 
 one for each data type:
 
-  /opt/perfsonar_ps/perfsonarbuoy_ma/bin/owdb.pl -c /opt/perfsonar_ps/perfsonarbuoy_ma/etc -i ADMIN_USER_NAME
-  /opt/perfsonar_ps/perfsonarbuoy_ma/bin/bwdb.pl -c /opt/perfsonar_ps/perfsonarbuoy_ma/etc -i ADMIN_USER_NAME
+  (sudo) bin/owdb.pl -c ../etc -i ADMIN_USER_NAME
+  (sudo) bin/bwdb.pl -c ../etc -i ADMIN_USER_NAME
   
 Note that if you wish to delete an existing data base replace '-i' with '-x'.
 Replace ADMIN_USER_NAME with the name of the MySQL admin (this is normally
@@ -66,8 +66,9 @@ for a specific use case:
       enable_registration      - Turn on or off LS registration
       ls_instance              - Specific hLS to register data with
       maintenance_interval     - Interval of time to re-generate the store.xml
-                                 file (N.B. doing this fast can be CPU expensive
-                                 but does make test data available faster)
+                                 file (N.B. doing this frequently can be CPU
+                                 expensive but does make test data available
+                                 more quickly)
       owmesh                   - This is the *DIRECTORY* that contains the
                                  owmesh.conf file.  *DO NOT* place the full path
                                  to the file or the service will not start.
@@ -92,9 +93,10 @@ for a specific use case:
 
   - /var/lib/perfsonar/perfsonarbuoy_ma/store.xml: 
 
-    Under normal circumstances this file is not to be edited.
+    The location of this file should be changed - but the file itself is dynamic
+    and should not be edited.
 
-  - /opt/perfsonar_ps/perfsonarbuoy_ma/etc/owmesh.conf: 
+  - etc/owmesh.conf: 
 
     This file is annotated with instructions on what to change.
 
@@ -104,9 +106,9 @@ Starting/Stopping:
 The service comes with init scripts that may be used to start and stop
 operation:
 
-  /etc/init.d/perfsonarbuoy_ma start
-  /etc/init.d/perfsonarbuoy_ma stop
-  /etc/init.d/perfsonarbuoy_ma restart
+  (sudo) /etc/init.d/perfsonarbuoy_ma start
+  (sudo) /etc/init.d/perfsonarbuoy_ma stop
+  (sudo) /etc/init.d/perfsonarbuoy_ma restart
 
 There are other scripts that manage the measurement and collection of data:
 
@@ -115,9 +117,13 @@ There are other scripts that manage the measurement and collection of data:
  - perfsonarbuoy_owp_master     Script that performs OWAMP measurements
  - perfsonarbuoy_owp_collector  Script to collect and store OWAMP measurements
 
+In general, "master" scripts will run on data collector nodes (e.g. 'beacons'),
+and "collector" scripts run on central node or nodes that normally contain a
+database. 
+
 The service can also be run in a manual fashion (useful for debugging):
 
-  perl bin/daemon.pl --verbose --conf=etc/daemon.conf --logger=etc/daemon_logger.conf
+  (sudo) perl bin/daemon.pl --verbose --conf=etc/daemon.conf --logger=etc/daemon_logger.conf
   
 Before doing this, be sure to edit "etc/daemon_logger.conf" to enable "Screen"
 debugging.
@@ -162,11 +168,11 @@ will also be sent to these locations
 Also if you are using package management software and have installed the
 Internet2 software repository, a typical upgrade should download new releases:
 
-  yum update
+  (sudo) yum update
 
 or
 
-  apt-get dist-upgrade
+  (sudo) apt-get upgrade
   
 Finally, check the following websites for news of software releases:
 

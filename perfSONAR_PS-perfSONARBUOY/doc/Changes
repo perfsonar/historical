@@ -1,7 +1,7 @@
 version 3.1
   * Initial RPM release.
   * The following development changes where added since the last release (0.9)
-    - OWAMP Suport
+    - OWAMP Support
     - Bugfixes (see below)
     - Updated message examples
   * Bugfixes
