@@ -115,7 +115,8 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*SNMP MA*_    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - _*Aaron*_ - Cacti Configuration on NPToolkit 
      * <font color=yellow>_*Mostly Done, Needs Testing - 6/23*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=215 215] - _*Jason*_ - Cacti database should 'exit' the SNMP MA service if no data is present. 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=215 215] - _*Jason*_ - ~~Cacti database should 'exit' the SNMP MA service if no data is present.~~
+     * <font color=green>_*Fixed - 8/25*_</font>
  * _*OWAMP/BWCTL*_ 	      
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - _*Aaron*_ - owamp/bwctl defaults for LHC sites 
      * <font color=yellow>_*In Progress - 7/2*_</font>	 
