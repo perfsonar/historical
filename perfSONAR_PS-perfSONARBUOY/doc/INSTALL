@@ -163,6 +163,7 @@ that may be used to download the necessary prerequisite software packages:
   tar -zxfv perfSONAR_PS-perfSONAR-BUOY-3.1.2.tar.gz
   cd perfSONAR_PS-perfSONAR-BUOY-3.1.2
   (sudo) make install
+    *Edit all configuration files - See README*
   cd scripts
   ./install_dependencies.sh
   ./prepare_environment.sh

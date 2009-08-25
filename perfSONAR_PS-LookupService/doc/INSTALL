@@ -157,6 +157,7 @@ that may be used to download the necessary prerequisite software packages:
   tar -zxfv perfSONAR_PS-LookupService-3.1.6.tar.gz
   cd perfSONAR_PS-LookupService-3.1.6
   (sudo) make install
+    *Edit all configuration files - See README*
   cd scripts
   ./install_dependencies.sh
   ./prepare_environment.sh
