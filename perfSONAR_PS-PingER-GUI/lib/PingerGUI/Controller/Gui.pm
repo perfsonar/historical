@@ -96,7 +96,7 @@ sub filter_links : Local {
     if($c->stash->{filter_project}) {
        $c->forward('_get_local_cache');  
     }
-    $c->stash->{template} =  'gui/filtered_ma.tmpl'; 
+    $c->stash->{template} = 'gui/filtered_ma.tmpl'; 
 }
 
 sub _get_local_cache : Private { 

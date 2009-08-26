@@ -47,7 +47,7 @@ sub end : Private {
 
    if ( scalar @{ $c->error } ) {
         $c->stash->{message} =  $c->error; 
-        $c->stash->{template} ='gui/error.tmpl';
+        $c->stash->{template} =   'gui/error.tmpl';
    } # handle errors
    return if $c->res->body; # already have a response
 }

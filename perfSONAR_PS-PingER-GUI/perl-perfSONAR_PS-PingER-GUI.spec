@@ -30,7 +30,7 @@ Requires:       perl(Catalyst::View::TT)
 Requires:       perl(Catalyst::Plugin::StackTrace)
 Requires:       perl(Catalyst::Plugin::Static::Simple)
 Requires:       perl(Catalyst::Plugin::ConfigLoader)
-
+Requires:       perl(Catalyst::Action::RenderView)
 Requires:       perl(Class::Data::Inheritable)
 
 Requires:       perl(Class::Accessor)
@@ -94,6 +94,7 @@ Requires:       perl(Time::gmtime)
 Requires:       perl(Time::Local)
 Requires:       perl(JSON::XS)
 Requires:       perl(XML::LibXML) >= 1.62
+Requires:       perl(YAML)
 Requires:       perl(constant)
 Requires:       perl(version) >= 0.5
 Requires:       perl(fields)
@@ -101,9 +102,6 @@ Requires:       perl(aliased)
 Requires:       perl(utf8)
 Requires:       perl(base)
 Requires:       httpd
-Requires:       mod_perl2
-Requires:       apache2-mpm-prefork
-Requires:       libapache2-mod-perl2
 
 %description
 The perfSONAR_PS PingER data charts GUI allows one to view graphs.
@@ -134,8 +132,12 @@ awk "{gsub(\"$RPM_BUILD_ROOT/\",\"\"); print}" scripts/%{apacheconf} > scripts/%
 install -D -m 644 scripts/%{apacheconf}.new   $RPM_BUILD_ROOT/etc/httpd/conf.d/%{apacheconf} 
  
 awk "{gsub(\"$RPM_BUILD_ROOT/\",\"\"); print}" lib/PingerGUI.pm >   lib/PingerGUI.pm.new
-install -D -m 644  lib/PingerGUI.pm.new    l%{install_base}/lib/PingerGUI.pm
- 
+awk "{gsub(\"MYPATH=/\",\"%{install_base}/\"); print}" lib/PingerGUI.pm.new >   lib/PingerGUI.pm.new2
+install -D -m 644  lib/PingerGUI.pm.new2     $RPM_BUILD_ROOT/%{install_base}/lib/PingerGUI.pm  
+
+awk "{gsub(\"MYPATH=/\",\"%{install_base}/\"); print}"  pinger_gui_conf.yml > pinger_gui_conf.yml.new
+install -D -m 644      pinger_gui_conf.yml.new    $RPM_BUILD_ROOT/%{install_base}/pinger_gui_conf.yml
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -146,9 +148,10 @@ rm -rf $RPM_BUILD_ROOT
 %{install_base}/scripts/*
 %{install_base}/lib/*
 %{install_base}/root/*
+%{install_base}/pinger_gui_conf.yml
+
 /etc/cron.d/*
 /etc/httpd/conf.d/*
-%{install_base}/pinger_gui_conf.yml
 
 %post
 mkdir -p %{logging_base}

@@ -41,7 +41,8 @@ lib/ChartDirector/lib/fonts/timR10.pcf
 lib/ChartDirector/lib/fonts/timR12.pcf
 lib/ChartDirector/lib/fonts/timR14.pcf
 lib/ChartDirector/lib/libchartdir.so
-lib/ChartDirector/lib/libchartdiri64.so
+lib/ChartDirector/lib/libchartdiri386.so
+lib/ChartDirector/lib/libchartdirx86_64.so
 lib/ChartDirector/lib/perlchartdir.pm
 lib/ChartDirector/lib/perlchartdir5004.so
 lib/ChartDirector/lib/perlchartdir5005.so

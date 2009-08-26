@@ -29,7 +29,7 @@ our $VERSION = '3.1.6';
 # details given here can function as a default configuration,
 # with an external configuration file acting as an override for
 # local deployment.
-__PACKAGE__->config( 'Plugin::ConfigLoader' => { file => 'pinger_gui_conf.yml' } );  
+__PACKAGE__->config( 'Plugin::ConfigLoader' => { file => 'MYPATH=/pinger_gui_conf.yml' } );  
 # Start the application
 __PACKAGE__->setup();
 
