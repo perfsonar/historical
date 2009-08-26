@@ -73,9 +73,29 @@ Using these sources for instructions on installation and configuration:
 
  http://code.google.com/p/perfsonar-ps/wiki/LS
 
+=== Preparing _stout_ ===
+
+_stout_ will act as a web server providing the gLS 'cloud', i.e., a list of gLS servers that will form the Lookup Service
+gLS network.  This list, a common text file, forms a hints file named `gls.root.hints`.
+
+We make a new hints file that includes the gLS instances created for this testing, and place it on _stout_'s web server
+(/var/www/external).  The contents of the file will be:
+
+{{{
+  http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
+}}}
+
+The URL for accessing the file, thus, is http://stout.damsl.cis.udel.edu/gls.root.hints .
+
+ 
 === Preparing _ale_ ===
 
-This server _ale_ is Fedora Core release 4 (Stentz).
+==== Background ====
+
+This server _ale_ is Fedora Core release 4 (Stentz).  There is already a Lookup Service installed and running on this
+server.
+
+==== Attempt 1 ====
 
 Checked out perfSONAR repository into home directory (must have permission):
 
@@ -513,3 +533,100 @@ BEGIN failed--compilation aborted at /home/mportnoi/perfSONAR-PS/branches/RELEAS
 }}}
 
 This last attempt just creates another version conflict.
+
+At this point we abandon this attempt, as it seems revolving in garbage (which generates more garbage).  Proceed
+to [LSScalabilityInvestigation#Attempt_3].
+
+
+==== Attempt 3 ====
+
+First, checkout or update the SVN repository.
+
+ `svn co https://svn.internet2.edu/svn/perfSONAR-PS/`
+ 
+The Lookup Service will be installed to directory `/opt/perfsonar_ps1`.
+
+After perfSONAR software is downloaded, create the installation directory:
+
+  `sudo mkdir -p /opt/perfsonar_ps1`
+  
+Copy the proper diretories from the download location to the installation directory.  Change
+to the directory where perfSONAR_PS-LookupService and Shared directories are located and do:
+
+{{{
+cd /home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1
+sudo cp -r perfSONAR_PS-LookupService /opt/perfsonar_ps1
+sudo cp -r Shared /opt/perfsonar_ps1
+}}}
+
+Do not run 'make install', as the Makefile will attempt to install the service to the default directory
+/opt/perfsonar_ps.  Instead, proceed to install the necessary dependencies:
+
+{{{
+cd /opt/perfsonar_ps1/perfSONAR_PS-LookupService/scripts  
+sudo ./install_dependencies.sh
+}}}
+
+Do not run 'prepare_environment.sh'.  Now modify the .conf files accordingly (refer to README):
+
+Edit `/opt/perfsonar_ps1/perfSONAR_PS-LookupService/etc/daemon_logger.conf` and set the desired logging method.
+Here, we choose to display log messages to the screen.  Hence, per instructed within the file, we uncomment the line:
+
+ `log4perl.appender.A1=Log::Dispatch::Screen`
+ 
+And comment the line:
+
+ `#log4perl.appender.A1=Log::Dispatch::FileRotate`
+ 
+Edit `/opt/perfsonar_ps1/perfSONAR_PS-LookupService/etc/daemon.conf` and set the appropriate configuration variables.
+The resulting file (for a gLS) is:
+
+{{{
+<port 7000>
+    <endpoint /perfSONAR_PS/services/gLS>
+        <gls>
+                                                                # just an gLS ... (ORG, CITY, STATE, COUNTRY)
+                        root                            1
+                                                                # data TTL = 4 days
+                        ls_ttl                          5760
+                                                                # 180 minute (3hr) registaration window
+                        ls_registration_interval        180
+                                                                # 120 miute cleaning/summary window
+                        maintenance_interval            120
+                                                                # Database options (only change path)
+                        metadata_db_file                    glsstore.dbxml
+                        metadata_summary_db_file            glsstore-summary.dbxml
+                        metadata_db_name                    /opt/perfsonar_ps1/perfSONAR_PS-LookupService/gLS-xmldb
+                                                                # Service options (please customize)
+                        service_accesspoint                 http://localhost:7000/perfSONAR_PS/services/gLS
+                        service_description             ORG Global Lookup Service (CITY, STATE, COUNTRY)
+                        service_name                    ORG GlobaL Lookup Service
+                        service_type                    gLS
+                </gls>
+                disable                             0
+                module                              perfSONAR_PS::Services::LS::gLS
+        </endpoint>
+</port>
+                                                    # 180 minute (3hr) registaration window
+ls_registration_interval                        180
+disable_echo                                0
+                                                    # Root hints info, url + local copy location
+root_hints_url                              http://stout.damsl.cis.udel.edu/gls.root.hints
+root_hints_file                             /opt/perfsonar_ps1/perfSONAR_PS-LookupService/hls.root.hints
+                                                    # Daemon management, shouldn't need changing
+reaper_interval                             20
+max_worker_lifetime                             300
+max_worker_processes                        30
+pid_dir                                     /opt/perfsonar_ps1/perfSONAR_PS-LookupService
+pid_file                                        lookup_service.pid
+}}}
+
+Finally, run the service (refer to README for manual start):
+
+{{{
+cd /opt/perfsonar_ps1/perfSONAR_PS-LookupService/bin
+sudo perl daemon.pl --verbose --conf=../etc/daemon.conf --logger=../etc/daemon_logger.conf
+}}}
+  
+Now the service reports to be running.  It can be switched to the background by pressing CTRL-Z and typing `bg`.
+To bring it back to the foreground, press CTRL-Z and type `fg`.
