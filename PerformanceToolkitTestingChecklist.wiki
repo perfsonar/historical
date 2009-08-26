@@ -59,7 +59,7 @@ This page contains a checklist of things to test before releasing a Performance 
 == Testing Checklist ==
 
 === Networking Configuration ===
-  * `_____` Did the network come up with DHCP?
+  * `_____` Did the network come up with DHCP (if DHCP is being used)?
   * `_____` Can you connect to hosts on the outside world, and resolve DNS names?
   * `_____` Using the "nptoolkit-configure.py", select "Configure Networking". Did the networking script come up?
   * `_____` Select "Configure DNS" and add a DNS server.
@@ -78,7 +78,7 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Change the Organization Name, Host Location, Administrator Name and Administrator Email
   * `_____` Add a community via "Add New Community"
   * `_____` Add multiple "Popular Community" communities
-     * `_____` Does the community just added get removed from the Popular Communities list?
+  * `_____` Does the community just added get removed from the Popular Communities list?
   * `_____` Delete a community via the "Delete" link
   * `_____` Does the community get deleted from the list?
   * `_____` If you deleted a "Popular Community" from the communities list, does it get added back to the Popular Communities list
@@ -86,10 +86,10 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Did all the information get saved? Click Reset and make sure nothing changes
   * `_____` Check that the following services were restarted: Lookup Service, PingER, SNMP MA, perfSONAR-BUOY Measurement Archive, ls registration daemon
   * `_____` Check that NPAD's and NDT's webpages got updated:
-     * `_____` NDT: `http://[host url]:7123`
-     * `_____` NPAD: `http://[host url]:3000`
+  * `_____` NDT: `http://[host url]:7123`
+  * `_____` NPAD: `http://[host url]:3000`
   * `_____` Check the contents of the hLS to make sure that the description information for services is updated.
-     * `_____` You can use the following URL to check: `http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://[host_url]:8095/perfSONAR_PS/services/hLS`
+  * `_____` You can use the following URL to check (*Please allow at least 10 minutes for service registration*): `http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://[host_url]:8095/perfSONAR_PS/services/hLS`
 
 === Enabled Services ===
   * `_____` Select "Only Enable Bandwidth Services", it should enable NDT, NPAD, BWCTL, perfSONAR-BUOY Throughput Testing. It should disable owamp, perfSONAR-BUOY Latency Testing, PingER.
