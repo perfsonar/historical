@@ -368,43 +368,42 @@ BINDIR=${PREFIX}/bin
 Before running the service, let us edit the `etc/daemon.conf` file.  The resulting file is as follows:
 
 {{{
-[mportnoi@ale etc]$ cat daemon.conf 
 <port 7000>
-    <endpoint /perfSONAR_PS/services/hLS>
+    <endpoint /perfSONAR_PS/services/gLS>
         <gls>
-                                                                # just an hLS ... (ORG, CITY, STATE, COUNTRY)
+                                                                # just an gLS ... (Udel, Newark, DE, USA)
                         root                            1
                                                                 # data TTL = 4 days
                         ls_ttl                          5760
-                                                                # 180 minute (3hr) registaration window
+                                                                # 180 minute (3hr) registration window
                         ls_registration_interval        180
                                                                 # 120 miute cleaning/summary window
                         maintenance_interval            120
                                                                 # Database options (only change path)
                         metadata_db_file                    glsstore.dbxml
                         metadata_summary_db_file            glsstore-summary.dbxml
-                        metadata_db_name                    /var/lib/perfsonar/lookup_service/xmldb
+                        metadata_db_name                    /opt/perfsonar_ps1/perfSONAR_PS-LookupService/gLS-xmldb
                                                                 # Service options (please customize)
-                        service_accesspoint                 http://localhost:7000/perfSONAR_PS/services/gLS
-                        service_description             ORG Global Lookup Service (CITY, STATE, COUNTRY)
-                        service_name                    ORG GlobaL Lookup Service
+                        service_accesspoint                 http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
+                        service_description             Udel Global Lookup Service (Udel, Newark, DE, USA)
+                        service_name                    Udel Global Lookup Service
                         service_type                    gLS
                 </gls>
                 disable                             0
                 module                              perfSONAR_PS::Services::LS::gLS
         </endpoint>
 </port>
-                                                    # 180 minute (3hr) registaration window
+                                                    # 180 minute (3hr) registration window
 ls_registration_interval                        180
 disable_echo                                0
                                                     # Root hints info, url + local copy location
-root_hints_url                              http://damsl.cis.udel.edu/gls.root.hints
-root_hints_file                             /var/lib/perfsonar/lookup_service/hls.root.hints
+root_hints_url                              http://stout.damsl.cis.udel.edu/gls.root.hints
+root_hints_file                             /opt/perfsonar_ps1/perfSONAR_PS-LookupService/hls.root.hints
                                                     # Daemon management, shouldn't need changing
 reaper_interval                             20
 max_worker_lifetime                             300
 max_worker_processes                        30
-pid_dir                                     /var/run
+pid_dir                                     /opt/perfsonar_ps1/perfSONAR_PS-LookupService
 pid_file                                        lookup_service.pid
 }}}
 
@@ -540,11 +539,13 @@ to [LSScalabilityInvestigation#Attempt_3].
 
 ==== Attempt 3 ====
 
+It is possible that using the `lookup_service start script` and running the services from the home directory caused
+the problems verified.  Now, the Lookup Service will be installed to directory `/opt/perfsonar_ps1`.
+
 First, checkout or update the SVN repository.
 
  `svn co https://svn.internet2.edu/svn/perfSONAR-PS/`
  
-The Lookup Service will be installed to directory `/opt/perfsonar_ps1`.
 
 After perfSONAR software is downloaded, create the installation directory:
 
@@ -585,11 +586,11 @@ The resulting file (for a gLS) is:
 <port 7000>
     <endpoint /perfSONAR_PS/services/gLS>
         <gls>
-                                                                # just an gLS ... (ORG, CITY, STATE, COUNTRY)
+                                                                # just an gLS ... (Udel, Newark, DE, USA)
                         root                            1
                                                                 # data TTL = 4 days
                         ls_ttl                          5760
-                                                                # 180 minute (3hr) registaration window
+                                                                # 180 minute (3hr) registration window
                         ls_registration_interval        180
                                                                 # 120 miute cleaning/summary window
                         maintenance_interval            120
@@ -598,16 +599,16 @@ The resulting file (for a gLS) is:
                         metadata_summary_db_file            glsstore-summary.dbxml
                         metadata_db_name                    /opt/perfsonar_ps1/perfSONAR_PS-LookupService/gLS-xmldb
                                                                 # Service options (please customize)
-                        service_accesspoint                 http://localhost:7000/perfSONAR_PS/services/gLS
-                        service_description             ORG Global Lookup Service (CITY, STATE, COUNTRY)
-                        service_name                    ORG GlobaL Lookup Service
+                        service_accesspoint                 http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
+                        service_description             Udel Global Lookup Service (Udel, Newark, DE, USA)
+                        service_name                    Udel Global Lookup Service
                         service_type                    gLS
                 </gls>
                 disable                             0
                 module                              perfSONAR_PS::Services::LS::gLS
         </endpoint>
 </port>
-                                                    # 180 minute (3hr) registaration window
+                                                    # 180 minute (3hr) registration window
 ls_registration_interval                        180
 disable_echo                                0
                                                     # Root hints info, url + local copy location
@@ -621,7 +622,7 @@ pid_dir                                     /opt/perfsonar_ps1/perfSONAR_PS-Look
 pid_file                                        lookup_service.pid
 }}}
 
-Finally, run the service (refer to README for manual start):
+Finally, run the service (refer to README for manual start) in the<font color=purple> foreground</font>:
 
 {{{
 cd /opt/perfsonar_ps1/perfSONAR_PS-LookupService/bin
@@ -630,3 +631,23 @@ sudo perl daemon.pl --verbose --conf=../etc/daemon.conf --logger=../etc/daemon_l
   
 Now the service reports to be running.  It can be switched to the background by pressing CTRL-Z and typing `bg`.
 To bring it back to the foreground, press CTRL-Z and type `fg`.
+
+To run it in<font color=purple> background</font>, it is best to switch the logging method to !FileRotate, and remove the --verbose option from
+`daemon.pl`.  Therefore, in file `daemon_logger.conf`, comment the line:
+
+ `#log4perl.appender.A1=Log::Dispatch::Screen`
+ 
+And uncomment the line:
+
+ `log4perl.appender.A1=Log::Dispatch::FileRotate`
+ 
+Select a log file to avoid conflict with other log files for additional LS instances.  Edit the line:
+
+ `log4perl.appender.A1.filename=/var/log/perfsonar/lookup_service1.log`
+ 
+And run:
+
+{{{
+cd /opt/perfsonar_ps1/perfSONAR_PS-LookupService/bin
+sudo perl daemon.pl --conf=../etc/daemon.conf --logger=../etc/daemon_logger.conf
+}}}
