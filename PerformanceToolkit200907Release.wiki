@@ -236,7 +236,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff*_ - Create organized web-site for pS-Performance-Toolkit    Documentation
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=285 285] - _*Aaron*_ - ~~Upgrade from older NPToolkit doesn't import tests~~
      * <font color=green>_*Fixed - 8/26*_</font>    	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=290 290] - _*Aaron*_ - Scheduled testing - 'invalid test' error
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=290 290] - _*Aaron*_ - ~~Scheduled testing - 'invalid test' error~~
+     * <font color=green>_*Fixed - 8/26*_</font>  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=291 291] - _*Aaron*_ - Scheduled Test Screen Shows Hosts Twice	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=292 292] - _*Aaron*_ - ~~GUI Display Consistency~~
      * <font color=green>_*Fixed - 8/26*_</font>
