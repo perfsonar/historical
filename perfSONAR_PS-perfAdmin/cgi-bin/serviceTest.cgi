@@ -471,7 +471,7 @@ else {
                                 $active[1] = $set2->{"active"} if $set2->{"active"};
                                 next unless $active[0] eq $active[1];
 
-                                $hostMap{ $set->{"key"} } = $set2->{"key"};
+                                push @{ $hostMap{ $set->{"key"} } }, $set2->{"key"};
                             }
                         }
                     }
@@ -579,7 +579,7 @@ else {
                             KEY            => $set->{"key"},
                             COUNT          => $counter,
                             SERVICE        => $service,
-                            KEY2           => $hostMap{ $set->{"key"} }
+                            KEY2           => $hostMap{ $set->{"key"} }->[0]
                             };
                         $counter++;
                     }
@@ -599,7 +599,7 @@ else {
                             KEY            => $set->{"key"},
                             COUNT          => $counter,
                             SERVICE        => $service,
-                            KEY2           => $hostMap{ $set->{"key"} },
+                            KEY2           => $hostMap{ $set->{"key"} }->[0],
                             SMON           => \@smon,
                             SDAY           => \@sday,
                             SYEAR          => \@syear,
@@ -609,7 +609,9 @@ else {
                             };
                         $counter++;
                     }
-                    $mark{ $hostMap{ $set->{"key"} } } = 1 if $hostMap{ $set->{"key"} };
+                    foreach my $hm ( @{ $hostMap{ $set->{"key"} } } ) {
+                        $mark{ $hm } = 1 if $hm;
+                    }
                 }
             }
         }
@@ -850,7 +852,7 @@ else {
                                 $active[1] = $set2->{"active"} if $set2->{"active"};
                                 next unless $active[0] eq $active[1];
 
-                                $hostMap{ $set->{"key"} } = $set2->{"key"};
+                                push @{ $hostMap{ $set->{"key"} } }, $set2->{"key"};
                             }
                         }
                     }
@@ -952,7 +954,7 @@ else {
                             KEY      => $set->{"key"},
                             COUNT    => $counter,
                             SERVICE  => $service,
-                            KEY2     => $hostMap{ $set->{"key"} }
+                            KEY2     => $hostMap{ $set->{"key"} }->[0]
                             };
                         $counter++;
                     }
@@ -966,7 +968,7 @@ else {
                             KEY      => $set->{"key"},
                             COUNT    => $counter,
                             SERVICE  => $service,
-                            KEY2     => $hostMap{ $set->{"key"} },
+                            KEY2     => $hostMap{ $set->{"key"} }->[0],
                             SMON     => \@smon,
                             SDAY     => \@sday,
                             SYEAR    => \@syear,
@@ -976,7 +978,9 @@ else {
                             };
                         $counter++;
                     }
-                    $mark{ $hostMap{ $set->{"key"} } } = 1 if $hostMap{ $set->{"key"} };
+                    foreach my $hm ( @{ $hostMap{ $set->{"key"} } } ) {
+                        $mark{ $hm } = 1 if $hm;
+                    }
                 }
             }
         }
