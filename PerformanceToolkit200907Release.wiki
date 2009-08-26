@@ -99,8 +99,8 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*pSB*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=273 273] - _*Jeff*_ - Stale .bwctlock files in pSB data collection 
  * _*PingER*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=228 228] - _*Aaron*_ - pinger tests are running but not showed on the GUI as scheduled
-     * <font color=yellow>_*In progress- 8/17*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=228 228] - _*Aaron*_ - ~~pinger tests are running but not showed on the GUI as scheduled~~
+     * <font color=yellow>_*Fixed- 8/26*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=233 233] - _*Aaron*_ - ~~there is no pinger data charts gui and there is no link to any external instance~~
      * <font color=green>_*Fixed - 8/5*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=237 237] - _*Aaron*_ - pinger daemon have not restarted when clicked on Save 
@@ -120,8 +120,8 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*OWAMP/BWCTL*_ 	      
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - _*Aaron*_ - owamp/bwctl defaults for LHC sites 
      * <font color=yellow>_*In Progress - 7/2*_</font>	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=200 200] - _*Aaron*_ - Upgrade script create owamp database if not present
-     * <font color=yellow>_*In Progress - 8/7*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=200 200] - _*Aaron*_ - ~~Upgrade script create owamp database if not present~~
+     * <font color=green>_*Fixed - 8/26*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=235 235] - _*Aaron*_ - simplified and documented options needed for configuring OWAMP tests 
      * <font color=yellow>_*In Progress - 8/24*_</font>   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=261 261] - _*Aaron*_ - JOWAMP requires hostname in .jnlp file    
@@ -133,21 +133,22 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=203 203] - _*Aaron*_ - Error messages when IS cannot be contacted for portions of the Admin GUIs 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=208 208] - _*Aaron*_ - ~~MTU Options in Console Config~~ 	 
      * <font color=green>_*Fixed - 8/5*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=209 209] - _*Aaron*_ - Scheduled Testing GUI 
-     * <font color=yellow>_*In Progress - 8/17*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=214 214] - _*Aaron*_ - GUIs should clearly reflect the decission to set up a 'latency host' vs a 'bandwidth' host 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=209 209] - _*Aaron*_ - ~~Scheduled Testing GUI~~
+     * <font color=green>_*Fixed - 8/26*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=214 214] - _*Aaron*_ - ~~GUIs should clearly reflect the decission to set up a 'latency host' vs a 'bandwidth' host~~
+     * <font color=green>_*Fixed - 8/26*_</font>    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=216 216] - _*Aaron*_ - Community handling in pS Performance Toolkit GUIs
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=217 217] - _*Aaron*_ - ~~Scheduled Test GUI Reports PingER tests when none configured~~ 	 
      * <font color=purple>_*Merged- 8/17*_</font>   
      * [http://code.google.com/p/perfsonar-ps/issues/detail?id=236 236]  
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=236 236] - _*Aaron*_ - the Regular Testing interface is confusing 	 
-     * <font color=yellow>_*In Progress - 8/17*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=236 236] - _*Aaron*_ - ~~the Regular Testing interface is confusing~~
+     * <font color=green>_*Fixed - 8/26*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=240 240] - _*Rich*_ - BWCTL Graphs Include unrelated data 
-     * <font color=yellow>_*In Progress - 8/11*_</font>
+     * <font color=green>_*Fixed - 8/26*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=257 257] - _*Aaron*_ - check that cross-browser js library is used with support for FF/IE/Safari
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=262 262] - _*Aaron*_ - Include Footnote describing communities 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=270 270] - _*Aaron*_ - Administrative Screen Correction
-     * <font color=yellow>_*In Progress - 8/13*_</font>    
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=270 270] - _*Aaron*_ - ~~Administrative Screen Correction~~
+     * <font color=green>_*Fixed - 8/26*_</font>    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=280 280] - _*Aaron*_ - Administrative Screen - Add Community Error
      * <font color=yellow>_*Needs Testing - 8/17*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=286 286] - _*Aaron*_ - ~~Readability in OWAMP/BWCTL Graphs~~
@@ -173,8 +174,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 6/23*_</font>: Most up to date drivers are included, needs testing on host with broadcom
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=98 98] - _*Jason*_ - ~~Ensure all service packages have init.d scripts~~
      * <font color=green>_*Fixed - 8/11*_</font>	
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=140 140] - _*Aaron*_ - Upgrades of NPToolkit may miss key file changes 	 	
-     * <font color=yellow>_*In Progress - 7/2*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=140 140] - _*Aaron*_ - ~~Upgrades of NPToolkit may miss key file changes~~
+     * <font color=green>_*Fixed - 8/26*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=164 164] - _*Aaron*_ - Add option to completely clear disk/partition table and all
      * <font color=yellow>_*In Progress - 6/23*_</font>: The better sorting of the partitions may obviate this need
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=165 165] - _*Aaron*_ - Explore syslog-ng, and potential loghost setup 	 
@@ -186,19 +187,20 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=201 201] - _*Aaron*_ - Upgrade Script Behavior 	
      * <font color=yellow>_*In Progress - 8/6*_</font>	    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - Colors in console configuration 	 	 
-     * <font color=yellow>_*In Progress - 8/4*_</font>
+     * <font color=yellow>_*In Progress - 8/26*_</font>
+     * Pushing back more functionality to RC4.
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=204 204] - _*Aaron*_ - ~~pre-load gLS cache on ISO~~
      * <font color=green>_*Fixed - 8/7*_</font>     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=206 206] - _*Aaron*_ - ~~non-rfc1918 addresses were getting flagged as local addresses~~ 	 
      * <font color=green>_*Fixed - 8/4*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=207 207] - _*Aaron*_ - pS Performance Toolit Bootup Suggestions	
-     * <font color=yellow>_*In Progress - 8/5*_</font>	
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=212 212] - _*Aaron*_ - Simplify prompt for advertised interface 	
-     * <font color=yellow>_*In Progress - 8/6*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=207 207] - _*Aaron*_ - ~~pS Performance Toolit Bootup Suggestions~~
+     * <font color=green>_*Fixed - 8/26*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=212 212] - _*Aaron*_ - ~~Simplify prompt for advertised interface~~
+     * <font color=green>_*Fixed - 8/26*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=213 213] - _*Aaron*_ - ~~Delete hLS-XMLDB on upgrade/reboot~~ 	 
      * <font color=green>_*Fixed - 8/6*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218 218] - _*Aaron*_ - NTP Server Selection 	 
-     * <font color=yellow>_*In Progress - 8/13*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=218 218] - _*Aaron*_ - ~~NTP Server Selection~~
+     * <font color=green>_*Fixed - 8/26*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=222 222] - _*Aaron*_ - ~~hostname and hosts.[allow|deny] must be preserved~~ 	 
      * <font color=green>_*Fixed - 8/6*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=249 249] - _*Aaron*_ - ~~minimum memory script issues~~   	 
