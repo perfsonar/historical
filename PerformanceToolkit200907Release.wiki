@@ -139,7 +139,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 8/26*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=214 214] - _*Aaron*_ - ~~GUIs should clearly reflect the decission to set up a 'latency host' vs a 'bandwidth' host~~
      * <font color=green>_*Fixed - 8/26*_</font>    
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=216 216] - _*Aaron*_ - Community handling in pS Performance Toolkit GUIs
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=216 216] - _*Aaron*_ - ~~Community handling in pS Performance Toolkit GUIs~~
+     * <font color=green>_*Fixed - 8/26*_</font>    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=217 217] - _*Aaron*_ - ~~Scheduled Test GUI Reports PingER tests when none configured~~ 	 
      * <font color=purple>_*Merged- 8/17*_</font>   
      * [http://code.google.com/p/perfsonar-ps/issues/detail?id=236 236]  
