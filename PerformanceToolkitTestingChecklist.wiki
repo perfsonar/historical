@@ -12,28 +12,34 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Is there an 'owamp' database?
 
 === Administrative Information ===
+  * `_____` Are the labels, prompts, and pop-ups clear and informative?
   * `_____` Does the "Host Information" match what it was before the upgrade?
   * `_____` Is the list of communities the host participates in the same as before the upgrade?
 
 === NTP ===
   * `_____` Did your previous NTP configuration get preserved? This can be checked in the NTP Administrative GUI
   * `_____` Did any custom NTP servers you had added get saved?
+  * `_____` Was NTP restarted after saving and does an 'ntpq -p' show the new hosts?
 
 === External BWCTL Limits ===
+  * `_____` Are the labels, prompts, and pop-ups clear and informative?
   * `_____` Do the bwctl limits for Unpriviledged Clients and Priviledges clients match what they were before the upgrade?
   * `_____` Does the list of users match what it was before the upgrade?
   * `_____` Does the list of networks match what it was before the upgrade?
 
 === External OWAMP Limits ===
+  * `_____` Are the labels, prompts, and pop-ups clear and informative?
   * `_____` Do the owamp limits for Unpriviledged Clients and Priviledges clients match what they were before the upgrade?
   * `_____` Does the list of users match what it was before the upgrade?
   * `_____` Does the list of networks match what it was before the upgrade?
 
 === Enabled Services ===
+  * `_____` Are the labels, prompts, and pop-ups clear and informative?
   * `_____` Does the list of which services are enabled match what it was before the upgrade?
   * `_____` Are the services listed as enabled actually running, and are those listed as disabled, not running? Can be checked via the "Services On This Node" link.
 
 === Scheduled Tests ===
+  * `_____` Are the labels, prompts, and pop-ups clear and informative?
   * `_____` Did all your previous tests get saved, and are they listed?
   * `_____` Do the tests in "Scheduled Tests" have all the hosts that were being tested to in the previous version?
   * `_____` Do the tests in "Scheduled Tests" have the same test parameters as in the previous version?
@@ -51,6 +57,7 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Are all Cacti graphs from the previous version still visible via the the "Cacti Graphs" link on the sidebar?
 
 == Testing Checklist ==
+
 === Networking Configuration ===
   * `_____` Did the network come up with DHCP?
   * `_____` Can you connect to hosts on the outside world, and resolve DNS names?
