@@ -104,7 +104,7 @@ my $result = $ma->metadataKeyRequest(
 
 unless ( $#{ $result->{"metadata"} } > -1 ) {
     $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
-    $template->param( ERROR => "MA <b><i>" . $service . "</i></b> experienced an error, is it functioning?" );
+    $template->param( ERROR => "MA <b><i>" . $service . "</i></b> did not return the expected response, is it functioning?" );
     print $template->output;
     exit( 1 );
 }
@@ -122,7 +122,7 @@ my $et = extract( find( $metadata->getDocumentElement, ".//nmwg:eventType", 1 ),
 
 if ( $et eq "error.ma.storage" ) {
     $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
-    $template->param( ERROR => "MA <b><i>" . $service . "</i></b> experienced an error, be sure it is configured and populated with data." );
+    $template->param( ERROR => "MA <b><i>" . $service . "</i></b> did not return the expected response, be sure it is configured and populated with data." );
 }
 else {
     if ( $eventType eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" ) {
