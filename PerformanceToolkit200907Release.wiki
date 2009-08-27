@@ -98,6 +98,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In progress- 8/18*_</font>
  * _*pSB*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=273 273] - _*Jeff*_ - Stale .bwctlock files in pSB data collection 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=306 306] - _*Aaron*_ - powmaster runs after stopping 
  * _*PingER*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=228 228] - _*Aaron*_ - ~~pinger tests are running but not showed on the GUI as scheduled~~
      * <font color=green>_*Fixed- 8/26*_</font>
@@ -248,6 +249,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=301 301] - _*Aaron*_ - Update perfSONAR Services + GUIs from Release Branch   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=302 302] - _*Aaron*_ - ~~Clarify knoppix su alias~~
      * <font color=green>_*Fixed - 8/26*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=305 305] - _*Aaron*_ - Run depmod before generating ISO 
      
 === Code Reviews ===
 
