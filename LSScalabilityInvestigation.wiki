@@ -73,7 +73,7 @@ Using these sources for instructions on installation and configuration:
 
  http://code.google.com/p/perfsonar-ps/wiki/LS
 
-=== Preparing _stout_ ===
+=== Preparing Server _stout_ ===
 
 _stout_ will act as a web server providing the gLS 'cloud', i.e., a list of gLS servers that will form the Lookup Service
 gLS network.  This list, a common text file, forms a hints file named `gls.root.hints`.
@@ -88,12 +88,13 @@ We make a new hints file that includes the gLS instances created for this testin
 The URL for accessing the file, thus, is http://stout.damsl.cis.udel.edu/gls.root.hints .
 
  
-=== Preparing _ale_ ===
+=== Preparing Server _ale_ ===
 
 ==== Background ====
 
-This server _ale_ is Fedora Core release 4 (Stentz).  There is already a Lookup Service installed and running on this
-server.
+This server _ale_ is Fedora Core release 4 (Stentz), linux core 2.6.17-1.2142_FC4smp.  There is already a Lookup Service
+installed and running on this server.
+
 
 ==== Attempt 1 ====
 
@@ -331,6 +332,7 @@ Stuck at this point.  Too many dependencies to resolve in a system.  Let's conti
 it was pointed by Jason Zurawski that the installation problem does not reside specifically in libxml2, but in Perl's
 Data/UUID.pm.
 
+
 ==== Attempt 2 ====
 
 Detected that Perl's Data/UUID.pm is generating the installation problem.  Let us try a different install approach, per
@@ -552,7 +554,7 @@ After perfSONAR software is downloaded, create the installation directory:
   `sudo mkdir -p /opt/perfsonar_ps1`
   
 Copy the proper diretories from the download location to the installation directory.  Change
-to the directory where perfSONAR_PS-LookupService and Shared directories are located and do:
+to the directory where perfSONAR_PS-!LookupService and Shared directories are located and do:
 
 {{{
 cd /home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1
@@ -630,7 +632,7 @@ sudo perl daemon.pl --verbose --conf=../etc/daemon.conf --logger=../etc/daemon_l
 }}}
   
 Now the service reports to be running.  It can be switched to the background by pressing CTRL-Z and typing `bg`.
-To bring it back to the foreground, press CTRL-Z and type `fg`.
+To bring it back to the foreground, press CTRL-Z and type `fg`.  Alternatively, use the command<font color=purple> `screen`</font>.
 
 To run it in<font color=purple> background</font>, it is best to switch the logging method to !FileRotate, and remove the --verbose option from
 `daemon.pl`.  Therefore, in file `daemon_logger.conf`, comment the line:
@@ -651,3 +653,138 @@ And run:
 cd /opt/perfsonar_ps1/perfSONAR_PS-LookupService/bin
 sudo perl daemon.pl --conf=../etc/daemon.conf --logger=../etc/daemon_logger.conf
 }}}
+
+
+=== Preparing Server _moonshine_ ===
+
+==== Backgroung ====
+
+This server _moonshine_ is Debian GNU/Linux 5.0, linux core 2.6.26-2-686.  Again, there is already a Lookup Service
+installed and running on this server.
+
+
+==== Attempt  1 ====
+
+This attempt was based on _ale_'s [LSScalabilityInvestigation#Attempt_3].  The Lookup Service will be installed to
+directory `/opt/perfsonar_ps1`.
+
+First, checkout or update the SVN repository.
+
+ `svn co https://svn.internet2.edu/svn/perfSONAR-PS/`
+ 
+
+After perfSONAR software is downloaded, create the installation directory:
+
+  `sudo mkdir -p /opt/perfsonar_ps1`
+  
+Copy the proper diretories from the download location to the installation directory.  Change
+to the directory where perfSONAR_PS-!LookupService and Shared directories are located and do:
+
+{{{
+cd /home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1
+sudo cp -r perfSONAR_PS-LookupService /opt/perfsonar_ps1
+sudo cp -r Shared /opt/perfsonar_ps1
+}}}
+
+Do not run 'make install', as the Makefile will attempt to install the service to the default directory
+/opt/perfsonar_ps.  Instead, proceed to install the necessary dependencies:
+
+{{{
+cd /opt/perfsonar_ps1/perfSONAR_PS-LookupService/scripts  
+sudo ./install_dependencies.sh
+}}}
+
+Do not run 'prepare_environment.sh'.  Now modify the .conf files accordingly (refer to README):
+
+Edit `/opt/perfsonar_ps1/perfSONAR_PS-LookupService/etc/daemon_logger.conf` and set the desired logging method.
+Here, we choose to display log messages to the screen.  Hence, per instructed within the file, we uncomment the line:
+
+ `log4perl.appender.A1=Log::Dispatch::Screen`
+ 
+And comment the line:
+
+ `#log4perl.appender.A1=Log::Dispatch::FileRotate`
+ 
+Edit `/opt/perfsonar_ps1/perfSONAR_PS-LookupService/etc/daemon.conf` and set the appropriate configuration variables.
+The resulting file (for a hLS) is:
+
+{{{
+<port 7000>
+    <endpoint /perfSONAR_PS/services/hLS>
+        <gls>
+                                                                # just an hLS ... (Udel, Newark, DE, USA)
+                        root                            0       #0 = hLS; 1 = gLS
+                                                                # data TTL = 4 days
+                        ls_ttl                          5760
+                                                                # 180 minute (3hr) registaration window
+                        ls_registration_interval        180
+                                                                # 120 miute cleaning/summary window
+                        maintenance_interval            120
+                                                                # Database options (only change path)
+                        metadata_db_file                    glsstore.dbxml
+                        metadata_summary_db_file            glsstore-summary.dbxml
+                        metadata_db_name                    /opt/perfsonar_ps1/perfSONAR_PS-LookupService/gLS-xmldb
+                                                                # Service options (please customize)
+                        service_accesspoint                 http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS
+                        service_description             Udel Home Lookup Service (Newark, DE, USA)
+                        service_name                    Udel Home Lookup Service
+                        service_type                    hLS
+                </gls>
+                disable                             0
+                module                              perfSONAR_PS::Services::LS::gLS
+        </endpoint>
+</port>
+                                                    # 180 minute (3hr) registaration window
+ls_registration_interval                        180
+disable_echo                                0
+                                                    # Root hints info, url + local copy location
+root_hints_url                              http://stout.damsl.cis.udel.edu/gls.root.hints
+root_hints_file                             /opt/perfsonar_ps1/perfSONAR_PS-LookupService/hls.root.hints
+                                                    # Daemon management, shouldn't need changing
+reaper_interval                             20
+max_worker_lifetime                             300
+max_worker_processes                        30
+pid_dir                                     /opt/perfsonar_ps1/perfSONAR_PS-LookupService
+pid_file                                        lookup_service.pid
+}}}
+
+Finally, run the service (refer to README for manual start) in the<font color=purple> foreground</font>:
+
+{{{
+cd /opt/perfsonar_ps1/perfSONAR_PS-LookupService/bin
+sudo perl daemon.pl --verbose --conf=../etc/daemon.conf --logger=../etc/daemon_logger.conf
+}}}
+  
+Now the service reports to be running.  It can be switched to the background by pressing CTRL-Z and typing `bg`.
+To bring it back to the foreground, press CTRL-Z and type `fg`.  Alternatively, use the command<font color=purple> `screen`</font>.
+
+To run it in<font color=purple> background</font>, it is best to switch the logging method to !FileRotate, and remove the --verbose option from
+`daemon.pl`.  Therefore, in file `daemon_logger.conf`, comment the line:
+
+ `#log4perl.appender.A1=Log::Dispatch::Screen`
+ 
+And uncomment the line:
+
+ `log4perl.appender.A1=Log::Dispatch::FileRotate`
+ 
+Select a log file to avoid conflict with other log files for additional LS instances.  Edit the line:
+
+ `log4perl.appender.A1.filename=/var/log/perfsonar/lookup_service1.log`
+ 
+And run:
+
+{{{
+cd /opt/perfsonar_ps1/perfSONAR_PS-LookupService/bin
+sudo perl daemon.pl --conf=../etc/daemon.conf --logger=../etc/daemon_logger.conf
+}}}
+
+After running the `daemon.pl` init script, _moonshine_ hLS immediately registered itself with _ale_ gLS, as seen in messages
+logged from both _ale_ and _moonshine_.
+
+<font color=green>_moonshine_ reports:</font>
+
+{{{
+gLS.pm:755 perfSONAR_PS::Services::LS::gLS::registerLS - Success from LS "http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS",
+ eventType: success.ls.register, response: [0] Data elements have been registered with key [41491c472d798db53b0bc90deb7c6f71]
+}}}
+
