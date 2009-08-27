@@ -252,6 +252,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 8/26*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=305 305] - _*Aaron*_ - ~~Run depmod before generating ISO~~
      * <font color=green>_*Fixed - 8/27*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=307 307] - _*Aaron*_ - spiiner not working under IE
     
 === Code Reviews ===
 
