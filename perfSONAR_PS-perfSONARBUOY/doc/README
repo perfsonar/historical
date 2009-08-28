@@ -1,0 +1,187 @@
+			        perfSONAR perfSONAR-BUOY MA Service
+
+--------------------------------------------------------------------------------
+
+About:
+------
+
+The perfSONAR-PS perfSONAR-BUOY Measurement Archive (MA) functions as both a
+storage facility and a regular testing framework in conjunction with the BWCTL
+and OWAMP measurement tools.  These archived measurements, stored in a MySQL
+database, are exposed through a web services interface.  
+
+The perfSONAR-BUOY MA provides a simple interface that is capable of exposing
+these files after basic configuration for consumption by perfSONAR client
+applications and services alike. The Web Service front end provides a uniform
+method of access using the perfSONAR XML protocols and delivers the data in an
+unambiguous manner, thus eliminating the mystery associated with the backend
+storage. 
+
+Installation:
+-------------
+
+Please read the INSTALL file for instructions
+
+Database Preparation:
+---------------------
+
+The MySQL database for the OWAMP and BWCTL data must be prepared before
+collection may begin.  Note that some options regarding the database can be
+adjusted in the 'owmesh.conf' file (see next section).  There are two scripts, 
+one for each data type:
+
+  (sudo) bin/owdb.pl -c ../etc -i ADMIN_USER_NAME
+  (sudo) bin/bwdb.pl -c ../etc -i ADMIN_USER_NAME
+  
+Note that if you wish to delete an existing data base replace '-i' with '-x'.
+Replace ADMIN_USER_NAME with the name of the MySQL admin (this is normally
+'root').  Before starting the script a prompt will appear for this user's
+password, if there is no password press enter.  
+     
+Configuration:
+--------------
+
+The perfSONAR-BUOY MA comes with a base configuration via the installation procedure.
+This is meant to allow for immediate testing as well as serve as a guide for
+customizing the service.  
+
+There are several files that may be adjusted manually to configure this service
+for a specific use case:
+
+  - etc/daemon.conf: 
+  
+    Contains information that identifies the service uniquely and allows it to
+    run in a given environment.  There are several options that should be
+    changed:  
+   
+      service_accesspoint      - Change the "hostname" from localhost
+      service_description      - Identifying information about the service
+      service_name             - Service Name (short)  
+
+    There are also several options that may be changed for a configuration:
+
+      port                     - Port the service listens on
+      endpoint                 - Endpoint to contact the service
+      ls_registration_interval - Length of time (minutes) between contacting LS 
+      enable_registration      - Turn on or off LS registration
+      ls_instance              - Specific hLS to register data with
+      maintenance_interval     - Interval of time to re-generate the store.xml
+                                 file (N.B. doing this frequently can be CPU
+                                 expensive but does make test data available
+                                 more quickly)
+      owmesh                   - This is the *DIRECTORY* that contains the
+                                 owmesh.conf file.  *DO NOT* place the full path
+                                 to the file or the service will not start.
+    
+    The rest of the items are normally not to be adjusted.  See also the service
+    wiki page for more information:
+    
+      http://code.google.com/p/perfsonar-ps/wiki/perfSONARBUOY
+    
+  - etc/daemon_logger.conf:
+
+    Contains information related to logging, there are three modes:
+    
+      Log::Dispatch::Screen     - Log messages to screen (useful for debugging)
+      Log::Dispatch::Syslog     - Log messages to syslog facility
+      Log::Dispatch::FileRotate - Log messages to specified file
+
+    Each logging mode is achieved by commenting/uncommenting specific lines in
+    the file.  Refer to the file for instructions.
+
+    The rest of the items are normally not to be adjusted.  See also the service
+    wiki page for more information:
+    
+      http://code.google.com/p/perfsonar-ps/wiki/perfSONARBUOY
+
+  - /var/lib/perfsonar/perfsonarbuoy_ma/store.xml: 
+
+    The location of this file should be changed - but the file itself is dynamic
+    and should not be edited.
+
+  - etc/owmesh.conf: 
+
+    This file is annotated with instructions on what to change.
+
+Starting/Stopping:
+------------------
+
+The service comes with init scripts that may be used to start and stop
+operation:
+
+  (sudo) /etc/init.d/perfsonarbuoy_ma start
+  (sudo) /etc/init.d/perfsonarbuoy_ma stop
+  (sudo) /etc/init.d/perfsonarbuoy_ma restart
+
+There are other scripts that manage the measurement and collection of data:
+
+ - perfsonarbuoy_bw_master      Script that performs BWCTL measurements
+ - perfsonarbuoy_bw_collector   Script to collect and store BWCTL measurements
+ - perfsonarbuoy_owp_master     Script that performs OWAMP measurements
+ - perfsonarbuoy_owp_collector  Script to collect and store OWAMP measurements
+
+In general, "master" scripts will run on data collector nodes (e.g. 'beacons'),
+and "collector" scripts run on central node or nodes that normally contain a
+database. 
+
+The service can also be run in a manual fashion (useful for debugging):
+
+  (sudo) perl bin/daemon.pl --verbose --conf=etc/daemon.conf --logger=etc/daemon_logger.conf
+  
+Before doing this, be sure to edit "etc/daemon_logger.conf" to enable "Screen"
+debugging.
+
+Testing:
+--------
+
+The service comes with a client application and several test messages that can
+be used to test functionality.  There are many messages provided as examples, 
+to test the service only one is recommended:
+
+  etc/requests/EchoRequest.xml
+
+This will test the basic functionality of this service. To test:
+
+  1) Ensure the service is started, it helps if you have configured logging to
+     use the "Screen" so you may monitor the service's activities.
+
+  2) Run the client:
+  
+     perl bin/client.pl URL FILENAME
+  
+  3) Compare the results of the test with the comments in each file.  Note there
+     may be some differences (e.g. id values, key values).  
+     
+  4) If everything looks OK, return logging to normal and restart service via
+     the init system.  
+
+Maintenance:
+------------
+
+Subscribe to the user mailing lists if you are seeking help on some problem
+related to this software.  Announcements regarding availability of new releases
+will also be sent to these locations
+
+  perfSONAR-PS Users Group - https://mail.internet2.edu/wws/info/perfsonar-ps-users
+  perfSONAR-PS Announcements - https://mail.internet2.edu/wws/info/perfsonar-ps-announce
+
+  Performance Node Users - https://mail.internet2.edu/wws/info/performance-node-users
+  Performance Node Announcements - https://mail.internet2.edu/wws/info/performance-node-announce
+
+Also if you are using package management software and have installed the
+Internet2 software repository, a typical upgrade should download new releases:
+
+  (sudo) yum update
+
+or
+
+  (sudo) apt-get upgrade
+  
+Finally, check the following websites for news of software releases:
+
+  http://software.internet2.edu
+  http://www.internet2.edu/performance
+
+--------------------------------------------------------------------------------
+
+Tue Aug 25 09:22:49 EDT 2009

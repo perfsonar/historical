@@ -1,1 +1,0 @@
-../../../t/perfSONAR_PS::MP::Agent::PingER.t

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
-              type="EchoRequest"
-              id="message.1">
-  <nmwg:metadata id="meta1">
-    <nmwg:eventType>echo.ma</nmwg:eventType>
-  </nmwg:metadata>
-  <nmwg:data id="data1" metadataIdRef="meta1" />
-</nmwg:message>

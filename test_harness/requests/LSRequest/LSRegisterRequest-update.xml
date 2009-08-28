@@ -11,7 +11,7 @@
 
     <nmwg:key>
       <nmwg:parameters id="param1">
-        <nmwg:parameter name="lsKey">5cfb07ea7a5b840ce4f8f48b842ac9c0</nmwg:parameter>
+        <nmwg:parameter name="lsKey">replaceMe</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key>        
                                              
@@ -54,22 +54,6 @@
       <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
     </nmwg:metadata> 
     
-  </nmwg:data>
-
-  <nmwg:data id="data1" metadataIdRef="serviceLookupInfo">
-    <nmwg:metadata id="meta">
-      <netutil:subject id="subj" xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/">
-        <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-          <nmwgt:hostName>localhost</nmwgt:hostName>
-          <nmwgt:ifName>eth0</nmwgt:ifName>
-          <nmwgt:ifDescription>Interface eth0 on localhost</nmwgt:ifDescription>
-          <nmwgt:ifAddress type="ipv4">127.0.0.1</nmwgt:ifAddress>
-          <nmwgt:direction>in</nmwgt:direction>
-          <nmwgt:capacity>10000000000</nmwgt:capacity>
-        </nmwgt:interface>
-      </netutil:subject>
-      <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
-    </nmwg:metadata>
   </nmwg:data>
 
 </nmwg:message>

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<nmwg:message type="QueryRequest" id="msg1"
+<nmwg:message type="TSQueryRequest" id="msg1"
   xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
   xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">
 

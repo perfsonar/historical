@@ -1,1 +1,0 @@
-../../../t/perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Parameters.t
