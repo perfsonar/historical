@@ -8,8 +8,8 @@
       function drawChart() {
         var data = new google.visualization.DataTable();
         data.addColumn('string', 'Location');
-        data.addColumn('number', 'Bandwidth Inbound (<tmpl_var name=GRAPHPREFIX>bps)');
-        data.addColumn('number', 'Bandwidth Outbound (<tmpl_var name=GRAPHPREFIX>bps)');       
+        data.addColumn('number', 'In BW (<tmpl_var name=GRAPHPREFIX>bps)');
+        data.addColumn('number', 'Out BW (<tmpl_var name=GRAPHPREFIX>bps)');       
         data.addRows(<tmpl_var name=GRAPHTOTAL>);
         <tmpl_loop name=GRAPH>
         data.setValue(<tmpl_var name=C>, 0, '<tmpl_var name=LOCATION>');
@@ -17,7 +17,7 @@
         data.setValue(<tmpl_var name=C>, 2, <tmpl_var name=OUT>); 
         </tmpl_loop>        
         var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-        chart.draw(data, {width: <tmpl_var name=GRAPHTOTAL>*75, height: 250, is3D: false, title: '1 Week Average Bandwidth in <tmpl_var name=GRAPHPREFIX>bps', legendFontSize: 8, titleFontSize: 14, colors: ['#0000ff', '#00cc00'], legend: 'bottom' });
+        chart.draw(data, {width: (<tmpl_var name=GRAPHTOTAL>*40)+250, height: 250, is3D: false, title: '1 Week Average Bandwidth in <tmpl_var name=GRAPHPREFIX>bps', legendFontSize: 8, titleFontSize: 14, colors: ['#0000ff', '#00cc00'], legend: 'bottom' });
       }
     </script>
   </head>

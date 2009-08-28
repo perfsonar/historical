@@ -633,7 +633,7 @@ while ( 1 ) {
         if ( ( keys %pid2info ) > 0 ) {
             next;
         }
-        die "Dead\n" if $debug;
+        die "Dead\n";
     }
     elsif ( $reset ) {
         next if ( ( keys %pid2info ) > 0 );
