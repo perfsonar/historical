@@ -167,8 +167,10 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=297 297] - _*Jason*_ - ~~gls cache script is failing on the remote hls~~
      * <font color=green>_*Fixed - 8/24*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=307 307] - _*Aaron*_ - spiiner not working under IE
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=308 308] - _*Aaron*_ - Add reverse ping to left 'main' menu   	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=309 309] - _*Aaron*_ - upgrade reverse_traceroute code 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=308 308] - _*Aaron*_ - ~~Add reverse ping to left 'main' menu~~   	 
+     * <font color=green>_*Fixed - 8/28*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=309 309] - _*Aaron*_ - ~~upgrade reverse_traceroute code~~
+     * <font color=green>_*Fixed - 8/28*_</font>	 
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
@@ -250,7 +252,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=298 298] - _*Jason*_ - Advanced Cacti data collection for localhost
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=299 299] - _*Aaron*_ - ~~pS Performance Toolit w/ HP Raid Controller ~~
      * <font color=green>_*Fixed - 8/27*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=301 301] - _*Aaron*_ - Update perfSONAR Services + GUIs from Release Branch   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=301 301] - _*Aaron*_ - ~~Update perfSONAR Services + GUIs from Release Branch~~ 
+     * <font color=green>_*Fixed - 8/28*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=302 302] - _*Aaron*_ - ~~Clarify knoppix su alias~~
      * <font color=green>_*Fixed - 8/26*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=305 305] - _*Aaron*_ - ~~Run depmod before generating ISO~~
