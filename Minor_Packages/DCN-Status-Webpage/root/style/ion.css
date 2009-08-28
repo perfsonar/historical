@@ -1,0 +1,114 @@
+.endpointComboBox{
+	float: left;
+}
+.endpointBrowser{
+	float: left;
+}
+
+.endpointBrowser img{
+	border: 0;
+}
+.epbWindow {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	width: 380px;
+	height: 260px;
+	border: 1px #CCCCCC solid;
+	z-index: 2;
+	background-color: #FFFFFF;
+	visibility: hidden;
+	font-size: 9pt;
+}
+
+.epbWindow a:link{
+	text-decoration: underline;
+	color: #0000CC;
+}
+
+.epbWindow a:visited{
+	text-decoration: underline;
+	color: #0000CC;
+}
+
+.epbWindow a:active{
+	text-decoration: underline;
+	color: #0000CC;
+}
+
+.epbWindow a:hover{
+	text-decoration: underline;
+	color: #000066;
+}
+
+.epbTitleBar{
+	text-align: right;
+	top: 0px;
+	height: 15px;
+	background-color: #EEEEEE;
+}
+
+.epbSearch{
+	position: relative;
+	text-align: center;
+	margin: 4px 4px 4px 4px;
+	border-bottom: 1px #213D7E solid;
+	top: 0px;
+	height: 30px;
+}
+
+.epbMenu{
+	position: relative;
+	margin: 2px 2px 2px 2px;
+	padding: 2px 2px 2px 2px;
+	top: 0px;
+	left: 0px;
+	width: 100px;
+	height: 195px;
+	background-color: #ECF3FE
+}
+
+.epbResults{
+	position: absolute;
+	margin: 2px 2px 2px 2px;
+	top: 50px;
+	left: 110px;
+	width: 260px;
+	height: 205px;
+}
+
+.epbResultsInfo{
+	margin: 2px 2px 2px 2px;
+	text-align: right;
+	font-weight: bold;
+	width: 260px;
+}
+
+.epbResultsPageNav{
+	position: absolute;
+	bottom: 0px;
+	text-align: center;
+	width: 260px;
+}
+
+.epbResultsCatLabel{
+	padding: 2px 2px 2px 2px;
+	font-weight: bold;
+	border-bottom: 1px #CCCCCC solid;
+}
+
+.epbResultsCatLabel a:link{
+	text-decoration: none;
+}
+
+.epbResultsCatLabel a:visited{
+	text-decoration: none;
+}
+
+.epbResultsCatLabel a:active{
+	text-decoration: none;
+}
+
+.epbResultsCatLabel a:hover{
+	text-decoration: none;
+}

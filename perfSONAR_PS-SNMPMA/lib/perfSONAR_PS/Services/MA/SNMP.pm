@@ -2,7 +2,7 @@ package perfSONAR_PS::Services::MA::SNMP;
 
 use base 'perfSONAR_PS::Services::Base';
 
-use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER', 'NETLOGGER';
+use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER', 'NETLOGGER', 'HASH_TO_ID', 'ID_TO_HASH', 'STORE_FILE_MTIME', 'BAD_MTIME';
 
 use strict;
 use warnings;
@@ -380,9 +380,8 @@ sub init {
     }
 
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        $self->{METADATADB} = new perfSONAR_PS::DB::File( { file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
-        $self->{METADATADB}->openDB( { error => \$error } );
-        unless ( $self->{METADATADB} ) {
+        my $status = $self->refresh_store_file({ error => \$error });
+        unless ( $status == 0 ) {
             $self->{LOGGER}->fatal( "Couldn't initialize store file: $error" );
             return -1;
         }
@@ -403,6 +402,15 @@ sub init {
             }
         }
 
+        my ($status, $res) = $self->buildHashedKeys({ metadatadb => $metadatadb, metadatadb_type => "xmldb" });
+        unless ($status == 0) {
+            $self->{LOGGER}->fatal( "Error building key database: $res" );
+            return -1;
+        }
+
+        $self->{HASH_TO_ID} = $res->{hash_to_id};
+        $self->{ID_TO_HASH} = $res->{id_to_hash};
+
         $metadatadb->closeDB( { error => \$error } );
         $self->{METADATADB} = q{};
     }
@@ -411,11 +419,63 @@ sub init {
         return -1;
     }
 
-    unless ( $self->buildHashedKeys == 0 ) {
-        $self->{LOGGER}->fatal( "Error building key database." );
-        return -1;
+    return 0;
+}
+
+sub inline_maintenance {
+    my ($self, @args) = @_;
+    my $parameters = validateParams( @args, { } );
+
+    $self->refresh_store_file();
+}
+
+sub refresh_store_file {
+    my ($self, @args) = @_;
+    my $parameters = validateParams( @args, { error => 0 } );
+
+    my $store_file = $self->{CONF}->{"snmp"}->{"metadata_db_file"};
+
+    if ( -f $store_file ) {
+        my ($mtime) = (stat ( $store_file ) )[9];
+        if ($self->{BAD_MTIME} and $mtime == $self->{BAD_MTIME}) {
+            my $msg = "Previously seen bad store file" ;
+            $self->{LOGGER}->error( $msg );
+            ${ $parameters->{error} } = $msg if ($parameters->{error});
+            return -1;
+        }
+
+        $self->{LOGGER}->debug("New: $mtime Old: ".$self->{STORE_FILE_MTIME});
+
+        unless ($self->{STORE_FILE_MTIME} and $self->{STORE_FILE_MTIME} == $mtime) {
+            my $error;
+            my $new_metadatadb = perfSONAR_PS::DB::File->new( { file => $store_file } );
+            $new_metadatadb->openDB( { error => \$error } );
+            unless ( $new_metadatadb ) {
+                my $msg = "Couldn't initialize store file: $error";
+                $self->{LOGGER}->error( $msg );
+                ${ $parameters->{error} } = $msg if ($parameters->{error});
+                $self->{BAD_MTIME} = $mtime;
+                return -1;
+            }
+
+            my ($status, $res) = $self->buildHashedKeys({ metadatadb => $new_metadatadb, metadatadb_type => "file" });
+            unless ($status == 0) {
+                my $msg = "Error building key database: $res";
+                $self->{LOGGER}->fatal( $msg );
+                ${ $parameters->{error} } = $msg if ($parameters->{error});
+                $self->{BAD_MTIME} = $mtime;
+                return -1;
+            }
+
+            $self->{METADATADB} = $new_metadatadb;
+            $self->{HASH_TO_ID} = $res->{hash_to_id};
+            $self->{ID_TO_HASH} = $res->{id_to_hash};
+            $self->{STORE_FILE_MTIME} = $mtime;
+            $self->{LOGGER}->debug("Setting mtime to $mtime");
+        }
     }
 
+    ${ $parameters->{error} } = "" if ($parameters->{error});
     return 0;
 }
 
@@ -521,27 +581,34 @@ map these to the key ids in the metadata database for easy lookup.
 
 sub buildHashedKeys {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, {} );
+    my $parameters = validateParams( @args, { metadatadb => 1, metadatadb_type => 1 } );
 
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        my $results = $self->{METADATADB}->querySet( { query => "/nmwg:store/nmwg:data" } );
+    my %hash_to_id = ();
+    my %id_to_hash = ();
+
+    my $metadatadb = $parameters->{metadatadb};
+    my $metadatadb_type = $parameters->{metadatadb_type};
+
+    if ( $metadatadb_type eq "file" ) {
+        my $results = $metadatadb->querySet( { query => "/nmwg:store/nmwg:data" } );
         if ( $results->size() > 0 ) {
             foreach my $data ( $results->get_nodelist ) {
                 if ( $data->getAttribute( "id" ) ) {
                     my $hash = md5_hex( $data->toString );
-                    $self->{CONF}->{"snmp"}->{"hashToId"}->{$hash} = $data->getAttribute( "id" );
-                    $self->{CONF}->{"snmp"}->{"idToHash"}->{ $data->getAttribute( "id" ) } = $hash;
+                    $hash_to_id{$hash} = $data->getAttribute( "id" );
+                    $id_to_hash{ $data->getAttribute( "id" ) } = $hash;
                     $self->{LOGGER}->debug( "Key id $hash maps to data element " . $data->getAttribute( "id" ) );
                 }
             }
         }
     }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+    elsif ( $metadatadb_type eq "xmldb" ) {
         my $metadatadb = $self->prepareDatabases( { doc => $parameters->{output} } );
         my $error = q{};
         unless ( $metadatadb ) {
-            $self->{LOGGER}->fatal( "Database could not be opened." );
-            return -1;
+            my $msg = "Database could not be opened.";
+            $self->{LOGGER}->fatal( $msg );
+            return (-1, $msg);
         }
 
         my $parser = XML::LibXML->new();
@@ -549,23 +616,31 @@ sub buildHashedKeys {
 
         my $len = $#results;
         if ( $len == -1 ) {
-            $self->{LOGGER}->error( "Nothing returned for database search." );
-            return -1;
+            my $msg = "Nothing returned for database search.";
+            $self->{LOGGER}->error( $msg );
+            return (-1, $msg);
         }
 
         for my $x ( 0 .. $len ) {
             my $hash = md5_hex( $results[$x] );
             my $data = $parser->parse_string( $results[$x] );
-            $self->{CONF}->{"snmp"}->{"hashToId"}->{$hash} = $data->getDocumentElement->getAttribute( "id" );
-            $self->{CONF}->{"snmp"}->{"idToHash"}->{ $data->getDocumentElement->getAttribute( "id" ) } = $hash;
+            $id_to_hash{$hash} = $data->getDocumentElement->getAttribute( "id" );
+            $hash_to_id{ $data->getDocumentElement->getAttribute( "id" ) } = $hash;
             $self->{LOGGER}->debug( "Key id $hash maps to data element " . $data->getDocumentElement->getAttribute( "id" ) );
         }
     }
     else {
-        $self->{LOGGER}->fatal( "Wrong value for 'metadata_db_type' set." );
-        return -1;
+        my $msg = "Wrong value for 'metadata_db_type' set.";
+        $self->{LOGGER}->fatal( $msg );
+        return (-1, $msg);
     }
-    return 0;
+
+    my %retval = (
+        id_to_hash => \%id_to_hash,
+        hash_to_id => \%hash_to_id,
+    );
+
+    return (0, \%retval);
 }
 
 =head2 needLS($self {})
@@ -1030,7 +1105,7 @@ sub metadataKeyRetrieveKey {
         return;
     }
 
-    my $hashId = $self->{CONF}->{"snmp"}->{"hashToId"}->{$hashKey};
+    my $hashId = $self->{HASH_TO_ID}->{$hashKey};
     unless ( $hashId ) {
         my $msg = "Key error in metadata storage - key not found.";
         $self->{LOGGER}->error( $msg );
@@ -1167,7 +1242,7 @@ sub metadataKeyRetrieveMetadataData {
             $parameters->{output}->addExistingXMLElement( $md_temp );
 
             my $hashId  = $d->getAttribute( "id" );
-            my $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{$hashId};
+            my $hashKey = $self->{ID_TO_HASH}->{$hashId};
 
             next if ( not defined $hashKey );
 
@@ -1304,7 +1379,7 @@ sub dataInfoRetrieveKey {
         return;
     }
 
-    my $hashId = $self->{CONF}->{"snmp"}->{"hashToId"}->{$hashKey};
+    my $hashId = $self->{HASH_TO_ID}->{$hashKey};
     unless ( $hashId ) {
         my $msg = "Key error in metadata storage - key not found.";
         $self->{LOGGER}->error( $msg );
@@ -1491,7 +1566,7 @@ sub dataInfoRetrieveMetadataData {
                 $md_temp->setAttribute( "id",            $mdId );
 
                 my $hashId  = $d->getAttribute( "id" );
-                my $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{$hashId};
+                my $hashKey = $self->{ID_TO_HASH}->{$hashId};
 
                 next if ( not defined $hashKey );
 
@@ -1672,7 +1747,7 @@ sub setupDataRetrieveKey {
         return;
     }
 
-    my $hashId = $self->{CONF}->{"snmp"}->{"hashToId"}->{$hashKey};
+    my $hashId = $self->{HASH_TO_ID}->{$hashKey};
     unless ( $hashId ) {
         my $msg = "Key error in metadata storage - key not found.";
         $self->{LOGGER}->error( $msg );

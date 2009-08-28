@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Internet2 ION Monitoring</title>
+
+<link rel="stylesheet" href="style/ion-dojo.css">
+<link href="style/ion-content.css" rel="stylesheet" type="text/css" media="all" />
+<link rel="stylesheet" href="style/ion.css">
+<link href="style/ion-style.css" rel="stylesheet" type="text/css" media="all" />
+<style type="text/css">
+	@import "lib/dojo/dijit/themes/tundra/tundra.css";
+	@import "lib/dojo/dojox/grid/resources/tundraGrid.css";
+</style>
+
+<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAg36TtTMa18i6HDDItHAkuRQHrbc7aAi-x516S_jFnaPiwzjCQxTPLsJIg7oFS3oXPAQV3vqE1tBd_A" type="text/javascript"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript" src="lib/dojo/dojo/dojo.js" djConfig="parseOnLoad: true"></script>
+<script type="text/javascript" src="lib/dojo/dojo/dojo-ion-status.js" djConfig="parseOnLoad: true"></script>
+<script type="text/javascript" src="lib/date.js"></script>
+<script type="text/javascript" src="lib/ion/status.js"></script>
+</head>
+
+
+<body onunload="GUnload()" class="tundra" style="width:100%; height:100%;">
+
+<div id="outer">
+<div id="container">
+<div id="header">
+<img src="images/ion-logo-transparent.png" id="logo" />
+</div> <!--/header-->
+<div id="main-nav">
+	<div id="primary">
+    	<a href="#" class="selected">Monitoring</a>
+    </div> <!--/primary-->
+</div><!--/main-nav-->
+
+<div id="content">
+
+<button id="select_reservation_button" dojoType="dijit.form.Button">Circuit Statistics</button>
+
+<div dojoType="dijit.layout.BorderContainer" style="width: 100%; padding: 0; margin: 0; border: 0;" splitter="true">
+  <div dojoType="dijit.layout.ContentPane" style="width: 100%; height: 400px; padding: 0; margin: 0; border: 0;">
+    <div dojoType="dijit.layout.BorderContainer" style="height: 400px; width: 100%; padding: 0; margin: 0; border: 0;" splitter="true">
+
+      <div id="content_map_frame" dojoType="dijit.layout.ContentPane" region="left" style="width: 800px; height: 380px">
+        <center> <div id="map_div" style="width: 95%; height:380px"></div> </center>
+      </div>
+
+      <div id="content_chart_frame" dojoType="dijit.layout.ContentPane" region="right" style="width: 400px; height: 380px">
+        <div id="ingress_chart_div" style="height:180px; width: 400px"></div>
+        <div id="egress_chart_div" style="height:180px; width: 400px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<center>
+  <div dojoType="dijit.layout.ContentPane" id="content_circuit_details" style="width: 570px;">
+      <table class="circuitInfoTable">
+          <tr class="tdheader"><td>Circuit ID</td><td id="details.circuit_id"></td></tr>
+          <tr class="oddrow"><td>Description</td><td id="details.description"></td></tr>
+          <tr><td>Status</td><td id="details.status"></td></tr>
+          <tr class="oddrow"><td>User</td><td id="details.user"></td></tr>
+          <tr><td>Start Time</td><td id="details.start_time"></td></tr>
+          <tr class="oddrow"><td>End Time</td><td id="details.end_time"></td></tr>
+          <tr><td>Bandwidth</td><td id="details.bandwidth"></td></tr>
+          <tr class="oddrow"><td>Ingress Point</td><td id="details.ingress"></td></tr>
+          <tr><td>Egress Point</td><td id="details.egress"></td></tr>
+          <tr class="oddrow"><td>Internal Path</td><td id="details.local_path"></td></tr>
+        </tbody>
+      </table>
+   </div>
+</center>
+
+<div dojoType="dijit.Dialog" id="dialog_find_reservations" title="Select Circuit">
+  <div dojoType="dijit.layout.ContentPane">
+       <div dojoType="dojo.data.ItemFileReadStore" jsId="identifiers_store" url="status.cgi?function=get_identifiers"></div>
+       <div dojoType="dojo.data.ItemFileReadStore" jsId="description_store" url="status.cgi?function=get_descriptions"></div>
+       <div dojoType="dojo.data.ItemFileReadStore" jsId="users_store" url="status.cgi?function=get_users"></div>
+
+       <form dojoType="dijit.form.Form" id="form_reservations_filter">
+	   <table>
+	   <tr>
+	   <td>Circuit ID:</td><td><input type="text" id="form_reservations_filter_identifier" name="identifier" value="" dojoType="dijit.form.ComboBox" store="identifiers_store"></td>
+	   <td>Description:</td><td><input type="text" id="form_reservations_filter_description" name="description" value="" dojoType="dijit.form.ComboBox" store="description_store"></td>
+	   </tr>
+	   <tr>
+	   <td>User:</td><td><input type="text" id="form_reservations_filter_user" name="user" value="" dojoType="dijit.form.ComboBox" store="users_store"></td>
+	   <td>Status:</td><td> 
+           <select id="form_reservations_filter_status" name="status" dojoType="dijit.form.ComboBox" autocomplete="true" value="">
+           <option select="selected"></option>
+           <option >ACTIVE</option>
+           <option>PENDING</option>
+           <option>FINISHED</option>
+           <option>CANCELLED</option>
+           <option>FAILED</option>
+           <option>ACCEPTED</option>
+           <option>SUBMITTED</option>
+           <option>INCREATE</option>
+           <option>INSETUP</option>
+           <option>INTEARDOWN</option>
+           <option>INMODIFY</option>
+           </select>
+	   </td>
+	   </tr>
+	   </table>
+       </form>
+  </div>
+  <div dojoType="dijit.layout.ContentPane" style="height: 400px;">
+    <div id="reservations.grid" dojoType="dojox.grid.DataGrid" structure="reservations_layout" autoWidth="true" autoHeight="false" elasticView="2"></div>
+  </div>
+</div> <!--/find reservation dialog-->
+
+<div id="dialog_loading_circuit_stats" dojoType="dijit.Dialog">
+	<span class="circuitListRetrieveMsg">Retrieving circuit statistics...</span>
+	<div dojoType="dijit.ProgressBar" indeterminate="true"></div>
+</div> 
+
+</div> <!--/content-->
+
+<div id="footer">
+Powered by <a href="https://wiki.internet2.edu/confluence/display/DCNSS/Home">OSCARS</a> and <a href="https://www.perfsonar.net/">perfSONAR</a>
+</div><!--/footer-->
+<div id="sub-footer">
+ <p>
+	<a href="#" target="_blank">Documentation</a> |
+	<a href="http://www.internet2.edu" target="_blank">Internet2</a> |
+	<a href="#" target="_blank">Privacy</a>
+ </p>
+</div> <!--/sub-footer-->
+</div> 
+</div> <!--/container-->
+
+&nbsp;
+</div> <!--/outer-->
+</body>
+</html>
