@@ -123,7 +123,7 @@ sub run {
                 $metadata->{urn} = $id;
             }
             
-            my $key = $self->{DATA_CLIENT}->add_metadata({
+            ($status, $res) = $self->{DATA_CLIENT}->add_port_metadata({
                                             data_type => $counter->{data_type},
                                             urn => $metadata->{urn},
                                             host_name => $metadata->{host_name},
@@ -133,10 +133,18 @@ sub run {
                                             description => $metadata->{description},
                                         });
 
-            unless ($key) {
+            unless ($status == 0) {
                 $self->{LOGGER}->error("Couldn't save data of type ".$counter->{data_type}." about element: ".$metadata->{urn}.": $res");
                 next;
             }
+
+            if ($status != 0) {
+                my $msg = "Error checking for existing metdata: $res";
+                $self->{LOGGER}->debug($msg);
+                next;
+            }
+
+            my $key = $res->{id};
 
             if ($metadata->{direction}) {
                 $self->{LOGGER}->debug("Key: $key URN: $metadata->{urn} direction: $metadata->{direction} data_type: $counter->{data_type}");

@@ -10,8 +10,17 @@ lib/perfSONAR_PS/Collectors/Status/ElementAgents/Constant.pm
 lib/perfSONAR_PS/Collectors/Status/ElementAgents/SNMP.pm
 lib/perfSONAR_PS/Collectors/Status/ElementAgents/Script.pm
 lib/perfSONAR_PS/Collectors/Status/ElementsWorker.pm
+lib/perfSONAR_PS/Collectors/TL1Collector.pm
+lib/perfSONAR_PS/Collectors/TL1Collector/Base.pm
+lib/perfSONAR_PS/Collectors/TL1Collector/DeviceAgents/Base.pm
+lib/perfSONAR_PS/Collectors/TL1Collector/DeviceAgents/CoreDirector.pm
+lib/perfSONAR_PS/Collectors/TL1Collector/DeviceAgents/HDXc.pm
+lib/perfSONAR_PS/Collectors/TL1Collector/DeviceAgents/OME.pm
+lib/perfSONAR_PS/Collectors/TL1Collector/DeviceAgents/SNMP.pm
+lib/perfSONAR_PS/Collectors/TL1Collector/StoreFileGenerationWorker.pm
 lib/perfSONAR_PS/Common.pm
 lib/perfSONAR_PS/DB/RRD.pm
+lib/perfSONAR_PS/DB/SQL.pm
 lib/perfSONAR_PS/DB/Status.pm
 lib/perfSONAR_PS/DB/TL1Counters.pm
 lib/perfSONAR_PS/Status/Common.pm

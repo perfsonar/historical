@@ -2,7 +2,9 @@ Cache::FastMmap
 Carp
 Config::General
 Cwd
+DBI
 Data::Dumper
+Digest::MD5
 English
 Exporter
 Fcntl

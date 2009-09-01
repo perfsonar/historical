@@ -330,12 +330,6 @@ sub handle_ethernet_port {
                      data_type   => "http://ggf.org/ns/nmwg/characteristic/errors/2.0",
                      values      => { errors => $in_errors },
         };
-
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name},  direction => "out" },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/errors/2.0",
-                     values      => { errors => $out_errors },
-        };
     }
 
     # Add 'oper' status

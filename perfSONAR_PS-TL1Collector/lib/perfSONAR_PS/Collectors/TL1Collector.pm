@@ -52,7 +52,7 @@ sub new {
     return $self;
 }
 
-=head2 init( $self, { \%conf } )
+=head2 init( $self, { \%conf, $directory_offset  } )
 
 A function to initializes the status collector. $conf is a hash from a
 Config::General.  Directory offset is the path to the configuration file. Any
@@ -67,11 +67,12 @@ sub init {
         @args,
         {
             conf             => 1,
+            directory_offset => 0,
         }
     );
 
     # Creates the database client object that will be used by all the status collector agents
-    my ( $status, $res ) = $self->create_database_client( { config => $args->{conf} } );
+    my ( $status, $res ) = $self->create_database_client( { config => $args->{conf} , directory_offset => $args->{directory_offset} });
     if ( $status != 0 ) {
         return ( $status, $res );
     }
@@ -79,7 +80,7 @@ sub init {
     my $database_client = $res;
 
     $self->{LOGGER}->debug("Creating workers");
-    ( $status, $res ) = $self->create_workers( { conf => $args->{conf}, database_client => $database_client } );
+    ( $status, $res ) = $self->create_workers( { conf => $args->{conf}, database_client => $database_client, directory_offset => $args->{directory_offset} } );
     $self->{LOGGER}->debug("Done creating workers");
     if ( $status != 0 ) {
         return ( $status, $res );
@@ -173,6 +174,7 @@ sub create_workers {
         @args,
         {
             conf             => 1,
+            directory_offset => 0,
             database_client  => 1,
         }
     );
@@ -205,6 +207,10 @@ sub create_workers {
     my $regeneration_period = 30;
     $regeneration_period = $config->{regeneration_period} if ($config->{regeneration_period});
 
+    unless ($config->{store_file} =~ /^\//) {
+        $config->{store_file} = $args->{directory_offset}."/".$config->{store_file} if ($args->{directory_offset});
+    }
+
     my $store_file_worker = perfSONAR_PS::Collectors::TL1Collector::StoreFileGenerationWorker->new();
     $status = $store_file_worker->init({ store_file => $config->{store_file}, data_client => $database_client, regeneration_period => 30 });
     unless ( $status == 0 ) {
@@ -231,11 +237,13 @@ sub create_device_workers {
         @args,
         {
             config           => 1,
+            directory_offset => 0,
             database_client  => 1,
         }
     );
 
     my $config           = $args->{config};
+    my $directory_offset = $args->{directory_offset};
     my $database_client  = $args->{database_client};
 
     my @workers = ();
@@ -281,37 +289,75 @@ sub create_database_client {
         @args,
         {
             config           => 1,
+            directory_offset => 0,
         }
     );
 
     my $config           = $args->{config};
+    my $directory_offset = $args->{directory_offset};
 
-    unless ( $config->{"db_type"} ) {
-        my $msg = "No database type specified. (db_type)";
+    unless ( $config->{"rrd_directory"} ) {
+        my $msg = "No RRD location specified. (rrd_directory)";
         return ( -1, $msg );
     }
 
-    unless ( $config->{"db_type"} eq "tl1_rrd") {
-        my $msg = "Unknown database type specified. Only supported is 'tl1_rrd'";
+    my ($dbistring, $username, $password);
+
+    if ( lc( $config->{"metadata_db_type"} ) eq "sqlite" ) {
+
+        unless ( $config->{"metadata_db_file"} ) {
+            my $msg = "You specified a SQLite Database, but then did not specify a database file(db_file)";
+            return ( -1, $msg );
+        }
+
+        my $file = $config->{"metadata_db_file"};
+        if ( $directory_offset ) {
+            if ( !( $file =~ "^/" ) ) {
+                $file = $directory_offset . "/" . $file;
+            }
+        }
+
+        $dbistring = "DBI:SQLite:dbname=" . $file;
+    }
+    elsif ( lc( $config->{"metadata_db_type"} ) eq "mysql" ) {
+        $dbistring = "dbi:mysql";
+
+        unless ( $config->{"metadata_db_name"} ) {
+            my $msg = "Specified a MySQL Database, but did not specify which database (db_name)";
+            return ( -1, $msg );
+        }
+
+        $dbistring .= ":" . $config->{"metadata_db_name"};
+
+        unless ( $config->{"metadata_db_host"} ) {
+            my $msg = "Specified a MySQL Database, but did not specify which database host (db_host)";
+            return ( -1, $msg );
+        }
+
+        $dbistring .= ":" . $config->{"metadata_db_host"};
+
+        if ( $config->{"metadata_db_port"} ) {
+            $dbistring .= ":" . $config->{"metadata_db_port"};
+        }
+
+	$username = $config->{metadata_db_username};
+	$password = $config->{metadata_db_password};
+    }
+    else {
+        my $msg = "Unknown database type: " . $config->{db_type};
         return ( -1, $msg );
     }
-
-    unless ( $config->{"db_directory"} ) {
-        my $msg = "No database location specified. (db_directory)";
-        return ( -1, $msg );
-    }
-
 
     my $max_timeout = $config->{"collection_interval"}*3;
     $max_timeout = $config->{"max_timeout"} if ($config->{"max_timeout"});
 
     my $data_client = perfSONAR_PS::DB::TL1Counters->new();
-    if ($data_client->init({ data_directory => $config->{"db_directory"}, max_timeout => $max_timeout })) {
-        my $msg = "Problem creating database client";
+    my ($status, $res) = $data_client->init({ data_directory => $config->{"rrd_directory"}, metadata_dbistring => $dbistring, metadata_username => $username, metadata_password => $password, max_timeout => $max_timeout });
+    if ($status != 0) {
+        my $msg = "Problem creating database client: $res";
+        $self->{LOGGER}->debug($msg);
         return ( -1, $msg );
     }
-
-    # XXX: need to create the store file generator process
 
     return ( 0, $data_client );
 }
