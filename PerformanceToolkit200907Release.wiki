@@ -275,6 +275,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=310 310] - _*Aaron*_ - ~~please put zsh on performance toolkit ISO~~
      * <font color=green>_*Fixed - 9/1*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=311 311] - _*Aaron*_ - ISO should be able to manually configure IPv6 address
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=312 312] - _*Aaron*_ - ISO should not be running /etc/cron.daily/find
     
 === Code Reviews ===
 
