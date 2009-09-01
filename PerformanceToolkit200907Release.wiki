@@ -238,7 +238,10 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=purple>_*Post Beta (needs user feedback) - 7/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=83 83] - _*Aaron*_ - Live CD Network Card Drivers (Broadcom)
      * <font color=yellow>_*In Progress - 6/23*_</font>: Most up to date drivers are included, needs testing on host with broadcom
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=120 120] - _*Aaron*_ - Apache Track/Trace 
+     * <font color=green>_*Fixed - 8/31*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=155 155] - _*Aaron*_ - Nessus Settings for NPToolkit
+     * <font color=green>_*Fixed - 9/1*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=164 164] - _*Aaron*_ - Add option to completely clear disk/partition table and all
      * <font color=yellow>_*In Progress - 6/23*_</font>: The better sorting of the partitions may obviate this need
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=165 165] - _*Aaron*_ - Explore syslog-ng, and potential loghost setup 	 
