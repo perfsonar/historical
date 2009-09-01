@@ -178,9 +178,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=263 263] - _*Jason*_ - ~~pSB Log Location~~
      * <font color=green>_*Fixed - 8/13*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=264 264] - _*Aaron*_ - ~~Enabled Services Screen~~
-     * <font color=green>_*Fixed - 8/26*_</font>	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=268 268] - _*Aaron*_ - ~~NPAD Customization~~
-     * <font color=green>_*Fixed - 8/26*_</font> 
+     * <font color=green>_*Fixed - 8/26*_</font>	  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=285 285] - _*Aaron*_ - ~~Upgrade from older NPToolkit doesn't import tests~~
      * <font color=green>_*Fixed - 8/26*_</font>    	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=290 290] - _*Aaron*_ - ~~Scheduled testing - 'invalid test' error~~
@@ -261,7 +259,11 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 8/10*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=265 265] - _*Aaron*_ - Clean Out Disk Prior to Release 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=267 267] - _*Aaron*_ - Error reporting on pS Performance Toolkit 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=271 271] - _*Aaron*_ - Consistency when setting service address/name	 	 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=268 268] - _*Aaron*_ - NPAD Customization
+     * <font color=green>_*Originally Fixed - 8/26*_</font>
+     * <font color=yellow>_*In Progress - 9/1*_</font>     
+     * Specific bug for RC1/RC2 -> RC3 Upgrade
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=271 271] - _*Aaron*_ - Consistency when setting service address/name		 
      * <font color=yellow>_*In Progress - 8/12*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=279 279] - _*Aaron*_ - Cacti restarting SNMP MA 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=281 281] - _*Aaron*_ - Cacti Graph View Policy
