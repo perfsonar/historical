@@ -124,7 +124,7 @@ Like Apt, YUM installation also manages the task of finding dependencies.  The
 following command is all that is needed:
 
 {{{
-yum install perl-perfSONAR_PS-LookupService-3.1-1.pSPS.noarch.rpm
+yum install perl-perfSONAR_PS-LookupService
 }}}
 
 There may be several prerequisites to install depending on the age of your
