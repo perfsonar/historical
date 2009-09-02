@@ -197,8 +197,8 @@ The following outline some exceptions to the overall release process.  Also see 
 ==== Post RC3 Bugs ====
 
  * _*LSRegistrationDaemon*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=210 210] - _*Aaron*_ - LSRegistration daemon start/restart on information change	 
-     * <font color=yellow>_*In progress- 8/18*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=210 210] - _*Aaron*_ - ~~LSRegistration daemon start/restart on information change~~	 
+     * <font color=green>_*Fixed - 9/2*_</font>	 
  * _*pSB*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=273 273] - _*Jeff*_ - Stale .bwctlock files in pSB data collection 
  * _*PingER*_ S
@@ -212,9 +212,10 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*OWAMP/BWCTL*_ 	      
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - _*Aaron*_ - owamp/bwctl defaults for LHC sites 
      * <font color=yellow>_*In Progress - 7/2*_</font>	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=235 235] - _*Aaron*_ - simplified and documented options needed for configuring OWAMP tests 
-     * <font color=yellow>_*In Progress - 8/24*_</font>   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=261 261] - _*Aaron*_ - JOWAMP requires hostname in .jnlp file    
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=235 235] - _*Aaron*_ - ~~simplified and documented options needed for configuring OWAMP tests~~ 
+     * <font color=green>_*Fixed - 9/2*_</font>	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=261 261] - _*Aaron*_ - ~~JOWAMP requires hostname in .jnlp file~~    
+     * <font color=green>_*Fixed - 9/2*_</font>	 
  * _*Testing*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - _*Brian*_ - Automated Nessus Evaluation of Software 
      * <font color=yellow>_*In Progress - 8/21*_</font>
@@ -250,9 +251,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 7/10*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=201 201] - _*Aaron*_ - Upgrade Script Behavior 	
      * <font color=yellow>_*In Progress - 8/6*_</font>	    
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - Colors in console configuration 	 	 
-     * <font color=yellow>_*In Progress - 8/26*_</font>
-     * Pushing back more functionality to RC4.
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - ~~Colors in console configuration~~ 	 	 
+     * <font color=green>_*Fixed - 9/2*_</font>	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=254 254] - _*Aaron*_ - gLs lookup does not work after upgrade   	 
      * <font color=yellow>_*In Progress - 8/7*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=259 259] - _*Aaron*_ - Add iptables REDIRECT to kernel 
