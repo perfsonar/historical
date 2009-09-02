@@ -40,7 +40,6 @@ lib/ChartDirector/lib/fonts/timR08.pcf
 lib/ChartDirector/lib/fonts/timR10.pcf
 lib/ChartDirector/lib/fonts/timR12.pcf
 lib/ChartDirector/lib/fonts/timR14.pcf
-lib/ChartDirector/lib/libchartdir.so
 lib/ChartDirector/lib/libchartdiri386.so
 lib/ChartDirector/lib/libchartdirx86_64.so
 lib/ChartDirector/lib/perlchartdir.pm
@@ -252,3 +251,4 @@ scripts/pinger_cache.cron
 scripts/pinger_gui.conf
 scripts/pingerui_server.pl
 scripts/pingerui_test.pl
+scripts/prep_links.sh

@@ -141,7 +141,8 @@ sub build_graph {
     my $ssid = sprintf("%d", 1E6*rand());
     my $localpath =  $c->config->{SCRATCH_DIR} . "/$GOUT_DIR";
     mkpath([$localpath], undef, 0777);
-    system("ln -s $localpath " . $c->config->{MYPATH} . "/root/") unless -l $c->config->{MYPATH} . "/root/$GOUT_DIR";
+    $ENV{PATH} = "/bin";
+    system("ln -s $localpath " . $c->config->{MYPATH} . "/root/");
     for ( my $i = 0; $i < $num_grs; $i++ ) {
         my $metaID_key=  $c->stash->{links}->[$i];
         my($src_name, $dst_name, $packet_size) = split ':', $metaID_key;

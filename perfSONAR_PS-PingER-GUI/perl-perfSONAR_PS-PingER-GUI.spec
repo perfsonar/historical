@@ -5,7 +5,7 @@
 %define crontab pinger_cache.cron
 %define disttag pSPS
 %define apacheconf pinger_gui.conf
-%define relnum 6
+%define relnum 8
 
 Name:           perl-perfSONAR_PS-PingER-GUI
 Version:        3.1
@@ -162,6 +162,8 @@ chown -R perfsonar:perfsonar    /var/lib/perfsonar
  
 chown -R apache:apache  %{install_base}/root
 chown -R root:root /etc/cron.d/%{crontab} 
+
+%{install_base}/scripts/prep_links.sh %{install_base}
 
 /etc/init.d/crond restart
 /etc/init.d/httpd restart

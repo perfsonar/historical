@@ -3,11 +3,9 @@
 name : PingerGUI
 root : MYPATH=/root
 DISABLE_GLS_LOOKUP : 0
-RESTART_SERVICE : 1
 SCRATCH_DIR : /tmp
 MYPATH : MYPATH=/
 BUILD_IN_KEY : jh34587wuhlkh789hbyf78343gort03idjuhf3785t0gfgofbf78o4348orgofg7o4fg7
-uploadtmp : /tmp/
 gls_cache : /var/lib/perfsonar/list.pinger
 Session :
     expires : 3600
