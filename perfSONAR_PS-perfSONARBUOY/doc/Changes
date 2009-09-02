@@ -35,10 +35,24 @@ version 3.1
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=106
       bwmaster/bwcontroller: better logging support	 	   	  
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=185
-      pS-B backend database sometimes includes 'port' in the host portion - need to normalize. 
+      pS-B backend database sometimes includes 'port' in the host portion - need
+      to normalize. 
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=192
       SIGHUP fails to restart powmaster 
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=194
       signal handling needs to be corrected in bwcollector and bwmaster   	
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=241
-      ps-buoy endpoint doesn't seem to store/upload owamp measurements; throws perl uninit value warning in data validation code 
+      ps-buoy endpoint doesn't seem to store/upload owamp measurements; throws
+      perl uninit value warning in data validation code
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=248
+      improvements for perfsonar-buoy README file 	 
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=263
+      pSB Log Location 	 
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=306
+      powmaster runs after stopping 	 
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=314
+      documentation patch for bwdb.pl & owdb.pl	 
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=315
+      perfsonarbuoy_ma/doc/README testing section non-obvious
+
+
