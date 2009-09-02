@@ -21,7 +21,7 @@ in an "archive" directory.
 
 =head1 SYNOPSIS
 
-bwcollector.pl [B<-a> add_this_file][B<-o>][B<-c> confdir/][B<-Z>][B<-k>][B<-h>][B<-p>]
+bwcollector.pl [B<-a> add_this_file][B<-o>][B<-c> confdir/][B<-Z>][B<-k>][B<-h>][B<-p>][B<-d>][B<-v>]
 
 =over
 
@@ -53,6 +53,18 @@ shutdown.
 Send a SIGHUP to a currently running bwcollector.pl. This causes any current
 connections to be closed, and the owmesh.conf file to be re-read before
 bwcollector.pl continues.
+
+=item B<-p>
+
+Debugging option to profile performance.
+
+=item B<-d>
+
+Print debugging messages. 
+
+=item B<-v>
+
+Print verbose messages.
 
 =back
 

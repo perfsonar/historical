@@ -17,6 +17,50 @@ Using the owmesh.conf file as a guide, perform specified measurements and store
 the results in a database.  This script is to be run on machines that will
 perform measurements.  
 
+=head1 SYNOPSIS
+
+powmaster.pl [B<-c> confdir/][B<-n> nodename][B<-Z>][B<-x>][B<-h>][B<-k>][B<-d>][B<-v>]
+
+=over
+
+=item B<-c> confdir
+
+Specify the directory to find the owmesh.conf file.
+
+=item B<-n> nodename
+
+Use a specific node, specified in the owmesh, that this host will run tests as.
+Useful in situations where the <HOST> directives are not used.
+
+=item B<-Z>
+
+Run bwcollector.pl in the foreground.
+
+=item B<-x>
+
+Exit the script immediatly after loading (debug option).  
+
+=item B<-h>
+
+Send a SIGHUP to a currently running bwcollector.pl. This causes any current
+connections to be closed, and the owmesh.conf file to be re-read before
+bwcollector.pl continues.
+
+=item B<-k>
+
+Send a SIGTERM to a currently running bwcollector.pl. i.e. Gracefully
+shutdown.
+
+=item B<-d>
+
+Print debugging messages. 
+
+=item B<-v>
+
+Print verbose messages.
+
+=back
+
 =cut
 
 use FindBin;

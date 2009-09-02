@@ -11,10 +11,28 @@ our $VERSION = 3.1;
 
 owdb.pl - Create OWAMP database for perfSONAR-BUOY
 
+=head1 SYNOPSIS
+
+owdb.pl [ -c configdir ] [ -i | -x ] dba_account_name
+
 =head1 DESCRIPTION
 
 Given some basic parameters, create the database for the OWAMP data portion of
 perfSONAR-BUOY collection.
+
+=head1 OPTIONS
+
+  -c configuration dir
+ 
+  -i initialize database
+
+  -x destroy database
+ 
+=head1 EXAMPLES
+
+Initialize database as "root" dba (typical for mysql):
+
+  owdb.pl -c /PATH/TO/CONFIG/DIRECTORY -i root
 
 =cut
 
@@ -123,7 +141,7 @@ __END__
 
 =head1 SEE ALSO
 
-L<FindBin>, 
+L<FindBin>, L<Getopt::Std>, L<OWP>, L<OWP::Utils>, L<OWP::DB>, L<Carp>, L<DBI>
 
 To join the 'perfSONAR Users' mailing list, please visit:
 

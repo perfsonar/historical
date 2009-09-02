@@ -1,4 +1,6 @@
 #!/usr/bin/perl -w
+# ex: set tabstop=4 ai expandtab softtabstop=4 shiftwidth=4:
+# -*- mode: c-basic-indent: 4; tab-width: 4; indent-tabs-mode: nil -*-
 
 use strict;
 use warnings;
@@ -9,10 +11,28 @@ our $VERSION = 3.1;
 
 bwdb.pl - Create BWCTL database for perfSONAR-BUOY
 
+=head1 SYNOPSIS
+
+bwdb.pl [ -c configdir ] [ -i | -x ] dba_account_name
+
 =head1 DESCRIPTION
 
 Given some basic parameters, create the database for the BWCTL data portion of
 perfSONAR-BUOY collection.
+
+=head1 OPTIONS
+
+  -c configuration dir
+ 
+  -i initialize database
+
+  -x destroy database
+ 
+=head1 EXAMPLES
+
+Initialize database as "root" dba (typical for mysql):
+
+  bwdb.pl -c /PATH/TO/CONFIG/DIRECTORY -i root
 
 =cut
 
