@@ -310,8 +310,8 @@ TBD
    * Testing Coordination - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Maxim
    * Development (perfSONAR-PS 3.1+) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
-   * Development (GUIs) - <font color=yellow>_*IN PROGRESS - 6/8*_</font>
-   * Testing - <font color=red>_*NOT STARTED - 6/8*_</font>
+   * Development (GUIs) - <font color=green>_*Done - 9/2*_</font>
+   * Testing - <font color=yellow>_*IN PROGRESS- 9/2*_</font>
  * Joe
    * Testing - <font color=red>_*NOT STARTED - 6/8*_</font>
  * Brian
