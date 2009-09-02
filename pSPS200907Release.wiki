@@ -119,12 +119,14 @@ Due to the time constraints placed on release team members, the Joint Techs Conf
      * <font color=yellow>_*Will not be addressed before release - 7/16*_</font>   
      * Upstream issue was addressed too late
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=247 247] - _*Jeff*_ - /etc/init.d/perfsonarbuoy_owp_master script will start multiple instances of powmaster; have to kill manually 	       
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=314 1314] - _*Jason*_ - documentation patch for bwdb.pl & owdb.pl
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=314 314] - _*Jason*_ - ~~documentation patch for bwdb.pl & owdb.pl~~
+     * <font color=green>_*Fixed - 9/2*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=315 315] - _*Jason*_ - perfsonarbuoy_ma/doc/README testing section non-obvious
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=316 316] - _*Jeff*_ - powmaster uses 100% cpu when stopped via init script
  * _*perfAdmin*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=300 300] - _*Jeff*_ - localhost connection between bwmaster and bwcollector failing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=317 317] - _*Jason*_ - psB owamp test data presentation is misleading
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=318 318] - _*Jeff*_ - Read failed: (Success)
      
 === Code Reviews ===
 
