@@ -45,11 +45,7 @@ and [http://apt-rpm.org/ APT-RPM].  [http://internet2.edu/ Internet2] has
 created a repository to house the perfSONAR-PS software, related performance
 tools, and hard to find prerequisites.  We encourage adopters of these tools to
 install a simple RPM package that gives the necessary configuration information
-for the YUM and APT-RPM tools.  The RPM can be found here:
-
-{{{
-wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
-}}}
+for the YUM and APT-RPM tools.  
   
 To install this RPM first import the signing key:
 
@@ -60,7 +56,7 @@ rpm --import http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2
 Then install the RPM:
 
 {{{
-rpm -ivh Internet2-repo-0.1-2.noarch.rpm
+rpm -ivh http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
 }}}
 
 It is also recommended that an additional repository be installed for hard to 
