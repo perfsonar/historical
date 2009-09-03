@@ -202,8 +202,9 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*pSB*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=273 273] - _*Jeff*_ - Stale .bwctlock files in pSB data collection 
  * _*PingER*_ S
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=237 237] - _*Aaron*_ - pinger daemon have not restarted when clicked on Save 
-     * <font color=yellow>_*In Progress - 8/6*_</font>   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=237 237] - _*Aaron*_ - ~~pinger daemon have not restarted when clicked on Save ~~
+     * <font color=purple>_*WontFix - 9/3*_</font>
+     * Could not reproduce.
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=253 253] - _*Aaron*_ - Update PingER GUI 
      * <font color=yellow>_*In Progress - 8/6*_</font>	   
  * _*SNMP MA*_    
@@ -225,7 +226,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 9/3*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=257 257] - _*Aaron*_ - check that cross-browser js library is used with support for FF/IE/Safari
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=262 262] - _*Aaron*_ - Include Footnote describing communities 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=307 307] - _*Aaron*_ - spiiner not working under IE 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=307 307] - _*Aaron*_ - ~~spiiner not working under IE ~~
+     * <font color=purple>_*Pushed Back to 3.2 - 9/3*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=319 319] - _*Aaron*_ - Help Page for JOWPing
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
@@ -271,7 +273,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=271 271] - _*Aaron*_ - ~~Consistency when setting service address/name	~~	 
      * <font color=green>_*Fixed - 9/3*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=279 279] - _*Aaron*_ - Cacti restarting SNMP MA 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=281 281] - _*Aaron*_ - Cacti Graph View Policy
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=281 281] - _*Aaron*_ - ~~Cacti Graph View Policy~~
      * <font color=green>_*Fixed - 9/3*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - _*Aaron*_ - LinuxPPS Support
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=283 283] - _*Jason*_ - pS Performance Toolkit Documentation
