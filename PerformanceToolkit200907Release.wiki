@@ -210,8 +210,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - _*Aaron*_ - Cacti Configuration on NPToolkit 
      * <font color=yellow>_*Mostly Done, Needs Testing - 6/23*_</font>
  * _*OWAMP/BWCTL*_ 	      
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - _*Aaron*_ - owamp/bwctl defaults for LHC sites 
-     * <font color=yellow>_*In Progress - 7/2*_</font>	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - _*Brian*_ - owamp/bwctl defaults for LHC sites 
+     * <font color=yellow>_*In Progress - 9/3*_</font>	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=235 235] - _*Aaron*_ - ~~simplified and documented options needed for configuring OWAMP tests~~ 
      * <font color=green>_*Fixed - 9/2*_</font>	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=261 261] - _*Aaron*_ - ~~JOWAMP requires hostname in .jnlp file~~    
@@ -226,10 +226,19 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=257 257] - _*Aaron*_ - check that cross-browser js library is used with support for FF/IE/Safari
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=262 262] - _*Aaron*_ - Include Footnote describing communities 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=307 307] - _*Aaron*_ - spiiner not working under IE 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=319 319] - _*Aaron*_ - Help Page for JOWPing
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=321 321] - _*Aaron*_ - Link to error logs on services page/perfAdmin GUIs 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=322 322] - _*Jason*_ -Scalability of directory.cgi 
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=275 275] - _*Jeff*_ - Should we be re-distributing the JDK on the knoppix disk
+ * _*NPAD/NDT*_ 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=268 268] - _*Aaron*_ - NPAD Customization
+     * <font color=green>_*Originally Fixed - 8/26*_</font>
+     * <font color=yellow>_*In Progress - 9/1*_</font>     
+     * Specific bug for RC1/RC2 -> RC3 Upgrade
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=320 320] - _*Aaron*_ - NDT Duplicate Text 	 
  * _*Disc Misc.*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=17 17] - _*Aaron*_ - Java plugin/homepage for KDE env 
      * <font color=yellow>_*Mostly Done - 6/23*_</font>: Needs link to firefox on desktop or modify Konqueror to accept plugin
@@ -260,10 +269,6 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 8/10*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=265 265] - _*Aaron*_ - Clean Out Disk Prior to Release 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=267 267] - _*Aaron*_ - Error reporting on pS Performance Toolkit 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=268 268] - _*Aaron*_ - NPAD Customization
-     * <font color=green>_*Originally Fixed - 8/26*_</font>
-     * <font color=yellow>_*In Progress - 9/1*_</font>     
-     * Specific bug for RC1/RC2 -> RC3 Upgrade
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=271 271] - _*Aaron*_ - Consistency when setting service address/name		 
      * <font color=yellow>_*In Progress - 9/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=279 279] - _*Aaron*_ - Cacti restarting SNMP MA 
