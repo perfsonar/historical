@@ -227,8 +227,6 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=262 262] - _*Aaron*_ - Include Footnote describing communities 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=307 307] - _*Aaron*_ - spiiner not working under IE 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=319 319] - _*Aaron*_ - Help Page for JOWPing
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=321 321] - _*Aaron*_ - Link to error logs on services page/perfAdmin GUIs 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=322 322] - _*Jason*_ -Scalability of directory.cgi 
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
