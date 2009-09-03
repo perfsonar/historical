@@ -201,15 +201,15 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 9/2*_</font>	 
  * _*pSB*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=273 273] - _*Jeff*_ - Stale .bwctlock files in pSB data collection 
- * _*PingER*_ S
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=237 237] - _*Aaron*_ - ~~pinger daemon have not restarted when clicked on Save ~~
+ * _*PingER*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=237 237] - _*Aaron*_ - ~~pinger daemon have not restarted when clicked on Save~~
      * <font color=purple>_*WontFix - 9/3*_</font>
      * Could not reproduce.
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=253 253] - _*Aaron*_ - Update PingER GUI 
      * <font color=yellow>_*In Progress - 8/6*_</font>	   
  * _*SNMP MA*_    
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - _*Aaron*_ - Cacti Configuration on NPToolkit 
-     * <font color=yellow>_*Mostly Done, Needs Testing - 6/23*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - _*Aaron*_ - ~~Cacti Configuration on NPToolkit~~
+     * <font color=green>_*Fixed - 9/3*_</font>	 
  * _*OWAMP/BWCTL*_ 	      
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=36 36] - _*Brian*_ - owamp/bwctl defaults for LHC sites 
      * <font color=yellow>_*In Progress - 9/3*_</font>	 
