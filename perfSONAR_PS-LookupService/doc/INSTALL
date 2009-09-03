@@ -99,7 +99,7 @@ Installation (YUM):
 Installation using YUM lets the package manager do the work of finding and
 installing the dependencies.  The following command is all that is needed:
 
-  (sudo) yum install perl-perfSONAR_PS-LookupService-3.1-6.pSPS.noarch.rpm
+  (sudo) yum install perl-perfSONAR_PS-LookupService
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -114,7 +114,7 @@ Like YUM, installation with APT-RPM also manages the task of finding
 dependencies.  The following commands will install is needed:
 
   (sudo) apt-get update
-  (sudo) apt-get install perl-perfSONAR_PS-LookupService-3.1-6.pSPS.noarch.rpm
+  (sudo) apt-get install perl-perfSONAR_PS-LookupService
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -191,7 +191,7 @@ retrieves all software and another that retrieves only selective services.
 
 To download the entire release:
 
-  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1 perfSONAR-PS
+  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1 perfSONAR-PS
   
 The instructions are the same here as for the Tar package.  Note that
 installation may require pre-requisite software.  Read the preceding sections
@@ -205,8 +205,8 @@ If a single service is all that is required, a similar method is used but also
 note that the service must have access to a "Shared" directory that contains
 perfSONAR-PS libraries:
 
-  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1/perfSONAR_PS-LookupService/
-  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1/Shared
+  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/
+  svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/RELEASE_3.1/Shared
 
 The instructions are also the same as above:
 
@@ -220,5 +220,5 @@ and
 
 --------------------------------------------------------------------------------
 
-Tue Aug 25 09:22:49 EDT 2009
+Thu Sep  3 10:01:49 EDT 2009
 

@@ -109,28 +109,68 @@ Testing:
 --------
 
 The service comes with a client application and several test messages that can
-be used to test functionality.  There are many messages provided as examples, 
-to test the service there are four that are recommended:
+be used to test functionality.  The client application sends the XML file
+specified on the command line as a request to the URL specified on the command
+line.  The XML response from the server is returned. There are many messages
+provided as examples, to test the service only one is recommended:
 
-  etc/requests/EchoRequest.xml
-  etc/requests/MetadataKeyRequest-1.xml 
-  etc/requests/DataInfoRequest-1.xml 
-  etc/requests/SetupDataRequest-1.xml
+  (sudo) perl bin/client.pl http://localhost:9990/perfSONAR_PS/services/SNMPMA etc/requests/EchoRequest.xml
 
-These four will test the major functions of this service. To test:
+These two will test the major functions of this service. To test:
 
-  1) Ensure the service is started, it helps if you have configured logging to
-     use the "Screen" so you may monitor the service's activities.
+  1) Ensure the service is started, this can be done two ways:
+  
+    a) Start the service via the init script - you will not be able to monitor
+       the service 'live', but log files may be examined to determine if things
+       are working.  
+  
+    b) Start the service in 'debug' mode:
+    
+       (sudo) perl bin/daemon.pl --verbose --conf=etc/daemon.conf --logger=etc/daemon_logger.conf
+       
+       Be sure that logging is configured to the use the "Screen" so you may
+       monitor the service's activities.
 
   2) Run the client:
   
      perl bin/client.pl URL FILENAME
   
-  3) Compare the results of the test with the comments in each file.  Note there
-     may be some differences (e.g. id values, key values).  
+  3) The results of the first test will be an XML message that indicates the service
+     is working:
      
-  4) If everything looks OK, return logging to normal and restart service via
+<?xml version="1.0"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Header/>
+  <SOAP-ENV:Body>
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+messageIdRef="EchoMessage1" id="message.12780503" type="EchoResponse"><nmwg:metadata
+metadataIdRef="metadata1"
+id="metadata.5353493"><nmwg:eventType>success.echo</nmwg:eventType></nmwg:metadata><nmwg:data
+metadataIdRef="metadata.5353493" id="data.1643179"><nmwgr:datum
+xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">The echo request has
+passed.</nmwgr:datum></nmwg:data><nmwg:metadata
+xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata1">
+    <nmwg:eventType>http://schemas.perfsonar.net/tools/admin/echo/2.0</nmwg:eventType>
+  </nmwg:metadata></nmwg:message>  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+  4) In a similar manner, it is possible to test other messages:
+
+  (sudo) perl bin/client.pl http://localhost:9990/perfSONAR_PS/services/SNMPMA etc/requests/EchoRequest.xml
+  (sudo) perl bin/client.pl http://localhost:9990/perfSONAR_PS/services/SNMPMA etc/requests/MetadataKeyRequest-1.xml 
+  (sudo) perl bin/client.pl http://localhost:9990/perfSONAR_PS/services/SNMPMA etc/requests/DataInfoRequest-1.xml 
+  (sudo) perl bin/client.pl http://localhost:9990/perfSONAR_PS/services/SNMPMA etc/requests/SetupDataRequest-1.xml
+
+     The response to these messages may differ from service to service, so they
+     will not be enumerated here.  
+       
+  5) If everything looks OK, return logging to normal and restart service via
      the init system.  
+
+
 
 Maintenance:
 ------------
@@ -161,4 +201,4 @@ Finally, check the following websites for news of software releases:
 
 --------------------------------------------------------------------------------
 
-Tue Aug 25 09:22:49 EDT 2009
+Thu Sep  3 10:01:49 EDT 2009

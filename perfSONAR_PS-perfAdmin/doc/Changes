@@ -1,15 +1,13 @@
 version 3.1
   * Initial RPM release.
   * Bugfixes
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=297
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=288
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=286
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=244
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=243
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=226
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=225
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=143
-    - http://code.google.com/p/perfsonar-ps/issues/detail?id=141
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=136
-
-
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=141
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=143
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=225
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=226
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=243
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=244
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=286
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=288
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=297
