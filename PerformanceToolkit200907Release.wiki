@@ -198,9 +198,7 @@ The following outline some exceptions to the overall release process.  Also see 
 
  * _*LSRegistrationDaemon*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=210 210] - _*Aaron*_ - ~~LSRegistration daemon start/restart on information change~~	 
-     * <font color=green>_*Fixed - 9/2*_</font>	 
- * _*pSB*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=273 273] - _*Jeff*_ - Stale .bwctlock files in pSB data collection 
+     * <font color=green>_*Fixed - 9/2*_</font> 
  * _*PingER*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=237 237] - _*Aaron*_ - ~~pinger daemon have not restarted when clicked on Save~~
      * <font color=purple>_*WontFix - 9/3*_</font>
@@ -222,7 +220,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 8/21*_</font>
      * RC2 has pased tests
  * _*GUIs*_  
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=203 203] - _*Aaron*_ - ~~Error messages when IS cannot be contacted for portions of the Admin GUIs ~~
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=203 203] - _*Aaron*_ - ~~Error messages when IS cannot be contacted for portions of the Admin GUIs~~
      * <font color=green>_*Fixed - 9/3*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=257 257] - _*Aaron*_ - check that cross-browser js library is used with support for FF/IE/Safari
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=262 262] - _*Aaron*_ - Include Footnote describing communities 
@@ -270,7 +268,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 8/10*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=265 265] - _*Aaron*_ - Clean Out Disk Prior to Release 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=267 267] - _*Aaron*_ - Error reporting on pS Performance Toolkit 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=271 271] - _*Aaron*_ - ~~Consistency when setting service address/name	~~	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=271 271] - _*Aaron*_ - ~~Consistency when setting service address/name~~	 
      * <font color=green>_*Fixed - 9/3*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=279 279] - _*Aaron*_ - Cacti restarting SNMP MA 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=281 281] - _*Aaron*_ - ~~Cacti Graph View Policy~~
@@ -282,13 +280,14 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=291 291] - _*Aaron*_ - ~~Scheduled Test Screen Shows Hosts Twice~~	 
      * <font color=green>_*Fixed - 9/3*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=298 298] - _*Jason*_ - Advanced Cacti data collection for localhost
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=304 304] - _*Aaron*_ - Backup utility 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=310 310] - _*Aaron*_ - ~~please put zsh on performance toolkit ISO~~
      * <font color=green>_*Fixed - 9/1*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=311 311] - _*Aaron*_ - ~~ISO should be able to manually configure IPv6 address~~
      * <font color=purple>_*Pushing to 3.2 - 9/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=312 312] - _*Aaron*_ - ~~ISO should not be running /etc/cron.daily/find~~
      * <font color=green>_*Fixed - 9/3*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=313 313] - _*Aaron*_ - syslogd goes crazy on ISO
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=313 313] - _*Aaron*_ - syslogd goes crazy on ISO   
     
 === Code Reviews ===
 
