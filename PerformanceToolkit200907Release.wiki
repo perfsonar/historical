@@ -282,7 +282,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 9/1*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=311 311] - _*Aaron*_ - ~~ISO should be able to manually configure IPv6 address~~
      * <font color=purple>_*Pushing to 3.2 - 9/2*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=312 312] - _*Aaron*_ - ISO should not be running /etc/cron.daily/find
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=312 312] - _*Aaron*_ - ~~ISO should not be running /etc/cron.daily/find~~
+     * <font color=green>_*Fixed - 9/3*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=313 313] - _*Aaron*_ - syslogd goes crazy on ISO
     
 === Code Reviews ===
