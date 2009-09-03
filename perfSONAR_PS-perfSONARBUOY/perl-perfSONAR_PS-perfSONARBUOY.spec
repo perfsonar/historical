@@ -181,6 +181,9 @@ rm -rf $RPM_BUILD_ROOT
 %{install_base}/bin/daemon.pl
 %{install_base}/scripts/install_dependencies.sh
 %{install_base}/scripts/prepare_environment_server.sh
+%{install_base}/scripts/perfsonarbuoy_ma
+%{install_base}/scripts/perfsonarbuoy_bw_collector
+%{install_base}/scripts/perfsonarbuoy_owp_collector
 %{install_base}/lib/*
 /etc/init.d/perfsonarbuoy_ma
 /etc/init.d/perfsonarbuoy_bw_collector
@@ -195,6 +198,8 @@ rm -rf $RPM_BUILD_ROOT
 %{install_base}/bin/powmaster.pl
 %{install_base}/scripts/install_dependencies.sh
 %{install_base}/scripts/prepare_environment_client.sh
+%{install_base}/scripts/perfsonarbuoy_bw_master
+%{install_base}/scripts/perfsonarbuoy_owp_master
 %{install_base}/lib/*
 /etc/init.d/perfsonarbuoy_bw_master
 /etc/init.d/perfsonarbuoy_owp_master
