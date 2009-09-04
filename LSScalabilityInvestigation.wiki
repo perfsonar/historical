@@ -818,14 +818,10 @@ There is no CONFIG file for the `fakeService` yet.  Let us run the service and l
  
 The program asks the following questions, for which the answers are in<font color=red> red</font>.
 
- `Enter the service type ( snmp | pSB | dcn )[snmp]:` <font color=red> ENTER</font>
- 
- `Enter the number of metadata [10]:` <font color=red> ENTER</font>
- 
- `Enter any service keywords separated by commas (ex: LHC,Internet2)[LHC]:` <font color=red> ENTER</font>
- 
- `Enter the hLS to register with [http://localhost:8080/perfSONAR_PS/services/gLS]:`  <font color=red> `http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS`</font>
- 
+ `Enter the service type ( snmp | pSB | dcn )[snmp]:` <font color=red> ENTER</font> 
+ `Enter the number of metadata [10]:` <font color=red> ENTER</font> 
+ `Enter any service keywords separated by commas (ex: LHC,Internet2)[LHC]:` <font color=red> ENTER</font> 
+ `Enter the hLS to register with [http://localhost:8080/perfSONAR_PS/services/gLS]:`  <font color=red> `http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS`</font> 
  `Enter the hLS registration interval (in minutes) [1]:` <font color=red> ENTER</font>
 
 
