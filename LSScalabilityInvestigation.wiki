@@ -1,4 +1,4 @@
-#labels ReportonLookupServiceScalabilityInvestigation
+#labels Report,Lookup,Service,Scalability,Investigation
 = perfSONAR Lookup Service (LS) Scalability Tests =
 
 <wiki:toc max_depth="6">
