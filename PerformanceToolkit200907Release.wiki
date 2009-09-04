@@ -222,7 +222,8 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*GUIs*_  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=203 203] - _*Aaron*_ - ~~Error messages when IS cannot be contacted for portions of the Admin GUIs~~
      * <font color=green>_*Fixed - 9/3*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=257 257] - _*Aaron*_ - check that cross-browser js library is used with support for FF/IE/Safari
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=257 257] - _*Aaron*_ - ~~check that cross-browser js library is used with support for FF/IE/Safari~~
+     * <font color=green>_*Fixed - 9/4*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=262 262] - _*Aaron*_ - Include Footnote describing communities 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=307 307] - _*Aaron*_ - ~~spiiner not working under IE ~~
      * <font color=purple>_*Pushed Back to 3.2 - 9/3*_</font>
@@ -232,10 +233,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=275 275] - _*Jeff*_ - Should we be re-distributing the JDK on the knoppix disk
  * _*NPAD/NDT*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=268 268] - _*Aaron*_ - NPAD Customization
-     * <font color=green>_*Originally Fixed - 8/26*_</font>
-     * <font color=yellow>_*In Progress - 9/1*_</font>     
-     * Specific bug for RC1/RC2 -> RC3 Upgrade
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=268 268] - _*Aaron*_ - ~~NPAD Customization~~
+     * <font color=green>_*Fixed - 9/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=320 320] - _*Aaron*_ - ~~NDT Duplicate Text~~ 	 
      * <font color=green>_*Fixed - 9/3*_</font> 
  * _*Disc Misc.*_ 
@@ -243,9 +242,9 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*Mostly Done - 6/23*_</font>: Needs link to firefox on desktop or modify Konqueror to accept plugin
      * Related to [http://code.google.com/p/perfsonar-ps/issues/detail?id=275 275]
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=26 26] - _*Aaron*_ - kernel nic drivers 	 	 
-     * <font color=purple>_*Post Beta (needs user feedback) - 7/2*_</font>
+     * <font color=yellow>_*In Progress - 9/4*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=83 83] - _*Aaron*_ - Live CD Network Card Drivers (Broadcom)
-     * <font color=yellow>_*In Progress - 6/23*_</font>: Most up to date drivers are included, needs testing on host with broadcom
+     * <font color=yellow>_*In Progress - 9/4*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=120 120] - _*Aaron*_ - ~~Apache Track/Trace~~
      * <font color=green>_*Fixed - 8/31*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=155 155] - _*Aaron*_ - ~~Nessus Settings for NPToolkit~~
@@ -255,25 +254,27 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=165 165] - _*Aaron*_ - Explore syslog-ng, and potential loghost setup 	 
      * <font color=yellow>_*In Progress - 6/23*_</font>: Need to document how to add loghost into /etc/syslog-ng/syslog-ng.conf
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - _*Aaron*_ - Add vmxnet module 	 	 	 
-     * <font color=purple>_*Post Beta (needs user feedback) - 7/2*_</font>
+     * <font color=yellow>_*In Progress - 9/4*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=189 189] - _*Aaron*_ - Add RNP NTP servers to NPToolkit   	
      * <font color=yellow>_*In Progress - 7/10*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=201 201] - _*Aaron*_ - Upgrade Script Behavior 	
-     * <font color=yellow>_*In Progress - 8/6*_</font>	    
+     * <font color=yellow>_*In Progress - 9/4*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - ~~Colors in console configuration~~ 	 	 
      * <font color=green>_*Fixed - 9/2*_</font>	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=254 254] - _*Aaron*_ - ~~gLs lookup does not work after upgrade~~   	 
      * <font color=green>_*Fixed - 9/3*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=259 259] - _*Aaron*_ - Add iptables REDIRECT to kernel 
-     * <font color=yellow>_*In Progress - 8/10*_</font> 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=259 259] - _*Aaron*_ - ~~Add iptables REDIRECT to kernel~~
+     * <font color=green>_*Fixed - 9/4*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=265 265] - _*Aaron*_ - Clean Out Disk Prior to Release 	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=267 267] - _*Aaron*_ - Error reporting on pS Performance Toolkit 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=267 267] - _*Aaron*_ - ~~Error reporting on pS Performance Toolkit~~
+     * <font color=green>_*Fixed - 9/4*_</font>  	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=271 271] - _*Aaron*_ - ~~Consistency when setting service address/name~~	 
      * <font color=green>_*Fixed - 9/3*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=279 279] - _*Aaron*_ - Cacti restarting SNMP MA 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=281 281] - _*Aaron*_ - ~~Cacti Graph View Policy~~
      * <font color=green>_*Fixed - 9/3*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - _*Aaron*_ - LinuxPPS Support
+     * <font color=yellow>_*In Progress - 9/4*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=283 283] - _*Jason*_ - pS Performance Toolkit Documentation
      * <font color=yellow>_*In Progress - 8/12*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff*_ - Create organized web-site for pS-Performance-Toolkit
