@@ -818,11 +818,22 @@ There is no CONFIG file for the `fakeService` yet.  Let us run the service and l
  
 The program asks the following questions, for which the answers are in<font color=red> red</font>.
 
- `Enter the service type ( snmp | pSB | dcn )[snmp]:` <font color=red> ENTER</font> 
- `Enter the number of metadata [10]:` <font color=red> ENTER</font> 
- `Enter any service keywords separated by commas (ex: LHC,Internet2)[LHC]:` <font color=red> ENTER</font> 
- `Enter the hLS to register with [http://localhost:8080/perfSONAR_PS/services/gLS]:`  <font color=red> `http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS`</font> 
+ `Enter the service type ( snmp | pSB | dcn )[snmp]:` <font color=red> ENTER</font>
+ 
+ `Enter the number of metadata [10]:` <font color=red> ENTER</font>
+ 
+ `Enter any service keywords separated by commas (ex: LHC,Internet2)[LHC]:` <font color=red> ENTER</font>
+ 
+ `Enter the hLS to register with [http://localhost:8080/perfSONAR_PS/services/gLS]:`  <font color=red> `http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS`</font>
+ 
  `Enter the hLS registration interval (in minutes) [1]:` <font color=red> ENTER</font>
 
 
-After this, the `fakeService` registers itself to the hLS, as the hLS reports.  But no CONFIG file is created. 
+After this, the `fakeService` registers itself to the hLS, as the hLS reports.  But no CONFIG file is created.
+
+A total of three `fakeService` instances were created on _ale_ and registered on the hLS on _moonshine_.  Their keys are:
+
+ # 99b748e77f1f6e92e9dbfe3831e204e6
+ # ebd472702a245d8fa686738bb6fde0cd
+ # 7d5be1eb93229de56f07535cb48e8c1a
+ 
