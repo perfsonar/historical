@@ -37,7 +37,7 @@ XXX ADD A DESCRIPTION OF THE PACKAGE XXX
 %install
 rm -rf $RPM_BUILD_ROOT
 
-make PREFIX=$RPM_BUILD_ROOT/%{install_base} install
+make PREFIX=$RPM_BUILD_ROOT/%{install_base} rpminstall
 
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
 
