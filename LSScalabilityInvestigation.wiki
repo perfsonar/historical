@@ -1,3 +1,4 @@
+#labels ReportonLookupServiceScalabilityInvestigation
 = perfSONAR Lookup Service (LS) Scalability Tests =
 
 <wiki:toc max_depth="6">
@@ -15,17 +16,13 @@
 
 == Suggested tests ==
 
- *  Use `ls_registration_daemon` to temporarily register 'fake services'.  Jason has a service emulator
- [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/fakeService/ FakeService] that should help.
+ *  Use `ls_registration_daemon` to temporarily register 'fake services'.  Jason has a service emulator [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/fakeService/ FakeService] that should help.
  *  Set up a test gLS and hLS, and then play with Jason's "!FakeService" tool to see when and how things break.
  *  Query the gLS and verify that everything what was registered is returned in the query. 
-  *  perfSONAR_PS-perfAdmin/cgi-bin/view.cgi is a program that provides an example of how to query an hLS.
- Use, for instance: http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://ps-bw.es.net:8095/perfSONAR_PS/services/hLS
+  *  perfSONAR_PS-perfAdmin/cgi-bin/view.cgi is a program that provides an example of how to query an hLS.  Use, for instance: http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://ps-bw.es.net:8095/perfSONAR_PS/services/hLS
   *  Also useful:  `perfSONAR_PS-perfAdmin/bin/cache.pl`
-  *  For perl client, use examples in etc/requests.  Consult design document for information on how to form the
- queries and use the eventTypes of the service.
-  *  For python, there is a wrapper for the generic perl client (`Shared/client/client.pl`) at:
- `test_harness/test_PS.py` 
+  *  For perl client, use examples in etc/requests.  Consult design document for information on how to form the queries and use the eventTypes of the service.
+  *  For python, there is a wrapper for the generic perl client (`Shared/client/client.pl`) at:  `test_harness/test_PS.py` 
  *  Deploy the !FakeService on 50 ESnet hosts and see what happens.
 
 
@@ -36,8 +33,7 @@
   *  _moonshine_.damsl.cis.udel.edu
   *  _stout_.damsl.cis.udel.edu
 
- *  Create a new gLS 'cloud', i.e., a new hints file.  The current hints file is located at
- http://dc211.internet2.edu/gls.root.hints .  Make a new hints file like this that includes the gLS instances created for this testing, and place it on _stout_'s web server (/var/www/external).  The contents of the file will be:
+ *  Create a new gLS 'cloud', i.e., a new hints file.  The current hints file is located at http://dc211.internet2.edu/gls.root.hints .  Make a new hints file like this that includes the gLS instances created for this testing, and place it on _stout_'s web server (/var/www/external).  The contents of the file will be:
 
 {{{
   http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
@@ -45,7 +41,9 @@
 
  *  Install the !LookupService package:
   *  one gLS in _ale_, port ~~9990~~ 7000:  in the daemon.conf set '`root 1`'.
-  *  one hLS in _moonshine_, standard port:  in the daemon.conf set '`root 0`'.
+   *  The access point for this gLS is:  http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
+  *  one hLS in _moonshine_, port 7000:  in the daemon.conf set '`root 0`'.
+   *  The access point for this hLS is:  http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS
 
  *  After initial setup and testing:
   *  Install a total of 2 - 3 gLSs:  one at UDel, one at LBL, one somewhere else (could be UDel/LBL, or one in Ann Arbor).
@@ -53,7 +51,7 @@
   *  Coordinate deployment of !FakeService on ESnet hosts on additional LSs.
  
 
-== Findings and Report ==
+== Report on Installation and Findings ==
 
 === Note ===
 
@@ -88,7 +86,7 @@ We make a new hints file that includes the gLS instances created for this testin
 The URL for accessing the file, thus, is http://stout.damsl.cis.udel.edu/gls.root.hints .
 
  
-=== Preparing Server _ale_ ===
+=== Installing gLS on Server _ale_ ===
 
 ==== Background ====
 
@@ -655,7 +653,7 @@ sudo perl daemon.pl --conf=../etc/daemon.conf --logger=../etc/daemon_logger.conf
 }}}
 
 
-=== Preparing Server _moonshine_ ===
+=== Installing hLS on Server _moonshine_ ===
 
 ==== Backgroung ====
 
@@ -788,3 +786,47 @@ gLS.pm:755 perfSONAR_PS::Services::LS::gLS::registerLS - Success from LS "http:/
  eventType: success.ls.register, response: [0] Data elements have been registered with key [41491c472d798db53b0bc90deb7c6f71]
 }}}
 
+
+=== Installing fakeService on _ale_ ===
+
+`fakeService` is already installed under `/opt/perfsonar_ps1/Shared/client/fakeService`.  Change to this directory.
+
+Trying the build script for `fakeService` first.
+
+ `sudo ./build_fakeService.sh`
+
+The script reports the following error:
+
+{{{
+Building executable fakeService
+ Building ... 
+  pp -c -I ../../lib -l /usr/lib/libxml2.a -l /usr/lib/libxml2.so.2 -o fakeService fakeService.pl  
+ 
+Can't locate Data/Random/WordList.pm in @INC (@INC contains: ../../lib /usr/local/lib/perl5/5.8.8/i686-linux /usr/local/lib/perl5/5.8.8 /usr/local/lib/perl5/site_perl/5.8.8/i686-linux /usr/local/lib/perl5/site_perl/5.8.8 /usr/local/lib/perl5/site_perl .) at E7F784 line 13.
+BEGIN failed--compilation aborted at E7F784 line 13.
+}}}
+
+Perl is missing the `Data::Random` library.  Let us install it:
+
+ `sudo perl -MCPAN -e 'Data::Random'`
+ 
+Now the build script works, and produces a compiled `fakeService` file.
+
+There is no CONFIG file for the `fakeService` yet.  Let us run the service and let it create the CONFIG file.
+
+ `sudo ./fakeService --verbose --config=/opt/perfsonar_ps1/Shared/client/fakeService`
+ 
+The program asks the following questions, for which the answers are in<font color=red> red</font>.
+
+ `Enter the service type ( snmp | pSB | dcn )[snmp]:` <font color=red> ENTER</font>
+ 
+ `Enter the number of metadata [10]:` <font color=red> ENTER</font>
+ 
+ `Enter any service keywords separated by commas (ex: LHC,Internet2)[LHC]:` <font color=red> ENTER</font>
+ 
+ `Enter the hLS to register with [http://localhost:8080/perfSONAR_PS/services/gLS]:`  <font color=red> `http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS`</font>
+ 
+ `Enter the hLS registration interval (in minutes) [1]:` <font color=red> ENTER</font>
+
+
+After this, the `fakeService` registers itself to the hLS, as the hLS reports.  But no CONFIG file is created. 
