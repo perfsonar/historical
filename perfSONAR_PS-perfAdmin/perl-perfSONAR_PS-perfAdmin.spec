@@ -5,7 +5,7 @@
 %define crontab perfAdmin.cron
 %define apacheconf perfAdmin.conf
 
-%define relnum 3
+%define relnum 4
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfAdmin
@@ -59,7 +59,7 @@ The perfSONAR-PS perfAdmin package is a series of simple web-based GUIs that int
 %install
 rm -rf $RPM_BUILD_ROOT
 
-make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} install
+make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} rpminstall
 
 mkdir -p $RPM_BUILD_ROOT/etc/cron.d
 
@@ -99,6 +99,9 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/*
 
 %changelog
+* Fri Sep 4 2009 zurawski@internet2.edu 3.1-4
+- RPM generation error fixed
+
 * Mon Aug 24 2009 zurawski@internet2.edu 3.1-3
 - Fixes to to documentation and package structure. 
 - Adding new graph support for PingER

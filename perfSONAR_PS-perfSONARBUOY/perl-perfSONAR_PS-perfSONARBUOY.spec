@@ -8,7 +8,7 @@
 %define init_script_owp_collector perfsonarbuoy_owp_collector
 %define init_script_owp_master perfsonarbuoy_owp_master
 
-%define relnum 2
+%define relnum 3
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfSONARBUOY
@@ -121,7 +121,7 @@ The perfSONARBUOY config package contains a configuration file that both the ser
 %install
 rm -rf $RPM_BUILD_ROOT
 
-make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} install
+make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} rpminstall
 
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
 
@@ -229,6 +229,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Fri Sep 4 2009 zurawski@internet2.edu 3.1-3
+- RPM generation error fixed
+
 * Tue Aug 25 2009 zurawski@internet2.edu 3.1-2
 - Fixes to to documentation and package structure.  
 - Bugfixes

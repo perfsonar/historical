@@ -4,7 +4,7 @@
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 lookup_service
 
-%define relnum 6
+%define relnum 7
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-LookupService
@@ -62,7 +62,7 @@ The perfSONAR-PS Lookup Service can function in one of two roles: global root or
 %install
 rm -rf $RPM_BUILD_ROOT
 
-make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} install
+make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} rpminstall
 
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
 
@@ -100,6 +100,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Fri Sep 4 2009 zurawski@internet2.edu 3.1-7
+- RPM generation error fixed
+
 * Tue Aug 25 2009 zurawski@internet2.edu 3.1-6
 - Fixes to to documentation and package structure.  
 - Adding DCN utilities

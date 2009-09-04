@@ -139,20 +139,20 @@ If you do not wish to install the Internet2 Repository package, you may simply
 find the appropriate RPM for your architecture without using a package manger.
 For example if you are on an "i386" architecture:
 
-  wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-perfSONARBUOY-client-3.1-2.pSPS.noarch.rpm
-  wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-perfSONARBUOY-config-3.1-2.pSPS.noarch.rpm
-  wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-perfSONARBUOY-server-3.1-2.pSPS.noarch.rpm
+  wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-perfSONARBUOY-client-3.1-3.pSPS.noarch.rpm
+  wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-perfSONARBUOY-config-3.1-3.pSPS.noarch.rpm
+  wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-perfSONARBUOY-server-3.1-3.pSPS.noarch.rpm
     
 To install without package manager help:
 
-  (sudo) rpm -ivh perl-perfSONAR_PS-perfSONARBUOY-client-3.1-2.pSPS.noarch.rpm perl-perfSONAR_PS-perfSONARBUOY-config-3.1-2.pSPS.noarch.rpm perl-perfSONAR_PS-perfSONARBUOY-server-3.1-2.pSPS.noarch.rpm
+  (sudo) rpm -ivh perl-perfSONAR_PS-perfSONARBUOY-client-3.1-3.pSPS.noarch.rpm perl-perfSONAR_PS-perfSONARBUOY-config-3.1-3.pSPS.noarch.rpm perl-perfSONAR_PS-perfSONARBUOY-server-3.1-3.pSPS.noarch.rpm
 
 Note that this RPM may need other packages to install correctly: if these
 packages are not found on your system, you will need to manually download and
 install them before proceeding.  An alternate method is to still use a package
 manager in a "local" way (YUM only):
 
-  (sudo) yum localinstall perl-perfSONAR_PS-perfSONARBUOY-client-3.1-2.pSPS.noarch.rpm perl-perfSONAR_PS-perfSONARBUOY-config-3.1-2.pSPS.noarch.rpm perl-perfSONAR_PS-perfSONARBUOY-server-3.1-2.pSPS.noarch.rpm
+  (sudo) yum localinstall perl-perfSONAR_PS-perfSONARBUOY-client-3.1-3.pSPS.noarch.rpm perl-perfSONAR_PS-perfSONARBUOY-config-3.1-3.pSPS.noarch.rpm perl-perfSONAR_PS-perfSONARBUOY-server-3.1-3.pSPS.noarch.rpm
   
 This will search the available repositories for any necessary packages.
 
@@ -165,9 +165,9 @@ All RPM packages are also available in "source" packages that may be installed
 and used in the typical Unix/Linux fashion.  There are helper scripts included
 that may be used to download the necessary prerequisite software packages:
 
-  wget -c http://software.internet2.edu/source/perfSONAR-PS/perfSONAR_PS-perfSONAR-BUOY-3.1.2.tar.gz
-  tar -zxfv perfSONAR_PS-perfSONAR-BUOY-3.1.2.tar.gz
-  cd perfSONAR_PS-perfSONAR-BUOY-3.1.2
+  wget -c http://software.internet2.edu/source/perfSONAR-PS/perfSONAR_PS-perfSONAR-BUOY-3.1.3.tar.gz
+  tar -zxfv perfSONAR_PS-perfSONAR-BUOY-3.1.3.tar.gz
+  cd perfSONAR_PS-perfSONAR-BUOY-3.1.3
   (sudo) make install
     *Edit all configuration files - See README*
   cd scripts

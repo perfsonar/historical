@@ -1,7 +1,7 @@
 PACKAGE=perfSONAR_PS-perfAdmin
 ROOTPATH=/opt/perfsonar_ps/perfAdmin
 VERSION=3.1
-RELEASE=3
+RELEASE=4
 
 default:
 	@echo No need to build the package. Just run \"make install\"
@@ -20,6 +20,11 @@ upgrade:
 	tar ch --exclude=etc/* -T MANIFEST | tar x -C /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
 	tar czf $(PACKAGE)-$(VERSION).$(RELEASE)-upgrade.tar.gz -C /tmp $(PACKAGE)-$(VERSION).$(RELEASE)
 	rm -rf /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
+
+rpminstall:
+	mkdir -p ${ROOTPATH}
+	tar ch --exclude=etc/* --exclude=*spec --exclude=MANIFEST --exclude=Makefile -T MANIFEST | tar x -C ${ROOTPATH}
+	for i in `cat MANIFEST | grep ^etc`; do  mkdir -p `dirname $(ROOTPATH)/$${i}`; if [ -e $(ROOTPATH)/$${i} ]; then install -m 640 -c $${i} $(ROOTPATH)/$${i}.new; else install -m 640 -c $${i} $(ROOTPATH)/$${i}; fi; done
 
 install:
 	for i in `ls ./scripts`; do sed -i "s|/opt/perfsonar_ps/perfAdmin|${ROOTPATH}|g" ./scripts/$${i}; done

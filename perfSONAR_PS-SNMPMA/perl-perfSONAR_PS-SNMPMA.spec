@@ -6,7 +6,7 @@ Autoreq: 0
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 snmp_ma
 
-%define relnum 7
+%define relnum 8
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-SNMPMA
@@ -96,7 +96,7 @@ The perfSONAR-PS SNMP MA is a measurement archive that is able to deliver gather
 %install
 rm -rf $RPM_BUILD_ROOT
 
-make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} install
+make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} rpminstall
 
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
 
@@ -135,6 +135,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Fri Sep 4 2009 zurawski@internet2.edu 3.1-8
+- RPM generation error fixed
+
 * Tue Aug 25 2009 zurawski@internet2.edu 3.1-7
 - Fixes to to documentation and package structure.  
 
