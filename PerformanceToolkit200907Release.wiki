@@ -229,6 +229,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=307 307] - _*Aaron*_ - ~~spiiner not working under IE ~~
      * <font color=purple>_*Pushed Back to 3.2 - 9/3*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=319 319] - _*Aaron*_ - Help Page for JOWPing
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=323 323] - _*Jason*_ - Historic/Current Breakdown for PingER Data
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
