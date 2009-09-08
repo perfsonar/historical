@@ -204,15 +204,15 @@ sub create_workers {
         return (-1, $msg);
     }
 
-    my $regeneration_period = 30;
-    $regeneration_period = $config->{regeneration_period} if ($config->{regeneration_period});
+    my $store_file_regeneration_period = 30;
+    $store_file_regeneration_period = $config->{store_file_regeneration_period} if ($config->{store_file_regeneration_period});
 
     unless ($config->{store_file} =~ /^\//) {
         $config->{store_file} = $args->{directory_offset}."/".$config->{store_file} if ($args->{directory_offset});
     }
 
     my $store_file_worker = perfSONAR_PS::Collectors::TL1Collector::StoreFileGenerationWorker->new();
-    $status = $store_file_worker->init({ store_file => $config->{store_file}, data_client => $database_client, regeneration_period => 30 });
+    $status = $store_file_worker->init({ store_file => $config->{store_file}, data_client => $database_client, regeneration_period => $store_file_regeneration_period });
     unless ( $status == 0 ) {
         my $msg = "Couldn't create store file worker";
         return ( -1, $msg );
@@ -301,6 +301,11 @@ sub create_database_client {
         return ( -1, $msg );
     }
 
+    unless ( $config->{"metadata_db_type"} ) {
+        my $msg = "No type specified for the metadata database. (metadata_db_type)";
+        return ( -1, $msg );
+    }
+
     my ($dbistring, $username, $password);
 
     if ( lc( $config->{"metadata_db_type"} ) eq "sqlite" ) {
@@ -344,7 +349,7 @@ sub create_database_client {
 	$password = $config->{metadata_db_password};
     }
     else {
-        my $msg = "Unknown database type: " . $config->{db_type};
+        my $msg = "Unknown database type: " . $config->{metadata_db_type};
         return ( -1, $msg );
     }
 
