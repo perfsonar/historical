@@ -106,7 +106,7 @@ The web interface should be available at: https://lab246.internet2.edu/
 Configuration of the pS Performance Toolkit is split into two parts:
 
  * [pSPT31#Console Console] - Configured on the target computer
-   * <font color=red>_*Caveat*_</font>: The console can be reached via a serial line or tool that may redirect this over a working network connection. 
+   * _*Caveat*_: The console can be reached via a serial line or tool that may redirect this over a working network connection. 
  * [pSPT31#Web Web] - Can be configured remotely
 
 In general the [pSPT31#Console console] configuration contains essential options that should be reviewed and set before the system can operate as a measurement framework.  Note that certain functionality, including the basic measurement tools, will function without any configuration.  The [pSPT31#Web web based] configuration steps can be performed remotely and should be used to personalize and customize the measurement experience.  
