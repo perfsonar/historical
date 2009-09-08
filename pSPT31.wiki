@@ -1,0 +1,280 @@
+#summary pS Performance Toolkit 3.1
+
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+The following guide describes in detail the steps required to set up version 3.1 of the perfSONAR performance Toolkit ([http://internet2.edu/performance/pS-PerformanceToolkit/ pS Performance Toolkit 3.1]).  It is important to follow each step in order.  Upon getting stuck, consult the [pSPerformanceToolkit31#FAQ FAQ] at the end of this document or join the [https://mail.internet2.edu/wws/info/performance-node-users mailing list].
+
+== System Requirements ==
+
+The pS Performance Toolkit requires modern hardware to function properly.  The following are basic guidelines to selecting hardware to power the measurement tools.
+
+ * _*CPU*_
+   * x86 or x86_64 Architecture
+   * _*Single Core*_
+     * 2.4Ghz or better
+   * _*Dual Core*_
+     * 1.6Ghz or better
+ * _*Main Memory*_
+   * 2G or better
+ * _*Disk Size*_
+   * 250G or better
+ * _*Network Card*_
+   * External NIC preferred to NIC located on the Motherboard
+   * Speed depends on intended use
+   * NIC choice is dependent on Linux driver availability, suggestions:
+     * Intel Chipset (uses the e1000 driver)
+       * PRO/1000 PT PCI-Express
+       * PRO/1000 MT PCI-X.
+       * PRO/1000 GT
+     * Linksys/Netgear (uses the ns83820 driver)
+       * 1GE PCI-X card
+     * Myricom 10G Cards
+       * Up to date drivers with each pS Performance Toolkit Release
+
+Further recommendations for specific test situations and environments are available below.  These should be used to supplement the basic information.  
+
+=== Virtual Machines ===
+
+Use of the pS Performance Toolkit as a virtual machine is not recommended.  Due to the emulation of virtual hardware, measurement tools may not feature a completely accurate result.  Observations have shown the following tools and services behave in unexpected ways when used in a VM environment:
+
+ * _*NTP*_: Virtual Machines (depending on software implementation) may receive a clock signal from the host they are running upon.  This may be delayed and is never as accurate as a true hardware clock; because of this NTP can suffer high jitter and delay characteristics.
+ * _*OWAMP*_: OWAMP depends on accurate NTP results to properly measure the packets used in testing.  
+ * _*BWCTL*_: BWCTL depends on accurate NTP results to properly measure the packets used in testing.  Additionally, virtual NIC support does not deliver the maximum available bandwidth as the guest machine often must fight with the host for access to the physical network.  
+
+=== Latency Recommendations === 
+
+Long term storage of latency data will require more disk space than recommended in the base.  We recommend upping the size of the primary disk to greater than or equal to 500G.  
+
+Minimization of _*Jitter*_ is a common goal when performing latency tests.  In general most CPU and Motherboard combinations work well on modern hardware.   It is also *highly recommended* that combination Motherboard and NIC be avoided.
+
+=== Bandwidth Recommendations === 
+
+Bandwidth testing often requires that the CPU, Motherboard, and Network card work in harmony to achieve promised speeds.  Testing has shown that using a CPU (Single or Dual Core) with a higher clock speed will work better when managing the needs of the rest of the machine during bandwidth testing.  It is also *highly recommended* that combination Motherboard and NIC be avoided. 
+
+== Installation ==
+
+The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/current.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/current.md5 md5] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
+
+{{{
+user@host:~$ md5sum current.iso;cat current.md5 
+9564ed9ac3b31c2fae361bcfdf894472  current.iso
+9564ed9ac3b31c2fae361bcfdf894472  pS-Performance_Toolkit-3.1rc3.iso
+}}}
+
+If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  After burning, please insert the CD into your target machine to boot.  Some items to consider:
+
+ * The target machine should have some way to access the console.  This can be via an attached monitor and keyboard or remote.
+ * The target machine's BIOS must allow the machine to boot from CD.  If the CD does not boot, adjust the BIOS (normally access via *_F12_* or similar) and try again.  
+ * The target hardware should match what is described in [pSPT31#System_Requirements System Requirements].
+
+After booting the following screen will appear:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/boot.png
+
+Options are not normally required, simply press enter.  The boot process will commence after this:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/boot-msg.png
+
+The pS Performance Toolkit features a system check to be sure some *_very_* minimal system requirements are met.  The following warning is used when the system memory is too low:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/disk-warn.png
+
+The system is configured to search for addresses via DHCP by default.  This may cause the system to pause for a short amount of time if there is no DHCP server on the target network.  Note that in the [pSPT31#Console Console Configuration] phase a static IP can be specified.  The following shows the DHCP client getting an address:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/dhcp.png
+
+The system will configure and start up services next.  It is normal to see some of these services fail (they will be configured in the [pSPT31#Console Console] and [pSPT31#Web Web] portions so they do start up properly).  The final step is to present the console to the user:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/login.png
+
+To log in to your new system, use the _*knoppix*_ user, and a blank password:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/login-knoppix.png
+
+The message at login motivates the two main forms of [pSPT31#Configuration Configuration]:
+
+{{{
+To start configuration, login as user knoppix and run 'sudo nptoolkit-configure.py'.
+Once you set passwords, you can login to the web interface and finish configuration.
+The web interface should be available at: https://lab246.internet2.edu/
+}}}
+
+== Configuration ==
+
+Configuration of the pS Performance Toolkit is split into two parts:
+
+ * [pSPT31#Console Console] - Configured on the target computer
+   * <font color=red>Caveat</font>: The console can be reached via a serial line or tool that may redirect this over a working network connection. 
+ * [pSPT31#Web Web] - Can be configured remotely
+
+In general the [pSPT31#Console console] configuration contains essential options that should be reviewed and set before the system can operate as a measurement framework.  Note that certain functionality, including the basic measurement tools, will function without any configuration.  The [pSPT31#Web web based] configuration steps can be performed remotely and should be used to personalize and customize the measurement experience.  
+
+=== Console ===
+
+At the console screen, type the following command:
+
+{{{
+sudo nptoolkit-configure.py
+}}}
+
+The following menu will appear:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/menu.png
+
+There are 6 options that may be configured through this menu:
+
+ * [pSPT31#Storage Storage] - Configure a drive to hold measurements and customizations
+ * [pSPT31#Passwords Passwords] - Set the _*root*_ and _*knoppix*_ user passwords
+ * [pSPT31#Networking Networking] - Set networking to be _DHCP_ or _Static_
+ * [pSPT31#Timezone Timezone] - Set the timezone in which the host is deployed
+ * [pSPT31#User_Management User Management] - Add additional users to the system
+ * [pSPT31#Exit Exit] - After exiting the menu
+
+The following sections detail the actions available in each section.  Note that as a menu item is addressed, they will change color.  
+
+==== Storage ====
+
+After choosing _*Option 1*_ from the menu, the following prompt will appear listing what drives were available on the system (experience may vary):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/drive-1.png
+
+At the time of configuration, the user chose the first option.  In this particular case an internal check requests that the disk have at least 10GB of capacity.  This message will appear as such:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/drive-2.png
+
+If the drive is unformatted, or formatted with a foreign filesystem (e.g. Linux can natively read several, but not not FAT or NTFS) there will be an option for format the drive in question.  _*N.B.*_: formatting a hard drive will render any existing old data un-readable.  Please be sure you wish to use the target hard drive before proceeding:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/drive-3.png
+
+The screen will display the results of the formatting step.  Note that a machine reboot is required before the system will be completely usable.  The remainder of the menu can be navigated before the reboot will be requested:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/drive-4.png
+
+After completing this series of questions, the menu will re-appear and mark that this step has been visited:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/menu-2.png
+
+==== Passwords ====
+
+After choosing _*Option 2*_ from the menu, the system will prompt for 2 new passwords:
+
+ * _*root*_ user
+ * _*knoppix*_ user
+
+Note that each time this menu option is used, both users will be promoted for.  To set the password of either user individually please see [pSPT31#User_Management User Management].  The screen will look similar to this:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/pass.png
+ 
+After completing this series of questions, the menu will re-appear and mark that this step has been visited:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/menu-3.png 
+
+==== Networking ====
+
+After choosing _*Option 3*_ from the menu, the following menu will appear:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/networking-1.png
+
+Note that the particular host used in this guide was equipped with only one interface.  If there are multiple interfaces present they will show up in the menu.  To alter the DNS server, choose option 1:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/networking-2.png
+
+In this case the DNS list may be empty, so the option to _add_ a server is all that is available.  To add a server to the list of DNS servers, choose option 1:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/networking-3.png
+
+After this step we could _add_ another server, or delete an existing server.  We will choose to exit.  The second option allows configuration of the interfaces:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/networking-4.png
+
+This option allows the operator to set the networking options (e.g. _*DHCP*_ vs _*Static IP*_, _*MTU*_ size).  The final option, _*Advertised Interface*_, is an option that relates to _perfSONAR_ services.  Each service will _advertise_ existence in a global directory.  If for some reason the target system is dual homed, for perfSONAR to work correctly the _*externally facing*_ interface should be advertised instead of something internal.
+
+finally, the changes must be saved:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/networking-5.png
+
+After completing this series of questions, the menu will re-appear and mark that this step has been visited:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/menu-4.png 
+
+==== Timezone ====
+
+After choosing _*Option 4*_ from the menu, the following warning will appear:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/tz-1.png
+
+If you do choose to change the timezone, the following menu will help to narrow down the choices:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/tz-2.png
+
+Finally, the name of the specified timezone should be entered:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/tz-3.png
+
+After completing this series of questions, the menu will re-appear and mark that this step has been visited:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/menu-5.png 
+
+==== User Management ====
+
+After choosing _*Option 5*_ from the menu, the following menu will appear with options:
+
+ * Add a user
+ * Delete a user
+ * Change a user's password
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/user-1.png
+
+_*Option 1*_ allows a new user to be added to the system:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/user-2.png
+
+_*Option 2*_ will delete a user.  Note the user must be on the system first or the delete will fail:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/user-3.png
+
+To delete the user properly:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/user-4.png
+
+_*Option 3*_ will change the password of a user.  Note the user must be on the system first or the change will fail:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/user-5.png
+
+To properly change the user's password:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/user-6.png
+
+After completing this series of questions, the menu will re-appear and mark that this step has been visited:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/menu-6.png 
+
+==== Exit ====
+
+If the [pSPT31#Storage Storage] was entered (e.g. even if a change was not requested) the system will request a reboot:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/reboot.png
+
+The screen may appear similar to the following and the system will enter the boot phase again:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/reboot-2.png
+
+Note that if [pSPT31#Storage Storage] was not entered, you will be returned to the console.  
+
+=== Web ===
+
+TBD
+
+== Known Bugs ==
+
+TBD
+
+== FAQ ==
+
+TBD
+
+== Last Updated ==
+
+$Id$
