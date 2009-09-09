@@ -1,0 +1,35 @@
+=  Sept 10 2009 Conference Call 2:00 pm EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+   * TBD
+ # Getting Started
+   * OGF Docs (in progress)
+     * NM-WG
+       * [https://svn.internet2.edu/svn/ogf/nm/base/ Base document]
+       * [https://svn.internet2.edu/svn/ogf/nm/instance/iperf/ iperf instance]
+     * NML-WG
+       * [https://svn.internet2.edu/svn/ogf/nml/base/ pS Topology]
+     * NMC-WG
+       * [https://svn.internet2.edu/svn/ogf/nml/base/ Base document]
+       * [https://svn.internet2.edu/svn/ogf/nml/MA/ MA Specific document]
+       * [https://svn.internet2.edu/svn/ogf/nml/IS/ IS Specific document]
+   * Caveats to the perl code, etc.
+ # Project Plans
+   * Client libraries first?
+   * Server stuff second?
+ # Ideas
+   * WSDL? (EU has been using for a while: see [http://mdm1.usatlas.bnl.gov:8080/geant2-java-rrd-ma/services/MeasurementArchiveService?wsdl here] and [http://p-mdm.ps-lhcopn.fnal.gov:8080/geant2-java-xml-ls/services/LookupService?wsdl here])
+   * Others?
+
+=== ACTIONS ===
+
+TBD
+
+== Where ==
+
+Internet2 conference bridge, To join the call, do the following: 
+ * Dial +1-734-615-7474 (NON-US/CA USERS MUST USE THIS NUMBER), * +1-866-411-0013 (toll free US/Canada Only)
+ * enter access code _*0145258*_
+
