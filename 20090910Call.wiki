@@ -20,6 +20,7 @@
    * Client libraries first?
    * Server stuff second?
  # Ideas
+   * [http://www.cedps.net/index.php/PerfSONAR_overview Wiki page of stuff]
    * WSDL? (EU has been using for a while: see [http://mdm1.usatlas.bnl.gov:8080/geant2-java-rrd-ma/services/MeasurementArchiveService?wsdl here] and [http://p-mdm.ps-lhcopn.fnal.gov:8080/geant2-java-xml-ls/services/LookupService?wsdl here])
    * Others?
 
