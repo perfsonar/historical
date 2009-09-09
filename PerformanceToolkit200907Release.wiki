@@ -276,9 +276,9 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=281 281] - _*Aaron*_ - ~~Cacti Graph View Policy~~
      * <font color=green>_*Fixed - 9/3*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - _*Aaron*_ - LinuxPPS Support
-     * <font color=yellow>_*In Progress - 9/4*_</font>	
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=283 283] - _*Jason*_ - pS Performance Toolkit Documentation
-     * <font color=yellow>_*In Progress - 8/12*_</font>
+     * <font color=yellow>_*In Progress - 9/9*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=283 283] - _*Aaron*_ - pS Performance Toolkit Documentation
+     * <font color=yellow>_*In Progress - 9/9*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff*_ - Create organized web-site for pS-Performance-Toolkit
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=291 291] - _*Aaron*_ - ~~Scheduled Test Screen Shows Hosts Twice~~	 
      * <font color=green>_*Fixed - 9/3*_</font> 
