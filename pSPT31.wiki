@@ -447,7 +447,13 @@ The first capture is seen when the service does not have any information to disp
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-snmp-1.png
 
+Once the host is collecting data (after going through the [pSPT31#Cacti_Administration Cacti Administration] step), a screen similar to the following will appear:
 
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-snmp-2.png
+
+Graphs can be produced for individual tests:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-snmp-3.png
 
 ==== Cacti Graphs ====
 
@@ -496,6 +502,25 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-7.png
 Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+
+===== Communities =====
+
+Selecting which _*communities*_ to identify this installation can be confusing to answer for new users.  This particular question is trying to associate some _loosely coupled_ labels to the data that the perfSONAR NPToolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music (e.g. a photo of a dog might have labels: _Dog_, _Rover_, etc. but someone else may choose different labels).  In general there is no _wrong way_ to choose a keyword.  Choose keywords that best describe the circumstances that surround this installation.  
+
+Some examples of valid answers are:
+
+ * *Internet2* - The data made available somehow connects the Intesrnet2 backbone
+ * *LHC* (*CMS*, *ATLAS*, etc.) - The disk is part of the LHC deployment structure
+ * *eVLBI* - The disk is a part of the larger telescope community
+ * *MAX* - A connector of member of the MAX gigapop
+
+We would recommend choosing keywords that:
+
+ * Describe the location/installation (e.g. the name of the organization installing): *MCNC*, *UDel*
+ * Network connections: *ESnet*, *GEANT*, *Internet2*, *NLR*, *RNP*
+ * Virtual Organizations (VOs): *CMS*, *ATLAS*
+
+Use as many community names as necessary to properly categorize the data from the installation.
 
 ==== BWCTL Limits ====
 
