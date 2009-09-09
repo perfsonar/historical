@@ -6,6 +6,7 @@ applicable.
 
 == Future Events ==
 
+   * [20090910Call] - Conference Call for Sept 10, 2009 (Special Purpose - Python pS-PS Extensions)
    * [20090914Video] - Video Conference for Sept 14, 2009
 
 == Past Events ==
