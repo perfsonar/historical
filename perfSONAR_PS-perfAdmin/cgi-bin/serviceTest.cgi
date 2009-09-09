@@ -563,6 +563,8 @@ else {
             foreach my $dst ( sort keys %{ $list{$src} } ) {
                 foreach my $set ( @{ $list{$src}{$dst} } ) {
                     next if $mark{ $set->{"key"} };
+                    my $bidir = "No";
+                    $bidir = "Yes" if $hostMap{ $set->{"key"} }->[0];
                     if ( exists $set->{"active"} and $set->{"active"} ) {
                         push @pairs,
                             {
@@ -579,7 +581,8 @@ else {
                             KEY            => $set->{"key"},
                             COUNT          => $counter,
                             SERVICE        => $service,
-                            KEY2           => $hostMap{ $set->{"key"} }->[0]
+                            KEY2           => $hostMap{ $set->{"key"} }->[0],
+                            BIDIR          => $bidir
                             };
                         $counter++;
                     }
@@ -605,7 +608,8 @@ else {
                             SYEAR          => \@syear,
                             DMON           => \@dmon,
                             DDAY           => \@dday,
-                            DYEAR          => \@dyear
+                            DYEAR          => \@dyear,
+                            BIDIR          => $bidir
                             };
                         $counter++;
                     }
@@ -944,6 +948,8 @@ else {
             foreach my $dst ( sort keys %{ $list{$src} } ) {
                 foreach my $set ( @{ $list{$src}{$dst} } ) {
                     next if $mark{ $set->{"key"} };
+                    my $bidir = "No";
+                    $bidir = "Yes" if $hostMap{ $set->{"key"} }->[0];
                     if ( exists $set->{"active"} and $set->{"active"} ) {
                         push @pairs,
                             {
@@ -954,7 +960,8 @@ else {
                             KEY      => $set->{"key"},
                             COUNT    => $counter,
                             SERVICE  => $service,
-                            KEY2     => $hostMap{ $set->{"key"} }->[0]
+                            KEY2     => $hostMap{ $set->{"key"} }->[0],
+                            BIDIR    => $bidir
                             };
                         $counter++;
                     }
@@ -974,7 +981,8 @@ else {
                             SYEAR    => \@syear,
                             DMON     => \@dmon,
                             DDAY     => \@dday,
-                            DYEAR    => \@dyear
+                            DYEAR    => \@dyear,
+                            BIDIR    => $bidir
                             };
                         $counter++;
                     }

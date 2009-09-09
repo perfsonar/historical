@@ -22,18 +22,18 @@
     </script>
   </head>
   <body>
-    <h3 align="center">Current Data Sets</h3>
+    <h3 align="center">Active Data Sets</h3>
     <hr size=2 width="85%" />
     <br>
     <table width="95%" align="center" cellpadding="1" border="2">
       <tr>
-        <th align="center" colspan="10"><tmpl_var name=EVENTTYPE> @ <tmpl_var name=SERVICE></th>
+        <th align="center" colspan="11"><tmpl_var name=EVENTTYPE> @ <tmpl_var name=SERVICE></th>
       </tr>
       <tr>
-        <th align="center">Source Host</th>
-        <th align="center">Source Address</th>
-        <th align="center">Destination Host</th>
-        <th align="center">Destination Address</th>
+        <th align="center">First Host</th>
+        <th align="center">First Address</th>
+        <th align="center">Second Host</th>
+        <th align="center">Second Address</th>
         <th align="center">Protocol</th>
         <th align="center">Duration</th>
 <!--
@@ -44,6 +44,7 @@
         <th align="center">Interval</th>
 -->
         <th align="center">Bandwidth Limit</th>        
+        <th align="center">Bi-Directional</th>
         <th align="center">Line Graph</th>
 <!--        
         <th align="center">Flash Graph</th>
@@ -87,6 +88,9 @@
           <tmpl_var name=BANDWIDTHLIMIT>&nbsp;
         </td>
         <td align="center">
+          <tmpl_var name=BIDIR>&nbsp;
+        </td>
+        <td align="center">
           <select value="Graph" id="graph1_<tmpl_var name=COUNT>" name="graph1_<tmpl_var name=COUNT>" onChange="window.open(options[selectedIndex].value,'graph1_<tmpl_var name=COUNT>','width=950,height=500,status=yes,scrollbars=yes,resizable=yes')">
             <option selected value="./bandwidthGraph.cgi">-- Select --</option>
             <option value="./bandwidthGraph.cgi?url=<tmpl_var name=SERVICE>&key=<tmpl_var name=KEY>&key2=<tmpl_var name=KEY2>&dst=<tmpl_var name=DADDRESS>&src=<tmpl_var name=SADDRESS>&dhost=<tmpl_var name=DHOST>&shost=<tmpl_var name=SHOST>&type=<tmpl_var name=PROTOCOL>&length=86400">1 Day</option>
@@ -122,18 +126,18 @@
     </center>        
     <br><br>
     
-    <h3 align="center">Historic Data Sets</h3>
+    <h3 align="center">Non-Active Data Sets</h3>
     <hr size=2 width="85%" />
     <br>
     <table width="95%" align="center" cellpadding="1" border="2">
       <tr>
-        <th align="center" colspan="10"><tmpl_var name=EVENTTYPE> @ <tmpl_var name=SERVICE></th>
+        <th align="center" colspan="11"><tmpl_var name=EVENTTYPE> @ <tmpl_var name=SERVICE></th>
       </tr>
       <tr>
-        <th align="center">Source Host</th>
-        <th align="center">Source Address</th>
-        <th align="center">Destination Host</th>
-        <th align="center">Destination Address</th>
+        <th align="center">First Host</th>
+        <th align="center">First Address</th>
+        <th align="center">Second Host</th>
+        <th align="center">Second Address</th>
         <th align="center">Protocol</th>
         <th align="center">Duration</th>
 <!--
@@ -144,6 +148,7 @@
         <th align="center">Interval</th>
 -->
         <th align="center">Bandwidth Limit</th>
+        <th align="center">Bi-Directional</th>
         <th align="center">Line Graph</th>
         <th align="center">Scatter Graph</th>
       </tr>
@@ -182,6 +187,9 @@
 -->
         <td align="center">
           <tmpl_var name=BANDWIDTHLIMIT>&nbsp;
+        </td>
+        <td align="center">
+          <tmpl_var name=BIDIR>&nbsp;
         </td>
         <td align="center">
           <form method="GET" name="form_<tmpl_var name=COUNT>" target="_blank" action="./bandwidthGraph.cgi">

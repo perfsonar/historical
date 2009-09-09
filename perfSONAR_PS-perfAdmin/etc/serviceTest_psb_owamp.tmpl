@@ -3,18 +3,19 @@
     <title>perfAdmin - Service Display - perfSONAR-BUOY One Way Latency Data</title>
   </head>
   <body>
-    <h3 align="center">Current Data Sets</h3>
+    <h3 align="center">Active Data Sets</h3>
     <hr size=2 width="85%" />
     <br>
     <table width="95%" align="center" cellpadding="1" border="2">
       <tr>
-        <th align="center" colspan="5"><tmpl_var name=EVENTTYPE> @ <tmpl_var name=SERVICE></th>
+        <th align="center" colspan="6"><tmpl_var name=EVENTTYPE> @ <tmpl_var name=SERVICE></th>
       </tr>
       <tr>
-        <th align="center">Source Host</th>
-        <th align="center">Source Address</th>
-        <th align="center">Destination Host</th>
-        <th align="center">Destination Address</th>
+        <th align="center">First Host</th>
+        <th align="center">First Address</th>
+        <th align="center">Second Host</th>
+        <th align="center">Second Address</th>
+        <th align="center">Bi-Directional</th>
         <th align="center">Graph</th>
       </tr>
       <tmpl_loop name=PAIRS>
@@ -30,6 +31,9 @@
         </td>
         <td align="center">
           <tmpl_var name=DADDRESS>&nbsp;
+        </td>
+        <td align="center">
+          <tmpl_var name=BIDIR>&nbsp;
         </td>
         <td align="center">
           <select value="Graph" id="graph1_<tmpl_var name=COUNT>" name="graph1_<tmpl_var name=COUNT>" onChange="window.open(options[selectedIndex].value,'graph1_<tmpl_var name=COUNT>','width=950,height=500,status=yes,scrollbars=yes,resizable=yes')">
@@ -65,18 +69,19 @@
     </table>
     <br><br>
     
-    <h3 align="center">Historic Data Sets</h3>
+    <h3 align="center">Non-Active Data Sets</h3>
     <hr size=2 width="85%" />
     <br>
     <table width="95%" align="center" cellpadding="1" border="2">
       <tr>
-        <th align="center" colspan="5"><tmpl_var name=EVENTTYPE> @ <tmpl_var name=SERVICE></th>
+        <th align="center" colspan="6"><tmpl_var name=EVENTTYPE> @ <tmpl_var name=SERVICE></th>
       </tr>
       <tr>
-        <th align="center">Source Host</th>
-        <th align="center">Source Address</th>
-        <th align="center">Destination Host</th>
-        <th align="center">Destination Address</th>
+        <th align="center">First Host</th>
+        <th align="center">First Address</th>
+        <th align="center">Second Host</th>
+        <th align="center">Second Address</th>
+        <th align="center">Bi-Directional</th>
         <th align="center">Graph</th>
       </tr>
       <tmpl_loop name=HISTPAIRS>
@@ -92,6 +97,9 @@
         </td>
         <td align="center">
           <tmpl_var name=DADDRESS>&nbsp;
+        </td>
+        <td align="center">
+          <tmpl_var name=BIDIR>&nbsp;
         </td>
         <td align="center">
           <form method="GET" name="form_<tmpl_var name=COUNT>" target="_blank" action="./delayGraph.cgi">
@@ -162,7 +170,6 @@
             <input type="submit" name="Graph" value="Graph" />
           </form>
         </td>
-
       </tr>
       </tmpl_loop>
     </table>    
