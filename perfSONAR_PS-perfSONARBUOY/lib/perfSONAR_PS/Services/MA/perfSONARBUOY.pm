@@ -836,124 +836,130 @@ sub createStorage {
             # ------------------------------------------------------------------
 
             $query = q{};
+            my $case = 0;
             foreach my $date ( @dateList ) {
                 $query .= " union " if $query;
                 $query .= "(select distinct send_id, recv_id, tspec_id, case";
                 foreach my $id ( keys %tspec ) {
                     foreach my $id2 ( keys %{ $tspec{$id}{"id"} } ) {
                         $query .= " when tspec_id=" . $id2 . " then '" . $id . "' ";
+                        $case++;
                     }
                 }
                 $query .= "end as tid from " . $date . "_DATA)";
             }
             $query .= " order by send_id, recv_id, tspec_id;";
 
-            my @dataSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
-            my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dataSchema, user => $dbuserBW, pass => $dbpassBW } );
-            $dbReturn = $datadb->openDB;
-            if ( $dbReturn == -1 ) {
-                $self->{LOGGER}->fatal( "Database error, aborting." );
-                return -1;
-            }
-            $result = $datadb->query( { query => $query } );
-            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+            if ( $case ) {
+                my @dataSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
+                my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dataSchema, user => $dbuserBW, pass => $dbpassBW } );
+                $dbReturn = $datadb->openDB;
+                if ( $dbReturn == -1 ) {
+                    $self->{LOGGER}->fatal( "Database error, aborting." );
+                    return -1;
+                }
+                $result = $datadb->query( { query => $query } );
+                $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
-            my %resSet = ();
-            $len = $#{$result};
-            for my $a ( 0 .. $len ) {
-                push @{ $resSet{ $result->[$a][0] }{ $result->[$a][1] }{ $result->[$a][3] } }, $result->[$a][2];
-            }
+                my %resSet = ();
+                $len = $#{$result};
+                for my $a ( 0 .. $len ) {
+                    push @{ $resSet{ $result->[$a][0] }{ $result->[$a][1] }{ $result->[$a][3] } }, $result->[$a][2];
+                }
 
-            my %mark = ();
-            foreach my $src ( keys %resSet ) {
-                foreach my $dst ( keys %{ $resSet{$src} } ) {
-                    foreach my $fakeid ( keys %{ $resSet{$src}{$dst} } ) {
+                my %mark = ();
+                foreach my $src ( keys %resSet ) {
+                    foreach my $dst ( keys %{ $resSet{$src} } ) {
+                        foreach my $fakeid ( keys %{ $resSet{$src}{$dst} } ) {
 
-                        # ------------------------------------------------------
-                        # XXX
-                        # JZ 7/19/09
-                        # Changes based on node resolution bug
-                        # ------------------------------------------------------
+                            # ------------------------------------------------------
+                            # XXX
+                            # JZ 7/19/09
+                            # Changes based on node resolution bug
+                            # ------------------------------------------------------
 
-                        next if $mark{$src}{$dst}{$fakeid};
-                        $mark{$src}{$dst}{$fakeid} = 1;
-                        foreach my $otherS ( keys %{ $tnode{$src} } ) {
-                            foreach my $otherD ( keys %{ $tnode{$dst} } ) {
-                                $mark{$otherS}{$otherD}{$fakeid} = 1;
-                            }
-                        }
-
-                        # ------------------------------------------------------
-
-                        my $metadata = q{};
-                        my $data     = q{};
-
-                        $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
-                        $metadata .= "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject-" . $id . "\">\n";
-                        $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-                        $metadata .= "        <nmwgt:src";
-                        $metadata .= " value=\"" . $node{$src}{"name"} . "\"" if $node{$src}{"name"};
-                        $metadata .= " port=\"" . $node{$src}{"port"} . "\"" if $node{$src}{"port"};
-                        $metadata .= " type=\"" . $node{$src}{"type"} . "\"" if $node{$src}{"type"};
-                        $metadata .= " />\n";
-                        $metadata .= "        <nmwgt:dst";
-                        $metadata .= " value=\"" . $node{$dst}{"name"} . "\"" if $node{$dst}{"name"};
-                        $metadata .= " port=\"" . $node{$dst}{"port"} . "\"" if $node{$dst}{"port"};
-                        $metadata .= " type=\"" . $node{$dst}{"type"} . "\"" if $node{$dst}{"type"};
-                        $metadata .= " />\n";
-                        $metadata .= "      </nmwgt:endPointPair>\n";
-                        $metadata .= "    </iperf:subject>\n";
-                        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>\n";
-                        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>\n";
-                        $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
-                        $metadata .= $tspec{$fakeid}{"xml"};
-                        $metadata .= "  </nmwg:metadata>\n";
-
-                        # ------------------------------------------------------
-                        # XXX
-                        # JZ 7/19/09
-                        # Changes based on node resolution bug
-                        # ------------------------------------------------------
-                        my %tList = ();
-                        foreach my $ts ( @{ $resSet{$src}{$dst}{$fakeid} } ) {
-                            $tList{$ts} = 1;
-                        }
-                        foreach my $otherS ( keys %{ $tnode{$src} } ) {
-                            foreach my $otherD ( keys %{ $tnode{$dst} } ) {
-                                foreach my $ts ( @{ $resSet{$otherS}{$otherD}{$fakeid} } ) {
-                                    $tList{$ts} = 1;
+                            next if $mark{$src}{$dst}{$fakeid};
+                            $mark{$src}{$dst}{$fakeid} = 1;
+                            foreach my $otherS ( keys %{ $tnode{$src} } ) {
+                                foreach my $otherD ( keys %{ $tnode{$dst} } ) {
+                                    $mark{$otherS}{$otherD}{$fakeid} = 1;
                                 }
                             }
-                        }
-                        my @temp = keys %tList;
 
-                        my @eT = ( "http://ggf.org/ns/nmwg/tools/iperf/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" );
-                        $data .= $self->generateData( { id => $id, testspec => \@temp, eT => \@eT, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
+                            # ------------------------------------------------------
 
-                        if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-                            my $dHash  = md5_hex( $data );
-                            my $mdHash = md5_hex( $metadata );
-                            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                            $errorFlag++ if $parameters->{"error"};
-                            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                            $errorFlag++ if $parameters->{"error"};
-                        }
-                        elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
-                            my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
-                            if ( defined $fh ) {
-                                print $fh $metadata . "\n" . $data . "\n";
-                                $fh->close;
+                            my $metadata = q{};
+                            my $data     = q{};
+
+                            $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
+                            $metadata .= "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject-" . $id . "\">\n";
+                            $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+                            $metadata .= "        <nmwgt:src";
+                            $metadata .= " value=\"" . $node{$src}{"name"} . "\"" if $node{$src}{"name"};
+                            $metadata .= " port=\"" . $node{$src}{"port"} . "\"" if $node{$src}{"port"};
+                            $metadata .= " type=\"" . $node{$src}{"type"} . "\"" if $node{$src}{"type"};
+                            $metadata .= " />\n";
+                            $metadata .= "        <nmwgt:dst";
+                            $metadata .= " value=\"" . $node{$dst}{"name"} . "\"" if $node{$dst}{"name"};
+                            $metadata .= " port=\"" . $node{$dst}{"port"} . "\"" if $node{$dst}{"port"};
+                            $metadata .= " type=\"" . $node{$dst}{"type"} . "\"" if $node{$dst}{"type"};
+                            $metadata .= " />\n";
+                            $metadata .= "      </nmwgt:endPointPair>\n";
+                            $metadata .= "    </iperf:subject>\n";
+                            $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>\n";
+                            $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>\n";
+                            $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
+                            $metadata .= $tspec{$fakeid}{"xml"};
+                            $metadata .= "  </nmwg:metadata>\n";
+
+                            # ------------------------------------------------------
+                            # XXX
+                            # JZ 7/19/09
+                            # Changes based on node resolution bug
+                            # ------------------------------------------------------
+                            my %tList = ();
+                            foreach my $ts ( @{ $resSet{$src}{$dst}{$fakeid} } ) {
+                                $tList{$ts} = 1;
                             }
-                            else {
-                                $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
-                                return -1;
+                            foreach my $otherS ( keys %{ $tnode{$src} } ) {
+                                foreach my $otherD ( keys %{ $tnode{$dst} } ) {
+                                    foreach my $ts ( @{ $resSet{$otherS}{$otherD}{$fakeid} } ) {
+                                        $tList{$ts} = 1;
+                                    }
+                                }
                             }
+                            my @temp = keys %tList;
+
+                            my @eT = ( "http://ggf.org/ns/nmwg/tools/iperf/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" );
+                            $data .= $self->generateData( { id => $id, testspec => \@temp, eT => \@eT, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
+
+                            if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
+                                my $dHash  = md5_hex( $data );
+                                my $mdHash = md5_hex( $metadata );
+                                $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                                $errorFlag++ if $parameters->{"error"};
+                                $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                                $errorFlag++ if $parameters->{"error"};
+                            }
+                            elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+                                my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
+                                if ( defined $fh ) {
+                                    print $fh $metadata . "\n" . $data . "\n";
+                                    $fh->close;
+                                }
+                                else {
+                                    $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
+                                    return -1;
+                                }
+                            }
+                            $id++;
                         }
-                        $id++;
                     }
                 }
             }
-
+            else {
+                $self->{LOGGER}->info( "BWCTL Data not found in database - not adding to metadata storage." );
+            }
         }
     }
 
@@ -1187,127 +1193,132 @@ sub createStorage {
             # ------------------------------------------------------------------
 
             $query = q{};
+            my $case = 0;
             foreach my $date ( @dateList ) {
                 $query .= " union " if $query;
                 $query .= "(select distinct send_id, recv_id, tspec_id, case";
                 foreach my $id ( keys %tspec ) {
                     foreach my $id2 ( keys %{ $tspec{$id}{"id"} } ) {
                         $query .= " when tspec_id=" . $id2 . " then '" . $id . "' ";
+                        $case++;
                     }
                 }
                 $query .= "end as tid from " . $date . "_DATA)";
             }
             $query .= " order by send_id, recv_id, tspec_id;";
 
-            my @dataSchema = ( "send_id", "recv_id", "tspec_id", "si", "ei", "stimestamp", "etimestamp", "start_time", "end_time", "min", "max", "minttl", "maxttl", "sent", "lost", "dups", "maxerr", "finished" );
-            my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dataSchema, user => $dbuserOWP, pass => $dbpassOWP } );
-            $dbReturn = $datadb->openDB;
-            if ( $dbReturn == -1 ) {
-                $self->{LOGGER}->fatal( "Database error, aborting." );
-                return -1;
-            }
-            $result = $datadb->query( { query => $query } );
-            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+            if ( $case ) {
+                my @dataSchema = ( "send_id", "recv_id", "tspec_id", "si", "ei", "stimestamp", "etimestamp", "start_time", "end_time", "min", "max", "minttl", "maxttl", "sent", "lost", "dups", "maxerr", "finished" );
+                my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dataSchema, user => $dbuserOWP, pass => $dbpassOWP } );
+                $dbReturn = $datadb->openDB;
+                if ( $dbReturn == -1 ) {
+                    $self->{LOGGER}->fatal( "Database error, aborting." );
+                    return -1;
+                }
+                $result = $datadb->query( { query => $query } );
+                $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
-            my %resSet = ();
-            $len = $#{$result};
-            for my $a ( 0 .. $len ) {
-                push @{ $resSet{ $result->[$a][0] }{ $result->[$a][1] }{ $result->[$a][3] } }, $result->[$a][2];
-            }
+                my %resSet = ();
+                $len = $#{$result};
+                for my $a ( 0 .. $len ) {
+                    push @{ $resSet{ $result->[$a][0] }{ $result->[$a][1] }{ $result->[$a][3] } }, $result->[$a][2];
+                }
 
-            my %mark = ();
-            foreach my $src ( keys %resSet ) {
-                foreach my $dst ( keys %{ $resSet{$src} } ) {
-                    foreach my $fakeid ( keys %{ $resSet{$src}{$dst} } ) {
+                my %mark = ();
+                foreach my $src ( keys %resSet ) {
+                    foreach my $dst ( keys %{ $resSet{$src} } ) {
+                        foreach my $fakeid ( keys %{ $resSet{$src}{$dst} } ) {
 
-                        # ------------------------------------------------------
-                        # XXX
-                        # JZ 7/19/09
-                        # Changes based on node resolution bug
-                        # ------------------------------------------------------
+                            # ------------------------------------------------------
+                            # XXX
+                            # JZ 7/19/09
+                            # Changes based on node resolution bug
+                            # ------------------------------------------------------
 
-                        next if $mark{$src}{$dst}{$fakeid};
-                        $mark{$src}{$dst}{$fakeid} = 1;
-                        foreach my $otherS ( keys %{ $tnode{$src} } ) {
-                            foreach my $otherD ( keys %{ $tnode{$dst} } ) {
-                                $mark{$otherS}{$otherD}{$fakeid} = 1;
-                            }
-                        }
-
-                        # ------------------------------------------------------
-
-                        my $metadata = q{};
-                        my $data     = q{};
-
-                        $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
-                        $metadata .= "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
-                        $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-                        $metadata .= "        <nmwgt:src";
-                        $metadata .= " value=\"" . $node{$src}{"name"} . "\"" if $node{$src}{"name"};
-                        $metadata .= " port=\"" . $node{$src}{"port"} . "\"" if $node{$src}{"port"};
-                        $metadata .= " type=\"" . $node{$src}{"type"} . "\"" if $node{$src}{"type"};
-                        $metadata .= " />\n";
-                        $metadata .= "        <nmwgt:dst";
-                        $metadata .= " value=\"" . $node{$dst}{"name"} . "\"" if $node{$dst}{"name"};
-                        $metadata .= " port=\"" . $node{$dst}{"port"} . "\"" if $node{$dst}{"port"};
-                        $metadata .= " type=\"" . $node{$dst}{"type"} . "\"" if $node{$dst}{"type"};
-                        $metadata .= " />\n";
-                        $metadata .= "      </nmwgt:endPointPair>\n";
-                        $metadata .= "    </owamp:subject>\n";
-                        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>\n";
-                        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:eventType>\n";
-                        $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
-                        $metadata .= $tspec{$fakeid}{"xml"};
-                        $metadata .= "  </nmwg:metadata>\n";
-
-                        # ------------------------------------------------------
-                        # XXX
-                        # JZ 7/19/09
-                        # Changes based on node resolution bug
-                        # ------------------------------------------------------
-                        my %tList = ();
-                        foreach my $ts ( @{ $resSet{$src}{$dst}{$fakeid} } ) {
-                            $tList{$ts} = 1;
-                        }
-                        foreach my $otherS ( keys %{ $tnode{$src} } ) {
-                            foreach my $otherD ( keys %{ $tnode{$dst} } ) {
-                                foreach my $ts ( @{ $resSet{$otherS}{$otherD}{$fakeid} } ) {
-                                    $tList{$ts} = 1;
+                            next if $mark{$src}{$dst}{$fakeid};
+                            $mark{$src}{$dst}{$fakeid} = 1;
+                            foreach my $otherS ( keys %{ $tnode{$src} } ) {
+                                foreach my $otherD ( keys %{ $tnode{$dst} } ) {
+                                    $mark{$otherS}{$otherD}{$fakeid} = 1;
                                 }
                             }
-                        }
-                        my @temp = keys %tList;
 
-                        # ------------------------------------------------------
+                            # ------------------------------------------------------
 
-                        my @eT = ( "http://ggf.org/ns/nmwg/tools/owamp/2.0", "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" );
-                        $data .= $self->generateData( { id => $id, testspec => \@temp, eT => \@eT, db => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
+                            my $metadata = q{};
+                            my $data     = q{};
 
-                        if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-                            my $dHash  = md5_hex( $data );
-                            my $mdHash = md5_hex( $metadata );
-                            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                            $errorFlag++ if $parameters->{"error"};
-                            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                            $errorFlag++ if $parameters->{"error"};
-                        }
-                        elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
-                            my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
-                            if ( defined $fh ) {
-                                print $fh $metadata . "\n" . $data . "\n";
-                                $fh->close;
+                            $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
+                            $metadata .= "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
+                            $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+                            $metadata .= "        <nmwgt:src";
+                            $metadata .= " value=\"" . $node{$src}{"name"} . "\"" if $node{$src}{"name"};
+                            $metadata .= " port=\"" . $node{$src}{"port"} . "\"" if $node{$src}{"port"};
+                            $metadata .= " type=\"" . $node{$src}{"type"} . "\"" if $node{$src}{"type"};
+                            $metadata .= " />\n";
+                            $metadata .= "        <nmwgt:dst";
+                            $metadata .= " value=\"" . $node{$dst}{"name"} . "\"" if $node{$dst}{"name"};
+                            $metadata .= " port=\"" . $node{$dst}{"port"} . "\"" if $node{$dst}{"port"};
+                            $metadata .= " type=\"" . $node{$dst}{"type"} . "\"" if $node{$dst}{"type"};
+                            $metadata .= " />\n";
+                            $metadata .= "      </nmwgt:endPointPair>\n";
+                            $metadata .= "    </owamp:subject>\n";
+                            $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>\n";
+                            $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:eventType>\n";
+                            $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
+                            $metadata .= $tspec{$fakeid}{"xml"};
+                            $metadata .= "  </nmwg:metadata>\n";
+
+                            # ------------------------------------------------------
+                            # XXX
+                            # JZ 7/19/09
+                            # Changes based on node resolution bug
+                            # ------------------------------------------------------
+                            my %tList = ();
+                            foreach my $ts ( @{ $resSet{$src}{$dst}{$fakeid} } ) {
+                                $tList{$ts} = 1;
                             }
-                            else {
-                                $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
-                                return -1;
+                            foreach my $otherS ( keys %{ $tnode{$src} } ) {
+                                foreach my $otherD ( keys %{ $tnode{$dst} } ) {
+                                    foreach my $ts ( @{ $resSet{$otherS}{$otherD}{$fakeid} } ) {
+                                        $tList{$ts} = 1;
+                                    }
+                                }
                             }
-                        }
-                        $id++;
+                            my @temp = keys %tList;
 
+                            # ------------------------------------------------------
+
+                            my @eT = ( "http://ggf.org/ns/nmwg/tools/owamp/2.0", "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" );
+                            $data .= $self->generateData( { id => $id, testspec => \@temp, eT => \@eT, db => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
+
+                            if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
+                                my $dHash  = md5_hex( $data );
+                                my $mdHash = md5_hex( $metadata );
+                                $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                                $errorFlag++ if $parameters->{"error"};
+                                $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                                $errorFlag++ if $parameters->{"error"};
+                            }
+                            elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+                                my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
+                                if ( defined $fh ) {
+                                    print $fh $metadata . "\n" . $data . "\n";
+                                    $fh->close;
+                                }
+                                else {
+                                    $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
+                                    return -1;
+                                }
+                            }
+                            $id++;
+                        }
                     }
                 }
             }
-
+            else {
+                $self->{LOGGER}->info( "OWAMP Data not found in database - not adding to metadata storage." );
+            }
         }
     }
 
