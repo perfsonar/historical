@@ -505,7 +505,9 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
 
 ===== Communities =====
 
-Selecting which _*communities*_ to identify this installation can be confusing to answer for new users.  This particular question is trying to associate some _loosely coupled_ labels to the data that the perfSONAR NPToolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music (e.g. a photo of a dog might have labels: _Dog_, _Rover_, etc. but someone else may choose different labels).  In general there is no _wrong way_ to choose a keyword.  Choose keywords that best describe the circumstances that surround this installation.  
+A community identification is a self organizing way to form affiliations within the perfSONAR world.  For instance, if a perfSONAR service if associated with a specific scientific project (e.g. LHC, eVLBI), or has access to a certain network (Internet2, NLR, ESnet), these values can be entered as "community" values and exported into the perfSONAR Information Services.  Participating in this procedure allows others in your community an easy way to identify specific instances throughout the world as being affiliated.  Adding a community value or values is recommended, but not required.  
+
+Selecting which _*communities*_ to identify this installation can be confusing to answer for new users.  This particular question is trying to associate some _loosely coupled_ labels to the data that the pS Performance Toolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music (e.g. a photo of a dog might have labels: _Dog_, _Rover_, etc. but someone else may choose different labels).  In general there is no _wrong way_ to choose a keyword.  Choose keywords that best describe the circumstances that surround this installation.  
 
 Some examples of valid answers are:
 
