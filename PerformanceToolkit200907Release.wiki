@@ -257,8 +257,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=yellow>_*In Progress - 6/23*_</font>: Need to document how to add loghost into /etc/syslog-ng/syslog-ng.conf
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - _*Aaron*_ - ~~Add vmxnet module~~
      * <font color=purple>_*Pushing to 3.2 - 9/4*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=189 189] - _*Aaron*_ - Add RNP NTP servers to NPToolkit   	
-     * <font color=yellow>_*In Progress - 7/10*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=189 189] - _*Aaron*_ - ~~Add RNP NTP servers to NPToolkit~~   	
+     * <font color=green>_*Fixed - 9/9*_</font>	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=201 201] - _*Aaron*_ - Upgrade Script Behavior 	
      * <font color=yellow>_*In Progress - 9/4*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - ~~Colors in console configuration~~ 	 	 
