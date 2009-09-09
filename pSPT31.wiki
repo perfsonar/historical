@@ -719,7 +719,7 @@ After entering these values, the test is saved, but it does not have test hosts 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-bwctl-2.png
 
-Adding test hosts can be done by _community_, or _manually_.  If a community is clicked from the list, the following dialog will appear:
+Adding test hosts can be done by [pSPT31#Communities community], or _manually_.  If a community is clicked from the list, the following dialog will appear:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-bwctl-3.png
 
@@ -755,7 +755,7 @@ After entering these values, the test is saved, but it does not have test hosts 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-pinger-3.png
 
-Adding test hosts can be done by _community_, or _manually_.  If a community is clicked from the list, the following dialog will appear:
+Adding test hosts can be done by [pSPT31#Communities community], or _manually_.  If a community is clicked from the list, the following dialog will appear:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-pinger-4.png
 
@@ -785,7 +785,7 @@ After entering these values, the test is saved, but it does not have test hosts 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-3.png
 
-Adding test hosts can be done by _community_, or _manually_.  If a community is clicked from the list, the following dialog will appear:
+Adding test hosts can be done by [pSPT31#Communities community], or _manually_.  If a community is clicked from the list, the following dialog will appear:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-4.png
 
