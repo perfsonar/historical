@@ -125,7 +125,8 @@ Due to the time constraints placed on release team members, the Joint Techs Conf
      * <font color=green>_*Fixed - 9/2*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=315 315] - _*Jason*_ - ~~perfsonarbuoy_ma/doc/README testing section non-obvious~~
      * <font color=green>_*Fixed - 9/2*_</font>	
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=316 316] - _*Jeff*_ - powmaster uses 100% cpu when stopped via init script
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=316 316] - _*Jeff*_ - ~~powmaster uses 100% cpu when stopped via init script~~
+     * <font color=purple>_*Merged into 306 - 9/9*_</font>   
  * _*perfAdmin*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=300 300] - _*Jeff*_ - localhost connection between bwmaster and bwcollector failing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=317 317] - _*Jason*_ - ~~psB owamp test data presentation is misleading~~
