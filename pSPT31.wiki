@@ -265,7 +265,16 @@ Note that if [pSPT31#Storage Storage] was not entered, you will be returned to t
 
 === Web ===
 
-Configuration over the web is available after the machine has come online.  First determine the address of the machine:
+Configuration over the web is available after the machine has come online.  First, determine the URL to go to for configuration.
+
+In most cases, the message seen during login will contain the URL:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/getaddress-2.png
+
+In some cases, the message will have a URL like _https://`[`host address`]`/_. If
+this is the case, login and run _ifconfig_. The URL will be the IP address
+after _inet addr_. In the following example, the URL will be
+_https://192.168.69.130/_:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/getaddress.png
 
