@@ -265,7 +265,611 @@ Note that if [pSPT31#Storage Storage] was not entered, you will be returned to t
 
 === Web ===
 
-TBD
+Configuration over the web is available after the machine has come online.  First determine the address of the machine:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/getaddress.png
+
+Enter this address in a web browser, and the following screen will appear:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-home.png
+
+The menu on the left side of the screen has the following areas that can be viewed and configured, this guide will examine each:
+
+ * User Tools
+   * [pSPT31#Services_On_This_Node Services On This Node]
+   * [pSPT31#Global_Set_Of_Services Global Set Of Services]
+   * [pSPT31#JOWAMP JOWAMP]
+   * [pSPT31#Reverse_Traceroute Reverse Traceroute]
+   * [pSPT31#Reverse_Ping Reverse Ping]
+   * [pSPT31#PingER_UI PingER UI]
+ * Service Graphs
+   * [pSPT31#perfAdmin_BWCTL BWCTL]
+   * [pSPT31#perfAdmin_OWAMP OWAMP]
+   * [pSPT31#perfAdmin_PingER PingER]
+   * [pSPT31#perfAdmin_SNMP SNMP]
+   * [pSPT31#Cacti_Graphs Cacti Graphs]
+ * Toolkit Administration
+   * [pSPT31#Administrative_Info Administrative Info]
+   * [pSPT31#BWCTL_Limits BWCTL Limits]
+   * [pSPT31#OWAMP_Limits OWAMP Limits]
+   * [pSPT31#Enabled_Services Enabled Services]
+   * [pSPT31#NTP NTP]
+   * [pSPT31#Scheduled_Testing Scheduled Testing]
+     * [pSPT31#Scheduled_BWCTL BWCTL]
+     * [pSPT31#Scheduled_PingER PingER]
+     * [pSPT31#Scheduled_OWAMP OWAMP]
+   * [pSPT31#Cacti_Administration Cacti Administration]
+
+==== Services On This Node ====
+
+The _*home*_ page, is linked via the _Services On This Node_ button:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-home.png
+
+This page lists the measurement tools currently on this node as well as the versions of each piece of software.  There are 3 states for each tool:
+
+ * _*Running*_ - The service is functioning normally
+ * _*Not Running*_ - The service is stopped
+ * _*Disabled*_ - The service has been disabled via the [pSPT31#Enabled_Services Enabled Services] dialog.  
+
+A service may be in the _*Not Running*_ state for a number of reasons, particularly if there was a problem at startup time.  If when examining this list a service is in this state, and the operator feels it shouldn't be, please try to restart the service and check the logs.  
+
+==== Global Set Of Services ====
+
+Using the power of the _perfSONAR Lookup Service_, the pS Performance Toolkit is able to locate and display information on other perfSONAR services, world-wide.  The following image displays the set of global services:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/global.png
+
+This functionality is two fold:
+
+ * A script, run via _*cron*_, queries the global services on a regular interval
+ * All services that depend on this information, including [pSPT31#Scheduled_Testing Scheduled Testing], will get this information locally
+ 
+The last time the script was executed is listed at the top of this page.  Note that if the date seems rather old the script could be experiencing an error - please consult the logs if this is the case.  
+
+==== JOWAMP ====
+
+JOWAMP is a Java client of the OWAMP tool that executes an owamp test from the web browser to the server located on that particular node.  Because JOWAMP is a Java applet, it must run in the browser and may trigger several warnings.  These warnings convey information about executing code that is not _signed_ within the browser.  The warnings will look similar to this (will vary by web browser):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-jowamp-1.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-jowamp-2.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-jowamp-3.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-jowamp-4.png
+
+After accepting this warnings, the JOWAMP main screen will start:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-jowamp-5.png
+
+Running a test between the machine with the web browser and the performance node will produce results similar to this:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-jowamp-6.png
+
+If for some reason an error was experienced, the following items should be checked:
+
+ * _*Firewalls*_ - Check to be sure the performance node and the system with the web browser are either un-firewalled or have setting that would allow OWAMP traffic.  See the [http://www.internet2.edu/performance/owamp/ OWAMP] page for more details.
+ * _*NTP*_ - Be sure the performance node has a stable NTP numbers.  The machine with the web browser does not need NTP, but should have synchronized time.  
+ * _*Browser Security*_ - Check to be sure your browser allows web applets to be executed, and that all of the warnings were agreed too in the previous steps.  
+
+==== Reverse Traceroute ====
+
+The [http://www.slac.stanford.edu/comp/net/ Reverse Traceroute] tool was developed at [http://www.slac.stanford.edu SLAC] and allows a user to run a traceroute from the performance node to the web browser of the initializing machine.  The GUI appears as so:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-traceroute-1.png
+
+The results of the traceroute are displayed as they complete:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-traceroute-2.png
+
+==== Reverse Ping ====
+
+The [http://www.slac.stanford.edu/comp/net/ Reverse Ping] tool was developed at [http://www.slac.stanford.edu SLAC] and is similar to the [pSPT31#Reverse_Traceroute Reverse Traceroute].  It allows a user to run a ping from the performance node to the web browser of the initializing machine.  The GUI appears as so:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-traceroute-3.png
+
+==== PingER UI ====
+
+The PingER UI is a tool designed to display and analyse data from the PingER tool:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pinger-1.png
+
+This GUI can be used to display the results of any PingER instance, in this case we select an instance that is different from the performance node itself:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pinger-2.png
+
+==== perfAdmin BWCTL ====
+
+_perfAdmin_ is a series of CGI scripts that display data from perfSONAR services.  Each pS Performance Toolkit contains a _perfSONAR-BUOY_ instance that is capable of making regular BWCTL tests to other hosts.  This GUI is used to show the results of these tests.  
+
+The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-throughput-1.png
+
+
+
+==== perfAdmin OWAMP ====
+
+_perfAdmin_ is a series of CGI scripts that display data from perfSONAR services.  Each pS Performance Toolkit contains a _perfSONAR-BUOY_ instance that is capable of making regular OWAMP tests to other hosts.  This GUI is used to show the results of these tests.  
+
+The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-owd-1.png
+
+
+
+==== perfAdmin PingER ====
+
+_perfAdmin_ is a series of CGI scripts that display data from perfSONAR services.  Each pS Performance Toolkit contains a _PingER_ instance that is capable of making regular Ping tests to other hosts.  This GUI is used to show the results of these tests.  
+
+The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-pinger-1.png
+
+
+
+==== perfAdmin SNMP ====
+
+_perfAdmin_ is a series of CGI scripts that display data from perfSONAR services.  Each pS Performance Toolkit contains a _Cacti_ instance that is capable of collecting regular SNMP tests and exposing these via the _SNMP MA_.  This GUI is used to show the results of these tests.  
+
+The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-snmp-1.png
+
+
+
+==== Cacti Graphs ====
+
+Cacti is used to poll SNMP on network devices, this particular interface to Cacti is _non-privileged_, and can be used to show the results of cacti to all un-authenticated users:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-cacti-1.png
+
+[pSPT31#Cacti_Administration Cacti Administration] describes how to configure Cacti.  
+
+==== Administrative Info ====
+
+This section requires authentication, the following box will appear before you may access any of the functionality:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+
+Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPT31#User_Management User Management] for more information).  
+
+The _administration_ screen will appear like this the first time:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-1.png
+
+Upon clicking _edit_, the following dialog will appear:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-2.png
+
+The information will appear in the web form after entry:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-3.png
+
+Clicking on the communities will instantly add them to your configuration:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-4.png
+
+Clicking _Add New Community_ will force a dialog box:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-5.png
+
+Adding new communities can be done in this manner:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-6.png
+
+Lastly, hit _save_ to be sure your changes are saved.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-7.png
+
+Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+
+==== BWCTL Limits ====
+
+This section requires authentication, the following box will appear before you may access any of the functionality:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+
+Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPT31#User_Management User Management] for more information).  
+
+The _BWCTL Limits_ screen allows the operator to set limits on the resources that the BWCTL tool may consume on the target system.  For instance:
+
+ * Protocols allowed
+ * Test duration
+ * Bandwidth allowed
+
+The screen defaults to these settings:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-bwctllimits-1.png
+
+Clicking an _edit_ link brings up a dialog:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-bwctllimits-2.png
+
+The changes to the settings can be seen after closing the dialog:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-bwctllimits-3.png
+
+Users and networks can be added in a similar manner.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-bwctllimits-4.png
+
+When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+
+==== OWAMP Limits ====
+
+This section requires authentication, the following box will appear before you may access any of the functionality:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+
+Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPT31#User_Management User Management] for more information).  
+
+The _OWAMP Limits_ screen allows the operator to set limits on the resources that the OWAMP tool may consume on the target system.  For instance:
+
+ * Bandwidth allowed
+ * Disk usage
+ * Saving vs deleting test results
+
+The screen defaults to these settings:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-owamplimits-1.png
+
+Clicking an _edit_ link brings up a dialog:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-owamplimits-2.png
+
+Users and networks can be added in a similar manner. 
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-owamplimits-3.png
+
+When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+
+==== Enabled Services ====
+
+This section requires authentication, the following box will appear before you may access any of the functionality:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+
+Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPT31#User_Management User Management] for more information).  
+
+The _enabled services_ screen lists the services that will start and stop when the machine does.  The screen looks similar to this:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-enabled.png
+
+A breakdown of each service:
+
+ * _*SSH*_ - Allows administrators to remotely connect to this host using SSH
+ * _*NDT*_ - Allows clients at other sites to run NDT tests to this host.
+ * _*NPAD*_ - Allows clients at other sites to run NPAD tests to this host.
+ * _*BWCTL*_ - Allows clients at other sites to run Throughput tests to this host
+ * _*OWAMP*_ - Allows clients at other sites to run One-Way Latency tests to this host
+ * _*PingER*_ - Enables this host to perform scheduled ping tests. These tests will periodically ping configured hosts giving administrators a view of the latency from their site over time.
+ * _*perfSONAR-BUOY Measurement Archive*_ - Makes available the data collected by the perfSONAR-BUOY Latency and Throughput tests.
+ * _*perfSONAR-BUOY Throughput Testing*_	Enables this host to perform scheduled throughput tests. These tests will run periodically giving administrators a view of the throughput to and from their site over time.  _*N.B.*_: Enabling this will disable _*OWAMP*_, _*PingER*_ and _*perfSONAR-BUOY Latency Testing*_.
+ * _*perfSONAR-BUOY Latency Testing*_	Enables this host to perform scheduled one-way latency tests. These tests will run periodically giving administrators a view of the latency from their site over time.  _*N.B.*_: Enabling this will disable _*perfSONAR-BUOY Throughput Testing*_, _*BWCTL*_, _*NDT*_, and _*NPAD*_. 
+
+After selecting which services to enable, press _save_ to save the changes:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-enabled-save.png
+
+Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+
+==== NTP ====
+
+This section requires authentication, the following box will appear before you may access any of the functionality:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+
+Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPT31#User_Management User Management] for more information).  
+
+[http://www.ntp.org/ NTP] is a protocol for keeping accurate time on networked machines.  NTP access is very important to measurement tools (e.g. OWAMP and BWCTL) and the pS Performance Toolkit will require a working NTP configuration to use these tools.  NTP configuration should consist of:
+
+ * 4-5 Servers (for redudency and to help the NTP algorithms make _good_ choices)
+ * Of a similar _stratum_ (e.g. all Stratum 1, or all Stratum 2)
+ * Geographically _close_ (within the same timezone is a safe assumption)
+ * On divergent network paths (prevents problems with failed network paths or asymetric congestion)
+
+The following screen shows a default NTP configuration:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-ntp-1.png
+
+The following NTP clocks have been identified as being valuable to use:
+
+ * United States - Eastern Timezone
+   * chronos.es.net	ESnet - New York, NY USA
+   * owamp.atla.net.internet2.edu	Internet2 - Atlanta, GA USA
+   * owamp.newy.net.internet2.edu	Internet2 - New York, NY USA
+   * time-a.nist.gov	NIST - Gaithersburg, MD USA
+   * navobs1.oar.net	Naval Observatory - Columbus, OH USA
+   * ntp0.usno.navy.mil	Naval Observatory - Washington, DC USA
+ * United States - Central Timezone
+   * owamp.chic.net.internet2.edu	Internet2 - Chicago, IL USA
+   * owamp.hous.net.internet2.edu	Internet2 - Houston, TX USA
+ * United States - Mountain Timezone	 	 	 	 	 	 	 
+   * owamp.salt.net.internet2.edu	Internet2 - Salt Lake City, UT USA	 	 	 	 	 	 	 
+   * tick.usnogps.navy.mil	Naval Observatory - Colorado Springs, CO USA
+ * United States - Pacific Timezone	 	 	 	 	 	 	 	 
+   * saturn.es.net	ESnet - Sunnyvale, CA USA
+   * owamp.losa.net.internet2.edu	Internet2 - Los Angeles, CA USA
+   * ntp-ucla.usno.navy.mil	Naval Observatory - Los Angeles, CA USA
+   * ntp-uw.usno.navy.mil	Naval Observatory - Seattle, WA USA
+ * United States - Alaskan Timezone
+   * ntp-ua.usno.navy.mil	Naval Observatory - Fairbanks, AK USA
+ * United States - Hawaiian Timezone
+   * tick.mhpcc.hpc.mil	Maui HPC Center - Maui, HI USA
+ * South America (Brazil)
+   * a.ntp.monipe.rnp.br	RNP Time Server #1 - Brazil
+   * b.ntp.monipe.rnp.br	RNP Time Server #2 - Brazil
+   * c.ntp.monipe.rnp.br	RNP Time Server #3 - Brazil
+   * d.ntp.monipe.rnp.br	RNP Time Server #4 - Brazil
+   * e.ntp.monipe.rnp.br	RNP Time Server #5 - Brazil
+
+_*N.B.*_: Routing has a large impact on if an NTP time source is _reachable_ and _close_ from your particular instance.  It is recommended that the _Select Closest Servers_ option be used:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-ntp-2.png
+
+After running the closest servers will be selected, and servers that were unreachable will be marked in red:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-ntp-3.png
+
+When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+
+==== Scheduled Testing ====
+
+This section requires authentication, the following box will appear before you may access any of the functionality:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+
+Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPT31#User_Management User Management] for more information).  
+
+The _Scheduled Testing_ screen allows the user to schedule several types of regular test:
+
+ * [pSPT31#Scheduled_BWCTL BWCTL] - Bandwidth Testing
+ * [pSPT31#Scheduled_PingER PingER] - Two-way Latency Testing
+ * [pSPT31#Scheduled_OWAMP OWAMP] - One-way Latency Testing
+
+The screen will look similar to this initially:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-1.png
+
+The following sections detail setting up tests for each of these measurement types.
+
+===== Scheduled BWCTL =====
+
+Upon adding a BWCTL test via the _Add New Throughput Test_ button, the following dialog will appear:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-bwctl-1.png
+
+Enter the following information:
+
+ * _*Description*_ - Enter a name for this test, e.g. _10 Second BWCTL Tests, every 4 Hours_.  _*N.B.*_ that this will be used to reference the test on the GUI.  
+ * _*Time Between Tests*_ - How often to run the BWCTL tests.  _*N.B.*_ that this number, along with _Test Duration_, will dictate how _busy_ the system will be.  
+ * _*Test Duration*_ - How long of a BWCTL test to run.  In general TCP may take several seconds (on average 20 to 30) to ramp up to full line speed, especially on WAN paths.  _*N.B.*_ that this number, along with _Time Between Tests_, will dictate how _busy_ the system will be.  
+ * _*Tester*_ - Currently only _iperf_ is allowed here. 
+ * _*Protocol*_ - TCP or UDP testing.  
+ * _*Use Auto-tuning*_ - Allow the linux kernel to tune the buffers or set your own buffer sizes.
+
+After entering these values, the test is saved, but it does not have test hosts (yet):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-bwctl-2.png
+
+Adding test hosts can be done by _community_, or _manually_.  If a community is clicked from the list, the following dialog will appear:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-bwctl-3.png
+
+A host can be selected from this list to add to the test:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-bwctl-4.png
+
+Once selected the host will show up in the testing dialog.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-bwctl-5.png
+
+When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+
+===== Scheduled PingER =====
+
+PingER functions in a similar manner to [pSPT31#Scheduled_BWCTL BWCTL].  Upon adding a PingER test via the _Add New Ping Test_ button, the following dialog may appear appear if the system is already configured to test with BWCTL (this will not appear if a BWCTL test was not scheduled):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-pinger-1.png
+
+Enter the following information when the dialog appears:
+
+ * _*Description*_ - Enter a name for this test, e.g. _10 PPS PingER Tests, every 1 Hour_.  _*N.B.*_ that this will be used to reference the test on the GUI.  
+ * _*Time Between Tests*_ - How often to run the tests.
+ * _*Packets Sent Per Test*_ - How many Ping Packets per test.  Note that sending more will increase the total length of a test.
+ * _*Time Between Packets*_ - The interval between Ping Packets.  Setting this higher will increase the total length of a test
+ * _*Size Of Test Packets*_ - How large of a Ping packet to use in testing.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-pinger-2.png
+
+After entering these values, the test is saved, but it does not have test hosts (yet):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-pinger-3.png
+
+Adding test hosts can be done by _community_, or _manually_.  If a community is clicked from the list, the following dialog will appear:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-pinger-4.png
+
+A host can be selected from this list to add to the test.  Once selected the host will show up in the testing dialog. 
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-pinger-5.png
+
+When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+
+===== Scheduled OWAMP =====
+
+OWAMP functions in a similar manner to [pSPT31#Scheduled_BWCTL BWCTL].  Upon adding a OWAMP test via the _Add New One-Way Delay Test_ button, the following dialog may appear appear if the system is already configured to test with BWCTL (this will not appear if a BWCTL test was not scheduled):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-1.png
+
+Enter the following information when the dialog appears:
+
+ * _*Description*_ - Enter a name for this test, e.g. _25 PPS OWAMP Test_.  _*N.B.*_ that this will be used to reference the test on the GUI.  
+ * _*Packet Rate*_ - How many PPS.  
+ * _*Packet Size*_ - Size of each packet
+ 
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-2.png
+
+After entering these values, the test is saved, but it does not have test hosts (yet):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-3.png
+
+Adding test hosts can be done by _community_, or _manually_.  If a community is clicked from the list, the following dialog will appear:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-4.png
+
+A host can be selected from this list to add to the test.  Once selected the host will show up in the testing dialog. 
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-5.png
+
+Manually adding a host is also possible, simply fill in the fields with the name and port of a host to test against:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-6.png
+
+After completing, the host will show up in the testing dialog. 
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-7.png
+
+When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+
+==== Cacti Administration ====
+
+This section requires authentication, the following box will appear before you may access any of the functionality:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+
+Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPT31#User_Management User Management] for more information).  
+
+The following steps will explain the basic setup of Cacti (e.g. to poll a network device).  A user wishing to do more with the software should consult the documentation.  
+
+===== Cacti Config Step 1 =====
+
+Visit the Cacti instance:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_1.png
+
+===== Cacti Config Step 2 =====
+
+After logging in you will see the _home_ screen.  In the middle there
+will be an option to *Create devices*.  This is where we will begin.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_2.png
+
+===== Cacti Config Step 3 =====
+
+The next screen shows the currently known devices.  The basic setup will
+*always* include _localhost_.  The example below shows a previously
+configured switch.  On the right side there is an *Add* _button_ (although
+it doesn't appear to be so).  Click this to add a new device.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_3.png
+
+===== Cacti Config Step 4 =====
+
+The next screen features many places to add information about your new
+network device.  Note that the red circles are representative of the most
+common places to make changes.  When you are finished press *Create*.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_5.png
+
+===== Cacti Config Step 5 =====
+
+By default Cacti will only poll the *System* information of the SNMP enabled
+host at this stage, just to see if it is alive.  To poll information such
+as network statistics it is necessary to create *Graphs*.  We will proceed
+by clicking on *Create graphs for this Host*.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_6.png
+
+===== Cacti Config Step 6 =====
+
+The next screen displays the possible interfaces that are available for 
+data display.  Note that this may be a *large* number.  In general it is
+efficient to simply click the *all* checkbox at the top unless there are 
+certain interfaces you wish you only poll or perhaps leave out.  After
+checking this, scroll to the bottom.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_7.png
+
+===== Cacti Config Step 7 =====
+
+At the bottom of the page is a drop down for the *format* of the data.  It is
+common to use the 64 bit counters (especially for backbone networks) and 
+display the information as bytes as shown here.  Other options are of course
+available.  When done click *Create*.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_8.png
+
+===== Cacti Config Step 8 =====
+
+The resulting page should show the success or failure of each interface.  At
+this point the following actions have happened:
+
+ * RRD Files have been created for the interfaces in question
+ * A Poller has been notified that these are values of interest (polling will occur by default every 5 minutes) 
+ * Graph templates have been established
+ 
+We now can organize this *set* into a graph tree for later display.  Select
+*Graph Trees* on the left hand side.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_9.png
+
+===== Cacti Config Step 9 =====
+
+Select *Default Tree*.  It is also possible to create your own tree at this
+stage if desired.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_10.png
+
+===== Cacti Config Step 10 =====
+
+As in _Step 3_ there is another *Add* button to click because we wish to add
+a new host to the tree.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_11.png
+
+===== Cacti Config Step 11 =====
+
+Select *Host* from the drop down.  This will automatically populate the
+next drop down with the network device you have set up.  When you are
+set click *Create*.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_12.png
+
+===== Cacti Config Step 12 =====
+
+The next menu shows that the device has been added.  To see the graphs
+click on *Graphs* on the top.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_13.png
+
+
+===== Cacti Config Step 13 =====
+
+By default you can view the _localhost_ statistics, but below this the new
+network device is present.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_14.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_15.png
 
 == Known Bugs ==
 
