@@ -318,7 +318,7 @@ A service may be in the _*Not Running*_ state for a number of reasons, particula
 
 Using the power of the _perfSONAR Lookup Service_, the pS Performance Toolkit is able to locate and display information on other perfSONAR services, world-wide.  The following image displays the set of global services:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/global.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-global.png
 
 This functionality is two fold:
 
@@ -387,7 +387,19 @@ The first capture is seen when the service does not have any information to disp
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-throughput-1.png
 
+Once the host is collecting data, a screen similar to the following will appear:
 
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-throughput-2.png
+
+There are three sections to the GUI:
+
+ * _*Current Data*_ - Data that has been collected in the past week.  
+ * _*Summary Graph*_ - Shows the aggregate average observed into and out of each host.  
+ * _*Historical Data*_ - Data that is present in the system, but older than a week.  
+
+Graphs can be produced for individual tests:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-throughput-3.png
 
 ==== perfAdmin OWAMP ====
 
@@ -397,7 +409,19 @@ The first capture is seen when the service does not have any information to disp
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-owd-1.png
 
+Once the host is collecting data, a screen similar to the following will appear:
 
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-owd-2.png
+
+There are three sections to the GUI:
+
+ * _*Current Data*_ - Data that has been collected in the past week.  
+ * _*Summary Graph*_ - Shows the aggregate average observed into and out of each host.  
+ * _*Historical Data*_ - Data that is present in the system, but older than a week.  
+
+Graphs can be produced for individual tests:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-owd-3.png
 
 ==== perfAdmin PingER ====
 
@@ -407,7 +431,13 @@ The first capture is seen when the service does not have any information to disp
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-pinger-1.png
 
+Once the host is collecting data, a screen similar to the following will appear:
 
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-pinger-2.png  
+
+Graphs can be produced for individual tests:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-pinger-3.png
 
 ==== perfAdmin SNMP ====
 
