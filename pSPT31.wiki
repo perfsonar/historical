@@ -325,16 +325,11 @@ A service may be in the _*Not Running*_ state for a number of reasons, particula
 
 ==== Global Set Of Services ====
 
-Using the power of the _perfSONAR Lookup Service_, the pS Performance Toolkit is able to locate and display information on other perfSONAR services, world-wide.  The following image displays the set of global services:
+Using the _perfSONAR Lookup Service_, the pS Performance Toolkit is able to locate and display information on other perfSONAR services, world-wide.  The [pSPT31#Global_Set_Of_Services Global Set Of Services] page displays the global set of perfSONAR services:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-global.png
 
-This functionality is two fold:
-
- * A script, run via _*cron*_, queries the global services on a regular interval
- * All services that depend on this information, including [pSPT31#Scheduled_Testing Scheduled Testing], will get this information locally
- 
-The last time the script was executed is listed at the top of this page.  Note that if the date seems rather old the script could be experiencing an error - please consult the logs if this is the case.  
+The time when the set of services was retrieved is displayed at the top of the page. The toolkit regularly runs a script to query the global services. This information is used by the [pSPT31#Global_Set_Of_Services Global Set Of Services] page as well as other pages, including [pSPT31#Scheduled_Testing Scheduled Testing] page. Note that if the date seems rather old the script could be experiencing an error - please consult the logs if this is the case.  
 
 ==== JOWAMP ====
 
