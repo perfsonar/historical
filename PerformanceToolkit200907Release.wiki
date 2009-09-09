@@ -225,7 +225,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=257 257] - _*Aaron*_ - ~~check that cross-browser js library is used with support for FF/IE/Safari~~
      * <font color=green>_*Fixed - 9/4*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=262 262] - _*Jason*_ - Include Footnote describing communities
-     * <font color=yellow>_*In Progress - 9/8*_</font>
+     * <font color=yellow>_*In Progress - 9/9*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=307 307] - _*Aaron*_ - ~~spiiner not working under IE ~~
      * <font color=purple>_*Pushed Back to 3.2 - 9/3*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=319 319] - _*Aaron*_ - Help Page for JOWPing
