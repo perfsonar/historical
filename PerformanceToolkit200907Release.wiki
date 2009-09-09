@@ -272,7 +272,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 9/4*_</font>  	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=271 271] - _*Aaron*_ - ~~Consistency when setting service address/name~~	 
      * <font color=green>_*Fixed - 9/3*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=279 279] - _*Aaron*_ - Cacti restarting SNMP MA 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=279 279] - _*Aaron*_ - ~~Cacti restarting SNMP MA~~
+     * <font color=green>_*Fixed - 9/9*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=281 281] - _*Aaron*_ - ~~Cacti Graph View Policy~~
      * <font color=green>_*Fixed - 9/3*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - _*Aaron*_ - LinuxPPS Support
