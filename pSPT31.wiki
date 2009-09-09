@@ -41,7 +41,7 @@ Use of the pS Performance Toolkit as a virtual machine is not recommended.  Due 
 
  * _*NTP*_: Virtual Machines (depending on software implementation) may receive a clock signal from the host they are running upon.  This may be delayed and is never as accurate as a true hardware clock; because of this NTP can suffer high jitter and delay characteristics.
  * _*OWAMP*_: OWAMP depends on accurate NTP results to properly measure the packets used in testing.  
- * _*BWCTL*_: BWCTL depends on accurate NTP results to properly measure the packets used in testing.  Additionally, virtual NIC support does not deliver the maximum available bandwidth as the guest machine often must fight with the host for access to the physical network.  
+ * _*BWCTL*_: BWCTL depends on an accurate clock to schedule tests to run at the proper time.  Additionally, virtual NIC support does not deliver the maximum available bandwidth as the guest machine often must fight with the host for access to the physical network.  
 
 === Latency Recommendations === 
 
@@ -55,7 +55,7 @@ Bandwidth testing often requires that the CPU, Motherboard, and Network card wor
 
 == Installation ==
 
-The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/current.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/current.md5 md5] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
+The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/current.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/current.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
 user@host:~$ md5sum current.iso;cat current.md5 
@@ -65,8 +65,8 @@ user@host:~$ md5sum current.iso;cat current.md5
 
 If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  After burning, please insert the CD into your target machine to boot.  Some items to consider:
 
- * The target machine should have some way to access the console.  This can be via an attached monitor and keyboard or remote.
- * The target machine's BIOS must allow the machine to boot from CD.  If the CD does not boot, adjust the BIOS (normally access via *_F12_* or similar) and try again.  
+ * The target machine should have some way to access the console.  This can be via an attached monitor and keyboard or via remote access through serial ports or KVMs.
+ * The target machine's BIOS must allow the machine to boot from CD.  If the CD does not boot, adjust the BIOS (normally access via *_F12_*, *_F2_*, *_Del_* or similar) and try again.  
  * The target hardware should match what is described in [pSPT31#System_Requirements System Requirements].
 
 After booting the following screen will appear:
@@ -93,7 +93,7 @@ To log in to your new system, use the _*knoppix*_ user, and a blank password:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/login-knoppix.png
 
-The message at login motivates the two main forms of [pSPT31#Configuration Configuration]:
+The message at login describes the two main forms of [pSPT31#Configuration Configuration]:
 
 {{{
 To start configuration, login as user knoppix and run 'sudo nptoolkit-configure.py'.
@@ -144,7 +144,7 @@ At the time of configuration, the user chose the first option.  In this particul
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/drive-2.png
 
-If the drive is unformatted, or formatted with a foreign filesystem (e.g. Linux can natively read several, but not not FAT or NTFS) there will be an option for format the drive in question.  _*N.B.*_: formatting a hard drive will render any existing old data un-readable.  Please be sure you wish to use the target hard drive before proceeding:
+If the drive is unformatted, or is not formatted with the ext3 filesystem, there will be an option for format the drive in question. While Linux can natively read and write many filesystems, some filesystems, specifically NTFS and Fat, do not contain support for features required by the toolkit. _*N.B.*_: formatting a hard drive will render any existing old data un-readable.  Please be sure you wish to use the target hard drive before proceeding:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/drive-3.png
 
@@ -457,7 +457,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-snmp-3.png
 
 ==== Cacti Graphs ====
 
-Cacti is used to poll SNMP on network devices, this particular interface to Cacti is _non-privileged_, and can be used to show the results of cacti to all un-authenticated users:
+Cacti is used to poll SNMP on network devices, this particular interface to Cacti is _read-only_, and can be used to show cacti graphs to un-authenticated users:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-cacti-1.png
 
@@ -483,11 +483,11 @@ The information will appear in the web form after entry:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-3.png
 
-Clicking on the communities will instantly add them to your configuration:
+Clicking on the communities will add them to your configuration:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-4.png
 
-Clicking _Add New Community_ will force a dialog box:
+Clicking _Add New Community_ will display a dialog box:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-5.png
 
@@ -511,7 +511,7 @@ Selecting which _*communities*_ to identify this installation can be confusing t
 
 Some examples of valid answers are:
 
- * *Internet2* - The data made available somehow connects the Intesrnet2 backbone
+ * *Internet2* - The data made available somehow connects the Internet2 backbone
  * *LHC* (*CMS*, *ATLAS*, etc.) - The disk is part of the LHC deployment structure
  * *eVLBI* - The disk is a part of the larger telescope community
  * *MAX* - A connector of member of the MAX gigapop
@@ -745,7 +745,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-pinger-1.png
 
 Enter the following information when the dialog appears:
 
- * _*Description*_ - Enter a name for this test, e.g. _10 PPS PingER Tests, every 1 Hour_.  _*N.B.*_ that this will be used to reference the test on the GUI.  
+ * _*Description*_ - Enter a name for this test, e.g. _10 Packet PingER Tests, every 1 Hour_.  _*N.B.*_ that this will be used to reference the test on the GUI.  
  * _*Time Between Tests*_ - How often to run the tests.
  * _*Packets Sent Per Test*_ - How many Ping Packets per test.  Note that sending more will increase the total length of a test.
  * _*Time Between Packets*_ - The interval between Ping Packets.  Setting this higher will increase the total length of a test
@@ -775,10 +775,10 @@ OWAMP functions in a similar manner to [pSPT31#Scheduled_BWCTL BWCTL].  Upon add
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-1.png
 
-Enter the following information when the dialog appears:
+Unlike PingER and BWCTL tests, OWAMP tests run constantly. Enter the following information when the dialog appears:
 
  * _*Description*_ - Enter a name for this test, e.g. _25 PPS OWAMP Test_.  _*N.B.*_ that this will be used to reference the test on the GUI.  
- * _*Packet Rate*_ - How many PPS.  
+ * _*Packet Rate*_ - How many packets per second to send.  
  * _*Packet Size*_ - Size of each packet
  
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-2.png
