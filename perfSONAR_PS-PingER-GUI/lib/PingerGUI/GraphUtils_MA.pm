@@ -54,7 +54,6 @@ my %Y_label = (
 		dupl   =>  'N per 10 packets'
 	       );
 	       
-my $GOUT_DIR = 'graphsMA';
 #   graphs filename base
 my $GFN_BASE = 'graph';
 
@@ -106,7 +105,7 @@ sub get_data {
    pre-processing and call for actual graphing function
    accepts two parameters - hashref to parameyers and arrayref to the link pairs
    returns arrayref with each arrays element as hashref of form:
-    { image => $local_filename, alt => $title}
+    { key => $local_filename, alt => $title}
    
 =cut 
 
@@ -139,16 +138,12 @@ sub build_graph {
     my @datums = qw/meanRtt minRtt maxRtt meanIpd minIpd maxIpd iqrIpd clp lossPercent duplicates/;
     ## main cycle for every link
     my $ssid = sprintf("%d", 1E6*rand());
-    my $localpath =  $c->config->{SCRATCH_DIR} . "/$GOUT_DIR";
-    mkpath([$localpath], undef, 0777);
     $ENV{PATH} = "/bin";
-    system("ln -s $localpath " . $c->config->{MYPATH} . "/root/");
     for ( my $i = 0; $i < $num_grs; $i++ ) {
         my $metaID_key=  $c->stash->{links}->[$i];
         my($src_name, $dst_name, $packet_size) = split ':', $metaID_key;
-	my $local_filename = "/$GOUT_DIR/$GFN_BASE-$ssid-$metaID_key";  
-        my $filename       = $c->config->{SCRATCH_DIR} . "/$local_filename";
-        $local_filename .=  '.png';
+	my $local_filename = "$GFN_BASE-$ssid-$metaID_key";  
+        my $filename       = $c->config->{GRAPH_DIR} . "/$local_filename";
         my %o_y_max = ( rt => 1, loss => 1, ipdv => 1, dupl => 1 );
          
         ## Query database and create   Image for every link
@@ -243,7 +238,7 @@ sub build_graph {
         if ( $image_obj ) {
 	    if($c->stash->{get_files}) {
 	        $image_obj->makeChart("$filename.png");
-                push  @img_flns, { image => $local_filename, alt => $title} unless -z  $local_filename;
+                push  @img_flns, { key => $local_filename, alt => $title} unless -z  $local_filename;
 	    }
 	    elsif($c->stash->{get_stream}) {
 	        return $image_obj;

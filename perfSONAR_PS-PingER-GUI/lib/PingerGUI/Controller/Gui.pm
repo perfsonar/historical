@@ -239,7 +239,7 @@ sub displayGraph : Local {
 	                                                                  $c->stash->{end_time},
 								          $c->stash->{gmt_offset});
         $graphs  = build_graph($c);
-        $graphs = [{ image => "", alt => " No graphs " }] unless @{$graphs} && $graphs->[0]->{image};
+        $graphs = [{ key => "", alt => " No graphs " }] unless @{$graphs} && $graphs->[0]->{key};
         $c->stash->{graphs} =  $graphs;
         $c->stash->{template} =  'gui/graph.tmpl';	
     } else  {
@@ -276,6 +276,37 @@ sub getGraph : Local {
 	    $c->response->content_type('image/jpg');
 	    $c->response->body($graph_obj->makeChart2(2));
 	}
+    }
+}
+
+sub retrieveGraph : Local {
+    my ( $self, $c ) = @_;
+
+
+    my $graph_id =  $c->request->parameters->{graph_id};
+
+    if($graph_id and $graph_id =~ /[a-zA-Z0-9_\-:.]*/) {
+        if (-e $c->config->{GRAPH_DIR}."/".$graph_id.".png") {
+	    my ($image_fh, $image_content, $res);
+	    my $res = open($image_fh, "<", $c->config->{GRAPH_DIR}."/".$graph_id.".png");
+            if ($res != 0) {
+	        binmode $image_fh;
+		my $content = do { local( $/ ) ; <$image_fh> } ;
+		close($image_fh);
+
+                $c->response->content_type('image/png');
+                $c->response->body($content);
+		if ($c->config->{DELETE_ON_FETCH}) {
+                     unlink($c->config->{GRAPH_DIR}."/".$graph_id.".png");
+		}
+	    }
+	} else {
+            $c->stash->{error_message} = "Invalid graph specified: no file.";
+            $c->stash->{template} = 'gui/error.tmpl';
+	}
+    } else {
+        $c->stash->{error_message} = "Invalid graph specified: junk id($graph_id).";
+        $c->stash->{template} = 'gui/error.tmpl';
     }
 }
 
