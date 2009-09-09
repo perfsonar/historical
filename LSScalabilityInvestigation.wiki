@@ -68,6 +68,8 @@ and/or
 
 Using these sources for instructions on installation and configuration:
 
+ http://code.google.com/p/perfsonar-ps/wiki/LS
+ 
  http://www.internet2.edu/performance/pS-PS/lookup.html
 
  http://code.google.com/p/perfsonar-ps/wiki/LS
@@ -790,7 +792,7 @@ gLS.pm:755 perfSONAR_PS::Services::LS::gLS::registerLS - Success from LS "http:/
 
 === Installing fakeService on _ale_ ===
 
-`fakeService` is already installed under `/opt/perfsonar_ps1/Shared/client/fakeService`.  Change to this directory.
+`fakeService` is already installed, together with the Shared libraries,  under `/opt/perfsonar_ps1/Shared/client/fakeService`.  Change to this directory.
 
 Trying the build script for `fakeService` first.
 
@@ -807,11 +809,14 @@ Can't locate Data/Random/WordList.pm in @INC (@INC contains: ../../lib /usr/loca
 BEGIN failed--compilation aborted at E7F784 line 13.
 }}}
 
-Perl is missing the `Data::Random` library.  Let us install it:
+Perl is missing the `Data::Random::WordList` library.  Let us install the parent library:
 
  `sudo perl -MCPAN -e 'Data::Random'`
  
-Now the build script works, and produces a compiled `fakeService` file.
+Now the build script works, and produces a compiled `fakeService` file.  Building the service *is not required*, though,
+and this step can be skipped.  Just run the `fakeService` Perl script directly with:
+
+ `sudo perl fakeService.pl --verbose --config=/opt/perfsonar_ps1/Shared/client/fakeService`
 
 There is no CONFIG file for the `fakeService` yet.  Let us run the service and let it create the CONFIG file.
 
@@ -837,6 +842,4 @@ A total of three `fakeService` instances were created on _ale_ and registered on
  # 99b748e77f1f6e92e9dbfe3831e204e6
  # ebd472702a245d8fa686738bb6fde0cd
  # 7d5be1eb93229de56f07535cb48e8c1a
- 
-
  
