@@ -71,7 +71,7 @@ Using these sources for instructions on installation and configuration:
  http://code.google.com/p/perfsonar-ps/wiki/LS
  
  http://www.internet2.edu/performance/pS-PS/lookup.html
-
+ 
  http://code.google.com/p/perfsonar-ps/wiki/LS
 
 === Preparing Server _stout_ ===
@@ -842,4 +842,6 @@ A total of three `fakeService` instances were created on _ale_ and registered on
  # 99b748e77f1f6e92e9dbfe3831e204e6
  # ebd472702a245d8fa686738bb6fde0cd
  # 7d5be1eb93229de56f07535cb48e8c1a
+ 
+
  
