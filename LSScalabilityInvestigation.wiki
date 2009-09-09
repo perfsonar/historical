@@ -809,39 +809,46 @@ Can't locate Data/Random/WordList.pm in @INC (@INC contains: ../../lib /usr/loca
 BEGIN failed--compilation aborted at E7F784 line 13.
 }}}
 
-Perl is missing the `Data::Random::WordList` library.  Let us install the parent library:
+Perl is missing the `Data::Random::WordList` library.  Let us install the parent library (it is best to try installing
+the exact `Data::Random::WordList` library first, but this was not done here):
 
  `sudo perl -MCPAN -e 'Data::Random'`
  
 Now the build script works, and produces a compiled `fakeService` file.  Building the service *is not required*, though,
-and this step can be skipped.  Just run the `fakeService` Perl script directly with:
+and this step can be skipped.  We will run the `fakeService` Perl script directly.  Since there is no CONFIG file for
+the service yet, we will let it create the file.  We will install 3 `fakeService` with 3 different configuration files.
+Under /opt/perfsonar_ps1/Shared/client/fakeService, type:
 
- `sudo perl fakeService.pl --verbose --config=/opt/perfsonar_ps1/Shared/client/fakeService`
-
-There is no CONFIG file for the `fakeService` yet.  Let us run the service and let it create the CONFIG file.
-
- `sudo ./fakeService --verbose --config=/opt/perfsonar_ps1/Shared/client/fakeService`
+ `sudo perl fakeService.pl --verbose --config=./fakeService.config1`
  
-The program asks the following questions, for which the answers are in<font color=red> red</font>.
+<font color=red>Note:  the --config parameter indicates the CONFIG _file_, and not the CONFIG directory.</font>
 
- `Enter the service type ( snmp | pSB | dcn )[snmp]:` <font color=red> ENTER</font>
+The program asks the following questions, for which the answers are in<font color=green> *green*</font>.
+
+ `Enter the service type ( snmp | pSB | dcn )[snmp]:` <font color=green> *ENTER*</font>
  
- `Enter the number of metadata [10]:` <font color=red> ENTER</font>
+ `Enter the number of metadata [10]:` <font color=green> *ENTER*</font>
  
- `Enter any service keywords separated by commas (ex: LHC,Internet2)[LHC]:` <font color=red> ENTER</font>
+ `Enter any service keywords separated by commas (ex: LHC,Internet2)[LHC]:` <font color=green> *ENTER*</font>
  
- `Enter the hLS to register with [http://localhost:8080/perfSONAR_PS/services/gLS]:`  <font color=red> `http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS`</font>
+ `Enter the hLS to register with [http://localhost:8080/perfSONAR_PS/services/gLS]:`  <font color=green> *`http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS`*</font>
  
- `Enter the hLS registration interval (in minutes) [1]:` <font color=red> ENTER</font>
+ `Enter the hLS registration interval (in minutes) [1]:` <font color=green> *ENTER*</font>
 
 
-After this, the `fakeService` registers itself to the hLS, as the hLS reports.  But no CONFIG file is created.
+After this, the `fakeService` registers itself to the hLS, as the hLS reports.
 
+Two more `fakeService` are created as follows:
+
+ `sudo perl fakeService.pl --verbose --config=./fakeService.config2`
+ 
+ `sudo perl fakeService.pl --verbose --config=./fakeService.config3`
+ 
 A total of three `fakeService` instances were created on _ale_ and registered on the hLS on _moonshine_.  Their keys are:
 
- # 99b748e77f1f6e92e9dbfe3831e204e6
- # ebd472702a245d8fa686738bb6fde0cd
- # 7d5be1eb93229de56f07535cb48e8c1a
- 
+ # 248fba4d9302ef8e993744d9c596181a
+ # 92e0b87f368c1f0a29e99cfd4a316133
+ # 5c5a140b2745c14d2baa09ccef29a2f6
+
 
  
