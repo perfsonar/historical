@@ -140,7 +140,7 @@ else {
             }
 
             my $metadataIdRef = $data->getDocumentElement->getAttribute( "metadataIdRef" );
-            my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
+            my $key = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
             if ( $key ) {
                 $lookup{$metadataIdRef}{"key1"} = $key if $metadataIdRef;
                 $lookup{$metadataIdRef}{"key2"} = q{};
@@ -278,7 +278,7 @@ else {
             }
 
             my $metadataIdRef = $data->getDocumentElement->getAttribute( "metadataIdRef" );
-            my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
+            my $key = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
             $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
         }
 
@@ -614,7 +614,7 @@ else {
                         $counter++;
                     }
                     foreach my $hm ( @{ $hostMap{ $set->{"key"} } } ) {
-                        $mark{ $hm } = 1 if $hm;
+                        $mark{$hm} = 1 if $hm;
                     }
                 }
             }
@@ -624,9 +624,9 @@ else {
         my $datacounter = 0;
         my $max         = 0;
         foreach my $d ( sort keys %data ) {
-            next if $data{$d}{"out"}{"count"} == 0 and $data{$d}{"in"}{"count"} == 0;           
+            next if $data{$d}{"out"}{"count"} == 0 and $data{$d}{"in"}{"count"} == 0;
             my $din  = 0;
-            my $dout = 0;            
+            my $dout = 0;
             $din  = ( $data{$d}{"in"}{"total"} / $data{$d}{"in"}{"count"} )   if $data{$d}{"in"}{"count"};
             $dout = ( $data{$d}{"out"}{"total"} / $data{$d}{"out"}{"count"} ) if $data{$d}{"out"}{"count"};
             $max  = $din                                                      if $din > $max;
@@ -666,7 +666,7 @@ else {
             }
 
             my $metadataIdRef = $data->getDocumentElement->getAttribute( "metadataIdRef" );
-            my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
+            my $key = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
             $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
         }
 
@@ -987,7 +987,7 @@ else {
                         $counter++;
                     }
                     foreach my $hm ( @{ $hostMap{ $set->{"key"} } } ) {
-                        $mark{ $hm } = 1 if $hm;
+                        $mark{$hm} = 1 if $hm;
                     }
                 }
             }
@@ -1055,6 +1055,14 @@ else {
             if ( $EVAL_ERROR ) {
                 $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
                 $template->param( ERROR => "Could not parse XML response from MA <b><i>" . $service . "</i></b>." );
+                print $template->output;
+                exit( 1 );
+            }
+
+            my $eT = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwg:eventType", 1 ), 0 );
+            if ( $et eq "http://schemas.perfsonar.net/status/failure/metadatakey/1.0/" ) {
+                $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
+                $template->param( ERROR => "No PingER tests scheduled for PingER MA <b><i>" . $service . "</i></b>." );
                 print $template->output;
                 exit( 1 );
             }
