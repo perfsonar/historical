@@ -1,9 +1,7 @@
 =  Sept 10 2009 Conference Call 2:00 pm EDT =
 
-== Agenda/Minutes ==
+== Agenda ==
 
- # Attendees:
-   * TBD
  # Getting Started
    * OGF Docs (in progress)
      * NM-WG
@@ -24,9 +22,110 @@
    * WSDL? (EU has been using for a while: see [http://mdm1.usatlas.bnl.gov:8080/geant2-java-rrd-ma/services/MeasurementArchiveService?wsdl here] and [http://p-mdm.ps-lhcopn.fnal.gov:8080/geant2-java-xml-ls/services/LookupService?wsdl here])
    * Others?
 
-=== ACTIONS ===
+== Minutes ==
 
-TBD
+ # Attendees:
+   * Jason - Internet2
+   * Aaron - Internet2
+   * Dan - LBL
+   * Monte - LBL
+   * Maxim - FNAL
+   * Brian ESnet
+   * Jon - ESnet
+
+_*Maxim*_ mailed out links to old PingER WSDL/SOAP UI Testing:
+
+ * http://anonsvn.internet2.edu/svn/perfsonar/trunk/functional-testing/PingER * http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/pinger/perfSONAR-PS-PingER-1.0/functional-testing
+
+_*Dan*_ started us out: The goal of the work that LBL (e.g. _*Dan*_ and _*Monte*_) are doing is to collect schemas/WSDLs for pS services to figure out the level of interoperabilty they will need with the service they are developing (GridFTP MA).  Service is in python.  
+
+_*Jason*_ asks if this is the same thing that SLAC is doing.  _*Dan*_ says the backend is the same thing, but SLAC will do a frontend in perl,  LBL will be python.  Code will also be useful for building other services in python.
+
+_*Jason*_ asks if this will be related to the USATLAS request/work (_*BNL*_, _*UMich*_) for GridFTP exposure in pS.  _*Brian/Dan*_ talk about how it fits their needs, they are not collaborating.  
+
+_*Dan*_ also mentions work that someone at LBL (Josh?) is doing to make monitoring widgets using the google APIs.  He may use python servers to get there.  
+
+_*Dan*_ asks about testing in the framework(s).  _*Jason*_ points out work that was done in the EU ([http://anonsvn.internet2.edu/svn/perfsonar/trunk/functional-testing/ here]), and _*Brian*_ points out his work ([https://svn.internet2.edu/svn/perfSONAR-PS/trunk/test_harness/ here]).  The pSPS test harness is not about interoperability - more of a functional test.  
+
+*Dan/Maxim* discuss Maxim's SOAPUI WSDLs/Schemas and how they fit in with the EU testing.  _*Maxim*_ points out that the WSDL file (at least how he is used to using it) is pretty basic (e.g. describes the functionality and the input - a doc/lit xml message).  The validation of the message is done via the schema (at least in SOAPUI).  pSPS tools do not validate against a schema currently (perl support is poor - libxml can validate against an XSD, but it is slow).  _*Dan*_ mentions that it is possible to validate more than just a doc/lit glob in WSDL.  Each service shoul be offering this to encourage interop (and to easily generate parsing libs, etc.).
+
+_*Dan*_ asks about what the expected request/response structure is in pS.  _*Jason*_ responds that its all related to the original service (the RRDMA) in that there is some paritally constructed md element that drives the interaction, that is matched to the backend, and then things happen w/ regards to what the message type may be.  The LS is a special case (e.g. xpath/xquery).  Dan sends along examples he worked on:
+
+{{{
+#
+# Schema for binary range queries
+#
+# Author: Dan Gunter <dkgunter@lbl.gov>
+# Created: 8/30/2009
+#
+default namespace = "http://acs.lbl.gov/~dang/brq/"
+
+start = query
+
+query = element brq { ns*, expr }
+# namespace
+ns = element ns {
+   attribute prefix { xsd:QName },
+   attribute value { xsd:token }
+}
+# expression
+expr = element expr {
+   ( attribute op { "and" | "or" }, expr, expr ) |
+   ( attribute op { "not" }, expr ) |
+   leaf
+}
+leaf =
+   ( attribute op { "cmp" }, leaf_content )
+leaf_content = ( rel, var, const )
+# comparison relational operators (rel)
+rel = rel_eq | rel_range | rel_re
+rel_eq = attribute rel { "=" | "!=" }
+rel_range = attribute rel { "<" | "<=" | ">" | ">=" }
+rel_re = attribute rel { "=~" }
+text_rel = ( rel_eq | rel_re )
+num_rel = ( rel_eq | rel_range )
+# variable
+var = attribute var { text }
+# const
+const = attribute const { text }
+num_const = attribute const { xsd:decimal }
+}}}
+
+and
+
+{{{
+#
+# Example derived binary range query schema that restricts
+# the elements to 'foo', which is text, and 'bar',
+# which is numeric.
+#
+# Author: Dan Gunter <dkgunter@lbl.gov>
+# Created: 8/30/2009
+#
+
+include "binary_range_query.rnc" {
+   leaf_content = (
+      ( text_rel, foo_var, const ) |
+      ( num_rel, bar_var, num_const )
+   )
+}
+
+foo_var = attribute var { "foo" }
+bar_var = attribute var { "bar" }
+}}}
+
+_*Jason*_ thinks these are good examples of what a query/request could be. _*Dan/Monte*_ will refine more.  
+
+_*Dan*_ discusses current work plan:
+
+ * Branch from trunk
+ * Jon/Monte/Dan will work from there
+
+_*Jason*_ mentions that they should expect to release the end-product as source, should make an RPM package (will be easier to include on pSPT).  
+
+_*Jason*_ asks some followup questions on how the service works (to see if this would be a valuable addition to the pSPT).  Service consumes gridftp logs and then exposes an MA.  Does not need to be on the same machine as gridftp software (exporting via netlogger currently?).  
+
+Group decides further meetings will be on-demand.  
 
 == Where ==
 
