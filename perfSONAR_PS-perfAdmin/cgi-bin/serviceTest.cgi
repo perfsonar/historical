@@ -1068,15 +1068,68 @@ else {
             }
 
             my $metadataId = $metadata->getDocumentElement->getAttribute( "id" );
-
+            
             my $src        = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src",             1 ), 0 );
+            my $saddr = q{};
+            my $shost = q{};
+
+            if ( is_ipv4( $src ) ) {
+                $saddr = $src;
+                my $iaddr = Socket::inet_aton( $src );
+                if ( defined $iaddr and $iaddr ) {
+                    $shost = gethostbyaddr( $iaddr, Socket::AF_INET );
+                }
+                $shost = $src unless $shost;
+            }
+            elsif ( &Net::IPv6Addr::is_ipv6( $src ) ) {
+                $saddr = $src;
+                $shost = $src;
+
+                # do something?
+            }
+            else {
+                $shost = $src;
+                my $packed_ip = gethostbyname( $src );
+                if ( defined $packed_ip and $packed_ip ) {
+                    $saddr = inet_ntoa( $packed_ip );
+                }
+                $saddr = $src unless $saddr;
+            }
+
             my $dst        = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst",             1 ), 0 );
+            my $daddr = q{};
+            my $dhost = q{};
+            if ( is_ipv4( $dst ) ) {
+                $daddr = $dst;
+                my $iaddr = Socket::inet_aton( $dst );
+                if ( defined $iaddr and $iaddr ) {
+                    $dhost = gethostbyaddr( $iaddr, Socket::AF_INET );
+                }
+                $dhost = $dst unless $dhost;
+            }
+            elsif ( &Net::IPv6Addr::is_ipv6( $dst ) ) {
+                $daddr = $dst;
+                $dhost = $dst;
+
+                # do something?
+            }
+            else {
+                $dhost = $dst;
+                my $packed_ip = gethostbyname( $dst );
+                if ( defined $packed_ip and $packed_ip ) {
+                    $daddr = inet_ntoa( $packed_ip );
+                }
+                $daddr = $dst unless $daddr;
+            }
+            
             my $packetsize = extract( find( $metadata->getDocumentElement, "./*[local-name()='parameters']/nmwg:parameter[\@name=\"packetSize\"]", 1 ), 0 );
 
             my %temp = ();
             $temp{"key"}        = $lookup{$metadataId};
-            $temp{"src"}        = $src;
-            $temp{"dst"}        = $dst;
+            $temp{"src"}        = $shost;
+            $temp{"dst"}        = $dhost;
+            $temp{"saddr"}      = $saddr;
+            $temp{"daddr"}      = $daddr;
             $temp{"packetsize"} = $packetsize ? $packetsize : 1000;
             $list{$src}{$dst}   = \%temp;
         }
@@ -1085,15 +1138,6 @@ else {
         my $counter = 0;
         foreach my $src ( sort keys %list ) {
             foreach my $dst ( sort keys %{ $list{$src} } ) {
-
-                my $packed_ip   = gethostbyname( $list{$src}{$dst}->{"src"} );
-                my $sip_address = $list{$src}{$dst}->{"src"};
-                $sip_address = inet_ntoa( $packed_ip ) if defined $packed_ip;
-
-                $packed_ip = gethostbyname( $list{$src}{$dst}->{"dst"} );
-                my $dip_address = $list{$src}{$dst}->{"dst"};
-                $dip_address = inet_ntoa( $packed_ip ) if defined $packed_ip;
-
                 my $p_time = time - 43200;
                 my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( $p_time );
                 my $p_start = sprintf "%04d-%02d-%02dT%02d:%02d:%02d", ( $year + 1900 ), ( $mon + 1 ), $mday, $hour, $min, $sec;
@@ -1105,9 +1149,9 @@ else {
                     {
                     KEY      => $list{$src}{$dst}->{"key"},
                     SHOST    => $list{$src}{$dst}->{"src"},
-                    SADDRESS => $sip_address,
+                    SADDRESS => $list{$src}{$dst}->{"saddr"},,
                     DHOST    => $list{$src}{$dst}->{"dst"},
-                    DADDRESS => $dip_address,
+                    DADDRESS => $list{$src}{$dst}->{"daddr"},
                     COUNT    => $counter,
                     SERVICE  => $service
                     };
