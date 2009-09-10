@@ -168,7 +168,14 @@ else {
 
             my $metadataId = $metadata->getDocumentElement->getAttribute( "id" );
             my $dir        = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:direction", 1 ), 0 );
-            my $host       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:hostName", 1 ), 0 );
+            my $host       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:hostName", 1 ), 0 );            
+            if ( is_ipv4( $host ) ) {
+                my $iaddr = Socket::inet_aton( $host );
+                if ( defined $iaddr and $iaddr ) {
+                    $host = gethostbyaddr( $iaddr, Socket::AF_INET );
+                }
+            }     
+            
             my $name       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifName", 1 ), 0 );
             if ( $list{$host}{$name} ) {
                 if ( $dir eq "in" ) {
@@ -198,11 +205,29 @@ else {
                 $temp{"ifName"}        = $name;
                 $temp{"ifIndex"}       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifIndex", 1 ), 0 );
                 $temp{"ipAddress"}     = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ipAddress", 1 ), 0 );
+                unless ( is_ipv4( $temp{"ipAddress"} ) ) {
+                    unless ( &Net::IPv6Addr::is_ipv6( $temp{"ipAddress"} ) ) {
+                        my $packed_ip = gethostbyname( $temp{"ipAddress"} );
+                        if ( defined $packed_ip and $packed_ip ) {
+                            $temp{"ipAddress"} = inet_ntoa( $packed_ip );
+                        }
+                    }
+                }
+
                 $temp{"ifDescription"} = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifDescription", 1 ), 0 );
                 unless ( exists $temp{"ifDescription"} and $temp{"ifDescription"} ) {
                     $temp{"ifDescription"} = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:description", 1 ), 0 );
                 }
                 $temp{"ifAddress"} = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifAddress", 1 ), 0 );
+                unless ( is_ipv4( $temp{"ifAddress"} ) ) {
+                    unless ( &Net::IPv6Addr::is_ipv6( $temp{"ifAddress"} ) ) {
+                        my $packed_ip = gethostbyname( $temp{"ifAddress"} );
+                        if ( defined $packed_ip and $packed_ip ) {
+                            $temp{"ifAddress"} = inet_ntoa( $packed_ip );
+                        }
+                    }
+                }
+
                 $temp{"capacity"}  = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:capacity",  1 ), 0 );
 
                 if ( $temp{"capacity"} ) {
