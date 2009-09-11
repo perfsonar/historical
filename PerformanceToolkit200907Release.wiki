@@ -203,8 +203,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=237 237] - _*Aaron*_ - ~~pinger daemon have not restarted when clicked on Save~~
      * <font color=purple>_*WontFix - 9/3*_</font>
      * Could not reproduce.
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=253 253] - _*Aaron*_ - Update PingER GUI 
-     * <font color=yellow>_*In Progress - 9/4*_</font>	   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=253 253] - _*Aaron*_ - ~~Update PingER GUI~~
+     * <font color=green>_*Fixed - 9/11*_</font>   
  * _*SNMP MA*_    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=148 148] - _*Aaron*_ - ~~Cacti Configuration on NPToolkit~~
      * <font color=green>_*Fixed - 9/3*_</font>	 
@@ -244,10 +244,10 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=17 17] - _*Aaron*_ - Java plugin/homepage for KDE env 
      * <font color=yellow>_*Mostly Done - 6/23*_</font>: Needs link to firefox on desktop or modify Konqueror to accept plugin
      * Related to [http://code.google.com/p/perfsonar-ps/issues/detail?id=275 275]
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=26 26] - _*Aaron*_ - kernel nic drivers 	 	 
-     * <font color=yellow>_*In Progress - 9/4*_</font>	
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=83 83] - _*Aaron*_ - Live CD Network Card Drivers (Broadcom)
-     * <font color=yellow>_*In Progress - 9/4*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=26 26] - _*Aaron*_ - ~~kernel nic drivers~~
+     * <font color=green>_*Fixed - 9/11*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=83 83] - _*Aaron*_ - ~~Live CD Network Card Drivers (Broadcom)~~
+     * <font color=green>_*Fixed - 9/11*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=120 120] - _*Aaron*_ - ~~Apache Track/Trace~~
      * <font color=green>_*Fixed - 8/31*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=155 155] - _*Aaron*_ - ~~Nessus Settings for NPToolkit~~
@@ -268,7 +268,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 9/3*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=259 259] - _*Aaron*_ - ~~Add iptables REDIRECT to kernel~~
      * <font color=green>_*Fixed - 9/4*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=265 265] - _*Aaron*_ - Clean Out Disk Prior to Release 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=265 265] - _*Aaron*_ - ~~Clean Out Disk Prior to Release~~
+     * <font color=green>_*Fixed - 9/11*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=267 267] - _*Aaron*_ - ~~Error reporting on pS Performance Toolkit~~
      * <font color=green>_*Fixed - 9/4*_</font>  	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=271 271] - _*Aaron*_ - ~~Consistency when setting service address/name~~	 
@@ -279,8 +280,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 9/3*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - _*Aaron*_ - LinuxPPS Support
      * <font color=yellow>_*In Progress - 9/9*_</font>	
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=283 283] - _*Aaron*_ - pS Performance Toolkit Documentation
-     * <font color=yellow>_*In Progress - 9/9*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=283 283] - _*Jason*_ - pS Performance Toolkit Documentation
+     * <font color=yellow>_*In Progress - 9/11*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff*_ - Create organized web-site for pS-Performance-Toolkit
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=291 291] - _*Aaron*_ - ~~Scheduled Test Screen Shows Hosts Twice~~	 
      * <font color=green>_*Fixed - 9/3*_</font> 
