@@ -39,7 +39,7 @@ use base qw(Exporter);
 our @EXPORT = ();
 our @EXPORT_OK = qw(build_graph);
 use Time::gmtime;
-use File::Path;
+use File::Path qw(mkpath);
 use perfSONAR_PS::Client::PingER;
 use Utils qw(max min get_time_hash getURL validURL);
 use POSIX qw(strftime);
@@ -144,6 +144,7 @@ sub build_graph {
         my($src_name, $dst_name, $packet_size) = split ':', $metaID_key;
 	my $local_filename = "$GFN_BASE-$ssid-$metaID_key";  
         my $filename       = $c->config->{GRAPH_DIR} . "/$local_filename";
+	mkpath($c->config->{GRAPH_DIR},1,0755) unless -d  $c->config->{GRAPH_DIR};
         my %o_y_max = ( rt => 1, loss => 1, ipdv => 1, dupl => 1 );
          
         ## Query database and create   Image for every link
