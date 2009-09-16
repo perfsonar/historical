@@ -938,7 +938,40 @@ TBD
 
 == FAQ ==
 
-TBD
+ * *Q: When clicking on GUI links the following error is seen:*
+{{{
+Software error: 
+
+Cannot write to '/var/log/perfSONAR/Web_Admin.log': No space left on device at /usr/local/share/perl/5.8.8/Log/Dispatch/File.pm line 134.
+For help, please send mail to the webmaster (webmaster@localhost), giving this error message and the time and date of the error.
+}}} 
+ * *A: The Disk may be full.  Try the following command to confirm:*
+{{{
+[knoppix@lab246 ~]$ df -h
+Filesystem            Size  Used Avail Use% Mounted on
+tmpfs                1009M     0 1009M   0% /UNIONFS/lib/init/rw
+udev                   10M   64K   10M   1% /dev
+tmpfs                1009M     0 1009M   0% /dev/shm
+rootfs                3.4M   23K  3.4M   1% /
+/dev/hda              587M  587M     0 100% /cdrom
+/dev/cloop            1.6G  1.6G     0 100% /KNOPPIX
+/ramdisk              404M   65M  339M  17% /ramdisk
+/UNIONFS              248M   11M  226M   5% /UNIONFS
+/dev/shm             1009M     0 1009M   0% /dev/shm
+/dev/mapper/VolGroup00-LogVol00
+                      145G   97G   42G  70% /mnt/store
+/mnt/store/NPTools/scratch
+                      248M   11M  226M   5% /scratch
+}}}
+
+*The important mount point is _/mnt/store_, it this has reached _100%_, the drive is full.  Try removing unecessary log files from _/usr/local/web/root/admin/log_ first, then remove older logs from the directories in _/var/log_* 
+
+
+ * *Q: PingER displays several sets of duplicate results via the GUI, some of which have _No Data_.*
+ * *A: PingER stores the results of all tests ever performed.  To clean out old test sets perform the following steps:*
+{{{
+sudo su -/etc/init.d/mysql stopmv /var/lib/mysql/pingerMA /var/lib/mysql/pingerMA.backcp -Ra /KNOPPIX/var/lib/mysql/pingerMA /var/lib/mysql/pingerMA/etc/init.d/mysql start/etc/init.d/PingER.sh restart 
+}}}
 
 == Last Updated ==
 
