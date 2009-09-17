@@ -15,7 +15,7 @@ t to tie circuits to underlying infrastructure is difficult due to the use of ge
 lty for clients to correlate which interfaces, or sub-interfaces, on a given host correspond to which circuits. The schema also does not allow for multi-layer topologies, making it difficult if not impossible to describe in detail the 
 underlying topology.
 
-== Solutions == 
+== Possible Solutions == 
 
 For the architectural issues, one proposed modification to the architecture adds the concept of an end-to-end circuit description which points at (or contains) domain-specific segments. The model looks like the following:
 
@@ -23,5 +23,4 @@ For the architectural issues, one proposed modification to the architecture adds
 
 By having an topology description of the end-to-end circuit, the source and destination, circuit size and other circuit metadata can be captured without encoding them explicitly into the circuit identifier. This end-to-end circuit description also provides the whole list of domains and paths to check, enabling parallel lookups, and avoiding confusing and/or incorrect descriptions of the end to end circuit if domains become unavailable.
 
-Dealing with the topology issues will be more difficult as that will require a new topology schema be adopted for describing the circuit links.
-
+Dealing with the topology issues will require support in the topology schema for describing the circuit links. The topology schema has been updated since it was implemented in E2Emon and now supports this functionality for these reasons.
