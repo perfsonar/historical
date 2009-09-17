@@ -1,21 +1,18 @@
-#summary E2EMon Limitations
+#summary List of perfSONAR-PS Activites from 2007
 
-= Current E2EMon Limitations =
+The current E2EMon architecture makes it difficult to construct applications that can query for a circuit's status in parallel is difficult due to the serial nature of the model. If a circuit traverses domains A, B and C, the only way to find that the circuit traverses B is to ask domains A or C.The current architecture/schema is also heavily reliant on circuit naming conventions. These are used to define sources, destinations and projects, but the limited metadata agreed to and the inflexibility in adding new metadata to the circuit name, makes it impossible to add new metadata. The metadata could get added on a per-domain basis, but there's not necessarily an 'authoritative' location to place it in the current model.
 
-Constructing applications that can query for a circuit's status in parallel is
-difficult due to the serial nature of the model. If a circuit traverses domains
-A, B and C, the only way to find that the circuit traverses B is to ask domains
-A or C.
+One proposed modification to the architecture adds the concept of an end-to-end circuit description which points at (or contains) domain-specific segments. The model looks like the following:
 
-Tying circuits to underlying infrastructure is difficult due to the use of
-generic nodes as the endpoints instead of ports. There may be a number of
-individual circuits that transit a given pair of nodes, increasing the
-difficulty for clients to correlate which interfaces, or sub-interfaces, on a
-given host correspond to which circuits.
+[CircuitMonitoring/circuit_descriptor.png]
 
-The E2EMon schema assumes that all links are bidirectional. This property
-limits E2EMon's ability to monitor circuits that follow different paths
-depending on the direction.
+By having an topology description of the end-to-end circuit, the source and destination, circuit size and other circuit metadata can be captured without encoding them explicitly into the circuit identifier. This end-to-end circuit desc
+ription also provides the whole list of domains and paths to check, enabling parallel lookups, and avoiding confusing and/or incorrect descriptions of the end to end circuit if domains become unavailable.
 
-The E2EMon schema is heavily reliant on circuit naming conventions. These are
-used to define sources, destinations and projects. 
+There are longer term plans to allow circuits with asymmetric routes, failover paths and other more advanced circuit properties that can not be easily captured in the current E2EMon topology schema.
+
+There is interest in allowing end users and administrators to drill down into the circuits to discover the underlying path and discover measurements that are being done on that path. The current E2EMon topology schema makes it difficul
+t to tie circuits to underlying infrastructure is difficult due to the use of generic nodes as the link endpoints instead of ports. There may be a number of individual circuits that transit a given pair of nodes, increasing the difficu
+lty for clients to correlate which interfaces, or sub-interfaces, on a given host correspond to which circuits. The schema also does not allow for multi-layer topologies, making it difficult if not impossible to describe in detail the 
+underlying topology.
+
