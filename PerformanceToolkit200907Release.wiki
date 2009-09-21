@@ -299,6 +299,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=313 313] - _*Aaron*_ - syslogd goes crazy on ISO
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=324 324] - _*Aaron*_ - HTTPS vs HTTP for pSPT Webadmin 
      * <font color=yellow>_*In Progress - 9/9*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=300 300] - _*Aaron*_ - Throughput Performance Degraded between 	RC3 and RC4 of pSPT
     
 === Code Reviews ===
 
