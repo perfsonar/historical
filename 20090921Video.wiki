@@ -12,6 +12,8 @@
 
  # Release Activities
  # Testing
+ # Updating of roadmap: http://code.google.com/p/perfsonar-ps/wiki/PPStrawMan
+ # Review of DICE meeting
  # LHC/Atlas deployments (status update)
  # Future topics:
    * Service Monitoring and Config management
