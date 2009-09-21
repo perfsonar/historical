@@ -235,15 +235,16 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=275 275] - _*Jeff*_ - Should we be re-distributing the JDK on the knoppix disk
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=275 275] - _*Jeff*_ - ~~Should we be re-distributing the JDK on the knoppix disk~~
+     * <font color=purple>_*Wont Fix - 9/21*_ - JDK has been removed</font>
  * _*NPAD/NDT*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=268 268] - _*Aaron*_ - ~~NPAD Customization~~
      * <font color=green>_*Fixed - 9/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=320 320] - _*Aaron*_ - ~~NDT Duplicate Text~~ 	 
      * <font color=green>_*Fixed - 9/3*_</font> 
  * _*Disc Misc.*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=17 17] - _*Aaron*_ - Java plugin/homepage for KDE env 
-     * <font color=yellow>_*Mostly Done - 6/23*_</font>: Needs link to firefox on desktop or modify Konqueror to accept plugin
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=17 17] - _*Aaron*_ - ~~Java plugin/homepage for KDE env~~ 
+     * <font color=purple>_*Wont Fix - 9/21*_ - JDK has been removed</font>
      * Related to [http://code.google.com/p/perfsonar-ps/issues/detail?id=275 275]
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=26 26] - _*Aaron*_ - ~~kernel nic drivers~~
      * <font color=green>_*Fixed - 9/11*_</font>
@@ -297,8 +298,9 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=312 312] - _*Aaron*_ - ~~ISO should not be running /etc/cron.daily/find~~
      * <font color=green>_*Fixed - 9/3*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=313 313] - _*Aaron*_ - syslogd goes crazy on ISO
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=324 324] - _*Aaron*_ - HTTPS vs HTTP for pSPT Webadmin 
-     * <font color=yellow>_*In Progress - 9/9*_</font>	
+     * <font color=yellow>_*In Progress - 9/15*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=324 324] - _*Aaron*_ - ~~HTTPS vs HTTP for pSPT Webadmin~~ 
+     * <font color=green>_*Fixed - 9/21*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=300 300] - _*Aaron*_ - Throughput Performance Degraded between 	RC3 and RC4 of pSPT
     
 === Code Reviews ===
