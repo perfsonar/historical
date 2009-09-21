@@ -964,13 +964,19 @@ rootfs                3.4M   23K  3.4M   1% /
                       248M   11M  226M   5% /scratch
 }}}
 
-*The important mount point is _/mnt/store_, it this has reached _100%_, the drive is full.  Try removing unecessary log files from _/usr/local/web/root/admin/log_ first, then remove older logs from the directories in _/var/log_* 
+*The important mount point is _/mnt/store_, it this has reached _100%_, the drive is full.  Try removing unnecessary log files from _/usr/local/web/root/admin/log_ first, then remove older logs from the directories in _/var/log_* 
 
 
  * *Q: PingER displays several sets of duplicate results via the GUI, some of which have _No Data_.*
  * *A: PingER stores the results of all tests ever performed.  To clean out old test sets perform the following steps:*
 {{{
 sudo su -/etc/init.d/mysql stopmv /var/lib/mysql/pingerMA /var/lib/mysql/pingerMA.backcp -Ra /KNOPPIX/var/lib/mysql/pingerMA /var/lib/mysql/pingerMA/etc/init.d/mysql start/etc/init.d/PingER.sh restart 
+}}}
+
+ * *Q: The Sun Java environment was on previous versions of the pSPT, has it been removed?*
+ * *A: Java (e.g. the JRE, JDK, and associated browser plugins) have been removed from the pSPT due to license concerns.  Instructions for installing Java:*
+{{{
+TBD
 }}}
 
 == Last Updated ==
