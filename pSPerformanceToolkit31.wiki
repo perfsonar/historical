@@ -71,27 +71,27 @@ If the calculated value matches the downloaded value, the ISO image is complete 
 
 After booting the following screen will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/boot.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/boot.png
 
 Options can be presented at this time (e.g. use of driver software included on a disk) but if nothing is required, simply press enter.  The boot process will commence after this:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/boot-msg.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/boot-msg.png
 
 The pS Performance Toolkit features a system check to be sure some *_very_* minimal system requirements are met.  The following warning is used when the system memory is too low:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/disk-warn.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/disk-warn.png
 
 The system is configured to search for addresses via DHCP by default.  This may cause the system to pause for a short amount of time if there is no DHCP server on the target network.  Note that in the [pSPerformanceToolkit31#Console Console Configuration] phase a static IP can be specified.  The following shows the DHCP client getting an address:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/dhcp.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/dhcp.png
 
 The system will configure and start up services next.  It is normal to see some of these services fail (they will be configured in the [pSPerformanceToolkit31#Console Console] and [pSPerformanceToolkit31#Web Web] portions so they do start up properly).  The final step is to present the console to the user:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/login.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/login.png
 
 To log in to your new system, use the _*knoppix*_ user, and a blank password:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/login-knoppix.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/login-knoppix.png
 
 The message at login describes the two main forms of [pSPerformanceToolkit31#Configuration Configuration]:
 
@@ -121,7 +121,7 @@ sudo nptoolkit-configure.py
 
 The following menu will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/menu.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/menu.png
 
 There are 6 options that may be configured through this menu:
 
@@ -138,23 +138,23 @@ The following sections detail the actions available in each section.  Note that 
 
 After choosing _*Option 1*_ from the menu, the following prompt will appear listing what drives were available on the system (experience may vary):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/drive-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/drive-1.png
 
 At the time of configuration, the user chose the first option.  In this particular case an internal check requests that the disk have at least 10GB of capacity.  This message will appear as such:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/drive-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/drive-2.png
 
 If the drive is unformatted, or is not formatted with the ext3 filesystem, there will be an option for format the drive in question. While Linux can natively read and write many filesystems, some filesystems, specifically NTFS and Fat, do not contain support for features required by the toolkit. _*N.B.*_: formatting a hard drive will render any existing old data un-readable.  Please be sure you wish to use the target hard drive before proceeding:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/drive-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/drive-3.png
 
 The screen will display the results of the formatting step.  Note that a machine reboot is required before the system will be completely usable.  The remainder of the menu can be navigated before the reboot will be requested:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/drive-4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/drive-4.png
 
 After completing this series of questions, the menu will re-appear and mark that this step has been visited:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/menu-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/menu-2.png
 
 ==== Passwords ====
 
@@ -165,57 +165,57 @@ After choosing _*Option 2*_ from the menu, the system will prompt for 2 new pass
 
 Note that each time this menu option is used, both users will be promoted for.  To set the password of either user individually please see [pSPerformanceToolkit31#User_Management User Management].  The screen will look similar to this:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/pass.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/pass.png
  
 After completing this series of questions, the menu will re-appear and mark that this step has been visited:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/menu-3.png 
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/menu-3.png 
 
 ==== Networking ====
 
 After choosing _*Option 3*_ from the menu, the following menu will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/networking-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/networking-1.png
 
 Note that the particular host used in this guide was equipped with only one interface.  If there are multiple interfaces present they will show up in the menu.  To alter the DNS server, choose option 1:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/networking-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/networking-2.png
 
 In this case the DNS list may be empty, so the option to _add_ a server is all that is available.  To add a server to the list of DNS servers, choose option 1:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/networking-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/networking-3.png
 
 After this step we could _add_ another server, or delete an existing server.  We will choose to exit.  The second option allows configuration of the interfaces:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/networking-4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/networking-4.png
 
 This option allows the operator to set the networking options (e.g. _*DHCP*_ vs _*Static IP*_, _*MTU*_ size).  The final option, _*Advertised Interface*_, is an option that relates to _perfSONAR_ services.  Each service will _advertise_ existence in a global directory.  If for some reason the target system is dual homed, for perfSONAR to work correctly the _*externally facing*_ interface should be advertised instead of something internal.
 
 finally, the changes must be saved:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/networking-5.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/networking-5.png
 
 After completing this series of questions, the menu will re-appear and mark that this step has been visited:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/menu-4.png 
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/menu-4.png 
 
 ==== Timezone ====
 
 After choosing _*Option 4*_ from the menu, the following warning will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/tz-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/tz-1.png
 
 If you do choose to change the timezone, the following menu will help to narrow down the choices:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/tz-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/tz-2.png
 
 Finally, the name of the specified timezone should be entered:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/tz-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/tz-3.png
 
 After completing this series of questions, the menu will re-appear and mark that this step has been visited:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/menu-5.png 
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/menu-5.png 
 
 ==== User Management ====
 
@@ -225,41 +225,41 @@ After choosing _*Option 5*_ from the menu, the following menu will appear with o
  * Delete a user
  * Change a user's password
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/user-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/user-1.png
 
 _*Option 1*_ allows a new user to be added to the system:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/user-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/user-2.png
 
 _*Option 2*_ will delete a user.  Note the user must be on the system first or the delete will fail:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/user-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/user-3.png
 
 To delete the user properly:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/user-4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/user-4.png
 
 _*Option 3*_ will change the password of a user.  Note the user must be on the system first or the change will fail:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/user-5.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/user-5.png
 
 To properly change the user's password:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/user-6.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/user-6.png
 
 After completing this series of questions, the menu will re-appear and mark that this step has been visited:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/menu-6.png 
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/menu-6.png 
 
 ==== Exit ====
 
 If the [pSPerformanceToolkit31#Storage Storage] was entered (e.g. even if a change was not requested) the system will request a reboot:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/reboot.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/reboot.png
 
 The screen may appear similar to the following and the system will enter the boot phase again:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/reboot-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/reboot-2.png
 
 Note that if [pSPerformanceToolkit31#Storage Storage] was not entered, you will be returned to the console.  
 
@@ -269,18 +269,18 @@ Configuration over the web is available after the machine has come online.  Firs
 
 In most cases, the message seen during login will contain the URL:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/getaddress-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/getaddress-2.png
 
 In some cases, the message will have a URL like _https://`[`host address`]`/_. If
 this is the case, login and run _ifconfig_. The URL will be the IP address
 after _inet addr_. In the following example, the URL will be
 _https://192.168.69.130/_:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/getaddress.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/getaddress.png
 
 Enter this address in a web browser, and the following screen will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-home.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-home.png
 
 The menu on the left side of the screen has the following areas that can be viewed and configured, this guide will examine each:
 
@@ -313,7 +313,7 @@ The menu on the left side of the screen has the following areas that can be view
 
 The _*home*_ page, is linked via the _Services On This Node_ button:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-home.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-home.png
 
 This page lists the measurement tools currently on this node as well as the versions of each piece of software.  There are 3 states for each tool:
 
@@ -327,7 +327,7 @@ A service may be in the _*Not Running*_ state for a number of reasons, particula
 
 Using the _perfSONAR Lookup Service_, the pS Performance Toolkit is able to locate and display information on other perfSONAR services, world-wide.  The [pSPerformanceToolkit31#Global_Set_Of_Services Global Set Of Services] page displays the global set of perfSONAR services:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-global.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-global.png
 
 The time when the set of services was retrieved is displayed at the top of the page. The toolkit regularly runs a script to query the global services. This information is used by the [pSPerformanceToolkit31#Global_Set_Of_Services Global Set Of Services] page as well as other pages, including [pSPerformanceToolkit31#Scheduled_Testing Scheduled Testing] page. Note that if the date seems rather old the script could be experiencing an error - please consult the logs if this is the case.  
 
@@ -335,21 +335,21 @@ The time when the set of services was retrieved is displayed at the top of the p
 
 JOWAMP is a Java client of the OWAMP tool that executes an owamp test from the web browser to the server located on that particular node.  Because JOWAMP is a Java applet, it must run in the browser and may trigger several warnings.  These warnings convey information about executing code that is not _signed_ within the browser.  The warnings will look similar to this (will vary by web browser):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-jowamp-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-jowamp-1.png
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-jowamp-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-jowamp-2.png
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-jowamp-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-jowamp-3.png
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-jowamp-4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-jowamp-4.png
 
 After accepting this warnings, the JOWAMP main screen will start:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-jowamp-5.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-jowamp-5.png
 
 Running a test between the machine with the web browser and the performance node will produce results similar to this:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-jowamp-6.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-jowamp-6.png
 
 If for some reason an error was experienced, the following items should be checked:
 
@@ -361,31 +361,31 @@ If for some reason an error was experienced, the following items should be check
 
 The [http://www.slac.stanford.edu/comp/net/ Reverse Traceroute] tool was developed at [http://www.slac.stanford.edu SLAC] and allows a user to run a traceroute from the performance node to the web browser of the initializing machine.  The GUI appears as so:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-traceroute-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-traceroute-1.png
 
 The results of the traceroute are displayed as they complete:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-traceroute-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-traceroute-2.png
 
 ==== Reverse Ping ====
 
 The [http://www.slac.stanford.edu/comp/net/ Reverse Ping] tool was developed at [http://www.slac.stanford.edu SLAC] and is similar to the [pSPerformanceToolkit31#Reverse_Traceroute Reverse Traceroute].  It allows a user to run a ping from the performance node to the web browser of the initializing machine.  The GUI appears as so:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-traceroute-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-traceroute-3.png
 
 ==== PingER UI ====
 
 The PingER UI is a tool designed to display and analyse data from the PingER tool:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pinger-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pinger-1.png
 
 This GUI can be used to display the results of any PingER instance, in this case we select an instance that is different from the performance node itself:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pinger-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pinger-2.png
 
 Graphs are displayed inline:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pinger-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pinger-3.png
 
 ==== perfAdmin BWCTL ====
 
@@ -393,11 +393,11 @@ _perfAdmin_ is a series of CGI scripts that display data from perfSONAR services
 
 The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-throughput-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pa-throughput-1.png
 
 Once the host is collecting data, a screen similar to the following will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-throughput-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pa-throughput-2.png
 
 There are three sections to the GUI:
 
@@ -407,7 +407,7 @@ There are three sections to the GUI:
 
 Graphs can be produced for individual tests:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-throughput-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pa-throughput-3.png
 
 ==== perfAdmin OWAMP ====
 
@@ -415,11 +415,11 @@ _perfAdmin_ is a series of CGI scripts that display data from perfSONAR services
 
 The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-owd-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pa-owd-1.png
 
 Once the host is collecting data, a screen similar to the following will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-owd-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pa-owd-2.png
 
 There are three sections to the GUI:
 
@@ -429,7 +429,7 @@ There are three sections to the GUI:
 
 Graphs can be produced for individual tests:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-owd-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pa-owd-3.png
 
 ==== perfAdmin PingER ====
 
@@ -437,15 +437,15 @@ _perfAdmin_ is a series of CGI scripts that display data from perfSONAR services
 
 The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-pinger-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pa-pinger-1.png
 
 Once the host is collecting data, a screen similar to the following will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-pinger-2.png  
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pa-pinger-2.png  
 
 Graphs can be produced for individual tests:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-pinger-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pa-pinger-3.png
 
 ==== perfAdmin SNMP ====
 
@@ -453,21 +453,21 @@ _perfAdmin_ is a series of CGI scripts that display data from perfSONAR services
 
 The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-snmp-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pa-snmp-1.png
 
 Once the host is collecting data (after going through the [pSPerformanceToolkit31#Cacti_Administration Cacti Administration] step), a screen similar to the following will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-snmp-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pa-snmp-2.png
 
 Graphs can be produced for individual tests:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pa-snmp-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-pa-snmp-3.png
 
 ==== Cacti Graphs ====
 
 Cacti is used to poll SNMP on network devices, this particular interface to Cacti is _read-only_, and can be used to show cacti graphs to un-authenticated users:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-cacti-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-cacti-1.png
 
 [pSPerformanceToolkit31#Cacti_Administration Cacti Administration] describes how to configure Cacti.  
 
@@ -475,41 +475,41 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-cacti-1.png
 
 This section requires authentication, the following box will appear before you may access any of the functionality:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
 Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPerformanceToolkit31#User_Management User Management] for more information).  
 
 The _administration_ screen will appear like this the first time:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-admin-1.png
 
 Upon clicking _edit_, the following dialog will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-admin-2.png
 
 The information will appear in the web form after entry:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-admin-3.png
 
 Clicking on the communities will add them to your configuration:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-admin-4.png
 
 Clicking _Add New Community_ will display a dialog box:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-5.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-admin-5.png
 
 Adding new communities can be done in this manner:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-6.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-admin-6.png
 
 Lastly, hit _save_ to be sure your changes are saved.  
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-admin-7.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-admin-7.png
 
 Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
 ===== Communities =====
 
@@ -536,7 +536,7 @@ Use as many community names as necessary to properly categorize the data from th
 
 This section requires authentication, the following box will appear before you may access any of the functionality:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
 Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPerformanceToolkit31#User_Management User Management] for more information).  
 
@@ -548,29 +548,29 @@ The _BWCTL Limits_ screen allows the operator to set limits on the resources tha
 
 The screen defaults to these settings:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-bwctllimits-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-bwctllimits-1.png
 
 Clicking an _edit_ link brings up a dialog:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-bwctllimits-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-bwctllimits-2.png
 
 The changes to the settings can be seen after closing the dialog:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-bwctllimits-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-bwctllimits-3.png
 
 Users and networks can be added in a similar manner.  
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-bwctllimits-4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-bwctllimits-4.png
 
 When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
 ==== OWAMP Limits ====
 
 This section requires authentication, the following box will appear before you may access any of the functionality:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
 Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPerformanceToolkit31#User_Management User Management] for more information).  
 
@@ -582,31 +582,31 @@ The _OWAMP Limits_ screen allows the operator to set limits on the resources tha
 
 The screen defaults to these settings:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-owamplimits-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-owamplimits-1.png
 
 Clicking an _edit_ link brings up a dialog:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-owamplimits-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-owamplimits-2.png
 
 Users and networks can be added in a similar manner. 
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-owamplimits-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-owamplimits-3.png
 
 When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
 ==== Enabled Services ====
 
 This section requires authentication, the following box will appear before you may access any of the functionality:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
 Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPerformanceToolkit31#User_Management User Management] for more information).  
 
 The _enabled services_ screen lists the services that will start and stop when the machine does.  The screen looks similar to this:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-enabled.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-enabled.png
 
 A breakdown of each service:
 
@@ -627,17 +627,17 @@ To ease the decision process of selecting the _appropriate_ services for a given
 
 After selecting which services to enable, press _save_ to save the changes:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-enabled-save.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-enabled-save.png
 
 Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
 ==== NTP ====
 
 This section requires authentication, the following box will appear before you may access any of the functionality:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
 Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPerformanceToolkit31#User_Management User Management] for more information).  
 
@@ -650,7 +650,7 @@ Authenticate with the _*knoppix*_ user or any other user that has _administrativ
 
 The following screen shows a default NTP configuration:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-ntp-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-ntp-1.png
 
 The following NTP clocks have been identified as being valuable to use:
 
@@ -685,21 +685,21 @@ The following NTP clocks have been identified as being valuable to use:
 
 _*N.B.*_: Routing has a large impact on if an NTP time source is _reachable_ and _close_ from your particular instance.  It is recommended that the _Select Closest Servers_ option be used:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-ntp-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-ntp-2.png
 
 After running the closest servers will be selected, and servers that were unreachable will be marked in red:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-ntp-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-ntp-3.png
 
 When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
 ==== Scheduled Testing ====
 
 This section requires authentication, the following box will appear before you may access any of the functionality:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
 Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPerformanceToolkit31#User_Management User Management] for more information).  
 
@@ -711,7 +711,7 @@ The _Scheduled Testing_ screen allows the user to schedule several types of regu
 
 The screen will look similar to this initially:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-1.png
 
 The following sections detail setting up tests for each of these measurement types.
 
@@ -719,7 +719,7 @@ The following sections detail setting up tests for each of these measurement typ
 
 Upon adding a BWCTL test via the _Add New Throughput Test_ button, the following dialog will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-bwctl-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-bwctl-1.png
 
 Enter the following information:
 
@@ -732,29 +732,29 @@ Enter the following information:
 
 After entering these values, the test is saved, but it does not have test hosts (yet):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-bwctl-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-bwctl-2.png
 
 Adding test hosts can be done by [pSPerformanceToolkit31#Communities community], or _manually_.  If a community is clicked from the list, the following dialog will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-bwctl-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-bwctl-3.png
 
 A host can be selected from this list to add to the test:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-bwctl-4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-bwctl-4.png
 
 Once selected the host will show up in the testing dialog.  
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-bwctl-5.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-bwctl-5.png
 
 When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
 ===== Scheduled PingER =====
 
 PingER functions in a similar manner to [pSPerformanceToolkit31#Scheduled_BWCTL BWCTL].  Upon adding a PingER test via the _Add New Ping Test_ button, the following dialog may appear appear if the system is already configured to test with BWCTL (this will not appear if a BWCTL test was not scheduled):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-pinger-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-pinger-1.png
 
 Enter the following information when the dialog appears:
 
@@ -764,29 +764,29 @@ Enter the following information when the dialog appears:
  * _*Time Between Packets*_ - The interval between Ping Packets.  Setting this higher will increase the total length of a test
  * _*Size Of Test Packets*_ - How large of a Ping packet to use in testing.  
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-pinger-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-pinger-2.png
 
 After entering these values, the test is saved, but it does not have test hosts (yet):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-pinger-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-pinger-3.png
 
 Adding test hosts can be done by [pSPerformanceToolkit31#Communities community], or _manually_.  If a community is clicked from the list, the following dialog will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-pinger-4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-pinger-4.png
 
 A host can be selected from this list to add to the test.  Once selected the host will show up in the testing dialog. 
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-pinger-5.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-pinger-5.png
 
 When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
 ===== Scheduled OWAMP =====
 
 OWAMP functions in a similar manner to [pSPerformanceToolkit31#Scheduled_BWCTL BWCTL].  Upon adding a OWAMP test via the _Add New One-Way Delay Test_ button, the following dialog may appear appear if the system is already configured to test with BWCTL (this will not appear if a BWCTL test was not scheduled):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-owamp-1.png
 
 Unlike PingER and BWCTL tests, OWAMP tests run constantly. Enter the following information when the dialog appears:
 
@@ -794,37 +794,37 @@ Unlike PingER and BWCTL tests, OWAMP tests run constantly. Enter the following i
  * _*Packet Rate*_ - How many packets per second to send.  
  * _*Packet Size*_ - Size of each packet
  
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-owamp-2.png
 
 After entering these values, the test is saved, but it does not have test hosts (yet):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-owamp-3.png
 
 Adding test hosts can be done by [pSPerformanceToolkit31#Communities community], or _manually_.  If a community is clicked from the list, the following dialog will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-owamp-4.png
 
 A host can be selected from this list to add to the test.  Once selected the host will show up in the testing dialog. 
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-5.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-owamp-5.png
 
 Manually adding a host is also possible, simply fill in the fields with the name and port of a host to test against:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-6.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-owamp-6.png
 
 After completing, the host will show up in the testing dialog. 
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-scheduled-owamp-7.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-owamp-7.png
 
 When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/non-save.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
 ==== Cacti Administration ====
 
 This section requires authentication, the following box will appear before you may access any of the functionality:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-auth.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
 Authenticate with the _*knoppix*_ user or any other user that has _administrative_ privileges on this system (See [pSPerformanceToolkit31#User_Management User Management] for more information).  
 
@@ -834,14 +834,14 @@ The following steps will explain the basic setup of Cacti (e.g. to poll a networ
 
 Visit the Cacti instance:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_1.png
 
 ===== Cacti Config Step 2 =====
 
 After logging in you will see the _home_ screen.  In the middle there
 will be an option to *Create devices*.  This is where we will begin.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_2.png
 
 ===== Cacti Config Step 3 =====
 
@@ -850,7 +850,7 @@ The next screen shows the currently known devices.  The basic setup will
 configured switch.  On the right side there is an *Add* _button_ (although
 it doesn't appear to be so).  Click this to add a new device.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_3.png
 
 ===== Cacti Config Step 4 =====
 
@@ -858,8 +858,8 @@ The next screen features many places to add information about your new
 network device.  Note that the red circles are representative of the most
 common places to make changes.  When you are finished press *Create*.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_4.png
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_5.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_5.png
 
 ===== Cacti Config Step 5 =====
 
@@ -868,7 +868,7 @@ host at this stage, just to see if it is alive.  To poll information such
 as network statistics it is necessary to create *Graphs*.  We will proceed
 by clicking on *Create graphs for this Host*.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_6.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_6.png
 
 ===== Cacti Config Step 6 =====
 
@@ -878,7 +878,7 @@ efficient to simply click the *all* checkbox at the top unless there are
 certain interfaces you wish you only poll or perhaps leave out.  After
 checking this, scroll to the bottom.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_7.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_7.png
 
 ===== Cacti Config Step 7 =====
 
@@ -887,7 +887,7 @@ common to use the 64 bit counters (especially for backbone networks) and
 display the information as bytes as shown here.  Other options are of course
 available.  When done click *Create*.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_8.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_8.png
 
 ===== Cacti Config Step 8 =====
 
@@ -901,21 +901,21 @@ this point the following actions have happened:
 We now can organize this *set* into a graph tree for later display.  Select
 *Graph Trees* on the left hand side.  
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_9.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_9.png
 
 ===== Cacti Config Step 9 =====
 
 Select *Default Tree*.  It is also possible to create your own tree at this
 stage if desired.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_10.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_10.png
 
 ===== Cacti Config Step 10 =====
 
 As in _Step 3_ there is another *Add* button to click because we wish to add
 a new host to the tree.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_11.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_11.png
 
 ===== Cacti Config Step 11 =====
 
@@ -923,14 +923,14 @@ Select *Host* from the drop down.  This will automatically populate the
 next drop down with the network device you have set up.  When you are
 set click *Create*.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_12.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_12.png
 
 ===== Cacti Config Step 12 =====
 
 The next menu shows that the device has been added.  To see the graphs
 click on *Graphs* on the top.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_13.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_13.png
 
 
 ===== Cacti Config Step 13 =====
@@ -938,8 +938,8 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_13.png
 By default you can view the _localhost_ statistics, but below this the new
 network device is present.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_14.png
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/Cacti_15.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_14.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_15.png
 
 == Known Bugs ==
 
