@@ -999,7 +999,6 @@ rootfs                3.4M   23K  3.4M   1% /
 /mnt/store/NPTools/scratch
                       248M   11M  226M   5% /scratch
 }}}
-
    * *The important mount point is _/mnt/store_, it this has reached _100%_, the drive is full.  Try removing unnecessary log files from _/usr/local/web/root/admin/log_ first, then remove older logs from the directories in _/var/log_* 
 
  * *Q: PingER displays several sets of duplicate results via the GUI, some of which have _No Data_.*
@@ -1014,9 +1013,7 @@ sudo su -/etc/init.d/mysql stopmv /var/lib/mysql/pingerMA /var/lib/mysql/pinge
 {{{
 [knoppix@Knoppix ~]$ sudo apt-get install sun-java5-jre sun-java5-plugin
 }}}
-
    * *The following will appear, noting that other items may need to be installed:*
-
 {{{
 Reading package lists... Done
 Building dependency tree... Done
@@ -1033,9 +1030,7 @@ Need to get 29.9MB of archives.
 After unpacking 82.8MB of additional disk space will be used.
 Do you want to continue [Y/n]?
 }}}
-
    * *After saying yes, the packages will download:*
-
 {{{
 Get:1 http://http.us.debian.org etch/non-free sun-java5-bin 1.5.0-14-1etch1 [22.4MB]
 Get:2 http://http.us.debian.org etch/non-free sun-java5-jre 1.5.0-14-1etch1 [7465kB]
@@ -1046,7 +1041,6 @@ Selecting previously deselected package sun-java5-bin.
 (Reading database ... 68831 files and directories currently installed.)
 Unpacking sun-java5-bin (from .../sun-java5-bin_1.5.0-14-1etch1_i386.deb) ...
 }}}
-
    * *A license agreement will appear, you may choose to either agree to this or disagree.  Disagreement will halt installation.  After agreeing the installation will proceed.  More information is available [http://wiki.debian.org/Java | here].*
 
 == Last Updated ==
