@@ -45,7 +45,7 @@ Use of the pS Performance Toolkit as a virtual machine is not recommended.  Due 
 
 === Latency Recommendations === 
 
-Long term storage of latency data will require more disk space than recommended in the base.  We recommend having storage available that is greater than or equal to 500G.  This may be accomplished using a single disk, or a combination of several (e.g. LVM or RAID configuration).  *N.B.* [http://en.wikipedia.org/wiki/Nested_RAID_levels#RAID_0.2B1 | RAID 0+1] is recommended for storage of OWAMP data due to the high overhead of multiple tiny write operations.  Use of [http://en.wikipedia.org/wiki/Raid_5#RAID_5 | RAID 5] is highly discouraged.   
+Long term storage of latency data will require more disk space than recommended in the base.  We recommend having storage available that is greater than or equal to 500G.  This may be accomplished using a single disk, or a combination of several (e.g. LVM or RAID configuration).  *N.B.* [http://en.wikipedia.org/wiki/Nested_RAID_levels#RAID_0.2B1|RAID 0+1] is recommended for storage of OWAMP data due to the high overhead of multiple tiny write operations.  Use of [http://en.wikipedia.org/wiki/Raid_5#RAID_5|RAID 5] is highly discouraged.   
 
 Minimization of _*Jitter*_ is a common goal when performing latency tests.  In general most CPU and Motherboard combinations work well on modern hardware.   It is *highly recommended* that combination Motherboard and NIC be avoided.
 
