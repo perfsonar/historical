@@ -73,7 +73,7 @@ After booting the following screen will appear:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/boot.png
 
-Options can be presented at this time (e.g. use of driver software included on a disk) but if nothing is required, simply press enter.  The boot process will commence after this:
+Options can be presented at this time (e.g. going into single user mode) but if nothing is required, simply press enter.  The boot process will commence after this:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/boot-msg.png
 
@@ -167,6 +167,7 @@ Note that each time this menu option is used, both users will be promoted for.  
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/pass.png
  
+
 After completing this series of questions, the menu will re-appear and mark that this step has been visited:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/menu-3.png 
@@ -189,7 +190,7 @@ After this step we could _add_ another server, or delete an existing server.  We
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/networking-4.png
 
-This option allows the operator to set the networking options (e.g. _*DHCP*_ vs _*Static IP*_, _*MTU*_ size).  The final option, _*Advertised Interface*_, is an option that relates to _perfSONAR_ services.  Each service will _advertise_ existence in a global directory.  If for some reason the target system is dual homed, for perfSONAR to work correctly the _*externally facing*_ interface should be advertised instead of something internal.
+This option allows the operator to set the networking options (e.g. _*DHCP*_ vs _*Static IP*_, _*MTU*_ size).  The final option, _*Primary Interface*_, is an option that relates to _perfSONAR_ services.  Each service will _advertise_ existence in a global directory.  If for some reason the target system is dual homed, for perfSONAR to work correctly the _*externally facing*_ interface should be advertised instead of something internal.
 
 finally, the changes must be saved:
 
@@ -321,7 +322,7 @@ This page lists the measurement tools currently on this node as well as the vers
  * _*Not Running*_ - The service is stopped
  * _*Disabled*_ - The service has been disabled via the [pSPerformanceToolkit31#Enabled_Services Enabled Services] dialog.  
 
-A service may be in the _*Not Running*_ state for a number of reasons, particularly if there was a problem at startup time.  If when examining this list a service is in this state, and the operator feels it shouldn't be, please try to restart the service and check the logs.  
+A service may be in the _*Not Running*_ state for a number of reasons, initially it is likely that the service has not been configured. If when examining this list a service is in this state, and the operator feels it shouldn't be, please try to restart the service and check the logs.  
 
 ==== Global Set Of Services ====
 
@@ -473,7 +474,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-cacti-1.p
 
 ==== Administrative Info ====
 
-This section requires authentication, the following box will appear before you may access any of the functionality:
+This section requires authentication, the following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
@@ -534,7 +535,7 @@ Use as many community names as necessary to properly categorize the data from th
 
 ==== BWCTL Limits ====
 
-This section requires authentication, the following box will appear before you may access any of the functionality:
+This section requires authentication, the following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
@@ -542,9 +543,9 @@ Authenticate with the _*knoppix*_ user or any other user that has _administrativ
 
 The _BWCTL Limits_ screen allows the operator to set limits on the resources that the BWCTL tool may consume on the target system.  For instance:
 
- * Protocols allowed
- * Test duration
- * Bandwidth allowed
+ * Protocols allowed: Whether the users can perform TCP or UDP bandwidth tests.
+ * Test duration: The maximum duration of that a user can request for a bandwidth test.
+ * UDP bandwidth allowed: The maximum bandwidth a user can request for a UDP bandwidth test.
 
 The screen defaults to these settings:
 
@@ -562,13 +563,13 @@ Users and networks can be added in a similar manner.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-bwctllimits-4.png
 
-When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+When done, press the _save_ button to commit your changes to disk, and restart the affected services.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
 ==== OWAMP Limits ====
 
-This section requires authentication, the following box will appear before you may access any of the functionality:
+This section requires authentication, the following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
@@ -576,9 +577,9 @@ Authenticate with the _*knoppix*_ user or any other user that has _administrativ
 
 The _OWAMP Limits_ screen allows the operator to set limits on the resources that the OWAMP tool may consume on the target system.  For instance:
 
- * Bandwidth allowed
- * Disk usage
- * Saving vs deleting test results
+ * Bandwidth allowed: The amount of network bandwidth that users can request for their OWAMP tests.
+ * Disk usage: OWAMP tests record information about all packets received which are stored on disk. The disk usage allows administrators to configure the amount of disk space that users can request for their OWAMP tests. 
+ * Saving vs deleting test results: The OWAMP records stored on disk can be deleted when they are fetched or stored for later retrieval. Administrators can configure when the test results are deleted.
 
 The screen defaults to these settings:
 
@@ -592,13 +593,13 @@ Users and networks can be added in a similar manner.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-owamplimits-3.png
 
-When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+When done, press the _save_ button to commit your changes to disk, and restart the affected services.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
 ==== Enabled Services ====
 
-This section requires authentication, the following box will appear before you may access any of the functionality:
+This section requires authentication, the following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
@@ -635,7 +636,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
 ==== NTP ====
 
-This section requires authentication, the following box will appear before you may access any of the functionality:
+This section requires authentication, the following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
@@ -691,13 +692,13 @@ After running the closest servers will be selected, and servers that were unreac
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-ntp-3.png
 
-When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+When done, press the _save_ button to commit your changes to disk, and restart the affected services.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
 ==== Scheduled Testing ====
 
-This section requires authentication, the following box will appear before you may access any of the functionality:
+This section requires authentication, the following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
@@ -724,8 +725,8 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled
 Enter the following information:
 
  * _*Description*_ - Enter a name for this test, e.g. _10 Second BWCTL Tests, every 4 Hours_.  _*N.B.*_ that this will be used to reference the test on the GUI.  
- * _*Time Between Tests*_ - How often to run the BWCTL tests.  _*N.B.*_ that this number, along with _Test Duration_, will dictate how _busy_ the system will be.  
- * _*Test Duration*_ - How long of a BWCTL test to run.  In general TCP may take several seconds (on average 20 to 30) to ramp up to full line speed, especially on WAN paths.  _*N.B.*_ that this number, along with _Time Between Tests_, will dictate how _busy_ the system will be.  
+ * _*Time Between Tests*_ - How often to run the BWCTL tests.  _*N.B.*_ that this number, along with _Test Duration_, will dictate how _busy_ the system, and the local network will be.  
+ * _*Test Duration*_ - How long of a BWCTL test to run.  The general rule of thumb is that if the round-trip times to all hosts being tested to are less than 50ms, the test duration should be at least 10 seconds. If the round-trip times to all hosts being tested to are less than 100ms, the test duration should be at least 20 seconds. If the round-trip times for any host being tested to is more than 100ms, the test duration should be at least 30 seconds. _*N.B.*_ that this number, along with _Time Between Tests_, will dictate how _busy_ the system, and the local network will be.  
  * _*Tester*_ - Currently only _iperf_ is allowed here. 
  * _*Protocol*_ - TCP or UDP testing.  
  * _*Use Auto-tuning*_ - Allow the linux kernel to tune the buffers or set your own buffer sizes.
@@ -746,7 +747,7 @@ Once selected the host will show up in the testing dialog.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-bwctl-5.png
 
-When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+When done, press the _save_ button to commit your changes to disk, and restart the affected services.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
@@ -778,7 +779,7 @@ A host can be selected from this list to add to the test.  Once selected the hos
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-pinger-5.png
 
-When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+When done, press the _save_ button to commit your changes to disk, and restart the affected services.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
@@ -816,13 +817,13 @@ After completing, the host will show up in the testing dialog.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-owamp-7.png
 
-When done, press the _save_ button to continue.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+When done, press the _save_ button to commit your changes to disk, and restart the affected services.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
 
 ==== Cacti Administration ====
 
-This section requires authentication, the following box will appear before you may access any of the functionality:
+This section requires authentication, the following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-auth.png
 
@@ -947,41 +948,41 @@ TBD
 
 == FAQ ==
 
- * *Q: Does my machine have meet the [pSPerformanceToolkit31#System_Requirements System Requirements]?*
- * *A: There is nothing on the pSPT that will prevent systems that do not meet the requirements from starting.  Erroneous or inaccurate behavior is possible if the hardware cannot support the measurement tools.*
+ * *Q:* Does my machine have to meet the [pSPerformanceToolkit31#System_Requirements System Requirements]?
+ * *A:* There is nothing on the pSPT that will prevent systems that do not meet the requirements from starting.  Erroneous or inaccurate behavior is possible if the hardware cannot support the measurement tools.
 
- * *Q: The colors on my [pSPerformanceToolkit31#Console Console Configuration] do not match what I see on the web.  Some are green already.*
- * *A: If you are upgrading from a previous version of the pSPT, the colors may be green already because a particular aspect was configured previously.  These do not need to be configured again.*
+ * *Q:* The colors on my [pSPerformanceToolkit31#Console Console Configuration] do not match what I see on the web.  Some are green already.
+ * *A:* If you are upgrading from a previous version of the pSPT, the colors may be green already because a particular aspect was configured previously.  These do not need to be configured again.
  
- * *Q: The [pSPerformanceToolkit31#Services_On_This_Node Services On This Node] screen shows many services in the non-running state when first started, what is wrong?*
- * *A: Many of the services will be in this state because they are missing some key configuration items (e.g. from the [pSPerformanceToolkit31#Administrative_Info Administrative Info]).  After following the configuration steps check this screen again, most should be functional.*
+ * *Q:* The [pSPerformanceToolkit31#Services_On_This_Node Services On This Node] screen shows many services in the non-running state when first started, what is wrong?
+ * *A:* Many of the services will be in this state because they are missing some key configuration items (e.g. from the [pSPerformanceToolkit31#Administrative_Info Administrative Info]).  After following the configuration steps check this screen again, most should be functional.
  
- * *Q: I do not see my service in the [pSPerformanceToolkit31#Global_Set_Of_Services Global Set Of Services], where is it?*
- * *A: Much like DNS, the information that will populate the Global Lookup Service will take time to propagate.  Please allow some time (e.g. several hours) before your service will be fully visible.*
+ * *Q:* I do not see my service in the [pSPerformanceToolkit31#Global_Set_Of_Services Global Set Of Services], where is it?
+ * *A:* Much like DNS, the information that will populate the Global Lookup Service will take time to propagate.  Please allow some time (e.g. a few hours) before your service will be fully visible.
  
- * *Q: When looking at the data display for [pSPerformanceToolkit31#perfAdmin_BWCTL perfAdmin BWCTL]/[pSPerformanceToolkit31#perfAdmin_OWAMP perfAdmin OWAMP] I do not see results, but I filled out information in the [pSPerformanceToolkit31#Scheduled_Testing Scheduled Testing] area.  Where is my data?*
- * *A: Data may take several minutes to show up in this area, possible causes:*
-   * *A Test has not run yet (e.g. a 4 hour testing interval may not produce tests for 4 hours.*
-   * *The testing data may not be available in the database yet.  A test may complete, but may take several minutes to be stored in the database, and therefore become available to the GUI*
+ * *Q:* When looking at the data display for [pSPerformanceToolkit31#perfAdmin_BWCTL perfAdmin BWCTL]/[pSPerformanceToolkit31#perfAdmin_OWAMP perfAdmin OWAMP] I do not see results, but I filled out information in the [pSPerformanceToolkit31#Scheduled_Testing Scheduled Testing] area.  Where is my data?
+ * *A:* Data may take several minutes to show up in this area, possible causes:
+   * A Test has not run yet (e.g. a 4 hour testing interval may not produce tests for 4 hours.
+   * The testing data may not be available in the database yet.  A test may complete, but may take several minutes to be stored in the database, and therefore become available to the GUI
  
- * *Q: I do not think I am a member of a [pSPerformanceToolkit31#Communities community], should I put anyting?  *
- * *A: Communities are not required, but it is still a good practice to join as many as you may think are applicable.*
+ * *Q:* I do not think I am a member of a [pSPerformanceToolkit31#Communities community], should I put anyting?  
+ * *A:* Communities are not required, but they allow other individuals and organizations to find and use your services. It is a good practice to join as many as you may think are applicable.
  
- * *Q: What is the purpose of [pSPerformanceToolkit31#BWCTL_Limits BWCTL Limits]/[pSPerformanceToolkit31#OWAMP_Limits OWAMP Limits]?*
- * *A: These allow you to limit the influence that outside users have on your system performance.  For example, to prevent your machine/network from being saturated with  BWCTL tests, limit the duration and maximum bandwidth available.  These screens allow a fine grained way to protect resources.*
+ * *Q:* What is the purpose of [pSPerformanceToolkit31#BWCTL_Limits BWCTL Limits]/[pSPerformanceToolkit31#OWAMP_Limits OWAMP Limits]?
+ * *A:* These allow you to limit the influence that outside users have on your system performance.  For example, to prevent your machine/network from being saturated with  BWCTL tests, limit the duration and maximum bandwidth available.  These screens allow a fine grained way to protect resources.
 
- * *Q: How many [pSPerformanceToolkit31#NTP NTP] servers do I need, can I select them all?*
- * *A: It is recommended that 4-5 _close_ and _active_ servers be used.  The _Select Closest Servers_ button will help with this decision.  Note that some servers may not be available due to routing (e.g. non-R&E networks vs R&E networks - a common problem for Internet2 and ESnet servers).*
+ * *Q:* How many [pSPerformanceToolkit31#NTP NTP] servers do I need, can I select them all?
+ * *A:* It is recommended that 4-5 _close_ and _active_ servers be used.  The _Select Closest Servers_ button will help with this decision.  Note that some servers may not be available due to routing (e.g. non-R&E networks vs R&E networks - a common problem for Internet2 and ESnet servers).
  
- * *Q: When clicking on GUI links the following error is seen:*
+ * *Q:* When clicking on GUI links the following error is seen:
 {{{
 Software error: 
 
 Cannot write to '/var/log/perfSONAR/Web_Admin.log': No space left on device at /usr/local/share/perl/5.8.8/Log/Dispatch/File.pm line 134.
 For help, please send mail to the webmaster (webmaster@localhost), giving this error message and the time and date of the error.
 }}} 
- * *A: *
-   * The Disk may be full.  Try the following command to confirm:*
+ * *A:*
+   * The Disk may be full.  Try the following command to confirm:
 {{{
 [knoppix@lab246 ~]$ df -h
 Filesystem            Size  Used Avail Use% Mounted on
@@ -999,21 +1000,21 @@ rootfs                3.4M   23K  3.4M   1% /
 /mnt/store/NPTools/scratch
                       248M   11M  226M   5% /scratch
 }}}
-   * *The important mount point is _/mnt/store_, it this has reached _100%_, the drive is full.  Try removing unnecessary log files from _/usr/local/web/root/admin/log_ first, then remove older logs from the directories in _/var/log_* 
+   * The important mount point is _/mnt/store_, it this has reached _100%_, the drive is full.  Try removing unnecessary log files from _/usr/local/web/root/admin/log_ first, then remove older logs from the directories in _/var/log_* 
 
- * *Q: PingER displays several sets of duplicate results via the GUI, some of which have _No Data_.*
- * *A: PingER stores the results of all tests ever performed.  To clean out old test sets perform the following steps:*
+ * *Q:* PingER displays several sets of duplicate results via the GUI, some of which have _No Data_.
+ * *A:* PingER stores the results of all tests ever performed.  To clean out the pinger test sets run the following command:
 {{{
-sudo su -/etc/init.d/mysql stopmv /var/lib/mysql/pingerMA /var/lib/mysql/pingerMA.backcp -Ra /KNOPPIX/var/lib/mysql/pingerMA /var/lib/mysql/pingerMA/etc/init.d/mysql start/etc/init.d/PingER.sh restart 
+sudo /usr/local/bin/reset_pinger.sh
 }}}
 
- * *Q: The Sun Java environment was on previous versions of the pSPT, has it been removed?*
- * *A: *
-   * *Java (e.g. the JRE, JDK, and associated browser plugins) have been removed from the pSPT due to license concerns.  Instructions for installing the Java JRE and Plugin (for web browsers on the pSPT):*
+ * *Q:* The Sun Java environment was on previous versions of the pSPT, has it been removed?
+ * *A:* 
+   * Java (e.g. the JRE, JDK, and associated browser plugins) have been removed from the pSPT due to license concerns.  Instructions for installing the Java JRE and Plugin (for web browsers on the pSPT):
 {{{
 [knoppix@Knoppix ~]$ sudo apt-get install sun-java5-jre sun-java5-plugin
 }}}
-   * *The following will appear, noting that other items may need to be installed:*
+   * The following will appear, noting that other items may need to be installed:
 {{{
 Reading package lists... Done
 Building dependency tree... Done
@@ -1030,7 +1031,7 @@ Need to get 29.9MB of archives.
 After unpacking 82.8MB of additional disk space will be used.
 Do you want to continue [Y/n]?
 }}}
-   * *After saying yes, the packages will download:*
+   * After saying yes, the packages will download:
 {{{
 Get:1 http://http.us.debian.org etch/non-free sun-java5-bin 1.5.0-14-1etch1 [22.4MB]
 Get:2 http://http.us.debian.org etch/non-free sun-java5-jre 1.5.0-14-1etch1 [7465kB]
@@ -1041,7 +1042,7 @@ Selecting previously deselected package sun-java5-bin.
 (Reading database ... 68831 files and directories currently installed.)
 Unpacking sun-java5-bin (from .../sun-java5-bin_1.5.0-14-1etch1_i386.deb) ...
 }}}
-   * *A license agreement will appear, you may choose to either agree to this or disagree.  Disagreement will halt installation.  After agreeing the installation will proceed.  More information is available [http://wiki.debian.org/Java | here].*
+   * A license agreement will appear, you may choose to either agree to this or disagree.  Disagreement will halt installation.  After agreeing the installation will proceed.  More information is available [http://wiki.debian.org/Java | here].
 
 == Last Updated ==
 
