@@ -980,7 +980,8 @@ Software error:
 Cannot write to '/var/log/perfSONAR/Web_Admin.log': No space left on device at /usr/local/share/perl/5.8.8/Log/Dispatch/File.pm line 134.
 For help, please send mail to the webmaster (webmaster@localhost), giving this error message and the time and date of the error.
 }}} 
- * *A: The Disk may be full.  Try the following command to confirm:*
+ * *A: *
+   * The Disk may be full.  Try the following command to confirm:*
 {{{
 [knoppix@lab246 ~]$ df -h
 Filesystem            Size  Used Avail Use% Mounted on
@@ -998,8 +999,8 @@ rootfs                3.4M   23K  3.4M   1% /
 /mnt/store/NPTools/scratch
                       248M   11M  226M   5% /scratch
 }}}
-*The important mount point is _/mnt/store_, it this has reached _100%_, the drive is full.  Try removing unnecessary log files from _/usr/local/web/root/admin/log_ first, then remove older logs from the directories in _/var/log_* 
 
+   * *The important mount point is _/mnt/store_, it this has reached _100%_, the drive is full.  Try removing unnecessary log files from _/usr/local/web/root/admin/log_ first, then remove older logs from the directories in _/var/log_* 
 
  * *Q: PingER displays several sets of duplicate results via the GUI, some of which have _No Data_.*
  * *A: PingER stores the results of all tests ever performed.  To clean out old test sets perform the following steps:*
@@ -1008,12 +1009,13 @@ sudo su -/etc/init.d/mysql stopmv /var/lib/mysql/pingerMA /var/lib/mysql/pinge
 }}}
 
  * *Q: The Sun Java environment was on previous versions of the pSPT, has it been removed?*
- * *A: Java (e.g. the JRE, JDK, and associated browser plugins) have been removed from the pSPT due to license concerns.  Instructions for installing the Java JRE and Plugin (for web browsers on the pSPT):*
+ * *A: *
+   * *Java (e.g. the JRE, JDK, and associated browser plugins) have been removed from the pSPT due to license concerns.  Instructions for installing the Java JRE and Plugin (for web browsers on the pSPT):*
 {{{
 [knoppix@Knoppix ~]$ sudo apt-get install sun-java5-jre sun-java5-plugin
 }}}
 
-*The following will appear, noting that other items may need to be installed:*
+   * *The following will appear, noting that other items may need to be installed:*
 
 {{{
 Reading package lists... Done
@@ -1032,7 +1034,7 @@ After unpacking 82.8MB of additional disk space will be used.
 Do you want to continue [Y/n]?
 }}}
 
-*After saying yes, the packages will download:*
+   * *After saying yes, the packages will download:*
 
 {{{
 Get:1 http://http.us.debian.org etch/non-free sun-java5-bin 1.5.0-14-1etch1 [22.4MB]
@@ -1045,7 +1047,7 @@ Selecting previously deselected package sun-java5-bin.
 Unpacking sun-java5-bin (from .../sun-java5-bin_1.5.0-14-1etch1_i386.deb) ...
 }}}
 
-*A license agreement will appear, you may choose to either agree to this or disagree.  Disagreement will halt installation.  After agreeing the installation will proceed.  More information is available [http://wiki.debian.org/Java | here].*
+   * *A license agreement will appear, you may choose to either agree to this or disagree.  Disagreement will halt installation.  After agreeing the installation will proceed.  More information is available [http://wiki.debian.org/Java | here].*
 
 == Last Updated ==
 
