@@ -231,7 +231,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=319 319] - _*Aaron*_ - ~~Help Page for JOWPing~~
      * <font color=green>_*Fixed - 9/9*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=323 323] - _*Jason*_ - Historic/Current Breakdown for PingER Data
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=327 327] - _*Aaron*_ - confusing text on https://nettest.lbl.gov/admin/regular_testing/
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=327 327] - _*Aaron*_ - ~~confusing text on https://nettest.lbl.gov/admin/regular_testing/~~
+     * <font color=green>_*Fixed - 9/22*_</font>	
  * _*Steering*_        
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
      * <font color=yellow>_*In Progress - 7/31*_</font>	
@@ -301,7 +302,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 9/21*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=324 324] - _*Aaron*_ - ~~HTTPS vs HTTP for pSPT Webadmin~~ 
      * <font color=green>_*Fixed - 9/21*_</font>	
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=300 300] - _*Aaron*_ - Throughput Performance Degraded between 	RC3 and RC4 of pSPT
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=300 300] - _*Aaron*_ - ~~Throughput Performance Degraded between 	RC3 and RC4 of pSPT~~
+     * <font color=green>_*Fixed - 9/22*_</font>	
     
 === Code Reviews ===
 
