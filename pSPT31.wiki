@@ -37,21 +37,21 @@ Further recommendations for specific test situations and environments are availa
 
 === Virtual Machines ===
 
-Use of the pS Performance Toolkit as a virtual machine is not recommended.  Due to the emulation of virtual hardware, measurement tools may not feature a completely accurate result.  Observations have shown the following tools and services behave in unexpected ways when used in a VM environment:
+Use of the pS Performance Toolkit as a virtual machine is not recommended.  Due to the emulation of virtual hardware (i.e. Network Card emulation, dependence on a host clock), measurement tools may not feature a completely accurate result.  Observations have shown the following tools and services behave in unexpected ways when used in a virtual environment:
 
  * _*NTP*_: Virtual Machines (depending on software implementation) may receive a clock signal from the host they are running upon.  This may be delayed and is never as accurate as a true hardware clock; because of this NTP can suffer high jitter and delay characteristics.
- * _*OWAMP*_: OWAMP depends on accurate NTP results to properly measure the packets used in testing.  
- * _*BWCTL*_: BWCTL depends on an accurate clock to schedule tests to run at the proper time.  Additionally, virtual NIC support does not deliver the maximum available bandwidth as the guest machine often must fight with the host for access to the physical network.  
+ * _*OWAMP*_: OWAMP requires that NTP be running and depends on accurate NTP results to properly measure the packets used in testing.  
+ * _*BWCTL*_: BWCTL requires that NTP be running and depends on an accurate clock to schedule tests to run at the proper time.  Additionally, virtual NIC support does not deliver the maximum available bandwidth as the guest machine often must fight with the host for access to the physical network.  
 
 === Latency Recommendations === 
 
-Long term storage of latency data will require more disk space than recommended in the base.  We recommend upping the size of the primary disk to greater than or equal to 500G.  
+Long term storage of latency data will require more disk space than recommended in the base.  We recommend having storage available that is greater than or equal to 500G.  This may be accomplished using a single disk, or a combination of several (e.g. LVM or RAID configuration).  *N.B.* [http://en.wikipedia.org/wiki/Nested_RAID_levels#RAID_0.2B1 | RAID 0+1] is recommended for storage of OWAMP data due to the high overhead of multiple tiny write operations.  Use of [http://en.wikipedia.org/wiki/Raid_5#RAID_5 | RAID 5] is highly discouraged.   
 
-Minimization of _*Jitter*_ is a common goal when performing latency tests.  In general most CPU and Motherboard combinations work well on modern hardware.   It is also *highly recommended* that combination Motherboard and NIC be avoided.
+Minimization of _*Jitter*_ is a common goal when performing latency tests.  In general most CPU and Motherboard combinations work well on modern hardware.   It is *highly recommended* that combination Motherboard and NIC be avoided.
 
 === Bandwidth Recommendations === 
 
-Bandwidth testing often requires that the CPU, Motherboard, and Network card work in harmony to achieve promised speeds.  Testing has shown that using a CPU (Single or Dual Core) with a higher clock speed will work better when managing the needs of the rest of the machine during bandwidth testing.  It is also *highly recommended* that combination Motherboard and NIC be avoided. 
+Bandwidth testing often requires that the CPU, Motherboard, and Network card work in harmony to achieve promised speeds.  Testing has shown that using a CPU (Single or Dual Core) with a higher clock speed will work better when managing the needs of the rest of the machine during bandwidth testing.  It is *highly recommended* that combination Motherboard and NIC be avoided. 
 
 == Installation ==
 
@@ -59,21 +59,21 @@ The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit
 
 {{{
 user@host:~$ md5sum current.iso;cat current.md5 
-9564ed9ac3b31c2fae361bcfdf894472  current.iso
-9564ed9ac3b31c2fae361bcfdf894472  pS-Performance_Toolkit-3.1rc3.iso
+b81342ec7d4585ec220718a9ba1c1107  current.iso
+b81342ec7d4585ec220718a9ba1c1107  pS-Performance_Toolkit-3.1rc4.iso
 }}}
 
 If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  After burning, please insert the CD into your target machine to boot.  Some items to consider:
 
  * The target machine should have some way to access the console.  This can be via an attached monitor and keyboard or via remote access through serial ports or KVMs.
- * The target machine's BIOS must allow the machine to boot from CD.  If the CD does not boot, adjust the BIOS (normally access via *_F12_*, *_F2_*, *_Del_* or similar) and try again.  
+ * The target machine's BIOS must allow the machine to boot from CD.  If the CD does not boot, adjust the BIOS (normally access via *_F12_*, *_F2_*, *_Del_*, etc.) and try again.  
  * The target hardware should match what is described in [pSPT31#System_Requirements System Requirements].
 
 After booting the following screen will appear:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/boot.png
 
-Options are not normally required, simply press enter.  The boot process will commence after this:
+Options can be presented at this time (e.g. use of driver software included on a disk) but if nothing is required, simply press enter.  The boot process will commence after this:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/boot-msg.png
 
@@ -383,6 +383,10 @@ This GUI can be used to display the results of any PingER instance, in this case
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pinger-2.png
 
+Graphs are displayed inline:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPT31/web-pinger-3.png
+
 ==== perfAdmin BWCTL ====
 
 _perfAdmin_ is a series of CGI scripts that display data from perfSONAR services.  Each pS Performance Toolkit contains a _perfSONAR-BUOY_ instance that is capable of making regular BWCTL tests to other hosts.  This GUI is used to show the results of these tests.  
@@ -615,6 +619,11 @@ A breakdown of each service:
  * _*perfSONAR-BUOY Measurement Archive*_ - Makes available the data collected by the perfSONAR-BUOY Latency and Throughput tests.
  * _*perfSONAR-BUOY Throughput Testing*_	Enables this host to perform scheduled throughput tests. These tests will run periodically giving administrators a view of the throughput to and from their site over time.  _*N.B.*_: Enabling this will disable _*OWAMP*_, _*PingER*_ and _*perfSONAR-BUOY Latency Testing*_.
  * _*perfSONAR-BUOY Latency Testing*_	Enables this host to perform scheduled one-way latency tests. These tests will run periodically giving administrators a view of the latency from their site over time.  _*N.B.*_: Enabling this will disable _*perfSONAR-BUOY Throughput Testing*_, _*BWCTL*_, _*NDT*_, and _*NPAD*_. 
+
+To ease the decision process of selecting the _appropriate_ services for a given deployment (e.g. deploying only _bandwidth-centric_ services) there are two buttons at the bottom of the page:
+
+ * _*Only Enable Bandwidth Services*_ - Turns on bandwidth testing applications, and turns off other services
+ * _*Only Enable Latency Services*_ - Turns on latency testing applications, and turns off other services
 
 After selecting which services to enable, press _save_ to save the changes:
 
