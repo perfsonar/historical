@@ -262,8 +262,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=purple>_*Pushing to 3.2 - 9/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=189 189] - _*Aaron*_ - ~~Add RNP NTP servers to NPToolkit~~   	
      * <font color=green>_*Fixed - 9/9*_</font>	 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=201 201] - _*Aaron*_ - Upgrade Script Behavior 	
-     * <font color=yellow>_*In Progress - 9/4*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=201 201] - _*Aaron*_ - ~~Upgrade Script Behavior~~
+     * <font color=green>_*Fixed - 9/21*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=202 202] - _*Aaron*_ - ~~Colors in console configuration~~ 	 	 
      * <font color=green>_*Fixed - 9/2*_</font>	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=254 254] - _*Aaron*_ - ~~gLs lookup does not work after upgrade~~   	 
@@ -280,8 +280,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 9/9*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=281 281] - _*Aaron*_ - ~~Cacti Graph View Policy~~
      * <font color=green>_*Fixed - 9/3*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - _*Aaron*_ - LinuxPPS Support
-     * <font color=yellow>_*In Progress - 9/9*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - _*Aaron*_ - ~~LinuxPPS Support~~
+     * <font color=purple>_*Pushing to 3.2 - 9/21*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=283 283] - _*Jason*_ - pS Performance Toolkit Documentation
      * <font color=yellow>_*In Progress - 9/11*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff*_ - Create organized web-site for pS-Performance-Toolkit
@@ -297,8 +297,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=purple>_*Pushing to 3.2 - 9/2*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=312 312] - _*Aaron*_ - ~~ISO should not be running /etc/cron.daily/find~~
      * <font color=green>_*Fixed - 9/3*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=313 313] - _*Aaron*_ - syslogd goes crazy on ISO
-     * <font color=yellow>_*In Progress - 9/15*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=313 313] - _*Aaron*_ - ~~syslogd goes crazy on ISO~~
+     * <font color=green>_*Fixed - 9/21*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=324 324] - _*Aaron*_ - ~~HTTPS vs HTTP for pSPT Webadmin~~ 
      * <font color=green>_*Fixed - 9/21*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=300 300] - _*Aaron*_ - Throughput Performance Degraded between 	RC3 and RC4 of pSPT
