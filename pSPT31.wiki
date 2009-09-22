@@ -998,7 +998,6 @@ rootfs                3.4M   23K  3.4M   1% /
 /mnt/store/NPTools/scratch
                       248M   11M  226M   5% /scratch
 }}}
-
 *The important mount point is _/mnt/store_, it this has reached _100%_, the drive is full.  Try removing unnecessary log files from _/usr/local/web/root/admin/log_ first, then remove older logs from the directories in _/var/log_* 
 
 
