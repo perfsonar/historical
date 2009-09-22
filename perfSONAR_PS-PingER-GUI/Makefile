@@ -2,18 +2,23 @@ PACKAGE=perfSONAR_PS-PingER-GUI
 ROOTPATH=/opt/perfsonar_ps/PingER-GUI
 VERSION=3.1
 RELEASE=9
+ARCH=i386
 
 default:
 	@echo No need to build the package. Just run \"make install\"
 
 dist:
-	mkdir /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
-	tar ch -T MANIFEST | tar x -C /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
-	cd /tmp/$(PACKAGE)-$(VERSION).$(RELEASE) && ln -s doc/LICENSE LICENSE
-	cd /tmp/$(PACKAGE)-$(VERSION).$(RELEASE) && ln -s doc/INSTALL INSTALL
-	cd /tmp/$(PACKAGE)-$(VERSION).$(RELEASE) && ln -s doc/README README
-	tar czf $(PACKAGE)-$(VERSION).$(RELEASE).tar.gz -C /tmp $(PACKAGE)-$(VERSION).$(RELEASE)
-	rm -rf /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
+	mkdir /tmp/$(PACKAGE)-$(VERSION).$(RELEASE).$(ARCH)
+	tar ch -T MANIFEST | tar x -C /tmp/$(PACKAGE)-$(VERSION).$(RELEASE).$(ARCH)
+	cd /tmp/$(PACKAGE)-$(VERSION).$(RELEASE).$(ARCH) && ln -s doc/LICENSE LICENSE
+	cd /tmp/$(PACKAGE)-$(VERSION).$(RELEASE).$(ARCH) && ln -s doc/INSTALL INSTALL
+	cd /tmp/$(PACKAGE)-$(VERSION).$(RELEASE).$(ARCH) && ln -s doc/README README
+	tar czf $(PACKAGE)-$(VERSION).$(RELEASE).$(ARCH).tar.gz -C /tmp $(PACKAGE)-$(VERSION).$(RELEASE).$(ARCH)
+	rm -rf /tmp/$(PACKAGE)-$(VERSION).$(RELEASE).$(ARCH)
+rpm:    dist
+	mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/RPMS ~/rpmbuild/SPEC ~/rpmbuild/SRPMS  ~/rpmbuild/tmp  ~/rpmbuild/BUILD
+	cp $(PACKAGE)-$(VERSION).$(RELEASE).$(ARCH).tar.gz  ~/rpmbuild/SOURCES/
+	/usr/bin/rpmbuild  -ba --sign  perl-perfSONAR_PS-PingER-GUI.spec
 
 upgrade:
 	mkdir /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)

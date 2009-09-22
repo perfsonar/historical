@@ -8,8 +8,6 @@ doc/LICENSE
 doc/README
 lib/Any/Moose.pm
 lib/ChartDirector/LICENSE.TXT
-lib/ChartDirector/README.TXT
-lib/ChartDirector/lib/FinanceChart.pm
 lib/ChartDirector/lib/chartdir.lic
 lib/ChartDirector/lib/fonts/helvB.pfc
 lib/ChartDirector/lib/fonts/helvB08.pcf
