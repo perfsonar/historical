@@ -947,6 +947,32 @@ TBD
 
 == FAQ ==
 
+ * *Q: Does my machine have meet the [pSPT31#System_Requirements System Requirements]?*
+ * *A: There is nothing on the pSPT that will prevent systems that do not meet the requirements from starting.  Erroneous or inaccurate behavior is possible if the hardware cannot support the measurement tools.*
+
+ * *Q: The colors on my [pSPT31#Console Console Configuration] do not match what I see on the web.  Some are green already.*
+ * *A: If you are upgrading from a previous version of the pSPT, the colors may be green already because a particular aspect was configured previously.  These do not need to be configured again.*
+ 
+ * *Q: The [pSPT31#Services_On_This_Node Services On This Node] screen shows many services in the non-running state when first started, what is wrong?*
+ * *A: Many of the services will be in this state because they are missing some key configuration items (e.g. from the [pSPT31#Administrative_Info Administrative Info]).  After following the configuration steps check this screen again, most should be functional.*
+ 
+ * *Q: I do not see my service in the [pSPT31#Global_Set_Of_Services Global Set Of Services], where is it?*
+ * *A: Much like DNS, the information that will populate the Global Lookup Service will take time to propagate.  Please allow some time (e.g. several hours) before your service will be fully visible.*
+ 
+ * *Q: When looking at the data display for [pSPT31#perfAdmin_BWCTL perfAdmin BWCTL]/[pSPT31#perfAdmin_OWAMP perfAdmin OWAMP] I do not see results, but I filled out information in the [pSPT31#Scheduled_Testing Scheduled Testing] area.  Where is my data?*
+ * *A: Data may take several minutes to show up in this area, possible causes:*
+   * *A Test has not run yet (e.g. a 4 hour testing interval may not produce tests for 4 hours.*
+   * *The testing data may not be available in the database yet.  A test may complete, but may take several minutes to be stored in the database, and therefore become available to the GUI*
+ 
+ * *Q: I do not think I am a member of a [pSPT31#Communities community], should I put anyting?  *
+ * *A: Communities are not required, but it is still a good practice to join as many as you may think are applicable.*
+ 
+ * *Q: What is the purpose of [pSPT31#BWCTL_Limits BWCTL Limits]/[pSPT31#OWAMP_Limits OWAMP Limits]?*
+ * *A: These allow you to limit the influence that outside users have on your system performance.  For example, to prevent your machine/network from being saturated with  BWCTL tests, limit the duration and maximum bandwidth available.  These screens allow a fine grained way to protect resources.*
+
+ * *Q: How many [pSPT31#NTP NTP] servers do I need, can I select them all?*
+ * *A: It is recommended that 4-5 _close_ and _active_ servers be used.  The _Select Closest Servers_ button will help with this decision.  Note that some servers may not be available due to routing (e.g. non-R&E networks vs R&E networks - a common problem for Internet2 and ESnet servers).*
+ 
  * *Q: When clicking on GUI links the following error is seen:*
 {{{
 Software error: 
@@ -983,10 +1009,44 @@ sudo su -/etc/init.d/mysql stopmv /var/lib/mysql/pingerMA /var/lib/mysql/pinge
 }}}
 
  * *Q: The Sun Java environment was on previous versions of the pSPT, has it been removed?*
- * *A: Java (e.g. the JRE, JDK, and associated browser plugins) have been removed from the pSPT due to license concerns.  Instructions for installing Java:*
+ * *A: Java (e.g. the JRE, JDK, and associated browser plugins) have been removed from the pSPT due to license concerns.  Instructions for installing the Java JRE and Plugin (for web browsers on the pSPT):*
 {{{
-TBD
+[knoppix@Knoppix ~]$ sudo apt-get install sun-java5-jre sun-java5-plugin
 }}}
+
+*The following will appear, noting that other items may need to be installed:*
+
+{{{
+Reading package lists... Done
+Building dependency tree... Done
+The following extra packages will be installed:
+  sun-java5-bin
+Suggested packages:
+  libnss-mdns sun-java5-fonts ttf-baekmuk ttf-unfonts ttf-unfonts-core
+  ttf-kochi-gothic ttf-sazanami-gothic ttf-kochi-mincho ttf-sazanami-mincho
+  ttf-arphic-uming
+The following NEW packages will be installed:
+  sun-java5-bin sun-java5-jre sun-java5-plugin
+0 upgraded, 3 newly installed, 0 to remove and 0 not upgraded.
+Need to get 29.9MB of archives.
+After unpacking 82.8MB of additional disk space will be used.
+Do you want to continue [Y/n]?
+}}}
+
+*After saying yes, the packages will download:*
+
+{{{
+Get:1 http://http.us.debian.org etch/non-free sun-java5-bin 1.5.0-14-1etch1 [22.4MB]
+Get:2 http://http.us.debian.org etch/non-free sun-java5-jre 1.5.0-14-1etch1 [7465kB]
+Get:3 http://http.us.debian.org etch/non-free sun-java5-plugin 1.5.0-14-1etch1 [1684B]
+Fetched 29.9MB in 1m27s (340kB/s)
+Preconfiguring packages ...
+Selecting previously deselected package sun-java5-bin.
+(Reading database ... 68831 files and directories currently installed.)
+Unpacking sun-java5-bin (from .../sun-java5-bin_1.5.0-14-1etch1_i386.deb) ...
+}}}
+
+*A license agreement will appear, you may choose to either agree to this or disagree.  Disagreement will halt installation.  After agreeing the installation will proceed.  More information is available [http://wiki.debian.org/Java | here].*
 
 == Last Updated ==
 
