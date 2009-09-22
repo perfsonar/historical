@@ -4,7 +4,7 @@
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 lookup_service
 
-%define relnum 7
+%define relnum 8
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-LookupService
@@ -52,7 +52,7 @@ The perfSONAR-PS Lookup Service can function in one of two roles: global root or
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
-/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
 %setup -q -n perfSONAR_PS-LookupService-%{version}.%{relnum}
@@ -100,6 +100,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Tue Sep 22 2009 zurawski@internet2.edu 3.1-8
+- useradd option change
+
 * Fri Sep 4 2009 zurawski@internet2.edu 3.1-7
 - RPM generation error fixed
 

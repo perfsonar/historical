@@ -7,7 +7,7 @@
 
 Name:           perl-perfSONAR_PS-PingER-server
 Version:        3.1
-Release:        6.%{disttag}
+Release:        7.%{disttag}
 Summary:        perfSONAR_PS PingER  Measurement Archive and Collection System
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -88,7 +88,7 @@ The perfSONAR_PS PingER MA/MP allows one to make ICMP ping data available in SQL
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
-/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 
 %prep
@@ -147,6 +147,9 @@ echo "    /opt/perfsonar_ps/PingER/doc/INSTALL file                    "
 echo "-----------------------------------------------------------------"
 
 %changelog
+* Tue Sep 22 2009 zurawski@internet2.edu v3.1.7
+- useradd option change
+
 * Thu Aug 13 2009 maxim@fnal.gov v3.1.6
 - left only empty pinger landmarks file
 - suppressed error messages in case of empty landmarks file 

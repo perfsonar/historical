@@ -8,7 +8,7 @@
 
 Name:           perl-perfSONAR_PS-TopologyService
 Version:        3.1
-Release:        2.%{disttag}
+Release:        3.%{disttag}
 Summary:        perfSONAR_PS Topology Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -50,7 +50,7 @@ The perfSONAR-PS Topology Service delivers stored topology information when quer
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
-/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
 %setup -q -n perfSONAR_PS-TopologyService
@@ -113,7 +113,8 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0755,perfsonar,perfsonar) /etc/init.d/*
 
 %changelog
-* XXX YYY ZZ 2009 aaron@internet2.edu 3.1-3
+* Tue Sep 22 2009 aaron@internet2.edu 3.1-3
+- useradd option change
 - Add script to remove elements from the database
 
 * Thu May 29 2009 aaron@internet2.edu 3.1-2

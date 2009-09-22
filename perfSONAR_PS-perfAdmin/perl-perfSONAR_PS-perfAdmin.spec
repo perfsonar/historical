@@ -5,7 +5,7 @@
 %define crontab perfAdmin.cron
 %define apacheconf perfAdmin.conf
 
-%define relnum 4
+%define relnum 5
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfAdmin
@@ -49,7 +49,7 @@ The perfSONAR-PS perfAdmin package is a series of simple web-based GUIs that int
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
-/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
 %setup -q -n perfSONAR_PS-perfAdmin-%{version}.%{relnum}
@@ -99,6 +99,9 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/*
 
 %changelog
+* Tue Sep 22 2009 zurawski@internet2.edu 3.1-5
+- useradd option change
+
 * Fri Sep 4 2009 zurawski@internet2.edu 3.1-4
 - RPM generation error fixed
 

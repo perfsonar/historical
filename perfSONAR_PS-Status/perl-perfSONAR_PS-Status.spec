@@ -8,7 +8,7 @@
 
 Name:           perl-perfSONAR_PS-Status
 Version:        3.1
-Release:        2.%{disttag}
+Release:        3.%{disttag}
 Summary:        perfSONAR-PS Status Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -52,7 +52,7 @@ The perfSONAR-PS Status Service is capable of storing the historical 'status' of
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
-/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
 %setup -q -n perfSONAR_PS-Status
@@ -117,6 +117,9 @@ if [ "$1" != "0" ]; then
 fi
 
 %changelog
+* Tue Sep 22 2009 zurawski@internet2.edu 3.1-3
+- useradd option change
+
 * Thu May 29 2009 aaron@internet2.edu 3.1-2
 - Documentation updates
 - Fix a problem where the MA might erroneously report "unknown" states: http://code.google.com/p/perfsonar-ps/issues/detail?id=150

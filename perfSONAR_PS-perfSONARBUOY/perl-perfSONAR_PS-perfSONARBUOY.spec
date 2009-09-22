@@ -8,7 +8,7 @@
 %define init_script_owp_collector perfsonarbuoy_owp_collector
 %define init_script_owp_master perfsonarbuoy_owp_master
 
-%define relnum 3
+%define relnum 4
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfSONARBUOY
@@ -103,15 +103,15 @@ The perfSONARBUOY config package contains a configuration file that both the ser
 
 %pre server
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
-/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %pre client
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
-/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %pre config
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
-/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
 %setup -q -n perfSONAR_PS-perfSONARBUOY-%{version}.%{relnum}
@@ -229,6 +229,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Tue Sep 22 2009 zurawski@internet2.edu 3.1-4
+- useradd option change
+
 * Fri Sep 4 2009 zurawski@internet2.edu 3.1-3
 - RPM generation error fixed
 

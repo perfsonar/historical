@@ -6,7 +6,7 @@ Autoreq: 0
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 snmp_ma
 
-%define relnum 8
+%define relnum 9
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-SNMPMA
@@ -86,7 +86,7 @@ The perfSONAR-PS SNMP MA is a measurement archive that is able to deliver gather
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
-/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
 %setup -q -n perfSONAR_PS-SNMPMA-%{version}.%{relnum}
@@ -135,6 +135,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Tue Sep 22 2009 zurawski@internet2.edu 3.1-9
+- useradd option change
+
 * Fri Sep 4 2009 zurawski@internet2.edu 3.1-8
 - RPM generation error fixed
 

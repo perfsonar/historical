@@ -5,7 +5,7 @@
 %define crontab pinger_cache.cron
 %define disttag pSPS
 %define apacheconf pinger_gui.conf
-%define relnum 9
+%define relnum 10
 
 Name:           perl-perfSONAR_PS-PingER-GUI
 Version:        3.1
@@ -108,7 +108,7 @@ The perfSONAR_PS PingER data charts GUI allows one to view graphs.
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
-/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 
 %prep
@@ -169,4 +169,6 @@ chown -R root:root /etc/cron.d/%{crontab}
 /etc/init.d/httpd restart
 
 %changelog
+* Tue Sep 22 2009 zurawski@internet2.edu 3.1-10
+- useradd option change
 
