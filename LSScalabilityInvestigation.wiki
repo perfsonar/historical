@@ -851,4 +851,18 @@ A total of three `fakeService` instances were created on _ale_ and registered on
  # 5c5a140b2745c14d2baa09ccef29a2f6
 
 
+=== Setting Up !PlanetLab ===
+
+In order to create a critical mass for the scalability testing, several hLS/gLS and client services need to be created.  These cannot all reside on both _ale_ and _moonshine_ machines, otherwise this could create performance issues.  We can make use of [http://www.planet-lab.org PlanetLab].
+
+!PlanetLab is an open platform that allows the creation of virtual machines running Fedora 8.  Each virtual machine has internet access and can be used to run any kind of experiment.  The virtual machines reside on real servers, called nodes, granted by several organizations.  In this document, we will refer to !PlanetLab's own definitions and jargon; the explanation can be found in !PlanetLab's website and documentation.
+
+First, the user must be affiliated with some institution that does have access to !PlanetLab's resources.  Then, the user requests a "slice", which is a virtual piece of !PlanetLab's combined resources.  Within this slice, the user adds nodes, that correspond to the real servers that provide the virtual functionalities.  On each of these nodes, !PlanetLab will create a virtual machine related to the user's slice.  (Therefore, a slice can span several nodes; each node may run several virtual machines, owned by different slices).  Once the user is assigned a slice (which must be authorized by the user institution Principal Investigator), then the user adds nodes to this slice.  All can be done through the !PlanetLab web interface.
+
+Adding a node to a slice, although a basal operation (without nodes, nothing can be done in a slice), is hidden under a number of menus in !PlanetLab web interface and not indicated in the immediate documentation.  It can be found by selecting "My Slices", then clicking on the slice's name, then expanding the "nodes" tab, and finally expanding the list of available nodes.  There, any node can be marked and added to the slice.
+
+If a node named `planetlab2.cis.upenn.edu` was added to the slice, the user can log on to this node (or virtual machine) by issuing:
+
+ `ssh -l slice_name -i ~/.ssh/id_rsa planetlab2.cis.upenn.edu`
  
+On each node, we install the Lookup Service as described for _ale_ and _moonshine_.
