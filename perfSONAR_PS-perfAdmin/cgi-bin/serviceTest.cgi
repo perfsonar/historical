@@ -30,6 +30,7 @@ use lib "$RealBin/../lib";
 use perfSONAR_PS::Client::MA;
 use perfSONAR_PS::Common qw( extract find );
 use perfSONAR_PS::Utils::ParameterValidation;
+use perfSONAR_PS::Client::PingER;
 
 my $template = q{};
 my $cgi      = CGI->new();
@@ -168,15 +169,15 @@ else {
 
             my $metadataId = $metadata->getDocumentElement->getAttribute( "id" );
             my $dir        = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:direction", 1 ), 0 );
-            my $host       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:hostName", 1 ), 0 );            
+            my $host       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:hostName", 1 ), 0 );
             if ( is_ipv4( $host ) ) {
                 my $iaddr = Socket::inet_aton( $host );
                 if ( defined $iaddr and $iaddr ) {
                     $host = gethostbyaddr( $iaddr, Socket::AF_INET );
                 }
-            }     
-            
-            my $name       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifName", 1 ), 0 );
+            }
+
+            my $name = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifName", 1 ), 0 );
             if ( $list{$host}{$name} ) {
                 if ( $dir eq "in" ) {
                     $list{$host}{$name}->{"key1_1"}    = $lookup{$metadataId}{"key1"};
@@ -201,10 +202,10 @@ else {
                     $temp{"key2_2"}    = $lookup{$metadataId}{"key2"};
                     $temp{"key2_type"} = $lookup{$metadataId}{"type"};
                 }
-                $temp{"hostName"}      = $host;
-                $temp{"ifName"}        = $name;
-                $temp{"ifIndex"}       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifIndex", 1 ), 0 );
-                $temp{"ipAddress"}     = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ipAddress", 1 ), 0 );
+                $temp{"hostName"}  = $host;
+                $temp{"ifName"}    = $name;
+                $temp{"ifIndex"}   = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifIndex", 1 ), 0 );
+                $temp{"ipAddress"} = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ipAddress", 1 ), 0 );
                 unless ( is_ipv4( $temp{"ipAddress"} ) ) {
                     unless ( &Net::IPv6Addr::is_ipv6( $temp{"ipAddress"} ) ) {
                         my $packed_ip = gethostbyname( $temp{"ipAddress"} );
@@ -228,7 +229,7 @@ else {
                     }
                 }
 
-                $temp{"capacity"}  = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:capacity",  1 ), 0 );
+                $temp{"capacity"} = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:capacity", 1 ), 0 );
 
                 if ( $temp{"capacity"} ) {
                     $temp{"capacity"} /= 1000000;
@@ -1050,6 +1051,7 @@ else {
         );
     }
     elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" or $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0" ) {
+        my $sec = time;
         $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_pinger.tmpl" );
 
         my %lookup = ();
@@ -1093,8 +1095,8 @@ else {
             }
 
             my $metadataId = $metadata->getDocumentElement->getAttribute( "id" );
-            
-            my $src        = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src",             1 ), 0 );
+
+            my $src   = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
             my $saddr = q{};
             my $shost = q{};
 
@@ -1121,7 +1123,7 @@ else {
                 $saddr = $src unless $saddr;
             }
 
-            my $dst        = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst",             1 ), 0 );
+            my $dst   = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst", 1 ), 0 );
             my $daddr = q{};
             my $dhost = q{};
             if ( is_ipv4( $dst ) ) {
@@ -1146,7 +1148,7 @@ else {
                 }
                 $daddr = $dst unless $daddr;
             }
-            
+
             my $packetsize = extract( find( $metadata->getDocumentElement, "./*[local-name()='parameters']/nmwg:parameter[\@name=\"packetSize\"]", 1 ), 0 );
 
             my %temp = ();
@@ -1156,30 +1158,163 @@ else {
             $temp{"saddr"}      = $saddr;
             $temp{"daddr"}      = $daddr;
             $temp{"packetsize"} = $packetsize ? $packetsize : 1000;
-            $list{$src}{$dst}   = \%temp;
+            $temp{"active"}     = 0;
+
+            # is there data in the last 4 hours (needs to be longer, but this makes it slow enough...)
+            my $ma = new perfSONAR_PS::Client::PingER( { instance => $service } );
+            my $result = $ma->setupDataRequest(
+                {
+                    start => ( $sec - 14400 ),
+                    end   => $sec,
+                    keys  => [ $lookup{$metadataId} ],
+                    cf    => "AVERAGE"
+                }
+            );
+
+            if ( $result ) {
+                my $data_md = $ma->getData( $result );
+                foreach my $key_id ( keys %{$data_md} ) {
+                    foreach my $id ( keys %{ $data_md->{$key_id}{data} } ) {
+                        foreach my $timev ( keys %{ $data_md->{$key_id}{data}{$id} } ) {
+                            my $datum = $data_md->{$key_id}{data}{$id}{$timev};
+                            my $min   = $datum->{minRtt};
+                            my $med   = $datum->{medianRtt};
+                            my $mean  = $datum->{meanRtt};
+                            my $max   = $datum->{maxRtt};
+
+                            if ( $timev and ( $min or $med or $mean or $max ) ) {
+                                $temp{"active"} = 1;
+                                last;
+                            }
+                        }
+                        last if $temp{"active"} == 1;
+                    }
+                    last if $temp{"active"} == 1;
+                }
+            }
+            $list{$src}{$dst} = \%temp;
         }
 
-        my @pairs   = ();
-        my $counter = 0;
+        my ( $stsec, $stmin, $sthour, $stday, $stmonth, $styear ) = localtime();
+        $stmonth += 1;
+        $styear  += 1900;
+
+        # XXX
+        # JZ 8/24 - until we can get a date range from the service, start
+        #           2 months back...
+        $stmonth -= 2;
+        if ( $stmonth <= 0 ) {
+            $stmonth += 12;
+            $styear -= 1;
+        }
+
+        my ( $dtsec, $dtmin, $dthour, $dtday, $dtmonth, $dtyear ) = localtime();
+        $dtmonth += 1;
+        $dtyear  += 1900;
+
+        my @mon      = ( "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" );
+        my @sday     = ();
+        my @smon     = ();
+        my @syear    = ();
+        my @dday     = ();
+        my @dmon     = ();
+        my @dyear    = ();
+        my $selected = 0;
+        for ( my $x = 1; $x < 13; $x++ ) {
+
+            if ( $stmonth == $x ) {
+                push @smon, { VALUE => $x, NAME => $mon[$x], SELECTED => 1 };
+            }
+            else {
+                push @smon, { VALUE => $x, NAME => $mon[$x] };
+            }
+        }
+        for ( my $x = 1; $x < 32; $x++ ) {
+            if ( $stday == $x ) {
+                push @sday, { VALUE => $x, NAME => $x, SELECTED => 1 };
+            }
+            else {
+                push @sday, { VALUE => $x, NAME => $x };
+            }
+        }
+        for ( my $x = 2000; $x < 2016; $x++ ) {
+            if ( $styear == $x ) {
+                push @syear, { VALUE => $x, NAME => $x, SELECTED => 1 };
+            }
+            else {
+                push @syear, { VALUE => $x, NAME => $x };
+            }
+        }
+
+        for ( my $x = 1; $x < 13; $x++ ) {
+            if ( $dtmonth == $x ) {
+                push @dmon, { VALUE => $x, NAME => $mon[$x], SELECTED => 1 };
+            }
+            else {
+                push @dmon, { VALUE => $x, NAME => $mon[$x] };
+            }
+        }
+        for ( my $x = 1; $x < 32; $x++ ) {
+            if ( $dtday == $x ) {
+                push @dday, { VALUE => $x, NAME => $x, SELECTED => 1 };
+            }
+            else {
+                push @dday, { VALUE => $x, NAME => $x };
+            }
+        }
+        for ( my $x = 2000; $x < 2016; $x++ ) {
+            if ( $dtyear == $x ) {
+                push @dyear, { VALUE => $x, NAME => $x, SELECTED => 1 };
+            }
+            else {
+                push @dyear, { VALUE => $x, NAME => $x };
+            }
+        }
+
+        my @pairs     = ();
+        my @histpairs = ();
+        my $counter   = 0;
         foreach my $src ( sort keys %list ) {
             foreach my $dst ( sort keys %{ $list{$src} } ) {
-                my $p_time = time - 43200;
+                my $p_time = $sec - 43200;
                 my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( $p_time );
                 my $p_start = sprintf "%04d-%02d-%02dT%02d:%02d:%02d", ( $year + 1900 ), ( $mon + 1 ), $mday, $hour, $min, $sec;
                 $p_time += 43200;
                 ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( $p_time );
                 my $p_end = sprintf "%04d-%02d-%02dT%02d:%02d:%02d", ( $year + 1900 ), ( $mon + 1 ), $mday, $hour, $min, $sec;
 
-                push @pairs,
-                    {
-                    KEY      => $list{$src}{$dst}->{"key"},
-                    SHOST    => $list{$src}{$dst}->{"src"},
-                    SADDRESS => $list{$src}{$dst}->{"saddr"},,
-                    DHOST    => $list{$src}{$dst}->{"dst"},
-                    DADDRESS => $list{$src}{$dst}->{"daddr"},
-                    COUNT    => $counter,
-                    SERVICE  => $service
-                    };
+                if ( $list{$src}{$dst}->{"active"} ) {
+                    push @pairs,
+                        {
+                        KEY      => $list{$src}{$dst}->{"key"},
+                        SHOST    => $list{$src}{$dst}->{"src"},
+                        SADDRESS => $list{$src}{$dst}->{"saddr"},
+                        ,
+                        DHOST    => $list{$src}{$dst}->{"dst"},
+                        DADDRESS => $list{$src}{$dst}->{"daddr"},
+                        COUNT    => $counter,
+                        SERVICE  => $service
+                        };
+                }
+                else {
+                    push @histpairs,
+                        {
+                        KEY      => $list{$src}{$dst}->{"key"},
+                        SHOST    => $list{$src}{$dst}->{"src"},
+                        SADDRESS => $list{$src}{$dst}->{"saddr"},
+                        ,
+                        DHOST    => $list{$src}{$dst}->{"dst"},
+                        DADDRESS => $list{$src}{$dst}->{"daddr"},
+                        COUNT    => $counter,
+                        SERVICE  => $service,
+                        SMON     => \@smon,
+                        SDAY     => \@sday,
+                        SYEAR    => \@syear,
+                        DMON     => \@dmon,
+                        DDAY     => \@dday,
+                        DYEAR    => \@dyear
+                        };
+                }
                 $counter++;
             }
         }
@@ -1187,7 +1322,8 @@ else {
         $template->param(
             EVENTTYPE => $eventType,
             SERVICE   => $service,
-            PAIRS     => \@pairs
+            PAIRS     => \@pairs,
+            HISTPAIRS => \@histpairs
         );
     }
     else {

@@ -21,6 +21,7 @@ use XML::LibXML;
 use Date::Manip;
 use Socket;
 use POSIX;
+use Time::Local 'timelocal_nocheck';
 use Config::General;
 use English qw( -no_match_vars );
 
@@ -34,23 +35,35 @@ use perfSONAR_PS::Common qw( extract find );
 my $cgi = new CGI;
 print "Content-type: text/html\n\n";
 if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
-
+    my $sec = time;
     my $ma = new perfSONAR_PS::Client::PingER( { instance => $cgi->param( 'url' ) } );
 
-    my ( $sec, $frac ) = Time::HiRes::gettimeofday;
-
-    my $time;
+    my $start;
+    my $end;
     if ( $cgi->param( 'length' ) ) {
-        $time = $cgi->param( 'length' );
+        $start = $sec - $cgi->param( 'length' );
+        $end   = $sec;
+    }
+    elsif ( $cgi->param( 'smon' ) or $cgi->param( 'sday' ) or $cgi->param( 'syear' ) or $cgi->param( 'dmon' ) or $cgi->param( 'dday' ) or $cgi->param( 'dyear' ) ) {
+        if ( $cgi->param( 'smon' ) and $cgi->param( 'sday' ) and $cgi->param( 'syear' ) and $cgi->param( 'dmon' ) and $cgi->param( 'dday' ) and $cgi->param( 'dyear' ) ) {
+            $start = timelocal_nocheck 0, 0, 0, ( $cgi->param( 'sday' ) - 1 ), ( $cgi->param( 'smon' ) - 1 ), ( $cgi->param( 'syear' ) - 1900 );
+            $end   = timelocal_nocheck 0, 0, 0, ( $cgi->param( 'dday' ) - 1 ), ( $cgi->param( 'dmon' ) - 1 ), ( $cgi->param( 'dyear' ) - 1900 );
+        }
+        else {
+            print "<html><head><title>perfSONAR-PS perfAdmin PingER Graph</title></head>";
+            print "<body><h2 align=\"center\">Graph error; Date not correctly entered.</h2></body></html>";
+            exit( 1 );
+        }
     }
     else {
-        $time = 7200;
+        $start = $sec - 43200;
+        $end   = $sec;
     }
 
     my $result = $ma->setupDataRequest(
         {
-            start => ( $sec - $time ),
-            end   => $sec,
+            start => $start,
+            end   => $end,
             keys  => [ $cgi->param( 'key' ) ],
 
             # resolution => 5,
