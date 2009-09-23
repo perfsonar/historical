@@ -865,4 +865,64 @@ If a node named `planetlab2.cis.upenn.edu` was added to the slice, the user can 
 
  `ssh -l slice_name -i ~/.ssh/id_rsa planetlab2.cis.upenn.edu`
  
-On each node, we install the Lookup Service as described for _ale_ and _moonshine_.
+On each node, we install the Lookup Service, this time trying the `yum` package.
+
+First, import signing key:
+
+ `rpm --import http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2`
+
+Then install the RPM: 
+
+ `rpm -ivh http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm`
+
+Now:
+
+ `yum install perl-perfSONAR_PS-LookupService`
+
+The installation fails, because many Perl libraries are missing.  Yum is uncapable of resolving this; it informs that certain Perl libraries are missing, and halts.  Trying to install these libraries with CPAN, we detect that the !Planetlab node needs a plethora of additional software, before attempting this installation.  Some are:
+
+ * cpan (and perl) and all packages required by perfSONAR
+ * svn
+ * gcc
+ * make
+ * apt (if desired)
+ 
+After installing the above through yum (at least it does work for those), we attempt installing Lookup Service again, but to no avail.  It still reports two missing Perl libraries:  NetAddr::IP, and Hash::Merge.  Using cpan to install them directly, by using:
+
+ {{{
+ sudo cpan install NetAddr::IP
+ sudo cpan install Hash::Merge
+ }}}
+ 
+This results in cpan resolving several dependencies, but failing at the end and reporting unsuccessful "make".  The error is:
+
+{{{
+ Unsatisfied dependencies detected during [M/MI/MIKER/NetAddr-IP-4.027.tar.gz] -----
+    Test::More
+Shall I follow them and prepend them to the queue
+of modules we are processing right now? [yes] 
+Running make test
+  Delayed until after prerequisites
+Running make install
+  Delayed until after prerequisites
+Running install for module Test::More
+Running make for M/MS/MSCHWERN/Test-Simple-0.94.tar.gz
+  Is already unwrapped into directory /home/udel_perfsonar/.cpan/build/Test-Simple-0.94
+  Has already been processed within this session
+Running make test
+  Can't test without successful make
+Running make install
+  make had returned bad status, install seems impossible
+Running make for M/MI/MIKER/NetAddr-IP-4.027.tar.gz
+  Is already unwrapped into directory /home/udel_perfsonar/.cpan/build/NetAddr-IP-4.027
+
+  CPAN.pm: Going to build M/MI/MIKER/NetAddr-IP-4.027.tar.gz
+
+    -- NOT OK
+Running make test
+  Can't test without successful make
+Running make install
+  make had returned bad status, install seems impossible
+}}}
+
+"Install seems impossible" is a superb, helpful, unix-style motivating message.
