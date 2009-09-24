@@ -258,8 +258,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=green>_*Fixed - 9/1*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=164 164] - _*Aaron*_ - ~~Add option to completely clear disk/partition table and all~~
      * <font color=purple>_*Pushing to 3.2 - 9/2*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=165 165] - _*Aaron*_ - Explore syslog-ng, and potential loghost setup 	 
-     * <font color=yellow>_*In Progress - 6/23*_</font>: Need to document how to add loghost into /etc/syslog-ng/syslog-ng.conf
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=165 165] - _*Aaron*_ - ~~Explore syslog-ng, and potential loghost setup~~ 	 
+     * <font color=purple>_*Pushed Back to 3.2 - 9/21*_</font>: Need to document how to add loghost into /etc/syslog-ng/syslog-ng.conf
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - _*Aaron*_ - ~~Add vmxnet module~~
      * <font color=purple>_*Pushing to 3.2 - 9/4*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=189 189] - _*Aaron*_ - ~~Add RNP NTP servers to NPToolkit~~   	
@@ -286,7 +286,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * <font color=purple>_*Pushing to 3.2 - 9/21*_</font>	
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=283 283] - _*Jason*_ - ~~pS Performance Toolkit Documentation~~
      * <font color=green>_*Fixed - 9/22*_</font> 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff*_ - Create organized web-site for pS-Performance-Toolkit
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff*_ - ~~Create organized web-site for pS-Performance-Toolkit~~
+     * <font color=purple>_*Pushed Back to 3.2 - 9/24*_</font>   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=291 291] - _*Aaron*_ - ~~Scheduled Test Screen Shows Hosts Twice~~	 
      * <font color=green>_*Fixed - 9/3*_</font> 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=298 298] - _*Jason*_ - ~~Advanced Cacti data collection for localhost~~
