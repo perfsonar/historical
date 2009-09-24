@@ -5,7 +5,7 @@
 %define crontab pinger_cache.cron
 %define disttag pSPS
 %define apacheconf pinger_gui.conf
-%define relnum 9
+%define relnum 10
 %define _unpackaged_files_terminate_build 0
 
 Name:           perl-perfSONAR_PS-PingER-GUI
@@ -15,9 +15,8 @@ Summary:        perfSONAR_PS PingER  data charts GUI
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-PingER-GUI/
-Source0:        perfSONAR_PS-PingER-GUI-%{version}.%{relnum}.tar.gz
+Source0:        perfSONAR_PS-PingER-GUI-%{version}.%{relnum}.%{arch}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildArch:      i386
 
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
@@ -109,11 +108,11 @@ The perfSONAR_PS PingER data charts GUI allows one to view graphs.
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
-/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 
 %prep
-%setup -q -n perfSONAR_PS-PingER-GUI-%{version}.%{relnum}
+%setup -q -n perfSONAR_PS-PingER-GUI-%{version}.%{relnum}.%{arch}
 
 %build
 
@@ -194,4 +193,6 @@ chown -R root:root /etc/cron.d/%{crontab}
 /etc/init.d/httpd restart
 
 %changelog
+* Tue Sep 22 2009 zurawski@internet2.edu 3.1-10
+- useradd option change
 

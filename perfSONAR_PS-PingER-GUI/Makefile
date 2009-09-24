@@ -1,7 +1,7 @@
 PACKAGE=perfSONAR_PS-PingER-GUI
 ROOTPATH=/opt/perfsonar_ps/PingER-GUI
 VERSION=3.1
-RELEASE=9
+RELEASE=10
 ARCH=i386
 
 default:
@@ -18,7 +18,7 @@ dist:
 rpm:    dist
 	mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/RPMS ~/rpmbuild/SPEC ~/rpmbuild/SRPMS  ~/rpmbuild/tmp  ~/rpmbuild/BUILD
 	cp $(PACKAGE)-$(VERSION).$(RELEASE).$(ARCH).tar.gz  ~/rpmbuild/SOURCES/
-	/usr/bin/rpmbuild  -ba --sign  perl-perfSONAR_PS-PingER-GUI.spec
+	/usr/bin/rpmbuild  -ba --sign  -D 'arch $(ARCH)' perl-perfSONAR_PS-PingER-GUI.spec
 
 upgrade:
 	mkdir /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
