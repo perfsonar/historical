@@ -216,9 +216,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=261 261] - _*Aaron*_ - ~~JOWAMP requires hostname in .jnlp file~~    
      * <font color=green>_*Fixed - 9/2*_</font>	 
  * _*Testing*_ 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - _*Brian*_ - Automated Nessus Evaluation of Software 
-     * <font color=yellow>_*In Progress - 8/21*_</font>
-     * RC2 has pased tests
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=119 119] - _*Brian*_ - ~~Automated Nessus Evaluation of Software~~ 
+     * <font color=green>_*Fixed - 9/26*_</font>
  * _*GUIs*_  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=203 203] - _*Aaron*_ - ~~Error messages when IS cannot be contacted for portions of the Admin GUIs~~
      * <font color=green>_*Fixed - 9/3*_</font> 
@@ -235,8 +234,9 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=327 327] - _*Aaron*_ - ~~confusing text on https://nettest.lbl.gov/admin/regular_testing/~~
      * <font color=green>_*Fixed - 9/22*_</font>	
  * _*Steering*_        
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - Branding for main pS-Perf Toolkit web page 
-     * <font color=yellow>_*In Progress - 7/31*_</font>	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - _*Aaron*_ - ~~Branding for main pS-Perf Toolkit web page~~
+     * <font color=purple>_*Pushed Back to 3.2 - 9/26*_</font>
+     * Mostly done
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=275 275] - _*Jeff*_ - ~~Should we be re-distributing the JDK on the knoppix disk~~
      * <font color=purple>_*Wont Fix - 9/21*_ - JDK has been removed</font>
  * _*NPAD/NDT*_ 
