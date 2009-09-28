@@ -32,7 +32,7 @@ use perfSONAR_PS::Collectors::TL1Collector::DeviceAgents::CoreDirector;
 use perfSONAR_PS::Collectors::TL1Collector::DeviceAgents::OME;
 use perfSONAR_PS::Collectors::TL1Collector::DeviceAgents::HDXc;
 
-use fields 'CHILDREN', 'WORKERS', 'CONF', 'LOGGER';
+use fields 'CHILDREN', 'WORKERS', 'CONF', 'LOGGER', 'IS_EXITING';
 
 =head2 new( $class )
 
@@ -122,8 +122,33 @@ sub run {
         $self->{CHILDREN}->{$pid} = $worker;
     }
 
-    foreach my $pid ( keys %{ $self->{CHILDREN} } ) {
-        waitpid( $pid, 0 );
+    # This loop tracks the children, and restarts any that exit.
+    while(scalar(keys %{ $self->{CHILDREN} }) > 0) {
+        last if ($self->{IS_EXITING});
+
+        my $pid;
+        do { 
+            $pid = waitpid(-1, WNOHANG);
+            if ($pid > 0) {
+                my $worker = $self->{CHILDREN}->{$pid};
+                delete($self->{CHILDREN}->{$pid});
+
+                $self->{LOGGER}->warn("Process $pid exited. Restarting worker");
+
+                my $new_pid = fork();
+                if ( $new_pid == 0 ) {
+                    $SIG{INT}  = 'DEFAULT';
+                    $SIG{TERM} = 'DEFAULT';
+
+                    $worker->run();
+                    exit( 0 );
+                }
+
+                $self->{CHILDREN}->{$new_pid} = $worker;
+            }
+        } while ($pid > 0);
+
+        sleep(1);
     }
 
     return;
@@ -138,6 +163,8 @@ Kills all the collector agents for this process off, and then exits.
 sub quit {
     my ( $self, @args ) = @_;
     my $args = validateParams( @args, {} );
+
+    $self->{IS_EXITING} = 1;
 
     foreach my $pid ( keys %{ $self->{CHILDREN} } ) {
         kill( "SIGINT", $pid );

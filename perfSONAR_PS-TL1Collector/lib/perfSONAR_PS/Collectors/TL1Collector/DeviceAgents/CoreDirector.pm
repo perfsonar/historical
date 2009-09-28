@@ -507,8 +507,12 @@ sub handle_vlan_ports {
             next;
         }
 
-        my $vlan = $eflow->{"outervlanidrange"};
-        unless ($vlan) {
+        my $vlan;
+        if ($eflow->{"outervlanid"} and $eflow->{"outervlanid"} ne "0" and $eflow->{"outervlanid"} ne "1") {
+            $vlan = $eflow->{"outervlanid"};
+        } elsif ($eflow->{"outervlanidrange"} and $eflow->{"outervlanidrange"} ne "0" and $eflow->{"outervlanidrange"} ne "1") {
+            $vlan = $eflow->{"outervlanidrange"};
+        } else {
             $vlan = "untagged";
         }
 
@@ -544,8 +548,12 @@ sub handle_vlan_ports {
         # The eflows link the ethernet port to the sonet stuff. We use
         # their stats gathering to get the "in" and "out" for this vlan.
 
+        $self->{LOGGER}->debug("VLAN Name: ".$vlan_name);
+        $self->{LOGGER}->debug("VLAN Elements: ".Dumper($vlan_elements{$vlan_name}));
+
         foreach my $direction ( "in_eflow", "out_eflow" ) {
             my $eflow = $vlan_elements{$vlan_name}->{$direction};
+
 
             # A 'vlan' doesn't have status of its own, so you have to check
             # both the ingress port and egress port of the eflow to get "its"
@@ -554,10 +562,10 @@ sub handle_vlan_ports {
             foreach my $type ( "ingressport", "egressport" ) {
                 my ( $status, $new_oper_status, $new_admin_status );
 
-                if ( $eflow->{ $type . "type" } eq "VCG" ) {
+                if ( $eflow->{ $type . "type" } and $eflow->{ $type . "type" } eq "VCG" ) {
                     ( $status, $new_oper_status, $new_admin_status ) = $self->checkVCG( $eflow->{ $type . "name" } );
                 }
-                elsif ( $eflow->{ $type . "type" } eq "ETTP" ) {
+                elsif ( $eflow->{ $type . "type" } and $eflow->{ $type . "type" } eq "ETTP" ) {
                     ( $status, $new_oper_status, $new_admin_status ) = $self->checkETH( $eflow->{ $type . "name" } );
                 }
                 else {
@@ -581,12 +589,13 @@ sub handle_vlan_ports {
         if ($vlan_elements{$vlan_name}->{"vcg"}) {
             ($status, $res) = $self->{AGENT}->get_vcg_mib_pms($vlan_elements{$vlan_name}->{"vcg"});
             if ($status == 0) {
-                $in_packets = $res->{INTF_IN_PACKETS}->{value};
-                $out_packets = $res->{INTF_OUT_PACKETS}->{value};
-                $in_octets = $res->{INTF_IN_OCTETS}->{value};
-                $out_octets = $res->{INTF_OUT_OCTETS}->{value};
-                $in_discards = $res->{INTF_IN_DISCARDS}->{value};
-                $out_discards = $res->{INTF_OUT_DISCARDS}->{value};
+                # in/out are swapped since we're measuring the 'vcg' to get the 'vlan' elements.
+                $out_packets = $res->{INTF_IN_PACKETS}->{value};
+                $in_packets = $res->{INTF_OUT_PACKETS}->{value};
+                $out_octets = $res->{INTF_IN_OCTETS}->{value};
+                $in_octets = $res->{INTF_OUT_OCTETS}->{value};
+                $out_discards = $res->{INTF_IN_DISCARDS}->{value};
+                $in_discards = $res->{INTF_OUT_DISCARDS}->{value};
                 $in_errors = $res->{INTF_IN_ERRORS}->{value};
             }
 
@@ -700,12 +709,231 @@ sub handle_vlan_ports {
     return (0, \@ret_counters);
 }
 
+sub handle_vcgs {
+    my ($self) = @_;
+
+    my @ret_counters = ();
+
+    $self->{LOGGER}->debug("handle_vcgs(): start");
+
+    if ( $self->{CHECK_ALL_VCG_PORTS} or scalar( keys %{ $self->{VCG_FACILITIES} } ) > 0 ) {
+        my @vcgs = ();
+        if ( $self->{CHECK_ALL_VCG_PORTS} ) {
+            my ( $status, $vcgs ) = $self->{AGENT}->get_vcgs();
+            if ( $status == 0 ) {
+                @vcgs = keys %{$vcgs};
+            } else {
+                $self->{LOGGER}->error("Error looking up VCGs: $vcgs");
+            }
+        }
+        else {
+            foreach my $fac (keys %{ $self->{VCG_FACILITIES} }) {
+                next if ($fac eq "*");
+                push @vcgs, $fac;
+            }
+        }
+
+        $self->{LOGGER}->debug("Checking vcgs: ".join(",", @vcgs));
+
+        foreach my $vcg (@vcgs) {
+            my ($status, $res) = $self->handle_vcg($vcg);
+            if ($status != 0) {
+                return ($status, $res);
+            }
+
+            foreach my $counter (@{ $res }) {
+                push @ret_counters, $counter;
+            }
+        }
+    }
+
+    $self->{LOGGER}->debug("handle_vcgs(): stop");
+
+
+    return (0, \@ret_counters);
+}
+
+sub handle_vcg {
+    my ( $self, $vcg_name ) = @_;
+
+    my @ret_counters = ();
+
+    my ( $status, $vcgs, $res );
+    ( $status, $vcgs ) = $self->{AGENT}->get_vcgs();
+    if ( $status == -1 or not $vcgs ) {
+        my $msg = "Couldn't look up VCG";
+        $self->{LOGGER}->error( $msg );
+        return ( -1, $msg );
+    }
+
+    my $vcg;
+
+    foreach my $vcg_id ( keys %$vcgs ) {
+        if ( $vcg_name eq $vcg_id or $vcgs->{$vcg_id}->{alias} eq $vcg_name ) {
+            $vcg = $vcgs->{$vcg_id};
+            last;
+        }
+    }
+
+    unless ($vcg) {
+        return (0, \@ret_counters);
+    }
+    my $oper_status;
+    my $admin_status;
+
+    unless ( $vcg->{pst} and $state_mapping{ lc( $vcg->{pst} ) } ) {
+        $oper_status  = "unknown";
+        $admin_status = "unknown";
+    }
+    else {
+        $oper_status  = $state_mapping{ lc( $vcg->{pst} ) }->{"oper_status"};
+        $admin_status = $state_mapping{ lc( $vcg->{pst} ) }->{"admin_status"};
+    }
+
+    my ($in_octets, $out_octets, $in_packets, $out_packets, $in_errors, $out_errors, $in_discards, $out_discards, $capacity, $description, $operbw);
+
+    ($status, $res) = $self->{AGENT}->get_vcg_mib_pms($vcg->{name});
+    if ($status == 0) {
+        # in/out are swapped since we're measuring the 'vcg' to get the 'vlan' elements.
+        $in_packets = $res->{INTF_IN_PACKETS}->{value};
+        $out_packets = $res->{INTF_OUT_PACKETS}->{value};
+        $in_octets = $res->{INTF_IN_OCTETS}->{value};
+        $out_octets = $res->{INTF_OUT_OCTETS}->{value};
+        $in_discards = $res->{INTF_IN_DISCARDS}->{value};
+        $out_discards = $res->{INTF_OUT_DISCARDS}->{value};
+        $in_errors = $res->{INTF_IN_ERRORS}->{value};
+    }
+
+    if ($vcg->{provbw}) {
+        $capacity = $vcg->{provbw}*50.112*1000*1000; # Convert to Bps
+        $operbw = $vcg->{operbw}*50.112*1000*1000;
+    }
+
+    $description = $vcg->{alias};
+
+    my ( $id );
+    if ( $self->{VCG_FACILITIES}->{ '*' } ) {
+        $id           = $self->{VCG_FACILITIES}->{ '*' }->{id}           if ( $self->{VCG_FACILITIES}->{ '*' }->{id} );
+        $admin_status = $self->{VCG_FACILITIES}->{ '*' }->{admin_status} if ( $self->{VCG_FACILITIES}->{ '*' }->{admin_status} );
+        $oper_status  = $self->{VCG_FACILITIES}->{ '*' }->{oper_status}  if ( $self->{VCG_FACILITIES}->{ '*' }->{oper_status} );
+    }
+
+    if ( $self->{VCG_FACILITIES}->{ $vcg->{name} } ) {
+        $id           = $self->{VCG_FACILITIES}->{ $vcg->{name} }->{id}           if ( $self->{VCG_FACILITIES}->{ $vcg->{name} }->{id} );
+        $admin_status = $self->{VCG_FACILITIES}->{ $vcg->{name} }->{admin_status} if ( $self->{VCG_FACILITIES}->{ $vcg->{name} }->{admin_status} );
+        $oper_status  = $self->{VCG_FACILITIES}->{ $vcg->{name} }->{oper_status}  if ( $self->{VCG_FACILITIES}->{ $vcg->{name} }->{oper_status} );
+    }
+
+    # Oper/Admin status
+    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_oper_status})
+            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_oper_status}) ) {
+        push @ret_counters, {
+            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, description => $description, capacity => $capacity },
+                     data_type   => "http://ggf.org/ns/nmwg/characteristic/interface/status/operational/2.0",
+                     values      => { oper_status => $oper_status },
+        };
+    }
+
+    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_admin_status})
+            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_admin_status}) ) {
+        push @ret_counters, {
+            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, description => $description, capacity => $capacity },
+                     data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/administrative/2.0",
+                     values      => { admin_status => $admin_status },
+        };
+    }
+
+    # Add 'utilization' counters
+    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_utilization})
+            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_utilization}) ) {
+
+        push @ret_counters, {
+            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, direction => "in" },
+                     data_type   => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
+                     values      => { utilization => $in_octets },
+        };
+
+        push @ret_counters, {
+            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name},  direction => "out" },
+                     data_type   => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
+                     values      => { utilization => $out_octets },
+        };
+    }
+
+    # Add 'discard' counters
+    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_discards})
+            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_discards}) ) {
+
+        push @ret_counters, {
+            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name},  direction => "in" },
+                     data_type   => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
+                     values      => { discards => $in_discards },
+        };
+
+        push @ret_counters, {
+            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name},  direction => "out" },
+                     data_type   => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
+                     values      => { discards => $out_discards },
+        };
+    }
+
+    # Add 'error' counter
+    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_errors})
+            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_errors}) ) {
+
+        push @ret_counters, {
+            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name},  direction => "in" },
+                     data_type   => "http://ggf.org/ns/nmwg/characteristic/errors/2.0",
+                     values      => { errors => $in_errors },
+        };
+    }
+
+    # Oper/Admin status
+    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_oper_status})
+            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_oper_status}) ) {
+
+        push @ret_counters, {
+            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name} },
+                     data_type   => "http://ggf.org/ns/nmwg/characteristic/interface/status/operational/2.0",
+                     values      => { oper_status => oper_status_to_num($oper_status) },
+        };
+    }
+
+    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_admin_status})
+            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_admin_status}) ) {
+
+        push @ret_counters, {
+            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name} },
+                     data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/administrative/2.0",
+                     values      => { admin_status => admin_status_to_num($admin_status) },
+        };
+    }
+
+    # Port Capacity
+    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_capacity})
+            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_capacity}) ) {
+
+        push @ret_counters, {
+            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name} },
+                     data_type => "http://ggf.org/ns/nmwg/characteristic/interface/capacity/provisioned/2.0",
+                     values      => { capacity => $capacity },
+        };
+
+        push @ret_counters, {
+            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name} },
+                     data_type => "http://ggf.org/ns/nmwg/characteristic/interface/capacity/actual/2.0",
+                     values      => { capacity => $operbw },
+        };
+    }
+
+    return (0, \@ret_counters);
+}
+
 =head2 checkVCG( $self, $vcg_name )
 
 An internal function used to query the status of a specific Virtual
 Concatentation Group (VCG). It is used when a user has configured the service
-to check all VCGs as well as if the user has configured the service to check on
-EFLOWs or VLANs.
+to check on EFLOWs or VLANs.
 
 =cut
 

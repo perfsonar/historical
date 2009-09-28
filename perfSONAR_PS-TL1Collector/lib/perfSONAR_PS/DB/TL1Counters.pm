@@ -7,7 +7,7 @@ use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::Utils::DNS qw(query_location);
-use perfSONAR_PS::Common qw(genuid);
+use perfSONAR_PS::Common qw(genuid escapeString);
 
 use Log::Log4perl qw(get_logger);
 use Storable qw(freeze thaw lock_store lock_nstore lock_retrieve);
@@ -111,7 +111,7 @@ sub add_port_metadata {
 
     $self->{LOGGER}->debug("Looking up metadata");
     # the only 'unique' bits are hostname, port, data_type and direction. The rest could conceivably change.
-    my ($status, $res) = $self->__lookup_port_metadata({ urn => $parameters->{urn}, data_type => $parameters->{data_type}, host_name => $parameters->{host_name}, port_name => $parameters->{port_name}, direction => $parameters->{direction} });
+    ($status, $res) = $self->__lookup_port_metadata({ urn => $parameters->{urn}, data_type => $parameters->{data_type}, host_name => $parameters->{host_name}, port_name => $parameters->{port_name}, direction => $parameters->{direction} });
     if ($status != 0) {
         my $msg = "Error checking for existing metdata: $res";
         $self->{LOGGER}->debug($msg);
@@ -141,6 +141,7 @@ sub add_port_metadata {
        $rrd_directory = $self->{DATA_DIRECTORY}."/".$directory_prefix;
        $rrd_filename = $parameters->{host_name}."_".$parameters->{port_name}.".".$nonce.".rrd";
        $rrd_filename =~ s/[^a-zA-Z0-9_.]/_/;
+       $rrd_filename =~ s/\&\&/-/;
     } while (-f $rrd_directory."/".$rrd_filename);
 
     $self->{LOGGER}->debug("New RRD directory: ".$rrd_directory);
@@ -386,12 +387,12 @@ $content .= qq(<?xml version="1.0" encoding="UTF-8"?>
         $content .= '  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m-' . $metadata->{id} . '">';
         $content .= '    <nmwg:subject id="s-' . $metadata->{id}. '-1">';
         $content .= '      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">';
-        $content .= '        <nmwgt:urn>'.$metadata->{urn}.'</nmwgt:urn>';
-        $content .= '        <nmwgt:hostName>'.$metadata->{host_name}.'</nmwgt:hostName>' if ($metadata->{host_name});
-        $content .= '        <nmwgt:ifName>'.$metadata->{port_name}.'</nmwgt:ifName>' if ($metadata->{port_name});
-        $content .= '        <nmwgt:ifDescription>'.$metadata->{description}.'</nmwgt:ifDescription>' if ($metadata->{description});
-        $content .= '        <nmwgt:direction>'.$metadata->{direction}.'</nmwgt:direction>' if ($metadata->{direction});
-        $content .= '        <nmwgt:capacity>'.$metadata->{capacity}.'</nmwgt:capacity>' if ($metadata->{capacity});
+        $content .= '        <nmwgt:urn>'.escapeString($metadata->{urn}).'</nmwgt:urn>';
+        $content .= '        <nmwgt:hostName>'.escapeString($metadata->{host_name}).'</nmwgt:hostName>' if ($metadata->{host_name});
+        $content .= '        <nmwgt:ifName>'.escapeString($metadata->{port_name}).'</nmwgt:ifName>' if ($metadata->{port_name});
+        $content .= '        <nmwgt:ifDescription>'.escapeString($metadata->{description}).'</nmwgt:ifDescription>' if ($metadata->{description});
+        $content .= '        <nmwgt:direction>'.escapeString($metadata->{direction}).'</nmwgt:direction>' if ($metadata->{direction});
+        $content .= '        <nmwgt:capacity>'.escapeString($metadata->{capacity}).'</nmwgt:capacity>' if ($metadata->{capacity});
         $content .= '      </nmwgt:interface>';
         $content .= '    </nmwg:subject>';
         $content .= '    <nmwg:parameters>';
@@ -403,11 +404,11 @@ $content .= qq(<?xml version="1.0" encoding="UTF-8"?>
         $content .= '  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="d-' . $metadata->{id} . '" metadataIdRef="m-' . $metadata->{id} . '">';
         $content .= '    <nmwg:key>';
         $content .= '      <nmwg:parameters>';
-        $content .= '        <nmwg:parameter name="eventType">'.$metadata->{data_type}.'</nmwg:parameter>';
+        $content .= '        <nmwg:parameter name="eventType">'.escapeString($metadata->{data_type}).'</nmwg:parameter>';
         $content .= '        <nmwg:parameter name="type">rrd</nmwg:parameter>';
-        $content .= '        <nmwg:parameter name="file">' . $metadata->{rrd_file} . '</nmwg:parameter>';
-        $content .= '        <nmwg:parameter name="valueUnits">'.$data_type->{units}.'</nmwg:parameter>' if ($data_type->{units});
-        $content .= '        <nmwg:parameter name="dataSource">'.(keys %{ $data_type->{values} })[0]. '</nmwg:parameter>'; # XXX only supports a single data source per data type
+        $content .= '        <nmwg:parameter name="file">' . escapeString($metadata->{rrd_file}) . '</nmwg:parameter>';
+        $content .= '        <nmwg:parameter name="valueUnits">'.escapeString($data_type->{units}).'</nmwg:parameter>' if ($data_type->{units});
+        $content .= '        <nmwg:parameter name="dataSource">'.escapeString((keys %{ $data_type->{values} })[0]). '</nmwg:parameter>'; # XXX only supports a single data source per data type
         $content .= '      </nmwg:parameters>';
         $content .= '    </nmwg:key>';
         $content .= '  </nmwg:data>';
