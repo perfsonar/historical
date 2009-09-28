@@ -272,10 +272,11 @@ In most cases, the message seen during login will contain the URL:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/getaddress.png
 
-In some cases, the message will have a URL like _https://`[`host address`]`/_. If
-this is the case, login and run _ifconfig_. The URL will be the IP address
-after _inet addr_. In the following example, the URL will be
-_https://192.168.69.130/_:
+In some cases, the message will have a URL like _https://`[`host address`]`/_:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/getaddress-1.png
+
+If this is the case, login and run _ifconfig_. The URL will be the IP address after _inet addr_. In the following example, the URL will be _https://192.168.69.130/_:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/getaddress-2.png
 
