@@ -887,7 +887,7 @@ The installation fails, because many Perl libraries are missing.  Yum is uncapab
  * make
  * apt (if desired)
  
-After installing the above through yum (at least it does work for those), we attempt installing Lookup Service again, but to no avail.  It still reports two missing Perl libraries:  NetAddr::IP, and Hash::Merge.  Using cpan to install them directly, by using:
+After installing the above through yum (at least it does work for those), we attempt installing Lookup Service again, but to no avail.  It still reports two missing Perl libraries:  *NetAddr::IP (version 4.007)*, and *Hash::Merge*.  Using cpan to install them directly, by using:
 
  {{{
  sudo cpan install NetAddr::IP
@@ -927,7 +927,9 @@ Running make install
 
 "Install seems impossible" is a typicall unix-style motivating message...
 
-Setting CPAN problem aside for a while, we try to tackle _yum_ not being able to retrieve the needed libraries from the pre-defined repositories.  Lookup Service
+*Setting CPAN Problem Aside for a Moment; Adding One Repository to Yum*
+
+Setting CPAN problem aside for a while and breathing, we try to tackle _yum_ not being able to retrieve the needed libraries from the pre-defined repositories.  Lookup Service
 suggests adding two repositories from:
 
  * http://dries.ulyssis.org/rpm/ 
@@ -955,13 +957,17 @@ Trying other mirror.
 Error: Cannot retrieve repository metadata (repomd.xml) for repository: dries. Please verify its path and try again
 }}}
 
-Trying the URL manually, we detect that the file `repomd.xml` is located one in a different directory.  Fixing the contents of `additional.repo`:
+Trying the URL manually, we detect that the file `repomd.xml` is located in a different directory.  Fixing the contents of `additional.repo`
+and also putting the Dag entry (found manually in dag.wieers.com):
 
 {{{
 # Name: Additional Repositories for perfSONAR Lookup Service
 [dries]
 name=Extra Fedora rpms dries - $releasever - $basearch
 baseurl=http://ftp.belnet.be/packages/dries.ulyssis.org/fedora/linux/$releasever/$basearch/dries/RPMS
+[Dag]
+name = Dag Repository
+baseurl = http://apt.sw.be/fedora/$releasever/en/$basearch/dries
 }}}
 
 And now `sudo yum update` reports this error:
@@ -983,10 +989,23 @@ We import the public key and update the repositories again:
  sudo yum update
  }}}
  
-This time successfully.  But, that does not mean installation of Lookup Service is possible, because CPAN is still incompetent
+This time successfully.  We still have to import DAG public key, but we have to do it manually, since the key file at http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
+has extra text and yields errors.  Since we do not know whether !PlanetLab virtual machine has a web browser, we just create a text
+file (`RPM-GPG-KEY.dag.txt`) and paste the public key contents into it, and then import.
+
+ {{{
+ sudo rpm --import RPM-GPG-KEY.dag.txt
+ sudo yum update
+ }}}
+ 
+Now, back to CPAN problem.
+
+*Back to CPAN Problem*
+
+Adding one more repository to _yum_ does not mean installation of Lookup Service is possible, because CPAN is still incompetent
 to resolve the dependencies and install what is needed, as seen above.
 
-Researching a bit more, we attempt the following (from http://www.nntp.perl.org/group/perl.cpan.discuss/2009/06/msg525.html):
+Researching a bit more, we endeavor the following (from http://www.nntp.perl.org/group/perl.cpan.discuss/2009/06/msg525.html):
 
 {{{
 rm /var/lib/rpm/__db.00*
@@ -996,5 +1015,68 @@ rpm -­rebuilddb
 CPAN is still unable to install what is needed.  Apparently, CPAN cannot install Parse::Yapp, or LWP, or XML::Parser, among other
 libraries.
 
+We will aim to install NetAddr::IP (version 4.007) and Hash::Merge manually from the rpm sources.  First, get the files:
 
+ {{{
+ wget http://apt.sw.be/fedora/8/en/SRPMS.rpmforge/perl-Hash-Merge-0.11-1.rf.src.rpm
+ wget http://apt.sw.be/fedora/8/en/SRPMS.rpmforge/perl-NetAddr-IP-4.007-1.rf.src.rpm
+ }}}
+ 
+Process Hash-Merge:
 
+ {{{
+ rpm -ivh perl-Hash-Merge-0.11-1.rf.src.rpm                                
+ error: cannot create %sourcedir /usr/src/redhat/SOURCES
+ }}}
+ 
+The indicated directory does not exist, so create it with `mkdir /usr/src/redhat/SOURCES`.
+
+ Process the files again:
+ 
+ {{{
+ rpm -ivh perl-Hash-Merge-0.11-1.rf.src.rpm
+ rpm -ivh perl-NetAddr-IP-4.007-1.rf.src.rpm
+ }}}
+ 
+Now extract the .gz file for Hash::Merge and a directory will be created:
+
+ `tar xvf Hash-Merge-0.11.tar.gz`
+ 
+According to the README file, install it via:
+
+ {{{
+ sudo perl Makefile.PL
+ sudo make
+ sudo make test
+ sudo make install
+ }}}
+ 
+The `make` generates warnings and `make test` generates a compile error, but what else is new, so we ignore them (possibly the error has something to do with Test::More not being installed yet).
+Extract .gz file for NetAddr::IP and install:
+
+ {{{
+ tar xvf NetAddr-IP-4.007.tar.gz
+ sudo perl Makefile.PL
+ sudo make
+ sudo make test
+ sudo make install
+ }}}
+ 
+Again, `make test` generates a compile error.  We put this error on the pile and proceed.  Attempting Lookup Service install via _yum_
+fails again with the same Hash::Merge and NetAddr::IP dependencies.  With Cpan, we detect that Hash::Merge seems to be OK, but
+NetAddr::IP is not there.  Cpan will not install it, perhaps due to a missing Test::More.  We attempt manual installation of Test::More.
+
+ {{{
+ wget http://apt.sw.be/fedora/8/en/SRPMS.rpmforge/perl-Test-Simple-0.94-1.rf.src.rpm
+ sudo rpm -ivh perl-Test-Simple-0.94-1.rf.src.rpm
+ cd /usr/src/redhat/SOURCES
+ sudo tar xvf Test-Simple-0.94.tar.gz
+ cd Test-Simple-0.94
+ sudo perl Makefile.PL
+ sudo make
+ sudo make test
+ sudo make install
+ }}}
+ 
+This one writes no error after `make test`.  Yum install for Lookup Service still fails for the same reasons; it seems that
+Hash::Merge and NetAddr::IP fail due to dependencies that Cpan cannot yet resolve.
