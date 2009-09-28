@@ -925,4 +925,76 @@ Running make install
   make had returned bad status, install seems impossible
 }}}
 
-"Install seems impossible" is a superb, helpful, unix-style motivating message.
+"Install seems impossible" is a typicall unix-style motivating message...
+
+Setting CPAN problem aside for a while, we try to tackle _yum_ not being able to retrieve the needed libraries from the pre-defined repositories.  Lookup Service
+suggests adding two repositories from:
+
+ * http://dries.ulyssis.org/rpm/ 
+ * http://dag.wieers.com/rpm/
+ 
+To add a repository to _yum_, edit the file `/etc/yum.conf` or add a file with the repository information to `/etc/yum.repos.d`.
+Let us attempt to add such a file (`additional.repo`) with the following contents (extracted from dries.ulyssis.org):
+
+{{{
+# Name: Additional Repositories for perfSONAR Lookup Service
+[dries]
+name=Extra Fedora rpms dries - $releasever - $basearch
+baseurl=http://ftp.belnet.be/packages/dries.ulyssis.org/fedora/linux/$releasever/$basearch/dries
+}}}
+
+Now running
+
+ `sudo yum update`
+ 
+We get the error message:
+
+{{{
+http://ftp.belnet.be/packages/dries.ulyssis.org/fedora/linux/8/i386/dries/repodata/repomd.xml: [Errno 14] HTTP Error 404: Not Found
+Trying other mirror.
+Error: Cannot retrieve repository metadata (repomd.xml) for repository: dries. Please verify its path and try again
+}}}
+
+Trying the URL manually, we detect that the file `repomd.xml` is located one in a different directory.  Fixing the contents of `additional.repo`:
+
+{{{
+# Name: Additional Repositories for perfSONAR Lookup Service
+[dries]
+name=Extra Fedora rpms dries - $releasever - $basearch
+baseurl=http://ftp.belnet.be/packages/dries.ulyssis.org/fedora/linux/$releasever/$basearch/dries/RPMS
+}}}
+
+And now `sudo yum update` reports this error:
+
+{{{
+Downloading Packages:     
+perl-Test-Harness-3.14-1.fc8.rf.noarch.rpm                    | 246 kB     00:01     
+warning: rpmts_HdrFromFdno: Header V3 DSA signature: NOKEY, key ID 1aa78495          
+
+
+Public key for perl-Test-Harness-3.14-1.fc8.rf.noarch.rpm is not installed
+}}}
+
+The public key for the repository is missing.  At http://dries.ulyssis.org/rpm/RPM-GPG-KEY.dries.html, we fetch such key.
+We import the public key and update the repositories again:
+
+ {{{
+ sudo rpm --import http://dries.ulyssis.org/rpm/RPM-GPG-KEY.dries.txt
+ sudo yum update
+ }}}
+ 
+This time successfully.  But, that does not mean installation of Lookup Service is possible, because CPAN is still incompetent
+to resolve the dependencies and install what is needed, as seen above.
+
+Researching a bit more, we attempt the following (from http://www.nntp.perl.org/group/perl.cpan.discuss/2009/06/msg525.html):
+
+{{{
+rm /var/lib/rpm/__db.00*
+rpm -­rebuilddb
+}}}
+
+CPAN is still unable to install what is needed.  Apparently, CPAN cannot install Parse::Yapp, or LWP, or XML::Parser, among other
+libraries.
+
+
+
