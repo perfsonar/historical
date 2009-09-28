@@ -55,12 +55,12 @@ Bandwidth testing often requires that the CPU, Motherboard, and Network card wor
 
 == Installation ==
 
-The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/current.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/current.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
+The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.1.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.1.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
-user@host:~$ md5sum current.iso;cat current.md5 
-b81342ec7d4585ec220718a9ba1c1107  current.iso
-b81342ec7d4585ec220718a9ba1c1107  pS-Performance_Toolkit-3.1rc4.iso
+user@host:~$ md5sum pS-Performance_Toolkit-3.1.iso;cat pS-Performance_Toolkit-3.1.iso.md5 
+2f366ddbd0bbf92b910ff74e5db7ee9b  pS-Performance_Toolkit-3.1.iso
+2f366ddbd0bbf92b910ff74e5db7ee9b  pS-Performance_Toolkit-3.1.iso
 }}}
 
 If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  After burning, please insert the CD into your target machine to boot.  Some items to consider:
