@@ -887,7 +887,7 @@ The installation fails, because many Perl libraries are missing.  Yum is uncapab
  * make
  * apt (if desired)
  
-After installing the above through yum (at least it does work for those), we attempt installing Lookup Service again, but to no avail.  It still reports two missing Perl libraries:  *NetAddr::IP (version 4.007)*, and *Hash::Merge*.  Using cpan to install them directly, by using:
+After installing the above through yum, we attempt installing Lookup Service again, but to no avail.  It still reports two missing Perl libraries:  *NetAddr::IP (version 4.007)*, and *Hash::Merge*.  Using cpan to install them directly, by using:
 
  {{{
  sudo cpan install NetAddr::IP
@@ -936,7 +936,7 @@ suggests adding two repositories from:
  * http://dag.wieers.com/rpm/
  
 To add a repository to _yum_, edit the file `/etc/yum.conf` or add a file with the repository information to `/etc/yum.repos.d`.
-Let us attempt to add such a file (`additional.repo`) with the following contents (extracted from dries.ulyssis.org):
+Let us attempt to add such a file (`additional.repo`) with the following contents (as instructed by dries.ulyssis.org):
 
 {{{
 # Name: Additional Repositories for perfSONAR Lookup Service
@@ -1051,7 +1051,7 @@ According to the README file, install it via:
  sudo make install
  }}}
  
-The `make` generates warnings and `make test` generates a compile error, but what else is new, so we ignore them (possibly the error has something to do with Test::More not being installed yet).
+The `make` generates warnings and `make test` generates a compile error; we ignore them (possibly the error has something to do with Test::More not being installed yet).
 Extract .gz file for NetAddr::IP and install:
 
  {{{
@@ -1080,3 +1080,13 @@ NetAddr::IP is not there.  Cpan will not install it, perhaps due to a missing Te
  
 This one writes no error after `make test`.  Yum install for Lookup Service still fails for the same reasons; it seems that
 Hash::Merge and NetAddr::IP fail due to dependencies that Cpan cannot yet resolve.
+
+Before the clouds definitely close, a hint from Jason Zurawsky directs to type "yum install" for the Lookup Service in this way:
+
+ `sudo yum install nano perl-perfSONAR_PS-LookupService --nogpgcheck`
+ 
+And this works.  It remains to be explained why the addition of "nano" and/or possibly "--nogpgcheck" solves the issue.
+
+
+
+
