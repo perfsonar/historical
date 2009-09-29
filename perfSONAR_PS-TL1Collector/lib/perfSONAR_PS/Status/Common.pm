@@ -127,7 +127,7 @@ sub get_new_admin_status {
 sub admin_status_to_num {
     my ( $admin_status ) = @_;
 
-    if (int($admin_status) == $admin_status) {
+    if ( int( $admin_status ) == $admin_status ) {
         return $admin_status;
     }
 
@@ -137,7 +137,7 @@ sub admin_status_to_num {
 sub oper_status_to_num {
     my ( $oper_status ) = @_;
 
-    if (int($oper_status) == $oper_status) {
+    if ( int( $oper_status ) == $oper_status ) {
         return $oper_status;
     }
 
@@ -147,8 +147,8 @@ sub oper_status_to_num {
 sub num_to_oper_status {
     my ( $num ) = @_;
 
-    foreach my $val (keys %oper_status_mapping) {
-        return $val if ($oper_status_mapping{$val} == $num);
+    foreach my $val ( keys %oper_status_mapping ) {
+        return $val if ( $oper_status_mapping{$val} == $num );
     }
 
     return;
@@ -157,8 +157,8 @@ sub num_to_oper_status {
 sub num_to_admin_status {
     my ( $num ) = @_;
 
-    foreach my $val (keys %admin_status_mapping) {
-        return $val if ($admin_status_mapping{$val} == $num);
+    foreach my $val ( keys %admin_status_mapping ) {
+        return $val if ( $admin_status_mapping{$val} == $num );
     }
 
     return;

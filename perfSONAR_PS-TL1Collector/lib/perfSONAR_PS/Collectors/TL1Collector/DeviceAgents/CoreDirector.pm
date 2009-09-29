@@ -27,7 +27,8 @@ use Data::Dumper;
 
 use base 'perfSONAR_PS::Collectors::TL1Collector::DeviceAgents::Base';
 
-use fields 'AGENT', 'OPTICAL_FACILITIES', 'ETHERNET_FACILITIES', 'VLAN_FACILITIES', 'EFLOW_FACILITIES', 'VCG_FACILITIES', 'CROSSCONNECT_FACILTIES', 'CHECK_ALL_OPTICAL_PORTS', 'CHECK_ALL_VLANS', 'CHECK_ALL_ETHERNET_PORTS', 'CHECK_ALL_CROSSCONNECTS', 'CHECK_ALL_EFLOWS', 'CHECK_ALL_VCGS', 'ROUTER_ADDRESS';
+use fields 'AGENT', 'OPTICAL_FACILITIES', 'ETHERNET_FACILITIES', 'VLAN_FACILITIES', 'EFLOW_FACILITIES', 'VCG_FACILITIES', 'CROSSCONNECT_FACILTIES', 'CHECK_ALL_OPTICAL_PORTS', 'CHECK_ALL_VLANS', 'CHECK_ALL_ETHERNET_PORTS', 'CHECK_ALL_CROSSCONNECTS', 'CHECK_ALL_EFLOWS', 'CHECK_ALL_VCGS',
+    'ROUTER_ADDRESS';
 
 # Oper Status:
 # 1 = up
@@ -40,11 +41,11 @@ use fields 'AGENT', 'OPTICAL_FACILITIES', 'ETHERNET_FACILITIES', 'VLAN_FACILITIE
 # 3 = maintenance
 # 4 = unknown
 my %state_mapping = (
-    "is-nr"    => { "oper_status" => 1,     "admin_status" => 1 },
-    "is-anr"   => { "oper_status" => 3,     "admin_status" => 1 },
-    "oos-au"   => { "oper_status" => 2,     "admin_status" => 1 },
-    "oos-auma" => { "oper_status" => 2,     "admin_status" => 3 },
-    "oos-ma"   => { "oper_status" => 2,     "admin_status" => 3 },
+    "is-nr"    => { "oper_status" => 1, "admin_status" => 1 },
+    "is-anr"   => { "oper_status" => 3, "admin_status" => 1 },
+    "oos-au"   => { "oper_status" => 2, "admin_status" => 1 },
+    "oos-auma" => { "oper_status" => 2, "admin_status" => 3 },
+    "oos-ma"   => { "oper_status" => 2, "admin_status" => 3 },
 );
 
 =head2 init( $self, { data_client, polling_interval, address, port, username, password, check_all_optical_ports, check_all_vlans, check_all_ethernet_ports, check_all_crossconnects, check_all_eflows, check_all_vcgs, facilities, identifier_pattern } )
@@ -93,34 +94,34 @@ sub init {
     $self->{CHECK_ALL_EFLOWS}         = $args->{check_all_eflows};
     $self->{CHECK_ALL_VCGS}           = $args->{check_all_vcgs};
 
-    $self->{OPTICAL_FACILITIES}     = ();
-    if ($args->{optical_facilities}) {
-        $self->{OPTICAL_FACILITIES}     = $args->{optical_facilities};
+    $self->{OPTICAL_FACILITIES} = ();
+    if ( $args->{optical_facilities} ) {
+        $self->{OPTICAL_FACILITIES} = $args->{optical_facilities};
     }
 
     $self->{CROSSCONNECT_FACILTIES} = ();
-    if ($args->{crossconnect_facilities}) {
-        $self->{CROSSCONNECT_FACILTIES}     = $args->{crossconnect_facilities};
+    if ( $args->{crossconnect_facilities} ) {
+        $self->{CROSSCONNECT_FACILTIES} = $args->{crossconnect_facilities};
     }
 
-    $self->{ETHERNET_FACILITIES}    = ();
-    if ($args->{ethernet_facilities}) {
-        $self->{ETHERNET_FACILITIES}     = $args->{ethernet_facilities};
+    $self->{ETHERNET_FACILITIES} = ();
+    if ( $args->{ethernet_facilities} ) {
+        $self->{ETHERNET_FACILITIES} = $args->{ethernet_facilities};
     }
 
-    $self->{VLAN_FACILITIES}        = ();
-    if ($args->{vlan_facilities}) {
-        $self->{VLAN_FACILITIES}     = $args->{vlan_facilities};
+    $self->{VLAN_FACILITIES} = ();
+    if ( $args->{vlan_facilities} ) {
+        $self->{VLAN_FACILITIES} = $args->{vlan_facilities};
     }
 
-    $self->{EFLOW_FACILITIES}       = ();
-    if ($args->{eflow_facilities}) {
-        $self->{EFLOW_FACILITIES}     = $args->{eflow_facilities};
+    $self->{EFLOW_FACILITIES} = ();
+    if ( $args->{eflow_facilities} ) {
+        $self->{EFLOW_FACILITIES} = $args->{eflow_facilities};
     }
 
-    $self->{VCG_FACILITIES}         = ();
-    if ($args->{vcg_facilities}) {
-        $self->{VCG_FACILITIES}     = $args->{vcg_facilities};
+    $self->{VCG_FACILITIES} = ();
+    if ( $args->{vcg_facilities} ) {
+        $self->{VCG_FACILITIES} = $args->{vcg_facilities};
     }
 
     $self->{AGENT} = perfSONAR_PS::Utils::TL1::CoreDirector->new();
@@ -157,45 +158,45 @@ sub check_facilities {
 
     my @ret_counters = ();
 
-    my ($status, $res);
+    my ( $status, $res );
 
-    ($status, $res) = $self->handle_ethernet_ports();
-    if ($status == 0) {
-        foreach my $counter (@{ $res }) {
+    ( $status, $res ) = $self->handle_ethernet_ports();
+    if ( $status == 0 ) {
+        foreach my $counter ( @{$res} ) {
             push @ret_counters, $counter;
         }
     }
 
-    ($status, $res) = $self->handle_optical_ports();
-    if ($status == 0) {
-        foreach my $counter (@{ $res }) {
+    ( $status, $res ) = $self->handle_optical_ports();
+    if ( $status == 0 ) {
+        foreach my $counter ( @{$res} ) {
             push @ret_counters, $counter;
         }
     }
 
-    ($status, $res) = $self->handle_vlan_ports();
-    if ($status == 0) {
-        foreach my $counter (@{ $res }) {
+    ( $status, $res ) = $self->handle_vlan_ports();
+    if ( $status == 0 ) {
+        foreach my $counter ( @{$res} ) {
             push @ret_counters, $counter;
         }
     }
 
-    ($status, $res) = $self->handle_vcgs();
-    if ($status == 0) {
-        foreach my $counter (@{ $res }) {
+    ( $status, $res ) = $self->handle_vcgs();
+    if ( $status == 0 ) {
+        foreach my $counter ( @{$res} ) {
             push @ret_counters, $counter;
         }
     }
 
-    return ( 0, \@ret_counters);
+    return ( 0, \@ret_counters );
 }
 
 sub handle_ethernet_ports {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     my @ret_counters = ();
 
-    $self->{LOGGER}->debug("handle_ethernet_ports(): start");
+    $self->{LOGGER}->debug( "handle_ethernet_ports(): start" );
 
     if ( $self->{CHECK_ALL_ETHERNET_PORTS} or scalar( keys %{ $self->{ETHERNET_FACILITIES} } ) > 0 ) {
         my @ports = ();
@@ -203,35 +204,35 @@ sub handle_ethernet_ports {
             my ( $status, $ports ) = $self->{AGENT}->get_ethernet_facilities();
             if ( $status == 0 ) {
                 @ports = keys %{$ports};
-            } else {
-                $self->{LOGGER}->error("Error looking up ethernet ports: $ports");
+            }
+            else {
+                $self->{LOGGER}->error( "Error looking up ethernet ports: $ports" );
             }
         }
         else {
-            foreach my $fac (keys %{ $self->{ETHERNET_FACILITIES} }) {
-                next if ($fac eq "*");
+            foreach my $fac ( keys %{ $self->{ETHERNET_FACILITIES} } ) {
+                next if ( $fac eq "*" );
                 push @ports, $fac;
             }
         }
 
-        $self->{LOGGER}->debug("Checking ports: ".join(",", @ports));
+        $self->{LOGGER}->debug( "Checking ports: " . join( ",", @ports ) );
 
-        foreach my $port (@ports) {
-            my ($status, $res) = $self->handle_ethernet_port($port);
-            if ($status != 0) {
-                return ($status, $res);
+        foreach my $port ( @ports ) {
+            my ( $status, $res ) = $self->handle_ethernet_port( $port );
+            if ( $status != 0 ) {
+                return ( $status, $res );
             }
 
-            foreach my $counter (@{ $res }) {
+            foreach my $counter ( @{$res} ) {
                 push @ret_counters, $counter;
             }
         }
     }
 
-    $self->{LOGGER}->debug("handle_ethernet_ports(): stop");
+    $self->{LOGGER}->debug( "handle_ethernet_ports(): stop" );
 
-
-    return (0, \@ret_counters);
+    return ( 0, \@ret_counters );
 }
 
 sub handle_ethernet_port {
@@ -259,35 +260,38 @@ sub handle_ethernet_port {
         $admin_status = $state_mapping{ lc( $port->{pst} ) }->{"admin_status"};
     }
 
-    my ($in_octets, $out_octets, $in_packets, $out_packets, $in_errors, $out_errors, $in_discards, $out_discards);
-    ($status, $res) = $self->{AGENT}->get_ethernet_mib_pms($port_name);
-    if ($status == 0) {
-        $in_packets = $res->{INTF_IN_PACKETS}->{value};
-        $out_packets = $res->{INTF_OUT_PACKETS}->{value};
-        $in_octets = $res->{INTF_IN_OCTETS}->{value};
-        $out_octets = $res->{INTF_OUT_OCTETS}->{value};
-        $in_discards = $res->{INTF_IN_DISCARDS}->{value};
+    my ( $in_octets, $out_octets, $in_packets, $out_packets, $in_errors, $out_errors, $in_discards, $out_discards );
+    ( $status, $res ) = $self->{AGENT}->get_ethernet_mib_pms( $port_name );
+    if ( $status == 0 ) {
+        $in_packets   = $res->{INTF_IN_PACKETS}->{value};
+        $out_packets  = $res->{INTF_OUT_PACKETS}->{value};
+        $in_octets    = $res->{INTF_IN_OCTETS}->{value};
+        $out_octets   = $res->{INTF_OUT_OCTETS}->{value};
+        $in_discards  = $res->{INTF_IN_DISCARDS}->{value};
         $out_discards = $res->{INTF_OUT_DISCARDS}->{value};
-        $in_errors = $res->{INTF_IN_ERRORS}->{value};
-        $out_errors = $res->{INTF_OUT_ERRORS}->{value};
+        $in_errors    = $res->{INTF_IN_ERRORS}->{value};
+        $out_errors   = $res->{INTF_OUT_ERRORS}->{value};
     }
 
     my ( $capacity );
+
     # capacity is in Bps
-    if ($port->{etherphy} =~ "10000") {
-        $capacity = 10_000_000_000; 
-    } elsif ($port->{etherphy} =~ "1000") {
+    if ( $port->{etherphy} =~ "10000" ) {
+        $capacity = 10_000_000_000;
+    }
+    elsif ( $port->{etherphy} =~ "1000" ) {
         $capacity = 1_000_000_000;
-    } elsif ($port->{etherphy} =~ "100") {
+    }
+    elsif ( $port->{etherphy} =~ "100" ) {
         $capacity = 100_000_000;
     }
 
     my ( $id );
 
-    if ( $self->{ETHERNET_FACILITIES}->{ '*' } ) {
-        $id           = $self->{ETHERNET_FACILITIES}->{ '*' }->{id}           if ( $self->{ETHERNET_FACILITIES}->{ '*' }->{id} );
-        $admin_status = $self->{ETHERNET_FACILITIES}->{ '*' }->{admin_status} if ( $self->{ETHERNET_FACILITIES}->{ '*' }->{admin_status} );
-        $oper_status  = $self->{ETHERNET_FACILITIES}->{ '*' }->{oper_status}  if ( $self->{ETHERNET_FACILITIES}->{ '*' }->{oper_status} );
+    if ( $self->{ETHERNET_FACILITIES}->{'*'} ) {
+        $id           = $self->{ETHERNET_FACILITIES}->{'*'}->{id}           if ( $self->{ETHERNET_FACILITIES}->{'*'}->{id} );
+        $admin_status = $self->{ETHERNET_FACILITIES}->{'*'}->{admin_status} if ( $self->{ETHERNET_FACILITIES}->{'*'}->{admin_status} );
+        $oper_status  = $self->{ETHERNET_FACILITIES}->{'*'}->{oper_status}  if ( $self->{ETHERNET_FACILITIES}->{'*'}->{oper_status} );
     }
 
     if ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } ) {
@@ -297,92 +301,106 @@ sub handle_ethernet_port {
     }
 
     # Add 'utilization' counters
-    if ( ($self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_utilization})
-            or ($self->{ETHERNET_FACILITIES}->{ '*' } and $self->{ETHERNET_FACILITIES}->{ '*' }->{collect_utilization}) ) {
+    if (   ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_utilization} )
+        or ( $self->{ETHERNET_FACILITIES}->{'*'} and $self->{ETHERNET_FACILITIES}->{'*'}->{collect_utilization} ) )
+    {
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name},  direction => "in" },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
-                     values      => { utilization => $in_octets },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, direction => "in" },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
+            values => { utilization => $in_octets },
+            };
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name},  direction => "out" },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
-                     values      => { utilization => $out_octets },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, direction => "out" },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
+            values => { utilization => $out_octets },
+            };
     }
 
     # Add 'discard' counters
-    if ( ($self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_discards})
-            or ($self->{ETHERNET_FACILITIES}->{ '*' } and $self->{ETHERNET_FACILITIES}->{ '*' }->{collect_discards}) ) {
+    if (   ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_discards} )
+        or ( $self->{ETHERNET_FACILITIES}->{'*'} and $self->{ETHERNET_FACILITIES}->{'*'}->{collect_discards} ) )
+    {
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name},  direction => "in" },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
-                     values      => { discards => $in_discards },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, direction => "in" },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
+            values => { discards => $in_discards },
+            };
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name},  direction => "out" },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
-                     values      => { discards => $out_discards },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, direction => "out" },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
+            values => { discards => $out_discards },
+            };
     }
 
     # Add 'error' counters
-    if ( ($self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_errors})
-            or ($self->{ETHERNET_FACILITIES}->{ '*' } and $self->{ETHERNET_FACILITIES}->{ '*' }->{collect_errors}) ) {
+    if (   ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_errors} )
+        or ( $self->{ETHERNET_FACILITIES}->{'*'} and $self->{ETHERNET_FACILITIES}->{'*'}->{collect_errors} ) )
+    {
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name},  direction => "in" },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/errors/2.0",
-                     values      => { errors => $in_errors },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, direction => "in" },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/errors/2.0",
+            values => { errors => $in_errors },
+            };
     }
 
     # Add 'oper' status
-    if ( ($self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_oper_status})
-            or ($self->{ETHERNET_FACILITIES}->{ '*' } and $self->{ETHERNET_FACILITIES}->{ '*' }->{collect_oper_status}) ) {
+    if (   ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_oper_status} )
+        or ( $self->{ETHERNET_FACILITIES}->{'*'} and $self->{ETHERNET_FACILITIES}->{'*'}->{collect_oper_status} ) )
+    {
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias} },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/interface/status/operational/2.0",
-                     values      => { oper_status => $oper_status },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias} },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/operational/2.0",
+            values => { oper_status => $oper_status },
+            };
     }
 
     # Add 'admin' status
-    if ( ($self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_admin_status})
-            or ($self->{ETHERNET_FACILITIES}->{ '*' } and $self->{ETHERNET_FACILITIES}->{ '*' }->{collect_admin_status}) ) {
+    if (   ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_admin_status} )
+        or ( $self->{ETHERNET_FACILITIES}->{'*'} and $self->{ETHERNET_FACILITIES}->{'*'}->{collect_admin_status} ) )
+    {
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias} },
-                     data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/administrative/2.0",
-                     values      => { admin_status => $admin_status },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias} },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/administrative/2.0",
+            values => { admin_status => $admin_status },
+            };
     }
 
     # Add Port Capacity
-    if ( ($self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_capacity})
-            or ($self->{ETHERNET_FACILITIES}->{ '*' } and $self->{ETHERNET_FACILITIES}->{ '*' }->{collect_capacity}) ) {
+    if (   ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_capacity} )
+        or ( $self->{ETHERNET_FACILITIES}->{'*'} and $self->{ETHERNET_FACILITIES}->{'*'}->{collect_capacity} ) )
+    {
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias} },
-                     data_type => "http://ggf.org/ns/nmwg/characteristic/interface/capacity/provisioned/2.0",
-                     values      => { capacity => $capacity },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias} },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/interface/capacity/provisioned/2.0",
+            values => { capacity => $capacity },
+            };
     }
 
-   return (0, \@ret_counters);
+    return ( 0, \@ret_counters );
 }
 
 sub handle_optical_ports {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     my @ret_counters = ();
 
-    $self->{LOGGER}->debug("handle_optical_ports(): start");
+    $self->{LOGGER}->debug( "handle_optical_ports(): start" );
 
     if ( $self->{CHECK_ALL_OPTICAL_PORTS} or scalar( keys %{ $self->{OPTICAL_FACILITIES} } ) > 0 ) {
         my @ports = ();
@@ -390,35 +408,35 @@ sub handle_optical_ports {
             my ( $status, $ports ) = $self->{AGENT}->get_optical_facilities();
             if ( $status == 0 ) {
                 @ports = keys %{$ports};
-            } else {
-                $self->{LOGGER}->error("Error looking up optical ports: $ports");
+            }
+            else {
+                $self->{LOGGER}->error( "Error looking up optical ports: $ports" );
             }
         }
         else {
-            foreach my $fac (keys %{ $self->{OPTICAL_FACILITIES} }) {
-                next if ($fac eq "*");
+            foreach my $fac ( keys %{ $self->{OPTICAL_FACILITIES} } ) {
+                next if ( $fac eq "*" );
                 push @ports, $fac;
             }
         }
 
-        $self->{LOGGER}->debug("Checking ports: ".join(",", @ports));
+        $self->{LOGGER}->debug( "Checking ports: " . join( ",", @ports ) );
 
-        foreach my $port (@ports) {
-            my ($status, $res) = $self->handle_optical_port($port);
-            if ($status != 0) {
-                return ($status, $res);
+        foreach my $port ( @ports ) {
+            my ( $status, $res ) = $self->handle_optical_port( $port );
+            if ( $status != 0 ) {
+                return ( $status, $res );
             }
 
-            foreach my $counter (@{ $res }) {
+            foreach my $counter ( @{$res} ) {
                 push @ret_counters, $counter;
             }
         }
     }
 
-    $self->{LOGGER}->debug("handle_optical_ports(): stop");
+    $self->{LOGGER}->debug( "handle_optical_ports(): stop" );
 
-
-    return (0, \@ret_counters);
+    return ( 0, \@ret_counters );
 }
 
 sub handle_optical_port {
@@ -447,16 +465,17 @@ sub handle_optical_port {
     }
 
     my ( $capacity );
+
     # capacity is in Bps
-    if ($port->{rate} =~ /OC(\d+)/) {
-        $capacity = $1*51_800_000;
+    if ( $port->{rate} =~ /OC(\d+)/ ) {
+        $capacity = $1 * 51_800_000;
     }
 
     my ( $id );
-    if ( $self->{OPTICAL_FACILITIES}->{ '*' } ) {
-        $id           = $self->{OPTICAL_FACILITIES}->{ '*' }->{id}           if ( $self->{OPTICAL_FACILITIES}->{ '*' }->{id} );
-        $admin_status = $self->{OPTICAL_FACILITIES}->{ '*' }->{admin_status} if ( $self->{OPTICAL_FACILITIES}->{ '*' }->{admin_status} );
-        $oper_status  = $self->{OPTICAL_FACILITIES}->{ '*' }->{oper_status}  if ( $self->{OPTICAL_FACILITIES}->{ '*' }->{oper_status} );
+    if ( $self->{OPTICAL_FACILITIES}->{'*'} ) {
+        $id           = $self->{OPTICAL_FACILITIES}->{'*'}->{id}           if ( $self->{OPTICAL_FACILITIES}->{'*'}->{id} );
+        $admin_status = $self->{OPTICAL_FACILITIES}->{'*'}->{admin_status} if ( $self->{OPTICAL_FACILITIES}->{'*'}->{admin_status} );
+        $oper_status  = $self->{OPTICAL_FACILITIES}->{'*'}->{oper_status}  if ( $self->{OPTICAL_FACILITIES}->{'*'}->{oper_status} );
     }
 
     if ( $self->{OPTICAL_FACILITIES}->{ $port->{name} } ) {
@@ -466,66 +485,72 @@ sub handle_optical_port {
     }
 
     # Oper/Admin status
-    if ( ($self->{OPTICAL_FACILITIES}->{ $port->{name} } and $self->{OPTICAL_FACILITIES}->{ $port->{name} }->{collect_oper_status})
-            or ($self->{OPTICAL_FACILITIES}->{ '*' } and $self->{OPTICAL_FACILITIES}->{ '*' }->{collect_oper_status}) ) {
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias}, capacity => $capacity },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/interface/status/operational/2.0",
-                     values      => { oper_status => $oper_status },
-        };
+    if (   ( $self->{OPTICAL_FACILITIES}->{ $port->{name} } and $self->{OPTICAL_FACILITIES}->{ $port->{name} }->{collect_oper_status} )
+        or ( $self->{OPTICAL_FACILITIES}->{'*'} and $self->{OPTICAL_FACILITIES}->{'*'}->{collect_oper_status} ) )
+    {
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias}, capacity => $capacity },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/operational/2.0",
+            values => { oper_status => $oper_status },
+            };
     }
 
-    if ( ($self->{OPTICAL_FACILITIES}->{ $port->{name} } and $self->{OPTICAL_FACILITIES}->{ $port->{name} }->{collect_admin_status})
-            or ($self->{OPTICAL_FACILITIES}->{ '*' } and $self->{OPTICAL_FACILITIES}->{ '*' }->{collect_admin_status}) ) {
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias}, capacity => $capacity },
-                     data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/administrative/2.0",
-                     values      => { admin_status => $admin_status },
-        };
+    if (   ( $self->{OPTICAL_FACILITIES}->{ $port->{name} } and $self->{OPTICAL_FACILITIES}->{ $port->{name} }->{collect_admin_status} )
+        or ( $self->{OPTICAL_FACILITIES}->{'*'} and $self->{OPTICAL_FACILITIES}->{'*'}->{collect_admin_status} ) )
+    {
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias}, capacity => $capacity },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/administrative/2.0",
+            values => { admin_status => $admin_status },
+            };
     }
 
-   return (0, \@ret_counters);
+    return ( 0, \@ret_counters );
 }
 
 sub handle_vlan_ports {
     my ( $self ) = @_;
 
-    unless ( $self->{CHECK_ALL_VLANS} or scalar(keys %{ $self->{VLAN_FACILITIES} }) > 0 ) {
+    unless ( $self->{CHECK_ALL_VLANS} or scalar( keys %{ $self->{VLAN_FACILITIES} } ) > 0 ) {
         my @tmp = ();
-        return (0, \@tmp);
+        return ( 0, \@tmp );
     }
 
     my @ret_counters = ();
 
-    my ( $status, $res) = $self->{AGENT}->get_eflows();
+    my ( $status, $res ) = $self->{AGENT}->get_eflows();
 
     if ( $status != 0 ) {
-        return ($status, $res);
+        return ( $status, $res );
     }
 
-    my $eflows = $res;
+    my $eflows        = $res;
     my %vlan_elements = ();
 
     foreach my $eflow_key ( keys %{$eflows} ) {
         my $eflow = $eflows->{$eflow_key};
 
-        $self->{LOGGER}->debug("EFLOW: ".Dumper($eflow));
+        $self->{LOGGER}->debug( "EFLOW: " . Dumper( $eflow ) );
 
-        unless ( $eflow->{"collectpm"} eq "YES" ) {   # we only care about monitored vlans
-            $self->{LOGGER}->debug("Skipping $eflow_key");
+        unless ( $eflow->{"collectpm"} eq "YES" ) {    # we only care about monitored vlans
+            $self->{LOGGER}->debug( "Skipping $eflow_key" );
             next;
         }
 
         my $vlan;
-        if ($eflow->{"outervlanid"} and $eflow->{"outervlanid"} ne "0" and $eflow->{"outervlanid"} ne "1") {
+        if ( $eflow->{"outervlanid"} and $eflow->{"outervlanid"} ne "0" and $eflow->{"outervlanid"} ne "1" ) {
             $vlan = $eflow->{"outervlanid"};
-        } elsif ($eflow->{"outervlanidrange"} and $eflow->{"outervlanidrange"} ne "0" and $eflow->{"outervlanidrange"} ne "1") {
+        }
+        elsif ( $eflow->{"outervlanidrange"} and $eflow->{"outervlanidrange"} ne "0" and $eflow->{"outervlanidrange"} ne "1" ) {
             $vlan = $eflow->{"outervlanidrange"};
-        } else {
+        }
+        else {
             $vlan = "untagged";
         }
 
-        my ($vlan_name, $direction, $vcg_name);
+        my ( $vlan_name, $direction, $vcg_name );
 
         if ( $eflow->{ingressporttype} eq "ETTP" ) {
             $vlan_name = $eflow->{ingressportname} . "." . $vlan;
@@ -536,9 +561,10 @@ sub handle_vlan_ports {
             $direction = "out_eflow";
         }
 
-        if ($eflow->{ingressporttype} eq "VCG") {
+        if ( $eflow->{ingressporttype} eq "VCG" ) {
             $vcg_name = $eflow->{ingressportname};
-        } elsif ($eflow->{egressporttype} eq "VCG") {
+        }
+        elsif ( $eflow->{egressporttype} eq "VCG" ) {
             $vcg_name = $eflow->{egressportname};
         }
 
@@ -552,17 +578,16 @@ sub handle_vlan_ports {
 
     foreach my $vlan_name ( keys %vlan_elements ) {
 
-        my ($oper_status, $admin_status);
+        my ( $oper_status, $admin_status );
 
         # The eflows link the ethernet port to the sonet stuff. We use
         # their stats gathering to get the "in" and "out" for this vlan.
 
-        $self->{LOGGER}->debug("VLAN Name: ".$vlan_name);
-        $self->{LOGGER}->debug("VLAN Elements: ".Dumper($vlan_elements{$vlan_name}));
+        $self->{LOGGER}->debug( "VLAN Name: " . $vlan_name );
+        $self->{LOGGER}->debug( "VLAN Elements: " . Dumper( $vlan_elements{$vlan_name} ) );
 
         foreach my $direction ( "in_eflow", "out_eflow" ) {
             my $eflow = $vlan_elements{$vlan_name}->{$direction};
-
 
             # A 'vlan' doesn't have status of its own, so you have to check
             # both the ingress port and egress port of the eflow to get "its"
@@ -594,18 +619,19 @@ sub handle_vlan_ports {
 
         # We read the VCG stats as the 'vlan' stats since they're the best we
         # can get.
-        my ($in_octets, $out_octets, $in_packets, $out_packets, $in_errors, $out_errors, $in_discards, $out_discards, $capacity, $description);
-        if ($vlan_elements{$vlan_name}->{"vcg"}) {
-            ($status, $res) = $self->{AGENT}->get_vcg_mib_pms($vlan_elements{$vlan_name}->{"vcg"});
-            if ($status == 0) {
+        my ( $in_octets, $out_octets, $in_packets, $out_packets, $in_errors, $out_errors, $in_discards, $out_discards, $capacity, $description );
+        if ( $vlan_elements{$vlan_name}->{"vcg"} ) {
+            ( $status, $res ) = $self->{AGENT}->get_vcg_mib_pms( $vlan_elements{$vlan_name}->{"vcg"} );
+            if ( $status == 0 ) {
+
                 # in/out are swapped since we're measuring the 'vcg' to get the 'vlan' elements.
-                $out_packets = $res->{INTF_IN_PACKETS}->{value};
-                $in_packets = $res->{INTF_OUT_PACKETS}->{value};
-                $out_octets = $res->{INTF_IN_OCTETS}->{value};
-                $in_octets = $res->{INTF_OUT_OCTETS}->{value};
+                $out_packets  = $res->{INTF_IN_PACKETS}->{value};
+                $in_packets   = $res->{INTF_OUT_PACKETS}->{value};
+                $out_octets   = $res->{INTF_IN_OCTETS}->{value};
+                $in_octets    = $res->{INTF_OUT_OCTETS}->{value};
                 $out_discards = $res->{INTF_IN_DISCARDS}->{value};
-                $in_discards = $res->{INTF_OUT_DISCARDS}->{value};
-                $in_errors = $res->{INTF_IN_ERRORS}->{value};
+                $in_discards  = $res->{INTF_OUT_DISCARDS}->{value};
+                $in_errors    = $res->{INTF_IN_ERRORS}->{value};
             }
 
             # We read the VCG information to get the capacity since that's the best
@@ -613,10 +639,10 @@ sub handle_vlan_ports {
 
             #PROVBW=2,OPERBW=2
 
-            ($status, $res) = $self->{AGENT}->get_vcgs($vlan_elements{$vlan_name}->{"vcg"});
-            if ($status == 0) {
-                if ($res->{provbw}) {
-                    $capacity = $res->{provbw}*50.112*1000*1000; # Convert to Bps
+            ( $status, $res ) = $self->{AGENT}->get_vcgs( $vlan_elements{$vlan_name}->{"vcg"} );
+            if ( $status == 0 ) {
+                if ( $res->{provbw} ) {
+                    $capacity = $res->{provbw} * 50.112 * 1000 * 1000;    # Convert to Bps
                 }
 
                 $description = $res->{alias};
@@ -638,97 +664,111 @@ sub handle_vlan_ports {
         }
 
         # Add 'utilization' counters
-        if ( ($self->{VLAN_FACILITIES}->{ $vlan_name } and $self->{VLAN_FACILITIES}->{ $vlan_name }->{collect_utilization})
-                or ($self->{VLAN_FACILITIES}->{ '*' } and $self->{VLAN_FACILITIES}->{ '*' }->{collect_utilization}) ) {
+        if (   ( $self->{VLAN_FACILITIES}->{$vlan_name} and $self->{VLAN_FACILITIES}->{$vlan_name}->{collect_utilization} )
+            or ( $self->{VLAN_FACILITIES}->{'*'} and $self->{VLAN_FACILITIES}->{'*'}->{collect_utilization} ) )
+        {
 
-            push @ret_counters, {
-                metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name,  direction => "in" },
-                         data_type   => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
-                         values      => { utilization => $in_octets },
-            };
+            push @ret_counters,
+                {
+                metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name, direction => "in" },
+                data_type => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
+                values => { utilization => $in_octets },
+                };
 
-            push @ret_counters, {
-                metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name,  direction => "out" },
-                         data_type   => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
-                         values      => { utilization => $out_octets },
-            };
+            push @ret_counters,
+                {
+                metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name, direction => "out" },
+                data_type => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
+                values => { utilization => $out_octets },
+                };
         }
 
         # Add 'discard' counters
-        if ( ($self->{VLAN_FACILITIES}->{ $vlan_name } and $self->{VLAN_FACILITIES}->{ $vlan_name }->{collect_discards})
-                or ($self->{VLAN_FACILITIES}->{ '*' } and $self->{VLAN_FACILITIES}->{ '*' }->{collect_discards}) ) {
+        if (   ( $self->{VLAN_FACILITIES}->{$vlan_name} and $self->{VLAN_FACILITIES}->{$vlan_name}->{collect_discards} )
+            or ( $self->{VLAN_FACILITIES}->{'*'} and $self->{VLAN_FACILITIES}->{'*'}->{collect_discards} ) )
+        {
 
-            push @ret_counters, {
-                metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name,  direction => "in" },
-                         data_type   => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
-                         values      => { discards => $in_discards },
-            };
+            push @ret_counters,
+                {
+                metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name, direction => "in" },
+                data_type => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
+                values => { discards => $in_discards },
+                };
 
-            push @ret_counters, {
-                metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name,  direction => "out" },
-                         data_type   => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
-                         values      => { discards => $out_discards },
-            };
+            push @ret_counters,
+                {
+                metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name, direction => "out" },
+                data_type => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
+                values => { discards => $out_discards },
+                };
         }
 
         # Add 'error' counter
-        if ( ($self->{VLAN_FACILITIES}->{ $vlan_name } and $self->{VLAN_FACILITIES}->{ $vlan_name }->{collect_errors})
-                or ($self->{VLAN_FACILITIES}->{ '*' } and $self->{VLAN_FACILITIES}->{ '*' }->{collect_errors}) ) {
+        if (   ( $self->{VLAN_FACILITIES}->{$vlan_name} and $self->{VLAN_FACILITIES}->{$vlan_name}->{collect_errors} )
+            or ( $self->{VLAN_FACILITIES}->{'*'} and $self->{VLAN_FACILITIES}->{'*'}->{collect_errors} ) )
+        {
 
-            push @ret_counters, {
-                metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name,  direction => "in" },
-                         data_type   => "http://ggf.org/ns/nmwg/characteristic/errors/2.0",
-                         values      => { errors => $in_errors },
-            };
+            push @ret_counters,
+                {
+                metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name, direction => "in" },
+                data_type => "http://ggf.org/ns/nmwg/characteristic/errors/2.0",
+                values => { errors => $in_errors },
+                };
         }
 
         # Oper/Admin status
-        if ( ($self->{VLAN_FACILITIES}->{ $vlan_name } and $self->{VLAN_FACILITIES}->{ $vlan_name }->{collect_oper_status})
-                or ($self->{VLAN_FACILITIES}->{ '*' } and $self->{VLAN_FACILITIES}->{ '*' }->{collect_oper_status}) ) {
+        if (   ( $self->{VLAN_FACILITIES}->{$vlan_name} and $self->{VLAN_FACILITIES}->{$vlan_name}->{collect_oper_status} )
+            or ( $self->{VLAN_FACILITIES}->{'*'} and $self->{VLAN_FACILITIES}->{'*'}->{collect_oper_status} ) )
+        {
 
-            push @ret_counters, {
-                metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name },
-                         data_type   => "http://ggf.org/ns/nmwg/characteristic/interface/status/operational/2.0",
-                         values      => { oper_status => oper_status_to_num($oper_status) },
-            };
+            push @ret_counters,
+                {
+                metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name },
+                data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/operational/2.0",
+                values => { oper_status => oper_status_to_num( $oper_status ) },
+                };
         }
 
-        if ( ($self->{VLAN_FACILITIES}->{ $vlan_name } and $self->{VLAN_FACILITIES}->{ $vlan_name }->{collect_admin_status})
-                or ($self->{VLAN_FACILITIES}->{ '*' } and $self->{VLAN_FACILITIES}->{ '*' }->{collect_admin_status}) ) {
+        if (   ( $self->{VLAN_FACILITIES}->{$vlan_name} and $self->{VLAN_FACILITIES}->{$vlan_name}->{collect_admin_status} )
+            or ( $self->{VLAN_FACILITIES}->{'*'} and $self->{VLAN_FACILITIES}->{'*'}->{collect_admin_status} ) )
+        {
 
-            push @ret_counters, {
-                metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name },
-                         data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/administrative/2.0",
-                         values      => { admin_status => admin_status_to_num($admin_status) },
-            };
+            push @ret_counters,
+                {
+                metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name },
+                data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/administrative/2.0",
+                values => { admin_status => admin_status_to_num( $admin_status ) },
+                };
         }
 
         # Port Capacity
-        if ( ($self->{VLAN_FACILITIES}->{ $vlan_name } and $self->{VLAN_FACILITIES}->{ $vlan_name }->{collect_capacity})
-                or ($self->{VLAN_FACILITIES}->{ '*' } and $self->{VLAN_FACILITIES}->{ '*' }->{collect_capacity}) ) {
+        if (   ( $self->{VLAN_FACILITIES}->{$vlan_name} and $self->{VLAN_FACILITIES}->{$vlan_name}->{collect_capacity} )
+            or ( $self->{VLAN_FACILITIES}->{'*'} and $self->{VLAN_FACILITIES}->{'*'}->{collect_capacity} ) )
+        {
 
-            push @ret_counters, {
-                metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name },
-                         data_type => "http://ggf.org/ns/nmwg/characteristic/interface/capacity/provisioned/2.0",
-                         values      => { capacity => $capacity },
-            };
+            push @ret_counters,
+                {
+                metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name },
+                data_type => "http://ggf.org/ns/nmwg/characteristic/interface/capacity/provisioned/2.0",
+                values => { capacity => $capacity },
+                };
         }
     }
 
-    return (0, \@ret_counters);
+    return ( 0, \@ret_counters );
 }
 
 sub handle_vcgs {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
-    unless ( $self->{CHECK_ALL_VCGS} or scalar(keys %{ $self->{VCG_FACILITIES} }) > 0 ) {
+    unless ( $self->{CHECK_ALL_VCGS} or scalar( keys %{ $self->{VCG_FACILITIES} } ) > 0 ) {
         my @tmp = ();
-        return (0, \@tmp);
+        return ( 0, \@tmp );
     }
 
     my @ret_counters = ();
 
-    $self->{LOGGER}->debug("handle_vcgs(): start");
+    $self->{LOGGER}->debug( "handle_vcgs(): start" );
 
     if ( $self->{CHECK_ALL_VCGS} or scalar( keys %{ $self->{VCG_FACILITIES} } ) > 0 ) {
         my @vcgs = ();
@@ -736,35 +776,35 @@ sub handle_vcgs {
             my ( $status, $vcgs ) = $self->{AGENT}->get_vcgs();
             if ( $status == 0 ) {
                 @vcgs = keys %{$vcgs};
-            } else {
-                $self->{LOGGER}->error("Error looking up VCGs: $vcgs");
+            }
+            else {
+                $self->{LOGGER}->error( "Error looking up VCGs: $vcgs" );
             }
         }
         else {
-            foreach my $fac (keys %{ $self->{VCG_FACILITIES} }) {
-                next if ($fac eq "*");
+            foreach my $fac ( keys %{ $self->{VCG_FACILITIES} } ) {
+                next if ( $fac eq "*" );
                 push @vcgs, $fac;
             }
         }
 
-        $self->{LOGGER}->debug("Checking vcgs: ".join(",", @vcgs));
+        $self->{LOGGER}->debug( "Checking vcgs: " . join( ",", @vcgs ) );
 
-        foreach my $vcg (@vcgs) {
-            my ($status, $res) = $self->handle_vcg($vcg);
-            if ($status != 0) {
-                return ($status, $res);
+        foreach my $vcg ( @vcgs ) {
+            my ( $status, $res ) = $self->handle_vcg( $vcg );
+            if ( $status != 0 ) {
+                return ( $status, $res );
             }
 
-            foreach my $counter (@{ $res }) {
+            foreach my $counter ( @{$res} ) {
                 push @ret_counters, $counter;
             }
         }
     }
 
-    $self->{LOGGER}->debug("handle_vcgs(): stop");
+    $self->{LOGGER}->debug( "handle_vcgs(): stop" );
 
-
-    return (0, \@ret_counters);
+    return ( 0, \@ret_counters );
 }
 
 sub handle_vcg {
@@ -789,14 +829,14 @@ sub handle_vcg {
         }
     }
 
-    unless ($vcg) {
-        return (0, \@ret_counters);
+    unless ( $vcg ) {
+        return ( 0, \@ret_counters );
     }
 
     my $oper_status;
     my $admin_status;
 
-    $self->{LOGGER}->debug("VCG: ".Dumper($vcg));
+    $self->{LOGGER}->debug( "VCG: " . Dumper( $vcg ) );
 
     if ( $vcg->{pst} and $state_mapping{ lc( $vcg->{pst} ) } ) {
         $oper_status  = $state_mapping{ lc( $vcg->{pst} ) }->{"oper_status"};
@@ -807,35 +847,36 @@ sub handle_vcg {
         $admin_status = 4;
     }
 
-    my ($in_octets, $out_octets, $in_packets, $out_packets, $in_errors, $out_errors, $in_discards, $out_discards, $capacity, $description, $operbw);
+    my ( $in_octets, $out_octets, $in_packets, $out_packets, $in_errors, $out_errors, $in_discards, $out_discards, $capacity, $description, $operbw );
 
-    ($status, $res) = $self->{AGENT}->get_vcg_mib_pms($vcg->{name});
-    if ($status == 0) {
+    ( $status, $res ) = $self->{AGENT}->get_vcg_mib_pms( $vcg->{name} );
+    if ( $status == 0 ) {
+
         # in/out are swapped since we're measuring the 'vcg' to get the 'vlan' elements.
-        $in_packets = $res->{INTF_IN_PACKETS}->{value};
-        $out_packets = $res->{INTF_OUT_PACKETS}->{value};
-        $in_octets = $res->{INTF_IN_OCTETS}->{value};
-        $out_octets = $res->{INTF_OUT_OCTETS}->{value};
-        $in_discards = $res->{INTF_IN_DISCARDS}->{value};
+        $in_packets   = $res->{INTF_IN_PACKETS}->{value};
+        $out_packets  = $res->{INTF_OUT_PACKETS}->{value};
+        $in_octets    = $res->{INTF_IN_OCTETS}->{value};
+        $out_octets   = $res->{INTF_OUT_OCTETS}->{value};
+        $in_discards  = $res->{INTF_IN_DISCARDS}->{value};
         $out_discards = $res->{INTF_OUT_DISCARDS}->{value};
-        $in_errors = $res->{INTF_IN_ERRORS}->{value};
+        $in_errors    = $res->{INTF_IN_ERRORS}->{value};
     }
 
-    if ($vcg->{provbw}) {
-        $capacity = $vcg->{provbw}*50.112*1000*1000; # Convert to Bps
-        $operbw = $vcg->{operbw}*50.112*1000*1000;
+    if ( $vcg->{provbw} ) {
+        $capacity = $vcg->{provbw} * 50.112 * 1000 * 1000;    # Convert to Bps
+        $operbw   = $vcg->{operbw} * 50.112 * 1000 * 1000;
     }
 
     $description = $vcg->{alias};
 
-    $self->{LOGGER}->debug("Oper status: ".$oper_status);
-    $self->{LOGGER}->debug("Admin status: ".$admin_status);
+    $self->{LOGGER}->debug( "Oper status: " . $oper_status );
+    $self->{LOGGER}->debug( "Admin status: " . $admin_status );
 
     my ( $id );
-    if ( $self->{VCG_FACILITIES}->{ '*' } ) {
-        $id           = $self->{VCG_FACILITIES}->{ '*' }->{id}           if ( $self->{VCG_FACILITIES}->{ '*' }->{id} );
-        $admin_status = $self->{VCG_FACILITIES}->{ '*' }->{admin_status} if ( $self->{VCG_FACILITIES}->{ '*' }->{admin_status} );
-        $oper_status  = $self->{VCG_FACILITIES}->{ '*' }->{oper_status}  if ( $self->{VCG_FACILITIES}->{ '*' }->{oper_status} );
+    if ( $self->{VCG_FACILITIES}->{'*'} ) {
+        $id           = $self->{VCG_FACILITIES}->{'*'}->{id}           if ( $self->{VCG_FACILITIES}->{'*'}->{id} );
+        $admin_status = $self->{VCG_FACILITIES}->{'*'}->{admin_status} if ( $self->{VCG_FACILITIES}->{'*'}->{admin_status} );
+        $oper_status  = $self->{VCG_FACILITIES}->{'*'}->{oper_status}  if ( $self->{VCG_FACILITIES}->{'*'}->{oper_status} );
     }
 
     if ( $self->{VCG_FACILITIES}->{ $vcg->{name} } ) {
@@ -844,93 +885,108 @@ sub handle_vcg {
         $oper_status  = $self->{VCG_FACILITIES}->{ $vcg->{name} }->{oper_status}  if ( $self->{VCG_FACILITIES}->{ $vcg->{name} }->{oper_status} );
     }
 
-    $self->{LOGGER}->debug("Oper status: ".$oper_status);
-    $self->{LOGGER}->debug("Admin status: ".$admin_status);
+    $self->{LOGGER}->debug( "Oper status: " . $oper_status );
+    $self->{LOGGER}->debug( "Admin status: " . $admin_status );
 
     # Oper/Admin status
-    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_oper_status})
-            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_oper_status}) ) {
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, description => $description, capacity => $capacity },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/interface/status/operational/2.0",
-                     values      => { oper_status => $oper_status },
-        };
+    if (   ( $self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_oper_status} )
+        or ( $self->{VCG_FACILITIES}->{'*'} and $self->{VCG_FACILITIES}->{'*'}->{collect_oper_status} ) )
+    {
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, description => $description, capacity => $capacity },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/operational/2.0",
+            values => { oper_status => $oper_status },
+            };
     }
 
-    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_admin_status})
-            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_admin_status}) ) {
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, description => $description, capacity => $capacity },
-                     data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/administrative/2.0",
-                     values      => { admin_status => $admin_status },
-        };
+    if (   ( $self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_admin_status} )
+        or ( $self->{VCG_FACILITIES}->{'*'} and $self->{VCG_FACILITIES}->{'*'}->{collect_admin_status} ) )
+    {
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, description => $description, capacity => $capacity },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/administrative/2.0",
+            values => { admin_status => $admin_status },
+            };
     }
 
     # Add 'utilization' counters
-    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_utilization})
-            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_utilization}) ) {
+    if (   ( $self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_utilization} )
+        or ( $self->{VCG_FACILITIES}->{'*'} and $self->{VCG_FACILITIES}->{'*'}->{collect_utilization} ) )
+    {
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, direction => "in" },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
-                     values      => { utilization => $in_octets },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, direction => "in" },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
+            values => { utilization => $in_octets },
+            };
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name},  direction => "out" },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
-                     values      => { utilization => $out_octets },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, direction => "out" },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0",
+            values => { utilization => $out_octets },
+            };
     }
 
     # Add 'discard' counters
-    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_discards})
-            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_discards}) ) {
+    if (   ( $self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_discards} )
+        or ( $self->{VCG_FACILITIES}->{'*'} and $self->{VCG_FACILITIES}->{'*'}->{collect_discards} ) )
+    {
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name},  direction => "in" },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
-                     values      => { discards => $in_discards },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, direction => "in" },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
+            values => { discards => $in_discards },
+            };
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name},  direction => "out" },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
-                     values      => { discards => $out_discards },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, direction => "out" },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/discards/2.0",
+            values => { discards => $out_discards },
+            };
     }
 
     # Add 'error' counter
-    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_errors})
-            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_errors}) ) {
+    if (   ( $self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_errors} )
+        or ( $self->{VCG_FACILITIES}->{'*'} and $self->{VCG_FACILITIES}->{'*'}->{collect_errors} ) )
+    {
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name},  direction => "in" },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/errors/2.0",
-                     values      => { errors => $in_errors },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, direction => "in" },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/errors/2.0",
+            values => { errors => $in_errors },
+            };
     }
 
     # Port Capacity
-    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_capacity})
-            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_capacity}) ) {
+    if (   ( $self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_capacity} )
+        or ( $self->{VCG_FACILITIES}->{'*'} and $self->{VCG_FACILITIES}->{'*'}->{collect_capacity} ) )
+    {
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name} },
-                     data_type => "http://ggf.org/ns/nmwg/characteristic/interface/capacity/provisioned/2.0",
-                     values      => { capacity => $capacity },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name} },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/interface/capacity/provisioned/2.0",
+            values => { capacity => $capacity },
+            };
 
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name} },
-                     data_type => "http://ggf.org/ns/nmwg/characteristic/interface/capacity/actual/2.0",
-                     values      => { capacity => $operbw },
-        };
+        push @ret_counters,
+            {
+            metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name} },
+            data_type => "http://ggf.org/ns/nmwg/characteristic/interface/capacity/actual/2.0",
+            values => { capacity => $operbw },
+            };
     }
 
-    $self->{LOGGER}->debug("Counters: ".Dumper(\@ret_counters));
+    $self->{LOGGER}->debug( "Counters: " . Dumper( \@ret_counters ) );
 
-    return (0, \@ret_counters);
+    return ( 0, \@ret_counters );
 }
 
 =head2 checkVCG( $self, $vcg_name )

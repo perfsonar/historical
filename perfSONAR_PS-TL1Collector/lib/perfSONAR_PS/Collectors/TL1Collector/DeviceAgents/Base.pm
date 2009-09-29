@@ -82,13 +82,13 @@ sub run {
     my %metadata_added    = ();
     my %topology_id_added = ();
 
-    my $initial_pause = $$%30;
-    $self->{LOGGER}->debug("Initial pause time: $initial_pause");
-    sleep($initial_pause);
+    my $initial_pause = $$ % 30;
+    $self->{LOGGER}->debug( "Initial pause time: $initial_pause" );
+    sleep( $initial_pause );
 
     while ( 1 ) {
         if ( $self->{NEXT_RUNTIME} ) {
-            $self->{LOGGER}->debug("Sleeping for : ".($self->{NEXT_RUNTIME} - time ));
+            $self->{LOGGER}->debug( "Sleeping for : " . ( $self->{NEXT_RUNTIME} - time ) );
             sleep( $self->{NEXT_RUNTIME} - time );
         }
 
@@ -113,45 +113,48 @@ sub run {
         $self->{LOGGER}->debug( "Facilities: " . Dumper( $res ) );
         my $time = time;
 
-        foreach my $counter (@{ $res }) {
+        foreach my $counter ( @{$res} ) {
             my $metadata = $counter->{metadata};
 
             unless ( $counter->{metadata}->{urn} ) {
                 my $name = $counter->{metadata}->{port_name};
-                my $id = $self->{IDENTIFIER_PATTERN};
+                my $id   = $self->{IDENTIFIER_PATTERN};
                 $id =~ s/\%facility%/$name/g;
                 $metadata->{urn} = $id;
             }
-            
-            ($status, $res) = $self->{DATA_CLIENT}->add_port_metadata({
-                                            data_type => $counter->{data_type},
-                                            urn => $metadata->{urn},
-                                            host_name => $metadata->{host_name},
-                                            port_name => $metadata->{port_name},
-                                            direction => $metadata->{direction},
-                                            capacity  => $metadata->{capacity},
-                                            description => $metadata->{description},
-                                        });
 
-            unless ($status == 0) {
-                $self->{LOGGER}->error("Couldn't save data of type ".$counter->{data_type}." about element: ".$metadata->{urn}.": $res");
+            ( $status, $res ) = $self->{DATA_CLIENT}->add_port_metadata(
+                {
+                    data_type   => $counter->{data_type},
+                    urn         => $metadata->{urn},
+                    host_name   => $metadata->{host_name},
+                    port_name   => $metadata->{port_name},
+                    direction   => $metadata->{direction},
+                    capacity    => $metadata->{capacity},
+                    description => $metadata->{description},
+                }
+            );
+
+            unless ( $status == 0 ) {
+                $self->{LOGGER}->error( "Couldn't save data of type " . $counter->{data_type} . " about element: " . $metadata->{urn} . ": $res" );
                 next;
             }
 
-            if ($status != 0) {
+            if ( $status != 0 ) {
                 my $msg = "Error checking for existing metdata: $res";
-                $self->{LOGGER}->debug($msg);
+                $self->{LOGGER}->debug( $msg );
                 next;
             }
 
             my $key = $res->{id};
 
-            if ($metadata->{direction}) {
-                $self->{LOGGER}->debug("Key: $key URN: $metadata->{urn} direction: $metadata->{direction} data_type: $counter->{data_type}");
-            } else {
-                $self->{LOGGER}->debug("Key: $key URN: $metadata->{urn} direction: both data_type: $counter->{data_type}");
+            if ( $metadata->{direction} ) {
+                $self->{LOGGER}->debug( "Key: $key URN: $metadata->{urn} direction: $metadata->{direction} data_type: $counter->{data_type}" );
             }
-            $self->{DATA_CLIENT}->add_data({ metadata_key => $key, time => $time, values => $counter->{values} });
+            else {
+                $self->{LOGGER}->debug( "Key: $key URN: $metadata->{urn} direction: both data_type: $counter->{data_type}" );
+            }
+            $self->{DATA_CLIENT}->add_data( { metadata_key => $key, time => $time, values => $counter->{values} } );
         }
 
         $self->disconnect();

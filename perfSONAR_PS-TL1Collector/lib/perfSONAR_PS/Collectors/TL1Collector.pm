@@ -72,16 +72,16 @@ sub init {
     );
 
     # Creates the database client object that will be used by all the status collector agents
-    my ( $status, $res ) = $self->create_database_client( { config => $args->{conf} , directory_offset => $args->{directory_offset} });
+    my ( $status, $res ) = $self->create_database_client( { config => $args->{conf}, directory_offset => $args->{directory_offset} } );
     if ( $status != 0 ) {
         return ( $status, $res );
     }
 
     my $database_client = $res;
 
-    $self->{LOGGER}->debug("Creating workers");
+    $self->{LOGGER}->debug( "Creating workers" );
     ( $status, $res ) = $self->create_workers( { conf => $args->{conf}, database_client => $database_client, directory_offset => $args->{directory_offset} } );
-    $self->{LOGGER}->debug("Done creating workers");
+    $self->{LOGGER}->debug( "Done creating workers" );
     if ( $status != 0 ) {
         return ( $status, $res );
     }
@@ -92,8 +92,8 @@ sub init {
         return ( -1, $msg );
     }
 
-    $self->{CONF}      = $args->{conf};
-    $self->{WORKERS}   = $res;
+    $self->{CONF}    = $args->{conf};
+    $self->{WORKERS} = $res;
 
     return ( 0, q{} );
 }
@@ -123,17 +123,17 @@ sub run {
     }
 
     # This loop tracks the children, and restarts any that exit.
-    while(scalar(keys %{ $self->{CHILDREN} }) > 0) {
-        last if ($self->{IS_EXITING});
+    while ( scalar( keys %{ $self->{CHILDREN} } ) > 0 ) {
+        last if ( $self->{IS_EXITING} );
 
         my $pid;
-        do { 
-            $pid = waitpid(-1, WNOHANG);
-            if ($pid > 0) {
+        do {
+            $pid = waitpid( -1, WNOHANG );
+            if ( $pid > 0 ) {
                 my $worker = $self->{CHILDREN}->{$pid};
-                delete($self->{CHILDREN}->{$pid});
+                delete( $self->{CHILDREN}->{$pid} );
 
-                $self->{LOGGER}->warn("Process $pid exited. Restarting worker");
+                $self->{LOGGER}->warn( "Process $pid exited. Restarting worker" );
 
                 my $new_pid = fork();
                 if ( $new_pid == 0 ) {
@@ -146,9 +146,9 @@ sub run {
 
                 $self->{CHILDREN}->{$new_pid} = $worker;
             }
-        } while ($pid > 0);
+        } while ( $pid > 0 );
 
-        sleep(1);
+        sleep( 1 );
     }
 
     return;
@@ -206,14 +206,14 @@ sub create_workers {
         }
     );
 
-    my $config           = $args->{conf};
-    my $database_client  = $args->{database_client};
+    my $config          = $args->{conf};
+    my $database_client = $args->{database_client};
 
     my @workers = ();
 
-    $self->{LOGGER}->debug("Creating device workers");
+    $self->{LOGGER}->debug( "Creating device workers" );
     my ( $status, $res ) = $self->create_device_workers( { config => $config, database_client => $database_client } );
-    $self->{LOGGER}->debug("Done creating device workers");
+    $self->{LOGGER}->debug( "Done creating device workers" );
     if ( $status == -1 ) {
         return ( $status, $res );
     }
@@ -226,20 +226,20 @@ sub create_workers {
         return ( -1, "No elements or devices to measure" );
     }
 
-    unless ($config->{store_file}) {
+    unless ( $config->{store_file} ) {
         my $msg = "No store file specified (store_file)";
-        return (-1, $msg);
+        return ( -1, $msg );
     }
 
     my $store_file_regeneration_period = 30;
-    $store_file_regeneration_period = $config->{store_file_regeneration_period} if ($config->{store_file_regeneration_period});
+    $store_file_regeneration_period = $config->{store_file_regeneration_period} if ( $config->{store_file_regeneration_period} );
 
-    unless ($config->{store_file} =~ /^\//) {
-        $config->{store_file} = $args->{directory_offset}."/".$config->{store_file} if ($args->{directory_offset});
+    unless ( $config->{store_file} =~ /^\// ) {
+        $config->{store_file} = $args->{directory_offset} . "/" . $config->{store_file} if ( $args->{directory_offset} );
     }
 
     my $store_file_worker = perfSONAR_PS::Collectors::TL1Collector::StoreFileGenerationWorker->new();
-    $status = $store_file_worker->init({ store_file => $config->{store_file}, data_client => $database_client, regeneration_period => $store_file_regeneration_period });
+    $status = $store_file_worker->init( { store_file => $config->{store_file}, data_client => $database_client, regeneration_period => $store_file_regeneration_period } );
     unless ( $status == 0 ) {
         my $msg = "Couldn't create store file worker";
         return ( -1, $msg );
@@ -289,9 +289,9 @@ sub create_device_workers {
         foreach my $switch ( @{ $config->{"switch"} } ) {
             my $switch_config = mergeHash( $config, $switch, () );
 
-            $self->{LOGGER}->debug("Creating switch workers");
+            $self->{LOGGER}->debug( "Creating switch workers" );
             my ( $status, $res ) = $self->create_switch_worker( { config => $switch_config, database_client => $database_client } );
-            $self->{LOGGER}->debug("Done creating switch workers");
+            $self->{LOGGER}->debug( "Done creating switch workers" );
             if ( $status != 0 ) {
                 return ( -1, $res );
             }
@@ -333,7 +333,7 @@ sub create_database_client {
         return ( -1, $msg );
     }
 
-    my ($dbistring, $username, $password);
+    my ( $dbistring, $username, $password );
 
     if ( lc( $config->{"metadata_db_type"} ) eq "sqlite" ) {
 
@@ -372,22 +372,22 @@ sub create_database_client {
             $dbistring .= ":" . $config->{"metadata_db_port"};
         }
 
-	$username = $config->{metadata_db_username};
-	$password = $config->{metadata_db_password};
+        $username = $config->{metadata_db_username};
+        $password = $config->{metadata_db_password};
     }
     else {
         my $msg = "Unknown database type: " . $config->{metadata_db_type};
         return ( -1, $msg );
     }
 
-    my $max_timeout = $config->{"collection_interval"}*3;
-    $max_timeout = $config->{"max_timeout"} if ($config->{"max_timeout"});
+    my $max_timeout = $config->{"collection_interval"} * 3;
+    $max_timeout = $config->{"max_timeout"} if ( $config->{"max_timeout"} );
 
     my $data_client = perfSONAR_PS::DB::TL1Counters->new();
-    my ($status, $res) = $data_client->init({ data_directory => $config->{"rrd_directory"}, metadata_dbistring => $dbistring, metadata_username => $username, metadata_password => $password, max_timeout => $max_timeout });
-    if ($status != 0) {
+    my ( $status, $res ) = $data_client->init( { data_directory => $config->{"rrd_directory"}, metadata_dbistring => $dbistring, metadata_username => $username, metadata_password => $password, max_timeout => $max_timeout } );
+    if ( $status != 0 ) {
         my $msg = "Problem creating database client: $res";
-        $self->{LOGGER}->debug($msg);
+        $self->{LOGGER}->debug( $msg );
         return ( -1, $msg );
     }
 
@@ -406,13 +406,13 @@ sub create_switch_worker {
     my $args = validateParams(
         @args,
         {
-            database_client  => 1,
-            config           => 1,
+            database_client => 1,
+            config          => 1,
         }
     );
 
-    my $config           = $args->{config};
-    my $database_client  = $args->{database_client};
+    my $config          = $args->{config};
+    my $database_client = $args->{database_client};
 
     unless ( $config->{type} ) {
         my $msg = "Switch does not have a type element";
@@ -423,11 +423,12 @@ sub create_switch_worker {
         return $self->create_switch_worker_snmp( { config => $config, database_client => $database_client } );
     }
     elsif ( lc( $config->{type} eq "tl1" ) ) {
-        $self->{LOGGER}->debug("Creating tl1 worker");
+        $self->{LOGGER}->debug( "Creating tl1 worker" );
         return $self->create_switch_worker_tl1( { config => $config, database_client => $database_client } );
-        $self->{LOGGER}->debug("Done creating tl1 worker");
-    } else {
-        return (-1, "Unknown switch type");
+        $self->{LOGGER}->debug( "Done creating tl1 worker" );
+    }
+    else {
+        return ( -1, "Unknown switch type" );
     }
 }
 
@@ -443,13 +444,13 @@ sub create_switch_worker_tl1 {
     my $args = validateParams(
         @args,
         {
-            database_client  => 1,
-            config           => 1,
+            database_client => 1,
+            config          => 1,
         }
     );
 
-    my $config           = $args->{config};
-    my $database_client  = $args->{database_client};
+    my $config          = $args->{config};
+    my $database_client = $args->{database_client};
 
     unless ( $config->{model} ) {
         my $msg = "TL1 switch does not a 'model'";
@@ -457,9 +458,9 @@ sub create_switch_worker_tl1 {
     }
 
     if ( lc( $config->{model} ) eq "coredirector" ) {
-        $self->{LOGGER}->debug("Creating coredirector worker");
+        $self->{LOGGER}->debug( "Creating coredirector worker" );
         return $self->create_switch_worker_coredirector( { config => $config, database_client => $database_client } );
-        $self->{LOGGER}->debug("Done creating coredirector worker");
+        $self->{LOGGER}->debug( "Done creating coredirector worker" );
     }
     elsif ( lc( $config->{model} ) eq "ome" ) {
         return $self->create_switch_worker_ome( { config => $config, database_client => $database_client } );
@@ -484,13 +485,13 @@ sub create_switch_worker_snmp {
     my $args = validateParams(
         @args,
         {
-            database_client  => 1,
-            config           => 1,
+            database_client => 1,
+            config          => 1,
         }
     );
 
-    my $config           = $args->{config};
-    my $database_client  = $args->{database_client};
+    my $config          = $args->{config};
+    my $database_client = $args->{database_client};
 
     unless ( $config->{address} ) {
         my $msg = "SNMP switch has no address";
@@ -558,13 +559,13 @@ sub create_switch_worker_coredirector {
     my $args = validateParams(
         @args,
         {
-            database_client  => 1,
-            config           => 1,
+            database_client => 1,
+            config          => 1,
         }
     );
 
-    my $config           = $args->{config};
-    my $database_client  = $args->{database_client};
+    my $config          = $args->{config};
+    my $database_client = $args->{database_client};
 
     unless ( $config->{address} ) {
         my $msg = "CoreDirector switch has no address";
@@ -615,10 +616,10 @@ sub create_switch_worker_coredirector {
             check_all_vcgs           => $check_all_vcgs,
             check_all_vlans          => $check_all_vlans,
 
-            vlan_facilities          => $config->{vlan},
-            vcg_facilities           => $config->{vcg},
-            ethernet_facilities      => $config->{ethernet},
-            optical_facilities       => $config->{optical},
+            vlan_facilities     => $config->{vlan},
+            vcg_facilities      => $config->{vcg},
+            ethernet_facilities => $config->{ethernet},
+            optical_facilities  => $config->{optical},
 
             polling_interval   => $polling_interval,
             identifier_pattern => $identifier_pattern,
@@ -628,7 +629,7 @@ sub create_switch_worker_coredirector {
         return ( -1, "Couldn't initialize CoreDirector module" );
     }
 
-    $self->{LOGGER}->debug("Created coredirector worker");
+    $self->{LOGGER}->debug( "Created coredirector worker" );
 
     return ( 0, $worker );
 }
@@ -645,13 +646,13 @@ sub create_switch_worker_ome {
     my $args = validateParams(
         @args,
         {
-            database_client  => 1,
-            config           => 1,
+            database_client => 1,
+            config          => 1,
         }
     );
 
-    my $config           = $args->{config};
-    my $database_client  = $args->{database_client};
+    my $config          = $args->{config};
+    my $database_client = $args->{database_client};
 
     unless ( $config->{address} ) {
         my $msg = "OME switch has no address";
@@ -740,13 +741,13 @@ sub create_switch_worker_hdxc {
     my $args = validateParams(
         @args,
         {
-            database_client  => 1,
-            config           => 1,
+            database_client => 1,
+            config          => 1,
         }
     );
 
-    my $config           = $args->{config};
-    my $database_client  = $args->{database_client};
+    my $config          = $args->{config};
+    my $database_client = $args->{database_client};
 
     unless ( $config->{address} ) {
         my $msg = "HDXc switch has no address";

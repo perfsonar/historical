@@ -41,16 +41,16 @@ sub init {
     my ( $self, @args ) = @_;
     my $args = validateParams( @args, { regeneration_period => 1, store_file => 1, data_client => 1 } );
 
-    my $status = $self->SUPER::init({ data_client => $args->{data_client} });
+    my $status = $self->SUPER::init( { data_client => $args->{data_client} } );
 
-    if ($status != 0) {
+    if ( $status != 0 ) {
         return $status;
     }
 
     $self->{REGENERATION_PERIOD} = $args->{regeneration_period};
-    $self->{STORE_FILE} = $args->{store_file};
-    $self->{LOGGER}->debug("Set regeneration period to: ".$self->{REGENERATION_PERIOD});
-    $self->{LOGGER}->debug("Set store file to: ".$self->{STORE_FILE});
+    $self->{STORE_FILE}          = $args->{store_file};
+    $self->{LOGGER}->debug( "Set regeneration period to: " . $self->{REGENERATION_PERIOD} );
+    $self->{LOGGER}->debug( "Set store file to: " . $self->{STORE_FILE} );
     return 0;
 
 }
@@ -66,37 +66,39 @@ sub run {
 
     my $next_runtime;
 
-    while (1) {
-        if ($next_runtime) {
-            sleep($next_runtime - time);
+    while ( 1 ) {
+        if ( $next_runtime ) {
+            sleep( $next_runtime - time );
         }
 
         # Set the next runtime before we do the work so that we update at that
         # time period no matter how long this takes.
         $next_runtime = time + $self->{REGENERATION_PERIOD};
 
-        my $file_contents = $self->{DATA_CLIENT}->generate_store_file({});
-        my $md5sum = md5_hex($file_contents);
-        unless ($self->{PREV_STORE_HASH} and $self->{PREV_STORE_HASH} eq $md5sum) {
+        my $file_contents = $self->{DATA_CLIENT}->generate_store_file( {} );
+        my $md5sum = md5_hex( $file_contents );
+        unless ( $self->{PREV_STORE_HASH} and $self->{PREV_STORE_HASH} eq $md5sum ) {
             my $status;
-            if (-f $self->{STORE_FILE}) {
+            if ( -f $self->{STORE_FILE} ) {
+
                 # Don't blow away the file if it already exists. We don't want
                 # to blow it away until we have a lock on it.
-                $status = open(STORE, "+<", $self->{STORE_FILE});
-            } else {
-                $status = open(STORE, ">", $self->{STORE_FILE});
+                $status = open( STORE, "+<", $self->{STORE_FILE} );
             }
-            unless ($status) {
-                $self->{LOGGER}->error("Couldn't open ".$self->{STORE_FILE}." for writing");
+            else {
+                $status = open( STORE, ">", $self->{STORE_FILE} );
+            }
+            unless ( $status ) {
+                $self->{LOGGER}->error( "Couldn't open " . $self->{STORE_FILE} . " for writing" );
             }
             else {
                 flock STORE, LOCK_EX;
                 truncate STORE, 0;
-                seek  STORE, 0, 0;
+                seek STORE, 0, 0;
                 print STORE $file_contents;
-                close(STORE);  # Closing will auto-unlock, and make sure that the
-                               # data is on disk before finishing.
-                $self->{LOGGER}->debug("Wrote ".$self->{STORE_FILE});
+                close( STORE );    # Closing will auto-unlock, and make sure that the
+                                   # data is on disk before finishing.
+                $self->{LOGGER}->debug( "Wrote " . $self->{STORE_FILE} );
 
                 $self->{PREV_STORE_HASH} = $md5sum;
             }
