@@ -135,8 +135,11 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Tue Sep 22 2009 zurawski@internet2.edu 3.1-9
+* Tue Sep 29 2009 zurawski@internet2.edu 3.1-9
 - useradd option change
+- Bugfixes
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=279
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=215
 
 * Fri Sep 4 2009 zurawski@internet2.edu 3.1-8
 - RPM generation error fixed

@@ -100,7 +100,7 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Tue Sep 22 2009 zurawski@internet2.edu 3.1-8
+* Tue Sep 29 2009 zurawski@internet2.edu 3.1-8
 - useradd option change
 
 * Fri Sep 4 2009 zurawski@internet2.edu 3.1-7

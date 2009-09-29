@@ -99,8 +99,11 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/*
 
 %changelog
-* Tue Sep 22 2009 zurawski@internet2.edu 3.1-5
+* Tue Sep 28 2009 zurawski@internet2.edu 3.1-5
 - useradd option change
+- Bugfixes
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=323
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=317
 
 * Fri Sep 4 2009 zurawski@internet2.edu 3.1-4
 - RPM generation error fixed
