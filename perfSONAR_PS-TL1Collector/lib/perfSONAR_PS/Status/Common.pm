@@ -127,11 +127,19 @@ sub get_new_admin_status {
 sub admin_status_to_num {
     my ( $admin_status ) = @_;
 
+    if (int($admin_status) == $admin_status) {
+        return $admin_status;
+    }
+
     return $admin_status_mapping{$admin_status};
 }
 
 sub oper_status_to_num {
     my ( $oper_status ) = @_;
+
+    if (int($oper_status) == $oper_status) {
+        return $oper_status;
+    }
 
     return $oper_status_mapping{$oper_status};
 }

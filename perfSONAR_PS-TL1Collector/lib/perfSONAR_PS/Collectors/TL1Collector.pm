@@ -616,6 +616,7 @@ sub create_switch_worker_coredirector {
             check_all_vlans          => $check_all_vlans,
 
             vlan_facilities          => $config->{vlan},
+            vcg_facilities           => $config->{vcg},
             ethernet_facilities      => $config->{ethernet},
             optical_facilities       => $config->{optical},
 

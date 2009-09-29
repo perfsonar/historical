@@ -33,10 +33,12 @@ use fields 'AGENT', 'OPTICAL_FACILITIES', 'ETHERNET_FACILITIES', 'VLAN_FACILITIE
 # 1 = up
 # 2 = down
 # 3 = degraded
+# 4 = unknown
 
 # Admin Status:
 # 1 = normaloperation
 # 3 = maintenance
+# 4 = unknown
 my %state_mapping = (
     "is-nr"    => { "oper_status" => 1,     "admin_status" => 1 },
     "is-anr"   => { "oper_status" => 3,     "admin_status" => 1 },
@@ -178,6 +180,13 @@ sub check_facilities {
         }
     }
 
+    ($status, $res) = $self->handle_vcgs();
+    if ($status == 0) {
+        foreach my $counter (@{ $res }) {
+            push @ret_counters, $counter;
+        }
+    }
+
     return ( 0, \@ret_counters);
 }
 
@@ -242,8 +251,8 @@ sub handle_ethernet_port {
     my $admin_status;
 
     unless ( $port->{pst} and $state_mapping{ lc( $port->{pst} ) } ) {
-        $oper_status  = "unknown";
-        $admin_status = "unknown";
+        $oper_status  = 4;
+        $admin_status = 4;
     }
     else {
         $oper_status  = $state_mapping{ lc( $port->{pst} ) }->{"oper_status"};
@@ -429,8 +438,8 @@ sub handle_optical_port {
     my $admin_status;
 
     unless ( $port->{pst} and $state_mapping{ lc( $port->{pst} ) } ) {
-        $oper_status  = "unknown";
-        $admin_status = "unknown";
+        $oper_status  = 4;
+        $admin_status = 4;
     }
     else {
         $oper_status  = $state_mapping{ lc( $port->{pst} ) }->{"oper_status"};
@@ -569,12 +578,12 @@ sub handle_vlan_ports {
                     ( $status, $new_oper_status, $new_admin_status ) = $self->checkETH( $eflow->{ $type . "name" } );
                 }
                 else {
-                    $oper_status = "unknown";
+                    $oper_status = 4;
                     last;
                 }
 
                 if ( $status == -1 ) {
-                    $oper_status = "unknown";
+                    $oper_status = 4;
                     last;
                 }
 
@@ -712,13 +721,18 @@ sub handle_vlan_ports {
 sub handle_vcgs {
     my ($self) = @_;
 
+    unless ( $self->{CHECK_ALL_VCGS} or scalar(keys %{ $self->{VCG_FACILITIES} }) > 0 ) {
+        my @tmp = ();
+        return (0, \@tmp);
+    }
+
     my @ret_counters = ();
 
     $self->{LOGGER}->debug("handle_vcgs(): start");
 
-    if ( $self->{CHECK_ALL_VCG_PORTS} or scalar( keys %{ $self->{VCG_FACILITIES} } ) > 0 ) {
+    if ( $self->{CHECK_ALL_VCGS} or scalar( keys %{ $self->{VCG_FACILITIES} } ) > 0 ) {
         my @vcgs = ();
-        if ( $self->{CHECK_ALL_VCG_PORTS} ) {
+        if ( $self->{CHECK_ALL_VCGS} ) {
             my ( $status, $vcgs ) = $self->{AGENT}->get_vcgs();
             if ( $status == 0 ) {
                 @vcgs = keys %{$vcgs};
@@ -778,16 +792,19 @@ sub handle_vcg {
     unless ($vcg) {
         return (0, \@ret_counters);
     }
+
     my $oper_status;
     my $admin_status;
 
-    unless ( $vcg->{pst} and $state_mapping{ lc( $vcg->{pst} ) } ) {
-        $oper_status  = "unknown";
-        $admin_status = "unknown";
-    }
-    else {
+    $self->{LOGGER}->debug("VCG: ".Dumper($vcg));
+
+    if ( $vcg->{pst} and $state_mapping{ lc( $vcg->{pst} ) } ) {
         $oper_status  = $state_mapping{ lc( $vcg->{pst} ) }->{"oper_status"};
         $admin_status = $state_mapping{ lc( $vcg->{pst} ) }->{"admin_status"};
+    }
+    else {
+        $oper_status  = 4;
+        $admin_status = 4;
     }
 
     my ($in_octets, $out_octets, $in_packets, $out_packets, $in_errors, $out_errors, $in_discards, $out_discards, $capacity, $description, $operbw);
@@ -811,6 +828,9 @@ sub handle_vcg {
 
     $description = $vcg->{alias};
 
+    $self->{LOGGER}->debug("Oper status: ".$oper_status);
+    $self->{LOGGER}->debug("Admin status: ".$admin_status);
+
     my ( $id );
     if ( $self->{VCG_FACILITIES}->{ '*' } ) {
         $id           = $self->{VCG_FACILITIES}->{ '*' }->{id}           if ( $self->{VCG_FACILITIES}->{ '*' }->{id} );
@@ -823,6 +843,9 @@ sub handle_vcg {
         $admin_status = $self->{VCG_FACILITIES}->{ $vcg->{name} }->{admin_status} if ( $self->{VCG_FACILITIES}->{ $vcg->{name} }->{admin_status} );
         $oper_status  = $self->{VCG_FACILITIES}->{ $vcg->{name} }->{oper_status}  if ( $self->{VCG_FACILITIES}->{ $vcg->{name} }->{oper_status} );
     }
+
+    $self->{LOGGER}->debug("Oper status: ".$oper_status);
+    $self->{LOGGER}->debug("Admin status: ".$admin_status);
 
     # Oper/Admin status
     if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_oper_status})
@@ -888,27 +911,6 @@ sub handle_vcg {
         };
     }
 
-    # Oper/Admin status
-    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_oper_status})
-            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_oper_status}) ) {
-
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name} },
-                     data_type   => "http://ggf.org/ns/nmwg/characteristic/interface/status/operational/2.0",
-                     values      => { oper_status => oper_status_to_num($oper_status) },
-        };
-    }
-
-    if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_admin_status})
-            or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_admin_status}) ) {
-
-        push @ret_counters, {
-            metadata => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name} },
-                     data_type => "http://ggf.org/ns/nmwg/characteristic/interface/status/administrative/2.0",
-                     values      => { admin_status => admin_status_to_num($admin_status) },
-        };
-    }
-
     # Port Capacity
     if ( ($self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_capacity})
             or ($self->{VCG_FACILITIES}->{ '*' } and $self->{VCG_FACILITIES}->{ '*' }->{collect_capacity}) ) {
@@ -925,6 +927,8 @@ sub handle_vcg {
                      values      => { capacity => $operbw },
         };
     }
+
+    $self->{LOGGER}->debug("Counters: ".Dumper(\@ret_counters));
 
     return (0, \@ret_counters);
 }
