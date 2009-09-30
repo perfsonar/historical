@@ -1079,14 +1079,21 @@ NetAddr::IP is not there.  Cpan will not install it, perhaps due to a missing Te
  }}}
  
 This one writes no error after `make test`.  Yum install for Lookup Service still fails for the same reasons; it seems that
-Hash::Merge and NetAddr::IP fail due to dependencies that Cpan cannot yet resolve.
+Hash::Merge and NetAddr::IP fail due to dependencies that Cpan cannot yet resolve; or, the manual installation failed, perhaps because
+environment variables deep in the system bowels were not updated (thus rendering the system unaware that the packages are in fact installed).
 
-Before the clouds definitely close, a hint from Jason Zurawsky directs to type "yum install" for the Lookup Service in this way:
+Before we could find the source of the problem, the Internet2 repository was updated in order to include both of the packages that _yum_ could not resolve.  Now:
 
  `sudo yum install nano perl-perfSONAR_PS-LookupService --nogpgcheck`
  
-And this works.  It remains to be explained why the addition of "nano" and/or possibly "--nogpgcheck" solves the issue.
+And this works.  Adding the "nano" editor and the last --nogpgcheck option were suggested by Jason Zurawsky, but the original _yum_ install command should also work.
 
+
+
+
+ 
+ 
+ 
 
 
 
