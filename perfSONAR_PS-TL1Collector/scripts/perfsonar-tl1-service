@@ -34,14 +34,14 @@ do
     if [ -f $FULL_PIDFILE ] ; then
         PID=`cat $FULL_PIDFILE`
         if [ "x$PID" != "x" ] && kill -0 $PID 2>/dev/null ; then
-            STATUS="Status Service (pid $PID) running"
+            STATUS="TL1 Service (pid $PID) running"
             RUNNING=1
         else
-            STATUS="Status Service (pid $PID?) not running"
+            STATUS="TL1 Service (pid $PID?) not running"
             RUNNING=0
         fi
     else
-        STATUS="Status Service (no pid file) not running"
+        STATUS="TL1 Service (no pid file) not running"
         RUNNING=0
     fi 
 
@@ -50,9 +50,9 @@ do
 	echo $PERFSONAR
 
 	if $PERFSONAR ; then
-	    echo "$0 $ARG: Status Service started"
+	    echo "$0 $ARG: TL1 Service started"
 	else
-	    echo "$0 $ARG: Status Service could not be started"
+	    echo "$0 $ARG: TL1 Service could not be started"
 	    ERROR=3
 	fi
 	;;
@@ -62,9 +62,9 @@ do
 	    continue
 	fi
 	if kill $PID ; then
-	    echo "$0 $ARG: Status Service stopped"
+	    echo "$0 $ARG: TL1 Service stopped"
 	else
-	    echo "$0 $ARG: Status Service could not be stopped"
+	    echo "$0 $ARG: TL1 Service could not be stopped"
 	    ERROR=4
 	fi
 	;;
@@ -75,9 +75,9 @@ do
 	echo "usage: $0 (start|stop|restart|help)"
 	cat <<EOF
 
-start      - start Status Service
-stop       - stop Status Service
-restart    - restart Status Service if running by sending a SIGHUP or start if 
+start      - start TL1 Service
+stop       - stop TL1 Service
+restart    - restart TL1 Service if running by sending a SIGHUP or start if 
              not running
 help       - this screen
 

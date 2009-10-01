@@ -4,16 +4,17 @@
 %define init_script_1 perfsonar-tl1-service
 %define init_script_2 perfsonar-tl1-collector
 
+%define relnum 1
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-TL1Collector
 Version:        3.1
-Release:        3.%{disttag}
+Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR-PS TL1 Collector/Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://www.internet2.edu/performance/pS-PS/
-Source0:        perfSONAR_PS-TL1Collector-%{version}.tar.gz
+Source0:        perfSONAR_PS-TL1Collector-%{version}.%{relnum}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:	perl(Carp)
@@ -51,7 +52,8 @@ Requires:	perl(Time::HiRes)
 Requires:	perl(XML::LibXML)
 Requires:	perl(base)
 Requires:	perl(lib)
-Requires:	perl(warnings)Requires:       perl
+Requires:	perl(warnings)
+Requires:       perl
 
 %description
 The perfSONAR-PS TL1Collector Service is capable of collecting and storing the
@@ -64,7 +66,7 @@ SQL capable databases.
 /usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
-%setup -q -n perfSONAR_PS-TL1Collector
+%setup -q -n perfSONAR_PS-TL1Collector-%{version}.%{relnum}
 
 %build
 
@@ -100,7 +102,7 @@ chown perfsonar:perfsonar /var/log/perfsonar
 mkdir -p /var/run/perfSONAR/tl1_collector
 chown perfsonar:perfsonar /var/run/perfSONAR/tl1_collector
 
-mkdir -p /var/lib/perfsonar/tl1_collector
+mkdir -p /var/lib/perfsonar/tl1_collector/data
 
 %{install_base}/scripts/createMetadataDB --config %{install_base}/etc/collector.conf
 

@@ -275,7 +275,7 @@ sub create_device_workers {
 
     my @workers = ();
 
-    unless ( $config->{"switch"} ) {
+    unless ( $config->{"switch"} or $cofng->{"device"} ) {
         return ( 0, \@workers );
     }
 
@@ -292,6 +292,27 @@ sub create_device_workers {
             $self->{LOGGER}->debug( "Creating switch workers" );
             my ( $status, $res ) = $self->create_switch_worker( { config => $switch_config, database_client => $database_client } );
             $self->{LOGGER}->debug( "Done creating switch workers" );
+            if ( $status != 0 ) {
+                return ( -1, $res );
+            }
+
+            push @workers, $res;
+        }
+    }
+
+    if ( $config->{"device"} ) {
+        if ( ref( $config->{"device"} ) ne "ARRAY" ) {
+            my @tmp = ();
+            push @tmp, $config->{"device"};
+            $config->{"device"} = \@tmp;
+        }
+
+        foreach my $device ( @{ $config->{"device"} } ) {
+            my $device_config = mergeHash( $config, $device, () );
+
+            $self->{LOGGER}->debug( "Creating device workers" );
+            my ( $status, $res ) = $self->create_switch_worker( { config => $device_config, database_client => $database_client } );
+            $self->{LOGGER}->debug( "Done creating device workers" );
             if ( $status != 0 ) {
                 return ( -1, $res );
             }

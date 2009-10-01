@@ -27,7 +27,7 @@ rpminstall:
 	for i in `cat MANIFEST | grep ^etc`; do  mkdir -p `dirname $(ROOTPATH)/$${i}`; if [ -e $(ROOTPATH)/$${i} ]; then install -m 640 -c $${i} $(ROOTPATH)/$${i}.new; else install -m 640 -c $${i} $(ROOTPATH)/$${i}; fi; done
 
 install:
-	for i in `ls ./etc`; do sed -i "s|/opt/perfsonar_ps/tl1_collector|${ROOTPATH}|g" ./scripts/$${i}; done
+	for i in `ls ./etc`; do sed -i "s|/opt/perfsonar_ps/tl1_collector|${ROOTPATH}|g" ./etc/$${i}; done
 	for i in `ls ./scripts`; do sed -i "s|/opt/perfsonar_ps/tl1_collector|${ROOTPATH}|g" ./scripts/$${i}; done
 	mkdir -p ${ROOTPATH}
 	tar ch --exclude=etc/* --exclude=*spec --exclude=MANIFEST --exclude=Makefile -T MANIFEST | tar x -C ${ROOTPATH}
