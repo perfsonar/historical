@@ -184,7 +184,7 @@ unless ( $DEBUGFLAG ) {
     &daemonize;
 }
 
-$PROGRAM_NAME = "perfsonar-status-collector.pl ($PID)";
+$PROGRAM_NAME = "perfsonar-tl1-collector.pl ($PID)";
 
 unlockPIDFile( $pidfile ) unless $IGNORE_PID;
 

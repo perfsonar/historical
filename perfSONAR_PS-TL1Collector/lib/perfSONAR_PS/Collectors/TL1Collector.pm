@@ -275,7 +275,7 @@ sub create_device_workers {
 
     my @workers = ();
 
-    unless ( $config->{"switch"} or $cofng->{"device"} ) {
+    unless ( $config->{"switch"} or $config->{"device"} ) {
         return ( 0, \@workers );
     }
 

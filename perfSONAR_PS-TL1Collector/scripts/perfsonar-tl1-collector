@@ -12,7 +12,7 @@ CONFDIR=${PREFIX}/etc
 RUNDIR=/var/run
 
 CONFFILE=${CONFDIR}/collector.conf
-LOGGERFILE=${CONFDIR}/collector_logger.conf
+LOGGERFILE=${CONFDIR}/collector-logger.conf
 PIDFILE=tl1_collector.pid
 
 USER=perfsonar

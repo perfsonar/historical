@@ -12,7 +12,7 @@ CONFDIR=${PREFIX}/etc
 RUNDIR=/var/run
 
 CONFFILE=${CONFDIR}/service.conf
-LOGGERFILE=${CONFDIR}/service_logger.conf
+LOGGERFILE=${CONFDIR}/service-logger.conf
 PIDFILE=tl1_service.pid
 
 USER=perfsonar
