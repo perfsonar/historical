@@ -148,7 +148,7 @@ sub init {
 =head2 check_facilities( $self )
 
 A function which is called by the Base class to check on the status of
-faciltiies. The function checks all the facilities identified, and returns an
+facilities. The function checks all the facilities identified, and returns an
 array of hashes describing each facility and its status.
 
 =cut
@@ -252,25 +252,29 @@ sub handle_ethernet_port {
     my $admin_status;
 
     unless ( $port->{pst} and $state_mapping{ lc( $port->{pst} ) } ) {
-        $oper_status  = 4;
-        $admin_status = 4;
+        $oper_status  = "unknown";
+        $admin_status = "unknown";
     }
     else {
         $oper_status  = $state_mapping{ lc( $port->{pst} ) }->{"oper_status"};
         $admin_status = $state_mapping{ lc( $port->{pst} ) }->{"admin_status"};
     }
-
     my ( $in_octets, $out_octets, $in_packets, $out_packets, $in_errors, $out_errors, $in_discards, $out_discards );
-    ( $status, $res ) = $self->{AGENT}->get_ethernet_mib_pms( $port_name );
-    if ( $status == 0 ) {
-        $in_packets   = $res->{INTF_IN_PACKETS}->{value};
-        $out_packets  = $res->{INTF_OUT_PACKETS}->{value};
-        $in_octets    = $res->{INTF_IN_OCTETS}->{value};
-        $out_octets   = $res->{INTF_OUT_OCTETS}->{value};
-        $in_discards  = $res->{INTF_IN_DISCARDS}->{value};
-        $out_discards = $res->{INTF_OUT_DISCARDS}->{value};
-        $in_errors    = $res->{INTF_IN_ERRORS}->{value};
-        $out_errors   = $res->{INTF_OUT_ERRORS}->{value};
+
+    if ($self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "collect_utilization" })
+            or $self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "collect_discards" })
+            or $self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "collect_errors" })) {
+        ( $status, $res ) = $self->{AGENT}->get_ethernet_mib_pms( $port_name );
+        if ( $status == 0 ) {
+            $in_packets   = $res->{INTF_IN_PACKETS}->{value};
+            $out_packets  = $res->{INTF_OUT_PACKETS}->{value};
+            $in_octets    = $res->{INTF_IN_OCTETS}->{value};
+            $out_octets   = $res->{INTF_OUT_OCTETS}->{value};
+            $in_discards  = $res->{INTF_IN_DISCARDS}->{value};
+            $out_discards = $res->{INTF_OUT_DISCARDS}->{value};
+            $in_errors    = $res->{INTF_IN_ERRORS}->{value};
+            $out_errors   = $res->{INTF_OUT_ERRORS}->{value};
+        }
     }
 
     my ( $capacity );
@@ -288,23 +292,20 @@ sub handle_ethernet_port {
 
     my ( $id );
 
-    if ( $self->{ETHERNET_FACILITIES}->{'*'} ) {
-        $id           = $self->{ETHERNET_FACILITIES}->{'*'}->{id}           if ( $self->{ETHERNET_FACILITIES}->{'*'}->{id} );
-        $admin_status = $self->{ETHERNET_FACILITIES}->{'*'}->{admin_status} if ( $self->{ETHERNET_FACILITIES}->{'*'}->{admin_status} );
-        $oper_status  = $self->{ETHERNET_FACILITIES}->{'*'}->{oper_status}  if ( $self->{ETHERNET_FACILITIES}->{'*'}->{oper_status} );
+    if ($self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "id" })) {
+        $id = $self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "id" });
     }
 
-    if ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } ) {
-        $id           = $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{id}           if ( $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{id} );
-        $admin_status = $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{admin_status} if ( $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{admin_status} );
-        $oper_status  = $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{oper_status}  if ( $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{oper_status} );
+    if ($self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "admin_status" })) {
+        $admin_status = $self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "admin_status" });
+    }
+
+    if ($self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "oper_status" })) {
+        $oper_status = $self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "oper_status" });
     }
 
     # Add 'utilization' counters
-    if (   ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_utilization} )
-        or ( $self->{ETHERNET_FACILITIES}->{'*'} and $self->{ETHERNET_FACILITIES}->{'*'}->{collect_utilization} ) )
-    {
-
+    if ($self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "collect_utilization" })) {
         push @ret_counters,
             {
             metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, direction => "in" },
@@ -321,9 +322,7 @@ sub handle_ethernet_port {
     }
 
     # Add 'discard' counters
-    if (   ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_discards} )
-        or ( $self->{ETHERNET_FACILITIES}->{'*'} and $self->{ETHERNET_FACILITIES}->{'*'}->{collect_discards} ) )
-    {
+    if ($self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "collect_discards" })) {
 
         push @ret_counters,
             {
@@ -341,10 +340,7 @@ sub handle_ethernet_port {
     }
 
     # Add 'error' counters
-    if (   ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_errors} )
-        or ( $self->{ETHERNET_FACILITIES}->{'*'} and $self->{ETHERNET_FACILITIES}->{'*'}->{collect_errors} ) )
-    {
-
+    if ($self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "collect_errors" })) {
         push @ret_counters,
             {
             metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, direction => "in" },
@@ -354,10 +350,7 @@ sub handle_ethernet_port {
     }
 
     # Add 'oper' status
-    if (   ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_oper_status} )
-        or ( $self->{ETHERNET_FACILITIES}->{'*'} and $self->{ETHERNET_FACILITIES}->{'*'}->{collect_oper_status} ) )
-    {
-
+    if ($self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "collect_oper_status" })) {
         push @ret_counters,
             {
             metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias} },
@@ -367,10 +360,7 @@ sub handle_ethernet_port {
     }
 
     # Add 'admin' status
-    if (   ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_admin_status} )
-        or ( $self->{ETHERNET_FACILITIES}->{'*'} and $self->{ETHERNET_FACILITIES}->{'*'}->{collect_admin_status} ) )
-    {
-
+    if ($self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "collect_admin_status" })) {
         push @ret_counters,
             {
             metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias} },
@@ -380,10 +370,7 @@ sub handle_ethernet_port {
     }
 
     # Add Port Capacity
-    if (   ( $self->{ETHERNET_FACILITIES}->{ $port->{name} } and $self->{ETHERNET_FACILITIES}->{ $port->{name} }->{collect_capacity} )
-        or ( $self->{ETHERNET_FACILITIES}->{'*'} and $self->{ETHERNET_FACILITIES}->{'*'}->{collect_capacity} ) )
-    {
-
+    if ($self->facility_config_get_option({ facility_type => "ethernet", facility_name => $port->{name}, config_option => "collect_capacity" })) {
         push @ret_counters,
             {
             metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias} },
@@ -456,8 +443,8 @@ sub handle_optical_port {
     my $admin_status;
 
     unless ( $port->{pst} and $state_mapping{ lc( $port->{pst} ) } ) {
-        $oper_status  = 4;
-        $admin_status = 4;
+        $oper_status  = "unknown";
+        $admin_status = "unknown";
     }
     else {
         $oper_status  = $state_mapping{ lc( $port->{pst} ) }->{"oper_status"};
@@ -472,22 +459,20 @@ sub handle_optical_port {
     }
 
     my ( $id );
-    if ( $self->{OPTICAL_FACILITIES}->{'*'} ) {
-        $id           = $self->{OPTICAL_FACILITIES}->{'*'}->{id}           if ( $self->{OPTICAL_FACILITIES}->{'*'}->{id} );
-        $admin_status = $self->{OPTICAL_FACILITIES}->{'*'}->{admin_status} if ( $self->{OPTICAL_FACILITIES}->{'*'}->{admin_status} );
-        $oper_status  = $self->{OPTICAL_FACILITIES}->{'*'}->{oper_status}  if ( $self->{OPTICAL_FACILITIES}->{'*'}->{oper_status} );
+    if ($self->facility_config_get_option({ facility_type => "optical", facility_name => $port->{name}, config_option => "id" })) {
+        $id = $self->facility_config_get_option({ facility_type => "optical", facility_name => $port->{name}, config_option => "id" });
     }
 
-    if ( $self->{OPTICAL_FACILITIES}->{ $port->{name} } ) {
-        $id           = $self->{OPTICAL_FACILITIES}->{ $port->{name} }->{id}           if ( $self->{OPTICAL_FACILITIES}->{ $port->{name} }->{id} );
-        $admin_status = $self->{OPTICAL_FACILITIES}->{ $port->{name} }->{admin_status} if ( $self->{OPTICAL_FACILITIES}->{ $port->{name} }->{admin_status} );
-        $oper_status  = $self->{OPTICAL_FACILITIES}->{ $port->{name} }->{oper_status}  if ( $self->{OPTICAL_FACILITIES}->{ $port->{name} }->{oper_status} );
+    if ($self->facility_config_get_option({ facility_type => "optical", facility_name => $port->{name}, config_option => "admin_status" })) {
+        $admin_status = $self->facility_config_get_option({ facility_type => "optical", facility_name => $port->{name}, config_option => "admin_status" });
+    }
+
+    if ($self->facility_config_get_option({ facility_type => "optical", facility_name => $port->{name}, config_option => "oper_status" })) {
+        $oper_status = $self->facility_config_get_option({ facility_type => "optical", facility_name => $port->{name}, config_option => "oper_status" });
     }
 
     # Oper/Admin status
-    if (   ( $self->{OPTICAL_FACILITIES}->{ $port->{name} } and $self->{OPTICAL_FACILITIES}->{ $port->{name} }->{collect_oper_status} )
-        or ( $self->{OPTICAL_FACILITIES}->{'*'} and $self->{OPTICAL_FACILITIES}->{'*'}->{collect_oper_status} ) )
-    {
+    if ($self->facility_config_get_option({ facility_type => "optical", facility_name => $port->{name}, config_option => "collect_oper_status" })) {
         push @ret_counters,
             {
             metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias}, capacity => $capacity },
@@ -496,9 +481,7 @@ sub handle_optical_port {
             };
     }
 
-    if (   ( $self->{OPTICAL_FACILITIES}->{ $port->{name} } and $self->{OPTICAL_FACILITIES}->{ $port->{name} }->{collect_admin_status} )
-        or ( $self->{OPTICAL_FACILITIES}->{'*'} and $self->{OPTICAL_FACILITIES}->{'*'}->{collect_admin_status} ) )
-    {
+    if ($self->facility_config_get_option({ facility_type => "optical", facility_name => $port->{name}, config_option => "collect_admin_status" })) {
         push @ret_counters,
             {
             metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $port->{name}, description => $port->{alias}, capacity => $capacity },
@@ -603,12 +586,12 @@ sub handle_vlan_ports {
                     ( $status, $new_oper_status, $new_admin_status ) = $self->checkETH( $eflow->{ $type . "name" } );
                 }
                 else {
-                    $oper_status = 4;
+                    $oper_status = "unknown";
                     last;
                 }
 
                 if ( $status == -1 ) {
-                    $oper_status = 4;
+                    $oper_status = "unknown";
                     last;
                 }
 
@@ -621,17 +604,25 @@ sub handle_vlan_ports {
         # can get.
         my ( $in_octets, $out_octets, $in_packets, $out_packets, $in_errors, $out_errors, $in_discards, $out_discards, $capacity, $description );
         if ( $vlan_elements{$vlan_name}->{"vcg"} ) {
-            ( $status, $res ) = $self->{AGENT}->get_vcg_mib_pms( $vlan_elements{$vlan_name}->{"vcg"} );
-            if ( $status == 0 ) {
+            $self->{LOGGER}->debug("Checking VCG Info");
 
-                # in/out are swapped since we're measuring the 'vcg' to get the 'vlan' elements.
-                $out_packets  = $res->{INTF_IN_PACKETS}->{value};
-                $in_packets   = $res->{INTF_OUT_PACKETS}->{value};
-                $out_octets   = $res->{INTF_IN_OCTETS}->{value};
-                $in_octets    = $res->{INTF_OUT_OCTETS}->{value};
-                $out_discards = $res->{INTF_IN_DISCARDS}->{value};
-                $in_discards  = $res->{INTF_OUT_DISCARDS}->{value};
-                $in_errors    = $res->{INTF_IN_ERRORS}->{value};
+            if ($self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "collect_utilization" })
+                or $self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "collect_discards" })
+                or $self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "collect_errors" })) {
+
+                $self->{LOGGER}->debug("Getting VCG MIBs");
+ 
+                ( $status, $res ) = $self->{AGENT}->get_vcg_mib_pms( $vlan_elements{$vlan_name}->{"vcg"} );
+                if ( $status == 0 ) {
+                    # in/out are swapped since we're measuring the 'vcg' to get the 'vlan' elements.
+                    $out_packets  = $res->{INTF_IN_PACKETS}->{value};
+                    $in_packets   = $res->{INTF_OUT_PACKETS}->{value};
+                    $out_octets   = $res->{INTF_IN_OCTETS}->{value};
+                    $in_octets    = $res->{INTF_OUT_OCTETS}->{value};
+                    $out_discards = $res->{INTF_IN_DISCARDS}->{value};
+                    $in_discards  = $res->{INTF_OUT_DISCARDS}->{value};
+                    $in_errors    = $res->{INTF_IN_ERRORS}->{value};
+                }
             }
 
             # We read the VCG information to get the capacity since that's the best
@@ -651,23 +642,20 @@ sub handle_vlan_ports {
 
         my ( $id );
 
-        if ( $self->{VLAN_FACILITIES}->{'*'} ) {
-            $id           = $self->{VLAN_FACILITIES}->{'*'}->{id}           if ( $self->{VLAN_FACILITIES}->{'*'}->{id} );
-            $admin_status = $self->{VLAN_FACILITIES}->{'*'}->{admin_status} if ( $self->{VLAN_FACILITIES}->{'*'}->{admin_status} );
-            $oper_status  = $self->{VLAN_FACILITIES}->{'*'}->{oper_status}  if ( $self->{VLAN_FACILITIES}->{'*'}->{oper_status} );
+        if ($self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "id" })) {
+            $id  = $self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "id" });
         }
 
-        if ( $self->{VLAN_FACILITIES}->{$vlan_name} ) {
-            $id           = $self->{VLAN_FACILITIES}->{$vlan_name}->{id}           if ( $self->{VLAN_FACILITIES}->{$vlan_name}->{id} );
-            $admin_status = $self->{VLAN_FACILITIES}->{$vlan_name}->{admin_status} if ( $self->{VLAN_FACILITIES}->{$vlan_name}->{admin_status} );
-            $oper_status  = $self->{VLAN_FACILITIES}->{$vlan_name}->{oper_status}  if ( $self->{VLAN_FACILITIES}->{$vlan_name}->{oper_status} );
+        if ($self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "admin_status" })) {
+            $admin_status = $self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "admin_status" });
+        }
+
+        if ($self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "oper_status" })) {
+            $oper_status = $self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "oper_status" });
         }
 
         # Add 'utilization' counters
-        if (   ( $self->{VLAN_FACILITIES}->{$vlan_name} and $self->{VLAN_FACILITIES}->{$vlan_name}->{collect_utilization} )
-            or ( $self->{VLAN_FACILITIES}->{'*'} and $self->{VLAN_FACILITIES}->{'*'}->{collect_utilization} ) )
-        {
-
+        if ($self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "collect_utilization" })) {
             push @ret_counters,
                 {
                 metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name, direction => "in" },
@@ -684,10 +672,7 @@ sub handle_vlan_ports {
         }
 
         # Add 'discard' counters
-        if (   ( $self->{VLAN_FACILITIES}->{$vlan_name} and $self->{VLAN_FACILITIES}->{$vlan_name}->{collect_discards} )
-            or ( $self->{VLAN_FACILITIES}->{'*'} and $self->{VLAN_FACILITIES}->{'*'}->{collect_discards} ) )
-        {
-
+        if ($self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "collect_discards" })) {
             push @ret_counters,
                 {
                 metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name, direction => "in" },
@@ -704,10 +689,7 @@ sub handle_vlan_ports {
         }
 
         # Add 'error' counter
-        if (   ( $self->{VLAN_FACILITIES}->{$vlan_name} and $self->{VLAN_FACILITIES}->{$vlan_name}->{collect_errors} )
-            or ( $self->{VLAN_FACILITIES}->{'*'} and $self->{VLAN_FACILITIES}->{'*'}->{collect_errors} ) )
-        {
-
+        if ($self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "collect_errors" })) {
             push @ret_counters,
                 {
                 metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name, direction => "in" },
@@ -717,10 +699,7 @@ sub handle_vlan_ports {
         }
 
         # Oper/Admin status
-        if (   ( $self->{VLAN_FACILITIES}->{$vlan_name} and $self->{VLAN_FACILITIES}->{$vlan_name}->{collect_oper_status} )
-            or ( $self->{VLAN_FACILITIES}->{'*'} and $self->{VLAN_FACILITIES}->{'*'}->{collect_oper_status} ) )
-        {
-
+        if ($self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "collect_oper_status" })) {
             push @ret_counters,
                 {
                 metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name },
@@ -729,10 +708,7 @@ sub handle_vlan_ports {
                 };
         }
 
-        if (   ( $self->{VLAN_FACILITIES}->{$vlan_name} and $self->{VLAN_FACILITIES}->{$vlan_name}->{collect_admin_status} )
-            or ( $self->{VLAN_FACILITIES}->{'*'} and $self->{VLAN_FACILITIES}->{'*'}->{collect_admin_status} ) )
-        {
-
+        if ($self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "collect_admin_status" })) {
             push @ret_counters,
                 {
                 metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name },
@@ -742,10 +718,7 @@ sub handle_vlan_ports {
         }
 
         # Port Capacity
-        if (   ( $self->{VLAN_FACILITIES}->{$vlan_name} and $self->{VLAN_FACILITIES}->{$vlan_name}->{collect_capacity} )
-            or ( $self->{VLAN_FACILITIES}->{'*'} and $self->{VLAN_FACILITIES}->{'*'}->{collect_capacity} ) )
-        {
-
+        if ($self->facility_config_get_option({ facility_type => "vlan", facility_name => $vlan_name, config_option => "collect_capacity" })) {
             push @ret_counters,
                 {
                 metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vlan_name },
@@ -843,23 +816,27 @@ sub handle_vcg {
         $admin_status = $state_mapping{ lc( $vcg->{pst} ) }->{"admin_status"};
     }
     else {
-        $oper_status  = 4;
-        $admin_status = 4;
+        $oper_status  = "unknown";
+        $admin_status = "unknown";
     }
 
     my ( $in_octets, $out_octets, $in_packets, $out_packets, $in_errors, $out_errors, $in_discards, $out_discards, $capacity, $description, $operbw );
 
-    ( $status, $res ) = $self->{AGENT}->get_vcg_mib_pms( $vcg->{name} );
-    if ( $status == 0 ) {
+    if ($self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "collect_utilization" })
+        or $self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "collect_discards" })
+        or $self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "collect_errors" })) {
+        ( $status, $res ) = $self->{AGENT}->get_vcg_mib_pms( $vcg->{name} );
+        if ( $status == 0 ) {
 
-        # in/out are swapped since we're measuring the 'vcg' to get the 'vlan' elements.
-        $in_packets   = $res->{INTF_IN_PACKETS}->{value};
-        $out_packets  = $res->{INTF_OUT_PACKETS}->{value};
-        $in_octets    = $res->{INTF_IN_OCTETS}->{value};
-        $out_octets   = $res->{INTF_OUT_OCTETS}->{value};
-        $in_discards  = $res->{INTF_IN_DISCARDS}->{value};
-        $out_discards = $res->{INTF_OUT_DISCARDS}->{value};
-        $in_errors    = $res->{INTF_IN_ERRORS}->{value};
+            # in/out are swapped since we're measuring the 'vcg' to get the 'vlan' elements.
+            $in_packets   = $res->{INTF_IN_PACKETS}->{value};
+            $out_packets  = $res->{INTF_OUT_PACKETS}->{value};
+            $in_octets    = $res->{INTF_IN_OCTETS}->{value};
+            $out_octets   = $res->{INTF_OUT_OCTETS}->{value};
+            $in_discards  = $res->{INTF_IN_DISCARDS}->{value};
+            $out_discards = $res->{INTF_OUT_DISCARDS}->{value};
+            $in_errors    = $res->{INTF_IN_ERRORS}->{value};
+        }
     }
 
     if ( $vcg->{provbw} ) {
@@ -873,25 +850,23 @@ sub handle_vcg {
     $self->{LOGGER}->debug( "Admin status: " . $admin_status );
 
     my ( $id );
-    if ( $self->{VCG_FACILITIES}->{'*'} ) {
-        $id           = $self->{VCG_FACILITIES}->{'*'}->{id}           if ( $self->{VCG_FACILITIES}->{'*'}->{id} );
-        $admin_status = $self->{VCG_FACILITIES}->{'*'}->{admin_status} if ( $self->{VCG_FACILITIES}->{'*'}->{admin_status} );
-        $oper_status  = $self->{VCG_FACILITIES}->{'*'}->{oper_status}  if ( $self->{VCG_FACILITIES}->{'*'}->{oper_status} );
+    if ($self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "id" })) {
+        $id = $self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "id" });
     }
 
-    if ( $self->{VCG_FACILITIES}->{ $vcg->{name} } ) {
-        $id           = $self->{VCG_FACILITIES}->{ $vcg->{name} }->{id}           if ( $self->{VCG_FACILITIES}->{ $vcg->{name} }->{id} );
-        $admin_status = $self->{VCG_FACILITIES}->{ $vcg->{name} }->{admin_status} if ( $self->{VCG_FACILITIES}->{ $vcg->{name} }->{admin_status} );
-        $oper_status  = $self->{VCG_FACILITIES}->{ $vcg->{name} }->{oper_status}  if ( $self->{VCG_FACILITIES}->{ $vcg->{name} }->{oper_status} );
+    if ($self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "oper_status" })) {
+        $oper_status = $self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "oper_status" });
+    }
+
+    if ($self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "admin_status" })) {
+        $admin_status = $self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "admin_status" });
     }
 
     $self->{LOGGER}->debug( "Oper status: " . $oper_status );
     $self->{LOGGER}->debug( "Admin status: " . $admin_status );
 
     # Oper/Admin status
-    if (   ( $self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_oper_status} )
-        or ( $self->{VCG_FACILITIES}->{'*'} and $self->{VCG_FACILITIES}->{'*'}->{collect_oper_status} ) )
-    {
+    if ($self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "collect_oper_status" })) {
         push @ret_counters,
             {
             metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, description => $description, capacity => $capacity },
@@ -900,9 +875,7 @@ sub handle_vcg {
             };
     }
 
-    if (   ( $self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_admin_status} )
-        or ( $self->{VCG_FACILITIES}->{'*'} and $self->{VCG_FACILITIES}->{'*'}->{collect_admin_status} ) )
-    {
+    if ($self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "collect_admin_status" })) {
         push @ret_counters,
             {
             metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, description => $description, capacity => $capacity },
@@ -912,10 +885,7 @@ sub handle_vcg {
     }
 
     # Add 'utilization' counters
-    if (   ( $self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_utilization} )
-        or ( $self->{VCG_FACILITIES}->{'*'} and $self->{VCG_FACILITIES}->{'*'}->{collect_utilization} ) )
-    {
-
+    if ($self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "collect_utilization" })) {
         push @ret_counters,
             {
             metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, direction => "in" },
@@ -932,10 +902,7 @@ sub handle_vcg {
     }
 
     # Add 'discard' counters
-    if (   ( $self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_discards} )
-        or ( $self->{VCG_FACILITIES}->{'*'} and $self->{VCG_FACILITIES}->{'*'}->{collect_discards} ) )
-    {
-
+    if ($self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "collect_discards" })) {
         push @ret_counters,
             {
             metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, direction => "in" },
@@ -952,10 +919,7 @@ sub handle_vcg {
     }
 
     # Add 'error' counter
-    if (   ( $self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_errors} )
-        or ( $self->{VCG_FACILITIES}->{'*'} and $self->{VCG_FACILITIES}->{'*'}->{collect_errors} ) )
-    {
-
+    if ($self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "collect_errors" })) {
         push @ret_counters,
             {
             metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name}, direction => "in" },
@@ -965,10 +929,7 @@ sub handle_vcg {
     }
 
     # Port Capacity
-    if (   ( $self->{VCG_FACILITIES}->{ $vcg->{name} } and $self->{VCG_FACILITIES}->{ $vcg->{name} }->{collect_capacity} )
-        or ( $self->{VCG_FACILITIES}->{'*'} and $self->{VCG_FACILITIES}->{'*'}->{collect_capacity} ) )
-    {
-
+    if ($self->facility_config_get_option({ facility_type => "vcg", facility_name => $vcg->{name}, config_option => "collect_capacity" })) {
         push @ret_counters,
             {
             metadata  => { urn => $id, host_name => $self->{ROUTER_ADDRESS}, port_name => $vcg->{name} },
@@ -1065,6 +1026,56 @@ sub checkETH {
     }
 
     return ( 0, $oper_status, $admin_status );
+}
+
+sub facility_config_get_option {
+    my ( $self, @params ) = @_;
+
+    my $args = validateParams(
+        @params,
+        {
+            facility_type            => 1,
+            facility_name            => 1,
+            config_option            => 1,
+        }
+    );
+
+    my $facility_type = $args->{facility_type};
+    my $facility_name = $args->{facility_name};
+    my $config_option = $args->{config_option};
+
+    my $facilities;
+    if ($facility_type eq "optical") {
+        $facilities = $self->{OPTICAL_FACILITIES};
+    } elsif ($facility_type eq "ethernet") {
+        $facilities = $self->{ETHERNET_FACILITIES};
+    } elsif ($facility_type eq "vcg") {
+        $facilities = $self->{VCG_FACILITIES};
+    } elsif ($facility_type eq "vlan") {
+        $facilities = $self->{VLAN_FACILITIES};
+    } else {
+        $self->{LOGGER}->error("Unknown facility type: ".$facility_type);
+        return;
+    }
+
+    unless ($facilities) {
+        $self->{LOGGER}->debug("Facility Config ($facility_type/$facility_name/$config_option) = undefined");
+        return;
+    }
+
+    if ($facilities->{$facility_name} and $facilities->{$facility_name}->{$config_option}) {
+        $self->{LOGGER}->debug("Facility Config ($facility_type/$facility_name/$config_option) = ".$facilities->{$facility_name}->{$config_option});
+        return $facilities->{$facility_name}->{$config_option};
+    }
+
+    if ($facilities->{'*'} and $facilities->{'*'}->{$config_option}) {
+        $self->{LOGGER}->debug("Facility Config ($facility_type/$facility_name(*)/$config_option) = ".$facilities->{'*'}->{$config_option});
+        return $facilities->{'*'}->{$config_option};
+    }
+
+    $self->{LOGGER}->debug("Facility Config ($facility_type/$facility_name/$config_option) = undefined");
+
+    return;
 }
 
 =head2 connect( $self )
