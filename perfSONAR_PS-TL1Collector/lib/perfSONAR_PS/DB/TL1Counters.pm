@@ -12,7 +12,6 @@ use perfSONAR_PS::Common qw(genuid escapeString);
 use Log::Log4perl qw(get_logger);
 use Storable qw(freeze thaw lock_store lock_nstore lock_retrieve);
 use Data::Dumper;
-use Cache::FastMmap;
 
 use fields 'LOGGER', 'METADATA_PORTS_TABLE', 'DB_CLIENT', 'DATA_DIRECTORY', 'STORE_FILE', 'DATA_TYPES', 'RRD_PATH', 'RRD_CREATE_PARAMETERS', 'RRD_STEP', 'MAX_TIMEOUT';
 

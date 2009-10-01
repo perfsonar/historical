@@ -1,7 +1,15 @@
+MANIFEST
+Makefile
 bin/collector.pl
 bin/service.pl
+doc/Changes
+doc/INSTALL
+doc/LICENSE
+doc/NOTES
+doc/README
 etc/collector-logger.conf
 etc/collector.conf
+etc/elements.conf
 etc/service-logger.conf
 etc/service.conf
 lib/perfSONAR_PS/Client/Echo.pm
@@ -20,7 +28,6 @@ lib/perfSONAR_PS/Common.pm
 lib/perfSONAR_PS/DB/File.pm
 lib/perfSONAR_PS/DB/RRD.pm
 lib/perfSONAR_PS/DB/SQL.pm
-lib/perfSONAR_PS/DB/Status.pm
 lib/perfSONAR_PS/DB/TL1Counters.pm
 lib/perfSONAR_PS/Error.pm
 lib/perfSONAR_PS/Error_compat.pm
@@ -44,6 +51,7 @@ lib/perfSONAR_PS/Utils/TL1/CoreDirector.pm
 lib/perfSONAR_PS/Utils/TL1/HDXc.pm
 lib/perfSONAR_PS/Utils/TL1/OME.pm
 lib/perfSONAR_PS/XML/Document.pm
+perl-perfSONAR_PS-TL1Collector.spec
 scripts/createMetadataDB
 scripts/perfsonar-tl1-collector
 scripts/perfsonar-tl1-service

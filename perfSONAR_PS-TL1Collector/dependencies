@@ -1,4 +1,3 @@
-Cache::FastMmap
 Carp
 Config::General
 Cwd
