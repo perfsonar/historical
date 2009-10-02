@@ -5,7 +5,7 @@
 %define crontab perfAdmin.cron
 %define apacheconf perfAdmin.conf
 
-%define relnum 5
+%define relnum 6
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfAdmin
@@ -99,6 +99,9 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/*
 
 %changelog
+* Fri Oct 2 2009 zurawski@internet2.edu 3.1-5
+- Install missing lib (lib/perfSONAR_PS/Datatypes/Message.pm)
+
 * Tue Sep 28 2009 zurawski@internet2.edu 3.1-5
 - useradd option change
 - Bugfixes
