@@ -45,7 +45,7 @@ Current testbed is:
 	
  * !PlanetLab virtual servers:
   * node planetlab2.cis.upenn.edu
-   * hLS, port 9995.  Access point:   http://planetlab2.cis.upenn.edu:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_planetlab2cis.upenn.edu]
+   * hLS, port 9995.  Access point:   http://planetlab2.cis.upenn.edu:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_planetlab2.cis.upenn.edu]
   * node planetlab3.cs.columbia.edu
   
    
