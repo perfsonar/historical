@@ -34,18 +34,18 @@ Current testbed is:
  * University of Delaware's Distributed and Meta-Systems Lab (DAMSL) servers:
   * _ale_.damsl.cis.udel.edu
    * Services:
-   * gLS, port 7000.  Access point:   http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for__ale_]
+   * gLS, port 7000.  Access point:   http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_ale]
    * fakeService registering to _moonshine_:  248fba4d9302ef8e993744d9c596181a
    * fakeService registering to _moonshine_:  92e0b87f368c1f0a29e99cfd4a316133
    * fakeService registering to _moonshine_:  5c5a140b2745c14d2baa09ccef29a2f6
   * _moonshine_.damsl.cis.udel.edu
-   * hLS, port 7000.  Access point:   http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for__moonshine_]
+   * hLS, port 7000.  Access point:   http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_moonshine]
   * _stout_.damsl.cis.udel.edu
    * gLS 'cloud', i.e., a new hints file.  Access:  http://stout.damsl.cis.udel.edu/gls.root.hints
 	
  * !PlanetLab virtual servers:
   * node planetlab2.cis.upenn.edu
-   * hLS, port 9995.  Access point:   http://planetlab2.cis.upenn.edu:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for__planetlab2.cis.upenn.edu_]
+   * hLS, port 9995.  Access point:   http://planetlab2.cis.upenn.edu:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_planetlab2cis.upenn.edu]
   * node planetlab3.cs.columbia.edu
   
    
