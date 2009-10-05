@@ -29,23 +29,26 @@
 
 == Testbed ==
 
- *  University of Delaware's Distributed and Meta-Systems Lab (DAMSL) will participate with 3 servers:
-  *  _ale_.damsl.cis.udel.edu
-  *  _moonshine_.damsl.cis.udel.edu
-  *  _stout_.damsl.cis.udel.edu
+Current testbed is:
 
- *  Create a new gLS 'cloud', i.e., a new hints file.  The current hints file is located at http://dc211.internet2.edu/gls.root.hints .  Make a new hints file like this that includes the gLS instances created for this testing, and place it on _stout_'s web server (/var/www/external).  The contents of the file will be:
-
-{{{
-  http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
-}}}
-
- *  Install the !LookupService package:
-  *  one gLS in _ale_, port ~~9990~~ 7000:  in the daemon.conf set '`root 1`'.
-   *  The access point for this gLS is:  http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
-  *  one hLS in _moonshine_, port 7000:  in the daemon.conf set '`root 0`'.
-   *  The access point for this hLS is:  http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS
-
+ * University of Delaware's Distributed and Meta-Systems Lab (DAMSL) servers:
+  * _ale_.damsl.cis.udel.edu
+   * Services:
+   * gLS, port 7000.  Access point:   http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for__ale_]
+   * fakeService registering to _moonshine_:  248fba4d9302ef8e993744d9c596181a
+   * fakeService registering to _moonshine_:  92e0b87f368c1f0a29e99cfd4a316133
+   * fakeService registering to _moonshine_:  5c5a140b2745c14d2baa09ccef29a2f6
+  * _moonshine_.damsl.cis.udel.edu
+   * hLS, port 7000.  Access point:   http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for__moonshine_]
+  * _stout_.damsl.cis.udel.edu
+   * gLS 'cloud', i.e., a new hints file.  Access:  http://stout.damsl.cis.udel.edu/gls.root.hints
+	
+ * !PlanetLab virtual servers:
+  * node planetlab2.cis.upenn.edu
+   * hLS, port 9995.  Access point:   http://planetlab2.cis.upenn.edu:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for__planetlab2.cis.upenn.edu_]
+  * node planetlab3.cs.columbia.edu
+  
+   
  *  After initial setup and testing:
   *  Install a total of 2 - 3 gLSs:  one at UDel, one at LBL, one somewhere else (could be UDel/LBL, or one in Ann Arbor).
   *  Install at least 3 hLS and probably more.
@@ -77,7 +80,7 @@ Using these sources for instructions on installation and configuration:
 === Preparing Server _stout_ ===
 
 _stout_ will act as a web server providing the gLS 'cloud', i.e., a list of gLS servers that will form the Lookup Service
-gLS network.  This list, a common text file, forms a hints file named `gls.root.hints`.
+gLS network.  This list, a common text file, forms a hints file named `gls.root.hints`.  The default hints file is currently http://dc211.internet2.edu/gls.root.hints.
 
 We make a new hints file that includes the gLS instances created for this testing, and place it on _stout_'s web server
 (/var/www/external).  The contents of the file will be:
@@ -582,6 +585,8 @@ And comment the line:
 
  `#log4perl.appender.A1=Log::Dispatch::FileRotate`
  
+===== daemon.conf file for _ale_ =====
+ 
 Edit `/opt/perfsonar_ps1/perfSONAR_PS-LookupService/etc/daemon.conf` and set the appropriate configuration variables.
 The resulting file (for a gLS) is:
 
@@ -706,6 +711,8 @@ And comment the line:
 
  `#log4perl.appender.A1=Log::Dispatch::FileRotate`
  
+===== daemon.conf file for _moonshine_ =====
+
 Edit `/opt/perfsonar_ps1/perfSONAR_PS-LookupService/etc/daemon.conf` and set the appropriate configuration variables.
 The resulting file (for a hLS) is:
 
@@ -865,7 +872,10 @@ If a node named `planetlab2.cis.upenn.edu` was added to the slice, the user can 
 
  `ssh -l slice_name -i ~/.ssh/id_rsa planetlab2.cis.upenn.edu`
  
-On each node, we install the Lookup Service, this time trying the `yum` package.
+
+==== Preparing planetlab2.cis.upenn.edu ====
+ 
+On this node, we install the Lookup Service, this time using the `yum` package.
 
 First, import signing key:
 
@@ -944,6 +954,26 @@ Let us attempt to add such a file (`additional.repo`) with the following content
 name=Extra Fedora rpms dries - $releasever - $basearch
 baseurl=http://ftp.belnet.be/packages/dries.ulyssis.org/fedora/linux/$releasever/$basearch/dries
 }}}
+
+Also, add file `rpmforge.repo`:
+
+{{{
+[rpmforge]
+name=Fedora Core $releasever - $basearch - rpmforge
+mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
+gpgcheck=1
+}}}
+
+And import the public key:
+
+{{{
+wget -c http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
+sudo rpm --import RPM-GPG-KEY.dag.txt
+}}}
+
+These last two steps will add some mirror repositores for _yum_, helpful to install a number of packages not available by default in !PlanetLab virtual machine.
 
 Now running
 
@@ -1088,12 +1118,67 @@ Before we could find the source of the problem, the Internet2 repository was upd
  
 And this works.  Adding the "nano" editor and the last --nogpgcheck option were suggested by Jason Zurawsky, but the original _yum_ install command should also work.
 
+Proceeding to start the hLS service.  Now modify the .conf files accordingly (refer to README):
+ 
+Edit /opt/perfsonar_ps1/perfSONAR_PS-LookupService/etc/daemon_logger.conf and set the desired logging method. Here, we choose to display log messages to the screen.  Hence, per instructed within the file, we uncomment the line:
+ 
+ log4perl.appender.A1=Log::Dispatch::Screen
 
+And comment the line: 
 
+ #log4perl.appender.A1=Log::Dispatch::FileRotate 
 
  
- 
- 
+===== daemon.conf file for _planetlab2.cis.upenn.edu_ =====
 
+File `daemon.conf`:
+
+{{{
+<port 9995>
+    <endpoint /perfSONAR_PS/services/hLS>
+        <gls>
+                                                                # just an hLS ... (Udel, Newark, DE, USA)
+                        root                            0
+                                                                # data TTL = 4 days
+                        ls_ttl                          5760
+                                                                # 180 minute (3hr) registaration window
+                        ls_registration_interval        180
+                                                                # 120 miute cleaning/summary window
+                        maintenance_interval            120
+                                                                # Database options (only change path)
+                        metadata_db_file                    glsstore.dbxml
+                        metadata_summary_db_file            glsstore-summary.dbxml
+                        metadata_db_name                    /var/lib/perfsonar/lookup_service/xmldb
+                                                                # Service options (please customize)
+                        service_accesspoint                 http://planetlab2.cis.upenn.edu:9995/perfSONAR_PS/services/hLS
+                        service_description             ORG Home Lookup Service (Newark, DE, USA)
+                        service_name                    ORG Home Lookup Service
+                        service_type                    hLS
+                </gls>
+                disable                             0
+                module                              perfSONAR_PS::Services::LS::gLS
+        </endpoint>
+</port>
+                                                    # 180 minute (3hr) registaration window
+ls_registration_interval                        180
+disable_echo                                0
+                                                    # Root hints info, url + local copy location
+root_hints_url                              http://stout.damsl.cis.udel.edu/gls.root.hints
+root_hints_file                             /var/lib/perfsonar/lookup_service/hls.root.hints
+                                                    # Daemon management, shouldn't need changing
+reaper_interval                             20
+max_worker_lifetime                             300
+max_worker_processes                        30
+pid_dir                                     /var/run
+pid_file                                        lookup_service.pid
+}}}
+
+We planned to use the `screen` command here and run the hLS on a separate terminal using the Perl script, similarly to what was done in _ale_ and _moonshine_.  !Planetlab, however, does not support the screen command, because it has no _pts_ terminals.  After a number of hours, sites of fruitless search, we have reached http://lists.planet-lab.org/pipermail/users/2005-September/001645.html.
+
+The service will run through the init.d script:
+
+ `/etc/init.d/lookup_service start`
+
+Per _ale_ log report, this hLS has successfully registered.
 
 
