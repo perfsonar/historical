@@ -1350,7 +1350,7 @@ And comment the line:
  #log4perl.appender.A1=Log::Dispatch::FileRotate 
 
  
-===== daemon.conf file for _planetlab3.cs.columbia.edu_ =====
+===== daemon.conf file for _planetlab2.cs.columbia.edu_ =====
 
 File `daemon.conf`:
 
