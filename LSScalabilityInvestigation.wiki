@@ -1405,7 +1405,10 @@ http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
 http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/gLS
 }}}
 
+The hLS service successfully registers to the gLS at _ale_.  However, a test fakeService running on _ale_ fails to register to this new hLS.  Need to discern why.
 
 == Current Status ==
 
-As this moment, it was noticed that the Lookup Services in _ale_ and _moonshine_ have stopped for some reason, and current any attempt to restart the gLS in _ale_ is unsuccessful:  the service starts, but it is unreacheable.
+The hLS service successfully registers to the gLS at _ale_.  However, a test fakeService running on _ale_ fails to register to this new hLS.  Need to discern why.
+
+There is no firewall at Planetlab nodes.  A rapid look at _ale's_ iptables did not show blocked ports that might be disturbing the fakeService registration to the hLS at `planetlab2.cis.upenn.edu`.
