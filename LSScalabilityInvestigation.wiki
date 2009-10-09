@@ -1412,3 +1412,24 @@ The hLS service successfully registers to the gLS at _ale_.  However, a test fak
 The hLS service successfully registers to the gLS at _ale_.  However, a test fakeService running on _ale_ fails to register to this new hLS.  Need to discern why.
 
 There is no firewall at Planetlab nodes.  A rapid look at _ale's_ iptables did not show blocked ports that might be disturbing the fakeService registration to the hLS at `planetlab2.cis.upenn.edu`.
+
+
+=== Installing fakeService on _planetlab2.cs.columbia.edu ===
+
+Trying a fakeService registering to `planetlab2.cis.upenn.edu` hLS.
+
+{{{
+sudo yum install svn cpan unzip make links ncftp ftp
+sudo cpan install Data::Random
+svn co https://svn.internet2.edu/svn/perfSONAR-PS/
+cd perfSONAR-PS/branches/RELEASE_3.1/
+sudo cp -r Shared /opt/perfsonar_ps
+cd /opt/perfsonar_ps/Shared/client/fakeService 
+sudo perl fakeService.pl --verbose --config=./fakeService.config1
+}}}
+
+`fakeService` fails with this error:
+
+{{{
+could not open /usr/share/dict/words : No such file or directory at /usr/lib/perl5/site_perl/5.8.8/Data/Random/WordList.pm line 41.
+}}}
