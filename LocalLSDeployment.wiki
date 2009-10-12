@@ -55,7 +55,7 @@ This enables the software to function as a root gLS server.  After designating t
 			root                            1
 				                                # data TTL = 4 days
 			ls_ttl                          5760
-				                                # 180 minute (1hr) registration window
+				                                # 60 minute (1hr) registration window
 			ls_registration_interval        60
 				                                # 20 minute cleaning/summary window
 			maintenance_interval	        20
@@ -73,7 +73,7 @@ This enables the software to function as a root gLS server.  After designating t
 		module	                            perfSONAR_PS::Services::LS::gLS
 	</endpoint>
 </port>
-	                                            # 60 minute (3hr) registration window
+	                                            # 60 minute (1hr) registration window
 ls_registration_interval	                60
 disable_echo	                            0
 	                                            # Root hints info, url + local copy location
@@ -104,7 +104,7 @@ This changes signifies that this service is _*not*_ a root server, and will simp
 			root                            1
 				                                # data TTL = 4 days
 			ls_ttl                          5760
-				                                # 180 minute (1hr) registration window
+				                                # 60 minute (1hr) registration window
 			ls_registration_interval        60
 				                                # 20 minute cleaning/summary window
 			maintenance_interval	        20
@@ -122,7 +122,7 @@ This changes signifies that this service is _*not*_ a root server, and will simp
 		module	                            perfSONAR_PS::Services::LS::gLS
 	</endpoint>
 </port>
-	                                            # 60 minute (3hr) registration window
+	                                            # 60 minute (1hr) registration window
 ls_registration_interval	                60
 disable_echo	                            0
 	                                            # Root hints info, url + local copy location
