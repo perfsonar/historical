@@ -1,0 +1,174 @@
+#summary Deploying LS Infrastructure on a Private Network
+
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+This page outlines the steps necessary to deploy an LS infrastructure for a private domain.  The reasons for doing this can vary from simply being able to locate services similar to a global methodology (e.g. search by keyword, IP range, etc) or using GUIs that would expect services to be located in a gLS instance.  
+
+The following sections will describe how to set up and configure the software packages, along with the necessary modifications that need to be made to supporting software (e.g. perfSONAR services and GUIs).  We will finish with a simple example network that features services, LS instances, and a GUI that will be able to locate measurement data.
+
+== Setup ==
+
+The following image describes the general idea of information services in the perfSONAR infrastructure
+
+http://perfsonar-ps.googlecode.com/svn/wiki/LocalLSDeployment/gls_overview.png
+
+ * _*gLS Cloud*_: The overall concept of many connected _*gLS Instances*_.  Over time, each instance will learn the entire state of the world (e.g. _*hLS*_s will register to one or more _*gLS*_s and the _*gLS*_s will share the information).  An intelligent _*Client*_ will be smart enough to contact any instance in the _*Cloud*_ when looking for something since they are all equal.  
+ * _*gLS Instances*_: A single _*gLS*_ instance.  Note that a single instance can be a _*Cloud*_ by itself - but for redundancy reasons it is nice to have several.  A _*gLS*_ is based on the same code as the _*hLS*_, it performs the same functions (just at a higher logical level).  
+ * _*hLS Instances*_: Responsible for collecting the information from registered _*Services*_ (e.g. _*MA*_s, _*MP*_s).  Summarizes all it knows about, and shares this up a level to the _*gLS*_s
+ * _*Services*_: Responsible for making or storing measurements.  Register whom they are and what they manage (e.g. measurement type, where the measurements originate, etc.) to a close _*hLS*_.  
+ * _*Clients*_: Searching for something, perhaps a specific domain or measurement type.  Will contact the _*gLS Cloud*_ first, then will be redirected to an _*hLS*_ (or _*hLS*_s), finally will contact the appropriate service for the data in question.  
+
+The above diagram relies on several pieces of software, I will describe each in terms of the [http://psps.perfsonar.net perfSONAR PS] version of the software.  Note that other perfSONAR offerings would work just as well.  
+
+=== Hints File ===
+
+The _*hints*_ file is a listing of _*gLS*_ servers that participate in a given cloud.  This list must accurately reflect what is available for a given _*gLS Cloud*_ as many parts of the framework depend on it's availability:
+
+ * Other _*gLS*_ servers
+   * Will consult the list to find peers to synchronize with
+ * _*hLS*_ servers
+   * Will consult to register
+ * _*Clients/Services*_: Will contact to find information.
+
+_*gLS*_s that are not listed in the hints file are essentially _unreachable_.  A _*gLS*_ that is not listed in the hints may of course still use a given hints, but this interaction is very one way.  
+
+For an example, see [http://www.perfsonar.net/gls.root.hints here].
+
+The first step is to establish where your gLS will live, then create a _*hints*_ file that contains this information.  Make it public on a web server and configure all services (_*gLS*_s, _*hLS*_s and _*services*_) aware of the location.  
+
+=== gLS ===
+
+The [http://software.internet2.edu/sources/perfSONAR-PS/perfSONAR_PS-LookupService-3.1.8.tar.gz gLS] is really the same code as the [LocalLSDeployment#hLS hLS].  There is one key change in the configuration file:
+
+{{{
+root    1
+}}}
+
+This enables the software to function as a root gLS server.  After designating the root server, it is also necessary to add it to the list of _*hints*_ (see [LocalLSDeployment#Hints_File Hints File]).  The remainder of the configuration will look similar to the following (making changes where obvious):
+
+{{{
+<port 9991>
+    <endpoint /perfSONAR_PS/services/gLS>
+        <gls>
+			root                            1
+				                                # data TTL = 4 days
+			ls_ttl                          5760
+				                                # 180 minute (1hr) registration window
+			ls_registration_interval        60
+				                                # 20 minute cleaning/summary window
+			maintenance_interval	        20
+				                                # Database options (only change path)
+			metadata_db_file	            glsstore.dbxml
+			metadata_summary_db_file	    glsstore-summary.dbxml
+			metadata_db_name	            /var/lib/perfsonar/lookup_service/gls-xmldb
+				                                # Service options (please customize)
+			service_accesspoint	            http://somehost.somedomain.net:9991/perfSONAR_PS/services/gLS
+			service_description             ORG Global Lookup Service (CITY, STATE, COUNTRY)
+			service_name                    ORG Global Lookup Service
+			service_type	                gLS
+		</gls>
+		disable	                            0
+		module	                            perfSONAR_PS::Services::LS::gLS
+	</endpoint>
+</port>
+	                                            # 60 minute (3hr) registration window
+ls_registration_interval	                60
+disable_echo	                            0
+	                                            # Root hints info, url + local copy location
+root_hints_url	                            http://somehost.somedomain.net/gls.root.hints
+root_hints_file	                            /var/lib/perfsonar/lookup_service/gls.root.hints
+	                                            # Daemon management, shouldn't need changing
+reaper_interval	                            20
+max_worker_lifetime	                        300
+max_worker_processes	                    30
+pid_dir                                     /var/run
+pid_file	                                gls.pid
+}}}
+
+=== hLS ===
+
+The [http://software.internet2.edu/sources/perfSONAR-PS/perfSONAR_PS-LookupService-3.1.8.tar.gz hLS] is really the same code as the [LocalLSDeployment#gLS gLS].  There is one key change in the configuration file:
+
+{{{
+root    0
+}}}
+
+This changes signifies that this service is _*not*_ a root server, and will simply contact the existing root servers.  Note that this service also relies on the [LocalLSDeployment#Hints_File Hints File], so be sure to properly specify where the file resides.  The configuration file looks similar to the following:
+
+{{{
+<port 9995>
+    <endpoint /perfSONAR_PS/services/hLS>
+        <gls>
+			root                            1
+				                                # data TTL = 4 days
+			ls_ttl                          5760
+				                                # 180 minute (1hr) registration window
+			ls_registration_interval        60
+				                                # 20 minute cleaning/summary window
+			maintenance_interval	        20
+				                                # Database options (only change path)
+			metadata_db_file	            glsstore.dbxml
+			metadata_summary_db_file	    glsstore-summary.dbxml
+			metadata_db_name	            /var/lib/perfsonar/lookup_service/hls-xmldb
+				                                # Service options (please customize)
+			service_accesspoint	            http://somehost.somedomain.net:9995/perfSONAR_PS/services/hLS
+			service_description             ORG Home Lookup Service (CITY, STATE, COUNTRY)
+			service_name                    ORG Home Lookup Service
+			service_type	                hLS
+		</gls>
+		disable	                            0
+		module	                            perfSONAR_PS::Services::LS::gLS
+	</endpoint>
+</port>
+	                                            # 60 minute (3hr) registration window
+ls_registration_interval	                60
+disable_echo	                            0
+	                                            # Root hints info, url + local copy location
+root_hints_url	                            http://somehost.somedomain.net/gls.root.hints
+root_hints_file	                            /var/lib/perfsonar/lookup_service/hls.root.hints
+	                                            # Daemon management, shouldn't need changing
+reaper_interval	                            20
+max_worker_lifetime	                        300
+max_worker_processes	                    30
+pid_dir                                     /var/run
+pid_file	                                hls.pid
+}}}
+
+=== perfSONAR-PS Services ===
+
+Each perfSONAR-PS service has the ability to contact an hLS in one of two ways:
+
+ * Directly by specifying an address
+ * By using the [LocalLSDeployment#Hints_File Hints File]
+ 
+It is recommended that both ways be set in the configuration.  First the direct specification:
+
+{{{
+ls_instance         http://somehost.somedomain.net:9995/perfSONAR_PS/services/hLS
+}}}
+
+Note that this should be specified _*in*_ the stanza for the service (e.g. _*port/endpoint/snmp*_, _*port/endpoint/perfsonarbuoy*_, etc.) as well as in the file by itself (see the configuration file for examples).  Lastly, the hints:
+
+{{{
+root_hints_url      http://somehost.somedomain.net/gls.root.hints
+}}}
+
+=== perfAdmin ===
+
+The [http://software.internet2.edu/sources/perfSONAR-PS/perfSONAR_PS-perfAdmin-3.1.6.tar.gz perfAdmin GUI] needs a manual change to the [LocalLSDeployment#Hints_File Hints File] location.  Open the _*perfSONAR_PS-perfAdmin/bin/cache.pl*_ file and change:
+
+{{{
+my $hints  = "http://www.perfsonar.net/gls.root.hints";
+}}}
+
+To the appropriate location specified above.  This change will have the cache script contact the appropriate _*gLS Cloud*_.  All other GUIs will function after this change is made.
+
+== Example Network ==
+
+TBD
+
+== Last Updated ==
+
+$Id$
