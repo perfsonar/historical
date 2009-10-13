@@ -157,13 +157,20 @@ root_hints_url      http://somehost.somedomain.net/gls.root.hints
 
 === perfAdmin ===
 
-The [http://software.internet2.edu/sources/perfSONAR-PS/perfSONAR_PS-perfAdmin-3.1.6.tar.gz perfAdmin GUI] needs a manual change to the [LocalLSDeployment#Hints_File Hints File] location.  Open the _*perfSONAR_PS-perfAdmin/bin/cache.pl*_ file and change:
+The [http://software.internet2.edu/sources/perfSONAR-PS/perfSONAR_PS-perfAdmin-3.1.6.tar.gz perfAdmin GUI] needs some manual changes to the [LocalLSDeployment#Hints_File Hints File] location.  Open the _*perfSONAR_PS-perfAdmin/bin/cache.pl*_ file and change:
 
 {{{
 my $hints  = "http://www.perfsonar.net/gls.root.hints";
 }}}
 
-To the appropriate location specified above.  This change will have the cache script contact the appropriate _*gLS Cloud*_.  All other GUIs will function after this change is made.
+To the appropriate location specified above.  This change will have the cache script contact the appropriate _*gLS Cloud*_. Also change the following line:
+
+{{{
+#my @private_list = ( "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16" );
+my @private_list = ( );
+}}}
+
+This allows the GUI to care about private networks.  All other GUIs will function after this change is made.
 
 == Example Network ==
 
@@ -307,31 +314,360 @@ sudo yum install perl-perfSONAR_PS-LookupService perl-perfSONAR_PS-SNMPMA
 hLS Configuration:
 
 {{{
+[zurawski@clean-centos4 ~]$ sudo cat /opt/perfsonar_ps/lookup_service/etc/daemon.conf 
+<port 9995>
+    <endpoint /perfSONAR_PS/services/hLS>
+        <gls>
+				                                # just an hLS ... (ORG, CITY, STATE, COUNTRY)
+			root                            0
+				                                # data TTL = 4 days
+			ls_ttl                          5760
+				                                # 60 minute (1hr) registaration window
+			ls_registration_interval        60
+				                                # 20 miute cleaning/summary window
+			maintenance_interval	        20
+				                                # Database options (only change path)
+			metadata_db_file	            glsstore.dbxml
+			metadata_summary_db_file	    glsstore-summary.dbxml
+			metadata_db_name	            /var/lib/perfsonar/lookup_service/xmldb
+				                                # Service options (please customize)
+			service_accesspoint	            http://192.168.69.174:9995/perfSONAR_PS/services/hLS
+			service_description             TEST Home Lookup Service 1 (Washington DC, USA)
+			service_name                    TEST Home Lookup Service 1
+			service_type	                hLS
+		</gls>
+		disable	                            0
+		module	                            perfSONAR_PS::Services::LS::gLS
+	</endpoint>
+</port>
+	                                            # 60 minute (1hr) registaration window
+ls_registration_interval	                60
+disable_echo	                            0
+	                                            # Root hints info, url + local copy location
+root_hints_url	                            http://192.168.69.172/hints
+root_hints_file	                            /var/lib/perfsonar/lookup_service/hls.root.hints
+	                                            # Daemon management, shouldn't need changing
+reaper_interval	                            20
+max_worker_lifetime	                        300
+max_worker_processes	                    30
+pid_dir                                     /var/run
+pid_file	                                lookup_service.pid
+
+
 }}}
 
 Start the hLS:
 
 {{{
+[zurawski@clean-centos4 ~]$ sudo /etc/init.d/lookup_service start
+/opt/perfsonar_ps/lookup_service/bin/daemon.pl --config=/opt/perfsonar_ps/lookup_service/etc/daemon.conf --pidfile=lookup_service.pid --piddir=/var/run --logger=/opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf --user=perfsonar --group=perfsonar
+/etc/init.d/lookup_service start: perfSONAR Lookup Service started
+
 }}}
 
 Service Configuration (daemon.conf):
 
 {{{
+[zurawski@clean-centos4 etc]$ sudo cat /opt/perfsonar_ps/snmp_ma/etc/daemon.conf 
+<port 9990>
+    <endpoint /perfSONAR_PS/services/SNMPMA>
+        <snmp>
+            default_resolution              300
+            rrdtool                         /usr/bin/rrdtool
+            
+            metadata_db_external            none
+            metadata_db_external_source     
+
+                                                        # Sample Cacti configuration
+#            metadata_db_external                   cacti
+#            metadata_db_external_source            /etc/cacti/cactid.conf
+
+                                                        # Sample cricket configuration
+#            metadata_db_external                   cricket
+#            metadata_db_external_cricket_config    /home/cricket/cricket-config
+#            metadata_db_external_cricket_cricket   /home/cricket/cricket
+#            metadata_db_external_cricket_data      /home/cricket/cricket-data
+#            metadata_db_external_cricket_home      /home/cricket
+
+            metadata_db_file                /var/lib/perfsonar/snmp_ma/store.xml
+            metadata_db_type                file
+
+                                                        # Sample dbxml configuration
+#            metadata_db_file                       snmpstore.dbxml
+#            metadata_db_name                       /var/lib/perfsonar/snmp_ma/xmldb
+#            metadata_db_type                       xmldb
+                                                        
+	                                            # 20 minute registaration window
+            ls_registration_interval        20
+            enable_registration             1
+                                                # fake LS instance (change to something real)
+            ls_instance                     http://192.168.69.141:9995/perfSONAR_PS/services/hLS
+            
+				                                # Service options (please customize)
+            service_accesspoint             http://192.168.69.174:9990/perfSONAR_PS/services/SNMPMA
+            service_description             TEST SNMP MA 1 (Washington DC, USA)
+            service_name                    TEST SNMP MA 1
+            service_type                    MA
+        </snmp>
+        disable                             0
+        module                              perfSONAR_PS::Services::MA::SNMP
+    </endpoint>
+</port>
+	                                            # 20 minute registaration window
+ls_registration_interval	                20
+                                                # fake LS instance (change to something real)
+ls_instance                                 http://192.168.69.141:9995/perfSONAR_PS/services/hLS
+
+disable_echo	                            0
+	                                            # Root hints info, url + local copy location
+root_hints_url	                            http://fake
+root_hints_file	                            /var/lib/perfsonar/snmp_ma/root.hints
+	                                            # Daemon management, shouldn't need changing
+reaper_interval	                            20
+max_worker_lifetime	                        300
+max_worker_processes	                    30
+pid_dir                                     /var/run
+pid_file	                                snmp_ma.pid
+
 }}}
 
 Service Configuration (store.xml):
 
 {{{
+[zurawski@clean-centos4 ~]$ sudo cat /var/lib/perfsonar/snmp_ma/store.xml 
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:store  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+             xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
+             xmlns:neterr="http://ggf.org/ns/nmwg/characteristic/errors/2.0/"
+             xmlns:netdisc="http://ggf.org/ns/nmwg/characteristic/discards/2.0/"
+             xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+             xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/"
+             xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m-in-netutil-1">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s-in-netutil-1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.69.174</nmwgt:ifAddress>
+        <nmwgt:hostName>localhost</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:parameters id="p-in-netutil-1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="d-in-netutil-1" metadataIdRef="m-in-netutil-1">
+    <nmwg:key id="k-in-netutil-1">
+      <nmwg:parameters id="pk-in-netutil-1">
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/var/lib/perfsonar/snmp_ma/localhost.rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>
+        <nmwg:parameter name="dataSource">ifinoctets</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m-out-netutil-1">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s-out-netutil-1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.69.174</nmwgt:ifAddress>
+        <nmwgt:hostName>localhost</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:parameters id="p-out-netutil-1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="d-out-netutil-1" metadataIdRef="m-out-netutil-1">
+    <nmwg:key id="k-out-netutil-1">
+      <nmwg:parameters id="pk-out-netutil-1">
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/var/lib/perfsonar/snmp_ma/localhost.rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>
+        <nmwg:parameter name="dataSource">ifoutoctets</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m-in-neterr-1">
+    <neterr:subject xmlns:neterr="http://ggf.org/ns/nmwg/characteristic/errors/2.0/" id="s-in-neterr-1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.69.174</nmwgt:ifAddress>
+        <nmwgt:hostName>localhost</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </neterr:subject>
+    <nmwg:parameters id="p-in-neterr-1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="d-in-neterr-1" metadataIdRef="m-in-neterr-1">
+    <nmwg:key id="k-in-neterr-1">
+      <nmwg:parameters id="pk-in-neterr-1">
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/var/lib/perfsonar/snmp_ma/localhost.rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>
+        <nmwg:parameter name="dataSource">ifinerrors</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m-out-neterr-1">
+    <neterr:subject xmlns:neterr="http://ggf.org/ns/nmwg/characteristic/errors/2.0/" id="s-out-neterr-1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.69.174</nmwgt:ifAddress>
+        <nmwgt:hostName>localhost</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </neterr:subject>
+    <nmwg:parameters id="p-out-neterr-1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="d-out-neterr-1" metadataIdRef="m-out-neterr-1">
+    <nmwg:key id="k-out-neterr-1">
+      <nmwg:parameters id="pk-out-neterr-1">
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/var/lib/perfsonar/snmp_ma/localhost.rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>
+        <nmwg:parameter name="dataSource">ifouterrors</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m-in-netdisc-1">
+    <netdisc:subject xmlns:netdisc="http://ggf.org/ns/nmwg/characteristic/discards/2.0/" id="s-in-netdisc-1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.69.174</nmwgt:ifAddress>
+        <nmwgt:hostName>localhost</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netdisc:subject>
+    <nmwg:parameters id="p-in-netdisc-1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="d-in-netdisc-1" metadataIdRef="m-in-netdisc-1">
+    <nmwg:key id="k-in-netdisc-1">
+      <nmwg:parameters id="pk-in-netdisc-1">
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:parameter>
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/var/lib/perfsonar/snmp_ma/localhost.rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Dps</nmwg:parameter>
+        <nmwg:parameter name="dataSource">ifindiscards</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m-out-netdisc-1">
+    <netdisc:subject xmlns:netdisc="http://ggf.org/ns/nmwg/characteristic/discards/2.0/" id="s-out-netdisc-1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.69.174</nmwgt:ifAddress>
+        <nmwgt:hostName>localhost</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netdisc:subject>
+    <nmwg:parameters id="p-out-netdisc-1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="d-out-netdisc-1" metadataIdRef="m-out-netdisc-1">
+    <nmwg:key id="k-out-netdisc-1">
+      <nmwg:parameters id="pk-out-netdisc-1">
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:parameter>
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/var/lib/perfsonar/snmp_ma/localhost.rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Dps</nmwg:parameter>
+        <nmwg:parameter name="dataSource">ifoutdiscards</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+</nmwg:store>
+
 }}}
 
 Start the service:
 
 {{{
+[zurawski@clean-centos4 ~]$ sudo /etc/init.d/snmp_ma start
+/opt/perfsonar_ps/snmp_ma/bin/daemon.pl --config=/opt/perfsonar_ps/snmp_ma/etc/daemon.conf --pidfile=snmp_ma.pid --piddir=/var/run --logger=/opt/perfsonar_ps/snmp_ma/etc/daemon_logger.conf --user=perfsonar --group=perfsonar
+/etc/init.d/snmp_ma start: perfSONAR SNMP MA Service started
 }}}
 
-Re-start the hLS:
+Re-start the hLS (speeds up the summarization process):
 
 {{{
+[zurawski@clean-centos4 ~]$ sudo /etc/init.d/lookup_service restart
+/etc/init.d/lookup_service stop: perfSONAR Lookup Service stopped
+waiting...
+/opt/perfsonar_ps/lookup_service/bin/daemon.pl --config=/opt/perfsonar_ps/lookup_service/etc/daemon.conf --pidfile=lookup_service.pid --piddir=/var/run --logger=/opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf --user=perfsonar --group=perfsonar
+/etc/init.d/lookup_service start: perfSONAR Lookup Service started
+
+}}}
+
+Re-start the hLS again (speeds up the summarization process):
+
+{{{
+[zurawski@clean-centos4 ~]$ sudo /etc/init.d/lookup_service restart
+/etc/init.d/lookup_service stop: perfSONAR Lookup Service stopped
+waiting...
+/opt/perfsonar_ps/lookup_service/bin/daemon.pl --config=/opt/perfsonar_ps/lookup_service/etc/daemon.conf --pidfile=lookup_service.pid --piddir=/var/run --logger=/opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf --user=perfsonar --group=perfsonar
+/etc/init.d/lookup_service start: perfSONAR Lookup Service started
+
 }}}
 
 === hLS Machine 2 ===
@@ -357,48 +693,396 @@ sudo yum install perl-perfSONAR_PS-LookupService perl-perfSONAR_PS-SNMPMA
 hLS Configuration:
 
 {{{
+[zurawski@clean-centos5 ~]$ sudo cat /opt/perfsonar_ps/lookup_service/etc/daemon.conf 
+<port 9995>
+    <endpoint /perfSONAR_PS/services/hLS>
+        <gls>
+				                                # just an hLS ... (ORG, CITY, STATE, COUNTRY)
+			root                            0
+				                                # data TTL = 4 days
+			ls_ttl                          5760
+				                                # 60 minute (1hr) registaration window
+			ls_registration_interval        60
+				                                # 20 miute cleaning/summary window
+			maintenance_interval	        20
+				                                # Database options (only change path)
+			metadata_db_file	            glsstore.dbxml
+			metadata_summary_db_file	    glsstore-summary.dbxml
+			metadata_db_name	            /var/lib/perfsonar/lookup_service/xmldb
+				                                # Service options (please customize)
+			service_accesspoint	            http://192.168.69.141:9995/perfSONAR_PS/services/hLS
+			service_description             Test Home Lookup Service 2 (Washington DC, USA)
+			service_name                    Test Home Lookup Service 2
+			service_type	                hLS
+		</gls>
+		disable	                            0
+		module	                            perfSONAR_PS::Services::LS::gLS
+	</endpoint>
+</port>
+	                                            # 60 minute (1hr) registaration window
+ls_registration_interval	                60
+disable_echo	                            0
+	                                            # Root hints info, url + local copy location
+root_hints_url	                            http://192.168.69.172/hints
+root_hints_file	                            /var/lib/perfsonar/lookup_service/hls.root.hints
+	                                            # Daemon management, shouldn't need changing
+reaper_interval	                            20
+max_worker_lifetime	                        300
+max_worker_processes	                    30
+pid_dir                                     /var/run
+pid_file	                                hls.pid
 }}}
 
 Start the hLS:
 
 {{{
+[zurawski@clean-centos5 ~]$ sudo /etc/init.d/lookup_service start
+/opt/perfsonar_ps/lookup_service/bin/daemon.pl --config=/opt/perfsonar_ps/lookup_service/etc/daemon.conf --pidfile=lookup_service.pid --piddir=/var/run --logger=/opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf --user=perfsonar --group=perfsonar
+/etc/init.d/lookup_service start: perfSONAR Lookup Service started
 }}}
 
 Service Configuration (daemon.conf):
 
 {{{
+[zurawski@clean-centos5 ~]$ sudo cat /opt/perfsonar_ps/snmp_ma/etc/daemon.conf 
+<port 9990>
+    <endpoint /perfSONAR_PS/services/SNMPMA>
+        <snmp>
+            default_resolution              300
+            rrdtool                         /usr/bin/rrdtool
+            
+            metadata_db_external            none
+            metadata_db_external_source     
+
+                                                        # Sample Cacti configuration
+#            metadata_db_external                   cacti
+#            metadata_db_external_source            /etc/cacti/cactid.conf
+
+                                                        # Sample cricket configuration
+#            metadata_db_external                   cricket
+#            metadata_db_external_cricket_config    /home/cricket/cricket-config
+#            metadata_db_external_cricket_cricket   /home/cricket/cricket
+#            metadata_db_external_cricket_data      /home/cricket/cricket-data
+#            metadata_db_external_cricket_home      /home/cricket
+
+            metadata_db_file                /var/lib/perfsonar/snmp_ma/store.xml
+            metadata_db_type                file
+
+                                                        # Sample dbxml configuration
+#            metadata_db_file                       snmpstore.dbxml
+#            metadata_db_name                       /var/lib/perfsonar/snmp_ma/xmldb
+#            metadata_db_type                       xmldb
+                                                        
+	                                            # 20 minute registaration window
+            ls_registration_interval        20
+            enable_registration             1
+                                                # fake LS instance (change to something real)
+            ls_instance                     http://192.168.69.174:9995/perfSONAR_PS/services/hLS
+            
+				                                # Service options (please customize)
+            service_accesspoint             http://192.168.69.141:9990/perfSONAR_PS/services/SNMPMA
+            service_description             TEST SNMP MA 2 (Washington DC, USA)
+            service_name                    TEST SNMP MA 2
+            service_type                    MA
+        </snmp>
+        disable                             0
+        module                              perfSONAR_PS::Services::MA::SNMP
+    </endpoint>
+</port>
+	                                            # 20 minute registaration window
+ls_registration_interval	                20
+                                                # fake LS instance (change to something real)
+ls_instance                                 http://192.168.69.174:9995/perfSONAR_PS/services/hLS
+
+disable_echo	                            0
+	                                            # Root hints info, url + local copy location
+root_hints_url	                            http://fake
+root_hints_file	                            /var/lib/perfsonar/snmp_ma/root.hints
+	                                            # Daemon management, shouldn't need changing
+reaper_interval	                            20
+max_worker_lifetime	                        300
+max_worker_processes	                    30
+pid_dir                                     /var/run
+pid_file	                                snmp_ma.pid
+
 }}}
 
 Service Configuration (store.xml):
 
 {{{
+[zurawski@clean-centos5 ~]$ sudo cat /var/lib/perfsonar/snmp_ma/store.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:store  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+             xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
+             xmlns:neterr="http://ggf.org/ns/nmwg/characteristic/errors/2.0/"
+             xmlns:netdisc="http://ggf.org/ns/nmwg/characteristic/discards/2.0/"
+             xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+             xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/"
+             xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m-in-netutil-1">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s-in-netutil-1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.69.141</nmwgt:ifAddress>
+        <nmwgt:hostName>localhost</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:parameters id="p-in-netutil-1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="d-in-netutil-1" metadataIdRef="m-in-netutil-1">
+    <nmwg:key id="k-in-netutil-1">
+      <nmwg:parameters id="pk-in-netutil-1">
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/var/lib/perfsonar/snmp_ma/localhost.rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>
+        <nmwg:parameter name="dataSource">ifinoctets</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m-out-netutil-1">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s-out-netutil-1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.69.141</nmwgt:ifAddress>
+        <nmwgt:hostName>localhost</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:parameters id="p-out-netutil-1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="d-out-netutil-1" metadataIdRef="m-out-netutil-1">
+    <nmwg:key id="k-out-netutil-1">
+      <nmwg:parameters id="pk-out-netutil-1">
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/var/lib/perfsonar/snmp_ma/localhost.rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>
+        <nmwg:parameter name="dataSource">ifoutoctets</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m-in-neterr-1">
+    <neterr:subject xmlns:neterr="http://ggf.org/ns/nmwg/characteristic/errors/2.0/" id="s-in-neterr-1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.69.141</nmwgt:ifAddress>
+        <nmwgt:hostName>localhost</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </neterr:subject>
+    <nmwg:parameters id="p-in-neterr-1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="d-in-neterr-1" metadataIdRef="m-in-neterr-1">
+    <nmwg:key id="k-in-neterr-1">
+      <nmwg:parameters id="pk-in-neterr-1">
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/var/lib/perfsonar/snmp_ma/localhost.rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>
+        <nmwg:parameter name="dataSource">ifinerrors</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m-out-neterr-1">
+    <neterr:subject xmlns:neterr="http://ggf.org/ns/nmwg/characteristic/errors/2.0/" id="s-out-neterr-1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.69.141</nmwgt:ifAddress>
+        <nmwgt:hostName>localhost</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </neterr:subject>
+    <nmwg:parameters id="p-out-neterr-1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="d-out-neterr-1" metadataIdRef="m-out-neterr-1">
+    <nmwg:key id="k-out-neterr-1">
+      <nmwg:parameters id="pk-out-neterr-1">
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/var/lib/perfsonar/snmp_ma/localhost.rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>
+        <nmwg:parameter name="dataSource">ifouterrors</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m-in-netdisc-1">
+    <netdisc:subject xmlns:netdisc="http://ggf.org/ns/nmwg/characteristic/discards/2.0/" id="s-in-netdisc-1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.69.141</nmwgt:ifAddress>
+        <nmwgt:hostName>localhost</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netdisc:subject>
+    <nmwg:parameters id="p-in-netdisc-1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="d-in-netdisc-1" metadataIdRef="m-in-netdisc-1">
+    <nmwg:key id="k-in-netdisc-1">
+      <nmwg:parameters id="pk-in-netdisc-1">
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:parameter>
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/var/lib/perfsonar/snmp_ma/localhost.rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Dps</nmwg:parameter>
+        <nmwg:parameter name="dataSource">ifindiscards</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m-out-netdisc-1">
+    <netdisc:subject xmlns:netdisc="http://ggf.org/ns/nmwg/characteristic/discards/2.0/" id="s-out-netdisc-1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.69.141</nmwgt:ifAddress>
+        <nmwgt:hostName>localhost</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netdisc:subject>
+    <nmwg:parameters id="p-out-netdisc-1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="d-out-netdisc-1" metadataIdRef="m-out-netdisc-1">
+    <nmwg:key id="k-out-netdisc-1">
+      <nmwg:parameters id="pk-out-netdisc-1">
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+        <nmwg:parameter name="eventType">http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:parameter>
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/var/lib/perfsonar/snmp_ma/localhost.rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Dps</nmwg:parameter>
+        <nmwg:parameter name="dataSource">ifoutdiscards</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+</nmwg:store>
+
 }}}
 
 Start the service:
 
 {{{
+[zurawski@clean-centos5 ~]$ sudo /etc/init.d/snmp_ma start
+/opt/perfsonar_ps/snmp_ma/bin/daemon.pl --config=/opt/perfsonar_ps/snmp_ma/etc/daemon.conf --pidfile=snmp_ma.pid --piddir=/var/run --logger=/opt/perfsonar_ps/snmp_ma/etc/daemon_logger.conf --user=perfsonar --group=perfsonar
+/etc/init.d/snmp_ma start: perfSONAR SNMP MA Service started
+
 }}}
 
 Re-start the hLS:
 
 {{{
+[zurawski@clean-centos5 ~]$ sudo /etc/init.d/lookup_service restart
+/etc/init.d/lookup_service stop: perfSONAR Lookup Service stopped
+waiting...
+/opt/perfsonar_ps/lookup_service/bin/daemon.pl --config=/opt/perfsonar_ps/lookup_service/etc/daemon.conf --pidfile=lookup_service.pid --piddir=/var/run --logger=/opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf --user=perfsonar --group=perfsonar
+/etc/init.d/lookup_service start: perfSONAR Lookup Service started
+
+}}}
+
+Re-start the hLS again (speeds up the summarization process):
+
+{{{
+[zurawski@clean-centos5 ~]$ sudo /etc/init.d/lookup_service restart
+/etc/init.d/lookup_service stop: perfSONAR Lookup Service stopped
+waiting...
+/opt/perfsonar_ps/lookup_service/bin/daemon.pl --config=/opt/perfsonar_ps/lookup_service/etc/daemon.conf --pidfile=lookup_service.pid --piddir=/var/run --logger=/opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf --user=perfsonar --group=perfsonar
+/etc/init.d/lookup_service start: perfSONAR Lookup Service started
 }}}
 
 === Validation ===
 
-On the [LocalLSDeployment#gLS_Machine gLS Machine], restart the gLS:
+On the [LocalLSDeployment#gLS_Machine gLS Machine], restart the gLS (speeds up the summarization):
 
 {{{
+[zurawski@clean-centos5 ~]$ sudo /etc/init.d/lookup_service restart
+/etc/init.d/lookup_service stop: perfSONAR Lookup Service stopped
+waiting...
+/opt/perfsonar_ps/lookup_service/bin/daemon.pl --config=/opt/perfsonar_ps/lookup_service/etc/daemon.conf --pidfile=lookup_service.pid --piddir=/var/run --logger=/opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf --user=perfsonar --group=perfsonar
+/etc/init.d/lookup_service start: perfSONAR Lookup Service started
+
 }}}
 
 On the [LocalLSDeployment#gLS_Machine gLS Machine], _kick_ the cache program:
 
 {{{
+[zurawski@clean-centos5 ~]$ sudo /opt/perfsonar_ps/perfAdmin/bin/cache.pl --verbose
+Trying root 'http://192.168.69.172:9991/perfSONAR_PS/services/gLS'
+Service: http://192.168.69.174:9995/perfSONAR_PS/services/hLS
+		hLS:	http://192.168.69.174:9995/perfSONAR_PS/services/hLS
+Service: http://192.168.69.141:9995/perfSONAR_PS/services/hLS
+		hLS:	http://192.168.69.141:9995/perfSONAR_PS/services/hLS
+
+ Contacting hLSs
+Trying 'http://192.168.69.141:9995/perfSONAR_PS/services/hLS'
+Trying 'http://192.168.69.174:9995/perfSONAR_PS/services/hLS'
+decoding: 'http://192.168.69.141:9995/perfSONAR_PS/services/hLS'
+decoding: 'http://192.168.69.174:9995/perfSONAR_PS/services/hLS'
+list.snmpma - http://192.168.69.174:9990/perfSONAR_PS/services/SNMPMA
+list.snmpma - http://192.168.69.141:9990/perfSONAR_PS/services/SNMPMA
 }}}
 
 View the perfAdmin one more time:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/LocalLSDeployment/xxx.png
+http://perfsonar-ps.googlecode.com/svn/wiki/LocalLSDeployment/full_directory.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/LocalLSDeployment/full_tree.png
 
 == Last Updated ==
 
