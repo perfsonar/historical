@@ -185,15 +185,15 @@ The interactions between the services will be as follows:
  * Hints File
    * Located at http://192.168.69.172/hints
  * hLS 1
-   * Reads hints to register to gLS http://192.168.69.172:9991/perfSONAR_PS/services/gLS
+   * Reads hints at http://192.168.69.172/hints and registers to gLS http://192.168.69.172:9991/perfSONAR_PS/services/gLS
  * hLS 2
-   * Reads hints to register to gLS http://192.168.69.172:9991/perfSONAR_PS/services/gLS
+   * Reads hints at http://192.168.69.172/hints and registers to gLS http://192.168.69.172:9991/perfSONAR_PS/services/gLS
  * Service 1
-   * Reads registers to hLS1 http://192.168.69.174:9995/perfSONAR_PS/services/hLS (_*only*_ - will not use hints)
+   * Registers to hLS1 http://192.168.69.174:9995/perfSONAR_PS/services/hLS (_*only*_ - will not use hints)
  * Service 2
-   * Reads registers to hLS1 http://192.168.69.141:9995/perfSONAR_PS/services/hLS (_*only*_ - will not use hints)
+   * Registers to hLS2 http://192.168.69.141:9995/perfSONAR_PS/services/hLS (_*only*_ - will not use hints)
  * perfAdmin
-   * Reads hints   
+   * Reads hints located at http://192.168.69.172/hints
 
 === gLS Machine ===
 
@@ -215,19 +215,74 @@ perfSONAR-PS Service Setup:
 sudo yum install perl-perfSONAR_PS-LookupService perl-perfSONAR_PS-perfAdmin
 }}}
 
+Create the hints file:
+
+{{{
+[zurawski@clean-centos5 ~]$ cat /var/www/html/hints 
+http://192.168.69.172:9991/perfSONAR_PS/services/gLS
+}}}
+
+Make sure it is reachable:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/LocalLSDeployment/hints.png
+
 gLS Configuration:
 
 {{{
+[zurawski@clean-centos5 ~]$ sudo cat /opt/perfsonar_ps/lookup_service/etc/daemon.conf 
+<port 9991>
+    <endpoint /perfSONAR_PS/services/gLS>
+        <gls>
+				                                # just an hLS ... (ORG, CITY, STATE, COUNTRY)
+			root                            1
+				                                # data TTL = 4 days
+			ls_ttl                          5760
+				                                # 60 minute (1hr) registaration window
+			ls_registration_interval        60
+				                                # 20 miute cleaning/summary window
+			maintenance_interval	        20
+				                                # Database options (only change path)
+			metadata_db_file	            glsstore.dbxml
+			metadata_summary_db_file	    glsstore-summary.dbxml
+			metadata_db_name	            /var/lib/perfsonar/lookup_service/xmldb
+				                                # Service options (please customize)
+			service_accesspoint	            http://192.168.69.172:9991/perfSONAR_PS/services/gLS
+			service_description             Test Global Lookup Service (Washington DC, USA)
+			service_name                    Test Global Lookup Service
+			service_type	                gLS
+		</gls>
+		disable	                            0
+		module	                            perfSONAR_PS::Services::LS::gLS
+	</endpoint>
+</port>
+	                                            # 60 minute (3hr) registaration window
+ls_registration_interval	                60
+disable_echo	                            0
+	                                            # Root hints info, url + local copy location
+root_hints_url	                            http://192.168.69.172/hints
+root_hints_file	                            /var/lib/perfsonar/lookup_service/gls.root.hints
+	                                            # Daemon management, shouldn't need changing
+reaper_interval	                            20
+max_worker_lifetime	                        300
+max_worker_processes	                    30
+pid_dir                                     /var/run
+pid_file	                                gls.pid
 }}}
 
-The cache program (_*/opt/*_) was changed as well.  Start the gLS:
+The cache program (_*/opt/perfsonar_ps/perfAdmin/bin/cache.pl*_) was changed as well.  Start the gLS:
 
 {{{
+[zurawski@clean-centos5 ~]$ sudo /etc/init.d/lookup_service start
+/opt/perfsonar_ps/lookup_service/bin/daemon.pl --config=/opt/perfsonar_ps/lookup_service/etc/daemon.conf --pidfile=lookup_service.pid --piddir=/var/run --logger=/opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf --user=perfsonar --group=perfsonar
+/etc/init.d/lookup_service start: perfSONAR Lookup Service started
+
 }}}
 
 View perfAdmin (note that there will be nothing here yet):
 
-http://perfsonar-ps.googlecode.com/svn/wiki/LocalLSDeployment/xxx.png
+http://perfsonar-ps.googlecode.com/svn/wiki/LocalLSDeployment/empty_directory.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/LocalLSDeployment/empty_tree.png
 
 === hLS Machine 1 ===
 
