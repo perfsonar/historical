@@ -1,3 +1,11 @@
+#summary Description of the proposed architecture for inter-domain circuit monitoring
+
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+The following outlines the proposed architecture for monitoring circuits, and describes what has been implemented so far.
+
 == Architecture ==
 
 There are 5 key components involved in circuit monitoring. A description of the circuit that clients can use to figure out what to query for. Topology lookup infrastructure to allow clients to lookup the circuit description. There is an agent, either programmatic or human, that, using knowledge about the domain's monitoring infrastructure, produces a description of their domain's segment of the circuit that clients can use to monitor the circuits. There is the monitoring infrastructure that measures the circuit statistics, via active or passive measurements. The lookup service infrastructure ties all these moving pieces together, allowing users to lookup these decentralized bits of information to construct the status of their circuits.
@@ -74,3 +82,9 @@ We've implemented the Lookup Service Infrastructure, and the Topology Service In
 There are rudimentary pieces completed for the monitoring infrastructure. There's a TL1 Collector that is being used by Internet2 to constantly poll the Ciena network, and grab the statistics for all circuits. ESnet is using an SNMP poller written by Jon Dugan to poll all the circuit statistics for their domain. There are other, more static, SNMP pollers like MRTG and Cacti which could be used by networks to provide more coarse-grained views of their circuit segments' statistics.
 
 For the circuit/segment description agent, Internet2 has some code that can produce a description of their segment of the circuits. It would be easy to modify this code to have it register this information in the Topology Service.
+
+== Last Updated ==
+
+$Id$
+
+
