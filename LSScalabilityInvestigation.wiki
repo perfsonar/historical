@@ -1414,7 +1414,7 @@ The hLS service successfully registers to the gLS at _ale_.  However, a test fak
 There is no firewall at Planetlab nodes.  A rapid look at _ale's_ iptables did not show blocked ports that might be disturbing the fakeService registration to the hLS at `planetlab2.cis.upenn.edu`.
 
 
-=== Installing fakeService on _planetlab2.cs.columbia.edu ===
+=== Installing fakeService on _planetlab2.cs.columbia.edu_ ===
 
 Trying a fakeService registering to `planetlab2.cis.upenn.edu` hLS.
 
@@ -1433,3 +1433,5 @@ sudo perl fakeService.pl --verbose --config=./fakeService.config1
 {{{
 could not open /usr/share/dict/words : No such file or directory at /usr/lib/perl5/site_perl/5.8.8/Data/Random/WordList.pm line 41.
 }}}
+
+Find the appropriate location of the Words list, or copy the list from another computer to this location in this host.
