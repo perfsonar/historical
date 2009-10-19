@@ -1,0 +1,5 @@
+for SCRIPT in `find ../ -name '.svn' -type d`
+do
+echo $SCRIPT
+rm -r $SCRIPT
+done

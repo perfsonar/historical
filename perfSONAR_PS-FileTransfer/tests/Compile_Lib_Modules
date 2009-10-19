@@ -1,0 +1,5 @@
+for SCRIPT in `find ../ -follow -type f -name *.pm`
+do
+echo $SCRIPT;
+perl $SCRIPT
+done

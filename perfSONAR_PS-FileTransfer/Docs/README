@@ -1,0 +1,119 @@
+
+File Transfer MA Service
+
+Introduction:
+     This service is a Measurement Archive for file transfer protocol implementations like Bestman and GridFTP.
+
+Team:
+
+
+
+Pre-Req:
+Perl Modules:
+
+    * Module::Load
+    * HTTP::Daemon
+    * XML::SAX
+    * Config::General
+    * aliased
+    * Readonly
+    * Term::ReadKey
+    * DBI::DBD
+    * DBD::mysql
+    * DBD::SQLite
+    * Class::Accessor
+    * Class::Fields
+    * Params::Validate
+    * Statistics::Descriptive
+    * Data::UUID
+    * IO::Interface
+    * DateTime
+    * Error
+    * Log::Dispatch::FileRotate
+    * Log::Log4perl
+
+Configuration:
+file: daemon.conf
+
+Structure:
+
+max_worker_lifetime     60
+max_worker_processes     30
+disable_echo     0
+ls_registration_interval     60
+ls_instance     http://192.168.117.129:9995/perfSONAR_PS/services/hLS
+root_hints_url    http://www.perfsonar.net/gls.root.hints
+<port 9000>
+        <endpoint /perfSONAR_PS/services/FT/MA>
+                service_type     MA
+                module    perfSONAR_PS::Services::MA::FT
+                <ftma>
+                        service_description    FT MA
+                        service_accesspoint     http://localhost:9000/perfSONAR_PS/services/FT/MA
+                        enable_registration     0
+                        service_name    perfSONAR_PS FT MA
+                        ls_registration_interval     60
+                        service_timeout     60
+                        query_size_limit     100000
+                        db_host     <database host>
+                        db_username     <database user>
+                        db_name     <database name>
+                        db_password   <database password>
+                        db_type     <database type>
+                </ftma>
+        </endpoint>
+</port>
+
+Service Requirements:
+
+    * mkdir /var/log/perfsonar
+    * Run the SQL Procedure(mysql) on the netlogger database to produce a secondary database. This secondary database is the one, the FTMA service will be interacting with.
+
+How to run the Service:
+
+    * sh FtpMaExecute.sh --skip-input || --help
+          o Attempts to install the missing, perl modules.
+          o Stops any previous running instance of the service.
+          o Creates a backup of any existing log file.
+          o Everytime the script executes, it copies the log file from the main log directory to an hourlyfolder in the same directory. The folder is named as: Ftp_MM-DD-YY:HH
+          o Starts a new Instance of the service by running daemon.pl
+
+Client Application:
+
+The service includes a basic client tool as well.
+
+    * perl FTP_client.pl
+
+    * This simple execution will fetch all the metadata from the service, and provide the user with a final output showing all the metadata keys mapped on source and destination ip addresses.
+
+    * perl FTP_client.pl --help
+
+-d Switch to debug level
+--debug Same as -d
+--url Url to the MA Service(FT)
+default is localhost
+--data Output Data as well
+--src source ip (string)
+--dst destination ip (string)
+--SrcPath metadata param: Source file path(string)
+--DestPath metadata param: Destination file path(string)
+--stripes metadata param: number of stripes
+--buffer metadata param: bufer size
+--block metadata param: block size
+--streams metadata param: number of streams
+--program metadata param: program used for file transfer
+--user metadata param: user, who requested the file transfer
+--initEpochTime initial Time limit in Epoch (integer)
+--finalEpochTime Final Time limit in Epoch (integer)
+--initUtcTime initial Time limit in UTC (string)
+--finalUtcTime final Time limit in UTC (string)
+-h Print this help
+--help Same as -h
+
+    * perl FTP_client.pl -d --data --DestPath=/ --stripes=1 --src=192.168.117.128 --dst=131.225.107.12 --initEpochTime=1220000000 --finalEpochTime=1225408002
+
+    *
+          o This execution will fetch metadata where destination path, stripes, source ip address and destination ip address is defined by the parameters passed.
+          o The --data argument makes sure that the returned metadata is then used to fetch data with start time and end time within the given limitation.
+          o The -d argument provides the debug data as well.
+

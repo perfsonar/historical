@@ -1,0 +1,15 @@
+#!/bin/bash
+count=0
+maxEntries=376
+user='root'
+pass='africa'
+db='gridftp'
+ip='192.168.1.2'
+while [ $count  -lt $maxEntries ]
+do
+SQLComm=`/usr/bin/mysql -u $user -p$pass $db -e "insert into attr(id,e_id,name,value) values($count,$count,'src','$ip')"`
+echo $SQLComm
+#Result=eval $SQLComm
+#echo $Result
+((count++))
+done

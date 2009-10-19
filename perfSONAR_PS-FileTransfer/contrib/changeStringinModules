@@ -1,0 +1,14 @@
+for SCRIPT in `find ./ -follow -type f -name *.pm`
+do
+echo $SCRIPT
+
+filetransfer=`sed -i 's/tools->ftp/tools->filetransfer/g' $SCRIPT`
+echo $filetransfer
+gridftp=`sed -i 's/ftp/filetransfer/g' $SCRIPT`
+echo $gridftp
+FTP=`sed -i 's/FTP/FT/g' $SCRIPT`
+echo $FTP
+#GRIDFTP=`sed -i 's/FTP/FT/g' $SCRIPT`
+#echo $GRIDFTP
+
+done

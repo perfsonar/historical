@@ -1,0 +1,14 @@
+#for SCRIPT in `find ../ -follow -type f -name '*.pl' -o -name '*.pm'`
+#do
+#echo $SCRIPT;
+#perltidy -b $SCRIPT
+#done
+#for SCRIPT in `find ../ -follow -type f -name '*.bak'`
+#do
+#mv $SCRIPT ../bk/
+#done
+for SCRIPT in `find ../ -follow -type f -name '*.pl' -o -name '*.pm'`
+do
+echo $SCRIPT
+perl -MPerl::Critic=critique -e 'print critique({-severity => 2},shift)' $SCRIPT
+done

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+out=`../Docs`
+for file in `find ../ -follow -type f -name '*.pl' -o -name '*.pm'` ; do
+#out=`basename $file .pl`
+#if [ ! -d $out ] ; then 
+# mkdir $out
+#fi
+ echo "Generating perldoc for file $file in $out"
+#outName="${out}/${out}_man_"`date -I`
+ 
+ # here do character conversion
+ tmpName=`mktemp /tmp/perlDocAll.XXXXXXX`
+ tmpNamePl=$tmpName".pl"
+ #iconv -f UTF-8 -t ISO-8859-2 $file > $tmpNamePl
+ cat $file > $tmpNamePl
+
+ perldoc -ortf $tmpNamePl > $out/rtf/$file.rtf
+ pod2latex $tmpNamePl -out $out/latex/$file.tex
+ pod2pdf $tmpNamePl > $out/pdf/$file.pdf
+ pod2html $tmpNamePl > $out/html/$file.html
+ pod2man $tmpNamePl > $out/man/$file.man
+ pod2wiki --style dokuwiki $tmpName > $out/wiki/$file.dokuwiki.txt
+
+ rm $tmpName $tmpNamePl
+done
