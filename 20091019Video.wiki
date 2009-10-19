@@ -4,7 +4,6 @@
 
  # Attendees
  # Team Updates
-
  # Coordination of short term GUI development
  # What should the ISO do with data longer term? (Requested by Brian)
  # Future topics:
@@ -27,7 +26,6 @@
     It'd be feasible to grab and store TL1/SNMP alarms as part of the collection framework. Though, that might be more reasonably done via nagios plugins.
     = =
     Currently in the regular testing setup screen, if a user doesn't specify a 'community', the node can not be found. We need to figure out a way to 'find' these nodes. Is there a reasonable way to 'find' them? (Perhaps if there is no 'community' specificied, it should get a 'default' of some kind?)
- # Next VC will be 9/28 2:30 EDT.
 
 === ACTIONS ===
 
