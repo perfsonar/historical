@@ -7,6 +7,7 @@
  # Coordination of short term GUI development
  # What should the ISO do with data longer term? (Requested by Brian)
  # ESnet OpenDevNet status update
+ # How to best use Issue tracker for "current work" that is not yet mapped to any specific release
  # Terena conference submission?
  # Future topics:
    * Google MLab
