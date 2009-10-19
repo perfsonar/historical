@@ -6,6 +6,8 @@
  # Team Updates
  # Coordination of short term GUI development
  # What should the ISO do with data longer term? (Requested by Brian)
+ # ESnet OpenDevNet status update
+ # Terena conference submission?
  # Future topics:
    * Google MLab
      * It would be great if we could start registering all these nodes in pS.
