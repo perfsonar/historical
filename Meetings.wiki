@@ -6,11 +6,12 @@ applicable.
 
 == Future Events ==
 
-   * [20090921Video] - Video Conference for Sept 21, 2009
+   * [20091019Video] - Video Conference for October 19, 2009
 
 == Past Events ==
 
  * 2009
+   * [20090921Video] - Video Conference for Sept 21, 2009
    * [20090914Video] - Video Conference for Sept 14, 2009
    * [20090910Call] - Conference Call for Sept 10, 2009 (Special Purpose - Python pS-PS Extensions)
    * [20090824Video] - Video Conference (pS-PerfTK Release 3.1 RC3) for Aug 24, 2009
