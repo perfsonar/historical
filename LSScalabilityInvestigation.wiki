@@ -15,7 +15,7 @@
  *  Behavior when using different values in configuration key "`maintenance_interval`"
 
 
-== Suggested tests ==
+== Proposed Tests ==
 
  *  Use `ls_registration_daemon` to temporarily register 'fake services'.  Jason has a service emulator [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/fakeService/ FakeService] that should help.
  *  Set up a test gLS and hLS, and then play with Jason's "!FakeService" tool to see when and how things break.
