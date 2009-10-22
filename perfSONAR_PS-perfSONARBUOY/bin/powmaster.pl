@@ -443,7 +443,13 @@ foreach $mset ( @meassets ) {
         if ( defined( $conf->get_val( NODE => $me, ATTR => 'NOAGENT' ) ) ) {
             die "configuration specifies NODE=$me should not run an agent";
         }
-
+        
+        #get test ports if specified
+        my $testports = 0;
+        if( defined( $conf->get_val( NODE => $me, ATTR => 'OWPTESTPORTS' ) ) ){
+            $testports = $conf->get_val( NODE => $me, ATTR => 'OWPTESTPORTS' );
+        }
+        
         # determine addresses for recv-relative tests started from this host
         foreach $recv ( keys %{ $msetdesc->{'RECEIVERS'} } ) {
 
@@ -505,8 +511,8 @@ foreach $mset ( @meassets ) {
 
                 warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined( $debug ) );
                 $starttime = OWP::Utils::time2owptime( time );
-                $pid = powstream( $msetdesc, $me, $bindaddr, $send, $saddr, 0 );
-                @{ $pid2info{$pid} } = ( "powstream", $starttime, $msetdesc, $bindaddr, $me, $raddr, $send, $saddr, 0 );
+                $pid = powstream( $msetdesc, $me, $bindaddr, $send, $saddr, $testports, 0 );
+                @{ $pid2info{$pid} } = ( "powstream", $starttime, $msetdesc, $bindaddr, $me, $raddr, $send, $saddr, $testports, 0 );
             }
         }
 
@@ -576,8 +582,8 @@ foreach $mset ( @meassets ) {
 
                 warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined( $debug ) );
                 $starttime = OWP::Utils::time2owptime( time );
-                $pid = powstream( $msetdesc, $me, $bindaddr, $recv, $raddr, 1 );
-                @{ $pid2info{$pid} } = ( "powstream", $starttime, $msetdesc, $bindaddr, $me, $saddr, $recv, $raddr, 1 );
+                $pid = powstream( $msetdesc, $me, $bindaddr, $recv, $raddr, $testports, 1 );
+                @{ $pid2info{$pid} } = ( "powstream", $starttime, $msetdesc, $bindaddr, $me, $saddr, $recv, $raddr, $testports, 1 );
 
             }
         }
@@ -1183,7 +1189,7 @@ SEND_DATA:
 # (Want it to happen before forking, and done once instead of for each
 # process.)
 sub powstream {
-    my ( $ms, $me, $myaddr, $onode, $oaddr, $do_send ) = @_;
+    my ( $ms, $me, $myaddr, $onode, $oaddr, $testports, $do_send ) = @_;
     local ( *CHWFD, *CHRFD );
     my $val;
 
@@ -1203,6 +1209,7 @@ sub powstream {
     my @cmd = ( $powcmd, "-e", $facility, "-p", "-S", $myaddr );
     push @cmd, ( "-i", $interval );
     push @cmd, ( "-c", $packet_count );
+    push @cmd, ( "-P", $testports );
 
     if ( $do_send ) {
         push @cmd, ( "-t" );
