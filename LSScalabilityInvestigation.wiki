@@ -1426,7 +1426,7 @@ There is no firewall at Planetlab nodes.  A rapid look at _ale's_ iptables did n
 
 ==== Perfsonar Stimulated Modification 3 ====
 
-Comprehensive documentation (LocalLSDeployment) added on installing an LS locally.
+Comprehensive documentation ([http://code.google.com/p/perfsonar-ps/wiki/LocalLSDeployment LocalLSDeployment]) added on installing an LS locally.
  
 
 ==== Installing fakeService on _planetlab2.cs.columbia.edu_ ====
