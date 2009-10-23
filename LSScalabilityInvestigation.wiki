@@ -1050,7 +1050,7 @@ Researching a bit more, we endeavor the following (from http://www.nntp.perl.org
 
 {{{
 rm /var/lib/rpm/__db.00*
-rpm -­rebuilddb
+rpm -¬≠rebuilddb
 }}}
 
 CPAN is still unable to install what is needed.  Apparently, CPAN cannot install Parse::Yapp, or LWP, or XML::Parser, among other
@@ -1435,3 +1435,27 @@ could not open /usr/share/dict/words : No such file or directory at /usr/lib/per
 }}}
 
 Find the appropriate location of the Words list, or copy the list from another computer to this location in this host.
+
+The Words list can be installed with:
+ `sudo yum install words`
+
+Again, listing the install script for fakeService from the beginning:
+
+{{{
+sudo yum install svn cpan unzip make links ncftp ftp words
+sudo cpan install Data::Random
+svn co https://svn.internet2.edu/svn/perfSONAR-PS/
+cd perfSONAR-PS/branches/RELEASE_3.1/
+sudo cp -r Shared /opt/perfsonar_ps
+cd /opt/perfsonar_ps/Shared/client/fakeService 
+sudo perl fakeService.pl --verbose --config=./fakeService.config1
+}}}
+
+`fakeService` goes through its initial query of configuration parameters.  Again, we are trying to register a `fakeService` to `planetlab2.cis.upenn.edu`.
+
+After the initial configuration, `fakeService` fails to register with the hLS at `planetlab2.cis.upenn.edu`.  This hints that, although the hLS can be seen from a web browser, the hLS is not running properly, or there might be a firewall blocking its function (no likely, since PLanetlab virtual machines are really barebones).
+
+As an additional test, we configure the `fakeService` to register to `moonshine.damsl.cis.udel.edu:7000` hLS.  This time, the `fakeService` successfully registers.  At least, this Planetlab platform works for launching the fakeServices...
+
+ 
+
