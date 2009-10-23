@@ -545,6 +545,11 @@ to [LSScalabilityInvestigation#Attempt_3].
 
 ==== Attempt 3 (_ale_) ====
 
+===== Perfsonar Stimulated Modification 1 =====
+
+Lookup Service installation scripts modified to better handle dependencies.
+
+
 It is possible that using the `lookup_service start script` and running the services from the home directory caused
 the problems verified.  Now, the Lookup Service will be installed to directory `/opt/perfsonar_ps1`.
 
@@ -1125,6 +1130,11 @@ environment variables deep in the system bowels were not updated (thus rendering
 
 ===== Attempt 4 (_planetlab2.cis.upenn.edu_) =====
 
+====== Perfsonar Stimulated Modification 2 ======
+
+Internet2 repository now includes packages NetAddr::IP and Hash::Merge, required by Perfsonar and that some Fedora versions have difficulty finding.
+
+
 Before we could find the source of the problem, the Internet2 repository was updated in order to include both of the packages that _yum_ could not resolve.  Now:
 
  `sudo yum install nano perl-perfSONAR_PS-LookupService --nogpgcheck`
@@ -1407,14 +1417,19 @@ http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/gLS
 
 The hLS service successfully registers to the gLS at _ale_.  However, a test fakeService running on _ale_ fails to register to this new hLS.  Need to discern why.
 
-== Current Status ==
+=== Current Planetlab Findings ===
 
 The hLS service successfully registers to the gLS at _ale_.  However, a test fakeService running on _ale_ fails to register to this new hLS.  Need to discern why.
 
 There is no firewall at Planetlab nodes.  A rapid look at _ale's_ iptables did not show blocked ports that might be disturbing the fakeService registration to the hLS at `planetlab2.cis.upenn.edu`.
 
 
-=== Installing fakeService on _planetlab2.cs.columbia.edu_ ===
+==== Perfsonar Stimulated Modification 3 ====
+
+Comprehensive documentation (LocalLSDeployment) added on installing an LS locally.
+ 
+
+==== Installing fakeService on _planetlab2.cs.columbia.edu_ ====
 
 Trying a fakeService registering to `planetlab2.cis.upenn.edu` hLS.
 
