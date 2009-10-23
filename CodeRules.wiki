@@ -471,7 +471,7 @@ conflicts.
 Write tests at the same time as your modules are written. Automate tests 
 generation if possible.  See also [ReleaseManagement#Testing].
 
-== SVN Guidlines ==
+== SVN Guidelines ==
 
 Branches should be created for development efforts that could take multiple days, may be disruptive, or if the submission needs be reviewed by others. Small fixes can be done directly in trunk, but should be well tested before being checked in. Q/A should take place when moving code from trunk to a release branch.
 
