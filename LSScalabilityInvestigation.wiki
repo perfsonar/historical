@@ -29,7 +29,10 @@
 
 == Testbed ==
 
-Current testbed is:
+Current testbed is depicted in the following figure, and further described below:
+
+<img src="http://code.google.com/p/perfsonar-ps/wiki/LSScalabilityInvestigation/testbed.png">
+
 
  * University of Delaware's Distributed and Meta-Systems Lab (DAMSL) servers:
   * _ale_.damsl.cis.udel.edu
