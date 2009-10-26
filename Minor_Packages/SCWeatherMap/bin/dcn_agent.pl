@@ -378,174 +378,205 @@ sub retrieve_dcn_links {
 
                 $logger->debug("Hop has link: $link_id");
 
-                my $link_info = $dcn_links->{$link_id};
-
-                next unless ($link_info);
-
-                $logger->debug("Hop has link info");
-
                 next unless ($hop->link->SwitchingCapabilityDescriptors->encodingType eq "ethernet");
 
                 $logger->debug("Hop is ethernet");
 
-                my $vlan = $hop->link->SwitchingCapabilityDescriptors->switchingCapabilitySpecificInfo->vlanRangeAvailability->__value;
+                my $link_match_info_arr = $dcn_links->{$link_id};
 
-                my ($MA, $direction, $hostName, $ifName, $ifIndex);
+                next unless ($link_match_info_arr);
 
-                if ($link_info->{measurement_parameters}) {
-                    $logger->debug("Found link info: measurement");
+                foreach my $link_match_info (@$link_match_info_arr) {
+                    $logger->debug("Hop has link match info: ".Dumper($link_match_info));
 
-                    $MA        = $link_info->{measurement_parameters}->{MA};
-                    $direction = $link_info->{measurement_parameters}->{direction};
-                    $hostName  = $link_info->{measurement_parameters}->{hostname};
-                    $ifName    = $link_info->{measurement_parameters}->{ifname};
-                    $ifIndex   = $link_info->{measurement_parameters}->{ifindex};
+                    my $vlan = $hop->link->SwitchingCapabilityDescriptors->switchingCapabilitySpecificInfo->vlanRangeAvailability->__value;
 
-                    if ($link_info->{measurement_parameters}->{vlanMapping}) {
-                        my $vlanMapping = $link_info->{measurement_parameters}->{vlanMapping};
+                    # XXX validate whether or not the vlan matches
+                    if ($link_match_info->{vlans}) {
+                        my $match;
 
-                        my $new_ifName = $vlanMapping;
-                        $new_ifName =~ s/\%p/$ifName/ if ($ifName);
-                        $new_ifName =~ s/\%v/$vlan/ if ($vlan);
+                        foreach my $vlan_range (@{ $link_match_info->{vlans} }) {
+                                next if ($vlan_range->{min} and $vlan < $vlan_range->{min});
+                                next if ($vlan_range->{max} and $vlan > $vlan_range->{max});
 
-                        $ifName = $new_ifName;
+                                $logger->debug("VLAN matches");
+                                $match = 1;
+                        }
+
+                        unless ($match) {
+                            $logger->debug("VLAN doesn't match");
+                            next;
+                        }
                     }
-                }
 
-                $logger->debug("Link Info: ".Dumper($link_info));
+                    my $link_info = $link_match_info->{link_info};
 
-                foreach my $action (@{ $link_info->{actions} }) {
-                    # only support 'add' for now. Could support removal or some
-                    # such later I guess.
-                    $logger->debug("Found action");
-                    next unless ($action->{type} eq "add");
-                    $logger->debug("Action is add");
+                    my ($MA, $direction, $hostName, $ifName, $ifIndex);
 
-                    if ($action->{'subject'}->{'link'}) {
-                        $logger->debug("Add type is link");
+                    if ($link_info->{measurement_parameters}) {
+                        $logger->debug("Found link info: measurement");
 
-                        my $source = $action->{'subject'}->{'link'}->{'source'};
-                        my $destination = $action->{'subject'}->{'link'}->{'destination'};
+                        $MA        = $link_info->{measurement_parameters}->{MA};
+                        $direction = $link_info->{measurement_parameters}->{direction};
+                        $hostName  = $link_info->{measurement_parameters}->{hostname};
+                        $ifName    = $link_info->{measurement_parameters}->{ifname};
+                        $ifIndex   = $link_info->{measurement_parameters}->{ifindex};
 
-                        # The semantics for the edge points says that we link
-                        # up the previous edge point to the 'source endpoint'
-                        # of the link we're connecting.
-                        if ($prev_edge_point and $source ne $prev_edge_point->{name} and $destination ne $prev_edge_point->{name}) {
+                        if ($link_info->{measurement_parameters}->{vlanMapping}) {
+                            my $vlanMapping = $link_info->{measurement_parameters}->{vlanMapping};
+
+                            my $new_ifName = $vlanMapping;
+                            $new_ifName =~ s/\%p/$ifName/ if ($ifName);
+                            $new_ifName =~ s/\%v/$vlan/ if ($vlan);
+
+                            $ifName = $new_ifName;
+                        }
+                    }
+
+                    $logger->debug("Link Info: ".Dumper($link_info));
+
+                    foreach my $action (@{ $link_info->{actions} }) {
+                        # only support 'add' for now. Could support removal or
+                        # some such later I guess.
+                        $logger->debug("Found action");
+                        next unless ($action->{type} eq "add");
+                        $logger->debug("Action is add");
+
+                        if ($action->{'subject'}->{'link'}) {
+                            $logger->debug("Add type is link");
+
+                            my $source = $action->{'subject'}->{'link'}->{'source'};
+                            my $destination = $action->{'subject'}->{'link'}->{'destination'};
+
+                            # The semantics for the edge points says that we
+                            # link up the previous edge point to the 'source
+                            # endpoint' of the link we're connecting.
+                            if ($prev_edge_point and $source ne $prev_edge_point->{name} and $destination ne $prev_edge_point->{name}) {
+                                my @measurements = ();
+                                if ($prev_edge_point->{'hostName'} and $prev_edge_point->{'direction'} and ($prev_edge_point->{'ifName'} or $prev_edge_point->{'ifIndex'})) {
+                                    # Previous is the source of the drawn
+                                    # links, so we can use it's direction
+                                    # directly because out == source -> dest.
+                                    my %measurement_point = (
+                                            type => "SNMP",
+                                            MA => $prev_edge_point->{'MA'},
+                                            hostname => $prev_edge_point->{'hostName'},
+                                            ifname => $prev_edge_point->{'ifName'},
+                                            ifindex => $prev_edge_point->{'ifIndex'},
+                                            direction => $prev_edge_point->{'direction'},
+                                            );
+
+                                    push @measurements, \%measurement_point;
+                                }
+
+                                my %new_link = (
+                                        source => $prev_edge_point->{'name'},
+                                        destination => $source,
+                                        type => "bidirectional-pair",
+                                        measurement_parameters => \@measurements,
+                                        );
+
+                                $logger->debug("Adding link(2): ".Dumper(\%new_link));
+                                push @added_links, \%new_link;
+                            }
+
                             my @measurements = ();
-                            if ($prev_edge_point->{'hostName'} and $prev_edge_point->{'direction'} and ($prev_edge_point->{'ifName'} or $prev_edge_point->{'ifIndex'})) {
-                                # Previous is the source of the drawn links, so we can use it's direction directly because out == source -> dest.
+                            if ($hostName and $direction and ($ifName or $ifIndex)) {
+                                # Previous is the source of the drawn links, so
+                                # we can use it's direction directly because
+                                # out == source -> dest.
                                 my %measurement_point = (
                                         type => "SNMP",
-                                        MA => $prev_edge_point->{'MA'},
-                                        hostname => $prev_edge_point->{'hostName'},
-                                        ifname => $prev_edge_point->{'ifName'},
-                                        ifindex => $prev_edge_point->{'ifIndex'},
-                                        direction => $prev_edge_point->{'direction'},
+                                        MA => $MA,
+                                        hostname => $hostName,
+                                        ifname => $ifName,
+                                        ifindex => $ifIndex,
+                                        direction => $direction,
                                         );
 
                                 push @measurements, \%measurement_point;
                             }
 
                             my %new_link = (
-                                    source => $prev_edge_point->{'name'},
-                                    destination => $source,
-                                    type => "bidirectional-pair",
+                                    source => $source,
+                                    destination => $destination,
                                     measurement_parameters => \@measurements,
+                                    type => "bidirectional-pair",
                                     );
 
-                            $logger->debug("Adding link(2): ".Dumper(\%new_link));
+                            $logger->debug("Adding link(3): ".Dumper(\%new_link));
                             push @added_links, \%new_link;
+
+                            # The destination gets setup as the new
+                            # 'edge-point'
+
+                            my %new_edge_point = ();
+                            $new_edge_point{'name'} = $destination;
+
+                            $prev_edge_point = \%new_edge_point;
                         }
+                        elsif ($action->{'subject'}->{'edge-point'}) {
+                            $logger->debug("Add type is edge-point");
 
-                        my @measurements = ();
-                        if ($hostName and $direction and ($ifName or $ifIndex)) {
-                            # Previous is the source of the drawn links, so we can use it's direction directly because out == source -> dest.
-                            my %measurement_point = (
-                                    type => "SNMP",
-                                    MA => $MA,
-                                    hostname => $hostName,
-                                    ifname => $ifName,
-                                    ifindex => $ifIndex,
-                                    direction => $direction,
-                                    );
+                            my %new_edge_point = ();
+                            $new_edge_point{'name'} = $action->{'subject'}->{'edge-point'};
+                            $new_edge_point{'MA'} = $MA;
+                            $new_edge_point{'hostName'} = $hostName;
+                            $new_edge_point{'ifName'} = $ifName;
+                            $new_edge_point{'ifIndex'} = $ifIndex;
+                            $new_edge_point{'direction'} = $direction;
 
-                            push @measurements, \%measurement_point;
-                        }
+                            # We want to not add a link if the new edge point's
+                            # endpoint is the same as the old one, but the new
+                            # edge point needs to be set so that the
+                            # measurement info gets carried over.
+                            if ($prev_edge_point and $prev_edge_point->{name} ne $action->{'subject'}->{'edge-point'}) {
+                                my @measurements = ();
+                                if ($prev_edge_point->{'hostName'} and $prev_edge_point->{'direction'} and ($prev_edge_point->{'ifName'} or $prev_edge_point->{'ifIndex'})) {
+                                    # Previous is the source of the drawn
+                                    # links, so we can use it's direction
+                                    # directly because out == source -> dest.
+                                    my %measurement_point = (
+                                            type => "SNMP",
+                                            MA => $prev_edge_point->{'MA'},
+                                            hostname => $prev_edge_point->{'hostName'},
+                                            ifname => $prev_edge_point->{'ifname'},
+                                            ifindex => $prev_edge_point->{'ifindex'},
+                                            direction => $prev_edge_point->{'direction'},
+                                            );
 
-                        my %new_link = (
-                                source => $source,
-                                destination => $destination,
-                                measurement_parameters => \@measurements,
-                                type => "bidirectional-pair",
-                                );
+                                    push @measurements, \%measurement_point;
+                                }
 
-                        $logger->debug("Adding link(3): ".Dumper(\%new_link));
-                        push @added_links, \%new_link;
+                                if ($new_edge_point{'hostName'} and $new_edge_point{'direction'} and ($new_edge_point{'ifName'} or $new_edge_point{'ifIndex'})) {
+                                    # The new node is the destination of the
+                                    # drawn links so we have to reverse its
+                                    # direction because out == dest -> source.
+                                    my %measurement_point = (
+                                            type => "SNMP",
+                                            MA => $new_edge_point{'MA'},
+                                            hostname => $new_edge_point{'hostName'},
+                                            ifname => $new_edge_point{'ifname'},
+                                            ifindex => $new_edge_point{'ifindex'},
+                                            direction => ($new_edge_point{'direction'}eq"reverse")?"forward":"reverse",
+                                            );
 
-                        # The destination gets setup as the new 'edge-point'
+                                    push @measurements, \%measurement_point;
+                                }
 
-                        my %new_edge_point = ();
-                        $new_edge_point{'name'} = $destination;
-                        
-                        $prev_edge_point = \%new_edge_point;
-                    }
-                    elsif ($action->{'subject'}->{'edge-point'}) {
-                        $logger->debug("Add type is edge-point");
-
-                        my %new_edge_point = ();
-                        $new_edge_point{'name'} = $action->{'subject'}->{'edge-point'};
-                        $new_edge_point{'MA'} = $MA;
-                        $new_edge_point{'hostName'} = $hostName;
-                        $new_edge_point{'ifName'} = $ifName;
-                        $new_edge_point{'ifIndex'} = $ifIndex;
-                        $new_edge_point{'direction'} = $direction;
-
-                        # We want to not add a link if the new edge point's
-                        # endpoint is the same as the old one, but the new edge
-                        # point needs to be set so that the measurement info
-                        # gets carried over.
-                        if ($prev_edge_point and $prev_edge_point->{name} ne $action->{'subject'}->{'edge-point'}) {
-                            my @measurements = ();
-                            if ($prev_edge_point->{'hostName'} and $prev_edge_point->{'direction'} and ($prev_edge_point->{'ifName'} or $prev_edge_point->{'ifIndex'})) {
-                                # Previous is the source of the drawn links, so we can use it's direction directly because out == source -> dest.
-                                my %measurement_point = (
-                                        type => "SNMP",
-                                        MA => $prev_edge_point->{'MA'},
-                                        hostname => $prev_edge_point->{'hostName'},
-                                        ifname => $prev_edge_point->{'ifname'},
-                                        ifindex => $prev_edge_point->{'ifindex'},
-                                        direction => $prev_edge_point->{'direction'},
+                                my %new_link = (
+                                        source => $prev_edge_point->{'name'},
+                                        destination => $new_edge_point{'name'},
+                                        measurement_parameters => \@measurements,
+                                        type => "bidirectional-pair",
                                         );
 
-                                push @measurements, \%measurement_point;
+                                $logger->debug("Adding link(1): ".Dumper(\%new_link));
+                                push @added_links, \%new_link;
                             }
 
-                            if ($new_edge_point{'hostName'} and $new_edge_point{'direction'} and ($new_edge_point{'ifName'} or $new_edge_point{'ifIndex'})) {
-                                # The new node is the destination of the drawn links so we have to reverse its direction because out == dest -> source.
-                                my %measurement_point = (
-                                        type => "SNMP",
-                                        MA => $new_edge_point{'MA'},
-                                        hostname => $new_edge_point{'hostName'},
-                                        ifname => $new_edge_point{'ifname'},
-                                        ifindex => $new_edge_point{'ifindex'},
-                                        direction => ($new_edge_point{'direction'}eq"reverse")?"forward":"reverse",
-                                   );
-
-                                push @measurements, \%measurement_point;
-                            }
-
-                            my %new_link = (
-                                    source => $prev_edge_point->{'name'},
-                                    destination => $new_edge_point{'name'},
-                                    measurement_parameters => \@measurements,
-                                    type => "bidirectional-pair",
-                                    );
-
-                            $logger->debug("Adding link(1): ".Dumper(\%new_link));
-                            push @added_links, \%new_link;
+                            $prev_edge_point = \%new_edge_point;
                         }
-
-                        $prev_edge_point = \%new_edge_point;
                     }
                 }
             }
@@ -668,14 +699,14 @@ sub parse_dcn_links {
     my %links_by_id = ();
 
     foreach my $link (@$dcnlinks) {
-        unless ($link->{id}) {
-            return (-1, "No link ID(s) specified");
+        unless ($link->{'dcn-edgepoint'}) {
+            return (-1, "No link endpoint(s) specified");
         }
 
-        ($status, $res) = parse_dcn_link_ids($link->{id});
+        ($status, $res) = parse_dcn_link_edgepoints($link->{'dcn-edgepoint'});
         return ($status, $res) if ($status != 0);
 
-        my $ids = $res;
+        my $dcnlink_endpoints = $res;
 
         unless ($link->{measurement}) {
             return (-1, "No measurement parameters specified");
@@ -696,33 +727,86 @@ sub parse_dcn_links {
         my $actions = $res;
 
         my %dcn_link_info = (
-                ids => $ids,
+                dcn_endpoints => $dcnlink_endpoints,
                 measurement_parameters => $measurement,
                 actions => $actions,
         );
 
-        foreach my $id (@$ids) {
-                if ($links_by_id{$id}) {
-                        # probably should either merge or just allow multiple.
-                        return (-1, $id." appears in multiple dcn-link entities");
+        foreach my $link_id (keys %$dcnlink_endpoints) {
+            foreach my $dcnlink_endpoint (@{ $dcnlink_endpoints->{$link_id} }) {
+                unless ($links_by_id{$dcnlink_endpoint->{link_id}}) {
+                    $links_by_id{$dcnlink_endpoint->{link_id}} = ();
                 }
 
-                $links_by_id{$id} = \%dcn_link_info;
+                $dcnlink_endpoint->{link_info} = \%dcn_link_info;
+
+                push @{ $links_by_id{$dcnlink_endpoint->{link_id}} }, $dcnlink_endpoint;
+            }
         }
     }
 
     return (0, \%links_by_id);
 }
 
-sub parse_dcn_link_ids {
-    my ($ids) = @_;
+sub parse_dcn_link_edgepoints {
+    my ($dcn_endpoints) = @_;
 
-    if (ref($ids) ne "ARRAY") {
-        $ids = [ $ids ];
+    if (ref($dcn_endpoints) ne "ARRAY") {
+        $dcn_endpoints = [ $dcn_endpoints ];
     }
 
-    # probably should validate in someway, but as long as they're URNs, we're happy.
-    return (0, $ids);
+    my %endpoints_by_linkid = ();
+
+    foreach my $dcn_endpoint (@$dcn_endpoints) {
+        $logger->debug("DCN Endpoint: ".Dumper($dcn_endpoint));
+
+        my %endpoint = ();
+        unless ($dcn_endpoint->{link_id}) {
+                return (-1, "Endpoint does not have link id");
+        }
+
+        $endpoint{link_id} = $dcn_endpoint->{link_id};
+
+        if ($dcn_endpoint->{vlans}) {
+            $logger->debug("Found vlans: ".Dumper($dcn_endpoint->{vlans}));
+            my ($status, $res) = parse_dcn_link_vlans($dcn_endpoint->{vlans});
+            return ($status, $res) if ($status != 0);
+
+            $endpoint{vlans} = $res;
+        }
+
+        unless ($endpoints_by_linkid{$endpoint{link_id}}) {
+            $endpoints_by_linkid{$endpoint{link_id}} = ();
+        }
+
+        push @{ $endpoints_by_linkid{$endpoint{link_id}} }, \%endpoint;
+
+        $logger->debug("Endpoint: ".Dumper(\%endpoint));
+    }
+
+    return (0, \%endpoints_by_linkid);
+}
+
+sub parse_dcn_link_vlans {
+    my ($vlans) = @_;
+    my @vlans = split(",", $vlans);
+
+    my @ret_vlans = ();
+    foreach my $vlan (@vlans) {
+        my %vlan_range = ();
+        if ($vlan =~ /-/) {
+            my ($min, $max) = split('-', $vlan);
+            $vlan_range{min} = $min;
+            $vlan_range{max} = $max;
+        } else {
+            $vlan_range{min} = $vlan;
+            $vlan_range{max} = $vlan;
+        }
+
+        push @ret_vlans, \%vlan_range;
+    }
+
+    return (0, \@ret_vlans);
 }
 
 sub parse_dcn_link_measurement {
