@@ -1454,6 +1454,8 @@ Comprehensive documentation ([http://code.google.com/p/perfsonar-ps/wiki/LocalLS
 
 ==== Installing fakeService on planetlab2.cs.columbia.edu ====
 
+===== Attempt 1 on fakeService at planetlab2.cs.columbia.edu =====
+
 Trying a fakeService registering to `planetlab2.cis.upenn.edu` hLS.
 
 {{{
@@ -1507,7 +1509,11 @@ They hint an issue with the method "getValue".
 
 As an additional test, we configure the `fakeService` to register to `moonshine.damsl.cis.udel.edu:7000` hLS.  This time, the `fakeService` successfully registers.  At least, this Planetlab platform works for launching the fakeServices...
 
-To be continued...
+===== Attempt 2 on fakeService at planetlab2.cs.columbia.edu =====
+
+It was suggested that the libxml and libxml2-dev library versions be upgraded to solve the "getValue" method problem.  Running `sudo yum update` or `sudo yum update libxml2` do not update the libraries, since their current versions (2.7.2-2) are the latest versions available in the yum repositories.  Manually installing or upgrading these libraries have already shown to be rather cumbersome, as reported in the several attempts for _ale_ above.  We postpone this endeavour until the systems involved become more user-friendly (sigh?), or until the user replenishes anti-headache pill stack.
+
+Planetlab can still be used to deploy `fakeService` instances.
 
  
 == Test Results ==
@@ -1548,7 +1554,7 @@ Store Type: LSStore
   </nmwg:metadata>
 }}}
 
-Curiously, the data for the first registered hLS is not up-to-date in the gLS.  It wrongly states "ORG Home Lookup Service (Newark, DE, USA)" as description, instead of "UPenn Home Lookup Service (Planetlab Virtual, USA)".  The last registered hLS is the same as this one; the port was changed from 9995 to 9990 to test whether it was registering.
-The Upenn hLS was restarted several times, but the data stored at _ale_ gLS does not update.
+The data for the first registered hLS is not up-to-date in the gLS; this is actually the "old" or first registration of the hLS.  Notice it states "ORG Home Lookup Service (Newark, DE, USA)" as description, instead of "UPenn Home Lookup Service (Planetlab Virtual, USA)".  The last registered hLS is the same service; the port was changed from 9995 to 9990 to test whether it was registering with the correct description, and it does show at the bottom of the list.  This is an expected behavior per the LS design.  We will monitor, however, whether the old registration is erased by the expiration date.
 
+Restarting the hLS at _ale_ did not erase the old data; we will not research this behavior at this moment.
 
