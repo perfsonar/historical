@@ -44,7 +44,6 @@ CGI script for dumping the contents of a gLS or hLS, usable from a web browser. 
 Command line Perl client:
  * http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/client.pl
 
-
  
 == Testbed ==
 
