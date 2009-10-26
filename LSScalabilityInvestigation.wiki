@@ -37,9 +37,11 @@ Perl libraries for each LS:
 Example requests:
  * http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-LookupService/etc/requests/
 
-CGI script for dumping the contents of a gLS or hLS, usable from a web browser.  This one is querying an hLS at http://ndb1.internet2.edu:9991/perfSONAR_PS/services/gLS.  To query any hLS/gLS, change the info after `view.cgi?hls=`:
- * http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://ndb1.internet2.edu:9991/perfSONAR_PS/services/gLS
- * Source for this CGI script:  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-perfAdmin/cgi-bin/view.cgi
+CGI script for dumping the contents of a gLS or hLS, usable from a web browser.  This one is querying a gLS at `ale.damsl.cis.udel.edu:7000`.  To query any hLS/gLS, change the info after `view.cgi?hls=`:
+ * http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
+To query `moonshine` hLS:
+ * http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS
+ * Source for the CGI script:  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-perfAdmin/cgi-bin/view.cgi
  
 Command line Perl client:
  * http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/client.pl
@@ -1489,9 +1491,23 @@ sudo perl fakeService.pl --verbose --config=./fakeService.config1
 
 `fakeService` goes through its initial query of configuration parameters.  Again, we are trying to register a `fakeService` to `planetlab2.cis.upenn.edu`.
 
-After the initial configuration, `fakeService` fails to register with the hLS at `planetlab2.cis.upenn.edu`.  This hints that, although the hLS can be seen from a web browser, the hLS is not running properly, or there might be a firewall blocking its function (no likely, since PLanetlab virtual machines are really barebones).
+After the initial configuration, `fakeService` fails to register with the hLS at `planetlab2.cis.upenn.edu`.  This hints that, although the hLS can be seen from a web browser, the hLS is not running properly (there is no firewall at Planetlab nodes).
+
+We run `planetlab2.cis.upenn.edu` hLS in verbose, screen log mode, and detect that it reports these error messages:
+
+{{{
+2009/10/26 17:27:56 (9050) ERROR> daemon.pl:718 main::__ANON__ - Unhandled exception or crash: Can't locate object method "getValue" via package "XML::LibXML::Namespace" at /opt/perfsonar_ps/lookup_service/bin/../lib/perfSONAR_PS/Common.pm line 694.
+}}}
+
+{{{
+2009/10/26 17:27:56 (9050) DEBUG> Document.pm:414 perfSONAR_PS::XML::Document::getValue - Construction Results: <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="message.1976931" type="ErrorResponse"><nmwg:metadata id="metadata.14164500"><nmwg:eventType>error.common.internal_error</nmwg:eventType></nmwg:metadata><nmwg:data metadataIdRef="metadata.14164500" id="data.2020620"><nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">An internal error occurred</nmwgr:datum></nmwg:data></nmwg:message>
+}}}
+
+They hint an issue with the method "getValue".
 
 As an additional test, we configure the `fakeService` to register to `moonshine.damsl.cis.udel.edu:7000` hLS.  This time, the `fakeService` successfully registers.  At least, this Planetlab platform works for launching the fakeServices...
+
+To be continued...
 
  
 == Test Results ==
