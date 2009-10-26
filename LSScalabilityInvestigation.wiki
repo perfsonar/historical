@@ -22,11 +22,30 @@
  *  Query the gLS and verify that everything what was registered is returned in the query. 
   *  perfSONAR_PS-perfAdmin/cgi-bin/view.cgi is a program that provides an example of how to query an hLS.  Use, for instance: http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://ps-bw.es.net:8095/perfSONAR_PS/services/hLS
   *  Also useful:  `perfSONAR_PS-perfAdmin/bin/cache.pl`
-  *  For perl client, use examples in etc/requests.  Consult design document for information on how to form the queries and use the eventTypes of the service.
+  *  For perl client, use examples in etc/requests.  Consult design [http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/gLS/phase_1_color.html document] for information on how to form the queries and use the eventTypes of the service.
   *  For python, there is a wrapper for the generic perl client (`Shared/client/client.pl`) at:  `test_harness/test_PS.py` 
  *  Deploy the !FakeService on 50 ESnet hosts and see what happens.
+ 
+== How to Query an LS ==
+
+The base document, where the raw XML queries are described, is at http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/gLS/phase_1_color.html.
+
+Perl libraries for each LS:
+ * gLS:  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/lib/perfSONAR_PS/Client/gLS.pm
+ * LS (works for gLS and hLS):  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/lib/perfSONAR_PS/Client/LS.pm
+
+Example requests:
+ * http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-LookupService/etc/requests/
+
+CGI script for dumping the contents of a gLS or hLS, usable from a web browser.  This one is querying an hLS at http://ndb1.internet2.edu:9991/perfSONAR_PS/services/gLS.  To query any hLS/gLS, change the info after `view.cgi?hls=`:
+ * http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://ndb1.internet2.edu:9991/perfSONAR_PS/services/gLS
+ * Source for this CGI script:  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-perfAdmin/cgi-bin/view.cgi
+ 
+Command line Perl client:
+ * http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/client.pl
 
 
+ 
 == Testbed ==
 
 Current testbed is depicted in the following figure, and further described below:
@@ -38,9 +57,10 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/testbed.p
   * _ale_.damsl.cis.udel.edu
    * Services:
    * gLS, port 7000.  Access point:   http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_ale]
-   * fakeService registering to _moonshine_:  248fba4d9302ef8e993744d9c596181a
-   * fakeService registering to _moonshine_:  92e0b87f368c1f0a29e99cfd4a316133
-   * fakeService registering to _moonshine_:  5c5a140b2745c14d2baa09ccef29a2f6
+   * fakeService registering to _moonshine_:  orange-headed.edu
+   * fakeService registering to _moonshine_:  retrograded.edu
+   * fakeService registering to _moonshine_:  to-break.edu
+   * _temporary_ fakeService registering to _moonshine_:  ohgod.edu
   * _moonshine_.damsl.cis.udel.edu
    * hLS, port 7000.  Access point:   http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_moonshine]
   * _stout_.damsl.cis.udel.edu
@@ -59,7 +79,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/testbed.p
   *  Coordinate deployment of !FakeService on ESnet hosts on additional LSs.
  
 
-== Report on Installation and Findings ==
+== Report on Installation ==
 
 === Note ===
 
@@ -80,7 +100,7 @@ Using these sources for instructions on installation and configuration:
  http://www.internet2.edu/performance/pS-PS/lookup.html
 
 
-=== Preparing Server _stout_ ===
+=== Preparing Server stout ===
 
 _stout_ will act as a web server providing the gLS 'cloud', i.e., a list of gLS servers that will form the Lookup Service
 gLS network.  This list, a common text file, forms a hints file named `gls.root.hints`.  The default hints file is currently http://dc211.internet2.edu/gls.root.hints.
@@ -95,7 +115,7 @@ We make a new hints file that includes the gLS instances created for this testin
 The URL for accessing the file, thus, is http://stout.damsl.cis.udel.edu/gls.root.hints .
 
  
-=== Installing gLS on Server _ale_ ===
+=== Installing gLS on Server ale ===
 
 ==== Background ====
 
@@ -103,7 +123,7 @@ This server _ale_ is Fedora Core release 4 (Stentz), linux core 2.6.17-1.2142_FC
 installed and running on this server.
 
 
-==== Attempt 1 (_ale_) ====
+==== Attempt 1 (ale) ====
 
 Checked out perfSONAR repository into home directory (must have permission):
 
@@ -340,7 +360,7 @@ it was pointed by Jason Zurawski that the installation problem does not reside s
 Data/UUID.pm.
 
 
-==== Attempt 2 (_ale_) ====
+==== Attempt 2 (ale) ====
 
 Detected that Perl's Data/UUID.pm is generating the installation problem.  Let us try a different install approach, per
 instructed by Jason.
@@ -542,13 +562,13 @@ BEGIN failed--compilation aborted at /home/mportnoi/perfSONAR-PS/branches/RELEAS
 
 This last attempt just creates another version conflict.
 
-At this point we abandon this attempt, as it seems revolving in garbage (which generates more garbage).  Proceed
+At this point we abandon this pursuit, as it seems revolving in garbage (which generates more garbage).  Proceed
 to [LSScalabilityInvestigation#Attempt_3].
 
 
-==== Attempt 3 (_ale_) ====
+==== Attempt 3 (ale) ====
 
-===== Perfsonar Stimulated Modification 1 =====
+===== Derived Modification in Perfsonar 1 =====
 
 Lookup Service installation scripts modified to better handle dependencies.
 
@@ -593,7 +613,7 @@ And comment the line:
 
  `#log4perl.appender.A1=Log::Dispatch::FileRotate`
  
-===== daemon.conf file for _ale_ =====
+===== daemon.conf file for ale =====
  
 Edit `/opt/perfsonar_ps1/perfSONAR_PS-LookupService/etc/daemon.conf` and set the appropriate configuration variables.
 The resulting file (for a gLS) is:
@@ -669,7 +689,7 @@ sudo perl daemon.pl --conf=../etc/daemon.conf --logger=../etc/daemon_logger.conf
 }}}
 
 
-=== Installing hLS on Server _moonshine_ ===
+=== Installing hLS on Server moonshine ===
 
 ==== Backgroung ====
 
@@ -677,7 +697,7 @@ This server _moonshine_ is Debian GNU/Linux 5.0, linux core 2.6.26-2-686.  Again
 installed and running on this server.
 
 
-==== Attempt 1 (_moonshine_) ====
+==== Attempt 1 (moonshine) ====
 
 This attempt was based on _ale_'s [LSScalabilityInvestigation#Attempt_3_(ale)].  The Lookup Service will be installed to
 directory `/opt/perfsonar_ps1`.
@@ -719,7 +739,7 @@ And comment the line:
 
  `#log4perl.appender.A1=Log::Dispatch::FileRotate`
  
-===== daemon.conf file for _moonshine_ =====
+===== daemon.conf file for moonshine =====
 
 Edit `/opt/perfsonar_ps1/perfSONAR_PS-LookupService/etc/daemon.conf` and set the appropriate configuration variables.
 The resulting file (for a hLS) is:
@@ -805,7 +825,7 @@ gLS.pm:755 perfSONAR_PS::Services::LS::gLS::registerLS - Success from LS "http:/
 }}}
 
 
-=== Installing fakeService on _ale_ ===
+=== Installing fakeService on ale ===
 
 `fakeService` is already installed, together with the Shared libraries,  under `/opt/perfsonar_ps1/Shared/client/fakeService`.  Change to this directory.
 
@@ -859,11 +879,10 @@ Two more `fakeService` are created as follows:
  
  `sudo perl fakeService.pl --verbose --config=./fakeService.config3`
  
-A total of three `fakeService` instances were created on _ale_ and registered on the hLS on _moonshine_.  Their keys are:
-
- # 248fba4d9302ef8e993744d9c596181a
- # 92e0b87f368c1f0a29e99cfd4a316133
- # 5c5a140b2745c14d2baa09ccef29a2f6
+A total of three `fakeService` instances were created on _ale_ and registered on the hLS on _moonshine_.  These services assume random URNs collected from the word list installed at the operating system.  The three fakeServices here acquired the following names:
+ * orange-headed.edu
+ * retrograded.edu
+ * to-break.edu
 
 
 === Setting Up !PlanetLab ===
@@ -888,7 +907,7 @@ If a node named `planetlab2.cis.upenn.edu` was added to the slice, the user can 
 This server _planetlab2.cis.upenn.edu_ is Fedora release 8 (Werewolf), linux core 2.6.22.19-vs2.3.0.34.39.planetlab.
 
 
-===== Attempt 1 (_planetlab2.cis.upenn.edu_) =====
+===== Attempt 1 (planetlab2.cis.upenn.edu) =====
  
 On this node, we install the Lookup Service, this time using the `yum` package.
 
@@ -952,7 +971,7 @@ Running make install
 
 "Install seems impossible" is a typicall unix-style motivating message...
 
-===== Attempt 2 (_planetlab2.cis.upenn.edu_) =====
+===== Attempt 2 (planetlab2.cis.upenn.edu) =====
 
 *Setting CPAN Problem Aside for a Moment; Adding One Repository to Yum*
 
@@ -1045,7 +1064,7 @@ file (`RPM-GPG-KEY.dag.txt`) and paste the public key contents into it, and then
  sudo yum update
  }}}
  
-===== Attempt 3 (_planetlab2.cis.upenn.edu_) =====
+===== Attempt 3 (planetlab2.cis.upenn.edu) =====
 
 Now, back to CPAN problem.
 
@@ -1058,7 +1077,7 @@ Researching a bit more, we endeavor the following (from http://www.nntp.perl.org
 
 {{{
 rm /var/lib/rpm/__db.00*
-rpm -¬≠rebuilddb
+rpm --rebuilddb
 }}}
 
 CPAN is still unable to install what is needed.  Apparently, CPAN cannot install Parse::Yapp, or LWP, or XML::Parser, among other
@@ -1131,9 +1150,9 @@ This one writes no error after `make test`.  Yum install for Lookup Service stil
 Hash::Merge and NetAddr::IP fail due to dependencies that Cpan cannot yet resolve; or, the manual installation failed, perhaps because
 environment variables deep in the system bowels were not updated (thus rendering the system unaware that the packages are in fact installed).
 
-===== Attempt 4 (_planetlab2.cis.upenn.edu_) =====
+===== Attempt 4 (planetlab2.cis.upenn.edu) =====
 
-====== Perfsonar Stimulated Modification 2 ======
+====== Derived Modification in Perfsonar 2 ======
 
 Internet2 repository now includes packages NetAddr::IP and Hash::Merge, required by Perfsonar and that some Fedora versions have difficulty finding.
 
@@ -1155,7 +1174,7 @@ And comment the line:
  #log4perl.appender.A1=Log::Dispatch::FileRotate 
 
  
-===== daemon.conf file for _planetlab2.cis.upenn.edu_ =====
+===== daemon.conf file for planetlab2.cis.upenn.edu =====
 
 File `daemon.conf`:
 
@@ -1214,7 +1233,7 @@ Per _ale_ log report, this hLS has successfully registered.
 
 This server _planetlab2.cs.columbia.edu_ is Fedora release 8 (Werewolf), linux core 2.6.22.19-vs2.3.0.34.39.planetlab.
 
-===== Attempt 1 (_planetlab3.cs.columbia.edu_) =====
+===== Attempt 1 (planetlab3.cs.columbia.edu) =====
 
 Import public keys:
 
@@ -1279,7 +1298,7 @@ sudo yum update
 
 No.  Trying to remove __db* files from /var/lib/rpm and executing the two commands above again.  Does not work.
 
-===== Attempt 2 (_planetlab2.cs.columbia.edu_) =====
+===== Attempt 2 (planetlab2.cs.columbia.edu) =====
 
 We will avoid spending hours confronting this new issue.  Let us destroy this Planetlab virtual node (by deleting it from the Planetlab slice), and then add it again.  This will basically mimic reinstalling the operating system.  We begin again:
 
@@ -1323,9 +1342,9 @@ After `sudo yum update`, we get:
  
 And nothing else gets to be installed via yum.
 
-===== Attempt 3 (_planetlab2.cs.columbia.edu_) - Undocumented Installation Procedure =====
+===== Attempt 3 (planetlab2.cs.columbia.edu) - Undocumented Installation Procedure =====
 
-Again, let us kill this node and restart from scratch.  We will attempt an undocumented (and now documented) venue for installation, following recommendation from Jason Zurawsky:
+Again, let us kill this node and restart from scratch.  We will try an undocumented (and now documented) venue for installation, following recommendation from Jason Zurawsky:
 
 In `/etc/yum.repos.d`, add file `rpmforge.repo`:
 
@@ -1363,7 +1382,7 @@ And comment the line:
  #log4perl.appender.A1=Log::Dispatch::FileRotate 
 
  
-===== daemon.conf file for _planetlab2.cs.columbia.edu_ =====
+===== daemon.conf file for planetlab2.cs.columbia.edu =====
 
 File `daemon.conf`:
 
@@ -1427,12 +1446,12 @@ The hLS service successfully registers to the gLS at _ale_.  However, a test fak
 There is no firewall at Planetlab nodes.  A rapid look at _ale's_ iptables did not show blocked ports that might be disturbing the fakeService registration to the hLS at `planetlab2.cis.upenn.edu`.
 
 
-==== Perfsonar Stimulated Modification 3 ====
+==== Derived Modification in Perfsonar 3 ====
 
 Comprehensive documentation ([http://code.google.com/p/perfsonar-ps/wiki/LocalLSDeployment LocalLSDeployment]) added on installing an LS locally.
  
 
-==== Installing fakeService on _planetlab2.cs.columbia.edu_ ====
+==== Installing fakeService on planetlab2.cs.columbia.edu ====
 
 Trying a fakeService registering to `planetlab2.cis.upenn.edu` hLS.
 
@@ -1476,4 +1495,45 @@ After the initial configuration, `fakeService` fails to register with the hLS at
 As an additional test, we configure the `fakeService` to register to `moonshine.damsl.cis.udel.edu:7000` hLS.  This time, the `fakeService` successfully registers.  At least, this Planetlab platform works for launching the fakeServices...
 
  
+== Test Results ==
+
+We will use mainly the CGI script for contacting the LSs.
+
+Querying _ale_ gLS returns:
+
+{{{
+Collection: http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/2.0 
+Store Type: LSStore 
+<nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="e8e1ddd9c293181afb29928705d0f639">
+<perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"><psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
+        <psservice:serviceName>ORG Home Lookup Service</psservice:serviceName>
+        <psservice:accessPoint>http://planetlab2.cis.upenn.edu:9995/perfSONAR_PS/services/hLS</psservice:accessPoint>
+        <psservice:serviceType>hLS</psservice:serviceType>
+        <psservice:serviceDescription>ORG Home Lookup Service (Newark, DE, USA)</psservice:serviceDescription>
+      </psservice:service></perfsonar:subject>
+</nmwg:metadata>
+<nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="41491c472d798db53b0bc90deb7c6f71">
+<perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"><psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
+        <psservice:serviceName>Udel Home Lookup Service</psservice:serviceName>
+        <psservice:accessPoint>http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS</psservice:accessPoint>
+        <psservice:serviceType>hLS</psservice:serviceType>
+        <psservice:serviceDescription>Udel Home Lookup Service (Newark, DE, USA)</psservice:serviceDescription>
+      </psservice:service></perfsonar:subject>
+</nmwg:metadata>
+<nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="93723529234a52092eee8242c6c8a7ae">
+    <perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" id="subject.2647501">
+      <psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
+        <psservice:serviceName>UPenn Home Lookup Service</psservice:serviceName>
+        <psservice:accessPoint>http://planetlab2.cis.upenn.edu:9990/perfSONAR_PS/services/hLS</psservice:accessPoint>
+        <psservice:serviceType>hLS</psservice:serviceType>
+        <psservice:serviceDescription>UPenn Home Lookup Service (Planetlab Virtual, USA)</psservice:serviceDescription>
+      </psservice:service>
+    </perfsonar:subject>
+  
+  </nmwg:metadata>
+}}}
+
+Curiously, the data for the first registered hLS is not up-to-date in the gLS.  It wrongly states "ORG Home Lookup Service (Newark, DE, USA)" as description, instead of "UPenn Home Lookup Service (Planetlab Virtual, USA)".  The last registered hLS is the same as this one; the port was changed from 9995 to 9990 to test whether it was registering.
+The Upenn hLS was restarted several times, but the data stored at _ale_ gLS does not update.
+
 
