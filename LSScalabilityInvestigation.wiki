@@ -37,10 +37,11 @@ Perl libraries for each LS:
 Example requests:
  * http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-LookupService/etc/requests/
 
-CGI script for dumping the contents of a gLS or hLS, usable from a web browser.  This one is querying a gLS at `ale.damsl.cis.udel.edu:7000`.  To query any hLS/gLS, change the info after `view.cgi?hls=`:
- * http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
-To query `moonshine` hLS:
- * http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS
+CGI script for dumping the contents of a gLS or hLS, usable from a web browser:
+ * This one is querying a gLS at `ale.damsl.cis.udel.edu:7000`.  To query any hLS/gLS, change the info after `view.cgi?hls=`:
+  * http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
+ * To query `moonshine` hLS:
+  * http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS
  * Source for the CGI script:  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-perfAdmin/cgi-bin/view.cgi
  
 Command line Perl client:
@@ -59,12 +60,12 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/testbed.p
    * Services:
    * gLS, port 7000.  Access point:   http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_ale]
    * fakeServices registering to _moonshine_:
-	* fake1-ale.edu
-	* fake2-ale.edu
-	* fake3-ale.edu
-	* fake2-planetlab2.columbia.edu
-	* fake3-planetlab2.columbia.edu
-	* fake4-planetlab2.columbia.edu 
+    * fake1-ale.edu
+    * fake2-ale.edu
+    * fake3-ale.edu
+    * fake2-planetlab2.columbia.edu
+    * fake3-planetlab2.columbia.edu
+    * fake4-planetlab2.columbia.edu 
   * _moonshine_.damsl.cis.udel.edu
    * hLS, port 7000.  Access point:   http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_moonshine]
   * _stout_.damsl.cis.udel.edu
