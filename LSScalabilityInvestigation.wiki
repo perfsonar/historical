@@ -58,10 +58,13 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/testbed.p
   * _ale_.damsl.cis.udel.edu
    * Services:
    * gLS, port 7000.  Access point:   http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_ale]
-   * fakeService registering to _moonshine_:  orange-headed.edu
-   * fakeService registering to _moonshine_:  retrograded.edu
-   * fakeService registering to _moonshine_:  to-break.edu
-   * _temporary_ fakeService registering to _moonshine_:  ohgod.edu
+   * fakeServices registering to _moonshine_:
+	* fake1-ale.edu
+	* fake2-ale.edu
+	* fake3-ale.edu
+	* fake2-planetlab2.columbia.edu
+	* fake3-planetlab2.columbia.edu
+	* fake4-planetlab2.columbia.edu 
   * _moonshine_.damsl.cis.udel.edu
    * hLS, port 7000.  Access point:   http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_moonshine]
   * _stout_.damsl.cis.udel.edu
@@ -880,10 +883,12 @@ Two more `fakeService` are created as follows:
  
  `sudo perl fakeService.pl --verbose --config=./fakeService.config3`
  
-A total of three `fakeService` instances were created on _ale_ and registered on the hLS on _moonshine_.  These services assume random URNs collected from the word list installed at the operating system.  The three fakeServices here acquired the following names:
- * orange-headed.edu
- * retrograded.edu
- * to-break.edu
+A total of three `fakeService` instances were created on _ale_ and registered on the hLS on _moonshine_.  These services assume random URNs collected from the word list installed at the operating system.  Nevertheless, we modify the configuration files such that the domains are not random, but bear some indication of where the `fakeService` instance is dispatched from.  The three fakeServices here acquired the following domain names:
+ * fake1-ale.edu
+ * fake2-ale.edu
+ * fake3-ale.edu
+ 
+Using these domains, each `fakeService` instance uses other prefix names to register.
 
 
 === Setting Up !PlanetLab ===
@@ -1495,6 +1500,8 @@ sudo perl fakeService.pl --verbose --config=./fakeService.config1
 
 After the initial configuration, `fakeService` fails to register with the hLS at `planetlab2.cis.upenn.edu`.  This hints that, although the hLS can be seen from a web browser, the hLS is not running properly (there is no firewall at Planetlab nodes).
 
+Note:  As an additional test, we configure the `fakeService` to temporarily register to `moonshine.damsl.cis.udel.edu:7000` hLS.  This time, the `fakeService` successfully registers.  At least, this Planetlab platform works for launching the fakeServices...
+
 We run `planetlab2.cis.upenn.edu` hLS in verbose, screen log mode, and detect that it reports these error messages:
 
 {{{
@@ -1507,13 +1514,17 @@ We run `planetlab2.cis.upenn.edu` hLS in verbose, screen log mode, and detect th
 
 They hint an issue with the method "getValue".
 
-As an additional test, we configure the `fakeService` to register to `moonshine.damsl.cis.udel.edu:7000` hLS.  This time, the `fakeService` successfully registers.  At least, this Planetlab platform works for launching the fakeServices...
 
 ===== Attempt 2 on fakeService at planetlab2.cs.columbia.edu =====
 
 It was suggested that the libxml and libxml2-dev library versions be upgraded to solve the "getValue" method problem.  Running `sudo yum update` or `sudo yum update libxml2` do not update the libraries, since their current versions (2.7.2-2) are the latest versions available in the yum repositories.  Manually installing or upgrading these libraries have already shown to be rather cumbersome, as reported in the several attempts for _ale_ above.  We postpone this endeavour until the systems involved become more user-friendly (sigh?), or until the user replenishes anti-headache pill stack.
 
-Planetlab can still be used to deploy `fakeService` instances.
+Planetlab can still be used to deploy `fakeService` instances.  Therefore, we create 3 `fakeService` instances registering to _moonshine_.  These are the domains for each instance:
+ * fake2-planetlab2.columbia.edu
+ * fake3-planetlab2.columbia.edu
+ * fake4-planetlab2.columbia.edu
+
+`fake1-planetlab2.columbia.edu` is currently set to register to `planetlab2.cis.upenn.edu` hLS; since this hLS is not operating correctly due to the "getValue" method problem, the `fakeService` fails to register.
 
  
 == Test Results ==
