@@ -1585,7 +1585,7 @@ Restarting the hLS at _ale_ did not erase the old data.
 Dumping _moonshine_ data also shows old information that was not yet purged.  For testing purposes, let us configure both _ale_ gLS and _moonshine_ hLS timings to force faster refreshings:
 
 || Parameter || Default Value (min) || New Value (min) ||
-|| ls_ttl || 10 || nn ||
+|| ls_ttl || 5760 || 10 ||
 || ls_registration_interval || 180 || 7 ||
 || maintenance_interval || 120 || 5 ||
 
