@@ -12,9 +12,6 @@ use Data::Dumper;
 use Log::Log4perl qw(:easy);
 use JSON::XS;
 
-use perfSONAR_PS::Client::OSCARS;
-use perfSONAR_PS::Utils::ParameterValidation;
-
 my $output_level = $DEBUG;
 
 my %logger_opts = (
@@ -53,6 +50,12 @@ if ($status != 0) {
         die($res);
 }
 
+my $static_links_filter = perfSONAR_PS::WeatherMap::Links::Static->new();
+($status, $res) = $static_links_filter->init(\%configuration);
+if ($status != 0) {
+        die($res);
+}
+
 my $dcn_links_filter = perfSONAR_PS::WeatherMap::Links::DCN->new();
 ($status, $res) = $dcn_links_filter->init(\%configuration);
 if ($status != 0) {
@@ -67,6 +70,12 @@ if ($status != 0) {
 
 my $color_filter = perfSONAR_PS::WeatherMap::Color::Utilization->new();
 ($status, $res) = $color_filter->init(\%configuration);
+if ($status != 0) {
+        die($res);
+}
+
+my $stacked_filter = perfSONAR_PS::WeatherMap::Layout::Stacked->new();
+($status, $res) = $stacked_filter->init(\%configuration);
 if ($status != 0) {
         die($res);
 }
@@ -91,6 +100,11 @@ if ($status != 0) {
         die($res);
 }
 
+($status, $res) = $static_links_filter->run({ current_endpoints => \%endpoints, current_links => \@links, current_background => \%background, current_icons => \@icons });
+if ($status != 0) {
+        die($res);
+}
+
 ($status, $res) = $dcn_links_filter->run({ current_endpoints => \%endpoints, current_links => \@links, current_background => \%background, current_icons => \@icons });
 if ($status != 0) {
         die($res);
@@ -102,6 +116,11 @@ if ($status != 0) {
 }
 
 ($status, $res) = $color_filter->run({ current_endpoints => \%endpoints, current_links => \@links, current_background => \%background, current_icons => \@icons });
+if ($status != 0) {
+        die($res);
+}
+
+($status, $res) = $stacked_filter->run({ current_endpoints => \%endpoints, current_links => \@links, current_background => \%background, current_icons => \@icons });
 if ($status != 0) {
         die($res);
 }
@@ -441,6 +460,7 @@ sub parse_endpoints {
                 icon => $ep->{icon},
                 height => $ep->{height},
                 width => $ep->{width},
+                type  => $ep->{type},
         );
 
         foreach my $id (@$ids) {
@@ -475,6 +495,7 @@ use fields 'OSCARS_CLIENT', 'IDCS', 'AXIS2_HOME', 'JAVA_DIRECTORY', 'DCN_LINKS';
 
 use Data::Dumper;
 
+use perfSONAR_PS::Client::OSCARS;
 use perfSONAR_PS::Utils::ParameterValidation;
 
 sub init {
@@ -923,23 +944,19 @@ sub parse_dcn_link_measurement {
         return (-1, "Direction must be either 'forward' or 'reverse'");
     }
 
-    unless ($measurement->{snmp} and ref($measurement->{snmp}) eq "HASH") {
-        return (-1, "No SNMP parameters specified");
-    }
-
-    my $hostname = $measurement->{snmp}->{hostname};
-    $hostname = $measurement->{snmp}->{hostName} unless ($hostname);
+    my $hostname = $measurement->{hostname};
+    $hostname = $measurement->{hostName} unless ($hostname);
     return (-1, "No SNMP hostname parameter specified") unless ($hostname);
 
-    my $ifname = $measurement->{snmp}->{ifname};
-    $ifname = $measurement->{snmp}->{ifName} unless ($ifname);
+    my $ifname = $measurement->{ifname};
+    $ifname = $measurement->{ifName} unless ($ifname);
 
-    my $ifindex = $measurement->{snmp}->{ifindex};
-    $ifindex = $measurement->{snmp}->{ifIndex} unless ($ifindex);
+    my $ifindex = $measurement->{ifindex};
+    $ifindex = $measurement->{ifIndex} unless ($ifindex);
 
     return (-1, "No SNMP ifName or ifIndex parameter specified") unless ($ifname or $ifindex);
 
-    my $vlanMapping = $measurement->{snmp}->{vlanMapping};
+    my $vlanMapping = $measurement->{vlanMapping};
 
     my %measurement_info = ();
     $measurement_info{type} = "SNMP";
@@ -1168,52 +1185,52 @@ sub run {
         my ($current_srcdst_color, $current_dstsrc_color);
 
         foreach my $color (@{ $self->{COLORS} }) {
-            if ($color->{minimum} and $color->{maximum}) {
-                if ($measurement_results->{source_destination}) {
+
+            if ($color->{type} eq "default") {
+                $current_srcdst_color = $color unless ($current_srcdst_color);  
+                $current_dstsrc_color = $color unless ($current_dstsrc_color);  
+            }
+
+            if ($measurement_results->{source_destination} and defined $measurement_results->{source_destination}->{value}) {
+                if ($color->{minimum} and $color->{maximum}) {
                     if ($color->{minimum} <= $measurement_results->{source_destination}->{value} and
                             $color->{maximum} > $measurement_results->{source_destination}->{value}) {
 
-                            $current_srcdst_color = $color;
+                        $current_srcdst_color = $color;
 
                     }
                 }
-
-                if ($measurement_results->{destination_source}) {
-                    if ($color->{minimum} <= $measurement_results->{destination_source}->{value} and
-                            $color->{maximum} > $measurement_results->{destination_source}->{value}) {
-
-                            $current_dstsrc_color = $color;
-
-                    }
-                }
-            }
-            elsif ($color->{minimum}) {
-                if ($measurement_results->{source_destination}) {
+                elsif ($color->{minimum}) {
                     if ($color->{minimum} <= $measurement_results->{source_destination}->{value}) {
                         $current_srcdst_color = $color;
                     }
                 }
-                if ($measurement_results->{destination_source}) {
-                    if ($color->{minimum} <= $measurement_results->{destination_source}->{value}) {
-                        $current_dstsrc_color = $color;
-                    }
-                }
-            }
-            elsif ($color->{maximum}) {
-                if ($measurement_results->{source_destination}) {
+                elsif ($color->{maximum}) {
                     if ($color->{maximum} >= $measurement_results->{source_destination}->{value}) {
                         $current_srcdst_color = $color;
                     }
                 }
-                if ($measurement_results->{destination_source}) {
-                    if ($color->{maximum} >= $measurement_results->{destination_source}->{value}) {
+            }
+
+            if ($measurement_results->{destination_source} and defined $measurement_results->{destination_source}->{value}) {
+                if ($color->{minimum} and $color->{maximum}) {
+                    if ($color->{minimum} <= $measurement_results->{destination_source}->{value} and
+                            $color->{maximum} > $measurement_results->{destination_source}->{value}) {
+
+                        $current_dstsrc_color = $color;
+
+                    }
+                }
+                elsif ($color->{minimum}) {
+                    if ($color->{minimum} <= $measurement_results->{destination_source}->{value}) {
                         $current_dstsrc_color = $color;
                     }
                 }
-            }
-            elsif ($color->{type} eq "default") {
-                $current_srcdst_color = $color unless ($current_srcdst_color);  
-                $current_dstsrc_color = $color unless ($current_dstsrc_color);  
+                elsif ($color->{maximum}) {
+                    if ($color->{maximum} >= $measurement_results->{destination_source}->{value}) {
+                            $current_dstsrc_color = $color;
+                    }
+                }
             }
         }
 
@@ -1335,4 +1352,229 @@ sub parse_number {
 }
 
 
+package perfSONAR_PS::WeatherMap::Links::Static;
 
+use base 'perfSONAR_PS::WeatherMap::Base';
+
+use fields 'LINKS';
+
+use Clone::Fast qw( clone );
+use Data::Dumper;
+
+use perfSONAR_PS::Utils::ParameterValidation;
+
+sub init {
+    my ( $self, $conf ) = @_;
+
+    unless ($conf->{'static-links'} and $conf->{'static-links'}->{'link'}) {
+        $self->{LOGGER}->debug("No dcn links defined");
+        return (0, "");
+    }
+
+    my ($status, $res) = $self->parse_static_links($conf->{'static-links'}->{'link'});
+    if ($status != 0) {
+        return ($status, $res);
+    }
+
+    $self->{LINKS} = $res;
+
+    return (0, "");
+}
+
+sub run {
+    my ( $self, @args ) = @_;
+    my $args = validateParams(
+        @args,
+        {
+            current_endpoints  => 1,
+            current_links      => 1,
+            current_icons      => 1,
+            current_background => 1,
+        }
+    );
+
+    my $links = clone($self->{LINKS});
+
+    foreach my $link (@$links) {
+        push @{ $args->{current_links} }, $link;
+    }
+
+    return (0, "");
+}
+
+sub parse_static_links {
+    my ($self, $staticlinks) = @_;
+
+    if (ref($staticlinks) ne "ARRAY") {
+        $staticlinks = [ $staticlinks ];
+    }
+
+    my @links = ();
+
+    foreach my $link (@$staticlinks) {
+        my %new_link = ();
+
+        unless ($link->{source}) {
+                return (-1, "Link does not have a source");
+        }
+
+        unless ($link->{destination}) {
+                return (-1, "Link does not have a destination");
+        }
+
+        unless ($link->{type}) {
+                return (-1, "Link does not have a type");
+        }
+
+        $new_link{source} = $link->{source};
+        $new_link{destination} = $link->{destination};
+        $new_link{type} = $link->{type};
+
+        if ($link->{measurement}) {
+            my ($status, $res) = $self->parse_link_measurement_parameters($link->{measurement});
+            if ($status != 0) {
+                return ($status, $res);
+            }
+
+            $new_link{measurement_parameters} = $res;
+        }
+
+        push @links, \%new_link;
+    }
+
+    return (0, \@links);
+}
+
+sub parse_link_measurement_parameters {
+    my ($self, $measurements) = @_;
+
+    if (ref($measurements) ne "ARRAY") {
+        $measurements = [ $measurements ];
+    }
+
+    my @measurement_parameters_list = ();
+
+    foreach my $params (@$measurements) {
+        $self->{LOGGER}->debug("PARAMS: ".Dumper($params));
+
+        unless ($params->{type}) {
+                return (-1, "Measurement set does not have a type");
+        }
+
+        push @measurement_parameters_list, $params;
+    }
+
+    return (0, \@measurement_parameters_list);
+}
+
+package perfSONAR_PS::WeatherMap::Layout::Stacked;
+
+use base 'perfSONAR_PS::WeatherMap::Base';
+
+use fields 'ENABLED', 'ENDPOINT_HEIGHT', 'ENDPOINT_WIDTH', 'ROW_WIDTH';
+
+use Clone::Fast qw( clone );
+use Data::Dumper;
+
+use perfSONAR_PS::Utils::ParameterValidation;
+
+sub init {
+    my ( $self, $conf ) = @_;
+
+    unless ($conf->{layout} and $conf->{layout}->{type} and $conf->{layout}->{type} eq "stacked") {
+        $self->{ENABLED} = 0;
+        return (0, "");
+    }
+
+    $self->{ENDPOINT_HEIGHT} = 30;
+    $self->{ENDPOINT_HEIGHT} = $conf->{layout}->{endpoint_height} if ($conf->{layout}->{endpoint_height});
+
+    $self->{ENDPOINT_WIDTH} = 30;
+    $self->{ENDPOINT_WIDTH} = $conf->{layout}->{endpoint_width} if ($conf->{layout}->{endpoint_width});
+
+    $self->{ROW_WIDTH} = 700;
+    $self->{ROW_WIDTH} = $conf->{layout}->{row_width} if ($conf->{layout}->{row_width});
+
+    $self->{ENABLED} = 1;
+
+    return (0, "");
+}
+
+sub run {
+    my ( $self, @args ) = @_;
+    my $args = validateParams(
+        @args,
+        {
+            current_endpoints  => 1,
+            current_links      => 1,
+            current_icons      => 1,
+            current_background => 1,
+        }
+    );
+
+    return (0, "") unless ($self->{ENABLED});
+
+    my %new_endpoints = ();
+
+    my $link_num = 0;
+
+    foreach my $link (@{ $args->{current_links} }) {
+        my $curr_src_endpoint = $args->{current_endpoints}->{$link->{"source"}};
+        my $curr_dst_endpoint = $args->{current_endpoints}->{$link->{"destination"}};
+
+        # Skip any missing endpoints
+        next unless ($curr_src_endpoint and $curr_dst_endpoint);
+
+        my $new_src_id = $link->{"source"}."-".$link_num;
+        my $new_dst_id = $link->{"destination"}."-".$link_num;
+
+        my %new_src_endpoint = ();
+        $new_src_endpoint{ids} = [ $new_src_id ];
+        $new_src_endpoint{type} = $curr_src_endpoint->{type};
+        $new_src_endpoint{icon} = $curr_src_endpoint->{icon};
+        $new_src_endpoint{type} = $curr_src_endpoint->{type};
+        $new_src_endpoint{outerRadius} = $curr_src_endpoint->{outerRadius};
+        $new_src_endpoint{innerRadius} = $curr_src_endpoint->{innerRadius};
+
+        $new_src_endpoint{height} = $self->{ENDPOINT_HEIGHT};
+        $new_src_endpoint{width}  = $self->{ENDPOINT_WIDTH};
+        $new_src_endpoint{x}      = 2*$self->{ENDPOINT_WIDTH};
+        $new_src_endpoint{y}      = $self->{ENDPOINT_HEIGHT}*($link_num + 1);
+
+        my %new_dst_endpoint = ();
+        $new_dst_endpoint{ids} = [ $new_dst_id ];
+        $new_dst_endpoint{type} = $curr_dst_endpoint->{type};
+        $new_dst_endpoint{icon} = $curr_dst_endpoint->{icon};
+        $new_dst_endpoint{type} = $curr_dst_endpoint->{type};
+        $new_dst_endpoint{outerRadius} = $curr_dst_endpoint->{outerRadius};
+        $new_dst_endpoint{innerRadius} = $curr_dst_endpoint->{innerRadius};
+
+        $new_dst_endpoint{height} = $self->{ENDPOINT_HEIGHT};
+        $new_dst_endpoint{width}  = $self->{ENDPOINT_WIDTH};
+        $new_dst_endpoint{x}      = $self->{ROW_WIDTH} - 2*$self->{ENDPOINT_WIDTH};
+        $new_dst_endpoint{y}      = $self->{ENDPOINT_HEIGHT}*($link_num + 1);
+
+        $new_endpoints{$new_src_id} = \%new_src_endpoint;
+        $new_endpoints{$new_dst_id} = \%new_dst_endpoint;
+
+        # update the links to point to the new endpoints
+        $link->{"source"} = $new_src_id;
+        $link->{"destination"} = $new_dst_id;
+
+        $link_num++;
+    }
+
+    # delete all the current endpoints and replace them with the modified endpoints
+    foreach my $key (keys %{ $args->{current_endpoints} }) {
+        delete($args->{current_endpoints}->{$key});
+    }
+
+    foreach my $key (keys %new_endpoints) {
+        $args->{current_endpoints}->{$key} = $new_endpoints{$key};
+    }
+
+    $args->{background}->{height} = $self->{ENDPOINT_HEIGHT}*($link_num + 1);
+    $args->{background}->{width} = $self->{ROW_WIDTH};
+
+    return (0, "");
+}

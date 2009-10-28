@@ -229,7 +229,7 @@ function drawMap() {
     // fill in the height/width for the non-image endpoints
     for(var ep_id in endpoints) {
         var endpoint = endpoints[ep_id];
-        if (endpoint.image == null) {
+        if (endpoint.type == 'radial') {
             var outerRadius = 4.5;
 
             if (endpoint.outerRadius) {
@@ -238,6 +238,14 @@ function drawMap() {
 
             endpoint["height"] = outerRadius * 2;
             endpoint["width"]  = outerRadius * 2;
+        } else if (endpoint.type == 'hidden') {
+            if (endpoint["height"] == null) {
+                endpoint["height"] = 1;
+            }
+
+            if (endpoint["width"] == null) {
+                endpoint["width"]  = 1;
+            }
         }
     }
 
@@ -387,7 +395,7 @@ function drawMap() {
         var y = parseInt(endpoint["y"], 10);
         var height;
         var width;
-        if (endpoint.image == null) {
+        if (endpoint.type == "radial") {
             var innerColor = "#FFCE00";
             var outerColor = "#FF0000";
             var innerRadius = 1.0;
@@ -423,7 +431,7 @@ function drawMap() {
             canvas_ctx.fillStyle = prevFillStyle;
 
             log("EP: "+endpoint["height"]+"/"+endpoint["width"]);
-        } else {
+        } else if (endpoint.type == "icon" || (endpoint.type == null && endpoint.image != null)) {
             if (endpoint["height"] && endpoint["width"]) {
                 height = endpoint["height"];
                 width  = endpoint["width"];
@@ -526,10 +534,17 @@ function getMapState() {
 function handleStateUpdate( req ) {
     log("Debug: handleUpdate: Data received \"" + Date() + "\"" );
     log("Debug: handleUpdate: JSON \"" + req.responseText + "\"" );
-    var json = MochiKit.Async.evalJSONRequest( req );
-    if( json == null ) { 
-        log("Debug: handleUpdate: got null json");
-        return; 
+    var json;
+
+    try {
+        json = MochiKit.Async.evalJSONRequest( req );
+        if( json == null ) { 
+            log("Debug: handleUpdate: got null json");
+            return; 
+        }
+    } catch(err) {
+        log("Error parsing json: "+err);
+        return;
     }
 
     background_image_src = json["background"]["image"];
