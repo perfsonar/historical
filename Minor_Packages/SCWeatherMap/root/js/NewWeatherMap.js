@@ -168,6 +168,10 @@ function refreshMap() {
 
             iconImg.src = endpoint.icon;
         }
+        else {
+            endpoint.loaded = 1;
+            endpoint.drawn  = 0;
+        }
     }
 
     return false;
@@ -182,7 +186,7 @@ function drawMap() {
     for(var ep_id in endpoints) {
         var endpoint = endpoints[ep_id];
         if (endpoint['loaded'] == 0) {
-                log("Debug: ep "+endpoint['name']+" not loaded");
+                log("Debug: ep "+ep_id+" not loaded");
                 return;
         }
     }
@@ -222,6 +226,21 @@ function drawMap() {
         canvas_ctx.fillStyle = prevFill;
     }
 
+    // fill in the height/width for the non-image endpoints
+    for(var ep_id in endpoints) {
+        var endpoint = endpoints[ep_id];
+        if (endpoint.image == null) {
+            var outerRadius = 4.5;
+
+            if (endpoint.outerRadius) {
+                outerRadius = endpoint.outerRadius;
+            }
+
+            endpoint["height"] = outerRadius * 2;
+            endpoint["width"]  = outerRadius * 2;
+        }
+    }
+
     var intra_link_count = new Array();
 
     for(var link_id in links) {
@@ -233,6 +252,8 @@ function drawMap() {
         }
 
         var num_links_between_id;
+
+        log("Drawing line from "+link["source"]+" to "+link["destination"]);
 
         if (link["source"] < link["destination"]) {
             num_links_between_id = link["source"]+link["destination"];
@@ -253,23 +274,21 @@ function drawMap() {
         var dst_x = parseInt(endpoints[link["destination"]]["x"], 10);
         var dst_y = parseInt(endpoints[link["destination"]]["y"], 10);
 
+        // we draw a "circle" around the pictures, and offset everything from that circle
+        var ang = Math.atan2(dst_y-src_y,dst_x-src_x);
+
         log("Debug: src("+src_x+","+src_y+"), dst("+dst_x+","+dst_y+")");
-        // no x movement if it's up/down
-        if (src_x < dst_x) {
-            src_x += endpoints[link["source"]]["width"]/2;
-            dst_x -= endpoints[link["destination"]]["width"]/2;
-        } else if (src_x > dst_x) {
-            src_x -= endpoints[link["source"]]["width"]/2;
-            dst_x += endpoints[link["destination"]]["width"]/2;
-        }
-        log("Debug: src("+src_x+","+src_y+"), dst("+dst_x+","+dst_y+"): post-x-mod");
-        if (src_y < dst_y) {
-            src_y += endpoints[link["source"]]["height"]/2;
-            dst_y -= endpoints[link["destination"]]["height"]/2;
-        } else if (src_y > dst_y) {
-            src_y -= endpoints[link["source"]]["height"]/2;
-            dst_y += endpoints[link["destination"]]["height"]/2;
-        }
+        var src_radius = Math.sqrt(Math.pow(endpoints[link["source"]]["width"], 2) + Math.pow(endpoints[link["source"]]["height"], 2))/2;
+        log("Debug: (width, height): ("+endpoints[link["source"]]["width"]+","+endpoints[link["source"]]["height"]+")");
+        var dst_radius = Math.sqrt(Math.pow(endpoints[link["destination"]]["width"], 2) + Math.pow(endpoints[link["destination"]]["height"], 2))/2;
+
+        log("Debug: (src, dst): ("+src_radius+","+dst_radius+")");
+
+        src_x += src_radius * Math.cos(ang);
+        src_y += src_radius * Math.sin(ang);
+        dst_x -= dst_radius * Math.cos(ang);
+        dst_y -= dst_radius * Math.sin(ang);
+
         log("Debug: src("+src_x+","+src_y+"), dst("+dst_x+","+dst_y+"): post-y-mod");
 
         // Offset the arrow some if there are multiple links
@@ -284,6 +303,24 @@ function drawMap() {
             src_y += y_offset;
             dst_x += x_offset;
             dst_y += y_offset;
+        }
+
+        // Offset the arrow according to the src/dst image edges.
+        var ang = Math.atan2(dst_y-src_y,dst_x-src_x);
+        log("Debug: fwd src("+src_x+","+src_y+"), dst("+dst_x+","+dst_y+"): "+ang);
+        log("Debug: rev src("+src_x+","+src_y+"), dst("+dst_x+","+dst_y+"): "+Math.atan2(src_y-dst_y,src_x-dst_x));
+
+        var i;
+        for(i = 0; i <= 2; i++) {
+            var j;
+                for(var j = 0; j <= 2; j++) {
+                        if (i == 1 && j == 1) {
+                                continue;
+                        }
+                        var ang = Math.atan2(j-1, i-1);
+
+                        log("Debug: fwd src("+1+","+1+"), dst("+i+","+j+"): "+ang+", "+(180/Math.PI*ang));
+                }
         }
 
         var src_color;
@@ -325,6 +362,23 @@ function drawMap() {
             drawArrow(canvas_ctx, src_x, src_y, midpt_x, midpt_y, src_color, arrow_scale );
             drawArrow(canvas_ctx, dst_x, dst_y, midpt_x, midpt_y, dst_color, arrow_scale );
         }
+        else if (link["type"] == "unidirectional-line") {
+            var prevLineWidth   = canvas_ctx.lineWidth;
+            var prevStrokeStyle = canvas_ctx.strokeStyle;
+
+            canvas_ctx.lineWidth     = 2 * arrow_scale;
+            if (src_color != null) {
+                canvas_ctx.strokeStyle   = src_color;
+            }
+            canvas_ctx.beginPath();
+            canvas_ctx.moveTo(src_x,src_y);
+            canvas_ctx.lineTo(dst_x, dst_y);
+            canvas_ctx.stroke();
+            canvas_ctx.strokeStyle = prevStrokeStyle;
+
+            canvas_ctx.strokeStyle = prevStrokeStyle;
+            canvas_ctx.lineWidth   = prevLineWidth;
+        }
     }
 
     for(var ep_id in endpoints) {
@@ -333,33 +387,83 @@ function drawMap() {
         var y = parseInt(endpoint["y"], 10);
         var height;
         var width;
-        if (endpoint["height"] && endpoint["width"]) {
-            height = endpoint["height"];
-            width  = endpoint["width"];
-        } else if (endpoint["height"]) {
-            height = endpoint["height"];
-            width = endpoint["height"]/endpoint.image.height*endpoint.image.width;
-        } else if (endpoint["width"]) {
-            width = endpoint["width"];
-            height = endpoint["width"]/endpoint.image.width*endpoint.image.height;
+        if (endpoint.image == null) {
+            var innerColor = "#FFCE00";
+            var outerColor = "#FF0000";
+            var innerRadius = 1.0;
+            var outerRadius = 4.5;
+
+            if (endpoint.innerColor) {
+                innerColor = endpoint.innerColor;
+            }
+
+            if (endpoint.outerColor) {
+                outerColor = endpoint.outerColor;
+            }
+
+            if (endpoint.innerRadius) {
+                innerRadius = endpoint.innerRadius;
+            }
+
+            if (endpoint.outerRadius) {
+                outerRadius = endpoint.outerRadius;
+            }
+
+            endpoint["height"] = outerRadius * 2;
+            endpoint["width"]  = outerRadius * 2;
+
+            var prevFillStyle = canvas_ctx.fillStyle;
+            var radgrad = canvas_ctx.createRadialGradient(endpoint.x,endpoint.y, innerRadius,endpoint.x, endpoint.y,outerRadius);
+            radgrad.addColorStop(0, innerColor);
+            radgrad.addColorStop(1, outerColor);
+            canvas_ctx.fillStyle = radgrad;
+            canvas_ctx.beginPath();
+            canvas_ctx.arc(endpoint.x,endpoint.y,outerRadius,0,Math.PI*2,true);
+            canvas_ctx.fill();
+            canvas_ctx.fillStyle = prevFillStyle;
+
+            log("EP: "+endpoint["height"]+"/"+endpoint["width"]);
         } else {
-            height = endpoint.image.height;
-            width = endpoint.image.width;
+            if (endpoint["height"] && endpoint["width"]) {
+                height = endpoint["height"];
+                width  = endpoint["width"];
+            } else if (endpoint["height"]) {
+                height = endpoint["height"];
+                width = endpoint["height"]/endpoint.image.height*endpoint.image.width;
+            } else if (endpoint["width"]) {
+                width = endpoint["width"];
+                height = endpoint["width"]/endpoint.image.width*endpoint.image.height;
+            } else {
+                height = endpoint.image.height;
+                width = endpoint.image.width;
+            }
+
+            endpoint["height"] = height;
+            endpoint["width"] = width;
+
+            y -= height/2;
+            x -= width/2;
+            log("Debug: Drawing "+ep_id+" image at ("+x+","+y+")");
+
+                /*
+            var new_rad = Math.sqrt(width*width+height*height)/2;
+            canvas_ctx.strokeStyle = "rgb(0, 0, 0)";
+            canvas_ctx.beginPath();
+            canvas_ctx.arc(x + width/2, y + height/2, new_rad, 0, 2*Math.PI, true); 
+            canvas_ctx.closePath();
+            canvas_ctx.stroke();
+
+            canvas_ctx.fillStyle = prevFill;
+                */
+
+            try {
+                canvas_ctx.drawImage(endpoint["image"], x, y, width, height);
+            }
+            catch(err) {
+                log("Error: "+err);
+            };
         }
-
-        endpoint["height"] = height;
-        endpoint["width"] = width;
-
-        y -= height/2;
-        x -= width/2;
-        log("Debug: Drawing "+ep_id+" image at ("+x+","+y+")");
-
-        var prevFill = canvas_ctx.fillStyle;
-        canvas_ctx.fillStyle = "rgb(255, 255, 255)";
-        canvas_ctx.fillRect(x, y, width,height);
-        canvas_ctx.fillStyle = prevFill;
-
-        canvas_ctx.drawImage(endpoint.image, x, y, width, height);
+        log("EP: "+endpoint["height"]+"/"+endpoint["width"]);
     }
 
     for(var icon_id in icons) {
@@ -406,7 +510,7 @@ function drawMap() {
 
 function getMapState() {
     // Call a 'local' CGI script that outputs data in JSON format
-    var query = "wmap.cgi";
+    var query = "out.json";
     log("Debug: getMapState: Calling cgi script \"" + query + "\"" );
     var doreq = MochiKit.Async.doSimpleXMLHttpRequest( query );
     doreq.addCallback( handleStateUpdate );
