@@ -65,7 +65,13 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/testbed.p
     * fake3-ale.edu
     * fake2-planetlab2.columbia.edu
     * fake3-planetlab2.columbia.edu
-    * fake4-planetlab2.columbia.edu 
+    * fake4-planetlab2.columbia.edu
+	* fake5-planetlab2.columbia.edu
+    * fake6-planetlab2.columbia.edu
+    * fake7-planetlab2.columbia.edu
+    * fake8-planetlab2.columbia.edu
+    * fake9-planetlab2.columbia.edu
+    * fake10-planetlab2.columbia.edu
   * _moonshine_.damsl.cis.udel.edu
    * hLS, port 7000.  Access point:   http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_moonshine]
   * _stout_.damsl.cis.udel.edu
@@ -1520,10 +1526,16 @@ They hint an issue with the method "getValue".
 
 It was suggested that the libxml and libxml2-dev library versions be upgraded to solve the "getValue" method problem.  Running `sudo yum update` or `sudo yum update libxml2` do not update the libraries, since their current versions (2.7.2-2) are the latest versions available in the yum repositories.  Manually installing or upgrading these libraries have already shown to be rather cumbersome, as reported in the several attempts for _ale_ above.  We postpone this endeavour until the systems involved become more user-friendly (sigh?), or until the user replenishes anti-headache pill stack.
 
-Planetlab can still be used to deploy `fakeService` instances.  Therefore, we create 3 `fakeService` instances registering to _moonshine_.  These are the domains for each instance:
+Planetlab can still be used to deploy `fakeService` instances.  Therefore, we create more `fakeService` instances <font color=green>registering to _moonshine_</font>.  These are the domains for each instance:
  * fake2-planetlab2.columbia.edu
  * fake3-planetlab2.columbia.edu
  * fake4-planetlab2.columbia.edu
+ * fake5-planetlab2.columbia.edu
+ * fake6-planetlab2.columbia.edu
+ * fake7-planetlab2.columbia.edu
+ * fake8-planetlab2.columbia.edu
+ * fake9-planetlab2.columbia.edu
+ * fake10-planetlab2.columbia.edu
 
 `fake1-planetlab2.columbia.edu` is currently set to register to `planetlab2.cis.upenn.edu` hLS; since this hLS is not operating correctly due to the "getValue" method problem, the `fakeService` fails to register.
 
@@ -1568,5 +1580,17 @@ Store Type: LSStore
 
 The data for the first registered hLS is not up-to-date in the gLS; this is actually the "old" or first registration of the hLS.  Notice it states "ORG Home Lookup Service (Newark, DE, USA)" as description, instead of "UPenn Home Lookup Service (Planetlab Virtual, USA)".  The last registered hLS is the same service; the port was changed from 9995 to 9990 to test whether it was registering with the correct description, and it does show at the bottom of the list.  This is an expected behavior per the LS design.  We will monitor, however, whether the old registration is erased by the expiration date.
 
-Restarting the hLS at _ale_ did not erase the old data; we will not research this behavior at this moment.
+Restarting the hLS at _ale_ did not erase the old data.
+
+Dumping _moonshine_ data also shows old information that was not yet purged.  For testing purposes, let us configure both _ale_ gLS and _moonshine_ hLS timings to force faster refreshings:
+
+|| Parameter || Default Value (min) || New Value (min) ||
+|| ls_ttl || 10 || nn ||
+|| ls_registration_interval || 180 || 7 ||
+|| maintenance_interval || 120 || 5 ||
+
+
+
+
+
 
