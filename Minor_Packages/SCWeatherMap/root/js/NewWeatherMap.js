@@ -174,10 +174,14 @@ function refreshMap() {
         }
     }
 
+    drawMap();
+
     return false;
 }
 
 function drawMap() {
+    log("Debug: drawMap()");
+
     if (background_loaded == 0) {
         log("Debug: no background");
         return;
@@ -367,8 +371,8 @@ function drawMap() {
             var midpt_x = (src_x + dst_x)/2;
             var midpt_y = (src_y + dst_y)/2;
 
-            drawArrow(canvas_ctx, src_x, src_y, midpt_x, midpt_y, src_color, arrow_scale );
-            drawArrow(canvas_ctx, dst_x, dst_y, midpt_x, midpt_y, dst_color, arrow_scale );
+            drawArrow(canvas_ctx, src_x, src_y, midpt_x, midpt_y, src_color, arrow_scale, 5 );
+            drawArrow(canvas_ctx, dst_x, dst_y, midpt_x, midpt_y, dst_color, arrow_scale, 5 );
         }
         else if (link["type"] == "unidirectional-line") {
             var prevLineWidth   = canvas_ctx.lineWidth;
@@ -522,7 +526,7 @@ function getMapState() {
     log("Debug: getMapState: Calling cgi script \"" + query + "\"" );
     var doreq = MochiKit.Async.doSimpleXMLHttpRequest( query );
     doreq.addCallback( handleStateUpdate );
-    MochiKit.Async.callLater( 20, getMapState );
+    MochiKit.Async.callLater( 120, getMapState );
 }
 
 /**

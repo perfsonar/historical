@@ -7,6 +7,8 @@ use FindBin qw($Bin);
 use lib "$Bin/../lib";
 my $confdir = "$Bin/../etc";
 
+use lib "/home/aaron/owamp/lib";
+
 use Config::General;
 use Data::Dumper;
 use Log::Log4perl qw(:easy);
@@ -16,9 +18,8 @@ use perfSONAR_PS::SCWeatherMap::Background;
 use perfSONAR_PS::SCWeatherMap::Icons;
 use perfSONAR_PS::SCWeatherMap::Endpoints;
 use perfSONAR_PS::SCWeatherMap::StaticLinks;
-use perfSONAR_PS::SCWeatherMap::DCNLinkUtilization;
-use perfSONAR_PS::SCWeatherMap::Utilization;
-use perfSONAR_PS::SCWeatherMap::UtilizationColors;
+use perfSONAR_PS::SCWeatherMap::perfSONARBUOY;
+use perfSONAR_PS::SCWeatherMap::JitterColors;
 use perfSONAR_PS::SCWeatherMap::StackedLayout;
 
 my $output_level = $DEBUG;
@@ -35,7 +36,7 @@ my $logger = get_logger( "perfSONAR_PS::SCWeatherMap" );
 
 my $file = shift;
 
-$file = $confdir."/dcn_configuration.conf" unless ($file);
+$file = $confdir."/owamp_configuration.conf" unless ($file);
 
 my %configuration = Config::General->new($file)->getall;
 
@@ -65,19 +66,13 @@ if ($status != 0) {
         die($res);
 }
 
-my $dcn_links_filter = perfSONAR_PS::SCWeatherMap::DCNLinkUtilization->new();
-($status, $res) = $dcn_links_filter->init(\%configuration);
+my $perfsonarbuoy_filter = perfSONAR_PS::SCWeatherMap::perfSONARBUOY->new();
+($status, $res) = $perfsonarbuoy_filter->init(\%configuration);
 if ($status != 0) {
         die($res);
 }
 
-my $utilization_filter = perfSONAR_PS::SCWeatherMap::Utilization->new();
-($status, $res) = $utilization_filter->init(\%configuration);
-if ($status != 0) {
-        die($res);
-}
-
-my $color_filter = perfSONAR_PS::SCWeatherMap::UtilizationColors->new();
+my $color_filter = perfSONAR_PS::SCWeatherMap::JitterColors->new();
 ($status, $res) = $color_filter->init(\%configuration);
 if ($status != 0) {
         die($res);
@@ -114,12 +109,7 @@ if ($status != 0) {
         die($res);
 }
 
-($status, $res) = $dcn_links_filter->run({ current_endpoints => \%endpoints, current_links => \@links, current_background => \%background, current_icons => \@icons });
-if ($status != 0) {
-        die($res);
-}
-
-($status, $res) = $utilization_filter->run({ current_endpoints => \%endpoints, current_links => \@links, current_background => \%background, current_icons => \@icons });
+($status, $res) = $perfsonarbuoy_filter->run({ current_endpoints => \%endpoints, current_links => \@links, current_background => \%background, current_icons => \@icons });
 if ($status != 0) {
         die($res);
 }
@@ -129,10 +119,12 @@ if ($status != 0) {
         die($res);
 }
 
-($status, $res) = $stacked_filter->run({ current_endpoints => \%endpoints, current_links => \@links, current_background => \%background, current_icons => \@icons });
-if ($status != 0) {
-        die($res);
-}
+#($status, $res) = $stacked_filter->run({ current_endpoints => \%endpoints, current_links => \@links, current_background => \%background, current_icons => \@icons });
+#if ($status != 0) {
+#        die($res);
+#}
+
+$logger->debug("Links: ".Dumper(\@links));
 
 my %results = ();
 $results{background} = \%background;
