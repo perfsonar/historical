@@ -66,7 +66,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/testbed.p
     * fake2-planetlab2.columbia.edu
     * fake3-planetlab2.columbia.edu
     * fake4-planetlab2.columbia.edu
-	* fake5-planetlab2.columbia.edu
+    * fake5-planetlab2.columbia.edu
     * fake6-planetlab2.columbia.edu
     * fake7-planetlab2.columbia.edu
     * fake8-planetlab2.columbia.edu
@@ -1457,7 +1457,7 @@ http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/gLS
 }}}
 
 
-=== Current Planetlab Findings ===
+==== Current Planetlab Findings ====
 
 The hLS service successfully registers to the gLS at _ale_.  However, a test fakeService running on _ale_ fails to register to this new hLS.  Need to discern why.
 
@@ -1710,12 +1710,13 @@ sudo rpm --import RPM-GPG-KEY.dag.txt
 sudo yum update --nogpgcheck
 sudo yum install perl-perfSONAR_PS-LookupService --nogpgcheck
 sudo yum install libxml2-devel
+sudo yum update --nogpgcheck
 wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-XML-LibXML-1.69-2.pSPS.i386.rpm
 sudo rpm -e --nodeps perl-XML-LibXML-1.62001-2.fc8.3 
 sudo rpm -ivh --force perl-XML-LibXML-1.69-2.pSPS.i386.rpm
 }}}
 
-In this case, we had to perform and additional `sudo yum install libxml2-devel` command, and add the `--nogpgcheck` paramenter to `sudo yum update`.
+In this case, we had to perform and additional `sudo yum install libxml2-devel` command, and add the `--nogpgcheck` parameter to `sudo yum update`.
 
 Proceeding to start the gLS service.  Modify the .conf files accordingly (refer to README):
  
@@ -1734,10 +1735,10 @@ File `daemon.conf`:
 
 {{{
 <port 9995>
-    <endpoint /perfSONAR_PS/services/gLS>
+    <endpoint /perfSONAR_PS/services/hLS>
         <gls>
                                                                 # just an hLS ... (Fraunhofer Fokus, Planetlab virtual, Germany)
-                        root                            1
+                        root                            0
                                                                 # data TTL = 4 days
                         ls_ttl                          5760
                                                                 # 180 minute (3hr) registaration window
