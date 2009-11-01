@@ -80,8 +80,14 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/testbed.p
  * !PlanetLab virtual servers:
   * node planetlab2.cis.upenn.edu
    * hLS, port 9995.  Access point:   http://planetlab2.cis.upenn.edu:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_planetlab2.cis.upenn.edu]
+   * fakeServices registering to _planetlab2.cis.upenn.edu_:
+    * fake4-ale.edu
   * node planetlab2.cs.columbia.edu
    * gLS, port 9995.  Access point:   http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_planetlab2.cs.columbia.edu]
+  * node plink.cs.uwaterloo.ca
+   * gLS, port 9995.  Access point:   http://plink.cs.uwaterloo.ca:9995/perfSONAR_PS/services/gLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_plink.cs.uwaterloo.ca]
+  * node onelab-1.fhi-fokus.de
+   * gLS, port 9995.  Access point:   http://onelab-1.fhi-fokus.de:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_onelab-1.fhi-fokus.de]
   
    
  *  After initial setup and testing:
@@ -424,7 +430,7 @@ Before running the service, let us edit the `etc/daemon.conf` file.  The resulti
                         metadata_summary_db_file            glsstore-summary.dbxml
                         metadata_db_name                    /opt/perfsonar_ps1/perfSONAR_PS-LookupService/gLS-xmldb
                                                                 # Service options (please customize)
-                        service_accesspoint                 http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
+                        service_accesspoint             http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
                         service_description             Udel Global Lookup Service (Udel, Newark, DE, USA)
                         service_name                    Udel Global Lookup Service
                         service_type                    gLS
@@ -577,7 +583,7 @@ At this point we abandon this pursuit, as it seems revolving in garbage (which g
 to [LSScalabilityInvestigation#Attempt_3].
 
 
-==== Attempt 3 (ale) ====
+==== Attempt 3 (ale) - Working Script ====
 
 ===== Derived Modification in Perfsonar 1 =====
 
@@ -646,7 +652,7 @@ The resulting file (for a gLS) is:
                         metadata_summary_db_file            glsstore-summary.dbxml
                         metadata_db_name                    /opt/perfsonar_ps1/perfSONAR_PS-LookupService/gLS-xmldb
                                                                 # Service options (please customize)
-                        service_accesspoint                 http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
+                        service_accesspoint             http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
                         service_description             Udel Global Lookup Service (Udel, Newark, DE, USA)
                         service_name                    Udel Global Lookup Service
                         service_type                    gLS
@@ -708,7 +714,7 @@ This server _moonshine_ is Debian GNU/Linux 5.0, linux core 2.6.26-2-686.  Again
 installed and running on this server.
 
 
-==== Attempt 1 (moonshine) ====
+==== Attempt 1 (moonshine) - Working Script ====
 
 This attempt was based on _ale_'s [LSScalabilityInvestigation#Attempt_3_(ale)].  The Lookup Service will be installed to
 directory `/opt/perfsonar_ps1`.
@@ -772,7 +778,7 @@ The resulting file (for a hLS) is:
                         metadata_summary_db_file            glsstore-summary.dbxml
                         metadata_db_name                    /opt/perfsonar_ps1/perfSONAR_PS-LookupService/gLS-xmldb
                                                                 # Service options (please customize)
-                        service_accesspoint                 http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS
+                        service_accesspoint             http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS
                         service_description             Udel Home Lookup Service (Newark, DE, USA)
                         service_name                    Udel Home Lookup Service
                         service_type                    hLS
@@ -1163,7 +1169,7 @@ This one writes no error after `make test`.  Yum install for Lookup Service stil
 Hash::Merge and NetAddr::IP fail due to dependencies that Cpan cannot yet resolve; or, the manual installation failed, perhaps because
 environment variables deep in the system bowels were not updated (thus rendering the system unaware that the packages are in fact installed).
 
-===== Attempt 4 (planetlab2.cis.upenn.edu) =====
+===== Attempt 4 (planetlab2.cis.upenn.edu) - Working Script =====
 
 ====== Derived Modification in Perfsonar 2 ======
 
@@ -1208,7 +1214,7 @@ File `daemon.conf`:
                         metadata_summary_db_file            glsstore-summary.dbxml
                         metadata_db_name                    /var/lib/perfsonar/lookup_service/xmldb
                                                                 # Service options (please customize)
-                        service_accesspoint                 http://planetlab2.cis.upenn.edu:9995/perfSONAR_PS/services/hLS
+                        service_accesspoint             http://planetlab2.cis.upenn.edu:9995/perfSONAR_PS/services/hLS
                         service_description             UPenn Home Lookup Service (Planetlab Virtual, USA)
                         service_name                    UPenn Home Lookup Service
                         service_type                    hLS
@@ -1355,7 +1361,7 @@ After `sudo yum update`, we get:
  
 And nothing else gets to be installed via yum.
 
-===== Attempt 3 (planetlab2.cs.columbia.edu) - Undocumented Installation Procedure =====
+===== Attempt 3 (planetlab2.cs.columbia.edu) - Undocumented Installation Procedure - Working Script =====
 
 Again, let us kill this node and restart from scratch.  We will try an undocumented (and now documented) venue for installation, following recommendation from Jason Zurawsky:
 
@@ -1416,7 +1422,7 @@ File `daemon.conf`:
                         metadata_summary_db_file            glsstore-summary.dbxml
                         metadata_db_name                    /var/lib/perfsonar/lookup_service/xmldb
                                                                 # Service options (please customize)
-                        service_accesspoint                 http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/gLS
+                        service_accesspoint             http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/gLS
                         service_description             Columbia Global Lookup Service (Planetlab virtual, USA)
                         service_name                    Columbia Home Lookup Service
                         service_type                    gLS
@@ -1450,7 +1456,6 @@ http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
 http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/gLS
 }}}
 
-The hLS service successfully registers to the gLS at _ale_.  However, a test fakeService running on _ale_ fails to register to this new hLS.  Need to discern why.
 
 === Current Planetlab Findings ===
 
@@ -1521,9 +1526,6 @@ We run `planetlab2.cis.upenn.edu` hLS in verbose, screen log mode, and detect th
 
 They hint an issue with the method "getValue".
 
-
-===== Attempt 2 on fakeService at planetlab2.cs.columbia.edu =====
-
 It was suggested that the libxml and libxml2-dev library versions be upgraded to solve the "getValue" method problem.  Running `sudo yum update` or `sudo yum update libxml2` do not update the libraries, since their current versions (2.7.2-2) are the latest versions available in the yum repositories.  Manually installing or upgrading these libraries have already shown to be rather cumbersome, as reported in the several attempts for _ale_ above.  We postpone this endeavour until the systems involved become more user-friendly (sigh?), or until the user replenishes anti-headache pill stack.
 
 Planetlab can still be used to deploy `fakeService` instances.  Therefore, we create more `fakeService` instances <font color=green>registering to _moonshine_</font>.  These are the domains for each instance:
@@ -1539,7 +1541,242 @@ Planetlab can still be used to deploy `fakeService` instances.  Therefore, we cr
 
 `fake1-planetlab2.columbia.edu` is currently set to register to `planetlab2.cis.upenn.edu` hLS; since this hLS is not operating correctly due to the "getValue" method problem, the `fakeService` fails to register.
 
+
+==== Fixing "getValue" Error on PlanetLab Nodes ====
+
+The "getValue" problem reported earlier is due to an old Perl library, namely XML::LibXML version 1.620001-2.  This is the output obtained from `planetlab2.cs.columbia.edu`:
+
+{{{
+$ rpm -qa | grep XML
+perl-XML-NamespaceSupport-1.09-2.fc8.1
+perl-XML-DOM-1.44-2.fc8.1
+perl-XML-LibXML-1.62001-2.fc8.3      <--- problem library
+perl-XML-SAX-0.16-2.fc8
+perl-XML-RegExp-0.03-2.fc8.1
+perl-XML-LibXML-Common-0.13-9
+perl-XML-Parser-2.36-1.fc8.rf
+}}}
+
+Yum will not update this library; the procedure has to be manual.  The update script below is (c) Jason Zurawski with the help of Internet2 repository.
+
+Download RPM package from Internet2 repository:
+ `wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-XML-LibXML-1.69-2.pSPS.i386.rpm`
  
+Remove current XML::LibXML from system (commanding `yum localinstall` will not work):
+
+ `sudo rpm -e --nodeps perl-XML-LibXML-1.62001-2.fc8.3`
+ 
+Force install the new package:
+
+ `sudo rpm -ivh --force perl-XML-LibXML-1.69-2.pSPS.i386.rpm`
+
+The system reports messages regarding existing symbolic links, but the procedure is successful.
+
+Let us install one more gLS in a Planetlab node, thus reporting the complete working script.
+
+
+==== Preparing plink.cs.uwaterloo.ca ====
+
+===== Background =====
+
+This server _plink.cs.uwaterloo.ca_ is Fedora release 8 (Werewolf), linux core 2.6.22.19-vs2.3.0.34.39.planetlab.
+
+===== Attempt 1 (plink.cs.uwaterloo.ca) - Working Script =====
+
+In `/etc/yum.repos.d`, add file `rpmforge.repo`:
+
+{{{
+[rpmforge]
+name=Fedora Core $releasever - $basearch - rpmforge
+mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
+gpgcheck=1
+}}}
+
+{{{
+sudo rpm -Uvh http://ftp.freshrpms.net/pub/freshrpms/fedora/linux/8/freshrpms-release/freshrpms-release-1.1-1.fc.noarch.rpm
+wget -c http://freshrpms.net/RPM-GPG-KEY-freshrpms
+sudo rpm --import http://www.perfsonar.net/download/services/perfSONAR-PS_RPM-GPG-KEY
+wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+sudo rpm -ivh http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+wget -c http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
+sudo rpm --import RPM-GPG-KEY.dag.txt
+sudo yum update --nogpgcheck
+sudo yum install perl-perfSONAR_PS-LookupService --nogpgcheck
+sudo yum install libxml2-devel
+wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+sudo rpm -e --nodeps perl-XML-LibXML-1.62001-2.fc8.3 
+sudo rpm -ivh --force perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+}}}
+
+In this case, we had to perform and additional `sudo yum install libxml2-devel` command, and add the `--nogpgcheck` paramenter to `sudo yum update`.
+
+Proceeding to start the gLS service.  Modify the .conf files accordingly (refer to README):
+ 
+Edit /opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf and set the desired logging method. Here, we choose to display log messages to the screen.  Hence, per instructed within the file, we uncomment the line:
+ 
+ log4perl.appender.A1=Log::Dispatch::Screen
+
+And comment the line: 
+
+ #log4perl.appender.A1=Log::Dispatch::FileRotate 
+
+ 
+===== daemon.conf file for plink.cs.uwaterloo.ca =====
+
+File `daemon.conf`:
+
+{{{
+<port 9995>
+    <endpoint /perfSONAR_PS/services/gLS>
+        <gls>
+                                                                # just an gLS ... (University of Waterloo, Planetlab virtual, Canada)
+                        root                            1
+                                                                # data TTL = 4 days
+                        ls_ttl                          5760
+                                                                # 180 minute (3hr) registaration window
+                        ls_registration_interval        180
+                                                                # 120 miute cleaning/summary window
+                        maintenance_interval            120
+                                                                # Database options (only change path)
+                        metadata_db_file                    glsstore.dbxml
+                        metadata_summary_db_file            glsstore-summary.dbxml
+                        metadata_db_name                    /var/lib/perfsonar/lookup_service/xmldb
+                                                                # Service options (please customize)
+                        service_accesspoint             http://plink.cs.uwaterloo.ca:9995/perfSONAR_PS/services/gLS
+                        service_description             University of Waterloo Global Lookup Service (Planetlab virtual, Canada)
+                        service_name                    University of Waterloo Global Lookup Service
+                        service_type                    gLS
+                </gls>
+                disable                             0
+                module                              perfSONAR_PS::Services::LS::gLS
+        </endpoint>
+</port>
+                                                    # 180 minute (3hr) registaration window
+ls_registration_interval                        180
+disable_echo                                0
+                                                    # Root hints info, url + local copy location
+root_hints_url                              http://stout.damsl.cis.udel.edu/gls.root.hints
+root_hints_file                             /var/lib/perfsonar/lookup_service/hls.root.hints
+                                                    # Daemon management, shouldn't need changing
+reaper_interval                             20
+max_worker_lifetime                             300
+max_worker_processes                        30
+pid_dir                                     /var/run
+pid_file                                        lookup_service.pid
+}}}
+
+The service will run through the init.d script:
+
+ `/etc/init.d/lookup_service start`
+
+We have to update the gLS cloud file `gls.root.hints` at _stout_ to reflect the newly added gLS server.  The file is located at `/var/www/external/gls.root.hints`.  The new contents is:
+
+{{{
+http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
+http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/gLS
+http://plink.cs.uwaterloo.ca:9995/perfSONAR_PS/services/gLS
+}}}
+
+
+==== Preparing onelab-1.fhi-fokus.de ====
+
+===== Background =====
+
+This server _onelab-1.fhi-fokus.de_ is Fedora release 8 (Werewolf), linux core 2.6.22.19-vs2.3.0.34.39.planetlab.
+
+===== Attempt 1 (onelab-1.fhi-fokus.de) - Working Script =====
+
+In `/etc/yum.repos.d`, add file `rpmforge.repo`:
+
+{{{
+[rpmforge]
+name=Fedora Core $releasever - $basearch - rpmforge
+mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
+gpgcheck=1
+}}}
+
+{{{
+sudo rpm -Uvh http://ftp.freshrpms.net/pub/freshrpms/fedora/linux/8/freshrpms-release/freshrpms-release-1.1-1.fc.noarch.rpm
+wget -c http://freshrpms.net/RPM-GPG-KEY-freshrpms
+sudo rpm --import http://www.perfsonar.net/download/services/perfSONAR-PS_RPM-GPG-KEY
+wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+sudo rpm -ivh http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+wget -c http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
+sudo rpm --import RPM-GPG-KEY.dag.txt
+sudo yum update --nogpgcheck
+sudo yum install perl-perfSONAR_PS-LookupService --nogpgcheck
+sudo yum install libxml2-devel
+wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+sudo rpm -e --nodeps perl-XML-LibXML-1.62001-2.fc8.3 
+sudo rpm -ivh --force perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+}}}
+
+In this case, we had to perform and additional `sudo yum install libxml2-devel` command, and add the `--nogpgcheck` paramenter to `sudo yum update`.
+
+Proceeding to start the gLS service.  Modify the .conf files accordingly (refer to README):
+ 
+Edit /opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf and set the desired logging method. Here, we choose to display log messages to the screen.  Hence, per instructed within the file, we uncomment the line:
+ 
+ log4perl.appender.A1=Log::Dispatch::Screen
+
+And comment the line: 
+
+ #log4perl.appender.A1=Log::Dispatch::FileRotate 
+
+ 
+===== daemon.conf file for onelab-1.fhi-fokus.de =====
+
+File `daemon.conf`:
+
+{{{
+<port 9995>
+    <endpoint /perfSONAR_PS/services/gLS>
+        <gls>
+                                                                # just an hLS ... (Fraunhofer Fokus, Planetlab virtual, Germany)
+                        root                            1
+                                                                # data TTL = 4 days
+                        ls_ttl                          5760
+                                                                # 180 minute (3hr) registaration window
+                        ls_registration_interval        180
+                                                                # 120 miute cleaning/summary window
+                        maintenance_interval            120
+                                                                # Database options (only change path)
+                        metadata_db_file                    glsstore.dbxml
+                        metadata_summary_db_file            glsstore-summary.dbxml
+                        metadata_db_name                    /var/lib/perfsonar/lookup_service/xmldb
+                                                                # Service options (please customize)
+                        service_accesspoint             http://onelab-1.fhi-fokus.de:9995/perfSONAR_PS/services/hLS
+                        service_description             Fraunhofer Fokus Home Lookup Service (Planetlab virtual, Germany)
+                        service_name                    Fraunhofer Fokus Home Lookup Service
+                        service_type                    hLS
+                </gls>
+                disable                             0
+                module                              perfSONAR_PS::Services::LS::gLS
+        </endpoint>
+</port>
+                                                    # 180 minute (3hr) registaration window
+ls_registration_interval                        180
+disable_echo                                0
+                                                    # Root hints info, url + local copy location
+root_hints_url                              http://stout.damsl.cis.udel.edu/gls.root.hints
+root_hints_file                             /var/lib/perfsonar/lookup_service/hls.root.hints
+                                                    # Daemon management, shouldn't need changing
+reaper_interval                             20
+max_worker_lifetime                             300
+max_worker_processes                        30
+pid_dir                                     /var/run
+pid_file                                        lookup_service.pid
+}}}
+
+The service will run through the init.d script:
+
+ `/etc/init.d/lookup_service start`
+	
+	
 == Test Results ==
 
 We will use mainly the CGI script for contacting the LSs.
