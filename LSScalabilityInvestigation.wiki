@@ -1874,8 +1874,31 @@ This is not a performance issue with PerfSONAR, but with Planetlab virtual syste
 || set_flags ||  DB_LOG_AUTOREMOVE || <font color=green> <i>unmodified</i> </font> ||
 || set_lg_regionmax ||  2097152 || <font color=green> <i>unmodified</i> </font> ||
 
-Next, we restart the local gLS and 10 `fakeService` instances.  The `fakeService` instances do start and register, but the local gLS seems to hang and do not go up after several minutes.
+Next, we restart the local gLS and 10 `fakeService` instances.  The `fakeService` instances do start and register, but the local gLS seems to hang and do not go up after several minutes.  `Top` command output, before the gLS goes up completely, follows:
 
+{{{
+top - 21:04:36 up 30 days, 22:55,  0 users,  load average: 14.17, 17.19, 19.01
+Tasks:  14 total,   1 running,  13 sleeping,   0 stopped,   0 zombie
+Cpu(s): 59.0%us, 33.3%sy,  0.0%ni,  0.0%id,  0.0%wa,  0.0%hi,  7.7%si,  0.0%st
+Mem:   1034760k total,  1021212k used,    13548k free,    21100k buffers
+Swap:  1048568k total,   601920k used,   446648k free,   201672k cached
+
+  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND            
+ 7323 root      18   0  2580 1100  952 S  0.0  0.1   0:00.02 lookup_service     
+ 7484 perfsona  18   0  301m  27m 7656 S  0.0  2.7   0:01.86 daemon.pl          
+ 9282 udel_per  15   0  2632 1440 1176 S  0.0  0.1   0:00.02 bash               
+ 9342 udel_per  15   0  2272  960  796 R  0.0  0.1   0:00.10 top                
+13991 root      17   0 16404  12m 2648 S  0.0  1.2   0:10.87 perl               
+13992 root      15   0 16412  11m 2648 S  0.0  1.2   0:10.89 perl               
+13993 root      18   0 16404  11m 2648 S  0.0  1.2   0:10.87 perl               
+13994 root      16   0 16404  11m 2648 S  0.0  1.2   0:10.88 perl               
+13995 root      15   0 16400 9752 2648 S  0.0  0.9   0:10.92 perl               
+13996 root      16   0 16408 8708 2648 S  0.0  0.8   0:11.11 perl               
+13997 root      18   0 16412 8752 2648 S  0.0  0.8   0:11.09 perl               
+14027 root      17   0 16408  13m 2648 S  0.0  1.3   0:11.15 perl               
+14032 root      17   0 16408  11m 2648 S  0.0  1.1   0:11.02 perl               
+14036 root      17   0 16524  13m 2648 S  0.0  1.3   0:11.02 perl
+}}}
 
 
 
