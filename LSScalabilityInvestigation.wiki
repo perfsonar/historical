@@ -83,7 +83,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/testbed.p
    * fakeServices registering to _planetlab2.cis.upenn.edu_:
     * fake4-ale.edu
   * node planetlab2.cs.columbia.edu
-   * gLS, port 9995.  Access point:   http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_planetlab2.cs.columbia.edu]
+   * gLS, port 9995.  Access point:   http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/gLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_planetlab2.cs.columbia.edu]
   * node plink.cs.uwaterloo.ca
    * gLS, port 9995.  Access point:   http://plink.cs.uwaterloo.ca:9995/perfSONAR_PS/services/gLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_plink.cs.uwaterloo.ca]
   * node onelab-1.fhi-fokus.de
@@ -1826,7 +1826,7 @@ Restarting the hLS at _ale_ did not erase the old data.
 
 Dumping _moonshine_ data also shows old information that was not yet purged.  For testing purposes, let us configure both _ale_ gLS and _moonshine_ hLS timings to force faster refreshings:
 
-|| Parameter || Default Value (min) || New Value (min) ||
+|| *Parameter* || *Default Value (min)* || *New Value (min)* ||
 || ls_ttl || 5760 || 10 ||
 || ls_registration_interval || 180 || 7 ||
 || maintenance_interval || 120 || 5 ||
@@ -1861,9 +1861,9 @@ Swap:  1048568k total,   643168k used,   405400k free,   142420k cached
 27070 perfsona  18   0 38820 4456 1324 S  0.0  0.4   0:01.27 daemon.pl       
 }}}
 
-The aim is to experiment with values in the file `DB_CONFIG` at `/var/lib/perfsonar/lookup_service/xmldb` in order to diminish the resources used by the LS instance.  We modify two parameters to 50% of their original values, as seen below:
+This is not a performance issue with PerfSONAR, but with Planetlab virtual system resource limitations.  The aim is to avoid further node resets in Planetlab, by experimenting with values in the file `DB_CONFIG` at `/var/lib/perfsonar/lookup_service/xmldb` in order to diminish the resources used by the LS instance.  We modify two parameters to 50% of their original values, as seen below:
 
-|| Parameter || Current Value || New Value ||
+|| *Parameter* || *Current Value* || *New Value* ||
 || set_lock_timeout || 5000 || <font color=green> <i>unmodified</i> </font> ||
 || set_txn_timeout ||  5000 || <font color=green> <i>unmodified</i> </font> ||
 || set_lk_max_lockers ||  500000 || <font color=green> <i>unmodified</i> </font> ||
@@ -1874,7 +1874,7 @@ The aim is to experiment with values in the file `DB_CONFIG` at `/var/lib/perfso
 || set_flags ||  DB_LOG_AUTOREMOVE || <font color=green> <i>unmodified</i> </font> ||
 || set_lg_regionmax ||  2097152 || <font color=green> <i>unmodified</i> </font> ||
 
-
+Next, we restart the local gLS and 10 `fakeService` instances.  The `fakeService` instances do start and register, but the local gLS seems to hang and do not go up after several minutes.
 
 
 
