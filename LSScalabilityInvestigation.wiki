@@ -87,7 +87,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/testbed.p
   * node plink.cs.uwaterloo.ca
    * gLS, port 9995.  Access point:   http://plink.cs.uwaterloo.ca:9995/perfSONAR_PS/services/gLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_plink.cs.uwaterloo.ca]
   * node onelab-1.fhi-fokus.de
-   * gLS, port 9995.  Access point:   http://onelab-1.fhi-fokus.de:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_onelab-1.fhi-fokus.de]
+   * hLS, port 9995.  Access point:   http://onelab-1.fhi-fokus.de:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_onelab-1.fhi-fokus.de]
   
    
  *  After initial setup and testing:
@@ -1463,6 +1463,8 @@ The hLS service successfully registers to the gLS at _ale_.  However, a test fak
 
 There is no firewall at Planetlab nodes.  A rapid look at _ale's_ iptables did not show blocked ports that might be disturbing the fakeService registration to the hLS at `planetlab2.cis.upenn.edu`.
 
+<font color=green>Planetlab is not a stable environment.  Nodes can be rebooted unexpectedly, bringing down the services running on the node.  This may happen especially if a slice is consuming "excessive" resources.  Periodically, the services on Planetlab nodes must be checked for normal operation.</font>
+
 
 ==== Derived Modification in Perfsonar 3 ====
 
@@ -1782,6 +1784,8 @@ The service will run through the init.d script:
 
 We will use mainly the CGI script for contacting the LSs.
 
+=== Modifying ale and moonshine Timing Configurations ===
+
 Querying _ale_ gLS returns:
 
 {{{
@@ -1826,6 +1830,50 @@ Dumping _moonshine_ data also shows old information that was not yet purged.  Fo
 || ls_ttl || 5760 || 10 ||
 || ls_registration_interval || 180 || 7 ||
 || maintenance_interval || 120 || 5 ||
+
+=== Planetlab planetlab2.cs.columbia.edu Exhausted Resources ===
+
+The _columbia_ node was reset by Planetlab monitoring watchdog due to exhausted resources on Nov 1, 2009.  Currently, this node has one gLS and 10 `fakeService` instances.  Planetlab's resource mapping by the time of reset follows:
+
+{{{
+top - 02:02:19 up 30 days,  3:53,  0 users,  load average: 27.75, 20.99, 19.76
+Tasks:  18 total,  11 running,   7 sleeping,   0 stopped,   0 zombie
+Cpu(s): 61.5%us, 31.2%sy,  0.0%ni,  0.0%id,  0.0%wa,  0.0%hi,  7.3%si,  0.0%st
+Mem:   1034760k total,  1020808k used,    13952k free,    15220k buffers
+Swap:  1048568k total,   643168k used,   405400k free,   142420k cached
+
+  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND            
+ 3015 root      18   0 12556 9240 2076 R  6.7  0.9   0:01.47 perl               
+ 2583 root      18   0 12556 9232 2076 R  1.7  0.9   0:01.51 perl               
+ 6812 udel_per  15   0  2276  964  796 R  0.3  0.1   0:00.04 top                
+ 2013 root      19   0 12556 9244 2076 R  0.0  0.9   0:01.68 perl               
+ 2091 root      18   0 12556 9244 2076 D  0.0  0.9   0:01.74 perl               
+ 2186 root      19   0 12560 9244 2076 R  0.0  0.9   0:01.72 perl               
+ 2369 root      18   0 12560 9244 2076 R  0.0  0.9   0:01.26 perl               
+ 3463 root      18   0 12560 9244 2076 R  0.0  0.9   0:01.69 perl               
+ 4083 root      18   0 12556 9240 2076 R  0.0  0.9   0:01.71 perl               
+ 4966 root      19   0 12560 9244 2076 R  0.0  0.9   0:01.71 perl               
+ 5436 root      18   0 12556 9240 2076 R  0.0  0.9   0:01.63 perl               
+ 6144 perfsona  18   0 38820 4736 1072 R  0.0  0.5   0:00.00 daemon.pl          
+ 8045 perfsona  18   0 38820 4748 1080 D  0.0  0.5   0:00.00 daemon.pl          
+27003 udel_per  15   0  2632 1440 1176 S  0.0  0.1   0:00.06 bash               
+27069 perfsona  19   0 38820 1028  616 S  0.0  0.1   0:00.00 daemon.pl          
+27070 perfsona  18   0 38820 4456 1324 S  0.0  0.4   0:01.27 daemon.pl       
+}}}
+
+The aim is to experiment with values in the file `DB_CONFIG` at `/var/lib/perfsonar/lookup_service/xmldb` in order to diminish the resources used by the LS instance.  We modify two parameters to 50% of their original values, as seen below:
+
+|| Parameter || Current Value || New Value ||
+|| set_lock_timeout || 5000 || <font color=green><i>unmodified</i></font> ||
+|| set_txn_timeout ||  5000 || <font color=green><i>unmodified</i></font> ||
+|| set_lk_max_lockers ||  500000 || <font color=green><i>unmodified</i></font> ||
+|| set_lk_max_locks ||  500000 || <font color=red>250000</font> ||
+|| set_lk_max_objects ||  500000 || <font color=green><i>unmodified</i></font> ||
+|| set_lk_detect ||  DB_LOCK_MINLOCKS || <font color=green><i>unmodified</i></font> ||
+|| set_cachesize ||  0 33554432 0 || <font color=red>0 16777216 0</font> ||
+|| set_flags ||  DB_LOG_AUTOREMOVE || <font color=green><i>unmodified</i></font> ||
+|| set_lg_regionmax ||  2097152 || <font color=green><i>unmodified</i></font> ||
+
 
 
 
