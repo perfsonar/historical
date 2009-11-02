@@ -728,8 +728,9 @@ sub save_node {
 
     # compute an MD5 hash for this testspec
     my $md5 = Digest::MD5->new;
-    $md5->add( $addr );
     $md5->add( $args{'NODE'} );
+    $md5->add( $args{'HOST'} );
+    $md5->add( $args{'ADDR'} );
     my $hexdigest = $md5->hexdigest;
     my $digest = hex( substr( $hexdigest, -8, 8 ) );
 
