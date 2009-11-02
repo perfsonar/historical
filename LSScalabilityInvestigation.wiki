@@ -1864,15 +1864,15 @@ Swap:  1048568k total,   643168k used,   405400k free,   142420k cached
 The aim is to experiment with values in the file `DB_CONFIG` at `/var/lib/perfsonar/lookup_service/xmldb` in order to diminish the resources used by the LS instance.  We modify two parameters to 50% of their original values, as seen below:
 
 || Parameter || Current Value || New Value ||
-|| set_lock_timeout || 5000 || <font color=green><i>unmodified</i></font> ||
-|| set_txn_timeout ||  5000 || <font color=green><i>unmodified</i></font> ||
-|| set_lk_max_lockers ||  500000 || <font color=green><i>unmodified</i></font> ||
-|| set_lk_max_locks ||  500000 || <font color=red>250000</font> ||
-|| set_lk_max_objects ||  500000 || <font color=green><i>unmodified</i></font> ||
-|| set_lk_detect ||  DB_LOCK_MINLOCKS || <font color=green><i>unmodified</i></font> ||
+|| set_lock_timeout || 5000 || <font color=green> <i>unmodified</i> </font> ||
+|| set_txn_timeout ||  5000 || <font color=green> <i>unmodified</i> </font> ||
+|| set_lk_max_lockers ||  500000 || <font color=green> <i>unmodified</i> </font> ||
+|| set_lk_max_locks ||  500000 || <font color=red> 250000 </font> ||
+|| set_lk_max_objects ||  500000 || <font color=green> <i>unmodified</i> </font> ||
+|| set_lk_detect ||  DB_LOCK_MINLOCKS || <font color=green> <i>unmodified</i> </font> ||
 || set_cachesize ||  0 33554432 0 || <font color=red>0 16777216 0</font> ||
-|| set_flags ||  DB_LOG_AUTOREMOVE || <font color=green><i>unmodified</i></font> ||
-|| set_lg_regionmax ||  2097152 || <font color=green><i>unmodified</i></font> ||
+|| set_flags ||  DB_LOG_AUTOREMOVE || <font color=green> <i>unmodified</i> </font> ||
+|| set_lg_regionmax ||  2097152 || <font color=green> <i>unmodified</i> </font> ||
 
 
 
