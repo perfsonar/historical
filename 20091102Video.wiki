@@ -5,12 +5,13 @@
  # Attendees: 
  # Developer Updates
  # Actions from last call:
-   * 
- # TBD 1
- # TBD 2
- # TBD 3
- # TBD 4
- # TBD 5
+ * _*ACTION*_: Joe will add something to wiki about cfengine. 
+ * _*ACTION*_: Andy will send a mail to the mailing list outlining what he was tasked with developing.  Aaron/Jason will add to this to see if there is overlap.
+ * _*ACTION*_: Aaron to organize a separate meeting with people interested in this 
+ # pS-PTK RC testing update.
+   * How close are we to a 'production' bug-fix release?
+ # SC
+   * Coordination work
  # Future topics:
    * _*pSPS*_:
      * Community handling in regular testing screens.  If the user doesn't pick a community, others can'y use this mechanism to find the node
