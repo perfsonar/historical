@@ -1,19 +1,32 @@
-=  Nov 2 2009 Conference Call 2:30 pm EDT =
+=  Nov 2 2009 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
 
- # Attendees: 
+ # Attendees: Eric, Andy, Jason, Fahad, Joe, Ezra, Brian, Marcos, Jeff, Maxim
  # Developer Updates
+    * Eric: Working on deployment of gLS/hLS nodes in test deployment. Nearly ready for testing.
+    * Andy: Helping with Atlas support issues. Also looking at owamp database issues. Have a proposal for how to do owamp data.
+    * Jason: Involved with SC, BWC, publications. Working with Atlas. Would like testing this week. Seeing pingER issues.
+    * Fahad: Nothing to report
+    * Joe: Nothing to report
+    * Ezra: Preparing for SC and BWC.
+    * Brian: Testing the latest ISO.
+    * Marcos: Working on IS testbed. Finding performance issues due to planet-lab limitations. Attempting to set database parameters to keep planet-lab from killing jobs.
+    * Maxim: Working on pingER issue. Suspects the issue is that the landmarks file is being zero'd out somehow. Aaron mentioned that it is actually the MP that is not running.
+    * Jeff: Totally on SCinet.
  # Actions from last call:
  * _*ACTION*_: Joe will add something to wiki about cfengine. 
  * _*ACTION*_: Andy will send a mail to the mailing list outlining what he was tasked with developing.  Aaron/Jason will add to this to see if there is overlap.
  * _*ACTION*_: Aaron to organize a separate meeting with people interested in this 
  # mailing lists
-   * psps-dev, psps-announce, psps-user?
+   * psps-dev, psps-announce, psps-users?
  # pS-PTK RC testing update.
    * How close are we to a 'production' bug-fix release?
+     * Plan is to attempt to get a production ISO out tomorrow for internal testing only. As long as that works in testing, it will be made available to Atlas Friday.
  # SC
    * Coordination work
+     * Joe/Aaron working on owamp/bwctl test coordination.
+     * If interesting utilization wanted across backbones, aaron/jeff will ask eli for help finding in esnet.
  # Future topics:
    * _*pSPS*_:
      * Community handling in regular testing screens.  If the user doesn't pick a community, others can'y use this mechanism to find the node
@@ -48,8 +61,11 @@
        * Gathering and storing alarm information.  Is this the same as Status?  Could or should this be done in nagios.  
  
 === ACTIONS ===
+ * _*ACTION*_: Joe will add something to wiki about cfengine. 
+ * _*ACTION*_: Marcos and Eric will work together to get Marcos access to the ESnet test servers for doing LS performance testing.
+ * _*ACTION*_: Maxim will work with Andy and Aaron to debug the pingER-MP problem.
+ * _*ACTION*_: Jason will send the psps related publications Internet2 has been working on.
 
-TBD
 
 == Where ==
 
