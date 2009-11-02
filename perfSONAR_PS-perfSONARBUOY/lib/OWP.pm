@@ -87,7 +87,7 @@ sub daemonize {
     $umask = $args{'UMASK'}   if ( defined $args{'UMASK'} );
 
     if ( defined $args{'PIDFILE'} ) {
-        $fh = new FileHandle $args{'PIDFILE'}, O_CREAT | O_RDWR | O_TRUNC;
+        $fh = new FileHandle $args{'PIDFILE'}, O_CREAT | O_RDWR;
         unless ( $fh && flock( $fh, LOCK_EX | LOCK_NB ) ) {
             die "Unable to lock pid file $args{'PIDFILE'}: $!";
         }
@@ -112,6 +112,7 @@ sub daemonize {
     exit if $pid;
 
     # child
+    truncate( $fh, 0 );
     $fh->seek( 0, 0 );
     $fh->print( $$ );
     undef $fh;
