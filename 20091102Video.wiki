@@ -8,6 +8,8 @@
  * _*ACTION*_: Joe will add something to wiki about cfengine. 
  * _*ACTION*_: Andy will send a mail to the mailing list outlining what he was tasked with developing.  Aaron/Jason will add to this to see if there is overlap.
  * _*ACTION*_: Aaron to organize a separate meeting with people interested in this 
+ # mailing lists
+   * psps-dev, psps-announce, psps-user?
  # pS-PTK RC testing update.
    * How close are we to a 'production' bug-fix release?
  # SC
