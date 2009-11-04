@@ -405,7 +405,9 @@ else {
             my $parser     = XML::LibXML->new();
 
             my $subject = "<nmwg:key id=\"key-1\"><nmwg:parameters id=\"parameters-key-1\"><nmwg:parameter name=\"maKey\">" . $lookup{$metadataId} . "</nmwg:parameter></nmwg:parameters></nmwg:key>";
-            my $time    = 604800;
+
+            # Default time is 7 Days = 60 sec * 60 min * 24 hours * 7 days
+            my $time    = 60 * 60 * 24 * 7;
 
             my $result = $ma->setupDataRequest(
                 {
@@ -792,7 +794,9 @@ else {
             my $parser     = XML::LibXML->new();
 
             my $subject = "<nmwg:key id=\"key-1\"><nmwg:parameters id=\"parameters-key-1\"><nmwg:parameter name=\"maKey\">" . $lookup{$metadataId} . "</nmwg:parameter></nmwg:parameters></nmwg:key>";
-            my $time    = 43200;
+
+            # Default time is 12 hours = 60 secs * 60 mins * 12 hours
+            my $time    = 60 * 60 * 12;
 
             my $result = $ma->setupDataRequest(
                 {
@@ -1160,11 +1164,14 @@ else {
             $temp{"packetsize"} = $packetsize ? $packetsize : 1000;
             $temp{"active"}     = 0;
 
+            # Default time is 4 hours = 60 secs * 60 mins * 4 hours
+            my $timeLength    = 60 * 60 * 4;
+
             # is there data in the last 4 hours (needs to be longer, but this makes it slow enough...)
             my $ma = new perfSONAR_PS::Client::PingER( { instance => $service } );
             my $result = $ma->setupDataRequest(
                 {
-                    start => ( $sec - 14400 ),
+                    start => ( $sec - $timeLength ),
                     end   => $sec,
                     keys  => [ $lookup{$metadataId} ],
                     cf    => "AVERAGE"
@@ -1276,10 +1283,14 @@ else {
         my $counter   = 0;
         foreach my $src ( sort keys %list ) {
             foreach my $dst ( sort keys %{ $list{$src} } ) {
-                my $p_time = $sec - 43200;
+
+                # Default time is 12 hours = 60 secs * 60 mins * 12 hours
+                my $timeLength  = 60 * 60 * 12;
+
+                my $p_time = $sec - $timeLength;
                 my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( $p_time );
                 my $p_start = sprintf "%04d-%02d-%02dT%02d:%02d:%02d", ( $year + 1900 ), ( $mon + 1 ), $mday, $hour, $min, $sec;
-                $p_time += 43200;
+                $p_time += $timeLength;
                 ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( $p_time );
                 my $p_end = sprintf "%04d-%02d-%02dT%02d:%02d:%02d", ( $year + 1900 ), ( $mon + 1 ), $mday, $hour, $min, $sec;
 
