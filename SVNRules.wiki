@@ -1,0 +1,271 @@
+#summary Rules for using the perfSONAR-PS SVN
+
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+The following guide was created to help both new and old developers understand the details and procedures of the perfSONAR-PS SVN repositories.  As the perfSONAR-PS project grows to a greater number of developers, it is important that all individuals with commit access respect the organization and rules of the repository.  This guide will:
+
+ * Explain some basic SVN commands for beginners
+ * Explain the layout of our SVN repository
+ * Detail the reasons behind why branches or tags are named following simple rules
+ * Branch and tag management
+ * Day to day operations, e.g. where developers should be working based on development cycles
+
+== SVN Basics ==
+
+Subversion resources can be found [http://svnbook.red-bean.com/en/1.5/svn-book.html here], but a quick guide to useful commands follows:
+
+ * Checking out (do initially)
+{{{
+bash$ svn checkout https://svn.internet2.edu/svn/perfSONAR-PS/trunk perfSONAR-PS
+}}}
+ * Updating working copy (do frequently)
+{{{
+bash$ svn update
+At revision 7.
+}}}
+ * Checking status (do to check the status of items in your local copy)
+{{{
+bash$ svn status
+?      newFile
+M      mirrors-Internet2
+}}}
+ * Adding
+{{{
+bash$ svn add newFile
+A      newFile
+}}}
+ * Deleting
+{{{
+bash$ svn rm RPM-GPG-KEY-Internet2 
+D     RPM-GPG-KEY-Internet2
+}}}
+ * Committing
+{{{
+bash$ svn commit
+A    trunk/newFile
+M    trunk/mirrors-Internet2
+D    trunk/RPM-GPG-KEY-Internet2
+}}}
+ * Branching (Long Way)
+{{{
+bash$ svn checkout https://svn.internet2.edu/svn/perfSONAR-PS/trunk
+bash$ svn copy trunk branches/20091104-trunk
+bash$ svn commit -m "Creating a trunk backup on Nov 4, 2009"
+Adding         branches/20091104-trunk
+Committed revision 3769.
+}}}
+ * Branching (Short Way)
+{{{
+bash$ svn copy https://svn.internet2.edu/svn/perfSONAR-PS/trunk \
+           https://svn.internet2.edu/svn/perfSONAR-PS/branches/20091104-trunk \
+      -m "Creating a trunk backup on Nov 4, 2009"
+Committed revision 3769.
+}}}
+ * Merging (Example illustrates merging an entire branch into a trunk)
+{{{
+bash$ svn checkout https://svn.internet2.edu/svn/perfSONAR-PS/trunk
+bash$ svn checkout https://svn.internet2.edu/svn/perfSONAR-PS/branches/20091104-trunk
+bash$ cd 20091104-trunk
+bash$ svn log --stop-on-copy
+------------------------------------------------------------------------
+r2488 | aaron | 2009-03-02 20:20:40 -0500 (Mon, 02 Mar 2009) | 4 lines
+
+Create a branch for the upcoming release
+------------------------------------------------------------------------
+bash$ cd ../trunk
+bash$ svn update
+bash$ svn merge -r2488:3769 https://svn.internet2.edu/svn/perfSONAR-PS/branches/20091104-trunk
+bash$ svn commit
+}}}
+
+== perfSONAR-PS SVN Layout ==
+
+The main perfSONAR-PS subversion repository is located in Ann Arbor Michigan:
+
+ * [http://anonsvn.internet2.edu/svn/perfSONAR-PS/] - Read only access to the source code
+ * [https://svn.internet2.edu/svn/perfSONAR-PS/] - Read/Write access for approved developers
+
+Specifically the organization of the subversion repository should resemble this from a high level:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/ReleaseManagement/svn.png
+
+The repository has gone through several changes through our development life cycle.  Please see also [SubversionStructure] for an explanation of the top level view of each branch, tag, or the trunk.  
+
+The SVN repository has 3 organizational directories:
+
+ * _*Trunk*_ - _Bleeding edge_ of development.  While functional, the trunk is not in a _release-ready_ state and should normally not be developed in directly or used by anyone not prepared to work with experimental code.  
+ * _*Branches*_ - Ongoing work meant to segregate developers or goals from the unstable trunk.  Will contain may active (or inactive) branches at any given time.
+ * _*Tags*_ - A _Frozen_ snapshot of a branch or trunk.  These are meant to represent a moment in time view.  Normally a branch becomes a tag after a release date.  
+
+=== Trunk ===
+
+The trunk is considered the _bleeding edge_ of the development process. This repository contains the most up to date set of code that has been tested and migrated out of the development branches or merged changes from previous releases.  There are some important things to note about trunk:
+
+ * _*Unstable*_: this due to the _just-in-time_ nature of the work that is merged back in. E.g. a developer may make changes in a development branch and merge back to the trunk after some basic testing.  This does not mean his changes are _release-ready_ and still may contain bugs.
+ * _*Unsupported*_: Due to the unstability of the code, we cannot offer support to the general user public who choose to install and update from the trunk.  Users who download from our SVN are encouraged to use tags.  
+ * _*Off limits*_: Development work, particularly large project for a single or team of developers, should not be started in the trunk - please branch the trunk into a development area.  Minor changes, e.g. _one-liners_ that alter documentation or small sections of code that do not impact anyone else may be committed directly to trunk.
+
+The Trunk should be the _primary source_ of all branches, particularly release branches and development efforts.
+
+=== Branches ===
+
+Development or release efforts forked from the unstable trunk.  The goal of a branch is provide a segregated environment where a developer (or developers) can work on specific features or enhancements.  In the case of a _release_ branch the primary goal is to stabilize, test, and package software for a release target.  
+
+The life cycle of a branch typically involves the following sequence of events:
+
+ # Creation by branching from the trunk or other branch
+ # Software development/enhancement
+ # Testing
+ # Resolution, this may be either:
+   * Merging changes into the parent (trunk or branch)
+   * Tagging the branch to represent a stable point
+ # Branch Deletion or Renaming
+
+=== Tags ===
+
+Tags in SVN are internally the same as branches.  The _tag_ distinction is usually reserved for specific snapshots that will not change.  Examples of a tag include checkpoints in development code (e.g. _*20091104-SNMP-MA*_) or a specific release target (e.g. _*RELEASE-3-1-1*_).  Once the trunk or a branch has been tagged, it is understood that the resulting tag will not have new items committed.
+
+== Naming Schemes ==
+
+Branches and tags may be created by anyone whenever there is a need, please following these rules when choosing your branch or tag name.
+
+=== Official Business ===
+
+_Official_ branches are understood to be related to the release management process.  These can represent ongoing work or snapshots.  Examples:
+
+ * Branch: _*RELEASE-3-1-1*_: Ongoing work for a current release
+ * Tag: _*RELEASE-3-1*_: A tag for a past release
+ * Tag: _*20091104-trunk*_: A trunk snapshot taken on the specified date
+
+Release management branches should start with the keyword _*RELEASE*_.  Other tags and branches of an official nature should include a _*date*_ for reference.  
+
+=== Personal Business ===
+
+Developers adding a feature, fixing a bug, or performing other tasks outside of an active release should use a descriptive name for branches so everyone can identify the purpose at a glance.  A descriptive name normally includes:
+
+ * Developers name (if this is truly private)
+ * Enhancement name
+ * Service name
+ 
+Some examples of good branch names:
+
+ * _*jzurawski-IPSummarization-LS*_: Developer working on a feature for a service.
+ * _*LSAPI-SNMPMA*_:  Many developers working on a feature for a service.
+ * _*abrown-DCNAPI*_: Developer working on a feature.  
+  
+== Management ==
+
+There are simple rules regarding using and managing branches, these are not hard but do require some thought and consideration of others.  
+
+=== Who Should Branch ===
+
+Anyone may branch for personal reasons.  Release branches should be done by the Release team only.  
+
+=== When to Branch ===
+
+The release management team will branch:
+
+ * Right before a major release, e.g. _*RELEASE-3.2*_
+ * Immediately after a major or minor release (to create the next minor release branch), e.g. _*RELEASE-3.1.1*_
+
+The release management team will tag:
+
+ * Right after each major and minor release, based on the state of the branch at release time, e.g. _*RELEASE-3.1*_
+ 
+Developers are free to branch whenever they need to, common times are:
+
+ * When implementing a new feature
+ * When fixing a bug
+ * When altering large sections of code that effect many people
+
+=== How to Branch ===
+
+There are two ways (maybe more!) to branch from a given source:
+
+ * Branching (Long Way)
+{{{
+bash$ svn checkout https://svn.internet2.edu/svn/perfSONAR-PS/trunk
+bash$ svn copy trunk branches/20091104-trunk
+bash$ svn commit -m "Creating a trunk backup on Nov 4, 2009"
+Adding         branches/20091104-trunk
+Committed revision 3769.
+}}}
+ * Branching (Short Way)
+{{{
+bash$ svn copy https://svn.internet2.edu/svn/perfSONAR-PS/trunk \
+           https://svn.internet2.edu/svn/perfSONAR-PS/branches/20091104-trunk \
+      -m "Creating a trunk backup on Nov 4, 2009"
+Committed revision 3769.
+}}}
+
+Always be sure to supply a log message when branching.  
+
+=== When and Who Should Merge ===
+
+The release team will merge changes from a RELEASE branch back to the trunk after the release has completed.  If a developer commits a post release bugfix to a release branch, *the developer* is responsible for merging these changes back to the trunk.  
+
+Developers with a private branch may merge anytime they see fit.  Regular merging and updating of a branch is considered a good idea to prevent merge conflicts at a later date.  
+
+=== How to Merge ===
+
+Merging involves knowledge of certain things:
+
+ * Source name of a branch 
+ * Name of the branch to merge
+ * Revision _range_, e.g. when the branch was created or last merged as a starting point, and an ending point to stop the merge procedure (could be the latest revision of a repository, or something else).  
+
+An example of merging (example illustrates merging an entire branch into a trunk) follows:
+
+{{{
+bash$ svn checkout https://svn.internet2.edu/svn/perfSONAR-PS/trunk
+bash$ svn checkout https://svn.internet2.edu/svn/perfSONAR-PS/branches/20091104-trunk
+bash$ cd 20091104-trunk
+bash$ svn log --stop-on-copy
+------------------------------------------------------------------------
+r2488 | aaron | 2009-03-02 20:20:40 -0500 (Mon, 02 Mar 2009) | 4 lines
+
+Create a branch for the upcoming release
+------------------------------------------------------------------------
+bash$ cd ../trunk
+bash$ svn update
+bash$ svn merge -r2488:3769 https://svn.internet2.edu/svn/perfSONAR-PS/branches/20091104-trunk
+bash$ svn commit
+}}}
+
+== Operations ==
+
+Developers must train themselves to carefully consider _where_ to accomplish certain tasks.  The following are some rules to help guide the process.
+
+=== Working in Trunk ===
+
+Developers are encouraged to not work out of the trunk.  Certain circumstances may allow working out of the trunk though:
+
+ * Small, self contained updates, e.g. documentation or _one-line_ changes.  Really anything that can be isolated to a specific service or function is acceptable to update in the trunk.  
+ * Merges from branches.  Developers should merge their changes from a development branch to the trunk (if the branch originated from the trunk).
+ 
+=== Working in Private Branches ===
+
+Major development including new projects, enhancements, and bugfixes should be done in private branches.  Developers should be self policing in this environment, things to consider:
+
+ - The trunk is like a stream - it will continue to flow.  Be sure to incorporate changes from the trunk into your branch often.
+ - Your branch can support many developers, but be sure to isolate yourself into a truly private branch if you are working alone
+  - Checkpoint your branch as frequently as you can, particularly when a bugfix or enhancement is complete and tested.  This will allow others who will eventually branch the trunk take advantage of your changes ASAP.
+
+=== Working in Release Branches ===
+
+Major development is not allowed in release branches.  The release branches serve a very specific purpose:
+
+ * Prepare the code for release.  
+   * Documentation updates
+   * Package updates
+ * Test code, repair minor bugs
+ * Test packaging, repair installation bugs
+
+Release branches will merge changes back to the trunk and will become tags when work is complete.
+
+== Last Updated ==
+
+$Id$
+
