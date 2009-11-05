@@ -2,7 +2,7 @@ package perfSONAR_PS::Services::LS::gLS;
 
 use base 'perfSONAR_PS::Services::Base';
 
-use fields 'STATE', 'LOGGER', 'IPTRIE', 'CLAIMTREE';
+use fields 'STATE', 'LOGGER', 'NETLOGGER', 'IPTRIE', 'CLAIMTREE';
 
 use strict;
 use warnings;
@@ -63,6 +63,7 @@ use Hash::Merge qw( merge );
 use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Services::LS::General;
 use perfSONAR_PS::Common;
+use perfSONAR_PS::Utils::NetLogger;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::Error_compat qw/:try/;
@@ -149,6 +150,7 @@ this function.
 sub init {
     my ( $self, $handler ) = @_;
     $self->{LOGGER}    = get_logger( "perfSONAR_PS::Services::LS::gLS" );
+    $self->{NETLOGGER} = get_logger( "NetLogger" );
     $self->{STATE}     = ();
     $self->{IPTRIE}    = ();
     $self->{CLAIMTREE} = ();
@@ -503,6 +505,9 @@ amount of time and do it again.
 sub registerLS {
     my ( $self, $sleep_time ) = validateParamsPos( @_, 1, { type => SCALARREF }, );
 
+    my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.registerLS.start" );
+    $self->{NETLOGGER}->debug( $msg );
+
     my $error     = q{};
     my $errorFlag = 0;
     my $eventType = q{};
@@ -769,6 +774,8 @@ sub registerLS {
     }
 
     $self->{LOGGER}->info( "registerLS Complete." );
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.registerLS.end" );
+    $self->{NETLOGGER}->debug( $msg );
 
     return 0;
 }
@@ -784,6 +791,9 @@ sub summarizeLS {
     my $parameters = validateParams( @args, { error => 0 } );
 
     return 0 if $self->{CONF}->{"gls"}->{"maintenance_interval"} == 0;
+
+    my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.summarizeLS.start" );
+    $self->{NETLOGGER}->debug( $msg );
 
     $self->{STATE}->{"messageKeys"} = ();
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
@@ -1455,6 +1465,8 @@ sub summarizeLS {
     }
 
     $self->{LOGGER}->info( "Summarization complete" );
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.summarizeLS.end" );
+    $self->{NETLOGGER}->debug( $msg );
 
     return 0;
 }
@@ -2160,6 +2172,9 @@ sub handleMessage {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { output => { isa => "perfSONAR_PS::XML::Document" }, messageId => { type => SCALAR | UNDEF }, messageType => { type => SCALAR }, message => { type => SCALARREF }, rawRequest => {} } );
 
+    my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.handleMessage.start" );
+    $self->{NETLOGGER}->debug( $msg );
+
     my $error   = q{};
     my $counter = 0;
     $self->{STATE}->{"messageKeys"} = ();
@@ -2241,6 +2256,8 @@ sub handleMessage {
     throw perfSONAR_PS::Error_compat( "error.ls.register.data_trigger_missing", "No data triggers found in request." ) unless $counter;
 
     endMessage( $parameters->{output} );
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.handleMessage.end" );
+    $self->{NETLOGGER}->debug( $msg );
     return;
 }
 
@@ -2267,6 +2284,10 @@ The following is a brief outline of the procedures:
 sub lsRegisterRequest {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, d => 1 } );
+
+    # probably too much detail, but leave here for now...
+    #my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.lsRegisterRequest.start" );
+    #$self->{NETLOGGER}->debug( $msg );
 
     my $error     = q{};
     my $errorFlag = 0;
@@ -2403,6 +2424,8 @@ sub lsRegisterRequest {
         $self->lsRegisterRequestNew( { doc => $parameters->{doc}, database => $database, dbTr => $dbTr, m => $parameters->{m}, d => $parameters->{d}, sec => $sec, eventType => $eventType, auth => $auth, error => $error, errorFlag => $errorFlag } );
     }
 
+    #$msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.lsRegisterRequest.end" );
+    #$self->{NETLOGGER}->debug( $msg );
     return;
 }
 
@@ -2880,6 +2903,9 @@ sub lsDeregisterRequest {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, d => 1 } );
 
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.lsDeregisterRequest.start" );
+    $self->{NETLOGGER}->debug( $nlmsg );
+
     my $msg       = q{};
     my $error     = q{};
     my $errorFlag = 0;
@@ -3014,6 +3040,8 @@ sub lsDeregisterRequest {
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
         }
     }
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.lsDeregisterRequest.end" );
+    $self->{NETLOGGER}->debug( $nlmsg );
     return;
 }
 
@@ -3038,6 +3066,9 @@ The following is a brief outline of the procedures:
 sub lsKeepaliveRequest {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1 } );
+
+    my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.lsKeepaliveRequest.start" );
+    $self->{NETLOGGER}->debug( $msg );
 
     my $auth      = 1;
     my $error     = q{};
@@ -3141,6 +3172,8 @@ sub lsKeepaliveRequest {
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
         }
     }
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.lsKeepaliveRequest.end" );
+    $self->{NETLOGGER}->debug( $msg );
 
     return;
 }
@@ -3167,6 +3200,9 @@ Any database errors will cause the given metadata/data pair to fail.
 sub lsQueryRequest {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1 } );
+
+    my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.lsQueryRequest.start" );
+    $self->{NETLOGGER}->debug( $msg );
 
     my $error     = q{};
     my $errorFlag = 0;
@@ -3543,6 +3579,8 @@ sub lsQueryRequest {
             }
         }
     }
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.lsQueryRequest.end" );
+    $self->{NETLOGGER}->debug( $msg );
     return;
 }
 
@@ -3564,6 +3602,9 @@ sub lsKeyRequest {
     my $summary    = 0;
     my $et         = find( $parameters->{m}, "./nmwg:eventType", 1 );
     my $eventType  = extract( $et, 0 );
+
+    my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.lsKeyRequest.start" );
+    $self->{NETLOGGER}->debug( $msg );
 
     if ( $eventType ) {
         unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/service/2.0" or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/summary/2.0" ) {
@@ -3653,6 +3694,8 @@ sub lsKeyRequest {
     else {
         throw perfSONAR_PS::Error_compat( "error.ls.key.service_missing", "Cannont find data, service element was not found." );
     }
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.lsKeyRequest.end" );
+    $self->{NETLOGGER}->debug( $msg );
     return;
 }
 
