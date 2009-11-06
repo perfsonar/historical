@@ -202,11 +202,31 @@ Committed revision 3769.
 
 Always be sure to supply a log message when branching.  
 
-=== When and Who Should Merge ===
+=== Who Should Merge ===
 
-The release team will merge changes from a RELEASE branch back to the trunk after the release has completed.  If a developer commits a post release bugfix to a release branch, *the developer* is responsible for merging these changes back to the trunk.  
+The Release team will take the responsibility of merging the changes from a release branch back to the trunk *immediately after* a release.
 
-Developers with a private branch may merge anytime they see fit.  Regular merging and updating of a branch is considered a good idea to prevent merge conflicts at a later date.  
+Developers are responsible for the upkeep and merging of their own branches.  The Release team will take no responsibility over a developers branch unless it is directly related to the progress of a release (e.g. a branch created from an in-progress release to fix a critical bug may be managed by the release team).  
+
+=== When To Merge ===
+
+Merging is not a complex process, but it does require some knowledge of the cycles of the project and consideration of what merged changes will do to development.
+
+==== Release Branches ====
+
+Release related branches are merged back to the trunk *immediately after* a release.  Any changes made after a release by the development team (e.g. bugfixes) must be merged back to the trunk on an as needed basis - it *is not* the job of the release team to continuously monitor or merge a completed release branch or tag to the trunk.  
+
+==== Private Branches ====
+
+Developers with a private branch may merge anytime they see fit.  Regular merging and updating of a branch is considered a good idea to prevent merge conflicts at a later date.  There are some simple rules that developers must follow when starting a merge:
+
+ * When the contents of a branch have been completed and thoroughly tested by the developers, an announcement is made announcing the intention to merge. * The announcement should include a description of the changes as well as the services, libraries, and APIs that may be affected.  Anyone who has a concern should speak up and discuss.   * After a couple of days with no objections, the developers are responsible for merging and resolving any conflicts.
+ * The branch should be deleted after the merge.
+At the discretion of the Release or Project manager, additional testing may be ordered to ensure that the merged changes will not adversely affect the trunk.  This testing would involve:
+
+ * The Release manager supervising a trunk update into the merged branch to be sure it is completely up to date.  
+ * The creation of tests to exercise portions of branch
+ * Testing the operation and installation of the branch
 
 === How to Merge ===
 
@@ -240,10 +260,12 @@ Developers must train themselves to carefully consider _where_ to accomplish cer
 
 === Working in Trunk ===
 
-Developers are encouraged to not work out of the trunk.  Certain circumstances may allow working out of the trunk though:
+Developers are encouraged to avoid working directly in the trunk.  This prevents altering an already unstable environment with more changes.  Certain circumstances may allow working out of the trunk:
 
- * Small, self contained updates, e.g. documentation or _one-line_ changes.  Really anything that can be isolated to a specific service or function is acceptable to update in the trunk.  
+ * Small, self contained updates, e.g. documentation or _one-line_ changes.  Anything that can be isolated to a specific service or function may be acceptable to update in the trunk. 
  * Merges from branches.  Developers should merge their changes from a development branch to the trunk (if the branch originated from the trunk).
+ 
+Questions about working in the trunk may always be directed to the Release or Project manager.   
  
 === Working in Private Branches ===
 
