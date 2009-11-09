@@ -9,11 +9,31 @@ This page describes a test plan to be performed on the ESnet OpenDevNet. OpenDev
 = Test Issues =
 
 One must be careful to create a separate gLS/hLS hierarchy for testing, so as to not pollute the global production hLS with bogus data. For more information, see: [http://code.google.com/p/perfsonar-ps/wiki/LocalLSDeployment].
-The service emulator [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/fakeService/ FakeService] can be used to register data into the hLS.
+The service emulator [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/fakeService/ FakeService] can be used to register data into the hLS. For all testing, the following should be monitored:
+ * correctness: are the results correct
+ * performance: how long does a client request take
+ * load: what is the CPU load on the server
+ * DB errors: at what point does xmldb start giving errors (Q: How many errors are acceptable? )
 
-= Basic hLS correctness Testing =
+== Basic hLS correctness Testing ==
+
+ * register fake services in an hLS, and then write a client to query the gLS for the service, and make sure the results are the same as what was registered. 
+ * Q: Are there different types of fake services that should be tested independently? If so, please add details here.
 
 Determine the amount of time for each of the following:
+
+== hLS scalability: number of services registered ==
+
+ * What is the maximum number of services that can be registered by a single instance of `ls_registration_daemon`?
+ * What is the maximum number of 'fake_services' instances can be run to a single hLS?
+
+== LS scalability: number of clients ==
+ * how many simultaneous clients can contact a single gLS asking for data from the same hLS?
+ * how many simultaneous clients can contact a single gLS asking for data from the different hLSs?
+
+== gLS scalability: number of hLSs ==
+ * what is the maximum number of hLSs that can register to a single gLS?
+
 
 
 == Notes ==
@@ -25,9 +45,10 @@ Complete testing must involve the ability to modify each of the following indepe
  * the number of gLS's
  * the number of (src/dest/eventTypes) in an MA
 
-== Test Assumptions  ===
+=== Test Assumptions  ===
  * each MA registers with 2 hLS's for redundancy
  * each 'network domain' runs 2 gLS's for redundancy
+ * all services set ls_registration_interval to 120 (Q: or should this be shorter?)
  * number of MA's should scale to around 100 per gLS
  * number of gLS's should scale to around 100  
  * the synchronization rate should tested at the following intervals: 
