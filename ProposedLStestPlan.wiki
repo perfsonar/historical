@@ -1,0 +1,36 @@
+#labels Phase-Requirements
+# This page contains information on plans for testing the gLS/hLS
+
+= Introduction =
+
+The Lookup Service is a critical piece of the perfSONAR infrastructure, and it is important to verify that
+the performance scales in all dimensions, including number of clients, number of hLS's, and amount of data being registered in each hLS. 
+
+This page describes a test plan to be performed on the ESnet OpenDevNet. OpenDevNet will all mutiple VMs to be used to simulate a reasonably large test environment.
+
+= Basic hLS Testing =
+
+Determine the amount of time for each of the following:
+
+
+== Notes ==
+Complete testing must involve the ability to modify each of the following independently:
+ * the gLS to gLS synchronization update rate
+ * the hLS to gLS synchronization update rate
+ * the MA to hLS update rate
+ * the number of MAs
+ * the number of gLS's
+ * the number of (src/dest/eventTypes) in an MA
+
+== Test Assumptions  ===
+ * each MA registers with 2 hLS's for redundancy
+ * each 'network domain' runs 2 gLS's for redundancy
+ * number of MA's should scale to around 100 per gLS
+ * number of gLS's should scale to around 100  
+ * the synchronization rate should tested at the following intervals: 
+   ** 10,30,60 min updates
+
+The following should be measured for each test configuration:
+ * Query time for a single requests
+ * Query time for simultaneous requests (5, 10, 50) to a single gLS
+ * measure the change in query time when a hLS or gLS fails
