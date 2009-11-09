@@ -1,14 +1,17 @@
 #labels Phase-Requirements
-# This page contains information on plans for testing the gLS/hLS
-
 = Introduction =
 
 The Lookup Service is a critical piece of the perfSONAR infrastructure, and it is important to verify that
 the performance scales in all dimensions, including number of clients, number of hLS's, and amount of data being registered in each hLS. 
 
-This page describes a test plan to be performed on the ESnet OpenDevNet. OpenDevNet will all mutiple VMs to be used to simulate a reasonably large test environment.
+This page describes a test plan to be performed on the ESnet OpenDevNet. OpenDevNet will allow mutiple VMs to be used to simulate a reasonably large test environment.
 
-= Basic hLS Testing =
+= Test Issues =
+
+One must be careful to create a separate gLS/hLS hierarchy for testing, so as to not pollute the global production hLS with bogus data. For more information, see: [http://code.google.com/p/perfsonar-ps/wiki/LocalLSDeployment].
+The service emulator [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/fakeService/ FakeService] can be used to register data into the hLS.
+
+= Basic hLS correctness Testing =
 
 Determine the amount of time for each of the following:
 
