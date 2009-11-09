@@ -17,7 +17,9 @@ For all testing, the following should be monitored and recorded:
  * load: what is the CPU load on the server
  * DB errors: at what point does xmldb start giving errors (Q: How many errors are acceptable? )
 
-Another issue is the maximum number of VMs supported by OpenDevNet. This is currently around 15, and will be around 100 in a few months. It should be possible to run multiple instances of client.pl, fakeService.pl, and ls_registration_daemon.pl from the same VM. It is NOT advisable to run multiple hLS or gLS in the same VM. (Q: what about doing 1 hLS and 1 gLS?)
+In most cases the goal should be to increase the item being tested until things break.
+
+Another issue is the maximum number of VMs supported by OpenDevNet. This is currently around 15, and will be around 100 in a few months. It should be possible to run multiple instances of client.pl, fakeService.pl, and ls_registration_daemon.pl from the same VM. It is NOT advisable to run multiple hLS or gLS in the same VM. 
 
 == Basic hLS correctness Testing ==
 
@@ -29,21 +31,28 @@ Determine the amount of time for each of the following:
 == hLS scalability: number of services registered ==
 
  * What is the maximum number of services that can be registered by a single instance of `ls_registration_daemon`?
+  ** try 10, 25, 50, 100, 250, and 500
  * What is the maximum number of 'fake_services' instances can be run to a single hLS?
+  ** try 10, 25, 50, 100
 
 == LS scalability: number of clients ==
  * how many simultaneous clients can contact a single gLS asking for data from the same hLS?
+  ** try 10, 25, 50, 100 (try up to 10 per VM)
  * how many simultaneous clients can contact a single gLS asking for data from the different hLSs?
+  ** try 10, 25, 50, 100
 
 == gLS scalability: number of hLSs ==
  * what is the maximum number of hLSs that can register to a single gLS?
+  ** try 10, 25, 50
 
 == Combined testing ==
- * what is the limit on an hLS and the number of both clients and service registrations increases?
+ * what is the limit on an hLS as the number of both clients and service registrations increases?
   ** this will test if doing both reading and writing to xmldb is worse that just reading or just writing 
+  ** try 10, 25, 50, 100
 
 == Failover Testing ==
  * test the performance for a client to detect a failed server and try the backup server instead.
+  ** try 10, 25, 50 simultaneous clients 
 
 === Test Assumptions  ===
  * each MA registers with 2 hLS's for redundancy
@@ -51,6 +60,11 @@ Determine the amount of time for each of the following:
  * the synchronization rate should tested at the following intervals: 
    ** 30,60,120 min updates (Q: is 30 min short enough?)
    ** these should be tested for both service to hLS updates and hLS to gLS, and gLS to gLS synchronization rates
+
+== OpenDevNet VMware Image Notes ==
+ * a vmware image with a pre-configured hLS and gLS is available here: XXX
+ * hLS/gLS needs an image with 1 GB RAM (verify this)
+ * test clients and services only need an image with 512K RAM (verify this too)
 
 == Notes ==
 Complete testing must involve the ability to modify each of the following independently:
@@ -65,3 +79,7 @@ The following should be measured for each test configuration:
  * Query time for a single requests
  * Query time for simultaneous requests (5, 10, 50) to a single gLS
  * measure the change in query time when a hLS or gLS fails
+
+= Results =
+ 
+Links to results will be here.
