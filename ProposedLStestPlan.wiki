@@ -6,14 +6,18 @@ the performance scales in all dimensions, including number of clients, number of
 
 This page describes a test plan to be performed on the ESnet OpenDevNet. OpenDevNet will allow mutiple VMs to be used to simulate a reasonably large test environment.
 
-= Test Issues =
+= LS Testing Issues =
 
 One must be careful to create a separate gLS/hLS hierarchy for testing, so as to not pollute the global production hLS with bogus data. For more information, see: [http://code.google.com/p/perfsonar-ps/wiki/LocalLSDeployment].
-The service emulator [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/fakeService/ FakeService] can be used to register data into the hLS. For all testing, the following should be monitored:
+The service emulator [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/fakeService/ FakeService] can be used to register data into the hLS. 
+
+For all testing, the following should be monitored and recorded:
  * correctness: are the results correct
  * performance: how long does a client request take
  * load: what is the CPU load on the server
  * DB errors: at what point does xmldb start giving errors (Q: How many errors are acceptable? )
+
+Another issue is the maximum number of VMs supported by OpenDevNet. This is currently around 15, and will be around 100 in a few months. It should be possible to run multiple instances of client.pl, fakeService.pl, and ls_registration_daemon.pl from the same VM. It is NOT advisable to run multiple hLS or gLS in the same VM. (Q: what about doing 1 hLS and 1 gLS?)
 
 == Basic hLS correctness Testing ==
 
@@ -34,25 +38,28 @@ Determine the amount of time for each of the following:
 == gLS scalability: number of hLSs ==
  * what is the maximum number of hLSs that can register to a single gLS?
 
+== Combined testing ==
+ * what is the limit on an hLS and the number of both clients and service registrations increases?
+  ** this will test if doing both reading and writing to xmldb is worse that just reading or just writing 
 
+== Failover Testing ==
+ * test the performance for a client to detect a failed server and try the backup server instead.
+
+=== Test Assumptions  ===
+ * each MA registers with 2 hLS's for redundancy
+ * all services set ls_registration_interval to 120 (Q: or should this be shorter?)
+ * the synchronization rate should tested at the following intervals: 
+   ** 30,60,120 min updates (Q: is 30 min short enough?)
+   ** these should be tested for both service to hLS updates and hLS to gLS, and gLS to gLS synchronization rates
 
 == Notes ==
 Complete testing must involve the ability to modify each of the following independently:
  * the gLS to gLS synchronization update rate
  * the hLS to gLS synchronization update rate
- * the MA to hLS update rate
- * the number of MAs
+ * the service to hLS update rate
+ * the number of servces
  * the number of gLS's
- * the number of (src/dest/eventTypes) in an MA
-
-=== Test Assumptions  ===
- * each MA registers with 2 hLS's for redundancy
- * each 'network domain' runs 2 gLS's for redundancy
- * all services set ls_registration_interval to 120 (Q: or should this be shorter?)
- * number of MA's should scale to around 100 per gLS
- * number of gLS's should scale to around 100  
- * the synchronization rate should tested at the following intervals: 
-   ** 10,30,60 min updates
+ * the number of (src/dest/eventTypes) that a service registers
 
 The following should be measured for each test configuration:
  * Query time for a single requests
