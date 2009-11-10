@@ -13,13 +13,17 @@ The service emulator [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client
 
 For all testing, the following should be monitored and recorded:
  * correctness: are the results correct
- * performance: how long does a client request take
- * load: what is the CPU load on the server
- * DB errors: at what point does xmldb start giving errors (Q: How many errors are acceptable? )
+ * performance: how long does a client request take. Each request should include a times tamp
+ * load: the CPU load, disk I/O, memory usage per process, swap activity and network activity should be captured every minute and recorded with time stamps.
+ * DB errors: at what point does xmldb start giving errors (Q: How many errors are acceptable? ). Each error should include  a time stamp.
 
 In most cases the goal should be to increase the item being tested until things break.
 
 Another issue is the maximum number of VMs supported by OpenDevNet. This is currently around 15, and will be around 100 in a few months. It should be possible to run multiple instances of client.pl, fakeService.pl, and ls_registration_daemon.pl from the same VM. It is NOT advisable to run multiple hLS or gLS in the same VM. 
+
+FInally, a number of iterations of the testing should be made, so the standard deviation could be calculated as well as allowing to discard testing equipment noise, such as VM artifacts.
+
+Note that time stamps are needed to correlate the actually activity (queries), with CPU, I/O, memory, network load. The time stamp should be based on synchronized machines.
 
 == Basic hLS correctness Testing ==
 
