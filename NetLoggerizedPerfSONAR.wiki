@@ -13,8 +13,8 @@ To active this instrumentation, add something like this to your logger.conf file
 log4perl.category.NetLogger=DEBUG, A2
 log4perl.appender.A2=Log::Dispatch::FileRotate
 # roll over log files when they reach 16MB, and only keep 5 of them
-log4perl.appender.A1.size=16777216
-log4perl.appender.A1.max=5
+log4perl.appender.A2.size=16777216
+log4perl.appender.A2.max=5
 log4perl.appender.A2.filename=/var/log/perfSONAR/hLS.netlogger.log
 log4perl.appender.A2.mode=append
 log4perl.appender.A2.layout=Log::Log4perl::Layout::PatternLayout
