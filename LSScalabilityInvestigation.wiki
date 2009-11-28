@@ -917,8 +917,221 @@ Adding a node to a slice, although a basal operation (without nodes, nothing can
 If a node named `planetlab2.cis.upenn.edu` was added to the slice, the user can log on to this node (or virtual machine) by issuing:
 
  `ssh -l slice_name -i ~/.ssh/id_rsa planetlab2.cis.upenn.edu`
- 
 
+ 
+==== Preparing planetlab2.cs.columbia.edu ====
+
+Installation of `planetlab2.cs.columbia.edu` and `planetlab2.cis.upenn.edu` were done concurrently, so there is some redundancy in the report for both.
+
+===== Background =====
+
+This server _planetlab2.cs.columbia.edu_ is Fedora release 8 (Werewolf), linux core 2.6.22.19-vs2.3.0.34.39.planetlab.
+
+===== Attempt 1 (planetlab3.cs.columbia.edu) =====
+
+Import public keys:
+
+{{{
+wget http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
+sudo rpm --import RPM-GPG-KEY.dag.txt
+sudo rpm --import http://dries.ulyssis.org/rpm/RPM-GPG-KEY.dries.txt
+}}}
+
+In `/etc/yum.repos.d`, add file `rpmforge.repo`:
+
+{{{
+[rpmforge]
+name=Fedora Core $releasever - $basearch - rpmforge
+mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
+gpgcheck=1
+}}}
+
+File `additional.repo`:
+
+{{{
+# Name: Additional Repositories for perfSONAR Lookup Service
+[dries]
+name=Extra Fedora rpms dries - $releasever - $basearch
+baseurl=http://ftp.belnet.be/packages/dries.ulyssis.org/fedora/linux/$releasever/$basearch/dries/RPMS
+[Dag]
+name = Dag Repository
+baseurl = http://apt.sw.be/fedora/$releasever/en/$basearch/dries
+}}}
+
+Now:
+
+ `sudo yum update`
+ 
+Brand new error to the report:
+
+{{{
+error: rpmdb: damaged header #79 retrieved -- skipping.
+Traceback (most recent call last):
+  File "/usr/bin/yum", line 29, in <module>
+    yummain.user_main(sys.argv[1:], exit_code=True)
+  File "/usr/share/yum-cli/yummain.py", line 229, in user_main
+    errcode = main(args)
+  File "/usr/share/yum-cli/yummain.py", line 84, in main
+    base.getOptionsConfig(args)
+  File "/usr/share/yum-cli/cli.py", line 184, in getOptionsConfig
+    enabled_plugins=self.optparser._splitArg(opts.enableplugins))
+  File "/vservers/.vref/planetlab-f8-i386/usr/lib/python2.5/site-packages/yum/__init__.py", line 192, in _getConfig
+  File "/vservers/.vref/planetlab-f8-i386/usr/lib/python2.5/site-packages/yum/config.py", line 774, in readMainConfig
+  File "/vservers/.vref/planetlab-f8-i386/usr/lib/python2.5/site-packages/yum/config.py", line 850, in _getsysver
+StopIteration
+}}}
+
+Trying:
+
+{{{
+sudo rpm --initdb
+sudo yum update
+}}}
+
+No.  Trying to remove __db* files from /var/lib/rpm and executing the two commands above again.  Does not work.
+
+===== Attempt 2 (planetlab2.cs.columbia.edu) =====
+
+We will avoid spending hours confronting this new issue.  Let us destroy this Planetlab virtual node (by deleting it from the Planetlab slice), and then add it again.  This will basically mimic reinstalling the operating system.  We begin again:
+
+Import public keys:
+
+ `wget http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt`
+ 
+Edit this file and remove the initial lines of text, that have nothing to do with the public key.  Now:
+
+{{{
+sudo rpm --import RPM-GPG-KEY.dag.txt
+sudo rpm --import http://dries.ulyssis.org/rpm/RPM-GPG-KEY.dries.txt
+}}}
+
+In `/etc/yum.repos.d`, add file `rpmforge.repo`:
+
+{{{
+[rpmforge]
+name=Fedora Core $releasever - $basearch - rpmforge
+mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
+gpgcheck=1
+}}}
+
+Add file `additional.repo`:
+
+{{{
+# Name: Additional Repositories for perfSONAR Lookup Service
+[dries]
+name=Extra Fedora rpms dries - $releasever - $basearch
+baseurl=http://ftp.belnet.be/packages/dries.ulyssis.org/fedora/linux/$releasever/$basearch/dries/RPMS
+[Dag]
+name = Dag Repository
+baseurl = http://apt.sw.be/fedora/$releasever/en/$basearch/dries
+}}}
+
+After `sudo yum update`, we get:
+
+ `Error: database disk image is malformed`
+ 
+And nothing else gets to be installed via yum.
+
+===== Attempt 3 (planetlab2.cs.columbia.edu) - Undocumented Installation Procedure - Working Script =====
+
+Again, let us kill this node and restart from scratch.  We will try an undocumented (and now documented) venue for installation, following recommendation from Jason Zurawsky:
+
+In `/etc/yum.repos.d`, add file `rpmforge.repo`:
+
+{{{
+[rpmforge]
+name=Fedora Core $releasever - $basearch - rpmforge
+mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
+gpgcheck=1
+}}}
+
+{{{
+sudo rpm -Uvh http://ftp.freshrpms.net/pub/freshrpms/fedora/linux/8/freshrpms-release/freshrpms-release-1.1-1.fc.noarch.rpm
+wget -c http://freshrpms.net/RPM-GPG-KEY-freshrpms
+sudo rpm --import http://www.perfsonar.net/download/services/perfSONAR-PS_RPM-GPG-KEY
+wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+sudo rpm -ivh http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+wget -c http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
+sudo rpm --import RPM-GPG-KEY.dag.txt
+sudo yum update
+sudo yum install perl-perfSONAR_PS-LookupService --nogpgcheck
+}}}
+
+This works.  Notice that this method installs additional RPM at ftp.freshrpms.net, adds an RPMFORGE repository, and uses --nogpgcheck when installing the Lookup Service (Internet2 public key was not imported here).
+
+Proceeding to start the gLS service.  Modify the .conf files accordingly (refer to README):
+ 
+Edit /opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf and set the desired logging method. Here, we choose to display log messages to the screen.  Hence, per instructed within the file, we uncomment the line:
+ 
+ `log4perl.appender.A1=Log::Dispatch::Screen`
+
+And comment the line: 
+
+ `#log4perl.appender.A1=Log::Dispatch::FileRotate` 
+
+ 
+===== daemon.conf file for planetlab2.cs.columbia.edu =====
+
+File `daemon.conf`:
+
+{{{
+<port 9995>
+    <endpoint /perfSONAR_PS/services/gLS>
+        <gls>
+                                                                # just an gLS ... (Columbia University, Planetlab virtual, USA)
+                        root                            1
+                                                                # data TTL = 4 days
+                        ls_ttl                          5760
+                                                                # 180 minute (3hr) registaration window
+                        ls_registration_interval        180
+                                                                # 120 miute cleaning/summary window
+                        maintenance_interval            120
+                                                                # Database options (only change path)
+                        metadata_db_file                    glsstore.dbxml
+                        metadata_summary_db_file            glsstore-summary.dbxml
+                        metadata_db_name                    /var/lib/perfsonar/lookup_service/xmldb
+                                                                # Service options (please customize)
+                        service_accesspoint             http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/gLS
+                        service_description             Columbia Global Lookup Service (Planetlab virtual, USA)
+                        service_name                    Columbia Home Lookup Service
+                        service_type                    gLS
+                </gls>
+                disable                             0
+                module                              perfSONAR_PS::Services::LS::gLS
+        </endpoint>
+</port>
+                                                    # 180 minute (3hr) registaration window
+ls_registration_interval                        180
+disable_echo                                0
+                                                    # Root hints info, url + local copy location
+root_hints_url                              http://stout.damsl.cis.udel.edu/gls.root.hints
+root_hints_file                             /var/lib/perfsonar/lookup_service/hls.root.hints
+                                                    # Daemon management, shouldn't need changing
+reaper_interval                             20
+max_worker_lifetime                             300
+max_worker_processes                        30
+pid_dir                                     /var/run
+pid_file                                        lookup_service.pid
+}}}
+
+The service will run through the init.d script:
+
+ `/etc/init.d/lookup_service start`
+
+We have to update the gLS cloud file `gls.root.hints` at _stout_ to reflect the newly added gLS server.  The file is located at `/var/www/external/gls.root.hints`.  The new contents is:
+
+{{{
+http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
+http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/gLS
+}}}
+
+ 
 ==== Preparing planetlab2.cis.upenn.edu ====
 
 ===== Background =====
@@ -1175,22 +1388,43 @@ environment variables deep in the system bowels were not updated (thus rendering
 
 Internet2 repository now includes packages NetAddr::IP and Hash::Merge, required by Perfsonar and that some Fedora versions have difficulty finding.
 
+Before we could find the source of the problem, the Internet2 repository was updated in order to include both of the packages that _yum_ could not resolve.  Now, the complete script:
 
-Before we could find the source of the problem, the Internet2 repository was updated in order to include both of the packages that _yum_ could not resolve.  Now:
+In `/etc/yum.repos.d`, add file `rpmforge.repo`:
 
- `sudo yum install nano perl-perfSONAR_PS-LookupService --nogpgcheck`
+{{{
+[rpmforge]
+name=Fedora Core $releasever - $basearch - rpmforge
+mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
+gpgcheck=1
+}}}
+
+{{{
+sudo rpm -Uvh http://ftp.freshrpms.net/pub/freshrpms/fedora/linux/8/freshrpms-release/freshrpms-release-1.1-1.fc.noarch.rpm
+wget -c http://freshrpms.net/RPM-GPG-KEY-freshrpms
+sudo rpm --import http://www.perfsonar.net/download/services/perfSONAR-PS_RPM-GPG-KEY
+wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+sudo rpm -ivh http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+wget -c http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
+sudo rpm --import RPM-GPG-KEY.dag.txt
+sudo yum update
+sudo yum install perl-perfSONAR_PS-LookupService --nogpgcheck
+}}}
+
  
-And this works.  Adding the "nano" editor and the last --nogpgcheck option were suggested by Jason Zurawsky, but the original _yum_ install command should also work.
+And this works.
 
 Proceeding to start the hLS service.  Now modify the .conf files accordingly (refer to README):
  
 Edit /opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf and set the desired logging method. Here, we choose to display log messages to the screen.  Hence, per instructed within the file, we uncomment the line:
  
- log4perl.appender.A1=Log::Dispatch::Screen
+ `log4perl.appender.A1=Log::Dispatch::Screen`
 
 And comment the line: 
 
- #log4perl.appender.A1=Log::Dispatch::FileRotate 
+ `#log4perl.appender.A1=Log::Dispatch::FileRotate` 
 
  
 ===== daemon.conf file for planetlab2.cis.upenn.edu =====
@@ -1245,216 +1479,6 @@ The service will run through the init.d script:
 
 Per _ale_ log report, this hLS has successfully registered.
 
-
-==== Preparing planetlab2.cs.columbia.edu ====
-
-===== Background =====
-
-This server _planetlab2.cs.columbia.edu_ is Fedora release 8 (Werewolf), linux core 2.6.22.19-vs2.3.0.34.39.planetlab.
-
-===== Attempt 1 (planetlab3.cs.columbia.edu) =====
-
-Import public keys:
-
-{{{
-wget http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
-sudo rpm --import RPM-GPG-KEY.dag.txt
-sudo rpm --import http://dries.ulyssis.org/rpm/RPM-GPG-KEY.dries.txt
-}}}
-
-In `/etc/yum.repos.d`, add file `rpmforge.repo`:
-
-{{{
-[rpmforge]
-name=Fedora Core $releasever - $basearch - rpmforge
-mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
-enabled=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
-gpgcheck=1
-}}}
-
-File `additional.repo`:
-
-{{{
-# Name: Additional Repositories for perfSONAR Lookup Service
-[dries]
-name=Extra Fedora rpms dries - $releasever - $basearch
-baseurl=http://ftp.belnet.be/packages/dries.ulyssis.org/fedora/linux/$releasever/$basearch/dries/RPMS
-[Dag]
-name = Dag Repository
-baseurl = http://apt.sw.be/fedora/$releasever/en/$basearch/dries
-}}}
-
-Now:
-
- `sudo yum update`
- 
-Brand new error to the report:
-
-{{{
-error: rpmdb: damaged header #79 retrieved -- skipping.
-Traceback (most recent call last):
-  File "/usr/bin/yum", line 29, in <module>
-    yummain.user_main(sys.argv[1:], exit_code=True)
-  File "/usr/share/yum-cli/yummain.py", line 229, in user_main
-    errcode = main(args)
-  File "/usr/share/yum-cli/yummain.py", line 84, in main
-    base.getOptionsConfig(args)
-  File "/usr/share/yum-cli/cli.py", line 184, in getOptionsConfig
-    enabled_plugins=self.optparser._splitArg(opts.enableplugins))
-  File "/vservers/.vref/planetlab-f8-i386/usr/lib/python2.5/site-packages/yum/__init__.py", line 192, in _getConfig
-  File "/vservers/.vref/planetlab-f8-i386/usr/lib/python2.5/site-packages/yum/config.py", line 774, in readMainConfig
-  File "/vservers/.vref/planetlab-f8-i386/usr/lib/python2.5/site-packages/yum/config.py", line 850, in _getsysver
-StopIteration
-}}}
-
-Trying:
-
-{{{
-sudo rpm --initdb
-sudo yum update
-}}}
-
-No.  Trying to remove __db* files from /var/lib/rpm and executing the two commands above again.  Does not work.
-
-===== Attempt 2 (planetlab2.cs.columbia.edu) =====
-
-We will avoid spending hours confronting this new issue.  Let us destroy this Planetlab virtual node (by deleting it from the Planetlab slice), and then add it again.  This will basically mimic reinstalling the operating system.  We begin again:
-
-Import public keys:
-
- `wget http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt`
- 
-Edit this file and remove the initial lines of text, that have nothing to do with the public key.  Now:
-
-{{{
-sudo rpm --import RPM-GPG-KEY.dag.txt
-sudo rpm --import http://dries.ulyssis.org/rpm/RPM-GPG-KEY.dries.txt
-}}}
-
-In `/etc/yum.repos.d`, add file `rpmforge.repo`:
-
-{{{
-[rpmforge]
-name=Fedora Core $releasever - $basearch - rpmforge
-mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
-enabled=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
-gpgcheck=1
-}}}
-
-Add file `additional.repo`:
-
-{{{
-# Name: Additional Repositories for perfSONAR Lookup Service
-[dries]
-name=Extra Fedora rpms dries - $releasever - $basearch
-baseurl=http://ftp.belnet.be/packages/dries.ulyssis.org/fedora/linux/$releasever/$basearch/dries/RPMS
-[Dag]
-name = Dag Repository
-baseurl = http://apt.sw.be/fedora/$releasever/en/$basearch/dries
-}}}
-
-After `sudo yum update`, we get:
-
- `Error: database disk image is malformed`
- 
-And nothing else gets to be installed via yum.
-
-===== Attempt 3 (planetlab2.cs.columbia.edu) - Undocumented Installation Procedure - Working Script =====
-
-Again, let us kill this node and restart from scratch.  We will try an undocumented (and now documented) venue for installation, following recommendation from Jason Zurawsky:
-
-In `/etc/yum.repos.d`, add file `rpmforge.repo`:
-
-{{{
-[rpmforge]
-name=Fedora Core $releasever - $basearch - rpmforge
-mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
-enabled=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
-gpgcheck=1
-}}}
-
-{{{
-sudo rpm -Uvh http://ftp.freshrpms.net/pub/freshrpms/fedora/linux/8/freshrpms-release/freshrpms-release-1.1-1.fc.noarch.rpm
-wget -c http://freshrpms.net/RPM-GPG-KEY-freshrpms
-sudo rpm --import http://www.perfsonar.net/download/services/perfSONAR-PS_RPM-GPG-KEY
-wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
-sudo rpm -ivh http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
-wget -c http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
-sudo rpm --import RPM-GPG-KEY.dag.txt
-sudo yum update
-sudo yum install perl-perfSONAR_PS-LookupService --nogpgcheck
-}}}
-
-This works.  Notice that this method installs additional RPM at ftp.freshrpms.net, adds an RPMFORGE repository, and uses --nogpgcheck when installing the Lookup Service (Internet2 public key was not imported here).
-
-Proceeding to start the gLS service.  Modify the .conf files accordingly (refer to README):
- 
-Edit /opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf and set the desired logging method. Here, we choose to display log messages to the screen.  Hence, per instructed within the file, we uncomment the line:
- 
- log4perl.appender.A1=Log::Dispatch::Screen
-
-And comment the line: 
-
- #log4perl.appender.A1=Log::Dispatch::FileRotate 
-
- 
-===== daemon.conf file for planetlab2.cs.columbia.edu =====
-
-File `daemon.conf`:
-
-{{{
-<port 9995>
-    <endpoint /perfSONAR_PS/services/gLS>
-        <gls>
-                                                                # just an gLS ... (Columbia University, Planetlab virtual, USA)
-                        root                            1
-                                                                # data TTL = 4 days
-                        ls_ttl                          5760
-                                                                # 180 minute (3hr) registaration window
-                        ls_registration_interval        180
-                                                                # 120 miute cleaning/summary window
-                        maintenance_interval            120
-                                                                # Database options (only change path)
-                        metadata_db_file                    glsstore.dbxml
-                        metadata_summary_db_file            glsstore-summary.dbxml
-                        metadata_db_name                    /var/lib/perfsonar/lookup_service/xmldb
-                                                                # Service options (please customize)
-                        service_accesspoint             http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/gLS
-                        service_description             Columbia Global Lookup Service (Planetlab virtual, USA)
-                        service_name                    Columbia Home Lookup Service
-                        service_type                    gLS
-                </gls>
-                disable                             0
-                module                              perfSONAR_PS::Services::LS::gLS
-        </endpoint>
-</port>
-                                                    # 180 minute (3hr) registaration window
-ls_registration_interval                        180
-disable_echo                                0
-                                                    # Root hints info, url + local copy location
-root_hints_url                              http://stout.damsl.cis.udel.edu/gls.root.hints
-root_hints_file                             /var/lib/perfsonar/lookup_service/hls.root.hints
-                                                    # Daemon management, shouldn't need changing
-reaper_interval                             20
-max_worker_lifetime                             300
-max_worker_processes                        30
-pid_dir                                     /var/run
-pid_file                                        lookup_service.pid
-}}}
-
-The service will run through the init.d script:
-
- `/etc/init.d/lookup_service start`
-
-We have to update the gLS cloud file `gls.root.hints` at _stout_ to reflect the newly added gLS server.  The file is located at `/var/www/external/gls.root.hints`.  The new contents is:
-
-{{{
-http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS
-http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/gLS
-}}}
 
 
 ==== Current Planetlab Findings ====
@@ -1618,11 +1642,11 @@ Proceeding to start the gLS service.  Modify the .conf files accordingly (refer 
  
 Edit /opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf and set the desired logging method. Here, we choose to display log messages to the screen.  Hence, per instructed within the file, we uncomment the line:
  
- log4perl.appender.A1=Log::Dispatch::Screen
+ `log4perl.appender.A1=Log::Dispatch::Screen`
 
 And comment the line: 
 
- #log4perl.appender.A1=Log::Dispatch::FileRotate 
+ `#log4perl.appender.A1=Log::Dispatch::FileRotate`
 
  
 ===== daemon.conf file for plink.cs.uwaterloo.ca =====
@@ -1724,11 +1748,11 @@ Proceeding to start the gLS service.  Modify the .conf files accordingly (refer 
  
 Edit /opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf and set the desired logging method. Here, we choose to display log messages to the screen.  Hence, per instructed within the file, we uncomment the line:
  
- log4perl.appender.A1=Log::Dispatch::Screen
+ `log4perl.appender.A1=Log::Dispatch::Screen`
 
 And comment the line: 
 
- #log4perl.appender.A1=Log::Dispatch::FileRotate 
+ `#log4perl.appender.A1=Log::Dispatch::FileRotate` 
 
  
 ===== daemon.conf file for onelab-1.fhi-fokus.de =====
@@ -1899,6 +1923,20 @@ Swap:  1048568k total,   601920k used,   446648k free,   201672k cached
 14032 root      17   0 16408  11m 2648 S  0.0  1.1   0:11.02 perl               
 14036 root      17   0 16524  13m 2648 S  0.0  1.3   0:11.02 perl
 }}}
+
+=== view.cgi script ===
+
+It would be interesting if a timestamp were included in the output of this script, in order to convey the time elapsed between the request and response of the script.
+
+An attempt to install perfAdmin in `plink.cs.uwaterloo.ca` was made with the command:
+
+ `sudo yum install perl-perfSONAR_PS-perfAdmin --nogpgcheck`
+ 
+And it was successful.  Venturing `http://plink.cs.uwaterloo.ca/perfAdmin` should display the directory list, as written in the INSTALL.  It does not work, however.
+
+=== Current Status ===
+
+After a number of days, the services in `moonshine`, `ale`, and most Planetlab nodes were stopped, probably due to server rebooting.  The hLS at `planetlab2.cis.upenn.edu` refuses to start again, and node `planetlab2.cs.columbia.edu` is inaccessible. 
 
 
 
