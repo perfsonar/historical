@@ -1934,9 +1934,17 @@ An attempt to install perfAdmin in `plink.cs.uwaterloo.ca` was made with the com
  
 And it was successful.  Venturing `http://plink.cs.uwaterloo.ca/perfAdmin` should display the directory list, as written in the INSTALL.  It does not work, however.
 
-=== Current Status ===
+=== Status Nov 29, 2009 ===
 
 After a number of days, the services in `moonshine`, `ale`, and most Planetlab nodes were stopped, probably due to server rebooting.  The hLS at `planetlab2.cis.upenn.edu` refuses to start again, and node `planetlab2.cs.columbia.edu` is inaccessible. 
+
+=== Response Timings ===
+
+The CGI script request/response timings are tabulated below.
+
+For the hLS, different number of fakeServices are registered.  The hLS is then queried using the CGI script and the response time is measured.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/response_timings.png
 
 
 
