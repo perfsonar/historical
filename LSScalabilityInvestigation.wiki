@@ -1940,7 +1940,15 @@ After a number of days, the services in `moonshine`, `ale`, and most Planetlab n
 
 === Response Timings ===
 
-The CGI script request/response timings are tabulated below.
+The CGI script request/response timings are tabulated below.  The procedure in obtaining these numbers is:
+
+ * Open a web browser and run the CGI script from Internet2 (http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=).
+ * Measure the time between the start of the web query, and when the result page starts loading.
+
+This procedure forces the inclusion of a number of delays, such as transmission delay from the user web browser to Internet2 (CGI) host, then from that host to the LS being measured.  Delays involved in running the web browser, and operator-related measurement errors.  Hence, the figures are better interpreted if compared with one another, and not taken individually.  For example, the timings from a load of 10 registered services can be compared to the timings from a load of 30 registered services.  The timings, taken alone, will reflect all the undesirable delays; in pair-wise comparison, the undesirable delays will tend to cancel out.
+
+Nevertheless, these timings can be considered temporary.  A final Perl script for testing must be devised to avoid web browser/third-party (CGI) host delays.
+
 
 For the hLS, different number of fakeServices are registered.  The hLS is then queried using the CGI script and the response time is measured.
 
