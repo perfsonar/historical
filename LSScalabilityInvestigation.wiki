@@ -1947,10 +1947,10 @@ The CGI script request/response timings are tabulated below.  The procedure in o
 
 This procedure forces the inclusion of a number of delays, such as transmission delay from the user web browser to Internet2 (CGI) host, then from that host to the LS being measured.  Delays involved in running the web browser, and operator-related measurement errors.  Hence, the figures are better interpreted if compared with one another, and not taken individually.  For example, the timings from a load of 10 registered services can be compared to the timings from a load of 30 registered services.  The timings, taken alone, will reflect all the undesirable delays; in pair-wise comparison, the undesirable delays will tend to cancel out.
 
-Nevertheless, these timings can be considered temporary.  A final Perl script for testing must be devised to avoid web browser/third-party (CGI) host delays.
+Nevertheless, these timings can be considered ad interim.  A final Perl script for testing must be devised to avoid web browser/third-party (CGI) host delays.
 
 
-For the hLS, different number of fakeServices are registered.  The hLS is then queried using the CGI script and the response time is measured.
+For the hLS, different quantities of fakeServices are registered.  The hLS is then queried using the CGI script and the response time is measured.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/response_timings.png
 
