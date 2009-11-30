@@ -10,6 +10,15 @@
  * _*ACTION*_: Maxim will work with Andy and Aaron to debug the pingER-MP problem.
  * _*ACTION*_: Jason will send the psps related publications Internet2 has been working on.
  # SC Postmordem
+ # *Iperf3* - bwctl integration issues. (Aaron)
+ # *Circuit Monitoring* - proposed developer meeting at Jt Techs. (FNAL?)
+ # *TestPoint Uniqueness*
+   * pS-BUOY treats node/host/addr as unique... pinger is slightly different
+   * how do we want to deal with this?
+ # pS-PerfTK
+   * Need to be prepared to do one more *bug fix* release of current incarnation before Jt Techs.
+   * RedHat migration needs to be high on the priority list.
+     * Modular build and revision control would help.
  # Future topics:
    * _*pSPS*_:
      * Community handling in regular testing screens.  If the user doesn't pick a community, others can'y use this mechanism to find the node
