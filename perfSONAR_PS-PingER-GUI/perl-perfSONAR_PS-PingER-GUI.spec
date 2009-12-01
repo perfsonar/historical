@@ -15,10 +15,10 @@ Summary:        perfSONAR_PS PingER  data charts GUI
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-PingER-GUI/
-Source0:        perfSONAR_PS-PingER-GUI-%{version}.%{relnum}.%{arch}.tar.gz
+Source0:        perfSONAR_PS-PingER-GUI-%{version}.%{relnum}.%{_arch}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+#Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 Requires:       perl(DateTime) >= 0.41
 Requires:       perl(DateTime::Format::Builder) >= 0.7901
@@ -112,7 +112,7 @@ The perfSONAR_PS PingER data charts GUI allows one to view graphs.
 
 
 %prep
-%setup -q -n perfSONAR_PS-PingER-GUI-%{version}.%{relnum}.%{arch}
+%setup -q -n perfSONAR_PS-PingER-GUI-%{version}.%{relnum}.%{_arch}
 
 %build
 
