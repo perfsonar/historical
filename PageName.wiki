@@ -1,0 +1,84 @@
+#summary CFengine for perfSONAR PS
+
+= Introduction =
+
+CFengine is a configuration management tool that could be utilized to 
+simplify & automate some perfSONAR PS management issues.
+
+More info is available at http://www.cfengine.com
+
+
+= Details =
+
+CFengine can be viewed as a state machine framework for system administration type tasks.
+It could be leveraged by the perfSONAR collaboration in 2 different scenarios.
+
+  * Managing a large collection of distributed servers & services in one domain
+  * Managing system administration & Housekeeping issues on performance nodes
+
+==CFengine Description==
+
+CFengine can be thought of as a state machine framework that does the following:
+  1. Fetch/load the latest version of the state machine as expressed in cfengine configuration files.
+  2. Interrogates the local machine to determine the current state
+  3. Applies actions to move from the current state to (or closer towards) the goal state.
+
+It is actually a bit more complicated than this, because everytime you apply an action, you
+maybe changing the state. It tries to sort out dependencies and may  make multiple passes 
+but you get the general idea.
+
+The framework provides lots of native primitives for determining the current state including,  checking the OS running, uptime, system load, running processes, looking for files in the file system, comparing files, etc.
+It provides a handful of native actions including touching, copying & deleting files, links & directories, starting or killing processes, etc.  It can also run arbitrary programs to either determine state, or to invoke changes.
+
+
+==How ESnet is using CFengine==
+
+ESnet's measurement infrastructure has over 60 hosts distributed in locations across the US running perfSONAR services.  ESnet is using CFengine to manage this collection of systems.  Currently (Nov 09) ESnet is using CFengine version 2.  We will be migrating to CFengine Nova in 2010, but most of the rulesets we are using should also 
+work in CFengine3 Community Edition.
+
+
+ESnet is using CFengine for the following:
+
+  * Installing perfSONAR services
+  * Configuring perfSONAR services
+  * Restarting services if they fail
+  * Killing/restarting services if they run wild (and consume excessive CPU.)
+  * Cleaning up temporary files that are left behind
+  * Redistributing service configuration files, & restarting services as neccessary
+  * Managing routing & acls on servers
+  * Installing software dependencies
+  * Rolling log files
+
+In the ESnet instance, all of the configuration is managed in a SVN repo on a central
+server, and an explicit goal of our CFengine configuration is to try and ensure that 
+all of our distributed machines are running the exact same software & services. For
+example, if we want to change the ntpd configuration on all of our services, we just
+need to update 1 file on the master, and then within the hour all of the servers in
+the field will update their config and restart the appropriate services.
+
+
+==Using CFengine on Performance Nodes==
+
+CFengine could be used on the Performance Nodes to automate all sorts of
+system administration tasks in a simple & efficient manner.  The primary
+capabilities that I think could be used are:
+
+  * Tidying up temporary files, rolling logs, etc.
+  * Checking the node configuration, and restarting services that might have crashed, or have 'run away'.
+  * Updating of some base configs, ie root hints file.
+  * Packaging up of log & config files for bug reports if it discovers a service failed.
+
+CFengine can be configured to securely fetch it's state machine from remote locations, or it
+can run in a closed single machine environment.  The Performance Node usage of CFengine should
+start with a plan to be be completely self-contained. At least until the collaboration defines a
+framework for who people might want to trust and why.
+
+But even in this configuration, it would
+be straight forward for an external group, (say US Atlas), to define a cfengine ruleset that would automatically
+add and remove regularly scheduled tests for any nodes that show up in the LS with a specific keyword.
+All that would be required is a leader would need to convince their followers to add 1 line to their
+cfengine config which would be to fetch a bit more config from some well known place.
+
+
+
+
