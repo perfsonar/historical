@@ -24,7 +24,7 @@
  * _*ACTION*_: Jeff, Brian and Joe will work on the roadmap.
  * _*ACTION*_: Jon will add Aaron to Iperf project. Aaron will add autoconf tools and begin bwctl/iperf3 integration.
  * _*ACTION*_: Joe/Brian will consider if ESnet has resources they want to put towards the RedHat based pS-NPTk version.
- # SC Postmordem
+ # *SC Postmordem*
    * pS, just worked.
  # *Iperf3* - bwctl integration issues. (Aaron)
    * Working on integrating into bwctl. Need a library. Aaron will work on adding autotools into iperf3.
@@ -32,11 +32,11 @@
  # *TestPoint Uniqueness*
    * pS-BUOY treats node/host/addr as unique... pinger is slightly different
    * how do we want to deal with this? Andy will propose solution.
- # pS-PerfTK
+ # *pS-PerfTK*
    * Need to be prepared to do one more *bug fix* release of current incarnation before Jt Techs.
    * RedHat migration needs to be high on the priority list.
      * Modular build and revision control would help.
- # Future topics:
+ # *Future topics*:
    * _*pSPS*_:
      * Community handling in regular testing screens.  If the user doesn't pick a community, others can'y use this mechanism to find the node
        * N.B. the node is still _findable_ via other methods including domain/IP and it does show up in the gLS
