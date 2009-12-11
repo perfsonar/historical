@@ -1910,7 +1910,7 @@ Starting At 30 services registered (from the same client), the number of errors 
 
 Error *type 3* was also observed in rare occasions when querying the LS, after approximately 30 services and up where registered.
 
-It is yet unknown whether there are related to the LS server, or to the host where the fakeServices are being deployed.  At approximately 45 fakeServices running, the performance of the host decreases appreciably.
+It is yet unknown whether these are related to the LS server, or to the host where the fakeServices are being deployed.  At approximately 45 fakeServices running, the performance of the host decreases appreciably.
 
 *Type 1*
 {{{
@@ -1927,4 +1927,3 @@ Service failed to register - LS did not respond.
 {{{
 Database errors prevented the transaction from completing:
 }}}
-
