@@ -1,0 +1,64 @@
+#summary Description of the proposed architecture for inter-domain circuit monitoring
+
+<wiki:toc max_depth="6" />
+
+=== Introduction ===
+
+The following outlines the proposed architecture for monitoring circuits, and describes what has been implemented so far.
+
+== Circuit Monitoring ===
+
+=== Constraints ===
+==== Various Measurement Metrics ====
+
+Users have expressed a desire to retrieve various metrics about the circuits they use. These metrics include up/down status, acheivable bandwidth, loss rate, jitter, and utilization. These statistics allow users to verify that the circuit fulfills their requirements. Domains have expressed interest in exporting more low level metrics in such a way that that information can be correlated with the dynamic circuits.
+
+How these metrics are described can vary significantly depending on the metric being measured, the method of collection, and the layer at which the metric is being measured. For example, end-to-end metrics captured by IP-level tools like iperf, owamp, ping and traceroute use IP addresses as the unique identifier for elements, and a source/destination pair to define a given test. SFlow and NetFlow are similar, using a combination of IP address, protocol and protocol port to define a unique element, and a pair of these elements to define a given flow. Statistics collected via TL1 or SNMP, on the other hand, use a combination of host address, and interface or facility name to define each unique measureable element, and, for the most part, there is only a single element for each measured metric.
+
+The above metrics are only a first cut at the types that might offered. Lower level statistics like light levels will likely be added into the framework at some point. The monitoring infrastructure must be extensible enough to describe the existing measurement data examples described above, while allowing for new types of measurement data to be integrated into the infrastructure without requiring substantial protocol changes.
+
+==== Metric Collection Techniques ====
+
+There are two broad methods of collecting circuit statistics: passive monitoring, and active monitoring. Active monitoring involves injecting traffic onto the circuit and measuring how that traffic is affected by traversing the circuit. Passive monitoring avoids injecting traffic onto the circuit by taking measurements of the elements along the circuit's path. Most passive circuit monitoring involves querying the switches and routers for the measurement counters or flow information that they maintain. Passive monitoring could also involve mirroring traffic to a monitoring device or inserting a tap into the circuit to permit a monitoring device to measure circuit statistics. 
+
+As some statistics may be impossible to gather either just active, or just passive measurements, domains may need to use a mixture of active and passive measurements to export relevant circuit statistics. The circuit monitoring infrastructure should not constrain the method, passive or active, that domains must employ to collect circuit statistics.
+
+==== End-To-End vs. Domain-Specific Statistics ====
+
+There are two granularities of circuit statistics that users are interested in: high-level statistics conveying the end-to-end performance, and more granular statistics that allow clients to more easily debug performance issues. One example of this split is the E2EMon tool which retrieves up/down state of each domain's segment of a circuit, and then calculates an end-to-end status. Users can then easily look at the overall state of their circuit, as well as the dig down to find the domain at issue if a problem occurs. This separate definition of the end-to-end statistics and lower level statistics becomes more important when active measurement are being collected that span the end-to-end circuit while passive measurements are being collected that measure per-segment information. The circuit monitoring infrastructure should not mandate either end-to-end or segment-specific segments, but should accomodate statistics gathered at both levels of granularity.
+
+==== Continuous vs. On-Demand Data Collection ====
+
+Beyond active vs. passive collection, there is another dimension to the collection methodology: whether or not the monitoring happens continuously, is initiated in response to circuit creation, or is initiated at the request of the end user. Many passive metrics can be monitored continuously since the elements being monitored will only exist when the circuits are available, or, for more static elements, the metrics are more generally useful outside of per-circuit monitoring. Active measurements are more likely to be initiated in response to circuit creation or user request since the data collection would interefere with production traffic if it were to run constantly.
+
+To allow for the addition of measurement data that may need to be collected using either metric, the dynamic circuit monitoring infrastructure must not mandate a specific type of data collection.
+
+==== Centralized vs. Decentralized Measurement Archives ====
+
+There are two envisioned paradigms for storing the measurement data to allow clients to retrieve them: centralized and decentralized. In the centralized model, each institution has a single service that holds all measurement data. This has the advantage of allowing for a single well known location from which all data can be obtained. It also matches the current circuit reservation model which expects that clients will only interact with a single entity, the inter-domain controller, in a given institution. However, differences between circuit reservation and measurement collection and provision mean that this model will not work for all institutions.
+
+In the circuit reservation model, there needs to be one entity whose role it is to arbitrate access to the various resources. This leads naturally to the single inter-domain controller model. For measurement, there can be numerous different agents collecting network statistics. As a domain begins making more and more network measurements, the feasibility of a single locus of measurement data becomes unfeasible. An example of this would include a instution like ESnet, which is monitoring both OWAMP and SNMP data across their domains. The wide range of network elements contributing data to each archive means that the machine collecting each type of data is heavily loaded. Combining both types of data collection onto a single machine would put heavy strain on that machine, necessitating a much more expensive machine, and hard drive configuration. In order to scale effectively, domains like ESnet need the ability to split their measurement archives based on geographic location, type of measurement data, or some other metric. 
+
+The above does not mean to imply that all domains must behave in a decentralized fashion. For domains that can handle having a single locus of measurement data, the infrastructure should not prevent them from doing so. However, the circuit monitoring infrastructure must be able to handle a more decentralized approach for the domains that need or desire it.
+
+==== Existing Monitoring Infrastructure ====
+
+Most domains that will be deploying dynamic circuit monitoring infrastructure will have an existing monitoring infrastructure in place. They are likely already collecting data such as SNMP statistics or alarm information. It is unlikely that domains will want to deploy a parallel monitoring infrastructure to gather the same information that they are already gathering. The SNMP MA provides a good example of easy integration. This measurement archive is able to integrate with existing Cacti, MRTG and Cricket installations with little work required of the site administrator. This ease of installation, and integration with existing monitoring infrastructure makes it more likely that a given domain will deploy the software.
+
+=== Proposed High Level Architecture ===
+
+The architecture makes use of 3 overall measurement services: a service to allow clients to find services and relevant measurement data (LS), a service to allow clients to look up topological information (TS), and services that provide measurement data for clients (MA).
+
+In the model, a circuit is described by a circuit descriptor. The circuit descriptor describes the properties applicable to the entire end-to-end circuit, including bandwidth, duration, and other similar metadata. This descriptor is added to a TS. Clients can then query the LS using circuit properties, like circuit identifier, to find which TS contains the circuit descriptor for that circuit. The only required piece of metadata is a circuit identifier.
+
+The circuit descriptor contains pointers to domain-specific segments that comprise the circuit. Each domain, or an entity working on its behalf, produces a segment descriptor that contains metadata about their segment of the circuit, along with as much topological detail as they desire to publish. These segment descriptors are then registered with a TS.
+
+Clients can then use the LS to discover the TS containing the circuit descriptor. The client can then use the LS to discover which TS contains each segment descriptor. Once the client has the circuit descriptors and the segment descriptors, they can use the LS along with information contained within each descriptor to discover measurements that are applicable to each circuit segment, or the entire end-to-end circuit.
+
+==== Benefits Of This Architecture ====
+
+The architecture allows for each domain to control of the information being made available about the circuits traversing their networks. Each domain controls what information it adds to the segment descriptor, and how the segment descriptor is made available. Since the segment descriptor contains the information that the client uses to discover measurement data, domains can control how much information the client knows is relevant to their circuits. 
+
+The above architecture also allows for a more decentralized approach to making available measurement data. Instead of having a single well known network oracle that must know everything about a circuit, the architecture uses a directory service (the LS) to find the services containing relevant circuit information. This permits domains to organize their data repositories in the way that is most reasonable to their organization's needs.
+
+The architecture also permits pooling of resources by allowing domains to share the LS, the TS or even the MAs. 
