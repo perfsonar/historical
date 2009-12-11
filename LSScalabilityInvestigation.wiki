@@ -59,19 +59,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/testbed.p
   * _ale_.damsl.cis.udel.edu
    * Services:
    * gLS, port 7000.  Access point:   http://ale.damsl.cis.udel.edu:7000/perfSONAR_PS/services/gLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_ale]
-   * fakeServices registering to _moonshine_:
-    * fake1-ale.edu
-    * fake2-ale.edu
-    * fake3-ale.edu
-    * fake2-planetlab2.columbia.edu
-    * fake3-planetlab2.columbia.edu
-    * fake4-planetlab2.columbia.edu
-    * fake5-planetlab2.columbia.edu
-    * fake6-planetlab2.columbia.edu
-    * fake7-planetlab2.columbia.edu
-    * fake8-planetlab2.columbia.edu
-    * fake9-planetlab2.columbia.edu
-    * fake10-planetlab2.columbia.edu
+   * fakeServices registering to _moonshine_ (from 1 to 50 fakeServices)
   * _moonshine_.damsl.cis.udel.edu
    * hLS, port 7000.  Access point:   http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_moonshine]
   * _stout_.damsl.cis.udel.edu
@@ -1806,54 +1794,10 @@ The service will run through the init.d script:
 	
 == Test Results ==
 
-We will use mainly the CGI script for contacting the LSs.
+We will use mainly the visualization tool named ICE - Internet Computer network Eye, built by Ivo Kenji Koga and Tassio Ferreira Vale, from Universidade Salvador.  The tool is available at http://wiki.nuperc.unifacs.br/ice/.  A special bundle was modified in order to obtain the time elapsed between a query and a response from an LS server.
 
-=== Modifying ale and moonshine Timing Configurations ===
+The tool, built in Java, works by transmiting an XML request to the server, and showing the XML received XML response.  The timing, therefore, comprehends processing by the server, and also transmission delays between the client running ICE and the server.
 
-Querying _ale_ gLS returns:
-
-{{{
-Collection: http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/2.0 
-Store Type: LSStore 
-<nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="e8e1ddd9c293181afb29928705d0f639">
-<perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"><psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
-        <psservice:serviceName>ORG Home Lookup Service</psservice:serviceName>
-        <psservice:accessPoint>http://planetlab2.cis.upenn.edu:9995/perfSONAR_PS/services/hLS</psservice:accessPoint>
-        <psservice:serviceType>hLS</psservice:serviceType>
-        <psservice:serviceDescription>ORG Home Lookup Service (Newark, DE, USA)</psservice:serviceDescription>
-      </psservice:service></perfsonar:subject>
-</nmwg:metadata>
-<nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="41491c472d798db53b0bc90deb7c6f71">
-<perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"><psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
-        <psservice:serviceName>Udel Home Lookup Service</psservice:serviceName>
-        <psservice:accessPoint>http://moonshine.damsl.cis.udel.edu:7000/perfSONAR_PS/services/hLS</psservice:accessPoint>
-        <psservice:serviceType>hLS</psservice:serviceType>
-        <psservice:serviceDescription>Udel Home Lookup Service (Newark, DE, USA)</psservice:serviceDescription>
-      </psservice:service></perfsonar:subject>
-</nmwg:metadata>
-<nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="93723529234a52092eee8242c6c8a7ae">
-    <perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" id="subject.2647501">
-      <psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
-        <psservice:serviceName>UPenn Home Lookup Service</psservice:serviceName>
-        <psservice:accessPoint>http://planetlab2.cis.upenn.edu:9990/perfSONAR_PS/services/hLS</psservice:accessPoint>
-        <psservice:serviceType>hLS</psservice:serviceType>
-        <psservice:serviceDescription>UPenn Home Lookup Service (Planetlab Virtual, USA)</psservice:serviceDescription>
-      </psservice:service>
-    </perfsonar:subject>
-  
-  </nmwg:metadata>
-}}}
-
-The data for the first registered hLS is not up-to-date in the gLS; this is actually the "old" or first registration of the hLS.  Notice it states "ORG Home Lookup Service (Newark, DE, USA)" as description, instead of "UPenn Home Lookup Service (Planetlab Virtual, USA)".  The last registered hLS is the same service; the port was changed from 9995 to 9990 to test whether it was registering with the correct description, and it does show at the bottom of the list.  This is an expected behavior per the LS design.  We will monitor, however, whether the old registration is erased by the expiration date.
-
-Restarting the hLS at _ale_ did not erase the old data.
-
-Dumping _moonshine_ data also shows old information that was not yet purged.  For testing purposes, let us configure both _ale_ gLS and _moonshine_ hLS timings to force faster refreshings:
-
-|| *Parameter* || *Default Value (min)* || *New Value (min)* ||
-|| ls_ttl || 5760 || 10 ||
-|| ls_registration_interval || 180 || 7 ||
-|| maintenance_interval || 120 || 5 ||
 
 === Planetlab planetlab2.cs.columbia.edu Exhausted Resources ===
 
@@ -1940,14 +1884,31 @@ After a number of days, the services in `moonshine`, `ale`, and most Planetlab n
 
 === Response Timings ===
 
-The CGI script request/response timings are tabulated below.  The procedure in obtaining these numbers is:
+The ICE tool request/response timings are tabulated below.  The procedure in obtaining these numbers is:
 
- * Open a web browser and run the CGI script from Internet2 (http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=).
- * Measure the time between the start of the web query, and when the result page starts loading.
+ * Run the tool and perform a LSQueryRequest to a specific LS server, using @type='LSSTORE'.  The complete message is:
 
-This procedure forces the inclusion of a number of delays, such as transmission delay from the user web browser to Internet2 (CGI) host, then from that host to the LS being measured.  Delays involved in running the web browser, and operator-related measurement errors.  Hence, the figures are better interpreted if compared with one another, and not taken individually.  For example, the timings from a load of 10 registered services can be compared to the timings from a load of 30 registered services.  The timings, taken alone, will reflect all the undesirable delays; in pair-wise comparison, the undesirable delays will tend to cancel out.
+{{{
+<nmwg:message type="LSQueryRequest"
+		  id="msg1"
+		  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+		  xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">
+<nmwg:metadata id="meta1">  
+<xquery:subject id="sub1">
+  declare namespace perfsonar='http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/'; 
+  declare namespace nmwg='http://ggf.org/ns/nmwg/base/2.0/'; 
+  declare namespace psservice='http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/'; 
+  declare namespace nmwgt='http://ggf.org/ns/nmwg/topology/2.0/'; 
+  declare namespace netutil='http://ggf.org/ns/nmwg/characteristic/utilization/2.0/';            
+  /nmwg:store[@type='LSStore']/nmwg:metadata
+</xquery:subject>
+<nmwg:eventType>service.lookup.xquery</nmwg:eventType>    
+</nmwg:metadata>  
+<nmwg:data metadataIdRef="meta1" id="d1"/>
+</nmwg:message>
+}}}
 
-Nevertheless, these timings can be considered ad interim.  A final Perl script for testing must be devised to avoid web browser/third-party (CGI) host delays.
+ * Measure the time between the transmission of the request, and receival of the response.  This is done by ICE.
 
 
 For the hLS, different quantities of fakeServices are registered.  The hLS is then queried using the CGI script and the response time is measured.
