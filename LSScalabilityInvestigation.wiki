@@ -68,8 +68,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/testbed.p
  * !PlanetLab virtual servers:
   * node planetlab2.cis.upenn.edu
    * hLS, port 9995.  Access point:   http://planetlab2.cis.upenn.edu:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_planetlab2.cis.upenn.edu]
-   * fakeServices registering to _planetlab2.cis.upenn.edu_:
-    * fake4-ale.edu
+   * fakeServices registering to _planetlab2.cis.upenn.edu_
   * node planetlab2.cs.columbia.edu
    * gLS, port 9995.  Access point:   http://planetlab2.cs.columbia.edu:9995/perfSONAR_PS/services/gLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_planetlab2.cs.columbia.edu]
   * node plink.cs.uwaterloo.ca
@@ -1542,18 +1541,7 @@ They hint an issue with the method "getValue".
 
 It was suggested that the libxml and libxml2-dev library versions be upgraded to solve the "getValue" method problem.  Running `sudo yum update` or `sudo yum update libxml2` do not update the libraries, since their current versions (2.7.2-2) are the latest versions available in the yum repositories.  Manually installing or upgrading these libraries have already shown to be rather cumbersome, as reported in the several attempts for _ale_ above.  We postpone this endeavour until the systems involved become more user-friendly (sigh?), or until the user replenishes anti-headache pill stack.
 
-Planetlab can still be used to deploy `fakeService` instances.  Therefore, we create more `fakeService` instances <font color=green>registering to _moonshine_</font>.  These are the domains for each instance:
- * fake2-planetlab2.columbia.edu
- * fake3-planetlab2.columbia.edu
- * fake4-planetlab2.columbia.edu
- * fake5-planetlab2.columbia.edu
- * fake6-planetlab2.columbia.edu
- * fake7-planetlab2.columbia.edu
- * fake8-planetlab2.columbia.edu
- * fake9-planetlab2.columbia.edu
- * fake10-planetlab2.columbia.edu
-
-`fake1-planetlab2.columbia.edu` is currently set to register to `planetlab2.cis.upenn.edu` hLS; since this hLS is not operating correctly due to the "getValue" method problem, the `fakeService` fails to register.
+Planetlab can still be used to deploy `fakeService` instances.  Therefore, we create more `fakeService` instances <font color=green>registering to _moonshine_</font>.  `fake1-planetlab2.columbia.edu` is currently set to register to `planetlab2.cis.upenn.edu` hLS; since this hLS is not operating correctly due to the "getValue" method problem, the `fakeService` fails to register.
 
 
 ==== Fixing "getValue" Error on PlanetLab Nodes ====
@@ -1916,5 +1904,28 @@ For the hLS, different quantities of fakeServices are registered.  The hLS is th
 http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/response_timings.png
 
 
+=== Observations ===
+
+Starting At 30 services registered (from the same client), the number of errors of the types below reported by `moonshine` hLS increases when the fakeServices first attempt to register.  Their registration also takes a long time to complete (be successful), during which several errors of *type 2* are reported.
+
+Error *type 3* was also observed in rare occasions when querying the LS, after approximately 30 services and up where registered.
+
+It is yet unknown whether there are related to the LS server, or to the host where the fakeServices are being deployed.  At approximately 45 fakeServices running, the performance of the host decreases appreciably.
+
+*Type 1*
+{{{
+Service failed to keepalive - eventType: error.ls.keepalive.key_not_found
+Response:       Database errors prevented the transaction from completing.
+}}}
+
+*Type 2*
+{{{
+Service failed to register - LS did not respond.
+}}}
+  
+*Type 3*
+{{{
+Database errors prevented the transaction from completing:
+}}}
 
 
