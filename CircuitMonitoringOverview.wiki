@@ -2,7 +2,7 @@
 
 <wiki:toc max_depth="6" />
 
-=== Introduction ===
+== Introduction ==
 
 The following outlines the proposed architecture for monitoring circuits, and describes what has been implemented so far.
 
@@ -62,3 +62,9 @@ The architecture allows for each domain to control of the information being made
 The above architecture also allows for a more decentralized approach to making available measurement data. Instead of having a single well known network oracle that must know everything about a circuit, the architecture uses a directory service (the LS) to find the services containing relevant circuit information. This permits domains to organize their data repositories in the way that is most reasonable to their organization's needs.
 
 The architecture also permits pooling of resources by allowing domains to share the LS, the TS or even the MAs. 
+
+== Last Updated ==
+
+$Id$
+
+
