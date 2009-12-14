@@ -2,10 +2,19 @@
 
 == Agenda/Minutes ==
 
- # Attendees: 
+ # Attendees: Maxim, Ezra, Aaron, Eric, Andy, Jeff, Joe, Brian, Martin
  # Developer Updates
+   * Maxim: Resolution for pingER problem is not finished. Have been unable to duplicate. Working primarily on eCenter. Looking at ways to do remote administration of pS services on hosts. Need to work on functional and design specifications.
+   * Ezra: Testing emulab architure (virtual switches), testing ciruit monitoring. Currently working on making sure emulab images have the same pS versions installed. Ezra is interested in Deb packages of pS.
+   * Aaron: Iperf3 integration into bwctl. Prliminary version working. Working on NTP security patch.
+   * Eric: Nothing to report.
+   * Andy: USAtlas found processes showing processes running when they are not. Has a patch ready for testing. Working on adding value buckets into owamp MA. Database interaction of MA is slow.
+   * Jeff: Roadmap, OSG report, Training/Workshops in the future.
+   * Joe: LHCOPN report. Monitoring tutorial. Map of LHCOPN (graphical e2emon system). Seemed to be discontent from regionals. For circuit monitoring - (good, good, unknown, good) == good? Don't like that model. DEISA has rejected MDM because it is not multi-domain, they also do not like the GPS clock req.
+   * Brian: Nothing to report
+   * Martin: Nothing to report
  # Actions from last call:
- * _*ACTION*_: Joe continue to refine wiki about cfengine. 
+ * _*ACTION*_: Everyone - please provide feedback on cfengine config.
  * _*ACTION*_: Maxim will work with Andy and Aaron to verify the pingER-MP fix.
  * _*ACTION*_: Andy will propose methods to deal with test point uniqueness.
  * _*ACTION*_: Jeff, Brian and Joe will work on the roadmap.
@@ -13,12 +22,19 @@
  * _*ACTION*_: Joe/Brian will consider if ESnet has resources they want to put towards the RedHat based pS-NPTk version.
  # pS-Performance-Toolkit - Security updates
    * NTP issue
+     * *plan is to include a fix in the 3.1.2 release. Already have a script available that will dynamically upgrade a 3.1 and 3.1.1 host whenever it is rebooted.*
    * Policy for security updates going forward
      # Need a more private list for discussion of issues
      # Publicly announce once we have solution?
      # Automatic security updates?
  # *!TestPoint Uniqueness* (Andy)
  # Future Meetings
+     * Suggested Topics:
+        MA database architecture
+        gLS/hLS profiling/optimizations
+        Automated updates for pS-PerfTK
+        Circuit Monitoring
+        Architecture for web-services based test scheduling
    * 1/2 day vid-conf in January
    * 1/2 day f2f @ SLC (Jt Techs - Sunday afternoon)
  # *Future topics*:
