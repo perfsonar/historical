@@ -29,6 +29,7 @@
      # Publicly announce once we have solution?
      # Automatic security updates?
  # *!TestPoint Uniqueness* (Andy)
+     * Andy discovered two separate types of duplicates that might appear in serviceTest.cgi. In one case, there were two separate entries that returned the same data set, and in the other, there were two identical looking entries that returned different data. Andy thought that the former problem might be a problem in the pSB MA's SQL generation where requests for two different 'node' elements were getting mapped to only one of them. To handle the latter issue, Andy thought that he could modify the service test CGI script to merge the duplicate entries into a single element that requests multiple keys and overlays both sets of data onto the same plot. There was some discussion about how this might get rearchitected, but it was decided that these kinds of ideas would probably be more appropriate for a future "MA database architecture" meeting. Jeff and Aaron thought that Andy's short term approach seemed sound.
  # Future Meetings
      * Suggested Topics:
         * MA database architecture
