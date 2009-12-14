@@ -2,7 +2,7 @@
 
 == Agenda/Minutes ==
 
- # Attendees: Maxim, Ezra, Aaron, Eric, Andy, Jeff, Joe, Brian, Martin
+ # Attendees: Maxim, Ezra, Aaron, Eric, Andy, Jeff, Joe, Brian, Martin, Marcos
  # Developer Updates
    * Maxim: Resolution for pingER problem is not finished. Have been unable to duplicate. Working primarily on eCenter. Looking at ways to do remote administration of pS services on hosts. Need to work on functional and design specifications.
    * Ezra: Testing emulab architure (virtual switches), testing ciruit monitoring. Currently working on making sure emulab images have the same pS versions installed. Ezra is interested in Deb packages of pS.
@@ -13,6 +13,7 @@
    * Joe: LHCOPN report. Monitoring tutorial. Map of LHCOPN (graphical e2emon system). Seemed to be discontent from regionals. For circuit monitoring - (good, good, unknown, good) == good? Don't like that model. DEISA has rejected MDM because it is not multi-domain, they also do not like the GPS clock req.
    * Brian: Nothing to report
    * Martin: Nothing to report
+   * Marcos: Put out more results from gLS testing. Please look at the wiki page.
  # Actions from last call:
  * _*ACTION*_: Everyone - please provide feedback on cfengine config.
  * _*ACTION*_: Maxim will work with Andy and Aaron to verify the pingER-MP fix.
@@ -30,11 +31,12 @@
  # *!TestPoint Uniqueness* (Andy)
  # Future Meetings
      * Suggested Topics:
-        MA database architecture
-        gLS/hLS profiling/optimizations
-        Automated updates for pS-PerfTK
-        Circuit Monitoring
-        Architecture for web-services based test scheduling
+        * MA database architecture
+        * gLS/hLS profiling/optimizations
+        * Automated updates for pS-PerfTK
+        * Circuit Monitoring
+        * Architecture for web-services based test scheduling
+        * Nagios on the toolkit
    * 1/2 day vid-conf in January
    * 1/2 day f2f @ SLC (Jt Techs - Sunday afternoon)
  # *Future topics*:
