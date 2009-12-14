@@ -17,7 +17,7 @@
      # Need a more private list for discussion of issues
      # Publicly announce once we have solution?
      # Automatic security updates?
- # *\TestPoint Uniqueness* (Andy)
+ # *!TestPoint Uniqueness* (Andy)
  # Future Meetings
    * 1/2 day vid-conf in January
    * 1/2 day f2f @ SLC (Jt Techs - Sunday afternoon)
