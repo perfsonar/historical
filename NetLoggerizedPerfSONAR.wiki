@@ -4,7 +4,7 @@ This page describes how to turn on the [http://acs.lbl.gov/NetLoggerWiki NetLogg
 
 = Details =
 
-Several of the core perfSONAR components have had NetLogger instrumentation added to them.
+Several of the core perfSONAR components have had NetLogger instrumentation added to them. The overhead of turning on NetLogger is slightly less than running the programs in DEBUG mode.
 
 To active this instrumentation, add something like this to your logger.conf file:
 
@@ -23,7 +23,12 @@ log4perl.appender.A2.layout.ConversionPattern=%m%n
 
 == Useful NetLogger Tools ==
 
-coming soon.
+This simplest way to extract NetLogger timing info is to use the tool nl_interval. For example:
+
+{{{
+ nl_interval logfile > timing.out
+ sort -n -k 2 -r timing.out | more
+}}}
 
 == Adding Additional Instrumentation ==
 
@@ -31,3 +36,14 @@ When doing performance analysis with NetLogger, often you'll want to add additio
 
 Some good examples for how to add NetLogger calls can be found in Shared/lib/perfSONAR_PS/Transport.pm.
 Just look for all instances of "NETLOGGER" and "NetLogger" in that file.
+
+== NetLogger Tools install quickstart ==
+
+To install nl_interval and other useful tools:
+   
+{{{
+ wget http://acs.lbl.gov/NetLogger-releases/src/4.1.2/netlogger-python-4.1.2.tar.gz
+ tar xvzf netlogger-python-4.1.2.tar.gz
+ cd netlogger-4.1.2/
+ python setup.py install
+}}}
