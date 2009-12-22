@@ -38,6 +38,13 @@ You also might want to just look at the events or a particular guid. For example
  grep AE7078F2-EE97-11DE-A71F-D1694B559BB9 netlogger.log > timing.out
 }}}
 
+If you want to plot the results in excel or gnuplot, the -t csv" option to nl_interval may be useful.
+
+You might also try nl_view:
+
+{{{
+ nl_view -g -d r.log  | grep "^ *5\."
+}}}
 
 == Adding Additional Instrumentation ==
 
