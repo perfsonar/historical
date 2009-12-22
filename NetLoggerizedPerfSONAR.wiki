@@ -30,6 +30,15 @@ This simplest way to extract NetLogger timing info is to use the tool nl_interva
  sort -n -k 2 -r timing.out | more
 }}}
 
+You also might want to just look at the events or a particular guid. For example:
+{{{
+ # find guid of top level event of interest
+ grep clientRequest.start netlogger.log | more
+ # extract only events for this guid
+ grep AE7078F2-EE97-11DE-A71F-D1694B559BB9 netlogger.log > timing.out
+}}}
+
+
 == Adding Additional Instrumentation ==
 
 When doing performance analysis with NetLogger, often you'll want to add additional NetLogger calls to zero in on the performance bottleneck. NetLogger adds very little overhead, so there is no harm adding additional calls.
