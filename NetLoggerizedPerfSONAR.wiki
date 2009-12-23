@@ -26,8 +26,7 @@ log4perl.appender.A2.layout.ConversionPattern=%m%n
 This simplest way to extract NetLogger timing info is to use the tool nl_interval. For example:
 
 {{{
- nl_interval logfile > timing.out
- sort -n -k 2 -r timing.out | more
+ nl_interval logfile | sort -n -k 2 -r  | more
 }}}
 
 You also might want to just look at the events or a particular guid. For example:
