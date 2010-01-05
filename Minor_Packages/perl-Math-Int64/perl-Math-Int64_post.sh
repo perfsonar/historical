@@ -7,6 +7,7 @@ eval "`perl -V:version`";
 eval "`perl -V:archname`";
 
 mkdir -p $installprefix/$installstyle/vendor_perl/$version/$archname/Math
+mkdir -p $installprefix/$defaultstyle/vendor_perl/$version/$archname/Math
 
 if [ -d $installprefix/$installstyle/$archname/Math ];
 then
@@ -27,6 +28,7 @@ else
 fi
 
 mkdir -p $installprefix/$installstyle/vendor_perl/$version/$archname/auto/Math/Int64
+mkdir -p $installprefix/$defaultstyle/vendor_perl/$version/$archname/auto/Math/Int64
 
 if [ -d $installprefix/$installstyle/$archname/auto/Math/Int64 ];
 then
