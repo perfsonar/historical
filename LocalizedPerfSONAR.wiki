@@ -45,7 +45,7 @@ All three require some slight modification to work in a private environment, but
 
 ==== Information Services ====
 
-See LocalLSDeployment for a step by step guide on installing localized instances of the perfSONAR-PS information services.  
+See [LocalLSDeployment] for a step by step guide on installing localized instances of the perfSONAR-PS information services.  
 
 ==== Measurement Archives ==== 
 
@@ -123,7 +123,7 @@ perfAdmin has graphs for SNMP, PingER, and perfSONARBUOY data.  PingER GUI is ju
 
 ===== perfAdmin =====
 
-See LocalLSDeployment for a step by step guide on installing perfAdmin and using it with localized perfSONAR-PS information services.  
+See [LocalLSDeployment] for a step by step guide on installing perfAdmin and using it with localized perfSONAR-PS information services.  
 
 ===== PingER GUI =====
 
