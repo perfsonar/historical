@@ -69,11 +69,11 @@ There are minimal changes to the _*daemon.conf*_ file, these changes will be out
             metadata_db_external                   cacti
             metadata_db_external_source            /etc/cacti/cactid.conf
 }}}
- * _*LS configuration*_ - Change _ls_instance_ (all instances), see choices from [LocalizedPerfSONAR#Information#Services Information Services]
+ * _*LS configuration*_ - Change _ls_instance_ (all instances), see choices from [LocalizedPerfSONAR#Information_Services Information Services]
 {{{
             ls_instance                             http://LOCAL_INSTALLATION_OF_HLS:9995/perfSONAR_PS/services/hLS
 }}}
- * _*gLS Hints Configuration*_ - Change the location of the hints url, see choices from [LocalizedPerfSONAR#Information#Services Information Services]
+ * _*gLS Hints Configuration*_ - Change the location of the hints url, see choices from [LocalizedPerfSONAR#Information_Services Information Services]
 {{{
             root_hints_url                          http://LOCAL_INSTALLATION_OF_HINTS_FILE/gls.root.hints
 }}}
@@ -84,11 +84,11 @@ perfSONARBUOY is a framework for performing, collecting, and storing OWAMP and B
 
 There are minimal changes to the _*daemon.conf*_ file, these changes will be outlined:
 
- * _*LS configuration*_ - Change _ls_instance_ (all instances), see choices from [LocalizedPerfSONAR#Information#Services Information Services]
+ * _*LS configuration*_ - Change _ls_instance_ (all instances), see choices from [LocalizedPerfSONAR#Information_Services Information Services]
 {{{
             ls_instance                             http://LOCAL_INSTALLATION_OF_HLS:9995/perfSONAR_PS/services/hLS
 }}}
- * _*gLS Hints Configuration*_ - Change the location of the hints url, see choices from [LocalizedPerfSONAR#Information#Services Information Services]
+ * _*gLS Hints Configuration*_ - Change the location of the hints url, see choices from [LocalizedPerfSONAR#Information_Services Information Services]
 {{{
             root_hints_url                          http://LOCAL_INSTALLATION_OF_HINTS_FILE/gls.root.hints
 }}}
@@ -101,11 +101,11 @@ PingER is a combination measurement scheduling, collection, and storage service 
 
 There are minimal changes to the _*daemon.conf*_ file, these changes will be outlined:
 
- * _*LS configuration*_ - Change _ls_instance_ (all instances), see choices from [LocalizedPerfSONAR#Information#Services Information Services]
+ * _*LS configuration*_ - Change _ls_instance_ (all instances), see choices from [LocalizedPerfSONAR#Information_Services Information Services]
 {{{
             ls_instance                             http://LOCAL_INSTALLATION_OF_HLS:9995/perfSONAR_PS/services/hLS
 }}}
- * _*gLS Hints Configuration*_ - Change the location of the hints url, see choices from [LocalizedPerfSONAR#Information#Services Information Services]
+ * _*gLS Hints Configuration*_ - Change the location of the hints url, see choices from [LocalizedPerfSONAR#Information_Services Information Services]
 {{{
             root_hints_url                          http://LOCAL_INSTALLATION_OF_HINTS_FILE/gls.root.hints
 }}}
@@ -135,7 +135,7 @@ A minor change is necessary to the _*pinger_cache.pl*_ file, change:
 my $hints  = "http://www.perfsonar.net/gls.root.hint";
 }}}
 
-To whatever was decided in the [LocalizedPerfSONAR#Information#Services Information Services] section.  
+To whatever was decided in the [LocalizedPerfSONAR#Information_Services Information Services] section.  
 
 == Testing ==
 
