@@ -1,0 +1,72 @@
+<html>
+  <head>
+    <title>One-Way Latency/Jitter</title>
+  </head>
+  <body>
+    <h1 align=center>One-Way Jitter (ms)</h1>
+    <br><br>
+
+    <table align=center width=85% border=1 cellpadding=1>
+	<tr>
+	<th></th>
+	[% FOREACH primary_node IN primary_nodes %]
+	        <th align=center valign=center colspan='[% primary_node.results.keys.size * 2 %]'> [% primary_node.name %] </th>
+	[% END %]
+	</tr>
+	<tr>
+	<th></th>
+	[% FOREACH primary_node IN primary_nodes %]
+		[% FOREACH address IN primary_node.results.keys %]
+	        	<th align=center colspan=2 valign=center>[% address %]</th>
+		[% END %]
+	[% END %]
+	</tr>
+	<tr>
+	<th></th>
+	[% FOREACH primary_node IN primary_nodes %]
+		[% FOREACH address IN primary_node.results.keys %]
+		        <th align=center valign=center>Sender</th>
+		        <th align=center valign=center>Receiver</th>
+		[% END %]
+	[% END %]
+	</tr>
+
+	[% FOREACH node IN nodes %]
+		<tr>
+	        <th align=center valign=center>[% node.name %]</th>
+		[% FOREACH primary_node IN primary_nodes %]
+			[% FOREACH address IN primary_node.results.keys %]
+
+			[% IF primary_node.results.${address}.${node.id}.send %]
+				[% SET src_node = primary_node.results.${address}.${node.id}.send.source %]
+				[% SET src_addr = primary_node.results.${address}.${node.id}.send.source_address %]
+				[% SET dst_node = primary_node.results.${address}.${node.id}.send.destination %]
+				[% SET dst_addr = primary_node.results.${address}.${node.id}.send.destination_address %]
+
+			<td align=center valign=center style="cursor:pointer" onClick="javascript:window.open('plot_histogram.cgi?sender=[% src_node %]&sender_address=[% src_addr %]&receiver=[% dst_node %]&receiver_address=[% dst_addr %]&alpha_max=[% alpha %]&plot_min=[% plot_min %]')">
+				<img src="plot_histogram.cgi?sender=[% src_node %]&sender_address=[% src_addr %]&receiver=[% dst_node %]&receiver_address=[% dst_addr %]&width=400&height=200&show_legend=no&alpha_max=[% alpha %]&plot_min=[% plot_min %]"></img>
+			</td>
+			[% ELSE %]
+			<td align=center valign=center bgcolor=gray>&nbsp;</td>
+			[% END %]
+			[% IF primary_node.results.${address}.${node.id}.receive %]
+				[% SET src_node = primary_node.results.${address}.${node.id}.receive.source %]
+				[% SET src_addr = primary_node.results.${address}.${node.id}.receive.source_address %]
+				[% SET dst_node = primary_node.results.${address}.${node.id}.receive.destination %]
+				[% SET dst_addr = primary_node.results.${address}.${node.id}.receive.destination_address %]
+			<td align=center valign=center style="cursor:pointer" onClick="javascript:window.open('plot_histogram.cgi?sender=[% src_node %]&sender_address=[% src_addr %]&receiver=[% dst_node %]&receiver_address=[% dst_addr %]&alpha_max=[% alpha %]&plot_min=[% plot_min %]')">
+				<img src="plot_histogram.cgi?sender=[% src_node %]&sender_address=[% src_addr %]&receiver=[% dst_node %]&receiver_address=[% dst_addr %]&width=400&height=200&show_legend=no&alpha_max=[% alpha %]&plot_min=[% plot_min %]"></img>
+			</td>
+			[% ELSE %]
+			<td align=center valign=center bgcolor=gray>&nbsp;</td>
+			[% END %]
+
+			[% END %]
+		[% END %]
+		</tr>
+	[% END %]
+      </tr>
+    </table>
+
+  </body>
+</html>
