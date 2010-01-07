@@ -1,0 +1,520 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Internet2 Observatory Dashboard</title>
+    <style type="text/css">
+      body {
+	    margin:0;
+   	    padding:0;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/fonts/fonts-min.css" />
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/json/json-min.js"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element-min.js"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/connection/connection-min.js"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/datasource/datasource-min.js"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/swf/swf-min.js"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/charts/charts-min.js"></script>
+
+    <style type="text/css">
+	  #chart_sox
+	  {
+		width: 400px;
+		height: 350px;
+	  }	
+	  #chart_atla
+	  {
+		width: 400px;
+		height: 350px;
+	  }	
+	  #chart_chic
+	  {
+		width: 400px;
+		height: 350px;
+	  }	
+	  #chart_hous
+	  {
+		width: 400px;
+		height: 350px;
+	  }	
+	  #chart_kans
+	  {
+		width: 400px;
+		height: 350px;
+	  }	
+	  #chart_losa
+	  {
+		width: 400px;
+		height: 350px;
+	  }	
+	  #chart_newy
+	  {
+		width: 400px;
+		height: 350px;
+	  }	
+	  #chart_salt
+	  {
+		width: 400px;
+		height: 350px;
+	  }	
+	  #chart_seat
+	  {
+		width: 400px;
+		height: 350px;
+	  }	
+	  #chart_wash
+	  {
+		width: 400px;
+		height: 350px;
+	  }	
+	  .chart_title
+  	  {
+		display: block;
+		font-size: 1.2em;
+		font-weight: bold;
+		margin-bottom: 0.4em;
+	  }
+    </style>
+  </head>
+
+  <body class="yui-skin-sam">
+    <center>
+      <h1>Internet2 Observatory Graphs</h1>
+      <h3>Graphs show 15 Minutes of data and are updated every 10 seconds</h3>
+    </center>
+    <br>
+    <table>
+      <tr>
+        <th align=center><font size=+2>SOX Phoebus</font></th>
+        <th align=center><font size=+2>HOUS</font></th>
+        <th align=center><font size=+2>LOSA</font></th>
+      </tr>
+      <tr>
+        <td align=center>
+          <span class="chart_title"></span>
+          <div id="chart_sox">Flash Player 9.0.45 needed for SOX Phoebus</div>        
+        </td>
+        <td align=center>
+          <span class="chart_title"></span>
+          <div id="chart_hous">Flash Player 9.0.45 needed for HOUS</div> 
+        </td>
+        <td align=center>
+          <span class="chart_title"></span>
+          <div id="chart_losa">Flash Player 9.0.45 needed for LOSA</div> 
+        </td>
+      </tr>
+      <tr>
+        <th align=center><font size=+2>SEAT</font></th>
+        <th align=center><font size=+2>ATLA</font></th>
+        <th align=center><font size=+2>CHIC</font></th>
+      </tr>
+      <tr>
+        <td align=center>
+          <span class="chart_title"></span>
+          <div id="chart_seat">Flash Player 9.0.45 needed for SEAT</div>
+        </td>
+        <td align=center>
+          <span class="chart_title"></span>
+          <div id="chart_atla">Flash Player 9.0.45 needed for ATLA</div>        
+        </td>
+        <td align=center>
+          <span class="chart_title"></span>
+          <div id="chart_chic">Flash Player 9.0.45 needed for CHIC</div> 
+        </td>
+      </tr>
+      <tr>
+        <th align=center><font size=+2>KANS</font></th>
+        <th align=center><font size=+2>NEWY</font></th>
+        <th align=center><font size=+2>SALT</font></th>
+      </tr>
+      <tr>
+        <td align=center>
+          <span class="chart_title"></span>
+          <div id="chart_kans">Flash Player 9.0.45 needed for KANS</div> 
+        </td>
+        <td align=center>
+          <span class="chart_title"></span>
+          <div id="chart_newy">Flash Player 9.0.45 needed for NEWY</div> 
+        </td>
+        <td align=center>
+          <span class="chart_title"></span>
+          <div id="chart_salt">Flash Player 9.0.45 needed for SALT</div>
+        </td>
+      </tr>
+      <tr>
+        <th align=center><font size=+2>WASH</font></th>
+      </tr>
+      <tr>
+        <td align=center>
+          <span class="chart_title"></span>
+          <div id="chart_wash">Flash Player 9.0.45 needed for WASH</div>
+        </td>
+      </tr>      
+    </table>
+
+    <script type="text/javascript">
+      YAHOO.widget.Chart.SWFURL = "http://yui.yahooapis.com/2.8.0r4/build/charts/assets/charts.swf";
+
+	  var seriesDef = [
+		{
+			displayName:"In Speed",
+			yField:"inspeed",
+			style:
+			{
+				lineColor:0x00ff00,
+				lineAlpha:.5,
+				borderColor:0x00ff00,
+				fillColor:0x00ff00,
+				size: 4
+			}
+		},
+		{
+			displayName:"Out Speed",
+			yField:"outspeed",
+			style:
+			{
+				lineColor:0x0000ff,
+				lineAlpha:.5,
+				borderColor:0x0000ff,
+				fillColor:0x0000ff,
+				size: 4
+			}
+		}
+	  ];
+
+	  var styleDef =
+	  {
+		xAxis:
+		{
+			majorTicks:
+			{
+				display:"inside",
+				length:3,
+				size:1
+			},
+			minorTicks:
+			{
+				display:"inside",
+				length:2
+			},
+			labelRotation: -45
+		},
+		yAxis:
+		{
+			minorTicks:{display:"none"}
+		},
+		legend:
+		{
+		    display: "bottom"
+		},
+		animationEnabled: true
+	  }
+
+	  YAHOO.example.formatTimeData = function(value, major)
+	  {
+		var formattedData = YAHOO.util.Date.format(new Date(value), {format:"%b %e %Y %H:%M"});
+		return formattedData.toString();
+	  }
+
+	  YAHOO.example.formatSpeedAxisLabel = function( value )
+	  {
+		return YAHOO.util.Number.format( value,
+		{
+			thousandsSeparator: ",",
+			decimalPlaces: 2, 
+			suffix: " Mbps"
+		});
+	  }
+
+	  YAHOO.example.formatDataTipText = function(item, index, series)
+	  {
+		var str = series.displayName + " for " + item.date;
+		str += "\n" + YAHOO.example.formatSpeedAxisLabel(item[series.yField]);
+		return str;
+ 	  }
+
+	  var myTimeAxis = new YAHOO.widget.TimeAxis();
+	  myTimeAxis.labelFunction = YAHOO.example.formatTimeData;
+	  myTimeAxis.calculateByLabelSize = true;
+
+	  var mySpeedAxis = new YAHOO.widget.NumericAxis();
+	  mySpeedAxis.labelFunction = YAHOO.example.formatSpeedAxisLabel;
+
+      // specific graph calls.  
+
+      // SOX (Atlanta)
+
+	  var myDataSource_sox = new YAHOO.util.DataSource( 'sox.cgi' );
+	  myDataSource_sox.connMethodPost = true;
+	  myDataSource_sox.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	  myDataSource_sox.responseSchema =
+	  {
+	    resultsList: "Results",
+		fields:
+		[
+			"date",
+			"inspeed",
+			"outspeed"
+		]
+	  };
+
+	  var mychart_sox = new YAHOO.widget.LineChart("chart_sox", myDataSource_sox,
+	  {
+		series: seriesDef,
+		style: styleDef,
+		xField: "date",
+		xAxis: myTimeAxis,
+		yAxis: mySpeedAxis,
+		dataTipFunction:YAHOO.example.formatDataTipText,
+	    polling: 10000
+	  });
+
+      // Atlanta
+
+	  var myDataSource_atla = new YAHOO.util.DataSource( 'atla.cgi' );
+	  myDataSource_atla.connMethodPost = true;
+	  myDataSource_atla.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	  myDataSource_atla.responseSchema =
+	  {
+	    resultsList: "Results",
+		fields:
+		[
+			"date",
+			"inspeed",
+			"outspeed"
+		]
+	  };
+
+	  var mychart_atla = new YAHOO.widget.LineChart("chart_atla", myDataSource_atla,
+	  {
+		series: seriesDef,
+		style: styleDef,
+		xField: "date",
+		xAxis: myTimeAxis,
+		yAxis: mySpeedAxis,
+		dataTipFunction:YAHOO.example.formatDataTipText,
+	    polling: 10000
+	  });
+
+      // Chicago
+
+	  var myDataSource_chic = new YAHOO.util.DataSource( 'chic.cgi' );
+	  myDataSource_chic.connMethodPost = true;
+	  myDataSource_chic.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	  myDataSource_chic.responseSchema =
+	  {
+	    resultsList: "Results",
+		fields:
+		[
+			"date",
+			"inspeed",
+			"outspeed"
+		]
+	  };
+
+	  var mychart_chic = new YAHOO.widget.LineChart("chart_chic", myDataSource_chic,
+	  {
+		series: seriesDef,
+		style: styleDef,
+		xField: "date",
+		xAxis: myTimeAxis,
+		yAxis: mySpeedAxis,
+		dataTipFunction:YAHOO.example.formatDataTipText,
+	    polling: 10000
+	  });
+
+      // Houston
+
+	  var myDataSource_hous = new YAHOO.util.DataSource( 'hous.cgi' );
+	  myDataSource_hous.connMethodPost = true;
+	  myDataSource_hous.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	  myDataSource_hous.responseSchema =
+	  {
+	    resultsList: "Results",
+		fields:
+		[
+			"date",
+			"inspeed",
+			"outspeed"
+		]
+	  };
+
+	  var mychart_hous = new YAHOO.widget.LineChart("chart_hous", myDataSource_hous,
+	  {
+		series: seriesDef,
+		style: styleDef,
+		xField: "date",
+		xAxis: myTimeAxis,
+		yAxis: mySpeedAxis,
+		dataTipFunction:YAHOO.example.formatDataTipText,
+	    polling: 10000
+	  });
+
+      // Kansas City
+
+	  var myDataSource_kans = new YAHOO.util.DataSource( 'kans.cgi' );
+	  myDataSource_kans.connMethodPost = true;
+	  myDataSource_kans.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	  myDataSource_kans.responseSchema =
+	  {
+	    resultsList: "Results",
+		fields:
+		[
+			"date",
+			"inspeed",
+			"outspeed"
+		]
+	  };
+
+	  var mychart_kans = new YAHOO.widget.LineChart("chart_kans", myDataSource_kans,
+	  {
+		series: seriesDef,
+		style: styleDef,
+		xField: "date",
+		xAxis: myTimeAxis,
+		yAxis: mySpeedAxis,
+		dataTipFunction:YAHOO.example.formatDataTipText,
+	    polling: 10000
+	  });
+
+      // Los Angeles
+
+	  var myDataSource_losa = new YAHOO.util.DataSource( 'losa.cgi' );
+	  myDataSource_losa.connMethodPost = true;
+	  myDataSource_losa.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	  myDataSource_losa.responseSchema =
+	  {
+	    resultsList: "Results",
+		fields:
+		[
+			"date",
+			"inspeed",
+			"outspeed"
+		]
+	  };
+
+	  var mychart_losa = new YAHOO.widget.LineChart("chart_losa", myDataSource_losa,
+	  {
+		series: seriesDef,
+		style: styleDef,
+		xField: "date",
+		xAxis: myTimeAxis,
+		yAxis: mySpeedAxis,
+		dataTipFunction:YAHOO.example.formatDataTipText,
+	    polling: 10000
+	  });
+
+      // New York
+
+	  var myDataSource_newy = new YAHOO.util.DataSource( 'newy.cgi' );
+	  myDataSource_newy.connMethodPost = true;
+	  myDataSource_newy.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	  myDataSource_newy.responseSchema =
+	  {
+	    resultsList: "Results",
+		fields:
+		[
+			"date",
+			"inspeed",
+			"outspeed"
+		]
+	  };
+
+	  var mychart_newy = new YAHOO.widget.LineChart("chart_newy", myDataSource_newy,
+	  {
+		series: seriesDef,
+		style: styleDef,
+		xField: "date",
+		xAxis: myTimeAxis,
+		yAxis: mySpeedAxis,
+		dataTipFunction:YAHOO.example.formatDataTipText,
+	    polling: 10000
+	  });
+
+      // Salt Lake City
+
+	  var myDataSource_salt = new YAHOO.util.DataSource( 'salt.cgi' );
+	  myDataSource_salt.connMethodPost = true;
+	  myDataSource_salt.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	  myDataSource_salt.responseSchema =
+	  {
+	    resultsList: "Results",
+		fields:
+		[
+			"date",
+			"inspeed",
+			"outspeed"
+		]
+	  };
+
+	  var mychart_salt = new YAHOO.widget.LineChart("chart_salt", myDataSource_salt,
+	  {
+		series: seriesDef,
+		style: styleDef,
+		xField: "date",
+		xAxis: myTimeAxis,
+		yAxis: mySpeedAxis,
+		dataTipFunction:YAHOO.example.formatDataTipText,
+	    polling: 10000
+	  });
+
+      // Seattle
+
+	  var myDataSource_seat = new YAHOO.util.DataSource( 'seat.cgi' );
+	  myDataSource_seat.connMethodPost = true;
+	  myDataSource_seat.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	  myDataSource_seat.responseSchema =
+	  {
+	    resultsList: "Results",
+		fields:
+		[
+			"date",
+			"inspeed",
+			"outspeed"
+		]
+	  };
+
+	  var mychart_seat = new YAHOO.widget.LineChart("chart_seat", myDataSource_seat,
+	  {
+		series: seriesDef,
+		style: styleDef,
+		xField: "date",
+		xAxis: myTimeAxis,
+		yAxis: mySpeedAxis,
+		dataTipFunction:YAHOO.example.formatDataTipText,
+	    polling: 10000
+	  });
+
+      // Washington 
+
+	  var myDataSource_wash = new YAHOO.util.DataSource( 'wash.cgi' );
+	  myDataSource_wash.connMethodPost = true;
+	  myDataSource_wash.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	  myDataSource_wash.responseSchema =
+	  {
+	    resultsList: "Results",
+		fields:
+		[
+			"date",
+			"inspeed",
+			"outspeed"
+		]
+	  };
+
+	  var mychart_wash = new YAHOO.widget.LineChart("chart_wash", myDataSource_wash,
+	  {
+		series: seriesDef,
+		style: styleDef,
+		xField: "date",
+		xAxis: myTimeAxis,
+		yAxis: mySpeedAxis,
+		dataTipFunction:YAHOO.example.formatDataTipText,
+	    polling: 10000
+	  });
+
+    </script>
+
+  </body>
+</html>

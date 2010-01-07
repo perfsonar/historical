@@ -1,0 +1,281 @@
+<html>
+  <head>
+    <title>SC09 BWC - University of Delaware</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/fonts/fonts-min.css" />
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/json/json-min.js"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element-min.js"></script>
+
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/connection/connection-min.js"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/datasource/datasource-min.js"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/swf/swf-min.js"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/charts/charts-min.js"></script>
+
+    <style type="text/css">
+	  #chart_seat {width: 400px; height: 387px;}/*350px*/	
+	  .chart_title {display: block;font-size: 1.2em;font-weight: bold;margin-bottom: 0.4em;}
+	  #chart_seat, #meter_seat {-moz-border-radius:15px;-webkit-border-radius:15px;border:solid 4px #68a5d1;padding:5px;}
+	  #meter_seat {background-color:#bce3ff;}
+	  #meter_seat td, #meter_seat th {margin:0;padding:2;}
+	  #meter_seat th {font-weight:bold;font-size:1.1em;}
+	  #meter_seat th span.terminus {font-size:1.5em;}
+	  div.bookmark-nav {padding:0;margin:20px 0;background-color:white;width:100%;border-top:2px solid #1e76bd;border-bottom:2px solid #1e76bd;}
+	  div.bookmark-nav-first {padding:0;margin:0;background-color:#1e76bd;width:100%;}
+	  div.table {display:table;margin:0 auto;}
+	  ul.bookmarks {padding:0;margin:0;}
+	  ul.bookmarks li {float:left;padding:5px 12px;list-style:none;text-align:center;}
+	  ul.bookmarks li.selected a {color:white;}
+	  ul.bookmarks li.selected a:hover {color:white;}
+	  ul.bookmarks li.selected {background-color:black;}
+	  ul.bookmarks li.not-selected a {color:#1e76bd;}
+	  div.bookmark-nav-first ul.bookmarks li.not-selected a {color:black;}
+	  ul.bookmarks li a:hover {color:#1e76bd;}
+	  div.bookmark-nav-first ul.bookmarks li a:hover {color:white;}
+	  div#perfometer {float:none;clear:left;}
+	  table.perfometer {float:none;}
+	  iframe {margin:0;padding:0;}
+	  table.perfometer {margin-top:0;padding-top:0;}
+	  div#perfometer {margin-bottom:10px;}
+	  img.fig {float:left;margin:0 10px 10px 0;}
+    </style>
+  </head>
+  <body>
+
+    <table border=0 align=center width=95%>
+      <tr>
+        <th colspan=3 align=center>
+          <font size=+2>SC09 BWC - University of Delaware</font>
+          <br><br>
+        </th>
+      </tr>
+      <tr>      
+        <td width=50%>
+          <table align=center width=100% border=0>
+            <tr>
+              <td width=left>
+                <br>
+                <font size=+1>
+                <b>Booth:</b>&nbsp;&nbsp;&nbsp;2785 - Vanderbilt University<br>
+                <b>Booth:</b>&nbsp;&nbsp;&nbsp;1355 - Internet2
+                </font>
+                <br><br>
+              </td>
+            </tr>
+            <tr>
+              <td width=left>
+<br>
+Scientific computing involves working with large, distributed datasets. This requires effective use of network capacity and 
+the means to optimize the transfer of actual data between remote compute and storage nodes. Phoebus is an architecture that 
+increases network throughput by intelligently segmenting and routing across heterogeneous paths. Phoebus can make decisions 
+about network optimization based on network information provided by the perfSONAR framework. 
+<br><br>
+The REDDnet (Research and Education Data Depot network) project is designed to provide a large distributed storage facility 
+for data intensive collaboration. For this challenge, we will use REDDnet resources to provide working storage for a 
+terabyte-scale network measurement data set. The integration of Phoebus will facilitate the massive distribution of data from 
+REDDnet and will use a model similar to that planned for Large Hadron Collider data, namely a hierarchy of dissemination and 
+analysis.
+<br><br>
+              </td>
+            </tr>
+            <tr>
+              <td width=left>
+                <br>
+                <font size=+1>
+                <b>WAN Paths:</b>&nbsp;&nbsp;&nbsp;Internet2 Network, Internet2 ION, and NLR PacketNet
+                </font>
+                <br><br>
+              </td>
+            </tr>
+          </table>
+        </td>
+
+        <td align="center" width=30%>
+          <!-- graph div -->
+          <div id="chart_seat">Flash Player 9.0.45 needed for SEAT</div><!-- graph div -->
+        </td>
+        <td align="center" width=20%>
+          <!-- perfOMeter div -->
+          <div id="meter_seat">
+            <table align="center" border="0">
+              <tr> 
+                <th colspan="2" align="center">
+                  <span class="terminus">WAN</span>
+                </th>
+              </tr>
+              <tr>
+                <td align="center">
+                  <iframe src="bwc-udel_wan.html" width="45" height="300" frameborder="0">
+                    <p>Your browser does not support iframes.</p>
+                  </iframe>
+                </td>
+                <td align=center>
+                  <iframe src="wan_bwc-udel.html" width="45" height="300" frameborder="0">
+                    <p>Your browser does not support iframes.</p>
+                  </iframe>
+                </td>
+              </tr>
+              <tr> 
+                <th colspan="2" align="center">
+                  <span class="terminus">SC09</span><br />Portland OR
+                </th>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan=3>
+          <br>
+        </td>
+      </tr>
+      <tr>
+        <td colspan=3 align=center>
+          <img src="bwc-udel/udel.png" width=200 />&nbsp;
+          <img src="bwc-udel/vu.gif" width=90 />&nbsp;
+          <img src="bwc-udel/utk.jpg" width=120 />&nbsp;
+          <img src="bwc-udel/ornl.jpg" width=120 />&nbsp;
+          <img src="bwc-udel/i2.jpg" width=120 />&nbsp;
+          <img src="bwc-udel/REDDnet.png" width=120 />&nbsp;
+          <!--
+
+          -->
+        </td>
+      </tr>
+      <tr>
+        <td colspan=3>
+         <br><br>
+        </td>
+      </tr>
+      <tr>
+        <td align=left valign="middle" width=50%>
+          <img src="scinet-logo.png" width="100" />
+        </td>
+        <td width=30%>&nbsp;</td>
+        <td align=right valign="middle" width=20%>
+          <img src="PerfSONAR-powered-CMYK.png" width="100" />
+        </td>
+      </tr>
+    </table>
+
+    <script type="text/javascript">
+      YAHOO.widget.Chart.SWFURL = "http://yui.yahooapis.com/2.8.0r4/build/charts/assets/charts.swf";
+
+	  var seriesDef = [
+		{
+			displayName:"In Speed",
+			yField:"inspeed",
+			style:
+			{
+				lineColor:0x00ff00,
+				lineAlpha:.5,
+				borderColor:0x00ff00,
+				fillColor:0x00ff00,
+				size: 4
+			}
+		},
+		{
+			displayName:"Out Speed",
+			yField:"outspeed",
+			style:
+			{
+				lineColor:0x0000ff,
+				lineAlpha:.5,
+				borderColor:0x0000ff,
+				fillColor:0x0000ff,
+				size: 4
+			}
+		}
+	  ];
+
+	  var styleDef =
+	  {
+		xAxis:
+		{
+			majorTicks:
+			{
+				display:"inside",
+				length:3,
+				size:1
+			},
+			minorTicks:
+			{
+				display:"inside",
+				length:2
+			},
+			labelRotation: -45
+		},
+		yAxis:
+		{
+			minorTicks:{display:"none"}
+		},
+		legend:
+		{
+		    display: "bottom"
+		},
+		animationEnabled: true
+	  }
+
+	  YAHOO.example.formatTimeData = function(value, major)
+	  {
+		var formattedData = YAHOO.util.Date.format(new Date(value), {format:"%b %e %Y %H:%M"});
+		return formattedData.toString();
+	  }
+
+	  YAHOO.example.formatSpeedAxisLabel = function( value )
+	  {
+		return YAHOO.util.Number.format( value,
+		{
+			thousandsSeparator: ",",
+			decimalPlaces: 2, 
+			suffix: " Gbps"
+		});
+	  }
+
+	  YAHOO.example.formatDataTipText = function(item, index, series)
+	  {
+		var str = series.displayName + " for " + item.date;
+		str += "\n" + YAHOO.example.formatSpeedAxisLabel(item[series.yField]);
+		return str;
+ 	  }
+
+	  var myTimeAxis = new YAHOO.widget.TimeAxis();
+	  myTimeAxis.labelFunction = YAHOO.example.formatTimeData;
+	  myTimeAxis.calculateByLabelSize = true;
+
+	  var mySpeedAxis = new YAHOO.widget.NumericAxis();
+	  mySpeedAxis.labelFunction = YAHOO.example.formatSpeedAxisLabel;
+
+      // specific graph calls.  
+
+      // Seattle
+
+	  var myDataSource_seat = new YAHOO.util.DataSource( 'bwc-udel.cgi' );
+	  myDataSource_seat.connMethodPost = true;
+	  myDataSource_seat.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	  myDataSource_seat.responseSchema =
+	  {
+	    resultsList: "Results",
+		fields:
+		[
+			"date",
+			"inspeed",
+			"outspeed"
+		]
+	  };
+
+	  var mychart_seat = new YAHOO.widget.LineChart("chart_seat", myDataSource_seat,
+	  {
+		series: seriesDef,
+		style: styleDef,
+		xField: "date",
+		xAxis: myTimeAxis,
+		yAxis: mySpeedAxis,
+		dataTipFunction:YAHOO.example.formatDataTipText,
+	    polling: 5000
+	  });
+    </script>
+
+    
+  </body>
+</html>

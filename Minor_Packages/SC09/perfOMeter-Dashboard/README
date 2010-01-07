@@ -1,0 +1,44 @@
+Installation:
+--------------------------------------------------------------------------------
+
+ - HTML file and directory of files must be in a web directory.  The helper
+   script in 'dashboard_files' will generate JSON files into that directory.
+   Either run the script in place or modify it to spit CGIs into the proper
+   location.
+
+ - Run the helper script in the background, e.g. 
+   'dashboard_files/./Internet2-perfOMeter.pl &'
+ 
+ - Script has error handling, but may choke on some bad data.  Watch to be sure
+   it doesnt die.  
+   
+Configuration:
+--------------------------------------------------------------------------------
+
+ - All interfaces are hardcoded in dashboard_files/Internet2-perfOMeter.pl
+ 
+ - All perfOMeters in dashboard_files are related to the interfaces in
+   dashboard_files/Internet2-perfOMeter.pl
+ 
+ - Changing/Adding is all manual
+
+Caveats:
+--------------------------------------------------------------------------------
+
+ - Changing/Adding is all manual, see above.  
+ 
+ - Libraries are absolute.  Will need some pS-PS libs on the target system.  
+ 
+ - Watch the script to be sure it doesn't die
+
+TODO:
+--------------------------------------------------------------------------------
+
+ - Package for release
+ - Error handling/logging
+ - Configuration file based
+ 
+
+-jason
+
+Thu Jan  7 13:40:23 EST 2010

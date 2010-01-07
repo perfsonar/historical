@@ -1,0 +1,58 @@
+<html>
+  <head>
+    <title>OWAMP - <tmpl_var name=NAME></title>
+  </head>
+  <body>
+    <h1 align=center>OWAMP - <tmpl_var name=NAME></h1>
+    <br><br>
+    <h3 align=center>[Latency (ms) / Jitter (ms) / Packet Loss (%)]</h3>
+    <br><br>
+
+    <table align=center width=85% border=1 cellpadding=1>
+      <tr>
+        <th align=center valign=center width=15%>
+          <tmpl_var name=TYPE>
+        </th>
+        <th colspan=<tmpl_var name=COLS>>
+          Senders
+        </th>
+      </tr>
+      <tr>
+        <th align=center valign=center rowspan=<tmpl_var name=COLS>>
+          Receivers
+        </th>
+        <th align=center valign=center bgcolor=gray>
+          <br> 
+        </th>
+        <tmpl_loop name=HEADER>
+        <th align=center valign=center>
+          <tmpl_var name=VAL>         
+        </th>
+        </tmpl_loop>      
+      </tr>
+      <tmpl_loop name=RECV>
+      <tr>
+        <th align=center valign=center>
+          <tmpl_var name=HEADER> 
+        </th>
+        <tmpl_loop name=SEND>        
+        <TMPL_IF ALIVE>
+        <TMPL_IF COLOR>
+        <td align=center valign=center bgcolor=<tmpl_var name=COLORCHOICE> style="cursor:pointer" onClick="javascript:window.open('owampplot.cgi?send=<tmpl_var name=S>&recv=<tmpl_var name=R>&length=2')">
+        <TMPL_ELSE>
+        <td align=center valign=center style="cursor:pointer" onClick="javascript:window.open('owampplot.cgi?send=<tmpl_var name=S>&recv=<tmpl_var name=R>&length=2'">
+        </TMPL_IF>
+          <br>
+          <font size=-1><tmpl_var name=VALUE><br><br><tmpl_var name=TIME></font>
+          <br><br>
+        </td>
+        <TMPL_ELSE>
+	<td align=center valign=center bgcolor=gray><br><br><br></td>
+        </TMPL_IF>
+        </tmpl_loop>
+      </tr>
+      </tmpl_loop>
+    </table>
+
+  </body>
+</body>
