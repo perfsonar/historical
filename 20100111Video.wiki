@@ -4,11 +4,26 @@
 
  # Attendees: 
    * TBD
+ # Etherpad:
+   * http://etherpad.com/9MDYtLe4OO
  # Developer Updates
    * TBD
  # Actions from last call:
    * _*ACTION*_:
- # Topic 1
+ # RPM Building
+   * Current:
+     * Supported Platforms
+       * i386 and x86_64
+       * RHEL/CentOS/Scientific + older (pre 8/9?) Fedora (Newer FCs too bleeding edge?)
+       * Nothing for Debian based
+     * Build Environment
+       * Varies by developer, e.g. Jason builds on VMs on laptop: Centos 4 i386 and x86_64.  
+     * Test Environment
+       * Also varies by developer, Jason uses VMs on laptop: e.g. Centos 3/4/5, Fedora 9/10, Scientific 4/5 - both i386 and x86_64.  
+   * Proposed:
+     * Need to make a stand on what we are supporting and what we will not support (post this publically).
+     * If we are supporting more, RPM Repo organization should change (e.g. others build test on each arch/platform and have a seperate repo for each instead of a _catch all_, see here: http://rpmfusion.org/)
+     * Need a build/test farm so this doesn't fall on individual developers anymore.  This can be done on the cheap with a single machine and dedicated VMs.  
  # Topic 2
  # Topic 3
  # *Future topics*:
