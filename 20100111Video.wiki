@@ -20,6 +20,11 @@
      * Other bugs to be announced in email 
  # OWAMP/pS-B status update
    * Timestamp/performance issues. (Andy)
+ # Iperf (bwctl integration) status update (Aaron)
+ # Future meetings
+   * Set time for VC
+      * Set agenda for f2f
+   * F2F
  # RPM Building
    * Current:
      * Supported Platforms
