@@ -13,39 +13,38 @@ applicable.
  * 2010
    * TBD
  * 2009
-   * [20091214Video] - Video Conference for December 14, 2009
-   * [20091130Video] - Video Conference for November 30, 2009
-   * [20091102Video] - Video Conference for November 2, 2009
-   * [20091026Video] - Video Conference for October 26, 2009
-   * [20091019Video] - Video Conference for October 19, 2009
-   * [20090921Video] - Video Conference for Sept 21, 2009
-   * [20090914Video] - Video Conference for Sept 14, 2009
-   * [20090910Call] - Conference Call for Sept 10, 2009 (Special Purpose - Python pS-PS Extensions)
-   * [20090824Video] - Video Conference (pS-PerfTK Release 3.1 RC3) for Aug 24, 2009
-   * [20090817Video] - Video Conference for Aug 17, 2009
-   * [20090803Video] - Video Conference for Aug 3, 2009
-   * [20090720Meet] - Meeting at Joint Techs, Indianapolis *date is tentative*
-   * [20090713Video] - Video Conference for July 13, 2009
-   * [20090706Video] - Video Conference for July 6, 2009
-   * [20090622Video] - Video Conference for June 22, 2009
-   * [20090608Video] - Video Conference for June 8, 2009
-   * [20090601Video] - Video Conference for June 1, 2009
-   * [20090518Video] - Video Conference for May 18, 2009
-   * [20090511Video] - Video Conference for May 11, 2009
-   * [20090429Meet] - Meeting after SMM in DC April 29 - May 1, 2009
-   * [20090420Video] - Video Conference for April 20, 2009
-   * [20090406Video] - Video Conference *Issue: v3.1 Release* for April 6, 2009
-   * [20090330Video] - Video Conference for March 30, 2009
-   * [20090323Video] - Video Conference *Issue: v3.1 Release* for March 23, 2009
-   * [20090316Video] - Video Conference for March 16, 2009
-   * [20090309Video] - Video Conference for March 9, 2009
-   * [20090302Video] - Video Conference for March 2, 2009
-   * [20090223Video] - Video Conference for February 23, 2009
-   * [20090217Video] - Video Conference *Issue: v3.1 Release* for February 17, 2009
-   * [20090203Meet] - Meeting at Joint Techs, College Station TX
-   * [20090126Video] - Video Conference *Issue: Release Mgmt* for January 26, 2009
-   * [20090112Video] - Video Conference for January 12, 2009
-
+   * [2009Activities#20091214Video Video Conference for December 14, 2009]
+   * [2009Activities#20091130Video Video Conference for November 30, 2009]
+   * [2009Activities#20091102Video Video Conference for November 2, 2009]
+   * [2009Activities#20091026Video Video Conference for October 26, 2009]
+   * [2009Activities#20091019Video Video Conference for October 19, 2009]
+   * [2009Activities#20090921Video Video Conference for Sept 21, 2009]
+   * [2009Activities#20090914Video Video Conference for Sept 14, 2009]
+   * [2009Activities#20090910Call Conference Call for Sept 10, 2009 (Special Purpose - Python pS-PS Extensions)]
+   * [2009Activities#20090824Video Video Conference (pS-PerfTK Release 3.1 RC3) for Aug 24, 2009]
+   * [2009Activities#20090817Video Video Conference for Aug 17, 2009]
+   * [2009Activities#20090803Video Video Conference for Aug 3, 2009]
+   * [2009Activities#20090720Meet Meeting at Joint Techs, Indianapolis]
+   * [2009Activities#20090713Video Video Conference for July 13, 2009]
+   * [2009Activities#20090706Video Video Conference for July 6, 2009]
+   * [2009Activities#20090622Video Video Conference for June 22, 2009]
+   * [2009Activities#20090608Video Video Conference for June 8, 2009]
+   * [2009Activities#20090601Video Video Conference for June 1, 2009]
+   * [2009Activities#20090518Video Video Conference for May 18, 2009]
+   * [2009Activities#20090511Video Video Conference for May 11, 2009]
+   * [2009Activities#20090429Meet Meeting after SMM in DC]
+   * [2009Activities#20090420Video Video Conference for April 20, 2009]
+   * [2009Activities#20090406Video Video Conference *Issue: v3.1 Release* for April 6, 2009]
+   * [2009Activities#20090330Video Video Conference for March 30, 2009]
+   * [2009Activities#20090323Video Video Conference *Issue: v3.1 Release* for March 23, 2009]
+   * [2009Activities#20090316Video Video Conference for March 16, 2009]
+   * [2009Activities#20090309Video Video Conference for March 9, 2009]
+   * [2009Activities#20090302Video Video Conference for March 2, 2009]
+   * [2009Activities#20090223Video Video Conference for February 23, 2009]
+   * [2009Activities#20090217Video Video Conference *Issue: v3.1 Release* for February 17, 2009]
+   * [2009Activities#20090203Meet Meeting at Joint Techs, College Station TX]
+   * [2009Activities#20090126Video Video Conference *Issue: Release Mgmt* for January 26, 2009]
+   * [2009Activities#20090112Video Video Conference for January 12, 2009]
  * 2008
    * [2008Activities#20081218Video Video Conference for December 18, 2008]
    * [2008Activities#20081211Video Video Conference *Issue: Release Mgmt* for December 11, 2008]
