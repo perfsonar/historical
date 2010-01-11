@@ -24,7 +24,14 @@
      * Need to make a stand on what we are supporting and what we will not support (post this publically).
      * If we are supporting more, RPM Repo organization should change (e.g. others build test on each arch/platform and have a seperate repo for each instead of a _catch all_, see here: http://rpmfusion.org/)
      * Need a build/test farm so this doesn't fall on individual developers anymore.  This can be done on the cheap with a single machine and dedicated VMs.  
- # Topic 2
+ # Next pSPT Release
+   * Target: 1/29 (Friday before JTs)
+   * Pending Bugs:
+     * NTP Security Patch (Aaron)
+     * OWAMP data cleanup (Aaron/Jeff pending...)
+     * pSB Performance (Andy)
+     * pSB Double entry for nodes (Andy)
+     * Other bugs to be announced in email 
  # Topic 3
  # *Future topics*:
    * _*pSPS*_:
