@@ -36,8 +36,9 @@
    * Iperf3 is working in a limited sense with bwctl. Iperf3 enhancements are needed to really get benefit. Aaron will prioritize what is needed.
  # Future meetings
    * Set time for VC
-      * Set agenda for f2f
+      * Set agenda for f2f (homework)
    * F2F
+      * Sunday afternoon of Jt Techs.
  # RPM Building
    * Current:
      * Supported Platforms
@@ -52,7 +53,6 @@
      * Need to make a stand on what we are supporting and what we will not support (post this publically).
      * If we are supporting more, RPM Repo organization should change (e.g. others build test on each arch/platform and have a seperate repo for each instead of a _catch all_, see here: http://rpmfusion.org/)
      * Need a build/test farm so this doesn't fall on individual developers anymore.  This can be done on the cheap with a single machine and dedicated VMs.  
- # Topic 3
  # *Future topics*:
    * _*pSPS*_:
      * Community handling in regular testing screens.  If the user doesn't pick a community, others can'y use this mechanism to find the node
