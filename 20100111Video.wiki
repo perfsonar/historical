@@ -3,13 +3,24 @@
 == Agenda/Minutes ==
 
  # Attendees: 
-   * TBD
+   * Joe, Brian, Jason, Maxim, Aaron, Andy, Jeff, Martin, Eric
  # Etherpad:
    * http://etherpad.com/9MDYtLe4OO
  # Developer Updates
-   * TBD
+   * Joe: Looking at traceroute
+   * Brian: Netloggerizing LS - dbopen/dbclose optimization may help. Andy will evalute to determine if it should be pushed into trunk. Netlogger extensions shold be pushed into trunk too.
+   * Jason: Off since SC.
+   * Maxim: Concerned with rpm build issues (supported OSs). Looking at use cases for analysis and e-center: http://code.google.com/p/ecenter/wiki/ECenterPortalUseCases
+   * Aaron: Looking at pS infrastructure, and TL1 issues.
+   * Andy: Will be working on documentation for example pS client.
+   * Jeff: On Vacation
+   * Martin: No report
+   * Eric: Open devnet work. More reliable.
  # Actions from last call:
    * _*ACTION*_:
+      * *ACTION*: Joe will be modifying cfengine config.
+      * *ACTION*: Maxim will verify pingER-MP fix.
+      * *ACTION*: Jeff, Brian, Joe will work on roadmap.
  # Next pSPT Release
    * Target: 1/29 (Friday before JTs)
    * Pending Bugs:
@@ -20,7 +31,9 @@
      * Other bugs to be announced in email 
  # OWAMP/pS-B status update
    * Timestamp/performance issues. (Andy)
+     * timestamp conversions found to be expensive (profiling with netlogger) Looks ready to merge into trunk after testing.
  # Iperf (bwctl integration) status update (Aaron)
+   * Iperf3 is working in a limited sense with bwctl. Iperf3 enhancements are needed to really get benefit. Aaron will prioritize what is needed.
  # Future meetings
    * Set time for VC
       * Set agenda for f2f
