@@ -35,37 +35,35 @@ The following outline some exceptions to the overall release process.  Also see 
 === Bugs Related to This Release ===
 
  * _*Web/Publications*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=169 169] - Jason - Add required hardware documentation   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - Jeff/Jason - Create organized web-site for pS-Performance-Toolkit
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=169 169] - _*Jason*_ - Add required hardware documentation   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff/Jason*_ - Create organized web-site for pS-Performance-Toolkit
      * _*Jason*_ - Review current state, find any holes
      * _*Jeff*_ - Edit/Approve
-    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - Jason - SNMP MA - Indicate it is not running due to cacti
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=368 368] - Jason/Aaron - Storage Configuration Clarifications
+    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Jason*_ - SNMP MA - Indicate it is not running due to cacti
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=368 368] - _*Jason/Aaron*_ - Storage Configuration Clarifications
      * _*Jason*_ - Update FAQ/documentation
      * _*Aaron*_ - Update menus
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=373 373] - Jason - Update pSPT FAQ
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=373 373] - _*Jason*_ - Update pSPT FAQ
  * _*pSPT Internals*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=313 313] - Aaron - syslogd goes crazy on ISO
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=362 362] - Aaron - logrotate.d can fail silently
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=366 366] - Aaron - syslog-ng crashes regularly on NP Toolkit
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=313 313] - _*Aaron*_ - syslogd goes crazy on ISO
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=362 362] - _*Aaron*_ - logrotate.d can fail silently
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=366 366] - _*Aaron*_ - syslog-ng crashes regularly on NP Toolkit
  * _*pSPT GUIs*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=325 325] - Aaron - Saving information in pSPT GUIs
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=326 326] - Aaron - pSPT Left Menu Enhancements
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=335 335] - Aaron/Jason - BWCTL/OWAMP Limits Clarity
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=325 325] - _*Aaron*_ - Saving information in pSPT GUIs
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=326 326] - _*Aaron*_ - pSPT Left Menu Enhancements
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=335 335] - _*Aaron/Jason*_ - BWCTL/OWAMP Limits Clarity
      * _*Jason*_ - Update documentation
      * _*Aaron*_ - Update GUIs   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=355 355] - Aaron - regular testing web gui may produce pinger landmark files without 'hostName' fields
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=360 360] - Andy - Services script displays process as running after its been stopped
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=361 361] - Aaron - excessive wait when adding a host manually to a regular test without DNS
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=364 364] - Andy - Same test displayed muliple times by serviceTest.cgi
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=355 355] - _*Aaron*_ - regular testing web gui may produce pinger landmark files without 'hostName' fields
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=360 360] - _*Andy*_ - Services script displays process as running after its been stopped
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=361 361] - _*Aaron*_ - excessive wait when adding a host manually to a regular test without DNS
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=364 364] - _*Andy*_ - Same test displayed muliple times by serviceTest.cgi
  * _*PingER*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=353 353] - Aaron - pinger on the ps-toolkit occasionally can't reconnect to mysql
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=372 372] - Aaron - hanging pinger instances
- * _*SNMP MA*_
- * _*hLS*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=353 353] - _*Aaron*_ - pinger on the ps-toolkit occasionally can't reconnect to mysql
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=372 372] - _*Aaron*_ - hanging pinger instances
  * _*pSB*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=358 358] - Jeff/Aaron - pS-Toolkit owampd stale file cleaner
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=365 365] - Aaron - support for constraining ports for perfsonarbuoy owamp tests
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=367 367] - Andy - OWAMP timestamp conversions slow down pSB MA requests
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=358 358] - _*Jeff/Aaron*_ - pS-Toolkit owampd stale file cleaner
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=365 365] - _*Aaron*_ - support for constraining ports for perfsonarbuoy owamp tests
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=367 367] - _*Andy*_ - OWAMP timestamp conversions slow down pSB MA requests
      
 === Code Reviews ===
 
@@ -80,10 +78,6 @@ Not applicable in this release.
 Testers should download ISO betas and excersize *ALL* functionality.  If you are upgrading, note so in your testing report.  If this is a new installation, note so in your testing report.  We will need testers to represent both worlds (e.g. perhaps format a disk if applicable).  
 
 == Open Tasks ==
-
- * Jason
-   * Release Tasks
-     * Prepare [YumRepository YUM] repo - <font color=green>_*DONE - 3/26*_</font>
 
  * Jason
    * Update Issue Tracker - <font color=green>_*DONE - 1/13*_</font>
