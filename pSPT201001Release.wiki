@@ -35,7 +35,8 @@ The following outline some exceptions to the overall release process.  Also see 
 === Bugs Related to This Release ===
 
  * _*Web/Publications*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=169 169] - _*Jason*_ - Add required hardware documentation   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff/Jason*_ - Create organized web-site for pS-Performance-Toolkit
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=169 169] - _*Jason*_ - Add required hardware documentation
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff/Jason*_ - Create organized web-site for pS-Performance-Toolkit
      * _*Jason*_ - Review current state, find any holes
      * _*Jeff*_ - Edit/Approve
     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Jason*_ - SNMP MA - Indicate it is not running due to cacti
@@ -81,8 +82,8 @@ Testers should download ISO betas and excersize *ALL* functionality.  If you are
 
  * Jason
    * Update Issue Tracker - <font color=green>_*DONE - 1/13*_</font>
-   * Development - <font color=yellow>_*IN PROGRESS - 1/4*_</font>
-   * Documentation - <font color=yellow>_*IN PROGRESS - 1/4*_</font>
+   * Development - <font color="#CCFF00">_*IN PROGRESS - 1/4*_</font>
+   * Documentation - <font color="#CCFF00">_*IN PROGRESS - 1/4*_</font>
    * Testing - <font color=blue>_*START AFTER - 1/22*_</font>
  * Aaron
    * Development - <font color=yellow>_*IN PROGRESS - 1/4*_</font>
