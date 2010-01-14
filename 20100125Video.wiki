@@ -1,0 +1,15 @@
+=  Jan 25 2010 Marathon Conference Call 1:00 p.m. EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees: 
+ # Topics for discussion:
+   * Software Architecture and Protocol directions
+   * gLS/hLS performance and scaling
+   * Traceroute integration with owamp/bwctl
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
