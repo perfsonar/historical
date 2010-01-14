@@ -6,12 +6,12 @@ applicable.
 
 == Future Events ==
 
-   * [20100111Video] - Video Conference for January 11, 2010
+   * [20100125Video] - Video Conference for January 25, 2010
 
 == Past Events ==
 
  * 2010
-   * TBD
+   * [20100111Video] - Video Conference for January 11, 2010
  * 2009
    * [2009Activities#20091214Video Video Conference for December 14, 2009]
    * [2009Activities#20091130Video Video Conference for November 30, 2009]
