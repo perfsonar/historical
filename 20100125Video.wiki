@@ -7,7 +7,9 @@
    * Software Architecture and Protocol directions
    * gLS/hLS performance and scaling
    * Traceroute integration with owamp/bwctl
+   * LiveCD transition
    * nagios integration into the NPTookit
+   * Circuit Monitoring
 
 == Where ==
 
