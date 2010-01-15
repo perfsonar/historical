@@ -67,7 +67,7 @@ Requires:       perl(Log::Log4perl) >= 1
 Requires:       perl(LWP::Simple)
 Requires:       perl(LWP::UserAgent)
 Requires:       perl(Math::BigFloat)
-Requires:       perl(Math::BigInt)
+Requires:       perl(Math::Int64)
 Requires:       perl(Module::Load)
 Requires:       perl(Moose) 
 Requires:       perl(Mouse) 

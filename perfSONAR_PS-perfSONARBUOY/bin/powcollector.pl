@@ -113,6 +113,7 @@ use FileHandle;
 use IO::Socket;
 use DB_File;
 use DBI;
+use Math::Int64 qw(uint64);
 
 my %options = (
     ADDFILE    => "a:",
@@ -209,7 +210,7 @@ my $sessionsumcmd = $conf->must_get_val( ATTR => 'BinDir', TYPE => $ttype );
 $sessionsumcmd .= "/" . $conf->must_get_val( ATTR => 'SessionSumCmd' );
 
 # XXX: Need this still?
-my $scale_factor = Math::BigInt->new( '4294967296' );
+my $scale_factor = uint64( '4294967296' );
 
 #
 # Initialize list of nodes (Only needed to implement debugging/peer validation)
@@ -964,8 +965,8 @@ sub add_session {
     my $ettime = $reqh->{'END_TIME'};
     my $arch   = undef;                   # XXX: put back in after demo... 080720-jwb
                                           # convert string to a bigint
-    $sttime = Math::BigInt->new( $sttime );
-    $ettime = Math::BigInt->new( $ettime );
+    $sttime = uint64( $sttime );
+    $ettime = uint64( $ettime );
 
     my $tprefix;
     $tprefix = init_date(

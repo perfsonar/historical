@@ -79,7 +79,7 @@ the following Perl libraries, libraries, and external tools to function:
     - Log::Dispatch::FileRotate
     - Log::Dispatch::Screen
     - Math::BigFloat
-    - Math::BigInt
+    - Math::Int64
     - Module::Load
     - Net::IPv6Addr
     - Net::Ping

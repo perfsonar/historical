@@ -46,7 +46,7 @@ use Params::Validate qw(:all);
 use Sys::Hostname;
 use Fcntl ':flock';
 use Date::Manip;
-use Math::BigInt;
+use Math::Int64;
 use Data::Validate::IP qw(is_ipv4);
 use Net::IPv6Addr;
 use File::Basename;
@@ -1660,26 +1660,26 @@ sub handleEvent {
 
     if ( exists $new_timeSettings->{"START"}->{"value"} ) {
         if ( exists $new_timeSettings->{"START"}->{"type"} and lc( $new_timeSettings->{"START"}->{"type"} ) eq "unix" ) {
-            $new_timeSettings->{"START"}->{"internal"} = time2owptime( $new_timeSettings->{"START"}->{"value"} )->bstr();
+            $new_timeSettings->{"START"}->{"internal"} = time2owptime( $new_timeSettings->{"START"}->{"value"} );
         }
         elsif ( exists $new_timeSettings->{"START"}->{"type"} and lc( $new_timeSettings->{"START"}->{"type"} ) eq "iso" ) {
-            $new_timeSettings->{"START"}->{"internal"} = time2owptime( UnixDate( $new_timeSettings->{"START"}->{"value"}, "%s" ) )->bstr();
+            $new_timeSettings->{"START"}->{"internal"} = time2owptime( UnixDate( $new_timeSettings->{"START"}->{"value"}, "%s" ) );
         }
         else {
-            $new_timeSettings->{"START"}->{"internal"} = time2owptime( $new_timeSettings->{"START"}->{"value"} )->bstr();
+            $new_timeSettings->{"START"}->{"internal"} = time2owptime( $new_timeSettings->{"START"}->{"value"} );
         }
     }
     $timeSettings{"START"} = $new_timeSettings->{"START"};
 
     if ( exists $new_timeSettings->{"END"}->{"value"} ) {
         if ( exists $new_timeSettings->{"END"}->{"type"} and lc( $new_timeSettings->{"END"}->{"type"} ) eq "unix" ) {
-            $new_timeSettings->{"END"}->{"internal"} = time2owptime( $new_timeSettings->{"END"}->{"value"} )->bstr();
+            $new_timeSettings->{"END"}->{"internal"} = time2owptime( $new_timeSettings->{"END"}->{"value"} );
         }
         elsif ( exists $new_timeSettings->{"START"}->{"type"} and lc( $new_timeSettings->{"END"}->{"type"} ) eq "iso" ) {
-            $new_timeSettings->{"END"}->{"internal"} = time2owptime( UnixDate( $new_timeSettings->{"END"}->{"value"}, "%s" ) )->bstr();
+            $new_timeSettings->{"END"}->{"internal"} = time2owptime( UnixDate( $new_timeSettings->{"END"}->{"value"}, "%s" ) );
         }
         else {
-            $new_timeSettings->{"END"}->{"internal"} = time2owptime( $new_timeSettings->{"END"}->{"value"} )->bstr();
+            $new_timeSettings->{"END"}->{"internal"} = time2owptime( $new_timeSettings->{"END"}->{"value"} );
         }
     }
     $timeSettings{"END"} = $new_timeSettings->{"END"};
@@ -1697,13 +1697,13 @@ sub handleEvent {
 
             if ( exists $new_timeSettings->{"START"}->{"value"} ) {
                 if ( exists $new_timeSettings->{"START"}->{"type"} and lc( $new_timeSettings->{"START"}->{"type"} ) eq "unix" ) {
-                    $new_timeSettings->{"START"}->{"internal"} = time2owptime( $new_timeSettings->{"START"}->{"value"} )->bstr();
+                    $new_timeSettings->{"START"}->{"internal"} = time2owptime( $new_timeSettings->{"START"}->{"value"} );
                 }
                 elsif ( exists $new_timeSettings->{"START"}->{"type"} and lc( $new_timeSettings->{"START"}->{"type"} ) eq "iso" ) {
-                    $new_timeSettings->{"START"}->{"internal"} = time2owptime( UnixDate( $new_timeSettings->{"START"}->{"value"}, "%s" ) )->bstr();
+                    $new_timeSettings->{"START"}->{"internal"} = time2owptime( UnixDate( $new_timeSettings->{"START"}->{"value"}, "%s" ) );
                 }
                 else {
-                    $new_timeSettings->{"START"}->{"internal"} = time2owptime( $new_timeSettings->{"START"}->{"value"} )->bstr();
+                    $new_timeSettings->{"START"}->{"internal"} = time2owptime( $new_timeSettings->{"START"}->{"value"} );
                 }
             }
             else {
@@ -1712,13 +1712,13 @@ sub handleEvent {
 
             if ( exists $new_timeSettings->{"END"}->{"value"} ) {
                 if ( exists $new_timeSettings->{"END"}->{"type"} and lc( $new_timeSettings->{"END"}->{"type"} ) eq "unix" ) {
-                    $new_timeSettings->{"END"}->{"internal"} = time2owptime( $new_timeSettings->{"END"}->{"value"} )->bstr();
+                    $new_timeSettings->{"END"}->{"internal"} = time2owptime( $new_timeSettings->{"END"}->{"value"} );
                 }
                 elsif ( exists $new_timeSettings->{"END"}->{"type"} and lc( $new_timeSettings->{"END"}->{"type"} ) eq "iso" ) {
-                    $new_timeSettings->{"END"}->{"internal"} = time2owptime( UnixDate( $new_timeSettings->{"END"}->{"value"}, "%s" ) )->bstr();
+                    $new_timeSettings->{"END"}->{"internal"} = time2owptime( UnixDate( $new_timeSettings->{"END"}->{"value"}, "%s" ) );
                 }
                 else {
-                    $new_timeSettings->{"END"}->{"internal"} = time2owptime( $new_timeSettings->{"END"}->{"value"} )->bstr();
+                    $new_timeSettings->{"END"}->{"internal"} = time2owptime( $new_timeSettings->{"END"}->{"value"} );
                 }
             }
             else {
@@ -3055,7 +3055,7 @@ __END__
 
 L<Log::Log4perl>, L<Module::Load>, L<Digest::MD5>, L<English>,
 L<Params::Validate>, L<Sys::Hostname>, L<Fcntl>, L<Date::Manip>,
-L<Math::BigInt>, L<Data::Validate::IP>, L<Net::IPv6Addr>, L<File::Basename>,
+L<Math::Int64>, L<Data::Validate::IP>, L<Net::IPv6Addr>, L<File::Basename>,
 L<perfSONAR_PS::Config::OWP>,L<perfSONAR_PS::Config::OWP::Utils>,
 L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
 L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>,

@@ -112,6 +112,7 @@ use FileHandle;
 use IO::Socket;
 use DB_File;
 use DBI;
+use Math::Int64 qw(uint64);
 
 my %options = (
     ADDFILE    => "a:",
@@ -817,7 +818,7 @@ sub add_session {
     $fttime   = $reqh->{'TIMESTAMP'};
     my $arch = undef;    # XXX: put back in after demo... 080720-jwb
                          # convert string to a bigint
-    $fttime = Math::BigInt->new( $fttime );
+    $fttime = uint64( $fttime );
 
     my $tprefix;
     $tprefix = init_month(

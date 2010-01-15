@@ -24,6 +24,7 @@ use Fcntl qw(:flock);
 use FileHandle;
 use OWP;
 use OWP::Utils;
+use Math::Int64 qw(uint64);
 use vars qw(@ISA @EXPORT $VERSION);
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use constant JAN_1970 => 0x83aa7e80;
@@ -167,8 +168,8 @@ sub owdb_fetch {
 
             # Now initialize the values for the new current session.
 
-            $owdbh->{'OSTART'} = new Math::BigInt( $owdbh->{'START'} );
-            $owdbh->{'OEND'}   = new Math::BigInt( $owdbh->{'END'} );
+            $owdbh->{'OSTART'} = uint64( $owdbh->{'START'} );
+            $owdbh->{'OEND'}   = uint64( $owdbh->{'END'} );
             $owdbh->{'OSENT'}  = $owdbh->{'SENT'};
             $owdbh->{'OLOST'}  = $owdbh->{'LOST'};
             $owdbh->{'ODUPS'}  = $owdbh->{'DUPS'};
@@ -253,7 +254,7 @@ sub owdb_plot_script {
         $res     = $lowest;
         @reslist = ( $res );
         $range   = $width * $res;
-        $$fref   = new Math::BigInt owptimeadd( $$lref, -$range );
+        $$fref   = owptimeadd( $$lref, -$range );
     }
 
     my $nrecs      = 0;
