@@ -8,6 +8,7 @@
    * gLS/hLS performance and scaling
    * Traceroute integration with owamp/bwctl
    * LiveCD transition
+     * Configuration GUI architecture
    * nagios integration into the NPTookit
    * Circuit Monitoring
 
