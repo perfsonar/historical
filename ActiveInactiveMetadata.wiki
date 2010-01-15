@@ -1,0 +1,18 @@
+#labels Phase-Design
+#dealing with current or obsolete metadata
+
+= Problem with obsolete/current metadata =
+
+== The problem ==
+
+I am not sure if this issue ever surfaced and been discussed but while testing health of the pinger service I stumbled upon this problem. 
+I created that health checking script which gets list of stored metadata
+and then checks if there were some current data for each metadata item.
+The problem is that when someone is using pinger admin interface to reconfigure pinger mp then list of metadata might change - for example someone decides to leave only single
+destination to monitor and removes everything else. But all old metadata is still in the db and therefore MDKrequest will return old list and health check will complain that some metadata is there but its missing recent data since data collection stopped for un-configured ones. In the worst case when someone decides to clean landmarks file then it will complain constantly and it will look exactly as it happened before - MP is running but not getting any data.  I don’t know how other services deal with that but I need to distinguish "active" metadata from the "inactive". 
+I propose to add parameter into the MKrequest to ask about "active" metadata" only
+or "inactive" or "all". On DB level it can be easily supported of course by simple boolean field.
+
+== Any Ideas ? ==
+
+???
