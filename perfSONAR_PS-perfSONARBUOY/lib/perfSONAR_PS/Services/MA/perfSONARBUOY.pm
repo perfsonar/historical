@@ -864,7 +864,24 @@ sub createStorage {
                 my %resSet = ();
                 $len = $#{$result};
                 for my $a ( 0 .. $len ) {
-                    push @{ $resSet{ $result->[$a][0] }{ $result->[$a][1] }{ $result->[$a][3] } }, $result->[$a][2];
+                    my $src_id = $result->[$a][0];
+                    my $dst_id = $result->[$a][1];
+
+                    my $src_str = "";
+		    $src_str .= $node{$src_id}{"name"};
+		    $src_str .= ",";
+		    $src_str .= $node{$src_id}{"port"};
+		    $src_str .= ",";
+		    $src_str .= $node{$src_id}{"type"};
+
+                    my $dst_str = "";
+		    $dst_str .= $node{$dst_id}{"name"};
+		    $dst_str .= ",";
+		    $dst_str .= $node{$dst_id}{"port"};
+		    $dst_str .= ",";
+		    $dst_str .= $node{$dst_id}{"type"};
+
+                    push @{ $resSet{ $src_str }{ $dst_str }{ $result->[$a][3] } }, $result->[$a][2];
                 }
 
                 my %mark = ();
@@ -888,6 +905,9 @@ sub createStorage {
 
                             # ------------------------------------------------------
 
+			    my ($src_name, $src_port, $src_type) = split(",", $src);
+			    my ($dst_name, $dst_port, $dst_type) = split(",", $dst);
+
                             my $metadata = q{};
                             my $data     = q{};
 
@@ -895,14 +915,14 @@ sub createStorage {
                             $metadata .= "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject-" . $id . "\">\n";
                             $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
                             $metadata .= "        <nmwgt:src";
-                            $metadata .= " value=\"" . $node{$src}{"name"} . "\"" if $node{$src}{"name"};
-                            $metadata .= " port=\"" . $node{$src}{"port"} . "\"" if $node{$src}{"port"};
-                            $metadata .= " type=\"" . $node{$src}{"type"} . "\"" if $node{$src}{"type"};
+                            $metadata .= " value=\"" . $src_name . "\"" if $src_name;
+                            $metadata .= " port=\"" . $src_port . "\"" if $src_port;
+                            $metadata .= " type=\"" . $src_type . "\"" if $src_type;
                             $metadata .= " />\n";
                             $metadata .= "        <nmwgt:dst";
-                            $metadata .= " value=\"" . $node{$dst}{"name"} . "\"" if $node{$dst}{"name"};
-                            $metadata .= " port=\"" . $node{$dst}{"port"} . "\"" if $node{$dst}{"port"};
-                            $metadata .= " type=\"" . $node{$dst}{"type"} . "\"" if $node{$dst}{"type"};
+                            $metadata .= " value=\"" . $dst_name . "\"" if $dst_name;
+                            $metadata .= " port=\"" . $dst_port . "\"" if $dst_port;
+                            $metadata .= " type=\"" . $dst_type . "\"" if $dst_type;
                             $metadata .= " />\n";
                             $metadata .= "      </nmwgt:endPointPair>\n";
                             $metadata .= "    </iperf:subject>\n";
@@ -1221,7 +1241,24 @@ sub createStorage {
                 my %resSet = ();
                 $len = $#{$result};
                 for my $a ( 0 .. $len ) {
-                    push @{ $resSet{ $result->[$a][0] }{ $result->[$a][1] }{ $result->[$a][3] } }, $result->[$a][2];
+                    my $src_id = $result->[$a][0];
+                    my $dst_id = $result->[$a][1];
+
+                    my $src_str = "";
+		    $src_str .= $node{$src_id}{"name"} if defined $node{$src_id}{"name"};
+		    $src_str .= ",";
+		    $src_str .= $node{$src_id}{"port"} if defined $node{$src_id}{"port"};
+		    $src_str .= ",";
+		    $src_str .= $node{$src_id}{"type"} if defined $node{$src_id}{"type"};
+
+                    my $dst_str = "";
+		    $dst_str .= $node{$dst_id}{"name"} if defined $node{$dst_id}{"name"};
+		    $dst_str .= ",";
+		    $dst_str .= $node{$dst_id}{"port"} if defined $node{$dst_id}{"port"};
+		    $dst_str .= ",";
+		    $dst_str .= $node{$dst_id}{"type"} if defined $node{$dst_id}{"type"};
+
+                    push @{ $resSet{ $src_str }{ $dst_str }{ $result->[$a][3] } }, $result->[$a][2];
                 }
 
                 my %mark = ();
@@ -1245,6 +1282,9 @@ sub createStorage {
 
                             # ------------------------------------------------------
 
+			    my ($src_name, $src_port, $src_type) = split(",", $src);
+			    my ($dst_name, $dst_port, $dst_type) = split(",", $dst);
+
                             my $metadata = q{};
                             my $data     = q{};
 
@@ -1252,14 +1292,14 @@ sub createStorage {
                             $metadata .= "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
                             $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
                             $metadata .= "        <nmwgt:src";
-                            $metadata .= " value=\"" . $node{$src}{"name"} . "\"" if $node{$src}{"name"};
-                            $metadata .= " port=\"" . $node{$src}{"port"} . "\"" if $node{$src}{"port"};
-                            $metadata .= " type=\"" . $node{$src}{"type"} . "\"" if $node{$src}{"type"};
+                            $metadata .= " value=\"" . $src_name . "\"" if $src_name;
+                            $metadata .= " port=\"" . $src_port . "\"" if $src_port;
+                            $metadata .= " type=\"" . $src_type . "\"" if $src_type;
                             $metadata .= " />\n";
                             $metadata .= "        <nmwgt:dst";
-                            $metadata .= " value=\"" . $node{$dst}{"name"} . "\"" if $node{$dst}{"name"};
-                            $metadata .= " port=\"" . $node{$dst}{"port"} . "\"" if $node{$dst}{"port"};
-                            $metadata .= " type=\"" . $node{$dst}{"type"} . "\"" if $node{$dst}{"type"};
+                            $metadata .= " value=\"" . $dst_name . "\"" if $dst_name;
+                            $metadata .= " port=\"" . $dst_port . "\"" if $dst_port;
+                            $metadata .= " type=\"" . $dst_type . "\"" if $dst_type;
                             $metadata .= " />\n";
                             $metadata .= "      </nmwgt:endPointPair>\n";
                             $metadata .= "    </owamp:subject>\n";
