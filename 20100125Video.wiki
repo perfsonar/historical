@@ -9,8 +9,12 @@
    * Traceroute integration with owamp/bwctl
    * LiveCD transition
      * Configuration GUI architecture
-   * nagios integration into the NPTookit
+   * Nagios integration into the NPTookit
+     * Alarms for services
+     * Alarms based on data analysis
    * Circuit Monitoring
+   * Wmap
+   * Client APIs and Documentation
 
 == Where ==
 
