@@ -1,5 +1,5 @@
-#labels Phase-Design
 #summary dealing with current or obsolete metadata
+#labels Phase-Design
 
 = Problem with obsolete/current metadata =
 
@@ -29,6 +29,12 @@ My thoughts on this would be to try and break the service into two metadata coll
  
 Each could be served via a different endpoint.  It is also important to offer a unified view so that a general query that doesn't have a time component (e.g. _show me all measurements between a and b that have ever happened_) can be answered.  It would be the service's job to partition each as appropriate (still have the problem described in #1) and this would not force a change in the structure of the metadata. 
 
+== AB ==
+
+I think "active/inactive" is a subset of the general concept of querying for dynamic metadata. For example, "what interfaces were stats collected on between X and Y" or "what tests were collected in the last X hours" gets you the concept of inactive/active, and may have wider usefulness (especially if the collector isn't being specifically munged to spit out something perfsonar specific). Depending on how the stats are collected/stored, answering these kinds of questions may be easy. E.g. with pSB, it should be straight-forward to set that kind of question up as a select query or two. For other methods of stats collection/storage, its probably significantly harder to answer that kind of question.
+
+I'm not sure there's a way to represent that in the protocol. 5-second strawman: a new kind of message, MetadataQueryRequest, which would work like a SetupDataRequest except it would select metadata from the database, and apply filters to the metadata coming out of the database. The time filters would not be filtering on a specific metadata field so I'm not sure I'm happy with that, but it's an idea.
+
 == Any Ideas ? ==
 
 ???
@@ -36,4 +42,3 @@ Each could be served via a different endpoint.  It is also important to offer a 
 == Last Updated ==
 
 $Id$
-
