@@ -13,6 +13,22 @@ destination to monitor and removes everything else. But all old metadata is stil
 I propose to add parameter into the MKrequest to ask about "active" metadata" only
 or "inactive" or "all". On DB level it can be easily supported of course by simple boolean field.
 
+== JZ ==
+
+_Tue Jan 19 12:30:33 EST 2010_
+
+Comments to the initial proposal:
+
+ # _Active_ vs _Inactive_ is pretty subjective.  If I have data that has been updated in the last month but collected only once per day that may be _active_ vs a PingER test that updates once ever 10 seconds and may be considered 'inactive' after 24 hours.  I don't think that a single parameter really covers this and a lot of variability will be present from service to service.
+ # _*<philosophical_musing>*_  Determining if something is active vs inactive is not something that should be encoded in the metadata, this is a property of the underlying data set. _*</philosophical_musing>*_.
+
+My thoughts on this would be to try and break the service into two metadata collections:
+
+ * historic
+ * active
+ 
+Each could be served via a different endpoint.  It is also important to offer a unified view so that a general query that doesn't have a time component (e.g. _show me all measurements between a and b that have ever happened_) can be answered.  It would be the service's job to partition each as appropriate (still have the problem described in #1) and this would not force a change in the structure of the metadata. 
+
 == Any Ideas ? ==
 
 ???
