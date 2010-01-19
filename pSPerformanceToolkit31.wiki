@@ -949,6 +949,95 @@ TBD
 
 == FAQ ==
 
+ * *Q: How do I run the NPAD system?*
+ * *A:* The [http://www.psc.edu/networking/projects/pathdiag/ NPAD] (Network Path and Application Diagnosis) is a client/server program developed by the network research group at Pittsburgh Supercomputer Center ([http://www.psc.edu PSC]). At boot time, the NPToolkit starts the NPAD server process and leaves it listening on TCP port *8200*. To use this server, a user starts a Java-enabled web browser and points it at the NPToolkit server (http://HOST:8200). The server automatically downloads a Java applet to the client. Then the user runs a test to begin the diagnostic process. Once the test has been completed, the server displays a results page on the clients browser. The user may examine these results and follow the recommendations to resolve problems. If the user is unable to repair a reported problem, the results page URL can be emailed to the appropriate system administrator or NOC operator.  The server retains a complete record of the test results and the raw data used to derive these results. This allows post-processing of interesting results to determine what went wrong and to improve the reporting capabilities of the NPAD server.
+
+ * *Q: How do I use BWCTL?*
+ * *A:* [http://e2epi.internet2.edu/bwctl/ BWCTL] (Bandwidth Test Controller) is a client/server program developed to simplify [http://www.dast.nlanr.net/Projects/Iperf Iperf], [http://sourceforge.net/projects/thrulay thrulay], and [http://www.wcisd.hpc.mil/nuttcp nuttcp] testing between hosts. At boot time, the NPTookit starts a BWCTL server process and leaves it listening on TCP port *4823*. This server may then be accessed by remote BWCTL clients.  Additionally, the disk contains BWCTL client applications that can be used to test to remote instances.  The BWCTL server allows TCP tests with a maximum duration of *60* seconds. To run a test to a remote BWCTL server:
+   # Logon to the NPToolkit server using the *_knoppix_* or other valid userid
+   # Identify the remote server
+   # Run _bwctl -s remote-bwctl-server_ command to stream data for 10 seconds from the locally instance to the remote BWCTL server. Results are displayed on our console or terminal window.
+
+ * *Q: How do I run the NDT system?*
+ * *A:* The [http://e2epi.internet2.edu/ndt/ NDT] (Network Diagnostic Tool) is a client/server program developed to simplify testing to desktop/laptop computers. At boot time, the NPToolkit starts a pair of NDT server processes and leaves them listening on TCP ports *7123* and *3001*. To use this server, a client starts a Java-enabled web browser and points it at the NPToolkit server (http://HOST:7123). The server automatically downloads a Java applet to the client. The end-user can run a test to begin the diagnostic process.  Once the test has been completed, the server displays a results page on the clients browser. The end-user may examine these results and follow the recommendations to resolve problems. If the end-user is unable to repair a reported problem, the user may click the _Report Problems_ button to generate an email that will be addressed to the appropriate NPToolkit administrator.  The server retains a record of the test results to allow the post-processing of interesting results to determine what went wrong and to improve the reporting capabilities of the NDT server.
+
+ * *Q: What is NTP?*
+ * *A:* [http://www.ntp.org NTP] (Network Time Protocol) is a program that synchronizes a computers clock to a global time source. An accurate clock is essential for running many of the measurement tests including [http://e2epi.internet2.edu/bwctl/ BWCTL] and [http://e2epi.internet2.edu/owamp/ OWAMP]. The NTP daemon must connect to several, at least four (4), remote time servers to obtain accurately set the local clock. By default the NPToolkit server will synchronize to both Internet2 and public time sources.  See [NPToolkitQuickStart#Step_7 Step 7 - NTP] for information regarding changing the default time sources.
+
+ * *Q: How do I use OWAMP?*
+ * *A:* [http://e2epi.internet2.edu/owamp/ OWAMP] (One-Way Ping) is a client server program that was developed to provide delay and jitter measurements between two target computers. At boot time, the NPToolkit starts an OWAMP server process and leaves it listening on TCP port *861*. This server may then be used by remote clients.  Additionally, the disk contains OWAMP client applications that can be used to test to remote instances (including a Java client and a console based application).  By default, the OWAMP server sends a low-level data stream in each direction and measures the one-way delay and jitter between the two hosts. Separate measurements, one for each direction, are reported to the user at the end of the test.
+   * To run a test to a remote OWAMP server:
+     # Logon to the NPToolkit server using the *_knoppix_* or other valid userid.
+     # Identify the remote server.
+     # Run the _owping remote-owamp-server_ command to make a pair of 10 second delay measurements (one in each direction) between remote OWAMP server and the local instance. Results are displayed on the console or terminal window.
+
+ * *Q: Where can I ask questions or report bugs?*
+ * *A:* 
+   * For questions, email to performance-node-users _at_ internet2 _dot_ edu.  You may also join the mailing list by visiting https://mail.internet2.edu/wws/subrequest/performance-node-users
+   * For bugs, report at http://code.google.com/p/perfsonar-ps/issues/list . Label the bug as _*Component-NPToolkit*_, or state in the bug description the issue involves the NPToolkit.
+
+ * *Q: Can I Use a Firewall? *
+ * *A:* 
+   * Yes.  To enable, first add all the desired rules to the firewall then run the command "/etc/init.d/iptables save". The firewall should then automatically come up on the next boot.  Note that there are some caveats to enabling a firewall, namely the amount of holes that must exist for the measurement tools included on the disk:  
+     * SNMP MA
+       * open port tcp/8065
+     * PingER
+       * open port tcp/8075
+     * perfSONAR-BUOY
+       * open port tcp/8085
+       * open port tcp/8569
+       * open port tcp/8570
+     * Lookup Service
+       * open port tcp/8095
+     * BWCTL
+       * open port tcp/4823
+       * Edit /usr/local/etc/bwctld.conf, set *peer_port* to a value, open the tcp port for that value
+       * Edit /usr/local/etc/bwctld.conf, set *iperf_port*, *thrulay_port* and *nuttcp_port* to a specific range, and open the tcp/udp ports for those ranges. 
+     * OWAMP
+       * open port tcp/861
+       * Edit /usr/local/etc/owampd.conf, set *testports* to range, open the udp ports for that range
+     * NDT
+       * open port tcp/3001
+       * open port tcp/3002
+       * open port tcp/3003
+       * open port tcp/7123
+     * NPAD
+       * open port tcp/8100
+       * open port tcp/8200
+     * Apache HTTP Server
+       * open port tcp/80
+       * open port tcp/443
+     * SSH
+       * open port tcp/22
+     * NTP 
+       * open port udp/123
+       
+ * *Q: How many ports will BWCTL need to operate effectively behind a firewall?*
+ * *A:* 
+   * BWCTL has several settings defined in the _*bwctld.conf*_ file that dictate which ports it may use for testing.  It is recommended that several ports be specified to allow for multiple test opportunities for the BWCTL scheduler, otherwise tests will not be completed in a timely fashion.  It is also important not to overlap these ports to prevent contention from the tools.  The configuration options are:
+     * _*iperf_port*_ - Port range (e.g. 5001-5005) to run the iperf _receiver_.
+     * _*nuttcp_port*_ - Port range (e.g. 5006-5010) to run the nuttcp _receiver_.
+     * _*thrulay_port*_ - Port range (e.g. 5011-5015) to run the thurlay _receiver_.
+     * _*peer_port*_ - Port range (e.g. 10100-10200) to run the _server_ processes of the above tests.  
+   * Note that some simple calculations can be used to determine how many ports are expected for a _*full*_ schedule of tests.  For example in assuming a completely packed schedule of 10 second long tests, there are a maximum of 6 tests per minute available. BWCTL cycles through the port range one-by-one, assigning each scheduled test the next open port in line. The iperf/nuttcp/thrulay applications may leave sockets open for a while after the test has finished. If a test tries to use the same port as was used by a previous test, and that test's socket is still open, the newer test will fail. By default, Linux allows these sockets to stay open for up to a minute. So, to ensure that no tests fail, for 6 tests, the minimum number of ports to make this work would be 7. However, due to environmental factors, it is best to use a number higher than this. Since port ranges are reasonably easy to open, it is recommended that the final number use double the range: 14 ports.
+
+ * *Q: I'd like to PXE boot the NPToolkit. Is that possible?*
+ * *A:* Not currently, but this is a consideration of future releases.
+
+ * *Q: When I boot, it gives me the following error _Can't find knoppix file system, sorry. Dropping you to a very limited shell ...._*
+ * *A:* This can be attributed to a bad CD burn or a bad ISO image. Check the MD5 sum of the ISO and match this to the posted MD5 value.
+
+ * *Q: What should I enter for the _Communities of interest_ configuration question?*
+ * *A:* 
+   * This question can be confusing to answer for new users.  The goal is to associate some _loosely coupled_ labels to the data that the perfSONAR NPToolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music.  Some examples of valid answers are:
+     * *Internet2* - The data made available somehow connects the Internet2 backbone
+     * *LHC* (*CMS*, *ATLAS*, etc.) – The system is part of the LHC perfSONAR instracture.
+       * The USATLAS community has requested that peer sites use the following as the Communities of Interest string:  _*LHC USATLAS*_     
+     * *eVLBI* - The disk is a part of the larger telescope community
+     * *MAX* - A connector of member of the MAX gigapop
+     * *DOE-SC-LAB* - US Department of Energy Office of Science Labs 
+   * Use as many community names as necessary to properly categorize the data from the installation. 
+
  * *Q:* Does my machine have to meet the [pSPerformanceToolkit31#System_Requirements System Requirements]?
  * *A:* There is nothing on the pSPT that will prevent systems that do not meet the requirements from starting.  Erroneous or inaccurate behavior is possible if the hardware cannot support the measurement tools.
 
@@ -1044,6 +1133,9 @@ Selecting previously deselected package sun-java5-bin.
 Unpacking sun-java5-bin (from .../sun-java5-bin_1.5.0-14-1etch1_i386.deb) ...
 }}}
    * A license agreement will appear, you may choose to either agree to this or disagree.  Disagreement will halt installation.  After agreeing the installation will proceed.  More information is available [http://wiki.debian.org/Java | here].
+
+ * *Q:* 
+ * *A:* 
 
 == Last Updated ==
 
