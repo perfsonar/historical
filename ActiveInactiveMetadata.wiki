@@ -1,5 +1,4 @@
 #labels Phase-Design
-
 #summary dealing with current or obsolete metadata
 
 = Problem with obsolete/current metadata =
