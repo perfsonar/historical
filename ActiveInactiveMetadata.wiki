@@ -1,5 +1,6 @@
 #labels Phase-Design
-#dealing with current or obsolete metadata
+
+#summary dealing with current or obsolete metadata
 
 = Problem with obsolete/current metadata =
 
@@ -16,3 +17,8 @@ or "inactive" or "all". On DB level it can be easily supported of course by simp
 == Any Ideas ? ==
 
 ???
+
+== Last Updated ==
+
+$Id$
+
