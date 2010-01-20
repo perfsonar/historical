@@ -44,6 +44,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * _*Jason*_ - Update FAQ/documentation
      * _*Aaron*_ - Update menus
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=373 373] - _*Jason*_ - Update pSPT FAQ
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=379 379] - _*Aaron*_ - update CD and splash screen images to 3.1.2
  * _*pSPT Internals*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=313 313] - _*Aaron*_ - ~~syslogd goes crazy on ISO~~
      * Fixed as much as can be for this release. If this doesn't fix, we'll have to move away from syslog-ng
