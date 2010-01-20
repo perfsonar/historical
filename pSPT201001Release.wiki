@@ -39,7 +39,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff/Jason*_ - Create organized web-site for pS-Performance-Toolkit
      * _*Jason*_ - Review current state, find any holes
      * _*Jeff*_ - Edit/Approve
-    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Jason*_ - SNMP MA - Indicate it is not running due to cacti
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Jason*_ - SNMP MA - Indicate it is not running due to cacti
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=368 368] - _*Jason/Aaron*_ - Storage Configuration Clarifications
      * _*Jason*_ - Update FAQ/documentation
      * _*Aaron*_ - Update menus
@@ -62,7 +62,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=361 361] - _*Aaron*_ - excessive wait when adding a host manually to a regular test without DNS
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=364 364] - _*Andy*_ - Same test displayed muliple times by serviceTest.cgi
  * _*PingER*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=353 353] - _*Aaron/Maxim*_ - pinger on the ps-toolkit occasionally can't reconnect to mysql
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=353 353] - _*Aaron/Maxim*_ - ~~pinger on the ps-toolkit occasionally can't reconnect to mysql~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=372 372] - _*Aaron/Maxim*_ - hanging pinger instances
  * _*pSB*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=358 358] - _*Jeff/Aaron*_ - pS-Toolkit owampd stale file cleaner
