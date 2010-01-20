@@ -49,7 +49,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * Fixed as much as can be for this release. If this doesn't fix, we'll have to move away from syslog-ng
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=362 362] - _*Aaron*_ - ~~logrotate.d can fail silently~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=366 366] - _*Aaron*_ - syslog-ng crashes regularly on NP Toolkit
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=376 376] - _*Aaron*_ - Enable Verbose debugging on BWCTL/OWAMP/PSB by default
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=376 376] - _*Aaron*_ - ~~Enable Verbose debugging on BWCTL/OWAMP/PSB by default~~
  * _*pSPT GUIs*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=325 325] - _*Aaron*_ - ~~Saving information in pSPT GUIs~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=326 326] - _*Aaron*_ - ~~pSPT Left Menu Enhancements~~
