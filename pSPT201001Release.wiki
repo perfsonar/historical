@@ -60,12 +60,12 @@ The following outline some exceptions to the overall release process.  Also see 
      * _*Jason*_ - Update documentation
      * _*Aaron*_ - Update GUIs   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=355 355] - _*Aaron/Maxim*_ - regular testing web gui may produce pinger landmark files without 'hostName' fields
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=360 360] - _*Andy*_ - Services script displays process as running after its been stopped
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=360 360] - _*Andy*_ - ~~Services script displays process as running after its been stopped~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=361 361] - _*Aaron*_ - ~~excessive wait when adding a host manually to a regular test without DNS~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=364 364] - _*Andy*_ - ~~Same test displayed muliple times by serviceTest.cgi~~
  * _*PingER*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=353 353] - _*Aaron/Maxim*_ - ~~pinger on the ps-toolkit occasionally can't reconnect to mysql~~
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=372 372] - _*Aaron/Maxim*_ - hanging pinger instances
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=372 372] - _*Aaron/Maxim*_ - ~~hanging pinger instances~~
  * _*pSB*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=358 358] - _*Jeff/Aaron*_ - pS-Toolkit owampd stale file cleaner
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=365 365] - _*Aaron*_ - ~~support for constraining ports for perfsonarbuoy owamp tests~~
