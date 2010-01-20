@@ -38,15 +38,8 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
     my $ma = new perfSONAR_PS::Client::MA( { instance => $cgi->param( 'url' ) } );
 
-    my @eventTypes = ();
     my $parser     = XML::LibXML->new();
     my $sec        = time;
-
-    my $subject = "  <nmwg:key id=\"key-1\">\n";
-    $subject .= "    <nmwg:parameters id=\"parameters-key-1\">\n";
-    $subject .= "      <nmwg:parameter name=\"maKey\">" . $cgi->param( 'key' ) . "</nmwg:parameter>\n";
-    $subject .= "    </nmwg:parameters>\n";
-    $subject .= "  </nmwg:key>  \n";
 
     my $start;
     my $end;
@@ -69,67 +62,27 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
         $start = $sec - 86400;
         $end   = $sec;
     }
-
-    my $result = $ma->setupDataRequest(
-        {
-            start      => $start,
-            end        => $end,
-            subject    => $subject,
-            eventTypes => \@eventTypes
-        }
-    );
-
-    my $doc1 = q{};
-    eval { $doc1 = $parser->parse_string( $result->{"data"}->[0] ); };
-    if ( $EVAL_ERROR ) {
-        print "<html><head><title>perfSONAR-PS perfAdmin Bandwidth Graph</title></head>";
-        print "<body><h2 align=\"center\">Cannot parse XML response from service.</h2></body></html>";
-        exit( 1 );
-    }
-
-    my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
-
-    my $doc2;
-    my $datum2;
-    my $result2;
-    if ( $cgi->param( 'key2' ) ) {
-        my $subject2 = "  <nmwg:key id=\"key-2\">\n";
-        $subject2 .= "    <nmwg:parameters id=\"parameters-key-2\">\n";
-        $subject2 .= "      <nmwg:parameter name=\"maKey\">" . $cgi->param( 'key2' ) . "</nmwg:parameter>\n";
-        $subject2 .= "    </nmwg:parameters>\n";
-        $subject2 .= "  </nmwg:key>  \n";
-
-        $result2 = $ma->setupDataRequest(
-            {
-                start      => $start,
-                end        => $end,
-                subject    => $subject2,
-                eventTypes => \@eventTypes
-            }
-        );
-
-        eval { $doc2 = $parser->parse_string( $result2->{"data"}->[0] ); };
-        if ( $EVAL_ERROR ) {
-            print "<html><head><title>perfSONAR-PS perfAdmin Bandwidth Graph</title></head>";
-            print "<body><h2 align=\"center\">Cannot parse XML response from service.</h2></body></html>";
-            exit( 1 );
-        }
-
-        $datum2 = find( $doc2->getDocumentElement, "./*[local-name()='datum']", 0 );
-    }
-
+    
     my %store = ();
-    if ( $datum1 ) {
-        foreach my $dt ( $datum1->get_nodelist ) {
-            my $secs = UnixDate( $dt->getAttribute( "timeValue" ), "%s" );
-            $store{$secs}{"src"} = eval( $dt->getAttribute( "throughput" ) ) if $secs and $dt->getAttribute( "throughput" );
-        }
-    }
-    if ( $datum2 ) {
-        foreach my $dt ( $datum2->get_nodelist ) {
-            my $secs = UnixDate( $dt->getAttribute( "timeValue" ), "%s" );
-            $store{$secs}{"dest"} = eval( $dt->getAttribute( "throughput" ) ) if $secs and $dt->getAttribute( "throughput" );
-        }
+    #retrieve data for forward direction
+    foreach my $key1( split '_', $cgi->param('key') ){
+        &retrieveData('key' => $key1, 
+                      'start' => $start, 
+                      'end' => $end, 
+                      'store' => \%store, 
+                      'storeType' => 'src', 
+                      'ma' => $ma, 
+                      'parser' => $parser);
+    } 
+    #retrieve data for reverse direction
+    foreach my $key2( split '_', $cgi->param('key2') ){
+        &retrieveData('key' => $key2, 
+                      'start' => $start, 
+                      'end' => $end, 
+                      'store' => \%store, 
+                      'storeType' => 'dest', 
+                      'ma' => $ma, 
+                      'parser' => $parser);
     }
 
     my $counter = 0;
@@ -227,15 +180,6 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             print "        data.addColumn('number', 'Destination -> Source in " . $mod . "bps');\n";
         }
 
-        my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
-        my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
-
-        my $doc2;
-        my $datum2;
-        if ( $cgi->param( 'key2' ) ) {
-            $doc2 = $parser->parse_string( $result2->{"data"}->[0] );
-            $datum2 = find( $doc2->getDocumentElement, "./*[local-name()='datum']", 0 );
-        }
         print "        data.addRows(" . $counter . ");\n";
 
         $counter = 0;
@@ -377,6 +321,50 @@ sub scaleValue {
         $result{"mod"}   = "G";
     }
     return \%result;
+}
+
+=head2 retrieveData ( { params } )
+
+Retrieve data based on a key using the given parameters
+
+=cut
+sub retrieveData(){
+    my $parameters = validateParams( @_, { 'key' => 1, 'start' => 1, 'end' => 1, 
+                                           'store' => 1, 'storeType' => 1, 
+                                           'ma' => 1, 'parser' => 1 } );
+                                           
+    my @eventTypes = ();
+    
+    my $subject = "  <nmwg:key id=\"key-1\">\n";
+    $subject .= "    <nmwg:parameters id=\"parameters-key-1\">\n";
+    $subject .= "      <nmwg:parameter name=\"maKey\">" . $parameters->{'key'} . "</nmwg:parameter>\n";
+    $subject .= "    </nmwg:parameters>\n";
+    $subject .= "  </nmwg:key>  \n";
+
+    my $result = $parameters->{'ma'}->setupDataRequest(
+        {
+            start      => $parameters->{'start'},
+            end        => $parameters->{'end'},
+            subject    => $subject,
+            eventTypes => \@eventTypes
+        }
+    );
+
+    my $doc1 = q{};
+    eval { $doc1 = $parameters->{'parser'}->parse_string( $result->{"data"}->[0] ); };
+    if ( $EVAL_ERROR ) {
+        print "<html><head><title>perfSONAR-PS perfAdmin Bandwidth Graph</title></head>";
+        print "<body><h2 align=\"center\">Cannot parse XML response from service.</h2></body></html>";
+        exit( 1 );
+    }
+
+    my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
+    if ( $datum1 ) {
+        foreach my $dt ( $datum1->get_nodelist ) {
+            my $secs = UnixDate( $dt->getAttribute( "timeValue" ), "%s" );
+            $parameters->{'store'}->{$secs}{$parameters->{'storeType'}} = eval( $dt->getAttribute( "throughput" ) ) if $secs and $dt->getAttribute( "throughput" );
+        }
+    }
 }
 
 __END__

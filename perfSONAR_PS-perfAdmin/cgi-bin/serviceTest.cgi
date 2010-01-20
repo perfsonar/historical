@@ -453,7 +453,17 @@ else {
             else {
                 $temp{"active"} = 0;
             }
-            push @{ $list{$shost}{$dhost} }, \%temp;
+            
+            #check for duplicate tests
+            my $testFound = 0;
+            foreach my $test (@{ $list{$shost}{$dhost} }){
+                if(&bwctlTestParamsEqual($test, \%temp)){
+                    $test->{"key"} .= '_' . $temp{"key"};
+                    $testFound = 1;
+                    last;
+                }
+            }
+            push @{ $list{$shost}{$dhost} }, \%temp unless $testFound;
         }
 
         # figure out if hosts are equal - requires unrolling all of the options and comparing (ugh)
@@ -461,45 +471,13 @@ else {
         foreach my $src ( sort keys %list ) {
             foreach my $dst ( sort keys %{ $list{$src} } ) {
                 foreach my $set ( @{ $list{$src}{$dst} } ) {
+                    #compare reverse tests
                     if ( $#{ $list{$src}{$dst} } > -1 and $#{ $list{$dst}{$src} } > -1 ) {
                         foreach my $set2 ( @{ $list{$dst}{$src} } ) {
                             if ( $set->{"src"} eq $set2->{"dst"} and $set->{"dst"} eq $set2->{"src"} and $set->{"saddr"} eq $set2->{"daddr"} and $set->{"daddr"} eq $set2->{"saddr"} ) {
-                                my @type = ( q{}, q{} );
-                                $type[0] = $set->{"type"}  if $set->{"type"};
-                                $type[1] = $set2->{"type"} if $set2->{"type"};
-                                next unless $type[0] eq $type[1];
-
-                                my @timeDuration = ( q{}, q{} );
-                                $timeDuration[0] = $set->{"timeDuration"}  if $set->{"timeDuration"};
-                                $timeDuration[1] = $set2->{"timeDuration"} if $set2->{"timeDuration"};
-                                next unless $timeDuration[0] eq $timeDuration[1];
-
-                                my @windowSize = ( q{}, q{} );
-                                $windowSize[0] = $set->{"windowSize"}  if $set->{"windowSize"};
-                                $windowSize[1] = $set2->{"windowSize"} if $set2->{"windowSize"};
-                                next unless $windowSize[0] eq $windowSize[1];
-
-                                my @bufferLength = ( q{}, q{} );
-                                $bufferLength[0] = $set->{"bufferLength"}  if $set->{"bufferLength"};
-                                $bufferLength[1] = $set2->{"bufferLength"} if $set2->{"bufferLength"};
-                                next unless $bufferLength[0] eq $bufferLength[1];
-
-                                my @interval = ( q{}, q{} );
-                                $interval[0] = $set->{"interval"}  if $set->{"interval"};
-                                $interval[1] = $set2->{"interval"} if $set2->{"interval"};
-                                next unless $interval[0] eq $interval[1];
-
-                                my @bandwidthLimit = ( q{}, q{} );
-                                $bandwidthLimit[0] = $set->{"bandwidthLimit"}  if $set->{"bandwidthLimit"};
-                                $bandwidthLimit[1] = $set2->{"bandwidthLimit"} if $set2->{"bandwidthLimit"};
-                                next unless $bandwidthLimit[0] eq $bandwidthLimit[1];
-
-                                my @active = ( q{}, q{} );
-                                $active[0] = $set->{"active"}  if $set->{"active"};
-                                $active[1] = $set2->{"active"} if $set2->{"active"};
-                                next unless $active[0] eq $active[1];
-
-                                push @{ $hostMap{ $set->{"key"} } }, $set2->{"key"};
+                                if(&bwctlTestParamsEqual($set, $set2)){
+                                    push @{ $hostMap{ $set->{"key"} } }, $set2->{"key"};
+                                }
                             }
                         }
                     }
@@ -839,8 +817,17 @@ else {
             else {
                 $temp{"active"} = 0;
             }
-
-            push @{ $list{$shost}{$dhost} }, \%temp;
+            
+            #check for duplicate tests
+            my $testFound = 0;
+            foreach my $test (@{ $list{$shost}{$dhost} }){
+                if(&owampTestParamsEqual($test, \%temp)){
+                    $test->{"key"} .= '_' . $temp{"key"};
+                    $testFound = 1;
+                    last;
+                }
+            }
+            push @{ $list{$shost}{$dhost} }, \%temp unless $testFound;
         }
 
         # figure out if hosts are equal - requires unrolling all of the options and comparing (ugh)
@@ -850,43 +837,11 @@ else {
                 foreach my $set ( @{ $list{$src}{$dst} } ) {
                     if ( $#{ $list{$src}{$dst} } > -1 and $#{ $list{$dst}{$src} } > -1 ) {
                         foreach my $set2 ( @{ $list{$dst}{$src} } ) {
+                            #compare reverse tests
                             if ( $set->{"src"} eq $set2->{"dst"} and $set->{"dst"} eq $set2->{"src"} and $set->{"saddr"} eq $set2->{"daddr"} and $set->{"daddr"} eq $set2->{"saddr"} ) {
-                                my @bucket_width = ( q{}, q{} );
-                                $bucket_width[0] = $set->{"bucket_width"}  if $set->{"bucket_width"};
-                                $bucket_width[1] = $set2->{"bucket_width"} if $set2->{"bucket_width"};
-                                next unless $bucket_width[0] eq $bucket_width[1];
-
-                                my @count = ( q{}, q{} );
-                                $count[0] = $set->{"count"}  if $set->{"count"};
-                                $count[1] = $set2->{"count"} if $set2->{"count"};
-                                next unless $count[0] eq $count[1];
-
-                                my @schedule = ( q{}, q{} );
-                                $schedule[0] = $set->{"schedule"}  if $set->{"schedule"};
-                                $schedule[1] = $set2->{"schedule"} if $set2->{"schedule"};
-                                next unless $schedule[0] eq $schedule[1];
-
-                                my @DSCP = ( q{}, q{} );
-                                $DSCP[0] = $set->{"DSCP"}  if $set->{"DSCP"};
-                                $DSCP[1] = $set2->{"DSCP"} if $set2->{"DSCP"};
-                                next unless $DSCP[0] eq $DSCP[1];
-
-                                my @timeout = ( q{}, q{} );
-                                $timeout[0] = $set->{"timeout"}  if $set->{"timeout"};
-                                $timeout[1] = $set2->{"timeout"} if $set2->{"timeout"};
-                                next unless $timeout[0] eq $timeout[1];
-
-                                my @packet_padding = ( q{}, q{} );
-                                $packet_padding[0] = $set->{"packet_padding"}  if $set->{"packet_padding"};
-                                $packet_padding[1] = $set2->{"packet_padding"} if $set2->{"packet_padding"};
-                                next unless $packet_padding[0] eq $packet_padding[1];
-
-                                my @active = ( q{}, q{} );
-                                $active[0] = $set->{"active"}  if $set->{"active"};
-                                $active[1] = $set2->{"active"} if $set2->{"active"};
-                                next unless $active[0] eq $active[1];
-
-                                push @{ $hostMap{ $set->{"key"} } }, $set2->{"key"};
+                                if(&owampTestParamsEqual($set, $set2)){
+                                    push @{ $hostMap{ $set->{"key"} } }, $set2->{"key"};
+                                }
                             }
                         }
                     }
@@ -1373,6 +1328,92 @@ sub scaleValue {
     return \%result;
 }
 
+=head2 bwctlTestParamsEqual ( { test1, test2 } )
+
+Given two bwctl tests, return true if parameters are equal
+
+=cut
+sub bwctlTestParamsEqual(){
+    my ($test1, $test2) = @_;
+    
+    my @type = ( q{}, q{} );
+    $type[0] = $test1->{"type"}  if $test1->{"type"};
+    $type[1] = $test2->{"type"} if $test2->{"type"};
+    return 0 unless $type[0] eq $type[1];
+    
+    my @timeDuration = ( q{}, q{} );
+    $timeDuration[0] = $test1->{"timeDuration"}  if $test1->{"timeDuration"};
+    $timeDuration[1] = $test2->{"timeDuration"} if $test2->{"timeDuration"};
+    return 0 unless $timeDuration[0] eq $timeDuration[1];
+    
+    my @windowSize = ( q{}, q{} );
+    $windowSize[0] = $test1->{"windowSize"}  if $test1->{"windowSize"};
+    $windowSize[1] = $test2->{"windowSize"} if $test2->{"windowSize"};
+    return 0 unless $windowSize[0] eq $windowSize[1];
+    
+    my @bufferLength = ( q{}, q{} );
+    $bufferLength[0] = $test1->{"bufferLength"}  if $test1->{"bufferLength"};
+    $bufferLength[1] = $test2->{"bufferLength"} if $test2->{"bufferLength"};
+    return 0 unless $bufferLength[0] eq $bufferLength[1];
+    
+    my @interval = ( q{}, q{} );
+    $interval[0] = $test1->{"interval"}  if $test1->{"interval"};
+    $interval[1] = $test2->{"interval"} if $test2->{"interval"};
+    return 0 unless $interval[0] eq $interval[1];
+    
+    my @bandwidthLimit = ( q{}, q{} );
+    $bandwidthLimit[0] = $test1->{"bandwidthLimit"}  if $test1->{"bandwidthLimit"};
+    $bandwidthLimit[1] = $test2->{"bandwidthLimit"} if $test2->{"bandwidthLimit"};
+    return 0 unless $bandwidthLimit[0] eq $bandwidthLimit[1];
+    
+    my @active = ( q{}, q{} );
+    $active[0] = $test1->{"active"}  if $test1->{"active"};
+    $active[1] = $test2->{"active"} if $test2->{"active"};
+    return 0 unless $active[0] eq $active[1];
+    
+    return 1;
+}
+
+sub owampTestParamsEqual(){
+    my ($test1, $test2) = @_;
+    
+    my @bucket_width = ( q{}, q{} );
+    $bucket_width[0] = $test1->{"bucket_width"}  if $test1->{"bucket_width"};
+    $bucket_width[1] = $test2->{"bucket_width"} if $test2->{"bucket_width"};
+    return 0 unless $bucket_width[0] eq $bucket_width[1];
+
+    my @count = ( q{}, q{} );
+    $count[0] = $test1->{"count"}  if $test1->{"count"};
+    $count[1] = $test2->{"count"} if $test2->{"count"};
+    return 0 unless $count[0] eq $count[1];
+
+    my @schedule = ( q{}, q{} );
+    $schedule[0] = $test1->{"schedule"}  if $test1->{"schedule"};
+    $schedule[1] = $test2->{"schedule"} if $test2->{"schedule"};
+    return 0 unless $schedule[0] eq $schedule[1];
+
+    my @DSCP = ( q{}, q{} );
+    $DSCP[0] = $test1->{"DSCP"}  if $test1->{"DSCP"};
+    $DSCP[1] = $test2->{"DSCP"} if $test2->{"DSCP"};
+    return 0 unless $DSCP[0] eq $DSCP[1];
+
+    my @timeout = ( q{}, q{} );
+    $timeout[0] = $test1->{"timeout"}  if $test1->{"timeout"};
+    $timeout[1] = $test2->{"timeout"} if $test2->{"timeout"};
+    return 0 unless $timeout[0] eq $timeout[1];
+
+    my @packet_padding = ( q{}, q{} );
+    $packet_padding[0] = $test1->{"packet_padding"}  if $test1->{"packet_padding"};
+    $packet_padding[1] = $test2->{"packet_padding"} if $test2->{"packet_padding"};
+    return 0 unless $packet_padding[0] eq $packet_padding[1];
+
+    my @active = ( q{}, q{} );
+    $active[0] = $test1->{"active"}  if $test1->{"active"};
+    $active[1] = $test2->{"active"} if $test2->{"active"};
+    return 0 unless $active[0] eq $active[1];
+    
+    return 1;
+}
 __END__
 
 =head1 SEE ALSO
