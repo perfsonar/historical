@@ -42,7 +42,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Jason*_ - SNMP MA - Indicate it is not running due to cacti
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=368 368] - _*Jason/Aaron*_ - Storage Configuration Clarifications
      * _*Jason*_ - Update FAQ/documentation
-     * _*Aaron*_ - Update menus
+     * _*Aaron*_ - ~~Update menus~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=373 373] - _*Jason*_ - Update pSPT FAQ
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=379 379] - _*Aaron*_ - update CD and splash screen images to 3.1.2
  * _*pSPT Internals*_
@@ -58,7 +58,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * Migrating remaining issues to 3.2
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=335 335] - _*Aaron/Jason*_ - BWCTL/OWAMP Limits Clarity
      * _*Jason*_ - Update documentation
-     * _*Aaron*_ - Update GUIs   
+     * _*Aaron*_ - ~~Update GUIs~~   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=355 355] - _*Aaron/Maxim*_ - ~~regular testing web gui may produce pinger landmark files without 'hostName' fields~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=360 360] - _*Andy*_ - ~~Services script displays process as running after its been stopped~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=361 361] - _*Aaron*_ - ~~excessive wait when adding a host manually to a regular test without DNS~~
@@ -68,9 +68,12 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=372 372] - _*Aaron/Maxim*_ - ~~hanging pinger instances~~
  * _*pSB*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=358 358] - _*Jeff/Aaron*_ - pS-Toolkit owampd stale file cleaner
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=365 365] - _*Aaron*_ - ~~support for constraining ports for perfsonarbuoy owamp tests~~
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=365 365] - _*Aaron*_ - support for constraining ports for perfsonarbuoy owamp tests
+     * _*Jason*_ - Update documentation
+     * _*Aaron*_ - ~~Update GUIs and pSB~~   
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=381 381] was opened as a subsequent issue
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=367 367] - _*Andy*_ - ~~OWAMP timestamp conversions slow down pSB MA requests~~
-     * Compete for 3.1.2
+     * Complete for 3.1.2
      * [http://code.google.com/p/perfsonar-ps/issues/detail?id=377 377] contains work for 3.2
      
 === Code Reviews ===
