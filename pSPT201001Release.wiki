@@ -22,7 +22,7 @@ This page outlines details regarding the release of pSPT 3.1.2.  The process sta
 
 Release Start: January 4, 2010
 
-First Release Candidates: January 22, 2010
+First Release Candidates: January ~~22~~ 21, 2010
 
 Beta Testing: January 22, 2010 through January 28, 2010
 
@@ -92,30 +92,27 @@ Testers should download ISO betas and excersize *ALL* functionality.  If you are
 
  * Jason
    * Update Issue Tracker - <font color=green>_*DONE - 1/13*_</font>
-   * Development - <font color="#CCFF00">_*IN PROGRESS - 1/4*_</font>
-   * Documentation - <font color="#CCFF00">_*IN PROGRESS - 1/4*_</font>
-   * Testing - <font color=blue>_*START AFTER - 1/22*_</font>
+   * Documentation - <font color="#CCFF00">_*IN PROGRESS - 1/20*_</font>
+   * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
  * Aaron
-   * Development - <font color="#CCFF00">_*IN PROGRESS - 1/4*_</font>
-   * Documentation - <font color="#CCFF00">_*IN PROGRESS - 1/4*_</font>
-   * Testing - <font color=blue>_*START AFTER - 1/22*_</font>
+   * Development - <font color=green>_*DONE - 1/21*_</font>
+   * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
  * Andy
-   * Development - <font color="#CCFF00">_*IN PROGRESS - 1/4*_</font>
-   * Documentation - <font color="#CCFF00">_*IN PROGRESS - 1/4*_</font>
-   * Testing - <font color=blue>_*START AFTER - 1/22*_</font>
+   * Development - <font color=green>_*DONE - 1/21*_</font>
+   * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
  * Jeff
    * Development - <font color="#CCFF00">_*IN PROGRESS - 1/4*_</font>
    * Documentation - <font color="#CCFF00">_*IN PROGRESS - 1/4*_</font> 
-   * Testing - <font color=blue>_*START AFTER - 1/22*_</font>
+   * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
  * Maxim 
    * Development - <font color="#CCFF00">_*IN PROGRESS - 1/4*_</font>
-   * Testing - <font color=blue>_*START AFTER - 1/22*_</font>
+   * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
  * Brian
-   * Testing - <font color=blue>_*START AFTER - 1/22*_</font>
+   * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
  * Joe
-   * Testing - <font color=blue>_*START AFTER - 1/22*_</font>
+   * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
  * Ezra
-   * Testing - <font color=blue>_*START AFTER - 1/22*_</font>
+   * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
 
 == Lessons Learned ==
 
