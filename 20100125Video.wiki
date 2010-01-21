@@ -8,11 +8,10 @@
    * gLS/hLS performance and scaling
    * Traceroute integration with owamp/bwctl
    * LiveCD transition
-     * Debian security support for v. 4.0 (etch) is being EOL'ed on Feb 15th
-       * http://lists.debian.org/debian-security-announce/2010/msg00010.html
+     * [http://lists.debian.org/debian-security-announce/2010/msg00010.html|Debian security support for v. 4.0 (etch) is being EOL'ed on Feb 15th]
        * Options:
          * Upgrade to 5.0, not a trivial task for a bugfix release.
-         * Use [backports | http://www.backports.org/dokuwiki/doku.php] where we can, manually port major security releases
+         * Use [http://www.backports.org/dokuwiki/doku.php|backports] where we can, manually port major security releases
        * Need to determine an EOL time range ourselves based on 3.2 development and community acceptance
      * Configuration GUI architecture
    * Nagios integration into the NPTookit
