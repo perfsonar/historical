@@ -5,6 +5,13 @@
  # Attendees: 
  # Topics for discussion:
    * Software Architecture and Protocol directions
+      * Ensuring compatibility between clients and services
+      * Merging the TS/LS protocols, and implementation/adoption
+      * Programming language direction going forward
+      * High-level style guidelines
+      * Improving the service architecture
+      * Increasing code reuse
+      * Easing outside development of clients and GUIs as well as development of new services
    * gLS/hLS performance and scaling
    * Traceroute integration with owamp/bwctl
    * LiveCD transition
