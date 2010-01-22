@@ -28,6 +28,7 @@ etc/view.tmpl
 lib/perfSONAR_PS/Client/DCN.pm
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
+lib/perfSONAR_PS/Client/gLS.pm
 lib/perfSONAR_PS/Client/MA.pm
 lib/perfSONAR_PS/Client/Parallel/LS.pm
 lib/perfSONAR_PS/Client/Parallel/Simple.pm
