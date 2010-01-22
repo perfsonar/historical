@@ -7,6 +7,7 @@
   * better visualization and analysis tools that demonstrate the utility of perfSONAR
   * better client APIs and documentation so that others can quickly write perfSONAR-based tools and services.
   * enable diagnostics of dynamic circuits
+  * better documentation for administrators (firewalls, testing recommendations...)
 
 
 === Specific pS-PS 3.2 Enhancements ===
