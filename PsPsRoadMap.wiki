@@ -5,6 +5,7 @@
  The primary short-term goals for perfSONAR development are:
   * make perfSONAR more reliable, easier to deploy, and easier to debug problems when they arrive
   * better visualization and analysis tools that demonstrate the utility of perfSONAR
+  * support standardization process for NMC(perfSONAR) protocols and protocol development.
   * better client APIs and documentation so that others can quickly write perfSONAR-based tools and services.
   * enable diagnostics of dynamic circuits
   * better documentation for administrators (firewalls, testing recommendations...)
