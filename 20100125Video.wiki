@@ -33,3 +33,8 @@
 ESnet conference bridge:
  * GDS:  00113498255555
  * phone: 1-510-883-7860  then 8255555# at the prompt.
+ * phone2: To join the call, do the following:
+   * +1-734-615-7474 (NON-US/CA USERS MUST USE THIS NUMBER)
+   * +1-866-411-0013 (toll free US/Canada Only) and enter
+   * access code 0180123 
+
