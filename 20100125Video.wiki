@@ -2,39 +2,64 @@
 
 == Agenda/Minutes ==
 
- # Attendees: 
+ # Attendees: Marcos, Andy, Brian, Aaron, Inder, Jason, Eric, Joe, Maxim, Jeff, Martin, Ezra
  # Topics for discussion:
    * Software Architecture and Protocol directions
+      * Improving the software-service architecture
+         * Increasing code reuse
+         * High-level style guidelines
+         * goal: increase modularity and code reuse
+         * example: shouldn't need to create a new service to make a new metric available
+         * Aaron/Eric/Andy
       * Ensuring compatibility between clients and services
+         * Inder/Aaron/Andy
       * Merging the TS/LS protocols, and implementation/adoption
+         * XML-DB? Organize TS so it is more distributable.
+         * Martin/Eric
       * Programming language direction going forward
-      * High-level style guidelines
-      * Improving the service architecture
-      * Increasing code reuse
+         * Lots of new programmers, some of different language interests
+         * Advantages/Disadvantages of current possibilities
+         * Aaron/Maxim/Eric
       * Easing outside development of clients and GUIs as well as development of new services
+         * What is needed to support client developers?
+         * Use cases
+         * Inder/Jason/Andy
    * gLS/hLS performance and scaling
+      * Testing shows scalability issues
+      * Potential solutions
+      * Brian/Martin/Eric/Jason
    * Traceroute integration with owamp/bwctl
+      * Andy/Jeff
    * LiveCD transition
+     * Goal: What should we do: upgrade to LiveCD, or upgrade to 5.0?
      * [http://lists.debian.org/debian-security-announce/2010/msg00010.html|Debian security support for v. 4.0 (etch) is being EOL'ed on Feb 15th]
        * Options:
          * Upgrade to 5.0, not a trivial task for a bugfix release.
          * Use [http://www.backports.org/dokuwiki/doku.php|backports] where we can, manually port major security releases
        * Need to determine an EOL time range ourselves based on 3.2 development and community acceptance
-     * Configuration GUI architecture
-   * Nagios integration into the NPTookit
+     * Aaron/Joe
+   * Configuration GUI architecture
+     * Goal: User perspective - what do they want to do? Architect config tool around that instead of from the OS perspective.
+     * Aaron/Andy/Maxim
+   * Testing plateform
+      * How many versions, OSs, etc...
+      * Eric/Brian/Jason
+   * Nagios integration into the pS-Perf-Tk
+     * Goal: What alarms/alerts should be configured in for the next release. And how that is implemented and configured.
      * Alarms for services
      * Alarms based on data analysis
+     * Brian/Jason
    * Circuit Monitoring
-   * Wmap
+     * Aaron/Ezra
+   * Wmap - Flashy GUIs
+     * What is needed, what is low hanging fruit?
+     * Joe/Jeff
    * Client APIs and Documentation
+     * What use cases do we want the documentation to support?
+     * Brian
 
 == Where ==
 
 ESnet conference bridge:
  * GDS:  00113498255555
  * phone: 1-510-883-7860  then 8255555# at the prompt.
- * phone2: To join the call, do the following:
-   * +1-734-615-7474 (NON-US/CA USERS MUST USE THIS NUMBER)
-   * +1-866-411-0013 (toll free US/Canada Only) and enter
-   * access code 0180123 
-
