@@ -4,6 +4,9 @@
 
  # Attendees: Marcos, Andy, Brian, Aaron, Inder, Jason, Eric, Joe, Maxim, Jeff, Martin, Ezra
  # Topics for discussion:
+   * Roadmap discussion
+      * http://code.google.com/p/perfsonar-ps/wiki/PsPsRoadMap
+      * Jeff/Brian/Joe
    * Software Architecture and Protocol directions
       * Improving the software-service architecture
          * Increasing code reuse
