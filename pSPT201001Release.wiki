@@ -52,6 +52,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=366 366] - _*Aaron*_ - ~~syslog-ng crashes regularly on NP Toolkit~~
      * Brian made some changes and is no longer seeing the crashes
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=376 376] - _*Aaron*_ - ~~Enable Verbose debugging on BWCTL/OWAMP/PSB by default~~
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=384 384] - _*Aaron*_ - Spelling error in NTP configuration file
  * _*pSPT GUIs*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=325 325] - _*Aaron*_ - ~~Saving information in pSPT GUIs~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=326 326] - _*Aaron*_ - ~~pSPT Left Menu Enhancements~~
