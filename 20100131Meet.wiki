@@ -23,7 +23,7 @@ January 31, 2010.
        * 3.1.5 in Nov/Dec (if needed - hard with SC)
      * Critical bug fixes and software upgrades only
      * Will release faster if something *very* critical comes up
-     * [http://lists.debian.org/debian-security-announce/2010/msg00010.html|Debian security support for v. 4.0 (etch) is being EOL'ed on Feb 15th]
+     * [http://lists.debian.org/debian-security-announce/2010/msg00010.html Debian security support for v. 4.0 (etch) is being EOL'ed on Feb 15th]
        * Upgrade?
        * Manually backport?
    * Support Structure
@@ -35,7 +35,7 @@ January 31, 2010.
        * _We will have fixes available for vulnerabilities within X days_
      * SLAC Kernel Discussion
        * SLAC's policy: follow the RHEL kernels.  
-       * Our (_unstated right now_) policy: Choose the [http://lkml.org/lkml/2008/10/11/235|long term support kernel] and follow the releases here.  
+       * Our (_unstated right now_) policy: Choose the [http://lkml.org/lkml/2008/10/11/235 long term support kernel] and follow the releases here.  
        * Setting a policy matters to the VOs (e.g. USATLAS).  Choosing a specific policy matters more to individual stake holders. We should weigh the options of following a packaged kernel linage vs what the support structure of the OSS community has to offer.  
    * RHEL (3.2) Transition
      * Targeting Summer for 3.2 Betas
@@ -54,12 +54,8 @@ January 31, 2010.
  # TBD 4 
  # TBD 5 
 
-=== ACTIONS ===
+== ACTIONS ==
 
   * _*ACTION*_:
 
-== Where ==
 
-ESnet conference bridge:
- * GDS:  00113498255555
- * phone: 1-510-883-7860  then 8255555# at the prompt.
