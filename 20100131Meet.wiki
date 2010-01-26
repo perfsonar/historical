@@ -1,0 +1,65 @@
+#summary Developers Meeting at Winter 2010 Joint Techs - Salt Lake City, UT
+
+=  Jan 31 2010 Meeting =
+
+== Where ==
+
+Collegiate room (2nd Floor - right next to the main ballroom) in the [http://www.union.utah.edu A. Ray Olpin University Union].  
+
+== When ==
+
+January 31, 2010.
+1:00pm - 5:00pm MDT
+
+== Agenda/Minutes ==
+
+ # Attendees: 
+   * TBD
+ # LiveCD Topics (*Jason*, *Aaron*)
+   * Remaining 3.1.X releases
+     * Targeting 2 - 3 more this year.  May need to worry about some next year depending on support...
+       * 3.1.3 in April (pre MM)
+       * 3.1.4 in July (pre JTs)
+       * 3.1.5 in Nov/Dec (if needed - hard with SC)
+     * Critical bug fixes and software upgrades only
+     * Will release faster if something *very* critical comes up
+     * [http://lists.debian.org/debian-security-announce/2010/msg00010.html|Debian security support for v. 4.0 (etch) is being EOL'ed on Feb 15th]
+       * Upgrade?
+       * Manually backport?
+   * Support Structure
+     * Need explicit language in a public area
+     * Ex:
+       * _We monitor X, Y, and Z for vulnderabilities_
+       * _We are will support 3.1 releases through X date_
+       * _We will make announcements on vulnerabilties within X days_
+       * _We will have fixes available for vulnerabilities within X days_
+     * SLAC Kernel Discussion
+       * SLAC's policy: follow the RHEL kernels.  
+       * Our (_unstated right now_) policy: Choose the [http://lkml.org/lkml/2008/10/11/235|long term support kernel] and follow the releases here.  
+       * Setting a policy matters to the VOs (e.g. USATLAS).  Choosing a specific policy matters more to individual stake holders. We should weigh the options of following a packaged kernel linage vs what the support structure of the OSS community has to offer.  
+   * RHEL (3.2) Transition
+     * Targeting Summer for 3.2 Betas
+     * Must support 3.1 in parallel
+     * VOs may be slow to adopt 3.2 - they are still not recommending 3.1 to Tier3s for example.  
+     * Features to worry about
+       * Wizard interfaces
+       * Backend magic to manage the disk
+       * Upgrade path?
+       * RPMs for all services and packages
+       * Kernels (see above) - and if we want to support web100 long term
+       * Install to disk option
+ # TBD 1
+ # TBD 2
+ # TBD 3
+ # TBD 4 
+ # TBD 5 
+
+=== ACTIONS ===
+
+  * _*ACTION*_:
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
