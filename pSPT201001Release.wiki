@@ -34,6 +34,11 @@ The following outline some exceptions to the overall release process.  Also see 
 
 === Bugs Related to This Release ===
 
+
+ 	 
+[Vote for this issue and get email change notifications] 	
+
+
  * _*Web/Publications*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=169 169] - _*Jason*_ - Add required hardware documentation
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff/Jason*_ - Create organized web-site for pS-Performance-Toolkit
@@ -45,6 +50,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * _*Aaron*_ - ~~Update menus~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=373 373] - _*Jason*_ - Update pSPT FAQ
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=379 379] - _*Aaron*_ - update CD and splash screen images to 3.1.2
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=385 385] - _*Jason*_ - authorization dialog failed while adding community in admin GUI  
  * _*pSPT Internals*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=313 313] - _*Aaron*_ - ~~syslogd goes crazy on ISO~~
      * Fixed as much as can be for this release. If this doesn't fix, we'll have to move away from syslog-ng
@@ -53,6 +59,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * Brian made some changes and is no longer seeing the crashes
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=376 376] - _*Aaron*_ - ~~Enable Verbose debugging on BWCTL/OWAMP/PSB by default~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=384 384] - _*Aaron*_ - Spelling error in NTP configuration file
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=374 374] - _*Andy*_ - Large clock change causes NTP to stop updating and services to stop
  * _*pSPT GUIs*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=325 325] - _*Aaron*_ - ~~Saving information in pSPT GUIs~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=326 326] - _*Aaron*_ - ~~pSPT Left Menu Enhancements~~
@@ -76,6 +83,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=367 367] - _*Andy*_ - ~~OWAMP timestamp conversions slow down pSB MA requests~~
      * Complete for 3.1.2
      * [http://code.google.com/p/perfsonar-ps/issues/detail?id=377 377] contains work for 3.2
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=386 386] - _*Aaron*_ - Unchecked null concatentation in pSB 
      
 === Code Reviews ===
 
