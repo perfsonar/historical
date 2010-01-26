@@ -35,13 +35,12 @@ class MeasurementArchiveService(psService):
     def metadataKeyRequest(self, message):
         log.debug('Fetching...')
         # do something
-        return ""
+        return message
         
     def measurementStoreRequest(self,message):
         log.debug('Storing...')
         # do something
-        message = makeResponse()
-        return ""
+        return message
         
 if __name__ == '__main__':
     # Change the logging level to DEBUG to see the messages

@@ -3,18 +3,13 @@
 The psMessageFix class is in places of the standard soaplib.soap.Message class
 and implements the perfSONAR "unwrapped" messages.
 """
-import logging
+import logging, warnings
 
 import soaplib.soap
 from soaplib.xml import NamespaceLookup, ElementTree, create_xml_element, ns
-from soaplib.wsgi_soap import SimpleWSGISoapApp
-from soaplib.service import soapmethod
-from soaplib.serializers.primitive import Any
 
-import warnings
 # shut up an annoying message from soaplib
 warnings.filterwarnings("ignore", category=FutureWarning, append=1)
-
 log = logging.getLogger(__name__)
 
 ################
@@ -86,6 +81,19 @@ class psMessageFix(soaplib.soap.Message):
         
 # Swap in the replacement class before the other imports
 soaplib.soap.__dict__['Message'] = psMessageFix  
+
+################
+
+# NOTE: it is important that these import statements are located *here*
+# rather than at the top of the module.  The preceeding code overwrites
+# part of the soaplib namespace and must be processed first.  Please don't 
+# move them around as breakage will ensue.
+
+from soaplib.wsgi_soap import SimpleWSGISoapApp
+from soaplib.service import soapmethod
+from soaplib.serializers.primitive import Any
+
+################
 
         
 class psUnwrappedMessage(Any):
