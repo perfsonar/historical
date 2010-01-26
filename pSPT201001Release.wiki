@@ -85,6 +85,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * Complete for 3.1.2
      * [http://code.google.com/p/perfsonar-ps/issues/detail?id=377 377] contains work for 3.2
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=386 386] - _*Aaron*_ - Unchecked null concatentation in pSB 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=388 388] - _*Aaron*_ - MySQL database checks 
      
 === Code Reviews ===
 
