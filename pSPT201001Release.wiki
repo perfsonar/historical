@@ -41,12 +41,12 @@ The following outline some exceptions to the overall release process.  Also see 
      * _*Jeff*_ - Edit/Approve
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Jason*_ - SNMP MA - ~~Indicate it is not running due to cacti~~
      * Passed to Aaron for 3.2 release.  
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=368 368] - _*Jason/Aaron*_ - Storage Configuration Clarifications
-     * _*Jason*_ - Update FAQ/documentation
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=368 368] - _*Jason/Aaron*_ - ~~Storage Configuration Clarifications~~
+     * _*Jason*_ - ~~Update FAQ/documentation~~
      * _*Aaron*_ - ~~Update menus~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=373 373] - _*Jason*_ - Update pSPT FAQ
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=379 379] - _*Aaron*_ - update CD and splash screen images to 3.1.2
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=385 385] - _*Jason*_ - authorization dialog failed while adding community in admin GUI  
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=385 385] - _*Jason*_ - ~~authorization dialog failed while adding community in admin GUI~~
  * _*pSPT Internals*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=313 313] - _*Aaron*_ - ~~syslogd goes crazy on ISO~~
      * Fixed as much as can be for this release. If this doesn't fix, we'll have to move away from syslog-ng
@@ -55,7 +55,9 @@ The following outline some exceptions to the overall release process.  Also see 
      * Brian made some changes and is no longer seeing the crashes
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=376 376] - _*Aaron*_ - ~~Enable Verbose debugging on BWCTL/OWAMP/PSB by default~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=384 384] - _*Aaron*_ - Spelling error in NTP configuration file
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=374 374] - _*Andy*_ - Large clock change causes NTP to stop updating and services to stop
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=374 374] - _*Andy*_ - ~~Large clock change causes NTP to stop updating and services to stop~~
+     * Documentation updated
+     * Moved to 3.2
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=387 387] - _*Aaron*_ - PID file format 
  * _*pSPT GUIs*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=325 325] - _*Aaron*_ - ~~Saving information in pSPT GUIs~~

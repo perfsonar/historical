@@ -556,6 +556,13 @@ The _BWCTL Limits_ screen allows the operator to set limits on the resources tha
  * Test duration: The maximum duration of that a user can request for a bandwidth test.
  * UDP bandwidth allowed: The maximum bandwidth a user can request for a UDP bandwidth test.
 
+Note a subtle nuance to the two classes of limitations:
+ 
+ # _*Privileged*_ clients will take the highest precedence
+ # _*Un-privileged*_ clients are derived from _*Privileged*_ client permissions
+ 
+For example, if a bandwidth limit of _500 MB_ was set for the _*Privileged*_ clients, then the _*Un-privileged*_ clients will be able to use less than or equal to this amount - never more.  Take this into consideration when setting the limits.  
+
 The screen defaults to these settings:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-bwctllimits-1.png
