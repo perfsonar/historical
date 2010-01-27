@@ -833,6 +833,14 @@ After completing, the host will show up in the testing dialog.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-owamp-7.png
 
+As of version 3.1.2, it is possible to configure the port range for OWAMP tests via the administrative GUI.  The button _Configure OWAMP Test Port Range_ will appear after setting up a regular OWAMP test:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-owamp-8.png
+
+When clicked the following dialog will appear.  The range may be entered.  After setting, be sure to save your changes.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/web-scheduled-owamp-9.png
+
 When done, press the _save_ button to commit your changes to disk, and restart the affected services.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/non-save.png
@@ -1102,6 +1110,10 @@ Information: The server 'HOSTNAME' does not support this command line client
      * _*peer_port*_ - Port range (e.g. 5061-5080) to run the _server_ processes of the above tests.
    * Note that the above ranges are examples, and that calculating the appropriate number of ports based on the FAQ item above is recommended.  
 
+ * *Q: Can the OWAMP test port ranges be added via the GUI?*
+ * *A:* 
+   * The pSPT development team recommends not limiting measurement tools to certain ports; this action may cause unexpected or unpredictable behavior.  If selecting a port range is still required, please see [pSPerformanceToolkit31#Scheduled_OWAMP this section] for instructions on how to alter the testing port range.
+
  * *Q: I'd like to PXE boot the pSPT. Is that possible?*
  * *A:* Not currently.  This is a consideration of future releases.
 
@@ -1119,36 +1131,36 @@ Information: The server 'HOSTNAME' does not support this command line client
      * *DOE-SC-LAB* - US Department of Energy Office of Science Labs 
    * Use as many community names as necessary to properly categorize the data from the installation. 
 
- * *Q:* Does my machine have to meet the [pSPerformanceToolkit31#System_Requirements System Requirements]?
+ * *Q: Does my machine have to meet the [pSPerformanceToolkit31#System_Requirements System Requirements]?*
  * *A:* There is nothing on the pSPT that will prevent systems that do not meet the requirements from starting.  Erroneous or inaccurate behavior is possible if the hardware cannot support the measurement tools.
 
- * *Q:* The colors on my [pSPerformanceToolkit31#Console Console Configuration] do not match what I see on the web.  Some are green already.
+ * *Q: The colors on my [pSPerformanceToolkit31#Console Console Configuration] do not match what I see on the web.  Some are green already.*
  * *A:* If you are upgrading from a previous version of the pSPT, the colors may be green already because a particular aspect was configured previously.  These do not need to be configured again.
  
- * *Q:* The [pSPerformanceToolkit31#Services_On_This_Node Services On This Node] screen shows many services in the non-running state when first started, what is wrong?
+ * *Q: The [pSPerformanceToolkit31#Services_On_This_Node Services On This Node] screen shows many services in the non-running state when first started, what is wrong?*
  * *A:* Many of the services will be in this state because they are missing some key configuration items (e.g. from the [pSPerformanceToolkit31#Administrative_Info Administrative Info]).  After following the configuration steps check this screen again, most should be functional.
  
- * *Q:* I do not see my service in the [pSPerformanceToolkit31#Global_Set_Of_Services Global Set Of Services], where is it?
+ * *Q: I do not see my service in the [pSPerformanceToolkit31#Global_Set_Of_Services Global Set Of Services], where is it?*
  * *A:* Much like DNS, the information that will populate the Global Lookup Service will take time to propagate.  Please allow some time (e.g. a few hours) before your service will be fully visible.
  
- * *Q:* When looking at the data display for [pSPerformanceToolkit31#perfAdmin_BWCTL perfAdmin BWCTL]/[pSPerformanceToolkit31#perfAdmin_OWAMP perfAdmin OWAMP] I do not see results, but I filled out information in the [pSPerformanceToolkit31#Scheduled_Testing Scheduled Testing] area.  Where is my data?
+ * *Q: When looking at the data display for [pSPerformanceToolkit31#perfAdmin_BWCTL perfAdmin BWCTL]/[pSPerformanceToolkit31#perfAdmin_OWAMP perfAdmin OWAMP] I do not see results, but I filled out information in the [pSPerformanceToolkit31#Scheduled_Testing Scheduled Testing] area.  Where is my data?*
  * *A:* Data may take several minutes to show up in this area, possible causes:
    * A Test has not run yet (e.g. a 4 hour testing interval may not produce tests for 4 hours.
    * The testing data may not be available in the database yet.  A test may complete, but may take several minutes to be stored in the database, and therefore become available to the GUI
  
- * *Q:* I do not think I am a member of a [pSPerformanceToolkit31#Communities community], should I put anything?  
+ * *Q: I do not think I am a member of a [pSPerformanceToolkit31#Communities community], should I put anything?*  
  * *A:* Communities are not required, but they allow other individuals and organizations to find and use your services. It is a good practice to join as many as you may think are applicable.
  
- * *Q:* What is the purpose of [pSPerformanceToolkit31#BWCTL_Limits BWCTL Limits]/[pSPerformanceToolkit31#OWAMP_Limits OWAMP Limits]?
+ * *Q: What is the purpose of [pSPerformanceToolkit31#BWCTL_Limits BWCTL Limits]/[pSPerformanceToolkit31#OWAMP_Limits OWAMP Limits]?*
  * *A:* These allow you to limit the influence that outside users have on your system performance.  For example, to prevent your machine/network from being saturated with  BWCTL tests, limit the duration and maximum bandwidth available.  These screens allow a fine grained way to protect resources.
 
  * *Q: How can I set limits to prevent others from overusing BWCTL/OWAMP?*
  * *A:* BWCTL and OWAMP have configurable dialog that allows the administrator to limit the resources consumed.  To set the limits for BWCTL, consult this [pSPerformanceToolkit31#BWCTL_Limits section].  To set the limits for OWAMP, consult this [pSPerformanceToolkit31#OWAMP_Limits section].
 
- * *Q:* How many [pSPerformanceToolkit31#NTP NTP] servers do I need, can I select them all?
+ * *Q: How many [pSPerformanceToolkit31#NTP NTP] servers do I need, can I select them all?*
  * *A:* It is recommended that 4 to 5 _close_ and _active_ servers be used.  The _Select Closest Servers_ button will help with this decision.  Note that some servers may not be available due to routing (e.g. non-R&E networks vs R&E networks - a common problem for Internet2 and ESnet servers).
  
- * *Q:* When clicking on GUI links the following error is seen:
+ * *Q: When clicking on GUI links the following error is seen:*
 {{{
 Software error: 
 
@@ -1191,13 +1203,13 @@ sudo logrotate -dv /etc/logrotate.conf
 }}}
      * remove older logs from the directories in _/var/log_
 
- * *Q:* PingER displays several sets of duplicate results via the GUI, some of which have _No Data_.
+ * *Q: PingER displays several sets of duplicate results via the GUI, some of which have _No Data_.*
  * *A:* PingER stores the results of all tests ever performed.  To clean out the pinger test sets run the following command:
 {{{
 sudo /usr/local/bin/reset_pinger.sh
 }}}
 
- * *Q:* The Sun Java environment was on previous versions of the pSPT, has it been removed?
+ * *Q: The Sun Java environment was on previous versions of the pSPT, has it been removed?*
  * *A:* 
    * Java (e.g. the JRE, JDK, and associated browser plugins) have been removed from the pSPT due to license concerns.  Instructions for installing the Java JRE and Plugin (for web browsers on the pSPT):
 {{{
@@ -1233,7 +1245,7 @@ Unpacking sun-java5-bin (from .../sun-java5-bin_1.5.0-14-1etch1_i386.deb) ...
 }}}
    * A license agreement will appear, you may choose to either agree to this or disagree.  Disagreement will halt installation.  After agreeing the installation will proceed.  More information is available [http://wiki.debian.org/Java here].
 
- * *Q:* The _*SNMP Measurement Archive*_ service is listed as _*Not Running*_ on the web interface.  Is this normal?
+ * *Q: The _*SNMP Measurement Archive*_ service is listed as _*Not Running*_ on the web interface.  Is this normal?*
  * *A:* 
    * The _*SNMP Measurement Archive*_ is directly tied to the [pSPerformanceToolkit31#Cacti_Administration Cacti configuration].  If you have not configured _*Cacti*_ to monitor a network device, the _*SNMP Measurement Archive*_ will not start and show up in this state.  The following message will appear in _*/var/log/perfSONAR/SNMP.log*_ to indicate the service cannot be started:
 {{{
@@ -1248,7 +1260,7 @@ waiting...
 /etc/init.d/snmpMA.sh start: SNMP MA started
 }}}
  
- * *Q:* Service _*X*_ is listed as _*Not Runnning*_ on the web interface.  How can I restart?
+ * *Q: Service _*X*_ is listed as _*Not Runnning*_ on the web interface.  How can I restart?*
  * *A:*
    * _*Bandwidth Test Controller (BWCTL)*_: 
 {{{
@@ -1293,7 +1305,7 @@ sudo /etc/init.d/PingER.sh restart
 sudo /etc/init.d/snmpMA.sh restart
 }}}
  
- * *Q:* I can't restart the _*perfSONAR-BUOY Measurement Archive*_, the following error appears:
+ * *Q: I can't restart the _*perfSONAR-BUOY Measurement Archive*_, the following error appears:*
 {{{
 [knoppix@Knoppix knoppix]# sudo /etc/init.d/pSB.sh restart
 /etc/init.d/pSB.sh stop: pSB (pid 2975?) not running
@@ -1322,10 +1334,10 @@ waiting...
 /etc/init.d/pSB.sh start: pSB started 
 }}}
  
- * *Q:* There is an old version of the Linux kernel on the pSPT.  Why was the _*2.6.27*_ Linux kernel chosen instead of the latest kernel release series?
+ * *Q: There is an old version of the Linux kernel on the pSPT.  Why was the _*2.6.27*_ Linux kernel chosen instead of the latest kernel release series?*
  * *A:* The pSPT development team is using this kernel because it has been dubbed the _*long term supported*_ kernel.  See [http://lkml.org/lkml/2008/10/11/235 this] for details.  This particular kernel lineage will still receive all of the benefits from kernel development (device drivers, security patches) but will not be subject to the same bleeding edge development that the newer (and frequently forked) head of the development effort will receive.  This choice makes for a stable kernel that should be free of any defects introduced by new development.  
  
- * *Q:* _*CRITICAL SECURITY VULNERABILITY XYZ123*_ was announced hours ago and I am scared the pSPT will be compromised.  When can the users expect a fix?  What support guarantees will be offered?
+ * *Q: _*CRITICAL SECURITY VULNERABILITY XYZ123*_ was announced hours ago and I am scared the pSPT will be compromised.  When can the users expect a fix?  What support guarantees will be offered?*
  * *A:* 
    * Software of all types, weather it be an operating system or a performance measurement tool may have bugs.  Some bugs may be exploitable and can ruin a single system, and potentially the surrounding network and users.  The pSPT development team is aware of these concerns from the community regarding the security and maintainability of the pSPT. As such we offer the following points to address these concerns:
      # The pSPT development team is a small open source project, and devotes as many resources as possible to addressing flaws in the software.  
@@ -1336,7 +1348,7 @@ waiting...
      # All open source software in this product comes with a LICENSE; within each license are the terms of support.  With BSD and GPL license the terms are usually _use this software at your own risk_.  
      # The pSPT development team cannot offer any form of SLA or hard time frame guarantees.
      
- * *Q:* NTPD has exited/is not running on my machine, why did this happen and how can I fix it?
+ * *Q: NTPD has exited/is not running on my machine, why did this happen and how can I fix it?*
  * *A:* 
    * NTPD may exit if the hardware clock on the host is too far off from the true time to make a difference.  To _skip_ the clock ahead to the correct time, try these commands:
 {{{
@@ -1354,13 +1366,13 @@ Starting NTP server: ntpd.
 }}}
    * If NTPD continues to exit on a periodic basis, there may be a hardware failure.  Consult the machine's BIOS to see if there may be problems with the hardware clock or internal battery.  
  
- * *Q:* What are the hardware requirements for running the pSPT?
+ * *Q: What are the hardware requirements for running the pSPT?*
  * *A:* See the [pSPerformanceToolkit31#System_Requirements section] in this document.  Note that the pSPT development team has not created hard minimum or maximum requirements - the pSPT will function on almost any form of hardware.  Performance considerations do favor meeting or exceeding the minimum guidelines.
  
- * *Q:* What is the recommended configuration for the hard disk of a machine running the pSPT?
+ * *Q: What is the recommended configuration for the hard disk of a machine running the pSPT?*
  * *A:* There is only one requirement for partitioning the hard disk of a pSPT system: an ext3 partition must be available for storage.  The user may configure as many partitions as they need for the pSPT disk, but for simplicity it is recommended that the entire disk be used in a single partition to allow for maximum storage resources.  See also [pSPerformanceToolkit31#Storage this section] for hints on storage configuration.  
  
- * *Q:* When using _Konqueror_ on the pSPT, I get the following error: _*Username is set to "undefined"*_.  What should I do?
+ * *Q: When using _Konqueror_ on the pSPT, I get the following error: _*Username is set to "undefined"*_.  What should I do?*
  * *A:* Avoid using _Konqueror_, if you are using the XWindows system on the pSPT use _Iceweasel_ or a browser on an external system.  
 
 == Last Updated ==
