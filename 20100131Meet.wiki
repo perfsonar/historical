@@ -77,6 +77,41 @@ January 31, 2010.
      * GUI extensions to watch other instances of the toolkit in the wild [requires nrpe probably] (future enhancement)
      * Send a 'come online' alert to a pS address?
  # Testing Platforms (*Eric*, *Jason*, *Brian*)
+                      
+             1) Define Supported Platforms
+                         . hardware archictecture + operating system/distribution + middleware.
+                         . try to support most of currently deployed plaftom
+                         . keep it to a minimum number
+                         . have at least one platform current (hardware/OS)
+
+
+             2) Create VM templates that matches the supported platforms
+
+                         . use a VM to build and package release. This allows reproductable build process
+                         . Duplicate VM from template and instantiate for testing (always starting from a known state
+
+             3) Create VM to run stub services for testing
+
+                         . needed for unit testing (automation)
+                         . needed for debuging and development
+                         . allows to model various configuration
+
+            4) The entire build and testing environment as a download.
+
+                         . This allows anyone to reproduce it anywhere.
+                         . Helps for automation and provisioning
+                         . Allows for collaborative debug (one may send a VM to another).
+
+            5) Available collaborative resources
+ 
+                         . OpenDevNet
+                         . NMI
+                         . Ad-hoc
+
+
+
+From Martin:
+
    * Group decission - what are we supporting for platform and arch?
      * Post policy to various web sites (psps.internet2, software.internet2, others?)
      * re-tool the yum repo (e.g. have a centos 5 vs a centos 4 vs a scientific, etc.) for new packages
@@ -103,5 +138,3 @@ January 31, 2010.
 == ACTIONS ==
 
   * _*ACTION*_:
-
-
