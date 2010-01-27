@@ -140,11 +140,11 @@ After choosing _*Option 1*_ from the menu, the following prompt will appear list
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/drive-1.png
 
-At the time of configuration, the user chose the first option.  In this particular case an internal check requests that the disk have at least 10GB of capacity.  This message will appear as such:
+At the time of configuration, the user chose the first option.  In this particular case an internal check requests that the disk have the minimum 10GB of capacity.  Note that any partition combination is acceptable, as long as the minimum size is respected.  Note that for simplicity a single partition will give the pSPT the most access to storage.  This message will appear as such:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/drive-2.png
 
-If the drive is unformatted, or is not formatted with the ext3 filesystem, there will be an option for format the drive in question. While Linux can natively read and write many filesystems, some filesystems, specifically NTFS and Fat, do not contain support for features required by the toolkit. _*N.B.*_: formatting a hard drive will render any existing old data un-readable.  Please be sure you wish to use the target hard drive before proceeding:
+If the drive is unformatted or is not formatted with the ext3 filesystem, there will be an option for format the drive in question. While Linux can natively read and write many filesystems, some (specifically NTFS and FAT) do not contain support for features required by the toolkit. _*N.B.*_: formatting a hard drive will render any existing old data un-readable.  Please be sure you wish to use the target hard drive before proceeding:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/drive-3.png
 
@@ -943,42 +943,97 @@ network device is present.
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_14.png
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/Cacti_15.png
 
-== Known Bugs ==
-
-TBD
-
 == FAQ ==
 
- * *Q: How do I run the NPAD system?*
- * *A:* The [http://www.psc.edu/networking/projects/pathdiag/ NPAD] (Network Path and Application Diagnosis) is a client/server program developed by the network research group at Pittsburgh Supercomputer Center ([http://www.psc.edu PSC]). At boot time, the NPToolkit starts the NPAD server process and leaves it listening on TCP port *8200*. To use this server, a user starts a Java-enabled web browser and points it at the NPToolkit server (http://HOST:8200). The server automatically downloads a Java applet to the client. Then the user runs a test to begin the diagnostic process. Once the test has been completed, the server displays a results page on the clients browser. The user may examine these results and follow the recommendations to resolve problems. If the user is unable to repair a reported problem, the results page URL can be emailed to the appropriate system administrator or NOC operator.  The server retains a complete record of the test results and the raw data used to derive these results. This allows post-processing of interesting results to determine what went wrong and to improve the reporting capabilities of the NPAD server.
+ * *Q: How do I use the NPAD system?*
+ * *A:* The [http://www.psc.edu/networking/projects/pathdiag/ NPAD] (Network Path and Application Diagnosis) is a client/server program developed by the network research group at Pittsburgh Supercomputer Center ([http://www.psc.edu PSC]). The NPAD users email list is located [https://lists.psc.edu/mailman/listinfo/npad-discussion here].  At boot time, the pSPT starts the NPAD server process and leaves it listening on TCP port *8200*. To use this server, a user starts a Java-enabled web browser and points it at the pSPT server (http://HOST:8200). The server automatically downloads a Java applet to the client. Then the user runs a test to begin the diagnostic process. Once the test has been completed, the server displays a results page on the clients browser. The user may examine these results and follow the recommendations to resolve problems. If the user is unable to repair a reported problem, the results page URL can be emailed to the appropriate system administrator or NOC operator.  The server retains a complete record of the test results and the raw data used to derive these results. This allows post-processing of interesting results to determine what went wrong and to improve the reporting capabilities of the NPAD server.
 
- * *Q: How do I use BWCTL?*
- * *A:* [http://e2epi.internet2.edu/bwctl/ BWCTL] (Bandwidth Test Controller) is a client/server program developed to simplify [http://www.dast.nlanr.net/Projects/Iperf Iperf], [http://sourceforge.net/projects/thrulay thrulay], and [http://www.wcisd.hpc.mil/nuttcp nuttcp] testing between hosts. At boot time, the NPTookit starts a BWCTL server process and leaves it listening on TCP port *4823*. This server may then be accessed by remote BWCTL clients.  Additionally, the disk contains BWCTL client applications that can be used to test to remote instances.  The BWCTL server allows TCP tests with a maximum duration of *60* seconds. To run a test to a remote BWCTL server:
-   # Logon to the NPToolkit server using the *_knoppix_* or other valid userid
-   # Identify the remote server
-   # Run _bwctl -s remote-bwctl-server_ command to stream data for 10 seconds from the locally instance to the remote BWCTL server. Results are displayed on our console or terminal window.
+ * *Q: How do I use the NPAD command line client (diag-client)?*
+ * *A:*
+   * The _diag-client_ is a command line version of the NPAD diagnostic client.  Instead of needing a web browser, this client runs the tests from a terminal window.  The basic options are to provide a server name/address and the connection IP.  The NPAD server has two ports open:
+     * 8200 for _*HTTP*_ traffic
+     * 8100 for _*measurement*_ traffic.
+   * Please connect to _*8100*_:
+{{{
+[knoppix@Knoppix ~]$ diag-client HOSTNAME 8100
+Using: rtt 10 ms and rate 20
+Connected.
+Control connection established.
+port = 8003
+Starting test.
+Parameters based on 107 ms initial RTT
+peakwin=27617 minpackets=3 maxpackets=83 stepsize=8
+Target run length is 608 packets (or a loss rate of 0.16447368%)
+Test 1a (11 seconds): Coarse Scan
+Test 1b (11 seconds): ...
+...
+}}}
+   * Connecting to the _*HTTP*_ port will result in the following error:
+{{{ 
+[knoppix@Knoppix ~]$ diag-client HOSTNAME 8200
+Using: rtt 10 ms and rate 20
+Connected.
+Protocol error: bad handshake.
+Please make sure you have the latest client,  and you have the correct port number.
+}}}
 
  * *Q: How do I run the NDT system?*
- * *A:* The [http://e2epi.internet2.edu/ndt/ NDT] (Network Diagnostic Tool) is a client/server program developed to simplify testing to desktop/laptop computers. At boot time, the NPToolkit starts a pair of NDT server processes and leaves them listening on TCP ports *7123* and *3001*. To use this server, a client starts a Java-enabled web browser and points it at the NPToolkit server (http://HOST:7123). The server automatically downloads a Java applet to the client. The end-user can run a test to begin the diagnostic process.  Once the test has been completed, the server displays a results page on the clients browser. The end-user may examine these results and follow the recommendations to resolve problems. If the end-user is unable to repair a reported problem, the user may click the _Report Problems_ button to generate an email that will be addressed to the appropriate NPToolkit administrator.  The server retains a record of the test results to allow the post-processing of interesting results to determine what went wrong and to improve the reporting capabilities of the NDT server.
+ * *A:* The [http://www.internet2.edu/performance/ndt NDT] (Network Diagnostic Tool) is a client/server program developed to simplify testing to desktop/laptop computers. At boot time, the pSPT starts a pair of NDT server processes and leaves them listening on TCP ports _*7123*_ and _*3001*_. To use this server, a client starts a Java-enabled web browser and points it at the pSPT server (http://HOST:7123). The server automatically downloads a Java applet to the client. The end-user can run a test to begin the diagnostic process.  Once the test has been completed, the server displays a results page on the clients browser. The end-user may examine these results and follow the recommendations to resolve problems. If the end-user is unable to repair a reported problem, the user may click the _Report Problems_ button to generate an email that will be addressed to the appropriate pSPT administrator.  The server retains a record of the test results to allow the post-processing of interesting results to determine what went wrong and to improve the reporting capabilities of the NDT server.
+
+ * *Q: How do I use the NDT command line client (web100clt)?*
+ * *A:*
+   * The _web100clt_ is a command line version of the NDT diagnostic client.  Instead of needing a web browser, this client runs the tests from a terminal window.  The basic options are to provide a server name/address and the connection IP.  The NPAD server has two ports open:
+     * 7123 for _*HTTP*_ traffic
+     * 3001, 3002, 3003 for _*measurement*_ traffic.
+   * Please connect to _*3001*_, _*3002*_, or _*3003*_:
+{{{
+[knoppix@Knoppix ~]$ web100clt -n HOSTNAME -p 3001
+Testing network path for configuration and performance problems  --  Using IPv4 address
+Checking for Middleboxes . . . . . . . . . . . . . . . . . .  Done
+checking for firewalls . . . . . . . . . . . . . . . . . . .  Done
+running 10s outbound test (client to server) . . . . .  164.00 kb/s
+running 10s inbound test (server to client) . . . . . . 13.40 Mb/s
+The slowest link in the end-to-end path is a a 622 Mbps OC-12 subnet
+Information [C2S]: Packet queuing detected: 16.95% (local buffers)
+Information [S2C]: Packet queuing detected: 67.10% (local buffers)
+Server '128.193.128.237' is not behind a firewall. [Connection to the ephemeral port was successful]
+Client is not behind a firewall. [Connection to the ephemeral port was successful]
+Packet size is preserved End-to-End
+Server IP addresses are preserved End-to-End
+Client IP addresses are preserved End-to-End
+}}}
+   * Connecting to the _*HTTP*_ port (or other ports) will result in the following error:
+{{{
+[knoppix@Knoppix ~]$ web100clt -n HOSTNAME -p 7123
+Testing network path for configuration and performance problems  --  Using IPv4 address
+Information: The server 'HOSTNAME' does not support this command line client
+}}}
 
  * *Q: What is NTP?*
- * *A:* [http://www.ntp.org NTP] (Network Time Protocol) is a program that synchronizes a computers clock to a global time source. An accurate clock is essential for running many of the measurement tests including [http://e2epi.internet2.edu/bwctl/ BWCTL] and [http://e2epi.internet2.edu/owamp/ OWAMP]. The NTP daemon must connect to several, at least four (4), remote time servers to obtain accurately set the local clock. By default the NPToolkit server will synchronize to both Internet2 and public time sources.  See [NPToolkitQuickStart#Step_7 Step 7 - NTP] for information regarding changing the default time sources.
+ * *A:* [http://www.ntp.org NTP] (Network Time Protocol) is a program that synchronizes a computers clock to a global time source. An accurate clock is essential for running many of the measurement tests including [http://www.internet2.edu/performance/bwctl/ BWCTL] and [http://www.internet2.edu/performance/owamp/ OWAMP]. The NTP daemon must connect to several, at least four (4), remote time servers to accurately set the local clock. By default the pSPT server will synchronize to both Internet2 and public time sources.  See [pSPerformanceToolkit31#NTP NTP] for information regarding changing the default time sources.
 
  * *Q: How do I use OWAMP?*
- * *A:* [http://e2epi.internet2.edu/owamp/ OWAMP] (One-Way Ping) is a client server program that was developed to provide delay and jitter measurements between two target computers. At boot time, the NPToolkit starts an OWAMP server process and leaves it listening on TCP port *861*. This server may then be used by remote clients.  Additionally, the disk contains OWAMP client applications that can be used to test to remote instances (including a Java client and a console based application).  By default, the OWAMP server sends a low-level data stream in each direction and measures the one-way delay and jitter between the two hosts. Separate measurements, one for each direction, are reported to the user at the end of the test.
+ * *A:* [http://www.internet2.edu/performance/owamp/ OWAMP] (One-Way Ping) is a client server program that was developed to provide delay and jitter measurements between two target computers. At boot time, the pSPT starts an OWAMP server process and leaves it listening on TCP port *861*. This server may then be used by remote clients.  Additionally, the disk contains OWAMP client applications that can be used to test to remote instances (including a Java client and a console based application).  By default, the OWAMP server sends a low-level data stream in each direction and measures the one-way delay and jitter between the two hosts. Separate measurements, one for each direction, are reported to the user at the end of the test.
    * To run a test to a remote OWAMP server:
-     # Logon to the NPToolkit server using the *_knoppix_* or other valid userid.
+     # Logon to the pSPT server using the *_knoppix_* or other valid userid.
      # Identify the remote server.
-     # Run the _owping remote-owamp-server_ command to make a pair of 10 second delay measurements (one in each direction) between remote OWAMP server and the local instance. Results are displayed on the console or terminal window.
+     # Run the _owping REMOTE_SERVER_ADDRESS_ command to make a pair of 10 second delay measurements (one in each direction) between remote OWAMP server and the local instance. Results are displayed on the console or terminal window.
+
+ * *Q: How do I use BWCTL?*
+ * *A:* [http://www.internet2.edu/performance/bwctl/ BWCTL] (Bandwidth Test Controller) is a client/server program developed to simplify [http://www.dast.nlanr.net/Projects/Iperf Iperf], [http://sourceforge.net/projects/thrulay thrulay], and [http://www.wcisd.hpc.mil/nuttcp nuttcp] testing between hosts. At boot time, the pSPT starts a BWCTL server process and leaves it listening on TCP port _*4823*_. This server may then be accessed by remote BWCTL clients.  Additionally, the disk contains BWCTL client applications that can be used to test to remote instances.  To run a test to a remote BWCTL server:
+   # Logon to the pSPT server using the *_knoppix_* or other valid userid
+   # Identify the remote server
+   # Run _bwctl -s REMOTE_SERVER_ADDRESS_ command to stream data for 10 seconds from the locally instance to the remote BWCTL server. Results are displayed on our console or terminal window.
+   # Run _bwctl -c REMOTE_SERVER_ADDRESS_ command to stream data for 10 seconds from the remote BWCTL server to the local instance. Results are displayed on our console or terminal window.
 
  * *Q: Where can I ask questions or report bugs?*
  * *A:* 
-   * For questions, email to performance-node-users _at_ internet2 _dot_ edu.  You may also join the mailing list by visiting https://mail.internet2.edu/wws/subrequest/performance-node-users
-   * For bugs, report at http://code.google.com/p/perfsonar-ps/issues/list . Label the bug as _*Component-NPToolkit*_, or state in the bug description the issue involves the NPToolkit.
+   * For questions, email to performance-node-users _at_ internet2 _dot_ edu.  You may also join the mailing list by visiting [https://mail.internet2.edu/wws/subrequest/performance-node-users]
+   * For bugs, report at http://code.google.com/p/perfsonar-ps/issues/list . Label the bug as _*Component-pS-NPToolkit*_, or state in the bug description the issue involves the pSPT.
 
  * *Q: Can I Use a Firewall? *
  * *A:* 
-   * Yes.  To enable, first add all the desired rules to the firewall then run the command "/etc/init.d/iptables save". The firewall should then automatically come up on the next boot.  Note that there are some caveats to enabling a firewall, namely the amount of holes that must exist for the measurement tools included on the disk:  
+   * The pSPT development team recommends not limiting measurement tools to certain ports; this action may cause unexpected or unpredictable behavior.  Ti enable a firewall anyway, first add all the desired rules to the firewall then run the command "/etc/init.d/iptables save". The firewall should then automatically come up on the next boot.  Note that there are some caveats to enabling a firewall, namely the amount of holes that must exist for the measurement tools included on the disk:  
      * SNMP MA
        * open port tcp/8065
      * PingER
@@ -996,6 +1051,7 @@ TBD
      * OWAMP
        * open port tcp/861
        * Edit /usr/local/etc/owampd.conf, set *testports* to range, open the udp ports for that range
+       * See also [pSPerformanceToolkit31#Scheduled_OWAMP this section] for information on using the GUI to set the range of allowed ports.
      * NDT
        * open port tcp/3001
        * open port tcp/3002
@@ -1014,22 +1070,32 @@ TBD
        
  * *Q: How many ports will BWCTL need to operate effectively behind a firewall?*
  * *A:* 
-   * BWCTL has several settings defined in the _*bwctld.conf*_ file that dictate which ports it may use for testing.  It is recommended that several ports be specified to allow for multiple test opportunities for the BWCTL scheduler, otherwise tests will not be completed in a timely fashion.  It is also important not to overlap these ports to prevent contention from the tools.  The configuration options are:
-     * _*iperf_port*_ - Port range (e.g. 5001-5005) to run the iperf _receiver_.
-     * _*nuttcp_port*_ - Port range (e.g. 5006-5010) to run the nuttcp _receiver_.
-     * _*thrulay_port*_ - Port range (e.g. 5011-5015) to run the thurlay _receiver_.
-     * _*peer_port*_ - Port range (e.g. 10100-10200) to run the _server_ processes of the above tests.  
-   * Note that some simple calculations can be used to determine how many ports are expected for a _*full*_ schedule of tests.  For example in assuming a completely packed schedule of 10 second long tests, there are a maximum of 6 tests per minute available. BWCTL cycles through the port range one-by-one, assigning each scheduled test the next open port in line. The iperf/nuttcp/thrulay applications may leave sockets open for a while after the test has finished. If a test tries to use the same port as was used by a previous test, and that test's socket is still open, the newer test will fail. By default, Linux allows these sockets to stay open for up to a minute. So, to ensure that no tests fail, for 6 tests, the minimum number of ports to make this work would be 7. However, due to environmental factors, it is best to use a number higher than this. Since port ranges are reasonably easy to open, it is recommended that the final number use double the range: 14 ports.
+   * The pSPT development team recommends not limiting measurement tools to certain ports; this action may cause unexpected or unpredictable behavior.  For instance tools such as BWCTL have two factors to consider if the ports are limited to a small subset:
+     # Ports available for the regular testing infrastructure _*on the machine*_
+     # Ports available for others to test _*to the machine*_
+   * Both situations are controlled by setting values in the same configuration file on the local machine, and it can be hard to predict how many to allow.  Some simple calculations can be used to determine a baseline number of ports for the first situation and are based on the parameters of the BWCTL test.  Consider the following BWCTL parameters:
+     # 10 Second long BWCTL tests
+     # Maximum availability of 6 _slots_ per minute
+   * This would imply needing a total of _*6*_ ports open.  To allow for time range rounding errors we should increase this to _*7*_ to be safe.  Ideally this would work well, but there are complications due to the nature of the Linux kernel.  A general behavior of the kernel is to not _release_ a port from a previous use for up to a minute after it may be closed.  This environmental consideration therefore has an impact on the above calculation.  Instead of only allowing _*7*_ ports, we should double this number to _*14*_ to be completely safe.   
+     
+ * *Q: Where can the BWCTL port values be adjusted?*
+ * *A:* 
+   * The pSPT development team recommends not limiting measurement tools to certain ports; this action may cause unexpected or unpredictable behavior.  If selecting a port range is still required, BWCTL has several settings defined in the _*bwctld.conf*_ file that dictate which ports it may use for testing.  The configuration options are:
+     * _*iperf_port*_ - Port range (e.g. 5001-5020) to run the iperf _receiver_.
+     * _*nuttcp_port*_ - Port range (e.g. 5021-5040) to run the nuttcp _receiver_.
+     * _*thrulay_port*_ - Port range (e.g. 5041-5060) to run the thurlay _receiver_.
+     * _*peer_port*_ - Port range (e.g. 5061-5080) to run the _server_ processes of the above tests.
+   * Note that the above ranges are examples, and that calculating the appropriate number of ports based on the FAQ item above is recommended.  
 
- * *Q: I'd like to PXE boot the NPToolkit. Is that possible?*
- * *A:* Not currently, but this is a consideration of future releases.
+ * *Q: I'd like to PXE boot the pSPT. Is that possible?*
+ * *A:* Not currently.  This is a consideration of future releases.
 
  * *Q: When I boot, it gives me the following error _Can't find knoppix file system, sorry. Dropping you to a very limited shell ...._*
  * *A:* This can be attributed to a bad CD burn or a bad ISO image. Check the MD5 sum of the ISO and match this to the posted MD5 value.
 
  * *Q: What should I enter for the _Communities of interest_ configuration question?*
  * *A:* 
-   * This question can be confusing to answer for new users.  The goal is to associate some _loosely coupled_ labels to the data that the perfSONAR NPToolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music.  Some examples of valid answers are:
+   * This question can be confusing to answer for new users.  The goal is to associate some _loosely coupled_ labels to the data that the perfSONAR pSPT disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music.  Some examples of valid answers are:
      * *Internet2* - The data made available somehow connects the Internet2 backbone
      * *LHC* (*CMS*, *ATLAS*, etc.) – The system is part of the LHC perfSONAR instracture.
        * The USATLAS community has requested that peer sites use the following as the Communities of Interest string:  _*LHC USATLAS*_     
@@ -1055,14 +1121,17 @@ TBD
    * A Test has not run yet (e.g. a 4 hour testing interval may not produce tests for 4 hours.
    * The testing data may not be available in the database yet.  A test may complete, but may take several minutes to be stored in the database, and therefore become available to the GUI
  
- * *Q:* I do not think I am a member of a [pSPerformanceToolkit31#Communities community], should I put anyting?  
+ * *Q:* I do not think I am a member of a [pSPerformanceToolkit31#Communities community], should I put anything?  
  * *A:* Communities are not required, but they allow other individuals and organizations to find and use your services. It is a good practice to join as many as you may think are applicable.
  
  * *Q:* What is the purpose of [pSPerformanceToolkit31#BWCTL_Limits BWCTL Limits]/[pSPerformanceToolkit31#OWAMP_Limits OWAMP Limits]?
  * *A:* These allow you to limit the influence that outside users have on your system performance.  For example, to prevent your machine/network from being saturated with  BWCTL tests, limit the duration and maximum bandwidth available.  These screens allow a fine grained way to protect resources.
 
+ * *Q: How can I set limits to prevent others from overusing BWCTL/OWAMP?*
+ * *A:* BWCTL and OWAMP have configurable dialog that allows the administrator to limit the resources consumed.  To set the limits for BWCTL, consult this [pSPerformanceToolkit31#BWCTL_Limits section].  To set the limits for OWAMP, consult this [pSPerformanceToolkit31#OWAMP_Limits section].
+
  * *Q:* How many [pSPerformanceToolkit31#NTP NTP] servers do I need, can I select them all?
- * *A:* It is recommended that 4-5 _close_ and _active_ servers be used.  The _Select Closest Servers_ button will help with this decision.  Note that some servers may not be available due to routing (e.g. non-R&E networks vs R&E networks - a common problem for Internet2 and ESnet servers).
+ * *A:* It is recommended that 4 to 5 _close_ and _active_ servers be used.  The _Select Closest Servers_ button will help with this decision.  Note that some servers may not be available due to routing (e.g. non-R&E networks vs R&E networks - a common problem for Internet2 and ESnet servers).
  
  * *Q:* When clicking on GUI links the following error is seen:
 {{{
@@ -1090,7 +1159,22 @@ rootfs                3.4M   23K  3.4M   1% /
 /mnt/store/NPTools/scratch
                       248M   11M  226M   5% /scratch
 }}}
-   * The important mount point is _/mnt/store_, it this has reached _100%_, the drive is full.  Try removing unnecessary log files from _/usr/local/web/root/admin/log_ first, then remove older logs from the directories in _/var/log_
+   * The important mount point is _/mnt/store_, it this has reached _100%_, the drive is full.  There are several things that can be done to make room on the disk:
+     * Try removing unnecessary log files from _/usr/local/web/root/admin/log_ first
+     * Check to be logrotate is working:
+       # sudo logrotate -dv /etc/logrotate.conf 
+       # This has been known to fail:
+{{{
+reading config file ulogd
+error: error accessing /var/log/ulog: No such file or directory
+error: ulogd:1 glob failed for /var/log/ulog/*.log
+}}}
+       # If this occurs, try these steps:
+{{{
+sudo mkdir -p /var/log/ulog
+sudo logrotate -dv /etc/logrotate.conf
+}}}
+     * remove older logs from the directories in _/var/log_
 
  * *Q:* PingER displays several sets of duplicate results via the GUI, some of which have _No Data_.
  * *A:* PingER stores the results of all tests ever performed.  To clean out the pinger test sets run the following command:
@@ -1132,10 +1216,137 @@ Selecting previously deselected package sun-java5-bin.
 (Reading database ... 68831 files and directories currently installed.)
 Unpacking sun-java5-bin (from .../sun-java5-bin_1.5.0-14-1etch1_i386.deb) ...
 }}}
-   * A license agreement will appear, you may choose to either agree to this or disagree.  Disagreement will halt installation.  After agreeing the installation will proceed.  More information is available [http://wiki.debian.org/Java | here].
+   * A license agreement will appear, you may choose to either agree to this or disagree.  Disagreement will halt installation.  After agreeing the installation will proceed.  More information is available [http://wiki.debian.org/Java here].
 
- * *Q:* 
+ * *Q:* The _*SNMP Measurement Archive*_ service is listed as _*Not Running*_ on the web interface.  Is this normal?
  * *A:* 
+   * The _*SNMP Measurement Archive*_ is directly tied to the [pSPerformanceToolkit31#Cacti_Administration Cacti configuration].  If you have not configured _*Cacti*_ to monitor a network device, the _*SNMP Measurement Archive*_ will not start and show up in this state.  The following message will appear in _*/var/log/perfSONAR/SNMP.log*_ to indicate the service cannot be started:
+{{{
+2010/01/27 12:17:13 (24778) FATAL> SNMP.pm:370 perfSONAR_PS::Services::MA::SNMP::init - Cacti database is empty, stopping service.
+}}}
+   * If you have configured _*Cacti*_ and wish to restart the SNMP MA, try this:
+{{{
+[knoppix@Knoppix ~]$ sudo /etc/init.d/snmpMA.sh restart
+/etc/init.d/snmpMA.sh stop: SNMP MA (no pid file) not running
+waiting...
+/usr/local/perfSONAR-PS/perfSONAR_PS-SNMPMA/bin/daemon.pl --config /usr/local/etc/perfSONAR/SNMP_MA.conf --logger=/usr/local/etc/perfSONAR/SNMP_MA_logger.conf --piddir=/var/run --pidfile=SNMP_MA.pid --user=perfsonar --group=perfsonar
+/etc/init.d/snmpMA.sh start: SNMP MA started
+}}}
+ 
+ * *Q:* Service _*X*_ is listed as _*Not Runnning*_ on the web interface.  How can I restart?
+ * *A:*
+   * _*Bandwidth Test Controller (BWCTL)*_: 
+{{{
+sudo /etc/init.d/bwctld.sh restart
+}}}
+   * _*Lookup Service*_: 
+{{{
+sudo /etc/init.d/hLS.sh restart
+}}}
+   * _*Network Diagnostic Tester (NDT)*_: 
+{{{
+sudo /etc/init.d/ndt restart
+}}}
+   * _*Network Path and Application Diagnosis (NPAD)*_: 
+{{{
+sudo /etc/init.d/npad restart
+}}}
+   * _*One-Way Ping Service (OWAMP)*_: 
+{{{
+sudo /etc/init.d/owampd.sh restart
+}}}
+   * _*perfSONAR-BUOY Regular Testing (Throughput)*_: 
+{{{
+sudo /etc/init.d/pSB_collector.sh restart
+sudo /etc/init.d/pSB_master.sh restart
+}}}
+   * _*perfSONAR-BUOY Measurement Archive*_: 
+{{{
+sudo /etc/init.d/pSB.sh restart
+}}}
+   * _*perfSONAR-BUOY Regular Testing (One-Way Latency)*_: 
+{{{
+sudo /etc/init.d/pSB_owp_collector.sh restart
+sudo /etc/init.d/pSB_owp_master.sh restart
+}}}
+   * _*PingER Measurement Archive and Regular Tester*_: 
+{{{
+sudo /etc/init.d/PingER.sh restart
+}}}
+   * _*SNMP Measurement Archive*_: 
+{{{
+sudo /etc/init.d/snmpMA.sh restart
+}}}
+ 
+ * *Q:* I can't restart the _*perfSONAR-BUOY Measurement Archive*_, the following error appears:
+{{{
+[knoppix@Knoppix knoppix]# sudo /etc/init.d/pSB.sh restart
+/etc/init.d/pSB.sh stop: pSB (pid 2975?) not running
+waiting...
+/usr/local/perfSONAR-PS/perfSONAR_PS-perfSONARBUOY/bin/daemon.pl --config /usr/local/etc/perfSONAR/pSB_MA.conf
+--logger=/usr/local/etc/perfSONAR/pSB_MA_logger.conf --piddir=/var/run --pidfile=pSB_MA.pid --user=perfsonar --group=perfsonar
+DBD::mysql::st execute failed: Table './owamp/20100123_DATA' is marked as crashed and should be repaired at /UNIONFS/usr/local/perfSONAR-PS/perfSONAR_PS-perfSONARBUOY/bin/../lib/perfSONAR_PS/DB/SQL.pm line 200.
+/etc/init.d/pSB.sh start: pSB could not be started 
+}}} 
+ * *A:* 
+   * This is a database error and the MySQL database will need to be repaired.  To repair the database take the following steps (replacing the _*database name*_):
+{{{
+[knoppix@Knoppix knoppix]# sudo su -
+[root@Knoppix knoppix]# myisamchk -er /var/lib/mysql/owamp/20100123_DATA.MYI
+- recovering (with sort) MyISAM-table '/var/lib/mysql/owamp/20100123_DATA.MYI'
+Data records: 979
+- Fixing index 1
+- Fixing index 2
+- Fixing index 3
+- Fixing index 4
+[root@Knoppix knoppix]# /etc/init.d/pSB.sh restart
+/etc/init.d/pSB.sh stop: pSB (pid 2975
+5185?) not running
+waiting...
+/usr/local/perfSONAR-PS/perfSONAR_PS-perfSONARBUOY/bin/daemon.pl --config /usr/local/etc/perfSONAR/pSB_MA.conf --logger=/usr/local/etc/perfSONAR/pSB_MA_logger.conf --piddir=/var/run --pidfile=pSB_MA.pid --user=perfsonar --group=perfsonar
+/etc/init.d/pSB.sh start: pSB started 
+}}}
+ 
+ * *Q:* There is an old version of the Linux kernel on the pSPT.  Why was the _*2.6.27*_ Linux kernel chosen instead of the latest kernel release series?
+ * *A:* The pSPT development team is using this kernel because it has been dubbed the _*long term supported*_ kernel.  See [http://lkml.org/lkml/2008/10/11/235 this] for details.  This particular kernel lineage will still receive all of the benefits from kernel development (device drivers, security patches) but will not be subject to the same bleeding edge development that the newer (and frequently forked) head of the development effort will receive.  This choice makes for a stable kernel that should be free of any defects introduced by new development.  
+ 
+ * *Q:* _*CRITICAL SECURITY VULNERABILITY XYZ123*_ was announced hours ago and I am scared the pSPT will be compromised.  When can the users expect a fix?  What support guarantees will be offered?
+ * *A:* 
+   * Software of all types, weather it be an operating system or a performance measurement tool may have bugs.  Some bugs may be exploitable and can ruin a single system, and potentially the surrounding network and users.  The pSPT development team is aware of these concerns from the community regarding the security and maintainability of the pSPT. As such we offer the following points to address these concerns:
+     # The pSPT development team is a small open source project, and devotes as many resources as possible to addressing flaws in the software.  
+     # The pSPT development team is subscribed to several security oriented mailing lists including those dealing with debian, knoppix, and the linux kernel development effort.  When problems are seen, we will alert our users via the pSPT mailing lists.
+     # We will make every effort possible to address problems in a timely manner using one of the following methods.  Response time will be based on bug severity - critical or exploitable bugs will be given priority:
+       * Patches available for currently released pSPT versions after identification and upstream fixes become available
+       * New releases of the pSPT, normally available quarterly (estimated 3 - 4 disk releases per year)
+     # All open source software in this product comes with a LICENSE; within each license are the terms of support.  With BSD and GPL license the terms are usually _use this software at your own risk_.  
+     # The pSPT development team cannot offer any form of SLA or hard time frame guarantees.
+     
+ * *Q:* NTPD has exited/is not running on my machine, why did this happen and how can I fix it?
+ * *A:* 
+   * NTPD may exit if the hardware clock on the host is too far off from the true time to make a difference.  To _skip_ the clock ahead to the correct time, try these commands:
+{{{
+[knoppix@Knoppix init.d]$ sudo /etc/init.d/ntp stop
+Stopping NTP server: ntpd.
+[knoppix@Knoppix init.d]$ sudo ntpdate owamp.newy.net.internet2.edu owamp.wash.net.internet2.edu
+Looking for host owamp.newy.net.internet2.edu and service ntp
+host found : eth-0.nms-rlat.newy32aoa.net.internet2.edu
+Looking for host owamp.wash.net.internet2.edu and service ntp
+host found : eth-1.nms-rlat.wash.net.internet2.edu
+27 Jan 13:42:51 ntpdate[14891]: adjust time server 2001:468:9:12::16:34 offset -0.001660 sec
+[knoppix@Knoppix init.d]$ sudo /etc/init.d/ntp restart
+Stopping NTP server: ntpd.
+Starting NTP server: ntpd.
+}}}
+   * If NTPD continues to exit on a periodic basis, there may be a hardware failure.  Consult the machine's BIOS to see if there may be problems with the hardware clock or internal battery.  
+ 
+ * *Q:* What are the hardware requirements for running the pSPT?
+ * *A:* See the [pSPerformanceToolkit31#System_Requirements section] in this document.  Note that the pSPT development team has not created hard minimum or maximum requirements - the pSPT will function on almost any form of hardware.  Performance considerations do favor meeting or exceeding the minimum guidelines.
+ 
+ * *Q:* What is the recommended configuration for the hard disk of a machine running the pSPT?
+ * *A:* There is only one requirement for partitioning the hard disk of a pSPT system: an ext3 partition must be available for storage.  The user may configure as many partitions as they need for the pSPT disk, but for simplicity it is recommended that the entire disk be used in a single partition to allow for maximum storage resources.  See also [pSPerformanceToolkit31#Storage this section] for hints on storage configuration.  
+ 
+ * *Q:* 
+ * *A:*
 
 == Last Updated ==
 
