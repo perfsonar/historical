@@ -110,7 +110,7 @@ January 31, 2010.
 
 
 
-From Martin:
+From Jason:
 
    * Group decission - what are we supporting for platform and arch?
      * Post policy to various web sites (psps.internet2, software.internet2, others?)
