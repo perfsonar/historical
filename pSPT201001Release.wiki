@@ -75,8 +75,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=372 372] - _*Aaron/Maxim*_ - ~~hanging pinger instances~~
  * _*pSB*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=358 358] - _*Jeff/Aaron*_ - pS-Toolkit owampd stale file cleaner
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=365 365] - _*Aaron*_ - support for constraining ports for perfsonarbuoy owamp tests
-     * _*Jason*_ - Update documentation
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=365 365] - _*Aaron*_ - ~~support for constraining ports for perfsonarbuoy owamp tests~~
+     * _*Jason*_ - ~~Update documentation~~
      * _*Aaron*_ - ~~Update GUIs and pSB~~   
      * [http://code.google.com/p/perfsonar-ps/issues/detail?id=381 381] was opened as a subsequent issue
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=367 367] - _*Andy*_ - ~~OWAMP timestamp conversions slow down pSB MA requests~~
