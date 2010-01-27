@@ -1345,8 +1345,8 @@ Starting NTP server: ntpd.
  * *Q:* What is the recommended configuration for the hard disk of a machine running the pSPT?
  * *A:* There is only one requirement for partitioning the hard disk of a pSPT system: an ext3 partition must be available for storage.  The user may configure as many partitions as they need for the pSPT disk, but for simplicity it is recommended that the entire disk be used in a single partition to allow for maximum storage resources.  See also [pSPerformanceToolkit31#Storage this section] for hints on storage configuration.  
  
- * *Q:* 
- * *A:*
+ * *Q:* When using _Konqueror_ on the pSPT, I get the following error: _*Username is set to "undefined"*_.  What should I do?
+ * *A:* Avoid using _Konqueror_, if you are using the XWindows system on the pSPT use _Iceweasel_ or a browser on an external system.  
 
 == Last Updated ==
 
