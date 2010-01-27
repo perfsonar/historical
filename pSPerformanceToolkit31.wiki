@@ -140,7 +140,11 @@ After choosing _*Option 1*_ from the menu, the following prompt will appear list
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/drive-1.png
 
-At the time of configuration, the user chose the first option.  In this particular case an internal check requests that the disk have the minimum 10GB of capacity.  Note that any partition combination is acceptable, as long as the minimum size is respected.  Note that for simplicity a single partition will give the pSPT the most access to storage.  This message will appear as such:
+At the time of configuration, the user chose the first option.  In this particular case an internal check requests that the disk have the minimum 10GB of capacity.  Note that any partition combination is acceptable, as long as the minimum size is respected.  Note that for simplicity a single partition will give the pSPT the most access to storage.  In the previous image note that the drive was not formatted with any partition type, this example shows a drive that has a partition already:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/drive-5.png
+
+After choosing a drive, this message will appear:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/drive-2.png
 
@@ -151,6 +155,10 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/drive-3.png
 The screen will display the results of the formatting step.  Note that a machine reboot is required before the system will be completely usable.  The remainder of the menu can be navigated before the reboot will be requested:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/drive-4.png
+
+Note that if the disk was previously formatted, the following warning will appear to signify data may be lost:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/drive-6.png
 
 After completing this series of questions, the menu will re-appear and mark that this step has been visited:
 

@@ -34,17 +34,13 @@ The following outline some exceptions to the overall release process.  Also see 
 
 === Bugs Related to This Release ===
 
-
- 	 
-[Vote for this issue and get email change notifications] 	
-
-
  * _*Web/Publications*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=169 169] - _*Jason*_ - Add required hardware documentation
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff/Jason*_ - Create organized web-site for pS-Performance-Toolkit
      * _*Jason*_ - Review current state, find any holes
      * _*Jeff*_ - Edit/Approve
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Jason*_ - SNMP MA - Indicate it is not running due to cacti
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Jason*_ - SNMP MA - ~~Indicate it is not running due to cacti~~
+     * Passed to Aaron for 3.2 release.  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=368 368] - _*Jason/Aaron*_ - Storage Configuration Clarifications
      * _*Jason*_ - Update FAQ/documentation
      * _*Aaron*_ - ~~Update menus~~
