@@ -48,6 +48,52 @@ January 31, 2010.
        * RPMs for all services and packages
        * Kernels (see above) - and if we want to support web100 long term
        * Install to disk option
+ # Nagios integration (*Jason*, *Brian*)
+   * Worth experimenting with basic installation/configuration of NAGIOS on current generation?
+   * Configuration
+     * Static - easy stuff
+       * Certain processes/data sets should always be monitored
+         * httpd
+         * ntpd
+         * service watcher?       
+         * Disk levels - go below a threshold
+         * Load Levels - go above a threshold
+         * Process Count?
+           * Total goes above some threshold
+           * Too many of one type, e.g. too many owampd's or bwctld's (indicates people testing to you)
+       * Alert intervals (how often to send alerts for the same outstanding event)
+     * Dynamic - the hard stuff
+       * Email addresse(s) to send alerts to (GUI tie in)
+       * Proccesses/data to monitor 
+         * ssh (if enabled)
+         * owampd/bwctld/npad/ndt/pS daemons/pow(master|collector)/bw(master|collector) (if enabled)
+         * mysqld (if enabled)      
+         * data sets from mysql (owamp/bwctl/pinger where applicable)
+           * if data is above/below (too many errors or too little bandwidth) a performance threshold
+           * if data is older than a time threshold           
+         * data sets from rrd (where applicable)
+           * if data is above/below a performance threshold (too many errors, too much or too little utilization)
+           * if data is older than a time threshold
+     * GUI extensions to watch other instances of the toolkit in the wild [requires nrpe probably] (future enhancement)
+     * Send a 'come online' alert to a pS address?
+ # Testing Platforms (*Eric*, *Jason*, *Brian*)
+   * Group decission - what are we supporting for platform and arch?
+     * Post policy to various web sites (psps.internet2, software.internet2, others?)
+     * re-tool the yum repo (e.g. have a centos 5 vs a centos 4 vs a scientific, etc.) for new packages
+     * list will need to flow with the what the vendors and major science VOs are using
+     * list also related to our availability to create/test
+   * Packages
+     * RPM build info in svn currently
+     * Deb packages?
+     * Each developer responsbile for mainitaing the spec file
+     * Release team should be handling the final build and test (currently each developer does this)
+     * Release team will handle the uploading and maintenance of the yum repo
+   * Buidling and Testing
+     * [https://nmi.cs.wisc.edu/ | NMI] - worth using?
+     * VM farm 
+       * Goal: create scripts that will build/test installation/test use on all arch and platforms in a single swoop
+       * Need VMs for each arch and platform, preferably 'clean' with each use.  Setup script could install the RPM repo and other pre-reqs
+       * Manual process = bad, this needs to be automated.  Infeasbile to log on to 10+ machines to do all of this      
  # TBD 1
  # TBD 2
  # TBD 3
