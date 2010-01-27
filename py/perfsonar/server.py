@@ -58,7 +58,8 @@ class psMessageFix(soaplib.soap.Message):
 
         if len(self.params):
             if len(data) != len(self.params):
-                raise Exception("Parameter number mismatch expected [%s] got [%s]"%(len(self.params),len(data)))
+                raise Exception("Parameter number mismatch expected [%s] got [%s]" \
+                            % (len(self.params),len(data)))
 
         nsmap = NamespaceLookup(self.ns)
         element = create_xml_element(self.name, nsmap, self.ns)
@@ -161,14 +162,16 @@ class psService(SimpleWSGISoapApp):
         dispatchMethod = None
         if self.dispatchmap.has_key(message.attrib['type']):
             try:
-                dispatchMethod = getattr(self, self.dispatchmap[message.attrib['type']])
+                dispatchMethod = getattr(self, 
+                                    self.dispatchmap[message.attrib['type']])
             except AttributeError:
                 er = 'No class/dispatch method named: ' + \
                     self.dispatchmap[message.attrib['type']]
                 log.fatal(er)
                 raise RuntimeError(er)
         else:
-            er = 'No entry in dispatch map for nmwg:message type: ' + message.attrib['type']
+            er = 'No entry in dispatch map for nmwg:message type: ' \
+                    + message.attrib['type']
             log.fatal(er)
             raise RuntimeError(er)
             
