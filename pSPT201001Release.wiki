@@ -4,7 +4,7 @@
 
 == Introduction ==
 
-This page outlines details regarding the release of pSPT 3.1.2.  The process started in early January of 2010 and is scheduled to complete on January 29th, 2010.  
+This page outlines details regarding the release of pSPT 3.1.2.  The process started in early January of 2010 and is scheduled to complete on ~~January 29th, 2010~~ February 17th, 2010.  
 
 == Release Team ==
 
@@ -22,11 +22,11 @@ This page outlines details regarding the release of pSPT 3.1.2.  The process sta
 
 Release Start: January 4, 2010
 
-First Release Candidates: January ~~22~~ 21, 2010
+First Release Candidates: January 22, 2010
 
-Beta Testing: January 22, 2010 through January 28, 2010
+Beta Testing: January 22, 2010 through ~~January 28, 2010~~ February 10, 2010
 
-Release Date: January 29, 2010
+Release Date: ~~January 29, 2010~~ February 17, 2010
 
 == Specifics ==
 
@@ -125,7 +125,7 @@ Testers should download ISO betas and excersize *ALL* functionality.  If you are
 
 == Lessons Learned ==
 
-TBD
+ * Need a longer test cycle
 
 == Last Updated ==
 
