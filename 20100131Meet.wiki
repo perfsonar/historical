@@ -21,7 +21,7 @@ January 31, 2010.
        * 3.1.3 in April (pre MM)
        * 3.1.4 in July (pre JTs)
        * 3.1.5 in Nov/Dec (if needed - hard with SC)
-     * Critical bug fixes and software upgrades only
+     * Critical bug fixes and software upgrades only 
      * Will release faster if something *very* critical comes up
      * [http://lists.debian.org/debian-security-announce/2010/msg00010.html Debian security support for v. 4.0 (etch) is being EOL'ed on Feb 15th]
        * Upgrade?
@@ -34,9 +34,15 @@ January 31, 2010.
        * _We will make announcements on vulnerabilties within X days_
        * _We will have fixes available for vulnerabilities within X days_
      * SLAC Kernel Discussion
-       * SLAC's policy: follow the RHEL kernels.  
+       * SLAC's policy: Like to support kernel versions tied to RHEL (e.g. we use 2.6.27, they like 2.6.31(32?))
        * Our (_unstated right now_) policy: Choose the [http://lkml.org/lkml/2008/10/11/235 long term support kernel] and follow the releases here.  
+       * No one has requested we make a switch, but there have been questions if we would consider it (and if so - soon)
+       * SLAC security alluded to being ok with 2.6.27 - as long as we publicize our reasons and promises of support
        * Setting a policy matters to the VOs (e.g. USATLAS).  Choosing a specific policy matters more to individual stake holders. We should weigh the options of following a packaged kernel linage vs what the support structure of the OSS community has to offer.  
+       * We do need to talk about kernel versions going forward in 3.1.x and 3.2
+         * Do we stick with a vanilla support kernel?
+         * Do we follow what the distribution (e.g. RHEL/CentOS/Scientific) is using - N.B. that applying web100 to a vendor kernel is not pleasant
+         * bye bye web100?  longer term perhaps - hard to convert npad/ndt to not use it. 
    * RHEL (3.2) Transition
      * Targeting Summer for 3.2 Betas
      * Must support 3.1 in parallel
