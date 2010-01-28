@@ -60,8 +60,7 @@ January 31, 2010.
      * Static - easy stuff
        * Certain processes/data sets should always be monitored
          * httpd
-         * ntpd
-         * service watcher?       
+         * ntpd (both is it up and is time in sync)
          * Disk levels - go below a threshold
          * Load Levels - go above a threshold
          * Process Count?
@@ -73,15 +72,20 @@ January 31, 2010.
        * Proccesses/data to monitor 
          * ssh (if enabled)
          * owampd/bwctld/npad/ndt/pS daemons/pow(master|collector)/bw(master|collector) (if enabled)
+         * pSB MA, SNMP MA, topology services, LS (if enabled)
+            * not just is it running, but does it respond to queries    
          * mysqld (if enabled)      
          * data sets from mysql (owamp/bwctl/pinger where applicable)
            * if data is above/below (too many errors or too little bandwidth) a performance threshold
-           * if data is older than a time threshold           
+               * e.g.: last 3 bwctl tests for a given host pair below 100 Mbps
+           * if data is older than a time threshold
+              * e.g.: no new bwctl data added to the MA for host pair x,y in the last 24 hours
          * data sets from rrd (where applicable)
            * if data is above/below a performance threshold (too many errors, too much or too little utilization)
            * if data is older than a time threshold
      * GUI extensions to watch other instances of the toolkit in the wild [requires nrpe probably] (future enhancement)
      * Send a 'come online' alert to a pS address?
+     * Decide which of the many Nagios GUIs to integrate (e.g.: http://www.debianhelp.co.uk/nagiosweb.htm)
  # Testing Platforms (*Eric*, *Jason*, *Brian*)
    * Eric: 
      # Define Supported Platforms
