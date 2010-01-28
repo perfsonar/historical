@@ -77,58 +77,45 @@ January 31, 2010.
      * GUI extensions to watch other instances of the toolkit in the wild [requires nrpe probably] (future enhancement)
      * Send a 'come online' alert to a pS address?
  # Testing Platforms (*Eric*, *Jason*, *Brian*)
-                      
-             1) Define Supported Platforms
-                         . hardware archictecture + operating system/distribution + middleware.
-                         . try to support most of currently deployed plaftom
-                         . keep it to a minimum number
-                         . have at least one platform current (hardware/OS)
-
-
-             2) Create VM templates that matches the supported platforms
-
-                         . use a VM to build and package release. This allows reproductable build process
-                         . Duplicate VM from template and instantiate for testing (always starting from a known state
-
-             3) Create VM to run stub services for testing
-
-                         . needed for unit testing (automation)
-                         . needed for debuging and development
-                         . allows to model various configuration
-
-            4) The entire build and testing environment as a download.
-
-                         . This allows anyone to reproduce it anywhere.
-                         . Helps for automation and provisioning
-                         . Allows for collaborative debug (one may send a VM to another).
-
-            5) Available collaborative resources
- 
-                         . OpenDevNet
-                         . NMI
-                         . Ad-hoc
-
-
-
-From Jason:
-
-   * Group decission - what are we supporting for platform and arch?
-     * Post policy to various web sites (psps.internet2, software.internet2, others?)
-     * re-tool the yum repo (e.g. have a centos 5 vs a centos 4 vs a scientific, etc.) for new packages
-     * list will need to flow with the what the vendors and major science VOs are using
-     * list also related to our availability to create/test
-   * Packages
-     * RPM build info in svn currently
-     * Deb packages?
-     * Each developer responsbile for mainitaing the spec file
-     * Release team should be handling the final build and test (currently each developer does this)
-     * Release team will handle the uploading and maintenance of the yum repo
-   * Buidling and Testing
-     * [https://nmi.cs.wisc.edu/ | NMI] - worth using?
-     * VM farm 
-       * Goal: create scripts that will build/test installation/test use on all arch and platforms in a single swoop
-       * Need VMs for each arch and platform, preferably 'clean' with each use.  Setup script could install the RPM repo and other pre-reqs
-       * Manual process = bad, this needs to be automated.  Infeasbile to log on to 10+ machines to do all of this      
+   * Eric: 
+     # Define Supported Platforms
+       * hardware archictecture + operating system/distribution + middleware.
+       * try to support most of currently deployed plaftom
+       * keep it to a minimum number
+       * have at least one platform current (hardware/OS)
+     # Create VM templates that matches the supported platforms
+       * use a VM to build and package release. This allows reproductable build process
+       * Duplicate VM from template and instantiate for testing (always starting from a known state
+     # Create VM to run stub services for testing
+       * needed for unit testing (automation)
+       * needed for debuging and development
+       * allows to model various configuration
+     # The entire build and testing environment as a download.
+       * This allows anyone to reproduce it anywhere.
+       * Helps for automation and provisioning
+       * Allows for collaborative debug (one may send a VM to another).
+     # Available collaborative resources
+       * OpenDevNet
+       * NMI
+       * Ad-hoc
+   * Jason: 
+     * Group decission - what are we supporting for platform and arch?
+       * Post policy to various web sites (psps.internet2, software.internet2, others?)
+       * re-tool the yum repo (e.g. have a centos 5 vs a centos 4 vs a scientific, etc.) for new packages
+       * list will need to flow with the what the vendors and major science VOs are using
+       * list also related to our availability to create/test
+     * Packages
+       * RPM build info in svn currently
+       * Deb packages?
+       * Each developer responsbile for mainitaing the spec file
+       * Release team should be handling the final build and test (currently each developer does this)
+       * Release team will handle the uploading and maintenance of the yum repo
+     * Buidling and Testing
+       * [https://nmi.cs.wisc.edu/ | NMI] - worth using?
+       * VM farm 
+         * Goal: create scripts that will build/test installation/test use on all arch and platforms in a single swoop
+         * Need VMs for each arch and platform, preferably 'clean' with each use.  Setup script could install the RPM repo and other pre-reqs
+         * Manual process = bad, this needs to be automated.  Infeasbile to log on to 10+ machines to do all of this      
  # TBD 1
  # TBD 2
  # TBD 3
