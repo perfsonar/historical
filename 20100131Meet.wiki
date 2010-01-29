@@ -223,7 +223,17 @@ January 31, 2010.
        * give me a list of pingER data for host A to host B for the past 24 hours
      * Topology MA:
        * add sample here
- # TBD 1
+ # Combining Path Data with Measurement Data
+   * Motiviations
+     * Short-term: Associate traceroute with measurement data
+     * Long-term: Store path data from non-traceroute sources
+   * Linking Path, Measurement and Topology Data
+   * Architecture
+     * Route MA
+     * Triggering traceroute measurements
+   * Schema for storing traceroute results
+     * Current: http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/rnc/traceroute.rnc
+   * Looking beyond traceroute
  # TBD 2
  # TBD 3
  # TBD 4 
