@@ -222,7 +222,9 @@ January 31, 2010.
      * PingER MA:
        * give me a list of pingER data for host A to host B for the past 24 hours
      * Topology MA:
-       * add sample here
+       * give me topology for domain A
+       * give me interface with IP address A
+       * give me interface connected to another interface with IP address A
  # Combining Path Data with Measurement Data
    * Motiviations
      * Short-term: Associate traceroute with measurement data
