@@ -225,8 +225,23 @@ January 31, 2010.
        * give me topology for domain A
        * give me interface with IP address A
        * give me interface connected to another interface with IP address A
+ # Improving ps-PS Service Architecture
+   * Problems
+     * Difficult to add new metrics
+     * Duplication in efforts which leads to inconsitencies
+   * Goals
+     * Ease development of new services
+     * Improve code re-use
+     * Increase modularity
+     * more
+   * Analyze types of services
+     * Look at functional components of each
+     * What's new functionality needed in future
+       * AA, etc
+   * Anything from OSCARS architecture that can apply to PS?
+   * Other Open Design Questions
  # Combining Path Data with Measurement Data
-   * Motiviations
+   * Motivations
      * Short-term: Associate traceroute with measurement data
      * Long-term: Store path data from non-traceroute sources
    * Linking Path, Measurement and Topology Data
@@ -236,7 +251,6 @@ January 31, 2010.
    * Schema for storing traceroute results
      * Current: http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/rnc/traceroute.rnc
    * Looking beyond traceroute
- # TBD 2
  # TBD 3
  # TBD 4 
  # TBD 5 
