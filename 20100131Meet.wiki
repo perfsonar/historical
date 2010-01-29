@@ -104,6 +104,12 @@ January 31, 2010.
        * This allows anyone to reproduce it anywhere.
        * Helps for automation and provisioning
        * Allows for collaborative debug (one may send a VM to another).
+     # Create enough VMs for scalability testing. Some examples include
+        * ability to test N clients all hitting the same service at the same time
+        * ability to run the LS scalability tests described here:
+           * http://code.google.com/p/perfsonar-ps/wiki/ProposedLStestPlan
+     # Ability to run interoperability tests with perfSONAR MDM release
+     # Ability to automate much of this to run tests before a release (longer term)
      # Available collaborative resources
        * OpenDevNet
        * NMI
