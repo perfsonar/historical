@@ -39,11 +39,7 @@ January 31, 2010.
        * Our commitment to alerting about vulnerabilities
        * Our commitment patching and fixing vulnerabilities.  Want to avoid timeframes in our definition.  
        * Support statement for support when the major version jumps
-   * In general we need to get these things in a public area so there is not a lot of confusion.  We will need to talk to VOs about this as well.  
- 
- 
- 
- 
+   * In general we need to get these things in a public area so there is not a lot of confusion.  We will need to talk to VOs about this as well.
  # LiveCD Topics (*Jason*, *Aaron*)
    * Remaining 3.1.X releases
      * Targeting 2 - 3 more this year.  May need to worry about some next year depending on support...
@@ -100,12 +96,6 @@ January 31, 2010.
        * RPMs for all services and packages
        * Kernels (see SLAC discussion) - and if we want to support web100 long term
        * Install to disk option
-
-
-
-
-
-
  # Nagios integration (*Jason*, *Brian*)
    * Worth experimenting with basic installation/configuration of NAGIOS on current generation?
    * Configuration
