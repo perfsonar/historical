@@ -225,7 +225,7 @@ January 31, 2010.
        * give me topology for domain A
        * give me interface with IP address A
        * give me interface connected to another interface with IP address A
- # Improving ps-PS Service Architecture
+ # Improving ps-PS Service Architecture (Aaron, Eric, Andy)
    * Problems
      * Difficult to add new metrics
      * Duplication in efforts which leads to inconsitencies
@@ -240,7 +240,7 @@ January 31, 2010.
        * AA, etc
    * Anything from OSCARS architecture that can apply to PS?
    * Other Open Design Questions
- # Combining Path Data with Measurement Data
+ # Combining Path Data with Measurement Data (Andy, Jeff)
    * Motivations
      * Short-term: Associate traceroute with measurement data
      * Long-term: Store path data from non-traceroute sources
