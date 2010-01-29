@@ -240,6 +240,18 @@ January 31, 2010.
        * AA, etc
    * Anything from OSCARS architecture that can apply to PS?
    * Other Open Design Questions
+ # Clients and services (Inder, Aaron, Andy)
+   * Goals
+    * Easier for clients to develop pS services
+    * Shorten the learning curve and development time
+    * Provide bridge between standards and sofware
+   * Short-term
+    * Client SDK
+    * More client documention
+    * High level programming libs
+    * Support process as upgrade libs and protocols
+    * Development support
+     * Dummy server for debugging and testing clients
  # Combining Path Data with Measurement Data (Andy, Jeff)
    * Motivations
      * Short-term: Associate traceroute with measurement data
