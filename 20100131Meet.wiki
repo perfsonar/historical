@@ -15,45 +15,97 @@ January 31, 2010.
 
  # Attendees: 
    * TBD
+ # Product Support (*Jason*)
+   * Packages for Platforms and Architectures
+     * Decide which Arch's we will support, suggested:
+       * x86
+       * x86 64 Bit
+       * Others we could consider
+         * ia64
+         * ppc
+     * Decide which platforms we will (explicitly) support, suggested:
+       * RHEL v4 and v5
+       * CentOS v4 and v5       
+       * Scientific v4 and v5
+       * Others to consider:
+         * Debian v4 and v5 (requires deb package support)
+         * Ubuntu (versions vary, maybe current + previous 2 - requires deb package support)
+         * Fedora (versions vary, maybe current + previous 2)
+         * SuSE (versions vary, maybe current + previous)
+         * FreeBSD (versions vary, maybe current + previous - requires maintaining something in 'ports')
+   * pSPT
+     * Need a general statement that covers
+       * A statement of who we are, and the resources (e.g. how limited) that are available
+       * Our commitment to alerting about vulnerabilities
+       * Our commitment patching and fixing vulnerabilities.  Want to avoid timeframes in our definition.  
+       * Support statement for support when the major version jumps
+   * In general we need to get these things in a public area so there is not a lot of confusion.  We will need to talk to VOs about this as well.  
+ 
+ 
+ 
+ 
  # LiveCD Topics (*Jason*, *Aaron*)
    * Remaining 3.1.X releases
      * Targeting 2 - 3 more this year.  May need to worry about some next year depending on support...
        * 3.1.3 in April (pre MM)
        * 3.1.4 in July (pre JTs)
        * 3.1.5 in Nov/Dec (if needed - hard with SC)
-     * Critical bug fixes and software upgrades only 
+     * Critical bug fixes and software upgrades _*only*_
+       * Limit the introduction of new features/structure
+       * Limit the changes to existing features/structure 
      * Will release faster if something *very* critical comes up
      * [http://lists.debian.org/debian-security-announce/2010/msg00010.html Debian security support for v. 4.0 (etch) is being EOL'ed on Feb 15th]
-       * Upgrade?
-       * Manually backport?
-   * Support Structure
-     * Need explicit language in a public area
-     * Ex:
-       * _We monitor X, Y, and Z for vulnderabilities_
-       * _We are will support 3.1 releases through X date_
-       * _We will make announcements on vulnerabilties within X days_
-       * _We will have fixes available for vulnerabilities within X days_
-     * SLAC Kernel Discussion
-       * SLAC's policy: Like to support kernel versions tied to RHEL (e.g. we use 2.6.27, they like 2.6.31(32?))
-       * Our (_unstated right now_) policy: Choose the [http://lkml.org/lkml/2008/10/11/235 long term support kernel] and follow the releases here.  
-       * No one has requested we make a switch, but there have been questions if we would consider it (and if so - soon)
-       * SLAC security alluded to being ok with 2.6.27 - as long as we publicize our reasons and promises of support
-       * Setting a policy matters to the VOs (e.g. USATLAS).  Choosing a specific policy matters more to individual stake holders. We should weigh the options of following a packaged kernel linage vs what the support structure of the OSS community has to offer.  
-       * We do need to talk about kernel versions going forward in 3.1.x and 3.2
-         * Do we stick with a vanilla support kernel?
-         * Do we follow what the distribution (e.g. RHEL/CentOS/Scientific) is using - N.B. that applying web100 to a vendor kernel is not pleasant
-         * bye bye web100?  longer term perhaps - hard to convert npad/ndt to not use it. 
+       * Upgrade could be time consuming and breaks the rules above
+       * Rely on backports prepared by others (security fixes would be quick to backport)
+       * Manually backport as needed (will be time consuming if backports are not quick to enter the market)
+   * Kernel Bingo (listen for you number, but only shout when its not called...)
+     * pSPT has adopted the 2.6.27 lineage, the _long term support_ kernel.  See [http://lkml.org/lkml/2008/10/11/235 here] for more details, this line replaces 2.6.18.
+       * _*Positives*_:
+         * We don't need an experimental kernel, we really don't need to be on the bleeding edge of hardware support of new features
+         * We want a safe kernel - the long term supported lineages _*should*_ receive all of the same fixes as the other mainline branches
+         * Web100 applies cleanly to the vanilla kernels from this line, and web100 development is not funded anymore (MM reported the current maintainer donates time to keep up).  
+       * _*Negatives*_:
+         * Real linux vendors are keeping up with the bleeding edge of development (and apply their own patches etc.)
+         * Knowledgeable (but perhaps easily excitable) people know math, and 2.6.27 < 2.6.32.  This throws up a red flag that we are not keeping up and may be pusing a vulnerable product.  
+     * USATLAS (specifically SLAC) has raised some concerns on our choice of kernels.  This is not news, but there is pressure for us to do one of two things (not clear if either would solve the problem of course):
+       # Clearly state our process
+         * Explain why we use the particular kernel
+         * Explain why we think this protects the end user vs. the alternative (bleeding edge)
+         * Explain our definition of _support_ (see above discussion)         
+       # Migrate to something that will make everyone happy
+         * Follow what the vendors are following - use what RHEL/CentOS/Scientific use
+         * Still state the process and support level
+     * To reiterate what was said from SLAC security personnel on their process:
+       * Typically like everything under their control (mostly RHEL/CentOS/Scientific) to all be at the same kernel, right now its 2.6.32.x
+       * Follow the CVE announcements like a hawk, expect that the vendors will offer patches in 2-4 weeks
+       * Patch everything on the network in that timeframe.
+     * Things we can consider to mitigate/compromise (in order of easiest to hardest):
+       # Follow all of the lists.  When we see a CVE we digest it as fast as possible and relay this information to the performance-node lists as well as USATLAS (or other VOs that want to be kept aware).  Suggest instant steps to comply in the event of a problem, announce when releases will be available to fix.
+       # Automatically update the 2.6.27 kernel when a fix becomes available (even if there is not a CVE that applies to us).  Follow same announcement steps as in _*1*_.
+       # Migrate to a vanilla 2.6.32 (or whatever the vendors are using).  Apply the same tactic as in _*1*_ (or _*2*_) regarding upgrades
+       # Use stock vendor kernels and apply web100.  Would need to monitor what they are using (will be easier when we are in 3.2) and will need to follow same announcement steps as in _*1*_.
+       # Convert all tools that use web100 (ndt/npad) to not use web100.  This eliminates some of the problem, but we would still need to follow what the vendors are doing regarding kernels.  
    * RHEL (3.2) Transition
-     * Targeting Summer for 3.2 Betas
-     * Must support 3.1 in parallel
-     * VOs may be slow to adopt 3.2 - they are still not recommending 3.1 to Tier3s for example.  
+     * Targeting Late Summer 2010 for 3.2 Betas
+       * Have a list of people interested in helping test already
+     * Must support 3.1.x's in parallel
+       * How long
+       * To what level
+       * Project fork if necessary?
+     * VOs may be slow to adopt 3.2 - e.g. USATLAS is very slow to recommend 3.1 to Tier3s for example.  An upgrade to a completly different system is similar to starting over, I would expect at least 2 minor releases (taking us into 2011) to work out all the kinks.        
      * Features to worry about
        * Wizard interfaces
        * Backend magic to manage the disk
        * Upgrade path?
        * RPMs for all services and packages
-       * Kernels (see above) - and if we want to support web100 long term
+       * Kernels (see SLAC discussion) - and if we want to support web100 long term
        * Install to disk option
+
+
+
+
+
+
  # Nagios integration (*Jason*, *Brian*)
    * Worth experimenting with basic installation/configuration of NAGIOS on current generation?
    * Configuration
@@ -94,53 +146,59 @@ January 31, 2010.
                * interface status
      * Send a 'come online' alert to a pS address?
    * GUI extensions to watch other instances of the toolkit in the wild [requires nrpe probably] (future enhancement)
-   * Decide which of the many Nagios GUIs to integrate (e.g.: http://www.debianhelp.co.uk/nagiosweb.htm)   
- # Testing Platforms (*Eric*, *Jason*, *Brian*)
-   * Eric: 
-     # Define Supported Platforms
-       * hardware archictecture + operating system/distribution + middleware.
-       * try to support most of currently deployed plaftom
-       * keep it to a minimum number
-       * have at least one platform current (hardware/OS)
-     # Create VM templates that matches the supported platforms
-       * use a VM to build and package release. This allows reproductable build process
-       * Duplicate VM from template and instantiate for testing (always starting from a known state
-     # Create VM to run stub services for testing
-       * needed for unit testing (automation)
-       * needed for debuging and development
-       * allows to model various configuration
-     # The entire build and testing environment as a download.
-       * This allows anyone to reproduce it anywhere.
-       * Helps for automation and provisioning
-       * Allows for collaborative debug (one may send a VM to another).
-     # Create enough VMs for scalability testing. Some examples include
-        * ability to test N clients all hitting the same service at the same time
-        * ability to run the LS scalability tests described here:
+   * Decide which of the many Nagios GUIs to integrate (e.g.: http://www.debianhelp.co.uk/nagiosweb.htm)      
+ # Build and Testing Platforms (*Eric*, *Jason*, *Brian*)
+   * Attempting to solve two problems (potentially with a common solution):
+     # _*Build infrastructure*_
+       * Does not have to be bare iron, VMs are acceptable
+       * _*Must*_ contain diverse set of platforms and architectures (discussion to be held in the support topic)
+       * _*Should*_ be automatable (kick off the same tests on all platforms simultaneously)
+            * download svn branch/tag
+            * build using rpm build tools
+            * verify - attempt to install on target arch/platform
+              * download pre-reqs
+              * install
+              * insert dummy config
+              * start service
+              * run canned unit tests
+       * _*Must*_ be resetable (bring the entire infrastructure back to a clean state for each build/test prorcess)
+       * Infrastructure does not have to be mobile (would prefer it not be - have it live in an accessible place)
+       * All developers have access to the _head_ machine
+         * accts live there
+         * machine configurations (to generate all VMs) live there too
+         * update the _master_ as new releases and software updates come out       
+       * Examples out in the world to consider:
+         * [https://nmi.cs.wisc.edu/ NMI] - OSG build tool, well supported and built for this specific purpose
+         * [http://www.emulab.net/ Emulab] - Network testbed, but fits some of the above needs (variable archs and some platforms, easy to _reset_, easy to automate)
+         * Homeade - Get a beefy system and set up software to start up QEMU/XEN/VMware instances.  Can make this as scriptable and configurable as we need to, but will require development time.  
+     # _*Testing infrastructure*_
+       * Configurable infrastructure with a potentially diverse topology used to validate functional requirements of the software
+       # Define Supported Platforms
+         * hardware archictecture + operating system/distribution + middleware.
+         * try to support most of currently deployed plaftom
+         * keep it to a minimum number
+         * have at least one platform current (hardware/OS)
+       # Create VM templates that matches the supported platforms
+         * use a VM to build and package release. This allows reproductable build process
+         * Duplicate VM from template and instantiate for testing (always starting from a known state
+       # Create VM to run stub services for testing
+         * needed for unit testing (automation)
+         * needed for debuging and development
+         * allows to model various configuration
+       # The entire build and testing environment as a download.
+         * This allows anyone to reproduce it anywhere.
+         * Helps for automation and provisioning
+         * Allows for collaborative debug (one may send a VM to another).
+       # Create enough VMs for scalability testing. Some examples include
+         * ability to test N clients all hitting the same service at the same time
+         * ability to run the LS scalability tests described here:
            * http://code.google.com/p/perfsonar-ps/wiki/ProposedLStestPlan
-     # Ability to run interoperability tests with perfSONAR MDM release
-     # Ability to automate much of this to run tests before a release (longer term)
-     # Available collaborative resources
-       * OpenDevNet
-       * NMI
-       * Ad-hoc
-   * Jason: 
-     * Group decission - what are we supporting for platform and arch?
-       * Post policy to various web sites (psps.internet2, software.internet2, others?)
-       * re-tool the yum repo (e.g. have a centos 5 vs a centos 4 vs a scientific, etc.) for new packages
-       * list will need to flow with the what the vendors and major science VOs are using
-       * list also related to our availability to create/test
-     * Packages
-       * RPM build info in svn currently
-       * Deb packages?
-       * Each developer responsbile for mainitaing the spec file
-       * Release team should be handling the final build and test (currently each developer does this)
-       * Release team will handle the uploading and maintenance of the yum repo
-     * Buidling and Testing
-       * [https://nmi.cs.wisc.edu/ | NMI] - worth using?
-       * VM farm 
-         * Goal: create scripts that will build/test installation/test use on all arch and platforms in a single swoop
-         * Need VMs for each arch and platform, preferably 'clean' with each use.  Setup script could install the RPM repo and other pre-reqs
-         * Manual process = bad, this needs to be automated.  Infeasbile to log on to 10+ machines to do all of this      
+       # Ability to run interoperability tests with perfSONAR MDM release
+       # Ability to automate much of this to run tests before a release (longer term)
+       # Available collaborative resources
+         * OpenDevNet
+         * NMI
+         * Ad-hoc
  # User Documentation Thoughts (Brian)
    * I think the user documentation should be organized around a set of use cases / sample queries. http://psps.perfsonar.net/client-doc.html is a good start in this direction. 
    * High level:
