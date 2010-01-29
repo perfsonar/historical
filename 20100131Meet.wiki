@@ -61,6 +61,7 @@ January 31, 2010.
        * Certain processes/data sets should always be monitored
          * httpd
          * ntpd (both is it up and is time in sync)
+         * service watcher process? 
          * Disk levels - go below a threshold
          * Load Levels - go above a threshold
          * Process Count?
@@ -71,21 +72,29 @@ January 31, 2010.
        * Email addresse(s) to send alerts to (GUI tie in)
        * Proccesses/data to monitor 
          * ssh (if enabled)
-         * owampd/bwctld/npad/ndt/pS daemons/pow(master|collector)/bw(master|collector) (if enabled)
+         * owampd/bwctld/npad/ndt/pow(master|collector)/bw(master|collector) (if enabled)
          * pSB MA, SNMP MA, topology services, LS (if enabled)
-            * not just is it running, but does it respond to queries    
-         * mysqld (if enabled)      
-         * data sets from mysql (owamp/bwctl/pinger where applicable)
-           * if data is above/below (too many errors or too little bandwidth) a performance threshold
-               * e.g.: last 3 bwctl tests for a given host pair below 100 Mbps
-           * if data is older than a time threshold
-              * e.g.: no new bwctl data added to the MA for host pair x,y in the last 24 hours
-         * data sets from rrd (where applicable)
-           * if data is above/below a performance threshold (too many errors, too much or too little utilization)
-           * if data is older than a time threshold
-     * GUI extensions to watch other instances of the toolkit in the wild [requires nrpe probably] (future enhancement)
+           * process running
+           * respond to echo
+           * respond to metdata
+           * respond to data (may duplicate a database check)   
+         * mysqld (if enabled)    
+         * Data Queries - could be done in two different ways:
+           * From databases directly (mysql for owamp/bwctl/pinger, rrd for snmp/smokeping)
+           * from services through WS queries
+           * Queries to care about:
+             * Data above or below a statistical threshold
+               * too many errors on an interface
+               * utilization too high
+               * bwctl epxpectation too low
+               * owamp loss/jitter too high
+             * Data older than a time threshold (bwctl/owamp/pinger can consult test time interval for this)
+             * Data flapping between known good and bad values               
+               * owamp/pinger latency
+               * interface status
      * Send a 'come online' alert to a pS address?
-     * Decide which of the many Nagios GUIs to integrate (e.g.: http://www.debianhelp.co.uk/nagiosweb.htm)
+   * GUI extensions to watch other instances of the toolkit in the wild [requires nrpe probably] (future enhancement)
+   * Decide which of the many Nagios GUIs to integrate (e.g.: http://www.debianhelp.co.uk/nagiosweb.htm)   
  # Testing Platforms (*Eric*, *Jason*, *Brian*)
    * Eric: 
      # Define Supported Platforms
