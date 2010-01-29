@@ -131,8 +131,51 @@ January 31, 2010.
        * VM farm 
          * Goal: create scripts that will build/test installation/test use on all arch and platforms in a single swoop
          * Need VMs for each arch and platform, preferably 'clean' with each use.  Setup script could install the RPM repo and other pre-reqs
-         * Manual process = bad, this needs to be automated.  Infeasbile to log on to 10+ machines to do all of this      
- # TBD 1
+         * Manual process = bad, this needs to be automated.  Infeasbile to log on to 10+ machines to do all of this   
+ # User Documentation Thoughts (Brian)
+I think the user documentation should be organized around a set of use cases / sample queries. 
+http://psps.perfsonar.net/client-doc.html is a good start in this direction. 
+High level:
+
+From all MAs:
+ * Get list of all 'metadata', e.g. interfaces, endpoints, etc.
+ * Get a list of all 'metadata' but filter by something, e.g. domain, ip range, specific characteristic (1G interfaces, or dual homed hosts)
+ * Get all 'data' for a given 'metadata' (by key, filtered by type)
+ * Get all 'data' for a given 'metadata' for a given time range or via a statistical function (e.g. averaged).
+
+From an hLS:
+ * List of all registered services
+ * List of services filtered by service elements (e.g. name, location)
+ * List of services filtered by contained metadata items (see MA queries)
+ * List of metadata for a given service
+ * List of metadata for a given service filtered by data type (see MA queries)
+
+Here are some detailed examples that I think are helpful:
+ * SNMP MA:
+   *  give me a list of all router interfaces
+   *  give me a list of all router interfaces at FNAL
+   *  give me the last hour average utilization for interface X
+   *  give me that last hour maximum utilization for interface X
+   *  give me average and max utilization data for June of last year
+
+  * pSB MA:
+    *  give me the list of src/dest pairs stored in this MA
+    *  give me all bwctl results for the past 24 hours from host A to host B
+    * give me all owamp results for the past 24 hours from host A to host B
+    *  give me all bwctl and owamp results from June of last year
+
+ * LS:
+   *  give me a list of all bwctl servers listed under project "ESnet" or "DOE-SC-LAB"
+   *  give me a list of all ESnet pSB MAs
+   *  give me a list of all SNMP MAs
+
+  * PingER MA:
+    * give me a list of pingER data for host A to host B for the past 24 hours
+
+  * Topology MA:
+    * add sample here
+
+
  # TBD 2
  # TBD 3
  # TBD 4 
