@@ -189,7 +189,7 @@ January 31, 2010.
          * OpenDevNet
          * NMI
          * Ad-hoc
- # User Documentation Thoughts (Brian)
+ # User Documentation Thoughts (*Brian*)
    * I think the user documentation should be organized around a set of use cases / sample queries. http://psps.perfsonar.net/client-doc.html is a good start in this direction. 
    * High level:
      * From all MAs:
@@ -225,7 +225,7 @@ January 31, 2010.
        * give me topology for domain A
        * give me interface with IP address A
        * give me interface connected to another interface with IP address A
- # Improving ps-PS Service Architecture (Aaron, Eric, Andy)
+ # Improving ps-PS Service Architecture (*Aaron*, *Andy*, *Eric*)
    * Problems
      * Difficult to add new metrics
      * Duplication in efforts which leads to inconsitencies
@@ -240,7 +240,7 @@ January 31, 2010.
        * AA, etc
    * Anything from OSCARS architecture that can apply to PS?
    * Other Open Design Questions
- # Clients and services (Inder, Aaron, Andy)
+ # Clients and services (*Inder*, *Aaron*, *Andy*)
    * Goals
     * Easier for clients to develop pS services
     * Shorten the learning curve and development time
@@ -252,7 +252,7 @@ January 31, 2010.
     * Support process as upgrade libs and protocols
     * Development support
      * Dummy server for debugging and testing clients
- # Combining Path Data with Measurement Data (Andy, Jeff)
+ # Combining Path Data with Measurement Data (*Andy*, *Jeff*)
    * Motivations
      * Short-term: Associate traceroute with measurement data
      * Long-term: Store path data from non-traceroute sources
@@ -263,6 +263,26 @@ January 31, 2010.
    * Schema for storing traceroute results
      * Current: http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/rnc/traceroute.rnc
    * Looking beyond traceroute
+ # Programming Languages (*Aaron*, *Eric*, *Maxim*)
+   * Goal
+     * To survey programming languages to see which best meet our needs given existing constraints
+   * Constraints
+     * We already have a substantial codebase written in Perl, along with a developer-base that understands it
+   * Provide some information about Perl, Python, Java and Ruby
+ # Web Configuration GUI (*Aaron*, *Andy*, *Maxim*)
+   * Problems
+     * The web configuration GUI is difficult to add new features to, and may not meet the needs or desires of current and future users.
+     * The glue between the configuration files/database and the configuration options provided to the end user were developed in an ad hoc manner.
+   * Goal
+     * Document the administrative and visual features desired by users
+     * Document the features that the backend can reasonably provide
+     * Produce a model for a web interface that provides the features as well as a model for a glue between the various software capabilities, and the needs of the web interface.
+   * Desired Features
+   * Discuss general web interface needs
+   * Discuss how to bridge the GUI features wanted by users with the configuration options of various services.
+
+
+
  # TBD 3
  # TBD 4 
  # TBD 5 
