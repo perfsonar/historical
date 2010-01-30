@@ -13,279 +13,315 @@ January 31, 2010.
 
 == Agenda/Minutes ==
 
- # Attendees: 
+ * Attendees:
    * TBD
- # Product Support (*Jason*)
-   * Packages for Platforms and Architectures
-     * Decide which Arch's we will support, suggested:
-       * x86
-       * x86 64 Bit
-       * Others we could consider
-         * ia64
-         * ppc
-     * Decide which platforms we will (explicitly) support, suggested:
-       * RHEL v4 and v5
-       * CentOS v4 and v5       
-       * Scientific v4 and v5
-       * Others to consider:
-         * Debian v4 and v5 (requires deb package support)
-         * Ubuntu (versions vary, maybe current + previous 2 - requires deb package support)
-         * Fedora (versions vary, maybe current + previous 2)
-         * SuSE (versions vary, maybe current + previous)
-         * FreeBSD (versions vary, maybe current + previous - requires maintaining something in 'ports')
-   * pSPT
-     * Need a general statement that covers
-       * A statement of who we are, and the resources (e.g. how limited) that are available
-       * Our commitment to alerting about vulnerabilities
-       * Our commitment patching and fixing vulnerabilities.  Want to avoid timeframes in our definition.  
-       * Support statement for support when the major version jumps
-   * In general we need to get these things in a public area so there is not a lot of confusion.  We will need to talk to VOs about this as well.
- # LiveCD Topics (*Jason*, *Aaron*)
-   * Remaining 3.1.X releases
-     * Targeting 2 - 3 more this year.  May need to worry about some next year depending on support...
-       * 3.1.3 in April (pre MM)
-       * 3.1.4 in July (pre JTs)
-       * 3.1.5 in Nov/Dec (if needed - hard with SC)
-     * Critical bug fixes and software upgrades _*only*_
-       * Limit the introduction of new features/structure
-       * Limit the changes to existing features/structure 
-     * Will release faster if something *very* critical comes up
-     * [http://lists.debian.org/debian-security-announce/2010/msg00010.html Debian security support for v. 4.0 (etch) is being EOL'ed on Feb 15th]
-       * Upgrade could be time consuming and breaks the rules above
-       * Rely on backports prepared by others (security fixes would be quick to backport)
-       * Manually backport as needed (will be time consuming if backports are not quick to enter the market)
-   * Kernel Bingo (listen for you number, but only shout when its not called...)
-     * pSPT has adopted the 2.6.27 lineage, the _long term support_ kernel.  See [http://lkml.org/lkml/2008/10/11/235 here] for more details, this line replaces 2.6.18.
-       * _*Positives*_:
-         * We don't need an experimental kernel, we really don't need to be on the bleeding edge of hardware support of new features
-         * We want a safe kernel - the long term supported lineages _*should*_ receive all of the same fixes as the other mainline branches
-         * Web100 applies cleanly to the vanilla kernels from this line, and web100 development is not funded anymore (MM reported the current maintainer donates time to keep up).  
-       * _*Negatives*_:
-         * Real linux vendors are keeping up with the bleeding edge of development (and apply their own patches etc.)
-         * Knowledgeable (but perhaps easily excitable) people know math, and 2.6.27 < 2.6.32.  This throws up a red flag that we are not keeping up and may be pusing a vulnerable product.  
-     * USATLAS (specifically SLAC) has raised some concerns on our choice of kernels.  This is not news, but there is pressure for us to do one of two things (not clear if either would solve the problem of course):
-       # Clearly state our process
-         * Explain why we use the particular kernel
-         * Explain why we think this protects the end user vs. the alternative (bleeding edge)
-         * Explain our definition of _support_ (see above discussion)         
-       # Migrate to something that will make everyone happy
-         * Follow what the vendors are following - use what RHEL/CentOS/Scientific use
-         * Still state the process and support level
-     * To reiterate what was said from SLAC security personnel on their process:
-       * Typically like everything under their control (mostly RHEL/CentOS/Scientific) to all be at the same kernel, right now its 2.6.32.x
-       * Follow the CVE announcements like a hawk, expect that the vendors will offer patches in 2-4 weeks
-       * Patch everything on the network in that timeframe.
-     * Things we can consider to mitigate/compromise (in order of easiest to hardest):
-       # Follow all of the lists.  When we see a CVE we digest it as fast as possible and relay this information to the performance-node lists as well as USATLAS (or other VOs that want to be kept aware).  Suggest instant steps to comply in the event of a problem, announce when releases will be available to fix.
-       # Automatically update the 2.6.27 kernel when a fix becomes available (even if there is not a CVE that applies to us).  Follow same announcement steps as in _*1*_.
-       # Migrate to a vanilla 2.6.32 (or whatever the vendors are using).  Apply the same tactic as in _*1*_ (or _*2*_) regarding upgrades
-       # Use stock vendor kernels and apply web100.  Would need to monitor what they are using (will be easier when we are in 3.2) and will need to follow same announcement steps as in _*1*_.
-       # Convert all tools that use web100 (ndt/npad) to not use web100.  This eliminates some of the problem, but we would still need to follow what the vendors are doing regarding kernels.  
-   * RHEL (3.2) Transition
-     * Targeting Late Summer 2010 for 3.2 Betas
-       * Have a list of people interested in helping test already
-     * Must support 3.1.x's in parallel
-       * How long
-       * To what level
-       * Project fork if necessary?
-     * VOs may be slow to adopt 3.2 - e.g. USATLAS is very slow to recommend 3.1 to Tier3s for example.  An upgrade to a completly different system is similar to starting over, I would expect at least 2 minor releases (taking us into 2011) to work out all the kinks.        
-     * Features to worry about
-       * Wizard interfaces
-       * Backend magic to manage the disk
-       * Upgrade path?
-       * RPMs for all services and packages
-       * Kernels (see SLAC discussion) - and if we want to support web100 long term
-       * Install to disk option
- # Nagios integration (*Jason*, *Brian*)
-   * Worth experimenting with basic installation/configuration of NAGIOS on current generation?
-   * Configuration
-     * Static - easy stuff
-       * Certain processes/data sets should always be monitored
-         * httpd
-         * ntpd (both is it up and is time in sync)
-         * service watcher process? 
-         * Disk levels - go below a threshold
-         * Load Levels - go above a threshold
-         * Process Count?
-           * Total goes above some threshold
-           * Too many of one type, e.g. too many owampd's or bwctld's (indicates people testing to you)
-       * Alert intervals (how often to send alerts for the same outstanding event)
-     * Dynamic - the hard stuff
-       * Email addresse(s) to send alerts to (GUI tie in)
-       * Proccesses/data to monitor 
-         * ssh (if enabled)
-         * owampd/bwctld/npad/ndt/pow(master|collector)/bw(master|collector) (if enabled)
-         * pSB MA, SNMP MA, topology services, LS (if enabled)
-           * process running
-           * respond to echo
-           * respond to metdata
-           * respond to data (may duplicate a database check)   
-         * mysqld (if enabled)    
-         * Data Queries - could be done in two different ways:
-           * From databases directly (mysql for owamp/bwctl/pinger, rrd for snmp/smokeping)
-           * from services through WS queries
-           * Queries to care about:
-             * Data above or below a statistical threshold
-               * too many errors on an interface
-               * utilization too high
-               * bwctl epxpectation too low
-               * owamp loss/jitter too high
-             * Data older than a time threshold (bwctl/owamp/pinger can consult test time interval for this)
-             * Data flapping between known good and bad values               
-               * owamp/pinger latency
-               * interface status
-     * Send a 'come online' alert to a pS address?
-   * GUI extensions to watch other instances of the toolkit in the wild [requires nrpe probably] (future enhancement)
-   * Decide which of the many Nagios GUIs to integrate (e.g.: http://www.debianhelp.co.uk/nagiosweb.htm)      
- # Build and Testing Platforms (*Eric*, *Jason*, *Brian*)
-   * Attempting to solve two problems (potentially with a common solution):
-     # _*Build infrastructure*_
-       * Does not have to be bare iron, VMs are acceptable
-       * _*Must*_ contain diverse set of platforms and architectures (discussion to be held in the support topic)
-       * _*Should*_ be automatable (kick off the same tests on all platforms simultaneously)
-            * download svn branch/tag
-            * build using rpm build tools
-            * verify - attempt to install on target arch/platform
-              * download pre-reqs
-              * install
-              * insert dummy config
-              * start service
-              * run canned unit tests
-       * _*Must*_ be resetable (bring the entire infrastructure back to a clean state for each build/test prorcess)
-       * Infrastructure does not have to be mobile (would prefer it not be - have it live in an accessible place)
-       * All developers have access to the _head_ machine
-         * accts live there
-         * machine configurations (to generate all VMs) live there too
-         * update the _master_ as new releases and software updates come out       
-       * Examples out in the world to consider:
-         * [https://nmi.cs.wisc.edu/ NMI] - OSG build tool, well supported and built for this specific purpose
-         * [http://www.emulab.net/ Emulab] - Network testbed, but fits some of the above needs (variable archs and some platforms, easy to _reset_, easy to automate)
-         * Homeade - Get a beefy system and set up software to start up QEMU/XEN/VMware instances.  Can make this as scriptable and configurable as we need to, but will require development time.  
-     # _*Testing infrastructure*_
-       * Configurable infrastructure with a potentially diverse topology used to validate functional requirements of the software
-       # Define Supported Platforms
-         * hardware archictecture + operating system/distribution + middleware.
-         * try to support most of currently deployed plaftom
-         * keep it to a minimum number
-         * have at least one platform current (hardware/OS)
-       # Create VM templates that matches the supported platforms
-         * use a VM to build and package release. This allows reproductable build process
-         * Duplicate VM from template and instantiate for testing (always starting from a known state
-       # Create VM to run stub services for testing
-         * needed for unit testing (automation)
-         * needed for debuging and development
-         * allows to model various configuration
-       # The entire build and testing environment as a download.
-         * This allows anyone to reproduce it anywhere.
-         * Helps for automation and provisioning
-         * Allows for collaborative debug (one may send a VM to another).
-       # Create enough VMs for scalability testing. Some examples include
-         * ability to test N clients all hitting the same service at the same time
-         * ability to run the LS scalability tests described here:
-           * http://code.google.com/p/perfsonar-ps/wiki/ProposedLStestPlan
-       # Ability to run interoperability tests with perfSONAR MDM release
-       # Ability to automate much of this to run tests before a release (longer term)
-       # Available collaborative resources
-         * OpenDevNet
-         * NMI
-         * Ad-hoc
- # User Documentation Thoughts (*Brian*)
-   * I think the user documentation should be organized around a set of use cases / sample queries. http://psps.perfsonar.net/client-doc.html is a good start in this direction. 
-   * High level:
-     * From all MAs:
-       * Get list of all 'metadata', e.g. interfaces, endpoints, etc.
-       * Get a list of all 'metadata' but filter by something, e.g. domain, ip range, specific characteristic (1G interfaces, or dual homed hosts)
-       * Get all 'data' for a given 'metadata' (by key, filtered by type)
-       * Get all 'data' for a given 'metadata' for a given time range or via a statistical function (e.g. averaged).
-     * From an hLS:
-       * List of all registered services
-       * List of services filtered by service elements (e.g. name, location)
-       * List of services filtered by contained metadata items (see MA queries)
-       * List of metadata for a given service
-       * List of metadata for a given service filtered by data type (see MA queries)
-   * Here are some detailed examples that I think are helpful:
-     * SNMP MA:
-       * give me a list of all router interfaces
-       * give me a list of all router interfaces at FNAL
-       * give me the last hour average utilization for interface X
-       * give me that last hour maximum utilization for interface X
-       * give me average and max utilization data for June of last year
-     * pSB MA:
-       * give me the list of src/dest pairs stored in this MA
-       * give me all bwctl results for the past 24 hours from host A to host B
-       * give me all owamp results for the past 24 hours from host A to host B
-       * give me all bwctl and owamp results from June of last year
-     * LS:
-       * give me a list of all bwctl servers listed under project "ESnet" or "DOE-SC-LAB"
-       * give me a list of all ESnet pSB MAs
-       * give me a list of all SNMP MAs
-     * PingER MA:
-       * give me a list of pingER data for host A to host B for the past 24 hours
-     * Topology MA:
-       * give me topology for domain A
-       * give me interface with IP address A
-       * give me interface connected to another interface with IP address A
- # Improving ps-PS Service Architecture (*Aaron*, *Andy*, *Eric*)
-   * Problems
-     * Difficult to add new metrics
-     * Duplication in efforts which leads to inconsitencies
-   * Goals
-     * Ease development of new services
-     * Improve code re-use
-     * Increase modularity
-     * more
-   * Analyze types of services
-     * Look at functional components of each
-     * What's new functionality needed in future
-       * AA, etc
-   * Anything from OSCARS architecture that can apply to PS?
-   * Other Open Design Questions
- # Clients and services (*Inder*, *Aaron*, *Andy*)
-   * Goals
-    * Easier for clients to develop pS services
-    * Shorten the learning curve and development time
-    * Provide bridge between standards and sofware
-   * Short-term
-    * Client SDK
-    * More client documention
-    * High level programming libs
-    * Support process as upgrade libs and protocols
-    * Development support
+   *
+ * Topics:
+   * [20100121Meet#Product_Support Product Support]
+   * [20100121Meet#LiveCD_Topics LiveCD Topics]
+   * [20100121Meet#Nagios_integration Nagios integration]
+   * [20100121Meet#Build_and_Testing_Platforms Build and Testing Platforms]
+   * [20100121Meet#User_Documentation_Thoughts User Documentation Thoughts]
+   * [20100121Meet#Improving_pSPS_Service_Architecture Improving pSPS Service Architecture]
+   * [20100121Meet#Clients_and_services Clients and services]
+   * [20100121Meet#Combining_Path_Data_with_Measurement_Data Combining Path Data with Measurement Data]
+   * [20100121Meet#Programming_Languages Programming Languages]
+   * [20100121Meet#Web_Configuration_GUI Web Configuration GUI]
+
+=== Product Support ===
+
+ * Presenting: *Jason*
+ * Packages for Platforms and Architectures
+   * Decide which Arch's we will support, suggested:
+     * x86
+     * x86 64 Bit
+     * Others we could consider
+       * ia64
+       * ppc
+   * Decide which platforms we will (explicitly) support, suggested:
+     * RHEL v4 and v5
+     * CentOS v4 and v5       
+     * Scientific v4 and v5
+     * Others to consider:
+       * Debian v4 and v5 (requires deb package support)
+       * Ubuntu (versions vary, maybe current + previous 2 - requires deb package support)
+       * Fedora (versions vary, maybe current + previous 2)
+       * SuSE (versions vary, maybe current + previous)
+       * FreeBSD (versions vary, maybe current + previous - requires maintaining something in 'ports')
+ * pSPT
+   * Need a general statement that covers
+     * A statement of who we are, and the resources (e.g. how limited) that are available
+     * Our commitment to alerting about vulnerabilities
+     * Our commitment patching and fixing vulnerabilities.  Want to avoid timeframes in our definition.  
+     * Support statement for support when the major version jumps
+ * In general we need to get these things in a public area so there is not a lot of confusion.  We will need to talk to VOs about this as well. 
+
+=== LiveCD Topics ===
+
+ * Presenting: *Jason*, *Aaron*
+ * Remaining 3.1.X releases
+   * Targeting 2 - 3 more this year.  May need to worry about some next year depending on support...
+     * 3.1.3 in April (pre MM)
+     * 3.1.4 in July (pre JTs)
+     * 3.1.5 in Nov/Dec (if needed - hard with SC)
+   * Critical bug fixes and software upgrades _*only*_
+     * Limit the introduction of new features/structure
+     * Limit the changes to existing features/structure 
+   * Will release faster if something *very* critical comes up
+   * [http://lists.debian.org/debian-security-announce/2010/msg00010.html Debian security support for v. 4.0 (etch) is being EOL'ed on Feb 15th]
+     * Upgrade could be time consuming and breaks the rules above
+     * Rely on backports prepared by others (security fixes would be quick to backport)
+     * Manually backport as needed (will be time consuming if backports are not quick to enter the market)
+ * Kernel Bingo (listen for you number, but only shout when its not called...)
+   * pSPT has adopted the 2.6.27 lineage, the _long term support_ kernel.  See [http://lkml.org/lkml/2008/10/11/235 here] for more details, this line replaces 2.6.18.
+     * _*Positives*_:
+       * We don't need an experimental kernel, we really don't need to be on the bleeding edge of hardware support of new features
+       * We want a safe kernel - the long term supported lineages _*should*_ receive all of the same fixes as the other mainline branches
+       * Web100 applies cleanly to the vanilla kernels from this line, and web100 development is not funded anymore (MM reported the current maintainer donates time to keep up).  
+     * _*Negatives*_:
+       * Real linux vendors are keeping up with the bleeding edge of development (and apply their own patches etc.)
+       * Knowledgeable (but perhaps easily excitable) people know math, and 2.6.27 < 2.6.32.  This throws up a red flag that we are not keeping up and may be pusing a vulnerable product.  
+   * USATLAS (specifically SLAC) has raised some concerns on our choice of kernels.  This is not news, but there is pressure for us to do one of two things (not clear if either would solve the problem of course):
+     # Clearly state our process
+       * Explain why we use the particular kernel
+       * Explain why we think this protects the end user vs. the alternative (bleeding edge)
+       * Explain our definition of _support_ (see above discussion)         
+     # Migrate to something that will make everyone happy
+       * Follow what the vendors are following - use what RHEL/CentOS/Scientific use
+       * Still state the process and support level
+   * To reiterate what was said from SLAC security personnel on their process:
+     * Typically like everything under their control (mostly RHEL/CentOS/Scientific) to all be at the same kernel, right now its 2.6.32.x
+     * Follow the CVE announcements like a hawk, expect that the vendors will offer patches in 2-4 weeks
+     * Patch everything on the network in that timeframe.
+   * Things we can consider to mitigate/compromise (in order of easiest to hardest):
+     # Follow all of the lists.  When we see a CVE we digest it as fast as possible and relay this information to the performance-node lists as well as USATLAS (or other VOs that want to be kept aware).  Suggest instant steps to comply in the event of a problem, announce when releases will be available to fix.
+     # Automatically update the 2.6.27 kernel when a fix becomes available (even if there is not a CVE that applies to us).  Follow same announcement steps as in _*1*_.
+     # Migrate to a vanilla 2.6.32 (or whatever the vendors are using).  Apply the same tactic as in _*1*_ (or _*2*_) regarding upgrades
+     # Use stock vendor kernels and apply web100.  Would need to monitor what they are using (will be easier when we are in 3.2) and will need to follow same announcement steps as in _*1*_.
+     # Convert all tools that use web100 (ndt/npad) to not use web100.  This eliminates some of the problem, but we would still need to follow what the vendors are doing regarding kernels.  
+ * RHEL (3.2) Transition
+   * Targeting Late Summer 2010 for 3.2 Betas
+     * Have a list of people interested in helping test already
+   * Must support 3.1.x's in parallel
+     * How long
+     * To what level
+     * Project fork if necessary?
+   * VOs may be slow to adopt 3.2 - e.g. USATLAS is very slow to recommend 3.1 to Tier3s for example.  An upgrade to a completly different system is similar to starting over, I would expect at least 2 minor releases (taking us into 2011) to work out all the kinks.        
+   * Features to worry about
+     * Wizard interfaces
+     * Backend magic to manage the disk
+     * Upgrade path?
+     * RPMs for all services and packages
+     * Kernels (see SLAC discussion) - and if we want to support web100 long term
+     * Install to disk option
+
+=== Nagios integration ===
+
+ * Presenting: *Jason*, *Brian*    
+ * Worth experimenting with basic installation/configuration of NAGIOS on current generation?
+ * Configuration
+   * Static - easy stuff
+     * Certain processes/data sets should always be monitored
+       * httpd
+       * ntpd (both is it up and is time in sync)
+       * service watcher process? 
+       * Disk levels - go below a threshold
+       * Load Levels - go above a threshold
+       * Process Count?
+         * Total goes above some threshold
+         * Too many of one type, e.g. too many owampd's or bwctld's (indicates people testing to you)
+     * Alert intervals (how often to send alerts for the same outstanding event)
+   * Dynamic - the hard stuff
+     * Email addresse(s) to send alerts to (GUI tie in)
+     * Proccesses/data to monitor 
+       * ssh (if enabled)
+       * owampd/bwctld/npad/ndt/pow(master|collector)/bw(master|collector) (if enabled)
+       * pSB MA, SNMP MA, topology services, LS (if enabled)
+         * process running
+         * respond to echo
+         * respond to metdata
+         * respond to data (may duplicate a database check)   
+       * mysqld (if enabled)    
+       * Data Queries - could be done in two different ways:
+         * From databases directly (mysql for owamp/bwctl/pinger, rrd for snmp/smokeping)
+         * from services through WS queries
+         * Queries to care about:
+           * Data above or below a statistical threshold
+             * too many errors on an interface
+             * utilization too high
+             * bwctl epxpectation too low
+             * owamp loss/jitter too high
+           * Data older than a time threshold (bwctl/owamp/pinger can consult test time interval for this)
+           * Data flapping between known good and bad values               
+             * owamp/pinger latency
+             * interface status
+   * Send a 'come online' alert to a pS address?
+ * GUI extensions to watch other instances of the toolkit in the wild [requires nrpe probably] (future enhancement)
+ * Decide which of the many Nagios GUIs to integrate (e.g.: http://www.debianhelp.co.uk/nagiosweb.htm)  
+
+=== Build and Testing Platforms ===
+
+ * Presenting: *Eric*, *Jason*, *Brian*
+ * Attempting to solve two problems (potentially with a common solution):
+   # _*Build infrastructure*_
+     * Does not have to be bare iron, VMs are acceptable
+     * _*Must*_ contain diverse set of platforms and architectures (discussion to be held in the support topic)
+     * _*Should*_ be automatable (kick off the same tests on all platforms simultaneously)
+          * download svn branch/tag
+          * build using rpm build tools
+          * verify - attempt to install on target arch/platform
+            * download pre-reqs
+            * install
+            * insert dummy config
+            * start service
+            * run canned unit tests
+     * _*Must*_ be resetable (bring the entire infrastructure back to a clean state for each build/test prorcess)
+     * Infrastructure does not have to be mobile (would prefer it not be - have it live in an accessible place)
+     * All developers have access to the _head_ machine
+       * accts live there
+       * machine configurations (to generate all VMs) live there too
+       * update the _master_ as new releases and software updates come out       
+     * Examples out in the world to consider:
+       * [https://nmi.cs.wisc.edu/ NMI] - OSG build tool, well supported and built for this specific purpose
+       * [http://www.emulab.net/ Emulab] - Network testbed, but fits some of the above needs (variable archs and some platforms, easy to _reset_, easy to automate)
+       * Homeade - Get a beefy system and set up software to start up QEMU/XEN/VMware instances.  Can make this as scriptable and configurable as we need to, but will require development time.  
+   # _*Testing infrastructure*_
+     * Configurable infrastructure with a potentially diverse topology used to validate functional requirements of the software
+     # Define Supported Platforms
+       * hardware archictecture + operating system/distribution + middleware.
+       * try to support most of currently deployed plaftom
+       * keep it to a minimum number
+       * have at least one platform current (hardware/OS)
+     # Create VM templates that matches the supported platforms
+       * use a VM to build and package release. This allows reproductable build process
+       * Duplicate VM from template and instantiate for testing (always starting from a known state
+     # Create VM to run stub services for testing
+       * needed for unit testing (automation)
+       * needed for debuging and development
+       * allows to model various configuration
+     # The entire build and testing environment as a download.
+       * This allows anyone to reproduce it anywhere.
+       * Helps for automation and provisioning
+       * Allows for collaborative debug (one may send a VM to another).
+     # Create enough VMs for scalability testing. Some examples include
+       * ability to test N clients all hitting the same service at the same time
+       * ability to run the LS scalability tests described here:
+         * http://code.google.com/p/perfsonar-ps/wiki/ProposedLStestPlan
+     # Ability to run interoperability tests with perfSONAR MDM release
+     # Ability to automate much of this to run tests before a release (longer term)
+     # Available collaborative resources
+       * OpenDevNet
+       * NMI
+       * Ad-hoc
+
+=== User Documentation Thoughts ===
+
+ * Presenting: *Brian*
+ * I think the user documentation should be organized around a set of use cases / sample queries. http://psps.perfsonar.net/client-doc.html is a good start in this direction. 
+ * High level:
+   * From all MAs:
+     * Get list of all 'metadata', e.g. interfaces, endpoints, etc.
+     * Get a list of all 'metadata' but filter by something, e.g. domain, ip range, specific characteristic (1G interfaces, or dual homed hosts)
+     * Get all 'data' for a given 'metadata' (by key, filtered by type)
+     * Get all 'data' for a given 'metadata' for a given time range or via a statistical function (e.g. averaged).
+   * From an hLS:
+     * List of all registered services
+     * List of services filtered by service elements (e.g. name, location)
+     * List of services filtered by contained metadata items (see MA queries)
+     * List of metadata for a given service
+     * List of metadata for a given service filtered by data type (see MA queries)
+ * Here are some detailed examples that I think are helpful:
+   * SNMP MA:
+     * give me a list of all router interfaces
+     * give me a list of all router interfaces at FNAL
+     * give me the last hour average utilization for interface X
+     * give me that last hour maximum utilization for interface X
+     * give me average and max utilization data for June of last year
+   * pSB MA:
+     * give me the list of src/dest pairs stored in this MA
+     * give me all bwctl results for the past 24 hours from host A to host B
+     * give me all owamp results for the past 24 hours from host A to host B
+     * give me all bwctl and owamp results from June of last year
+   * LS:
+     * give me a list of all bwctl servers listed under project "ESnet" or "DOE-SC-LAB"
+     * give me a list of all ESnet pSB MAs
+     * give me a list of all SNMP MAs
+   * PingER MA:
+     * give me a list of pingER data for host A to host B for the past 24 hours
+   * Topology MA:
+     * give me topology for domain A
+     * give me interface with IP address A
+     * give me interface connected to another interface with IP address A
+     
+=== Improving pSPS Service Architecture ===
+
+ * Presenting: *Aaron*, *Andy*, *Eric*
+ * Problems
+   * Difficult to add new metrics
+   * Duplication in efforts which leads to inconsitencies
+ * Goals
+   * Ease development of new services
+   * Improve code re-use
+   * Increase modularity
+   * more
+ * Analyze types of services
+   * Look at functional components of each
+   * What's new functionality needed in future
+     * AA, etc
+ * Anything from OSCARS architecture that can apply to PS?
+ * Other Open Design Questions
+
+=== Clients and services ===
+
+ * Presenting: *Inder*, *Aaron*, *Andy*
+ * Goals
+   * Easier for clients to develop pS services
+   * Shorten the learning curve and development time
+   * Provide bridge between standards and sofware
+ * Short-term
+   * Client SDK
+   * More client documention
+   * High level programming libs
+   * Support process as upgrade libs and protocols
+   * Development support
      * Dummy server for debugging and testing clients
- # Combining Path Data with Measurement Data (*Andy*, *Jeff*)
-   * Motivations
-     * Short-term: Associate traceroute with measurement data
-     * Long-term: Store path data from non-traceroute sources
-   * Linking Path, Measurement and Topology Data
-   * Architecture
-     * Route MA
-     * Triggering traceroute measurements
-   * Schema for storing traceroute results
-     * Current: http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/rnc/traceroute.rnc
-   * Looking beyond traceroute
- # Programming Languages (*Aaron*, *Eric*, *Maxim*)
-   * Goal
-     * To survey programming languages to see which best meet our needs given existing constraints
-   * Constraints
-     * We already have a substantial codebase written in Perl, along with a developer-base that understands it
-   * Provide some information about Perl, Python, Java and Ruby
- # Web Configuration GUI (*Aaron*, *Andy*, *Maxim*)
-   * Problems
-     * The web configuration GUI is difficult to add new features to, and may not meet the needs or desires of current and future users.
-     * The glue between the configuration files/database and the configuration options provided to the end user were developed in an ad hoc manner.
-   * Goal
-     * Document the administrative and visual features desired by users
-     * Document the features that the backend can reasonably provide
-     * Produce a model for a web interface that provides the features as well as a model for a glue between the various software capabilities, and the needs of the web interface.
-   * Desired Features
-   * Discuss general web interface needs
-   * Discuss how to bridge the GUI features wanted by users with the configuration options of various services.
+     
+=== Combining Path Data with Measurement Data ===
 
+ * Presenting: *Andy*, *Jeff*
+ * Motivations
+   * Short-term: Associate traceroute with measurement data
+   * Long-term: Store path data from non-traceroute sources
+ * Linking Path, Measurement and Topology Data
+ * Architecture
+   * Route MA
+   * Triggering traceroute measurements
+ * Schema for storing traceroute results
+   * Current: http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/rnc/traceroute.rnc
+ * Looking beyond traceroute
 
+=== Programming Languages ===
 
- # TBD 3
- # TBD 4 
- # TBD 5 
+ * Presenting: *Aaron*, *Eric*, *Maxim*
+ * Goal
+   * To survey programming languages to see which best meet our needs given existing constraints
+ * Constraints
+   * We already have a substantial codebase written in Perl, along with a developer-base that understands it
+ * Provide some information about Perl, Python, Java and Ruby
+
+=== Web Configuration GUI ===
+
+ * Presenting: *Aaron*, *Andy*, *Maxim*
+ * Problems
+   * The web configuration GUI is difficult to add new features to, and may not meet the needs or desires of current and future users.
+   * The glue between the configuration files/database and the configuration options provided to the end user were developed in an ad hoc manner.
+ * Goal
+   * Document the administrative and visual features desired by users
+   * Document the features that the backend can reasonably provide
+   * Produce a model for a web interface that provides the features as well as a model for a glue between the various software capabilities, and the needs of the web interface.
+ * Desired Features
+ * Discuss general web interface needs
+ * Discuss how to bridge the GUI features wanted by users with the configuration options of various services.
 
 == ACTIONS ==
 
