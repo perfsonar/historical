@@ -193,6 +193,7 @@ January 31, 2010.
 === Build and Testing Platforms ===
 
  * Presenting: *Eric*, *Jason*, *Brian*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-testing-platform-ep.pptx Slides]
  * Attempting to solve two problems (potentially with a common solution):
    # _*Build infrastructure*_
      * Does not have to be bare iron, VMs are acceptable
