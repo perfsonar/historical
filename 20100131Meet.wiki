@@ -17,6 +17,11 @@ January 31, 2010.
    * TBD
    *
  * Topics:
+   * [20100131Meet#Roadmap_discussion Roadmap discussion]
+   * [20100131Meet#Merging_LS_and_TS Merging LS and TS]
+   * [20100131Meet#gLS_and_hLS_performance_and_scaling gLS and hLS performance and scaling]
+   * [20100131Meet#Circuit_Monitoring Circuit Monitoring]
+   * [20100131Meet#WMap WMap]
    * [20100131Meet#Product_Support Product Support]
    * [20100131Meet#LiveCD_Topics LiveCD Topics]
    * [20100131Meet#Nagios_integration Nagios integration]
@@ -27,6 +32,32 @@ January 31, 2010.
    * [20100131Meet#Combining_Path_Data_with_Measurement_Data Combining Path Data with Measurement Data]
    * [20100131Meet#Programming_Languages Programming Languages]
    * [20100131Meet#Web_Configuration_GUI Web Configuration GUI]
+
+=== Roadmap discussion ===
+
+ * Presenting: *Jeff*, *Brian*, *Joe*
+ * [http://code.google.com/p/perfsonar-ps/wiki/PsPsRoadMap Roadmap]
+
+=== Merging LS and TS ===
+        
+ * Presenting: *Martin*, *Eric*      
+ * Merging the TS/LS protocols, and implementation/adoption
+   * XML-DB? Organize TS so it is more distributable.
+
+=== gLS and hLS performance and scaling ===
+
+ * Presenting: *Brian*, *Martin*, *Eric*, *Jason*
+ * Present the Results of the testing performed by Eric and Brian
+ * Potential solutions
+
+=== Circuit Monitoring ===
+
+ * Presenting: *Aaron*, *Ezra*
+
+=== WMap ===
+ 
+ * Presenting: *Joe*, *Jeff*    
+ * What is needed, what is low hanging fruit?
 
 === Product Support ===
 
