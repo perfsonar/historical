@@ -38,30 +38,64 @@ January 31, 2010.
  * Presenting: *Jeff*, *Brian*, *Joe*
  * [http://code.google.com/p/perfsonar-ps/wiki/PsPsRoadMap Roadmap]
 
+=== User Documentation Thoughts ===
+
+ * Presenting: *Brian*
+ * I think the user documentation should be organized around a set of use cases / sample queries. http://psps.perfsonar.net/client-doc.html is a good start in this direction. 
+ * High level:
+   * From all MAs:
+     * Get list of all 'metadata', e.g. interfaces, endpoints, etc.
+     * Get a list of all 'metadata' but filter by something, e.g. domain, ip range, specific characteristic (1G interfaces, or dual homed hosts)
+     * Get all 'data' for a given 'metadata' (by key, filtered by type)
+     * Get all 'data' for a given 'metadata' for a given time range or via a statistical function (e.g. averaged).
+   * From an hLS:
+     * List of all registered services
+     * List of services filtered by service elements (e.g. name, location)
+     * List of services filtered by contained metadata items (see MA queries)
+     * List of metadata for a given service
+     * List of metadata for a given service filtered by data type (see MA queries)
+ * Here are some detailed examples that I think are helpful:
+   * SNMP MA:
+     * give me a list of all router interfaces
+     * give me a list of all router interfaces at FNAL
+     * give me the last hour average utilization for interface X
+     * give me that last hour maximum utilization for interface X
+     * give me average and max utilization data for June of last year
+   * pSB MA:
+     * give me the list of src/dest pairs stored in this MA
+     * give me all bwctl results for the past 24 hours from host A to host B
+     * give me all owamp results for the past 24 hours from host A to host B
+     * give me all bwctl and owamp results from June of last year
+   * LS:
+     * give me a list of all bwctl servers listed under project "ESnet" or "DOE-SC-LAB"
+     * give me a list of all ESnet pSB MAs
+     * give me a list of all SNMP MAs
+   * PingER MA:
+     * give me a list of pingER data for host A to host B for the past 24 hours
+   * Topology MA:
+     * give me topology for domain A
+     * give me interface with IP address A
+     * give me interface connected to another interface with IP address A
+     
 === WMap ===
  
  * Presenting: *Joe*, *Jeff*    
  * What is needed, what is low hanging fruit?
 
-=== Merging LS and TS ===
-        
- * Presenting: *Martin*, *Eric*      
- * Merging the TS/LS protocols, and implementation/adoption
-   * XML-DB? Organize TS so it is more distributable.
+=== Web Configuration GUI ===
 
-=== gLS and hLS performance and scaling ===
-
- * Presenting: *Brian*, *Martin*, *Eric*, *Jason*
- * Present the Results of the testing performed by Eric and Brian
- * Potential solutions
-
-=== Circuit Monitoring ===
-
- * Presenting: *Aaron*, *Ezra*
- * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-circuit_monitoring.ppt Slides]
- * Discussion of the architecture described in:
-   * CircuitMonitoringOverview, CircuitMonitoringArchitecture, CircuitMonitoring and CircuitMonitoringMoreDetails
- * Goal for session: Foster discussion about the circuit monitoring, and to bring folks into broad agreement over the overarching architecture.
+ * Presenting: *Aaron*, *Andy*, *Maxim*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-web_configuration.ppt Slides]
+ * Problems
+   * The web configuration GUI is difficult to add new features to, and may not meet the needs or desires of current and future users.
+   * The glue between the configuration files/database and the configuration options provided to the end user were developed in an ad hoc manner.
+ * Goal
+   * Document the administrative and visual features desired by users
+   * Document the features that the backend can reasonably provide
+   * Produce a model for a web interface that provides the features as well as a model for a glue between the various software capabilities, and the needs of the web interface.
+ * Desired Features
+ * Discuss general web interface needs
+ * Discuss how to bridge the GUI features wanted by users with the configuration options of various services.
 
 === Product Support ===
 
@@ -198,6 +232,84 @@ January 31, 2010.
  * GUI extensions to watch other instances of the toolkit in the wild [requires nrpe probably] (future enhancement)
  * Decide which of the many Nagios GUIs to integrate (e.g.: http://www.debianhelp.co.uk/nagiosweb.htm)  
 
+=== gLS and hLS performance and scaling ===
+
+ * Presenting: *Brian*, *Martin*, *Eric*, *Jason*
+ * Present the Results of the testing performed by Eric and Brian
+ * Potential solutions
+
+=== Merging LS and TS ===
+        
+ * Presenting: *Martin*, *Eric*      
+ * Merging the TS/LS protocols, and implementation/adoption
+   * XML-DB? Organize TS so it is more distributable.
+
+=== Improving pSPS Service Architecture ===
+
+ * Presenting: *Aaron*, *Andy*, *Eric*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-software_architecture.ppt Slides]
+ * Problems
+   * Difficult to add new metrics
+   * Duplication in efforts which leads to inconsitencies
+ * Goals
+   * Ease development of new services
+   * Improve code re-use
+   * Increase modularity
+   * more
+ * Analyze types of services
+   * Look at functional components of each
+   * What's new functionality needed in future
+     * AA, etc
+ * Anything from OSCARS architecture that can apply to PS?
+ * Other Open Design Questions
+
+=== Clients and services ===
+
+ * Presenting: *Inder*, *Aaron*, *Andy*
+ * Goals
+   * Easier for clients to develop pS services
+   * Shorten the learning curve and development time
+   * Provide bridge between standards and sofware
+ * Short-term
+   * Client SDK
+   * More client documention
+   * High level programming libs
+   * Support process as upgrade libs and protocols
+   * Development support
+     * Dummy server for debugging and testing clients
+     
+=== Circuit Monitoring ===
+
+ * Presenting: *Aaron*, *Ezra*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-circuit_monitoring.ppt Slides]
+ * Discussion of the architecture described in:
+   * CircuitMonitoringOverview, CircuitMonitoringArchitecture, CircuitMonitoring and CircuitMonitoringMoreDetails
+ * Goal for session: Foster discussion about the circuit monitoring, and to bring folks into broad agreement over the overarching architecture.
+
+=== Combining Path Data with Measurement Data ===
+
+ * Presenting: *Andy*, *Jeff*
+ * Motivations
+   * Short-term: Associate traceroute with measurement data
+   * Long-term: Store path data from non-traceroute sources
+ * Linking Path, Measurement and Topology Data
+ * Architecture
+   * Route MA
+   * Triggering traceroute measurements
+ * Schema for storing traceroute results
+   * Current: http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/rnc/traceroute.rnc
+ * Looking beyond traceroute
+
+=== Programming Languages ===
+
+ * Presenting: *Aaron*, *Eric*, *Maxim*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-programming_languages.ppt Slides]
+ * Goal
+   * To survey programming languages to see which best meet our needs given existing constraints
+ * Constraints
+   * We already have a substantial codebase written in Perl, along with a developer-base that understands it
+ * Provide some information about Perl, Python, Java and Ruby
+
 === Build and Testing Platforms ===
 
  * Presenting: *Eric*, *Jason*, *Brian*
@@ -253,118 +365,6 @@ January 31, 2010.
        * OpenDevNet
        * NMI
        * Ad-hoc
-
-=== User Documentation Thoughts ===
-
- * Presenting: *Brian*
- * I think the user documentation should be organized around a set of use cases / sample queries. http://psps.perfsonar.net/client-doc.html is a good start in this direction. 
- * High level:
-   * From all MAs:
-     * Get list of all 'metadata', e.g. interfaces, endpoints, etc.
-     * Get a list of all 'metadata' but filter by something, e.g. domain, ip range, specific characteristic (1G interfaces, or dual homed hosts)
-     * Get all 'data' for a given 'metadata' (by key, filtered by type)
-     * Get all 'data' for a given 'metadata' for a given time range or via a statistical function (e.g. averaged).
-   * From an hLS:
-     * List of all registered services
-     * List of services filtered by service elements (e.g. name, location)
-     * List of services filtered by contained metadata items (see MA queries)
-     * List of metadata for a given service
-     * List of metadata for a given service filtered by data type (see MA queries)
- * Here are some detailed examples that I think are helpful:
-   * SNMP MA:
-     * give me a list of all router interfaces
-     * give me a list of all router interfaces at FNAL
-     * give me the last hour average utilization for interface X
-     * give me that last hour maximum utilization for interface X
-     * give me average and max utilization data for June of last year
-   * pSB MA:
-     * give me the list of src/dest pairs stored in this MA
-     * give me all bwctl results for the past 24 hours from host A to host B
-     * give me all owamp results for the past 24 hours from host A to host B
-     * give me all bwctl and owamp results from June of last year
-   * LS:
-     * give me a list of all bwctl servers listed under project "ESnet" or "DOE-SC-LAB"
-     * give me a list of all ESnet pSB MAs
-     * give me a list of all SNMP MAs
-   * PingER MA:
-     * give me a list of pingER data for host A to host B for the past 24 hours
-   * Topology MA:
-     * give me topology for domain A
-     * give me interface with IP address A
-     * give me interface connected to another interface with IP address A
-     
-=== Improving pSPS Service Architecture ===
-
- * Presenting: *Aaron*, *Andy*, *Eric*
- * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-software_architecture.ppt Slides]
- * Problems
-   * Difficult to add new metrics
-   * Duplication in efforts which leads to inconsitencies
- * Goals
-   * Ease development of new services
-   * Improve code re-use
-   * Increase modularity
-   * more
- * Analyze types of services
-   * Look at functional components of each
-   * What's new functionality needed in future
-     * AA, etc
- * Anything from OSCARS architecture that can apply to PS?
- * Other Open Design Questions
-
-=== Clients and services ===
-
- * Presenting: *Inder*, *Aaron*, *Andy*
- * Goals
-   * Easier for clients to develop pS services
-   * Shorten the learning curve and development time
-   * Provide bridge between standards and sofware
- * Short-term
-   * Client SDK
-   * More client documention
-   * High level programming libs
-   * Support process as upgrade libs and protocols
-   * Development support
-     * Dummy server for debugging and testing clients
-     
-=== Combining Path Data with Measurement Data ===
-
- * Presenting: *Andy*, *Jeff*
- * Motivations
-   * Short-term: Associate traceroute with measurement data
-   * Long-term: Store path data from non-traceroute sources
- * Linking Path, Measurement and Topology Data
- * Architecture
-   * Route MA
-   * Triggering traceroute measurements
- * Schema for storing traceroute results
-   * Current: http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/rnc/traceroute.rnc
- * Looking beyond traceroute
-
-=== Programming Languages ===
-
- * Presenting: *Aaron*, *Eric*, *Maxim*
- * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-programming_languages.ppt Slides]
- * Goal
-   * To survey programming languages to see which best meet our needs given existing constraints
- * Constraints
-   * We already have a substantial codebase written in Perl, along with a developer-base that understands it
- * Provide some information about Perl, Python, Java and Ruby
-
-=== Web Configuration GUI ===
-
- * Presenting: *Aaron*, *Andy*, *Maxim*
- * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-web_configuration.ppt Slides]
- * Problems
-   * The web configuration GUI is difficult to add new features to, and may not meet the needs or desires of current and future users.
-   * The glue between the configuration files/database and the configuration options provided to the end user were developed in an ad hoc manner.
- * Goal
-   * Document the administrative and visual features desired by users
-   * Document the features that the backend can reasonably provide
-   * Produce a model for a web interface that provides the features as well as a model for a glue between the various software capabilities, and the needs of the web interface.
- * Desired Features
- * Discuss general web interface needs
- * Discuss how to bridge the GUI features wanted by users with the configuration options of various services.
 
 == ACTIONS ==
 
