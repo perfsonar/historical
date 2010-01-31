@@ -53,6 +53,10 @@ January 31, 2010.
 === Circuit Monitoring ===
 
  * Presenting: *Aaron*, *Ezra*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-circuit_monitoring.ppt Slides]
+ * Discussion of the architecture described in:
+   * CircuitMonitoringOverview, CircuitMonitoringArchitecture, CircuitMonitoring and CircuitMonitoringMoreDetails
+ * Goal for session: Foster discussion about the circuit monitoring, and to bring folks into broad agreement over the overarching architecture.
 
 === WMap ===
  
@@ -92,6 +96,7 @@ January 31, 2010.
 
  * Presenting: *Jason*, *Aaron*
  * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-JZ-LiveCD.ppt Slides]
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-toolkit_transition.ppt Debian Security Updates EOL Slides]
  * Remaining 3.1.X releases
    * Targeting 2 - 3 more this year.  May need to worry about some next year depending on support...
      * 3.1.3 in April (pre MM)
@@ -291,6 +296,7 @@ January 31, 2010.
 === Improving pSPS Service Architecture ===
 
  * Presenting: *Aaron*, *Andy*, *Eric*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-software_architecture.ppt Slides]
  * Problems
    * Difficult to add new metrics
    * Duplication in efforts which leads to inconsitencies
@@ -338,6 +344,7 @@ January 31, 2010.
 === Programming Languages ===
 
  * Presenting: *Aaron*, *Eric*, *Maxim*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-programming_languages.ppt Slides]
  * Goal
    * To survey programming languages to see which best meet our needs given existing constraints
  * Constraints
@@ -347,6 +354,7 @@ January 31, 2010.
 === Web Configuration GUI ===
 
  * Presenting: *Aaron*, *Andy*, *Maxim*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-web_configuration.ppt Slides]
  * Problems
    * The web configuration GUI is difficult to add new features to, and may not meet the needs or desires of current and future users.
    * The glue between the configuration files/database and the configuration options provided to the end user were developed in an ad hoc manner.
