@@ -102,6 +102,7 @@ January 31, 2010.
  * Presenting: *Brian*, *Martin*, *Eric*, *Jason*
  * Present the Results of the testing performed by Eric and Brian
  * Potential solutions
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/LS-Scalability-issues.pptx Slides]
 
 === Merging LS and TS ===
         
