@@ -128,7 +128,6 @@ January 31, 2010.
      * AA, etc
  * Anything from OSCARS architecture that can apply to PS?
  * Other Open Design Questions
- * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/LS-Scalability-issues.pptx Slides]
 
 === Clients and services ===
 
