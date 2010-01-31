@@ -17,26 +17,31 @@ January 31, 2010.
    * TBD
    *
  * Topics:
-   * [20100131Meet#Roadmap_discussion Roadmap discussion]
-   * [20100131Meet#Merging_LS_and_TS Merging LS and TS]
-   * [20100131Meet#gLS_and_hLS_performance_and_scaling gLS and hLS performance and scaling]
-   * [20100131Meet#Circuit_Monitoring Circuit Monitoring]
-   * [20100131Meet#WMap WMap]
-   * [20100131Meet#Product_Support Product Support]
-   * [20100131Meet#LiveCD_Topics LiveCD Topics]
-   * [20100131Meet#Nagios_integration Nagios integration]
-   * [20100131Meet#Build_and_Testing_Platforms Build and Testing Platforms]
-   * [20100131Meet#User_Documentation_Thoughts User Documentation Thoughts]
-   * [20100131Meet#Improving_pSPS_Service_Architecture Improving pSPS Service Architecture]
-   * [20100131Meet#Clients_and_services Clients and services]
-   * [20100131Meet#Combining_Path_Data_with_Measurement_Data Combining Path Data with Measurement Data]
-   * [20100131Meet#Programming_Languages Programming Languages]
-   * [20100131Meet#Web_Configuration_GUI Web Configuration GUI]
+   * [20100131Meet#Roadmap_discussion Roadmap discussion] (30 jeff/brian/joe)
+   * [20100131Meet#User_Documentation_Thoughts User Documentation Thoughts] (10 brian)
+   * [20100131Meet#WMap WMap] (10 joe, jeff)
+   * [20100131Meet#Web_Configuration_GUI Web Configuration GUI] (15 aaron, andy, maxim)
+   * [20100131Meet#Product_Support Product Support] (10 jason)
+   * [20100131Meet#LiveCD_Topics LiveCD Topics] (10 jason, aaron)
+   * [20100131Meet#Nagios_integration Nagios integration] (5 jason, brian)
+   * [20100131Meet#gLS_and_hLS_performance_and_scaling gLS and hLS performance and scaling] (20 brian, martin, eric, jason)
+   * [20100131Meet#Merging_LS_and_TS Merging LS and TS] (20 martin/eric)
+   * [20100131Meet#Improving_pSPS_Service_Architecture Improving pSPS Service Architecture] (30 aaron, andy, eric)
+   * [20100131Meet#Clients_and_services Clients and services] (30 inder, aaron, andy)
+   * [20100131Meet#Circuit_Monitoring Circuit Monitoring] (20 aaron, ezra)
+   * [20100131Meet#Combining_Path_Data_with_Measurement_Data Combining Path Data with Measurement Data] (15 andy, jeff)
+   * [20100131Meet#Programming_Languages Programming Languages] (15 aaron, eric, maxim)
+   * [20100131Meet#Build_and_Testing_Platforms Build and Testing Platforms] (10 eric, jason, brian)
 
 === Roadmap discussion ===
 
  * Presenting: *Jeff*, *Brian*, *Joe*
  * [http://code.google.com/p/perfsonar-ps/wiki/PsPsRoadMap Roadmap]
+
+=== WMap ===
+ 
+ * Presenting: *Joe*, *Jeff*    
+ * What is needed, what is low hanging fruit?
 
 === Merging LS and TS ===
         
@@ -57,11 +62,6 @@ January 31, 2010.
  * Discussion of the architecture described in:
    * CircuitMonitoringOverview, CircuitMonitoringArchitecture, CircuitMonitoring and CircuitMonitoringMoreDetails
  * Goal for session: Foster discussion about the circuit monitoring, and to bring folks into broad agreement over the overarching architecture.
-
-=== WMap ===
- 
- * Presenting: *Joe*, *Jeff*    
- * What is needed, what is low hanging fruit?
 
 === Product Support ===
 
