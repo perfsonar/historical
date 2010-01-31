@@ -133,6 +133,7 @@ January 31, 2010.
 === Clients and services ===
 
  * Presenting: *Inder*, *Aaron*, *Andy*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-clients-services.ppt Slides]
  * Goals
    * Easier for clients to develop pS services
    * Shorten the learning curve and development time
