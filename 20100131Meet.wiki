@@ -21,15 +21,15 @@ January 31, 2010.
    * [20100131Meet#User_Documentation_Thoughts User Documentation Thoughts] (10 brian)
    * [20100131Meet#WMap WMap] (10 joe, jeff)
    * [20100131Meet#Web_Configuration_GUI Web Configuration GUI] (15 aaron, andy, maxim)
-   * [20100131Meet#Product_Support Product Support] (10 jason)
-   * [20100131Meet#LiveCD_Topics LiveCD Topics] (10 jason, aaron)
-   * [20100131Meet#Nagios_integration Nagios integration] (5 jason, brian)
    * [20100131Meet#gLS_and_hLS_performance_and_scaling gLS and hLS performance and scaling] (20 brian, martin, eric, jason)
    * [20100131Meet#Merging_LS_and_TS Merging LS and TS] (20 martin/eric)
    * [20100131Meet#Improving_pSPS_Service_Architecture Improving pSPS Service Architecture] (30 aaron, andy, eric)
    * [20100131Meet#Clients_and_services Clients and services] (30 inder, aaron, andy)
    * [20100131Meet#Circuit_Monitoring Circuit Monitoring] (20 aaron, ezra)
    * [20100131Meet#Combining_Path_Data_with_Measurement_Data Combining Path Data with Measurement Data] (15 andy, jeff)
+   * [20100131Meet#Product_Support Product Support] (10 jason)
+   * [20100131Meet#LiveCD_Topics LiveCD Topics] (10 jason, aaron)
+   * [20100131Meet#Nagios_integration Nagios integration] (5 jason, brian)
    * [20100131Meet#Programming_Languages Programming Languages] (15 aaron, eric, maxim)
    * [20100131Meet#Build_and_Testing_Platforms Build and Testing Platforms] (10 eric, jason, brian)
 
@@ -96,6 +96,74 @@ January 31, 2010.
  * Desired Features
  * Discuss general web interface needs
  * Discuss how to bridge the GUI features wanted by users with the configuration options of various services.
+
+=== gLS and hLS performance and scaling ===
+
+ * Presenting: *Brian*, *Martin*, *Eric*, *Jason*
+ * Present the Results of the testing performed by Eric and Brian
+ * Potential solutions
+
+=== Merging LS and TS ===
+        
+ * Presenting: *Martin*, *Eric*      
+ * Merging the TS/LS protocols, and implementation/adoption
+   * XML-DB? Organize TS so it is more distributable.
+
+=== Improving pSPS Service Architecture ===
+
+ * Presenting: *Aaron*, *Andy*, *Eric*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-software_architecture.ppt Slides]
+ * Problems
+   * Difficult to add new metrics
+   * Duplication in efforts which leads to inconsitencies
+ * Goals
+   * Ease development of new services
+   * Improve code re-use
+   * Increase modularity
+   * more
+ * Analyze types of services
+   * Look at functional components of each
+   * What's new functionality needed in future
+     * AA, etc
+ * Anything from OSCARS architecture that can apply to PS?
+ * Other Open Design Questions
+
+=== Clients and services ===
+
+ * Presenting: *Inder*, *Aaron*, *Andy*
+ * Goals
+   * Easier for clients to develop pS services
+   * Shorten the learning curve and development time
+   * Provide bridge between standards and sofware
+ * Short-term
+   * Client SDK
+   * More client documention
+   * High level programming libs
+   * Support process as upgrade libs and protocols
+   * Development support
+     * Dummy server for debugging and testing clients
+     
+=== Circuit Monitoring ===
+
+ * Presenting: *Aaron*, *Ezra*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-circuit_monitoring.ppt Slides]
+ * Discussion of the architecture described in:
+   * CircuitMonitoringOverview, CircuitMonitoringArchitecture, CircuitMonitoring and CircuitMonitoringMoreDetails
+ * Goal for session: Foster discussion about the circuit monitoring, and to bring folks into broad agreement over the overarching architecture.
+
+=== Combining Path Data with Measurement Data ===
+
+ * Presenting: *Andy*, *Jeff*
+ * Motivations
+   * Short-term: Associate traceroute with measurement data
+   * Long-term: Store path data from non-traceroute sources
+ * Linking Path, Measurement and Topology Data
+ * Architecture
+   * Route MA
+   * Triggering traceroute measurements
+ * Schema for storing traceroute results
+   * Current: http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/rnc/traceroute.rnc
+ * Looking beyond traceroute
 
 === Product Support ===
 
@@ -231,74 +299,6 @@ January 31, 2010.
    * Send a 'come online' alert to a pS address?
  * GUI extensions to watch other instances of the toolkit in the wild [requires nrpe probably] (future enhancement)
  * Decide which of the many Nagios GUIs to integrate (e.g.: http://www.debianhelp.co.uk/nagiosweb.htm)  
-
-=== gLS and hLS performance and scaling ===
-
- * Presenting: *Brian*, *Martin*, *Eric*, *Jason*
- * Present the Results of the testing performed by Eric and Brian
- * Potential solutions
-
-=== Merging LS and TS ===
-        
- * Presenting: *Martin*, *Eric*      
- * Merging the TS/LS protocols, and implementation/adoption
-   * XML-DB? Organize TS so it is more distributable.
-
-=== Improving pSPS Service Architecture ===
-
- * Presenting: *Aaron*, *Andy*, *Eric*
- * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-software_architecture.ppt Slides]
- * Problems
-   * Difficult to add new metrics
-   * Duplication in efforts which leads to inconsitencies
- * Goals
-   * Ease development of new services
-   * Improve code re-use
-   * Increase modularity
-   * more
- * Analyze types of services
-   * Look at functional components of each
-   * What's new functionality needed in future
-     * AA, etc
- * Anything from OSCARS architecture that can apply to PS?
- * Other Open Design Questions
-
-=== Clients and services ===
-
- * Presenting: *Inder*, *Aaron*, *Andy*
- * Goals
-   * Easier for clients to develop pS services
-   * Shorten the learning curve and development time
-   * Provide bridge between standards and sofware
- * Short-term
-   * Client SDK
-   * More client documention
-   * High level programming libs
-   * Support process as upgrade libs and protocols
-   * Development support
-     * Dummy server for debugging and testing clients
-     
-=== Circuit Monitoring ===
-
- * Presenting: *Aaron*, *Ezra*
- * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-circuit_monitoring.ppt Slides]
- * Discussion of the architecture described in:
-   * CircuitMonitoringOverview, CircuitMonitoringArchitecture, CircuitMonitoring and CircuitMonitoringMoreDetails
- * Goal for session: Foster discussion about the circuit monitoring, and to bring folks into broad agreement over the overarching architecture.
-
-=== Combining Path Data with Measurement Data ===
-
- * Presenting: *Andy*, *Jeff*
- * Motivations
-   * Short-term: Associate traceroute with measurement data
-   * Long-term: Store path data from non-traceroute sources
- * Linking Path, Measurement and Topology Data
- * Architecture
-   * Route MA
-   * Triggering traceroute measurements
- * Schema for storing traceroute results
-   * Current: http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/rnc/traceroute.rnc
- * Looking beyond traceroute
 
 === Programming Languages ===
 
