@@ -371,23 +371,23 @@ January 31, 2010.
 
 == NOTES ==
 
-1. Road Map
+=== Road Map ===
   * _*ACTION*_: Jason: Create minor milestones of first major milestone
 
-2 User Documentation
+=== User Documentation ===
   * Should use as feedback for API development
   * Step one - document current API and queries
   * Templating approach for documentation
   * _*ACTION*_:  Jason: Presentation for APAN - turned into dev-guide (march timeframe)
   * _*ACTION*_: Jason/Eric: Reorganize Issue tracker to include individual tags vs project milestones
- 
-3) WMap
+
+=== WMap ===
   * Need better GUIs: Goals, need flashy stuff to 'sell' pS utility
   * current ESnet wmap uses non-pS interaction
   * what is the low-hanging fruit?
   * _*ACTION*_: Aaron: come up with proposal for an API/toolkit for this functionality
 
-4) Web Config GUI
+=== Web Config GUI ===
   * Current state: Feature creep with no underlying design
   * Need survey of what users *want*
   * what are services, what are functionalities?
@@ -395,7 +395,7 @@ January 31, 2010.
   * _*ACTION*_: Joe: Ask questions on this topic at ESCC PS BOF Wed Night.
   * _*ACTION*_: Jason: Get feedback from USAtlas on directions for WebGUI
 
-5) gLS/hLS scaling goo
+=== gLS/hLS scalability ===
   * most common query: find me the service access point for X where X can be lots.
   * Find me topology server for ESnet (easy)
   * Find me all pSB MAs for community LHC
@@ -414,12 +414,11 @@ January 31, 2010.
   * _*ACTION*_: Martin/Jeff/Joe: look at current model and evaluate (both scaling issues and LS/TS merging)
   * _*ACTION*_: Andy/Brian/Aaron: continue optimization of current implementation
 
-6) Client and Service Architecture
+=== Client and Service Architecture ===
   * _*ACTION*_: Aaron/Andy: Develop use cases and use as means to evaluate an architecture
 
-7) Circuit Monitoring
-
-  * Notes on slide deck:
+=== Circuit Monitoring ===
+Notes on slide deck:
     * Add operational vs administrative status to slide 3
     * Add "Capacity" & COS policy to slide 3
     * Slide 6: Monitoring Service should be called Measuremnet Point/Archive, not a new element in the perfSONAR architecture, OR, maybe it is a transformation service that combines data from perfSONAR MA's & MP's.
