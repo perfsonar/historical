@@ -369,6 +369,59 @@ January 31, 2010.
        * NMI
        * Ad-hoc
 
-== ACTIONS ==
+== NOTES ==
 
-  * _*ACTION*_:
+1. Road Map
+  * _*ACTION*_: Jason: Create minor milestones of first major milestone
+
+2 User Documentation
+  * Should use as feedback for API development
+  * Step one - document current API and queries
+  * Templating approach for documentation
+  * _*ACTION*_:  Jason: Presentation for APAN - turned into dev-guide (march timeframe)
+  * _*ACTION*_: Jason/Eric: Reorganize Issue tracker to include individual tags vs project milestones
+ 
+3) WMap
+  * Need better GUIs: Goals, need flashy stuff to 'sell' pS utility
+  * current ESnet wmap uses non-pS interaction
+  * what is the low-hanging fruit?
+  * _*ACTION*_: Aaron: come up with proposal for an API/toolkit for this functionality
+
+4) Web Config GUI
+  * Current state: Feature creep with no underlying design
+  * Need survey of what users *want*
+  * what are services, what are functionalities?
+  * document what is there
+  * _*ACTION*_: Joe: Ask questions on this topic at ESCC PS BOF Wed Night.
+  * _*ACTION*_: Jason: Get feedback from USAtlas on directions for WebGUI
+
+5) gLS/hLS scaling goo
+  * most common query: find me the service access point for X where X can be lots.
+  * Find me topology server for ESnet (easy)
+  * Find me all pSB MAs for community LHC
+  * Find me all MAs with throughput data for host X
+  * Jeff doesn't like "find me all", hard to optimize
+  * Joe: want "find me MAs along path A->B->C->D". Potentially useful query that has very different implications for scaling. Andy: may exist outside LS Jeff: maybe when you combine LS/TS Martin: difficult to optimize for. Jeff: you have to query with path info to optimize
+  * Believe current system won't scale
+  * What if hLSes are down, what if they're far away. Common queries shouldn't hit large # of hLSes.
+  * Three issues:
+    * performance of the implementation
+    * questions about summarization
+    * what should be cached and where
+  * need to create subgroup to think about these issues more
+    * add another layer to the hierarchy?
+    * recursive queries?
+  * _*ACTION*_: Martin/Jeff/Joe: look at current model and evaluate (both scaling issues and LS/TS merging)
+  * _*ACTION*_: Andy/Brian/Aaron: continue optimization of current implementation
+
+6) Client and Service Architecture
+  * _*ACTION*_: Aaron/Andy: Develop use cases and use as means to evaluate an architecture
+
+7) Circuit Monitoring
+
+  * Notes on slide deck:
+    * Add operational vs administrative status to slide 3
+    * Add "Capacity" & COS policy to slide 3
+    * Slide 6: Monitoring Service should be called Measuremnet Point/Archive, not a new element in the perfSONAR architecture, OR, maybe it is a transformation service that combines data from perfSONAR MA's & MP's.
+    * Concerns: way that mapping between circuit-id to full set of segment ids needs to be fully specified in a way describable to operations
+  * _*ACTION*_: Inder/Joe/Jeff: review and refine model
