@@ -84,6 +84,11 @@ The following outline some exceptions to the overall release process.  Also see 
      * [http://code.google.com/p/perfsonar-ps/issues/detail?id=377 377] contains work for 3.2
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=386 386] - _*Aaron*_ - Unchecked null concatentation in pSB 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=388 388] - _*Aaron*_ - MySQL database checks 
+ * _*Documentation*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=390 390] - _*All*_ - URLs in pS Package Documentation 
+     * _*Jason*_ - SNMP MA, LS, pSB, perfAdmin
+     * _*Aaron*_ - LSReg, Status, Topology
+     * _*Maxim*_ - PingER, PingER GUI
      
 === Code Reviews ===
 
@@ -101,10 +106,11 @@ Testers should download ISO betas and excersize *ALL* functionality.  If you are
 
  * Jason
    * Update Issue Tracker - <font color=green>_*DONE - 1/13*_</font>
-   * Documentation - <font color="#CCFF00">_*IN PROGRESS - 1/20*_</font>
+   * Documentation - <font color="#CCFF00">_*IN PROGRESS - 2/2*_</font>
    * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
  * Aaron
    * Development - <font color=green>_*DONE - 1/21*_</font>
+   * Documentation - <font color="#CCFF00">_*IN PROGRESS - 2/2*_</font>
    * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
  * Andy
    * Development - <font color=green>_*DONE - 1/21*_</font>
@@ -115,6 +121,7 @@ Testers should download ISO betas and excersize *ALL* functionality.  If you are
    * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
  * Maxim 
    * Development - <font color="#CCFF00">_*IN PROGRESS - 1/4*_</font>
+   * Documentation - <font color="#CCFF00">_*IN PROGRESS - 2/2*_</font>
    * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
  * Brian
    * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
