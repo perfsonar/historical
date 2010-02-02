@@ -424,3 +424,12 @@ Notes on slide deck:
     * Slide 6: Monitoring Service should be called Measuremnet Point/Archive, not a new element in the perfSONAR architecture, OR, maybe it is a transformation service that combines data from perfSONAR MA's & MP's.
     * Concerns: way that mapping between circuit-id to full set of segment ids needs to be fully specified in a way describable to operations
   * _*ACTION*_: Inder/Joe/Jeff: review and refine model
+  
+=== Product Support ===
+  * _*ACTION*_: We will only be supporting one architecture and operating system combination (CentOS 5.x, x86).  x = version to be determined later, usually at release time.  
+  * _*ACTION*_: Jason will draft policy statements on supported OSs and our commitment to security vulnerabilities.  
+  
+=== LiveCD Topics ===
+  * _*ACTION*_: See _*Product Support*_ for statement of support.  
+  * _*ACTION*_: Templates for  all knoppix configs need to be modified to note that they should not be manually edited (e.g. will get clobbered)
+
