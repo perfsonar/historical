@@ -405,7 +405,7 @@ class psMessageReader(psMessage):
         attribute-style access to a message level named
         parameter block.
         """
-        return Parameters(self.message, eid)
+        return Parameters(self.findElementByID(eid), eid)
         
     def fetchMessageParams(self,eid):
         """
@@ -427,7 +427,7 @@ class psMessageReader(psMessage):
         Returns a perfsonar.Metadata subclass object to give
         attribute-style access to a single named metadata block.
         """
-        return Metadata(self.message, eid)
+        return Metadata(self.findElementByID(eid), eid)
         
     def fetchMetadataAttributes(self,eid):
         """
@@ -509,7 +509,7 @@ class psMessageReader(psMessage):
         Returns a perfsonar.Data subclass object to give
         attribute-style access to a single named metadata block.
         """
-        return Data(self.message, eid)
+        return Data(self.findElementByID(eid), eid)
         
     def fetchDataAttributes(self,eid):
         """
@@ -553,8 +553,9 @@ class StructureBase(psMessageReader):
     section classes.  Subclasses psMessageReader.
     """
     def __init__(self,msg,eid):
-        super(StructureBase, self).__init__(msg)
+        self.message = msg
         self.eid = eid
+        log.debug('%s' % self)
     @property
     def id(self):
         return self.eid
