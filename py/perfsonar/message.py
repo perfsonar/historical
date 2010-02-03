@@ -221,6 +221,7 @@ class psMessageReader(psMessage):
         super(psMessageReader, self).__init__()
         
         self.messageId = None
+        self.messageIdRef = None
         self.messageType = None
         self.mainMessageElements = {'data':[], 'metadata':[], 'parameters':[]}
         log.debug('%s' % self)
@@ -260,6 +261,9 @@ class psMessageReader(psMessage):
         elementInfo = self.getElementInformation(messageElement)
         self.messageId = elementInfo['id']
         self.messageType = elementInfo['type']
+        
+        if messageElement.attrib.has_key('messageIdRef'):
+            self.messageIdRef = messageElement.attrib['messageIdRef']
 
         for i in messageElement.iterdescendants():
             if self.isComment(i):
@@ -359,9 +363,15 @@ class psMessageReader(psMessage):
             
     def getMessageId(self):
         """
-        Returns message type - ie: MeasurementArchiveStoreRequest, etc.
+        Returns message id.
         """
         return self.messageId
+        
+    def getMessageIdRef(self):
+        """
+        Returns message id ref if there is one.
+        """
+        return self.messageIdRef
         
     def getMessageType(self):
         """
