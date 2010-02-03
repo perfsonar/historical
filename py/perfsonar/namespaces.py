@@ -10,7 +10,9 @@ nsdict = {
     'select':"http://ggf.org/ns/nmwg/ops/select/2.0/",
     'neterr':"http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
     'netdisc':"http://ggf.org/ns/nmwg/characteristic/discards/2.0/",
-    'netutil':"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
+    'netutil':"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
+    'iperf': "http://ggf.org/ns/nmwg/tools/iperf/2.0/",
+    'owamp': "http://ggf.org/ns/nmwg/tools/owamp/2.0/"
 }
 
 # The namespaces that the individual elements exist in.

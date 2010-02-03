@@ -215,7 +215,8 @@ class psMessageBuilder(psMessage):
 class psMessageReader(psMessage):
     def __init__(self,msg=None):
         """
-        Ctor
+        Ctor - Can be initialized by either an XML string or an etree.Element
+        object as is used in the server dispatch library.
         """
         super(psMessageReader, self).__init__()
         
