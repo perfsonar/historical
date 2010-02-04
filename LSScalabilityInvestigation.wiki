@@ -1786,6 +1786,20 @@ We will use mainly the visualization tool named ICE - Internet Computer network 
 
 The tool, built in Java, works by transmiting an XML request to the server, and showing the XML received XML response.  The timing, therefore, comprehends processing by the server, and also transmission delays between the client running ICE and the server.
 
+The fakeServices take basically the configuration exemplified below:
+
+{{{
+Service.config
+domain     mainframe.edu
+ip     51.106.c.d
+key     0e2e12f4e0a7845cb5b35494bfbad7aa
+keywords     LHC
+ls     http://onelab-1.fhi-fokus.de:9995/perfSONAR_PS/services/hLS
+ls_interval     60
+md_number     10
+type     snmp
+}}}
+
 
 === Planetlab planetlab2.cs.columbia.edu Exhausted Resources ===
 
@@ -1899,14 +1913,14 @@ The ICE tool request/response timings are tabulated below.  The procedure in obt
  * Measure the time between the transmission of the request, and receival of the response.  This is done by ICE.
 
 
-For the hLS, different quantities of fakeServices are registered.  The hLS is then queried using the CGI script and the response time is measured.
+For the hLS, different quantities of fakeServices are registered.  The hLS is then queried using ICE and the response time is reported (the response time obviously includes the roundtrip communication between client/server).
 
 http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/response_timings.png
 
 
 === Observations ===
 
-Starting At 30 services registered (from the same client), the number of errors of the types below reported by `moonshine` hLS increases when the fakeServices first attempt to register.  Their registration also takes a long time to complete (be successful), during which several errors of *type 2* are reported.
+Starting at 30 services registered (from the same client), the number of errors of the types below reported by `moonshine` hLS increases when the fakeServices first attempt to register.  Their registration also takes a long time to complete (be successful), during which several errors of *type 2* are reported.
 
 Error *type 3* was also observed in rare occasions when querying the LS, after approximately 30 services and up where registered.
 
@@ -1927,3 +1941,7 @@ Service failed to register - LS did not respond.
 {{{
 Database errors prevented the transaction from completing:
 }}}
+
+For the the hLS at `onelab-1.fhi-fokus.de`, the same observation was noted:  at 30 registered services and up, the number of errors and the registration times increase; services begin to take tipically 5-10 minutes to successfully register.
+
+It is important to note that the fakeServices do try to register with very little interval in between different instances, since they are deployed in series, one after another.  This also causes them to behave in synchronism.
