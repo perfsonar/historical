@@ -142,8 +142,8 @@ class psMessageBuilder(psMessage):
             
     def addMetadataBlock(self, eid, subject=None, forceSubjectNS=None,
                         subjectType=None, subjectData=None,
-                        eventType=None, paramid=None, params=None):
-        metadata = self.addElement('metadata', eid, self.messageId)
+                        eventType=None, paramid=None, params=None, **kwargs):
+        metadata = self.addElement('metadata', eid, self.messageId, **kwargs)
         if subject is not None:
             subject = self.createElement('subject', subject)
             metadata.append(subject)
@@ -207,7 +207,19 @@ class psMessageBuilder(psMessage):
     def addKeyToDataBlock(self, eid, keyid=None, paramid=None, params=None):
         key = self.addElement('key', keyid, eid)
         if paramid is not None:
-            self.addParameters(paramid, key.attrib['id'], params)
+            parms = self.createElement('parameters', paramid)
+            key.append(parms)
+            if params is not None:
+                for k,v in params.items():
+                    if type(v) != type([]):
+                        # add a single parameter
+                        parms.append(self.createElement('parameter', None, 
+                                                        name=k, payload=v))
+                    else:
+                        for multival in v:
+                            # for repeating params like supportedEventType
+                            parms.append(self.createElement('parameter', None, 
+                                                            name=k, payload=multival))
     
 
 ########
