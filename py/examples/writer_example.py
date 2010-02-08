@@ -6,7 +6,7 @@ import logging
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG,
-                        format="%(levelname)s: %(funcName)s : %(message)s")
+                        format="%(levelname)s: %(name)s: %(funcName)s : %(message)s")
     # Construct the message - arg1 is the id and arg2 is the message type
     psm = psMessageBuilder('msg4', 'MeasurementArchiveStoreRequest')
     
