@@ -331,7 +331,12 @@ class psMessageReader(psMessage):
         for e in ele.iterchildren():
             try:
                 eInfo = self.getElementInformation(e)
-                params[eInfo['name']] = e.text
+                if params.has_key(eInfo['name']):
+                    if type(params[eInfo['name']]) != type([]):
+                        params[eInfo['name']] = [params[eInfo['name']]]
+                    params[eInfo['name']].append(e.text)
+                else:
+                    params[eInfo['name']] = e.text
             except:
                 er = 'Unable to get value from child element %s in %s' \
                     % (e, ele)
@@ -349,7 +354,12 @@ class psMessageReader(psMessage):
             return params
         for e in ele.iterchildren():
             try:
-                params[e.attrib['name']] = e.text
+                if params.has_key(e.attrib['name']):
+                    if type(params[e.attrib['name']]) != type([]):
+                        params[e.attrib['name']] = [params[e.attrib['name']]]
+                    params[e.attrib['name']].append(e.text)
+                else:
+                    params[e.attrib['name']] = e.text
             except:
                 er = 'Unable to get value from child element %s in %s' \
                     % (e, ele)
@@ -499,10 +509,11 @@ class psMessageReader(psMessage):
         Returns the event type from a named metadata section.
         """
         mdEle = self.findElementByID(eid)
-        et = self.findElementByName(mdEle, 'eventType')
-        if et == None:
+        mDict = self.makeSimpleDictFromElement(mdEle)
+        if mDict.has_key('eventType'):
+            return mDict['eventType']
+        else:
             return None
-        return et.text
         
     def fetchMetadataKey(self,eid):
         """
