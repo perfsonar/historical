@@ -1,5 +1,6 @@
 from perfsonar.message import psMessageBuilder, psMessageReader
 from perfsonar.client import SimpleClient
+from optparse import OptionParser
 import logging, sys
 log = logging.getLogger(__name__)
 
@@ -63,24 +64,37 @@ def dumpMaResults(message, listall=False):
             break
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO,
+    # -H rrdma.net.internet2.edu -p 8080 -u /perfSONAR_PS/services/snmpMA
+    opts = OptionParser()
+    opts.add_option("-H", "--host", dest="host", default='localhost',
+                    help="SNMP MA hostname (default: localhost)", metavar="HOST")
+    opts.add_option("-p", "--port", dest="port", default=8080,
+                    help="Service port number (default: 8080)", metavar="PORT")
+    opts.add_option("-u", "--uri", dest="uri",
+                    help="Service URI (default: default: /)", metavar="URI")
+    opts.add_option("-v", action="store_true", dest="verbose",
+                    help="Use verbose: logging.DEBUG", default=False)
+    opts.add_option("-d", action="store_true", dest="dumpall",
+                    help="Dump all records to stdout (default: just the first record)", 
+                    default=False)
+    (options, args) = opts.parse_args()
+    
+    loglevel = logging.INFO
+    if options.verbose:
+        print 'verbose'
+        loglevel = logging.DEBUG
+    
+    
+    logging.basicConfig(level=loglevel,
                         format="%(levelname)s: %(name)s: %(funcName)s : %(message)s")
                         
     snmpMA = makeSNMPMAmessage()
-    #client = SimpleClient('localhost', 8080, '/')
     client = SimpleClient('rrdma.net.internet2.edu', 8080, 
                             '/perfSONAR_PS/services/snmpMA')
+    client = SimpleClient(options.host, options.port, options.uri)
     client.setMessage(snmpMA)
     message = client.sendAndGetResponse()
     
-    dumpMaResults(message, listall=False)
+    dumpMaResults(message, listall=options.dumpall)
     
-    #psbOwamp = makepSBMAowampMessage()
-    #client = SimpleClient('ndb1.net.internet2.edu', 8085, 
-    #                        '/perfSONAR_PS/services/pSB')
-    #client.setMessage(psbOwamp)
-    #message = client.sendAndGetResponse()
-    #print message.tostring()
-    #dumpResults(message)
-
     pass
