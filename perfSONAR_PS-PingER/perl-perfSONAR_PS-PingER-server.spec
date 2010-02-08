@@ -4,19 +4,21 @@
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 PingER
 %define disttag pSPS
+%define relnum 12
 
 Name:           perl-perfSONAR_PS-PingER-server
 Version:        3.1
-Release:        7.%{disttag}
+Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS PingER  Measurement Archive and Collection System
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-PingER/
-Source0:        perfSONAR_PS-PingER-server-%{version}.tar.gz
+Source0:        perfSONAR_PS-PingER-server-%{version}.%{relnum}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 
-Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+
+###Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:       perl(DateTime) >= 0.41
 Requires:       perl(DateTime::Format::Builder) >= 0.7901
 Requires:       perl(Carp) >= 0.41
@@ -48,11 +50,12 @@ Requires:       perl(Hash::Merge)
 Requires:       perl(IO::File)
 Requires:       perl(IO::Interface)
 Requires:       perl(IO::Socket)
+Requires:       perl(Log::Dispatch::FileRotate)
 Requires:       perl(Log::Log4perl) >= 1
 Requires:       perl(LWP::Simple)
 Requires:       perl(LWP::UserAgent)
 Requires:       perl(Math::BigFloat)
-Requires:       perl(Math::Int64)
+Requires:       perl(Math::BigInt)
 Requires:       perl(Module::Load)
 Requires:       perl(Net::Ping)
 Requires:       perl(Net::DNS)
@@ -92,7 +95,7 @@ The perfSONAR_PS PingER MA/MP allows one to make ICMP ping data available in SQL
 
 
 %prep
-%setup -q -n perfSONAR_PS-PingER-server
+%setup -q -n perfSONAR_PS-PingER-server-%{version}.%{relnum}
 
 %build
 
@@ -147,6 +150,12 @@ echo "    /opt/perfsonar_ps/PingER/doc/INSTALL file                    "
 echo "-----------------------------------------------------------------"
 
 %changelog
+* Mon Feb 08 2010 maxim@fnal.gov v3.1.12
+- fixes for issues # 391,392
+
+* Tue Jan 08 2010 maxim@fnal.gov v3.1.11
+- removed perl prereq
+
 * Tue Sep 22 2009 zurawski@internet2.edu v3.1.7
 - useradd option change
 

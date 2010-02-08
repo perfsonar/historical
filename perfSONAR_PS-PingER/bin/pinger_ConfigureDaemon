@@ -98,6 +98,7 @@ while ( 1 ) {
         print "\n";
         print "Saved config to $file\n";
         print "\n";
+	exit( 0 );
     }
     elsif( $input == 4) { 
       SaveConfig_mine( $file, \%config ) if  $pre_input && $pre_input != 5;
