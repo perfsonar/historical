@@ -1,5 +1,6 @@
 from perfsonar.server import psService, serveWithCherryPy
 from perfsonar.message import psMessageBuilder, psMessageReader
+from optparse import OptionParser
 
 from time import time
 import logging
@@ -35,6 +36,10 @@ class MeasurementArchiveService(psService):
     # presumably since they used to use the ElementTree lib.
     def metadataKeyRequest(self, message):
         log.debug('Fetching metadata...')
+        # NOTE: the "message" that is passed in by the dispatch 
+        # framwork is an lxml.etree object.  It can be passed
+        # to a psMessageReader object (as in this example), 
+        # manipulated directly or handled however the user wishes.
         messageIn = psMessageReader(message)
         # Read data from the request.
         requestId = messageIn.getMessageId()
@@ -85,7 +90,14 @@ class MeasurementArchiveService(psService):
             
             keyParams = {'maKey': 'a593c5016d0778e59d76c6ba42fffc3a'}
             messageOut.addKeyToDataBlock(dataBlockId, paramid='params.0',params=keyParams)
-                                        
+        
+        # NOTE: as  with what is passed in, the dispatch framework
+        # expects an lxml.etree object containing the message wrapper
+        # as the base element (ie: no SOAP headers or the like). The
+        # return message can be constructed using a psMessageBuilder
+        # object and then return the ".message" attribute of the 
+        # object (as in this example) or by some other method if
+        # the developer wishes.
         return messageOut.message
         
     def measurementStoreRequest(self,message):
@@ -94,9 +106,17 @@ class MeasurementArchiveService(psService):
         return message
         
 if __name__ == '__main__':
+    opts = OptionParser()
+    opts.add_option("-v", action="store_true", dest="verbose",
+                    help="Use verbose: logging.DEBUG", default=False)
+    (options, args) = opts.parse_args()
+
+    loglevel = logging.INFO
+    if options.verbose:
+        loglevel = logging.DEBUG
     # Change the logging level to DEBUG to see the messages
     # and such.
-    logging.basicConfig(level=logging.DEBUG,
+    logging.basicConfig(level=loglevel,
                         format="%(levelname)s: %(name)s: %(funcName)s : %(message)s")
     service = MeasurementArchiveService()
     log.debug("starting server")
