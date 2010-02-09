@@ -81,9 +81,7 @@ if __name__ == '__main__':
     
     loglevel = logging.INFO
     if options.verbose:
-        print 'verbose'
         loglevel = logging.DEBUG
-    
     
     logging.basicConfig(level=loglevel,
                         format="%(levelname)s: %(name)s: %(funcName)s : %(message)s")
