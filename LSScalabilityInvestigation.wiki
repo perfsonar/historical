@@ -1945,3 +1945,55 @@ Database errors prevented the transaction from completing:
 For the the hLS at `onelab-1.fhi-fokus.de`, the same observation was noted:  at 30 registered services and up, the number of errors and the registration times increase; services begin to take tipically 5-10 minutes to successfully register.
 
 It is important to note that the fakeServices do try to register with very little interval in between different instances, since they are deployed in series, one after another.  This also causes them to behave in synchronism.
+
+==== XMLDB Error ====
+
+After approximately 5 days and with 50 registered fakeServices, the hLS server at `onelab-1.fhi-fokus.de` stopped working.  Attempts to restart the LS service were not successful:  the init script would halt after displaying the warning message:
+
+ `WARN> daemon.pl:232 main:: - Enabling echo service for each endpoint unless specified otherwise`
+ 
+To find out the origin of the problem, we run the LS init script with the `--verbose` option:
+
+{{{
+cd /opt/perfsonar/lookup_service/bin
+sudo perl daemon.pl --verbose --config=../etc/daemon.conf --logger=../etc/daemon_logger.conf
+}}}
+ 
+This outputs:
+
+{{{
+2010/02/09 17:37:58 (9546) WARN> daemon.pl:232 main:: - Enabling echo service for each endpoint unless specified otherwise
+2010/02/09 17:37:58 (9546) DEBUG> daemon.pl:241 main:: - Starting perfSONAR-PS daemon as '9546'
+2010/02/09 17:37:58 (9546) DEBUG> daemon.pl:300 main:: - Adding endpoint /perfSONAR_PS/services/hLS to 9995
+2010/02/09 17:37:58 (9546) DEBUG> daemon.pl:315 main:: - Modules is not an array: 
+2010/02/09 17:37:58 (9546) DEBUG> gLS.pm:216 perfSONAR_PS::Services::LS::gLS::init - Creating 'metadata_db_file' file at "/var/lib/perfsonar/lookup_service/xmldb/glsstore.dbxml"
+2010/02/09 17:37:58 (9546) DEBUG> gLS.pm:224 perfSONAR_PS::Services::LS::gLS::init - Creating 'metadata_db_file' file at "/var/lib/perfsonar/lookup_service/xmldb/glsstore-summary.dbxml"
+2010/02/09 17:37:58 (9546) DEBUG> gLS.pm:250 perfSONAR_PS::Services::LS::gLS::init - Setting 'ls_registration_interval' to 10800 seconds
+2010/02/09 17:37:58 (9546) DEBUG> gLS.pm:274 perfSONAR_PS::Services::LS::gLS::init - Setting 'maintenance_interval' to "120" minutes.
+2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSRegisterRequest
+2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSDeregisterRequest
+2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSKeepaliveRequest
+2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSQueryRequest
+2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSLookupRequest
+2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSKeyRequest
+2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSSynchronizationRequest
+}}}
+
+This hints at a XMLDB - XML database problem.  The fix used was:
+ 
+ # Delete the files at `/var/lib/perfsonar/lookup_service/xmldb`.
+ # Recreate the perfsonar XML database with:
+  {{{
+  cd /opt/perfsonar/lookup_service/scripts
+  sudo ./psCreateLookupDB --directory=/var/lib/perfsonar/lookup_service/xmldb
+  }}}
+ # Change ownership of the files:
+  {{{
+  sudo chown -R perfsonar:perfsonar /var/lib/perfsonar/lookup_service/xmldb
+  }}}
+ # Now, start the LS again
+  {{{
+  sudo /etc/init.d/lookup_service start
+  }}}
+  
+And it works again.  It is now yet clear whether this is a problem with the LS service implementation, or with Planetlab environment.
