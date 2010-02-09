@@ -85,12 +85,14 @@ if __name__ == '__main__':
     
     logging.basicConfig(level=loglevel,
                         format="%(levelname)s: %(name)s: %(funcName)s : %(message)s")
-                        
+    # Get a psMessageBuilder object with the request message.
     snmpMA = makeSNMPMAmessage()
-    client = SimpleClient('rrdma.net.internet2.edu', 8080, 
-                            '/perfSONAR_PS/services/snmpMA')
     client = SimpleClient(options.host, options.port, options.uri)
+    # setMessage() will accept either a Builder or Reader object
+    # or a properly formatted xml string.
     client.setMessage(snmpMA)
+    # Send the message and return the response in a psMessageReader
+    # object.
     message = client.sendAndGetResponse()
     
     dumpMaResults(message, listall=options.dumpall)
