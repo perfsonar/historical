@@ -6,7 +6,7 @@ Autoreq: 0
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 snmp_ma
 
-%define relnum 9
+%define relnum 10
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-SNMPMA
@@ -135,6 +135,11 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Wed Feb 9 2010 zurawski@internet2.edu 3.1-10
+- Documentation update
+- Bugfixes
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=340
+
 * Tue Sep 29 2009 zurawski@internet2.edu 3.1-9
 - useradd option change
 - Bugfixes

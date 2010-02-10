@@ -8,7 +8,7 @@
 %define init_script_owp_collector perfsonarbuoy_owp_collector
 %define init_script_owp_master perfsonarbuoy_owp_master
 
-%define relnum 4
+%define relnum 5
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfSONARBUOY
@@ -229,6 +229,14 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Wed Feb 9 2010 zurawski@internet2.edu 3.1-5
+- Documentation update
+- Bugfixes
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=347
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=364
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=367
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=376
+ 
 * Tue Sep 29 2009 zurawski@internet2.edu 3.1-4
 - useradd option change
 - Bugfixes
@@ -236,6 +244,7 @@ fi
  - http://code.google.com/p/perfsonar-ps/issues/detail?id=306
  - http://code.google.com/p/perfsonar-ps/issues/detail?id=314
  - http://code.google.com/p/perfsonar-ps/issues/detail?id=315
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=317
 
 * Fri Sep 4 2009 zurawski@internet2.edu 3.1-3
 - RPM generation error fixed

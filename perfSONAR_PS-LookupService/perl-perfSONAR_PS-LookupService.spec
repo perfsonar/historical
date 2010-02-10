@@ -4,7 +4,7 @@
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 lookup_service
 
-%define relnum 8
+%define relnum 9
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-LookupService
@@ -100,7 +100,10 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Tue Sep 29 2009 zurawski@internet2.edu 3.1-8
+* Wed Feb 9 2010 zurawski@internet2.edu 3.1-9
+- Documentation update
+
+* Tue Sep 22 2009 zurawski@internet2.edu 3.1-8
 - useradd option change
 
 * Fri Sep 4 2009 zurawski@internet2.edu 3.1-7
@@ -109,6 +112,9 @@ fi
 * Tue Aug 25 2009 zurawski@internet2.edu 3.1-6
 - Fixes to to documentation and package structure.  
 - Adding DCN utilities
+- Bugfixes
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=213
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=297
 
 * Tue Jul 21 2009 zurawski@internet2.edu 3.1-5
 - Shared library upgrades.
@@ -118,6 +124,7 @@ fi
 
 * Mon Jul 6 2009 zurawski@internet2.edu 3.1-3
 - Bugfix to inclcude perl(Clone) as a dep.
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=187
 
 * Thu May 7 2009 zurawski@internet2.edu 3.1-2
 - Bugfixes
