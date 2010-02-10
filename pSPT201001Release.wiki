@@ -34,6 +34,8 @@ The following outline some exceptions to the overall release process.  Also see 
 
 === Bugs Related to This Release ===
 
+ * _*LS Reg Daemon*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=398 398] - _*Aaron*_ - LS returns URLs and strings containing ARRAY(0xABCDEF) instead of name
  * _*Web/Publications*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=169 169] - _*Jason*_ - Add required hardware documentation
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff/Jason*_ - Create organized web-site for pS-Performance-Toolkit
@@ -73,6 +75,8 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*PingER*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=353 353] - _*Aaron/Maxim*_ - ~~pinger on the ps-toolkit occasionally can't reconnect to mysql~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=372 372] - _*Aaron/Maxim*_ - ~~hanging pinger instances~~
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=391 391] - _*Maxim*_ - ~~pinger config script does not exit on option 5~~
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=392 392] - _*Maxim*_ - ~~/etc/init.d/PingER start doesn't~~
  * _*pSB*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=358 358] - _*Jeff/Aaron*_ - pS-Toolkit owampd stale file cleaner
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=365 365] - _*Aaron*_ - ~~support for constraining ports for perfsonarbuoy owamp tests~~
@@ -86,8 +90,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=388 388] - _*Aaron*_ - MySQL database checks 
  * _*Documentation*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=390 390] - _*All*_ - URLs in pS Package Documentation 
-     * _*Jason*_ - SNMP MA, LS, pSB, perfAdmin
-     * _*Aaron*_ - LSReg, Status, Topology
+     * _*Jason*_ - ~~SNMP MA, LS, pSB, perfAdmin~~
+     * _*Aaron*_ - ~~LSReg, Status, Topology~~
      * _*Maxim*_ - PingER, PingER GUI
      
 === Code Reviews ===
@@ -106,11 +110,11 @@ Testers should download ISO betas and excersize *ALL* functionality.  If you are
 
  * Jason
    * Update Issue Tracker - <font color=green>_*DONE - 1/13*_</font>
-   * Documentation - <font color="#CCFF00">_*IN PROGRESS - 2/2*_</font>
+   * Documentation - <font color="#CCFF00">_*IN PROGRESS - 2/9*_</font>
    * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
  * Aaron
-   * Development - <font color=green>_*DONE - 1/21*_</font>
-   * Documentation - <font color="#CCFF00">_*IN PROGRESS - 2/2*_</font>
+   * Development - <font color=green>_*DONE - 2/9*_</font>
+   * Documentation - <font color="#CCFF00">_*IN PROGRESS - 2/9*_</font>
    * Testing - <font color=blue>_*START AFTER - 1/21*_</font>
  * Andy
    * Development - <font color=green>_*DONE - 1/21*_</font>
