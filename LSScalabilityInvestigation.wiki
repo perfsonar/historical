@@ -1882,7 +1882,7 @@ And it was successful.  Venturing `http://plink.cs.uwaterloo.ca/perfAdmin` shoul
 
 === Status Nov 29, 2009 ===
 
-After a number of days, the services in `moonshine`, `ale`, and most Planetlab nodes were stopped, probably due to server rebooting.  The hLS at `planetlab2.cis.upenn.edu` refuses to start again, and node `planetlab2.cs.columbia.edu` is inaccessible. 
+After a number of days, the services in `moonshine`, `ale`, and most Planetlab nodes were stopped, probably due to server rebooting.  The hLS at `planetlab2.cis.upenn.edu` refuses to start again, and node `planetlab2.cs.columbia.edu` is inaccessible.   These Planetlab nodes will be reinstalled.
 
 === Response Timings ===
 
@@ -1952,7 +1952,7 @@ After approximately 5 days and with 50 registered fakeServices, the hLS server a
 
  `WARN> daemon.pl:232 main:: - Enabling echo service for each endpoint unless specified otherwise`
  
-To find out the origin of the problem, we run the LS init script with the `--verbose` option:
+To find out the origin of the problem, the LS init script is run with the `--verbose` option:
 
 {{{
 cd /opt/perfsonar/lookup_service/bin
@@ -1962,24 +1962,24 @@ sudo perl daemon.pl --verbose --config=../etc/daemon.conf --logger=../etc/daemon
 This outputs:
 
 {{{
-2010/02/09 17:37:58 (9546) WARN> daemon.pl:232 main:: - Enabling echo service for each endpoint unless specified otherwise
-2010/02/09 17:37:58 (9546) DEBUG> daemon.pl:241 main:: - Starting perfSONAR-PS daemon as '9546'
-2010/02/09 17:37:58 (9546) DEBUG> daemon.pl:300 main:: - Adding endpoint /perfSONAR_PS/services/hLS to 9995
-2010/02/09 17:37:58 (9546) DEBUG> daemon.pl:315 main:: - Modules is not an array: 
-2010/02/09 17:37:58 (9546) DEBUG> gLS.pm:216 perfSONAR_PS::Services::LS::gLS::init - Creating 'metadata_db_file' file at "/var/lib/perfsonar/lookup_service/xmldb/glsstore.dbxml"
-2010/02/09 17:37:58 (9546) DEBUG> gLS.pm:224 perfSONAR_PS::Services::LS::gLS::init - Creating 'metadata_db_file' file at "/var/lib/perfsonar/lookup_service/xmldb/glsstore-summary.dbxml"
-2010/02/09 17:37:58 (9546) DEBUG> gLS.pm:250 perfSONAR_PS::Services::LS::gLS::init - Setting 'ls_registration_interval' to 10800 seconds
-2010/02/09 17:37:58 (9546) DEBUG> gLS.pm:274 perfSONAR_PS::Services::LS::gLS::init - Setting 'maintenance_interval' to "120" minutes.
-2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSRegisterRequest
-2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSDeregisterRequest
-2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSKeepaliveRequest
-2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSQueryRequest
-2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSLookupRequest
-2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSKeyRequest
-2010/02/09 17:37:58 (9546) DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSSynchronizationRequest
+   WARN> daemon.pl:232 main:: - Enabling echo service for each endpoint unless specified otherwise
+   DEBUG> daemon.pl:241 main:: - Starting perfSONAR-PS daemon as '9546'
+   DEBUG> daemon.pl:300 main:: - Adding endpoint /perfSONAR_PS/services/hLS to 9995
+   DEBUG> daemon.pl:315 main:: - Modules is not an array: 
+   DEBUG> gLS.pm:216 perfSONAR_PS::Services::LS::gLS::init - Creating 'metadata_db_file' file at "/var/lib/perfsonar/lookup_service/xmldb/glsstore.dbxml"
+   DEBUG> gLS.pm:224 perfSONAR_PS::Services::LS::gLS::init - Creating 'metadata_db_file' file at "/var/lib/perfsonar/lookup_service/xmldb/glsstore-summary.dbxml"
+   DEBUG> gLS.pm:250 perfSONAR_PS::Services::LS::gLS::init - Setting 'ls_registration_interval' to 10800 seconds
+   DEBUG> gLS.pm:274 perfSONAR_PS::Services::LS::gLS::init - Setting 'maintenance_interval' to "120" minutes.
+   DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSRegisterRequest
+   DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSDeregisterRequest
+   DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSKeepaliveRequest
+   DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSQueryRequest
+   DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSLookupRequest
+   DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSKeyRequest
+   DEBUG> RequestHandler.pm:115 perfSONAR_PS::RequestHandler::registerFullMessageHandler - Adding message handler for LSSynchronizationRequest
 }}}
 
-This hints at a XMLDB - XML database problem.  The fix used was:
+This hints a XMLDB - XML database problem.  The fix used was:
  
  # Delete the files at `/var/lib/perfsonar/lookup_service/xmldb`.
  # Recreate the perfsonar XML database with:
@@ -1996,4 +1996,4 @@ This hints at a XMLDB - XML database problem.  The fix used was:
   sudo /etc/init.d/lookup_service start
   }}}
   
-And it works again.  It is now yet clear whether this is a problem with the LS service implementation, or with Planetlab environment.
+After these procedures, the service successfully starts.  It is now yet clear whether this is a problem with the LS service implementation, or with Planetlab environment.
