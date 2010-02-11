@@ -1,0 +1,8 @@
+MANIFEST
+Makefile
+dependencies
+doc/Changes
+doc/INSTALL
+doc/LICENSE
+doc/README
+perl-perfSONAR_PS-perfAdmin.spec
