@@ -89,10 +89,10 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=386 386] - _*Aaron*_ - Unchecked null concatentation in pSB 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=388 388] - _*Aaron*_ - MySQL database checks 
  * _*Documentation*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=390 390] - _*All*_ - URLs in pS Package Documentation 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=390 390] - _*All*_ - ~~URLs in pS Package Documentation~~
      * _*Jason*_ - ~~SNMP MA, LS, pSB, perfAdmin~~
      * _*Aaron*_ - ~~LSReg, Status, Topology~~
-     * _*Maxim*_ - PingER, PingER GUI
+     * _*Maxim*_ - ~~PingER, PingER GUI~~
      
 === Code Reviews ===
 
