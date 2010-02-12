@@ -60,10 +60,31 @@ if ( $cgi->param( 'type' ) ) {
     $type = $cgi->param( 'type' );
 }
 
-my $length = q{};
+my ( $sec, $frac ) = Time::HiRes::gettimeofday;
+my $startTime;
+my $endTime;
 if ( $cgi->param( 'length' ) ) {
-    $length = $cgi->param( 'length' );
+    $startTime = $sec - $cgi->param( 'length' );
+    $endTime   = $sec;
 }
+elsif ( $cgi->param( 'smon' ) or $cgi->param( 'sday' ) or $cgi->param( 'syear' ) or $cgi->param( 'emon' ) or $cgi->param( 'eday' ) or $cgi->param( 'eyear' ) ) {
+    if ( $cgi->param( 'smon' ) and $cgi->param( 'sday' ) and $cgi->param( 'syear' ) and $cgi->param( 'emon' ) and $cgi->param( 'eday' ) and $cgi->param( 'eyear' ) ) {
+        $startTime = timelocal_nocheck 0, 0, ( $cgi->param( 'shour' ) ), ( $cgi->param( 'sday' ) ), ( $cgi->param( 'smon' ) - 1 ), ( $cgi->param( 'syear' ) - 1900 );
+        $endTime   = timelocal_nocheck 0, 0, ( $cgi->param( 'ehour' ) ), ( $cgi->param( 'eday' ) ), ( $cgi->param( 'emon' ) - 1 ), ( $cgi->param( 'eyear' ) - 1900 );
+    }
+    else {
+        print "<html><head><title>perfSONAR-PS perfAdmin Delay Graph</title></head>";
+        print "<body><h2 align=\"center\">Graph error; Date not correctly entered.</h2></body></html>";
+        exit( 1 );
+    }
+}
+else {
+    $startTime = $sec - 7200;
+    $endTime   = $sec;
+}
+
+my ( $e_sec, $e_min, $e_hour, $e_mday, $e_mon, $e_year ) = gmtime( $endTime );
+my ( $s_sec, $s_min, $s_hour, $s_mday, $s_mon, $s_year ) = gmtime( $startTime );
 
 print "Content-type: text/html\n\n";
 
@@ -84,13 +105,6 @@ my $dbh      = DBI->connect(
         PrintError => 1
     }
 ) || croak "Couldn't connect to database";
-
-my $endTime = time;
-my ( $e_sec, $e_min, $e_hour, $e_mday, $e_mon, $e_year ) = gmtime( $endTime );
-
-$length = 12 unless $length;
-my $startTime = $endTime - ( 3600 * $length );
-my ( $s_sec, $s_min, $s_hour, $s_mday, $s_mon, $s_year ) = gmtime( $startTime );
 
 #
 #  Sanity check the DB to be sure we have the proper date(s) stored
