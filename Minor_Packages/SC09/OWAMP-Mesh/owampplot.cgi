@@ -230,7 +230,7 @@ if ( $s_year == $e_year ) {
         my $ssql = " ( ";
         foreach my $s ( @{ $map{$send} } ) {
             $ssql .= " or " if $sc;
-            $ssql .= " send_id=\"" . $s . "\" ";
+            $ssql .= " recv_id=\"" . $s . "\" ";
             $sc++;
         }
 
@@ -238,7 +238,7 @@ if ( $s_year == $e_year ) {
         my $rsql = " ( ";
         foreach my $r ( @{ $map{$recv} } ) {
             $rsql .= " or " if $rc;
-            $rsql .= " recv_id=\"" . $r . "\" ";
+            $rsql .= " send_id=\"" . $r . "\" ";
             $rc++;
         }
         $sql .= $ssql . " ) and " . $rsql . " ) and etimestamp > '" . time2owptime( $startTime ) . "' and etimestamp < '" . time2owptime( $endTime ) . "' ";
