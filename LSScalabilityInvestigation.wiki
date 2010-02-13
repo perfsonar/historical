@@ -75,6 +75,8 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/testbed.p
    * gLS, port 9995.  Access point:   http://plink.cs.uwaterloo.ca:9995/perfSONAR_PS/services/gLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_plink.cs.uwaterloo.ca]
   * node onelab-1.fhi-fokus.de
    * hLS, port 9995.  Access point:   http://onelab-1.fhi-fokus.de:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_onelab-1.fhi-fokus.de]
+  * node plonk.cs.uwaterloo.ca
+   * Lookup Service installed, but this node will run fakeServices only.
   
    
  *  After initial setup and testing:
@@ -1778,6 +1780,117 @@ pid_file                                        lookup_service.pid
 The service will run through the init.d script:
 
  `/etc/init.d/lookup_service start`
+ 
+ 
+==== Preparing plonk.cs.uwaterloo.ca ====
+
+===== Background =====
+
+This server _plonk.cs.uwaterloo.ca_ is Fedora release 8 (Werewolf), linux core 2.6.22.19-vs2.3.0.34.39.planetlab.
+
+===== Attempt 1 (plink.cs.uwaterloo.ca) - Working Script =====
+
+In `/etc/yum.repos.d`, add file `rpmforge.repo`:
+
+{{{
+[rpmforge]
+name=Fedora Core $releasever - $basearch - rpmforge
+mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
+gpgcheck=1
+}}}
+
+{{{
+sudo rpm -Uvh http://ftp.freshrpms.net/pub/freshrpms/fedora/linux/8/freshrpms-release/freshrpms-release-1.1-1.fc.noarch.rpm
+wget -c http://freshrpms.net/RPM-GPG-KEY-freshrpms
+sudo rpm --import http://www.perfsonar.net/download/services/perfSONAR-PS_RPM-GPG-KEY
+wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+sudo rpm -ivh http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+wget -c http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
+sudo rpm --import RPM-GPG-KEY.dag.txt
+sudo yum update --nogpgcheck
+sudo yum install perl-perfSONAR_PS-LookupService --nogpgcheck
+sudo yum install libxml2-devel
+wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+sudo rpm -e --nodeps perl-XML-LibXML-1.62001-2.fc8.3 
+sudo rpm -ivh --force perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+}}}
+
+In this case, we had to perform and additional `sudo yum install libxml2-devel` command, and add the `--nogpgcheck` paramenter to `sudo yum update`.
+
+Proceeding to start the hLS service.  Modify the .conf files accordingly (refer to README):
+ 
+Edit /opt/perfsonar_ps/lookup_service/etc/daemon_logger.conf and set the desired logging method. Here, we choose to display log messages to the screen.  Hence, per instructed within the file, we uncomment the line:
+ 
+ `log4perl.appender.A1=Log::Dispatch::Screen`
+
+And comment the line: 
+
+ `#log4perl.appender.A1=Log::Dispatch::FileRotate`
+
+ 
+===== daemon.conf file for plonk.cs.uwaterloo.ca =====
+
+File `daemon.conf`:
+
+{{{
+<port 9995>
+    <endpoint /perfSONAR_PS/services/hLS>
+        <gls>
+                                                                # just an hLS ... (University of Waterloo, Planetlab virtual, Canada)
+                        root                            0
+                                                                # data TTL = 4 days
+                        ls_ttl                          5760
+                                                                # 180 minute (3hr) registaration window
+                        ls_registration_interval        180
+                                                                # 120 miute cleaning/summary window
+                        maintenance_interval            120
+                                                                # Database options (only change path)
+                        metadata_db_file                    glsstore.dbxml
+                        metadata_summary_db_file            glsstore-summary.dbxml
+                        metadata_db_name                    /var/lib/perfsonar/lookup_service/xmldb
+                                                                # Service options (please customize)
+                        service_accesspoint             http://plonk.cs.uwaterloo.ca:9995/perfSONAR_PS/services/hLS
+                        service_description             University of Waterloo Home Lookup Service (Planetlab virtual, Canada)
+                        service_name                    University of Waterloo Home Lookup Service
+                        service_type                    gLS
+                </gls>
+                disable                             0
+                module                              perfSONAR_PS::Services::LS::gLS
+        </endpoint>
+</port>
+                                                    # 180 minute (3hr) registaration window
+ls_registration_interval                        180
+disable_echo                                0
+                                                    # Root hints info, url + local copy location
+root_hints_url                              http://stout.damsl.cis.udel.edu/gls.root.hints
+root_hints_file                             /var/lib/perfsonar/lookup_service/hls.root.hints
+                                                    # Daemon management, shouldn't need changing
+reaper_interval                             20
+max_worker_lifetime                             300
+max_worker_processes                        30
+pid_dir                                     /var/run
+pid_file                                        lookup_service.pid
+}}}
+
+The service will run through the init.d script:
+
+ `/etc/init.d/lookup_service start`
+ 
+===== Installing fakeService on plonk.cs.uwaterloo.ca =====
+
+Install script for fakeService:
+
+{{{
+sudo yum install svn cpan unzip make links ncftp ftp words
+sudo cpan install Data::Random
+svn co https://svn.internet2.edu/svn/perfSONAR-PS/
+cd perfSONAR-PS/branches/RELEASE_3.1/
+sudo cp -r Shared /opt/perfsonar_ps
+cd /opt/perfsonar_ps/Shared/client/fakeService 
+sudo perl fakeService.pl --verbose --config=./fakeService.config
+}}}
 	
 	
 == Test Results ==
