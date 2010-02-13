@@ -445,7 +445,7 @@ pid_file                                        lookup_service.pid
 Now running `lookup_service start` under `scripts`, we get:
 
 {{{
-[mportnoi@ale perfSONAR_PS-LookupService]$ sudo scripts/lookup_service start
+$ sudo scripts/lookup_service start
 /home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/bin/daemon.pl --config=/home/mportnoi/
  perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/etc/daemon.conf --pidfile=lookup_service.pid --piddir=
  /var/run --logger=/home/mportnoi/perfSONAR-PS/branches/RELEASE_3.1/perfSONAR_PS-LookupService/etc/daemon_logger.conf
@@ -1854,7 +1854,7 @@ File `daemon.conf`:
                         service_accesspoint             http://plonk.cs.uwaterloo.ca:9995/perfSONAR_PS/services/hLS
                         service_description             University of Waterloo Home Lookup Service (Planetlab virtual, Canada)
                         service_name                    University of Waterloo Home Lookup Service
-                        service_type                    gLS
+                        service_type                    hLS
                 </gls>
                 disable                             0
                 module                              perfSONAR_PS::Services::LS::gLS
@@ -1886,7 +1886,7 @@ Install script for fakeService:
 sudo yum install svn cpan unzip make links ncftp ftp words
 sudo cpan install Data::Random
 svn co https://svn.internet2.edu/svn/perfSONAR-PS/
-cd perfSONAR-PS/branches/RELEASE_3.1/
+cd perfSONAR-PS/branches/RELEASE_3.1.1/
 sudo cp -r Shared /opt/perfsonar_ps
 cd /opt/perfsonar_ps/Shared/client/fakeService 
 sudo perl fakeService.pl --verbose --config=./fakeService.config
@@ -2029,6 +2029,10 @@ The ICE tool request/response timings are tabulated below.  The procedure in obt
 For the hLS, different quantities of fakeServices are registered.  The hLS is then queried using ICE and the response time is reported (the response time obviously includes the roundtrip communication between client/server).
 
 http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/response_timings.png
+
+The response output from `onelab-1.fhi-fokus.de` for 100 registered services, as obtained from the `view.cgi` script from perfAdmin, is below.
+
+[http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/onelab-1_fhi-fokus_de-output.html Response output from `onelab-1.fhi-fokus.de` for 100 registered services.]
 
 
 === Observations ===
