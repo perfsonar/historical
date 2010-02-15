@@ -1375,6 +1375,9 @@ Starting NTP server: ntpd.
  * *Q: When using _Konqueror_ on the pSPT, I get the following error: _*Username is set to "undefined"*_.  What should I do?*
  * *A:* Avoid using _Konqueror_, if you are using the XWindows system on the pSPT use _Iceweasel_ or a browser on an external system.  
 
+ * *Q: Is it possible to boot the pSPT from a USB Key?*
+ * *A:* Yes, Instructions are available here: http://jreyes.us/USB%20Knoppix%205.1.1%20install.html
+
 == Last Updated ==
 
 $Id$
