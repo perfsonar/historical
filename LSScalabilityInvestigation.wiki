@@ -2398,4 +2398,5 @@ This hints a XMLDB - XML database problem.  The fix used was:
   }}}
   
 After these procedures, the service successfully starts.  It is now yet clear whether this is a problem with the LS service implementation, or with Planetlab environment.
->>>>>>> .r1322
+
+This procedure can also be used to quickly restart the LS database and eliminate old registrations for services that do not exist anymore.
