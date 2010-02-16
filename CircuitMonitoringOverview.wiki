@@ -75,6 +75,8 @@ The circuit descriptor also includes the path traversed by the end-to-end circui
 
 The segment descriptors describe the domain-specific view of the reservation. This can include things like bandwidth, ingress point, egress point, and any other information specific to that segment of the circuit. The client will use this information to both construct an end-to-end view of the circuit, as well as to lookup statistics about the circuit itself. The information given to clients can contain an abstract high-level view of the segment, or a more detailed description of the path that the segment takes through the network. This level of detail given to clients could be varied depending on the what level of access that client is authorized to have.
 
+[http://perfsonar-ps.googlecode.com/svn/wiki/CircuitMonitoring/circuit_descriptor.png]
+
 The agent tasked with constructing circuit descriptors needs to know the identifiers for the domain-specific segment descriptors. This can be accomplished either by, somehow, asking each domain in turn what the identifiers are. An easier method is to have all parties involved agree to a simple algorithm for constructing their segment specific identifiers based on the circuit identifier. An example algorithm might take the circuit identifier and using that as the domain-specific portion of the identifier. If the circuit was named "urn:glif:internet2.edu:gri-123456", then ESnet segment of that circuit might be named "urn:glif:es.net:circuit_internet2.edu:gri-123456". This algorithmic approach allows for distributed domains to work together without necessitating communication every time a circuit is setup.
 
 === Topology Lookup Infrastructure ===
@@ -105,6 +107,24 @@ Constant monitoring and on-demand monitoring could be combined to allow certain 
 
 The monitoring infrastructure needs to support registering this information in the Lookup Service infrastructure so that clients can discover it.
 
+=== Overall Interaction ===
+
+The interaction of the various services and the clients would work like the following:
+
+[http://perfsonar-ps.googlecode.com/svn/wiki/CircuitMonitoring/interactions.png]
+
+  # The circuit creation service contacts the various routers and switches and sets up the new circuit
+  # The circuit creation service contacts the circuit monitoring agent, and informs it about the new circuit, including the internal path and other circuit metadata.
+  # If needed, the circuit creation service contacts the measurement services and informs them of any new elements that they need to measure or new information that they need to make available.
+  # The measurement services tell the lookup infrastructure about the new measurement information they can make available.
+  # The circuit creation service creates the circuit and segment descriptors, and registers them with the topology service.
+  # The topology service tells the lookup infrastructure about the circuit and segment descriptors it now contains.
+  # The client uses the circuit identifier, and asks the lookup infrastructure where it can find the circuit descriptor. The lookup infrastructure directs the client to the topology service.
+  # The client contacts the topology service and retrieves the circuit descriptor.
+  # The client uses the domain-specific segment identifier, and asks the lookup infrastructure where it can find the segment descriptor. The lookup infrastructure directs the client to the topology service.
+  # The client contacts the topology service and retrieves the segment descriptor.
+  # The client uses the information in the segment descriptor, and asks the lookup infrastructure which measurement services can return performance statistics about the circuit. The lookup infrastructure directs the client to one or more measurement services.
+  # The client requests the performance statistics from the measurement services who may retrieve the statistics directly from a known databasae, compute the statistics on the fly using existing collected statistics or may collect the statistics on the fly and return them.
 
 == Last Updated ==
 
