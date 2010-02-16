@@ -444,6 +444,41 @@ circuits traversing it.
 
 }}}
 
+== Possible Development/Deployment Roadmap ==
+
+=== Step 1 ===
+
+Start off with the highest level of granularity. There are no Segment Descriptors, each domain makes available information for their circuit segment. The domain SHOULD provide status information.
+
+A gui would be written to either find or take a circuit descriptor and lookup status or other information. A domain that does not provide status information will be listed as "unknown". Due to the time required to perform these lookups and find this information, this gui would need to cache this information. 
+
+=== Step 2 ===
+
+Either each domain deploys its own TS or a central one could be provided. Each domain could register a segment descriptor for their segment. The depth of these circuits would be as detailed as that domain wanted to be. If a domain did not register the sement descriptor, it would simply be viewed as opaque by the gui.
+
+The gui would be modified to lookup the segment descriptors in the TS. It would then allow users to click on segments that have a corresponding segment descriptor. The user would be taken to a page containing status.
+
+=== Step 3 ===
+
+Software would be written (or reused) to collect and make available any available counters. This would include TL1 or SNMP.
+
+The gui would be modified to collect this information when available.
+
+=== Step 4 ===
+
+The above software would be deployed on the various domains, and configured.
+
+=== Step 5 ===
+
+An agent would be written that would listen to OSCARS NB events. This agent would construct the segment descriptors for a given domain, and an end-to-end
+segment descriptor using the naming convention used in the above examples.
+
+Initially, it would only work with predefined physical hardware that is always being monitored.
+
+=== Step 6 ===
+
+The agent and monitoring software so that the agent could signal the monitoring software to start collecting information about a given circuit's virtual links. It would then make a circuit descriptor consisting of these virtual links.
+
 == Last Updated ==
 
 $Id$
