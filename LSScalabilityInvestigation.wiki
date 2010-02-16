@@ -2204,7 +2204,7 @@ The fakeService instances can be killed with:
 
 `sudo killall perl`
 
-This command will also kill other `perl` jobs.  For Planetlab nodes what are executing fakeServices only, this is not a problem.
+This command will also kill other `perl` jobs.  For Planetlab nodes that are executing fakeServices only, this is not a problem.
 
 
 === Planetlab planetlab2.cs.columbia.edu Exhausted Resources ===
