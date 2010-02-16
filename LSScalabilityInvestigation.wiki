@@ -17,7 +17,7 @@
 
 == Proposed Tests ==
 
- *  Use `ls_registration_daemon` to temporarily register 'fake services'.  Jason has a service emulator [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/fakeService/ FakeService] that should help.
+ *  Use `ls_registration_daemon` to temporarily register 'fake services'.  Jason has a service emulator [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/fakeService/ FakeService] that should help.
  *  Set up a test gLS and hLS, and then play with Jason's "!FakeService" tool to see when and how things break.
  *  Query the gLS and verify that everything what was registered is returned in the query. 
   *  perfSONAR_PS-perfAdmin/cgi-bin/view.cgi is a program that provides an example of how to query an hLS.  Use, for instance: http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://ps-bw.es.net:8095/perfSONAR_PS/services/hLS
