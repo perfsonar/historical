@@ -77,6 +77,16 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/testbed.p
    * hLS, port 9995.  Access point:   http://onelab-1.fhi-fokus.de:9995/perfSONAR_PS/services/hLS.  conf.daemon:  [LSScalabilityInvestigation#daemon.conf_file_for_onelab-1.fhi-fokus.de]
   * node plonk.cs.uwaterloo.ca
    * Lookup Service installed, but this node will run fakeServices only.
+  * node cs-planetlab3.cs.surrey.sfu.ca
+   * Lookup Service installed. but this node will run fakeServices only.
+  * node cs-planetlab4.cs.surrey.sfu.ca
+   * Lookup Service installed. but this node will run fakeServices only.
+  * node pl1.bit.uoit.ca
+   * Lookup Service installed. but this node will run fakeServices only.
+  * node pl1.csl.utoronto.ca
+   * Lookup Service installed. but this node will run fakeServices only.
+  * node pl1.rcc.uottawa.ca
+   * Lookup Service installed. but this node will run fakeServices only.
   
    
  *  After initial setup and testing:
@@ -1788,7 +1798,7 @@ The service will run through the init.d script:
 
 This server _plonk.cs.uwaterloo.ca_ is Fedora release 8 (Werewolf), linux core 2.6.22.19-vs2.3.0.34.39.planetlab.
 
-===== Attempt 1 (plink.cs.uwaterloo.ca) - Working Script =====
+===== Attempt 1 (plonk.cs.uwaterloo.ca) - Working Script =====
 
 In `/etc/yum.repos.d`, add file `rpmforge.repo`:
 
@@ -1891,8 +1901,272 @@ sudo cp -r Shared /opt/perfsonar_ps
 cd /opt/perfsonar_ps/Shared/client/fakeService 
 sudo perl fakeService.pl --verbose --config=./fakeService.config
 }}}
+
+
+==== Preparing cs-planetlab3.cs.surrey.sfu.ca ====
+
+===== Background =====
+
+This server _cs-planetlab3.cs.surrey.sfu.ca_ is Fedora release 8 (Werewolf), linux core 2.6.22.19-vs2.3.0.34.39.planetlab.
+
+===== Attempt 1 (cs-planetlab3.cs.surrey.sfu.ca) - Working Script =====
+
+In `/etc/yum.repos.d`, add file `rpmforge.repo`:
+
+{{{
+[rpmforge]
+name=Fedora Core $releasever - $basearch - rpmforge
+mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
+gpgcheck=1
+}}}
+
+{{{
+sudo rpm -Uvh http://ftp.freshrpms.net/pub/freshrpms/fedora/linux/8/freshrpms-release/freshrpms-release-1.1-1.fc.noarch.rpm
+wget -c http://freshrpms.net/RPM-GPG-KEY-freshrpms
+sudo rpm --import http://www.perfsonar.net/download/services/perfSONAR-PS_RPM-GPG-KEY
+wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+sudo rpm -ivh http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+wget -c http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
+sudo rpm --import RPM-GPG-KEY.dag.txt
+sudo yum update --nogpgcheck
+sudo yum install perl-perfSONAR_PS-LookupService --nogpgcheck
+sudo yum install libxml2-devel
+wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+sudo rpm -e --nodeps perl-XML-LibXML-1.62001-2.fc8.3 
+sudo rpm -ivh --force perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+}}}
+
+In this case, we had to perform and additional `sudo yum install libxml2-devel` command, and add the `--nogpgcheck` paramenter to `sudo yum update`.
+
+ 
+===== Installing fakeService on cs-planetlab3.cs.surrey.sfu.ca =====
+
+Install script for fakeService:
+
+{{{
+sudo yum install svn cpan unzip make links ncftp ftp words
+sudo cpan install Data::Random
+svn co https://svn.internet2.edu/svn/perfSONAR-PS/
+cd perfSONAR-PS/branches/RELEASE_3.1.1/
+sudo cp -r Shared /opt/perfsonar_ps
+cd /opt/perfsonar_ps/Shared/client/fakeService 
+sudo perl fakeService.pl --verbose --config=./fakeService.config
+}}}
 	
 	
+==== Preparing cs-planetlab4.cs.surrey.sfu.ca ====
+
+===== Background =====
+
+This server _cs-planetlab4.cs.surrey.sfu.ca_ is Fedora release 8 (Werewolf), linux core 2.6.22.19-vs2.3.0.34.39.planetlab.
+
+===== Attempt 1 (cs-planetlab4.cs.surrey.sfu.ca) - Working Script =====
+
+In `/etc/yum.repos.d`, add file `rpmforge.repo`:
+
+{{{
+[rpmforge]
+name=Fedora Core $releasever - $basearch - rpmforge
+mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
+gpgcheck=1
+}}}
+
+{{{
+sudo rpm -Uvh http://ftp.freshrpms.net/pub/freshrpms/fedora/linux/8/freshrpms-release/freshrpms-release-1.1-1.fc.noarch.rpm
+wget -c http://freshrpms.net/RPM-GPG-KEY-freshrpms
+sudo rpm --import http://www.perfsonar.net/download/services/perfSONAR-PS_RPM-GPG-KEY
+wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+sudo rpm -ivh http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+wget -c http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
+sudo rpm --import RPM-GPG-KEY.dag.txt
+sudo yum update --nogpgcheck
+sudo yum install perl-perfSONAR_PS-LookupService --nogpgcheck
+sudo yum install libxml2-devel
+wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+sudo rpm -e --nodeps perl-XML-LibXML-1.62001-2.fc8.3 
+sudo rpm -ivh --force perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+}}}
+
+In this case, we had to perform and additional `sudo yum install libxml2-devel` command, and add the `--nogpgcheck` paramenter to `sudo yum update`.
+
+ 
+===== Installing fakeService on cs-planetlab4.cs.surrey.sfu.ca =====
+
+Install script for fakeService:
+
+{{{
+sudo yum install svn cpan unzip make links ncftp ftp words
+sudo cpan install Data::Random
+svn co https://svn.internet2.edu/svn/perfSONAR-PS/
+cd perfSONAR-PS/branches/RELEASE_3.1.1/
+sudo cp -r Shared /opt/perfsonar_ps
+cd /opt/perfsonar_ps/Shared/client/fakeService 
+sudo perl fakeService.pl --verbose --config=./fakeService.config
+}}}
+
+
+==== Preparing pl1.bit.uoit.ca ====
+
+===== Background =====
+
+This server _pl1.bit.uoit.ca_ is Fedora release 8 (Werewolf), linux core 2.6.22.19-vs2.3.0.34.39.planetlab.
+
+===== Attempt 1 (pl1.bit.uoit.ca) - Working Script =====
+
+In `/etc/yum.repos.d`, add file `rpmforge.repo`:
+
+{{{
+[rpmforge]
+name=Fedora Core $releasever - $basearch - rpmforge
+mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
+gpgcheck=1
+}}}
+
+{{{
+sudo rpm -Uvh http://ftp.freshrpms.net/pub/freshrpms/fedora/linux/8/freshrpms-release/freshrpms-release-1.1-1.fc.noarch.rpm
+wget -c http://freshrpms.net/RPM-GPG-KEY-freshrpms
+sudo rpm --import http://www.perfsonar.net/download/services/perfSONAR-PS_RPM-GPG-KEY
+wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+sudo rpm -ivh http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+wget -c http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
+sudo rpm --import RPM-GPG-KEY.dag.txt
+sudo yum update --nogpgcheck
+sudo yum install perl-perfSONAR_PS-LookupService --nogpgcheck
+sudo yum install libxml2-devel
+wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+sudo rpm -e --nodeps perl-XML-LibXML-1.62001-2.fc8.3 
+sudo rpm -ivh --force perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+}}}
+
+In this case, we had to perform and additional `sudo yum install libxml2-devel` command, and add the `--nogpgcheck` paramenter to `sudo yum update`.
+
+ 
+===== Installing fakeService on pl1.bit.uoit.ca =====
+
+Install script for fakeService:
+
+{{{
+sudo yum install svn cpan unzip make links ncftp ftp words
+sudo cpan install Data::Random
+svn co https://svn.internet2.edu/svn/perfSONAR-PS/
+cd perfSONAR-PS/branches/RELEASE_3.1.1/
+sudo cp -r Shared /opt/perfsonar_ps
+cd /opt/perfsonar_ps/Shared/client/fakeService 
+sudo perl fakeService.pl --verbose --config=./fakeService.config
+}}}
+
+==== Preparing pl1.csl.utoronto.ca ====
+
+===== Background =====
+
+This server _pl1.csl.utoronto.ca_ is Fedora release 8 (Werewolf), linux core 2.6.22.19-vs2.3.0.34.39.planetlab.
+
+===== Attempt 1 (pl1.csl.utoronto.ca) - Working Script =====
+
+In `/etc/yum.repos.d`, add file `rpmforge.repo`:
+
+{{{
+[rpmforge]
+name=Fedora Core $releasever - $basearch - rpmforge
+mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
+gpgcheck=1
+}}}
+
+{{{
+sudo rpm -Uvh http://ftp.freshrpms.net/pub/freshrpms/fedora/linux/8/freshrpms-release/freshrpms-release-1.1-1.fc.noarch.rpm
+wget -c http://freshrpms.net/RPM-GPG-KEY-freshrpms
+sudo rpm --import http://www.perfsonar.net/download/services/perfSONAR-PS_RPM-GPG-KEY
+wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+sudo rpm -ivh http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+wget -c http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
+sudo rpm --import RPM-GPG-KEY.dag.txt
+sudo yum update --nogpgcheck
+sudo yum install perl-perfSONAR_PS-LookupService --nogpgcheck
+sudo yum install libxml2-devel
+wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+sudo rpm -e --nodeps perl-XML-LibXML-1.62001-2.fc8.3 
+sudo rpm -ivh --force perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+}}}
+
+In this case, we had to perform and additional `sudo yum install libxml2-devel` command, and add the `--nogpgcheck` paramenter to `sudo yum update`.
+
+ 
+===== Installing fakeService on pl1.csl.utoronto.ca =====
+
+Install script for fakeService:
+
+{{{
+sudo yum install svn cpan unzip make links ncftp ftp words
+sudo cpan install Data::Random
+svn co https://svn.internet2.edu/svn/perfSONAR-PS/
+cd perfSONAR-PS/branches/RELEASE_3.1.1/
+sudo cp -r Shared /opt/perfsonar_ps
+cd /opt/perfsonar_ps/Shared/client/fakeService 
+sudo perl fakeService.pl --verbose --config=./fakeService.config
+}}}
+
+
+==== Preparing pl1.rcc.uottawa.ca ====
+
+===== Background =====
+
+This server _pl1.rcc.uottawa.ca_ is Fedora release 8 (Werewolf), linux core 2.6.22.19-vs2.3.0.34.39.planetlab.
+
+===== Attempt 1 (pl1.rcc.uottawa.ca) - Working Script =====
+
+In `/etc/yum.repos.d`, add file `rpmforge.repo`:
+
+{{{
+[rpmforge]
+name=Fedora Core $releasever - $basearch - rpmforge
+mirrorlist=http://apt.sw.be/fedora/$releasever/en/mirrors-rpmforge
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY.dag.txt
+gpgcheck=1
+}}}
+
+{{{
+sudo rpm -Uvh http://ftp.freshrpms.net/pub/freshrpms/fedora/linux/8/freshrpms-release/freshrpms-release-1.1-1.fc.noarch.rpm
+wget -c http://freshrpms.net/RPM-GPG-KEY-freshrpms
+sudo rpm --import http://www.perfsonar.net/download/services/perfSONAR-PS_RPM-GPG-KEY
+wget -c http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+sudo rpm -ivh http://software.internet2.edu/Internet2-repo-0.1-2.noarch.rpm
+wget -c http://dag.wieers.com/packages/RPM-GPG-KEY.dag.txt
+sudo rpm --import RPM-GPG-KEY.dag.txt
+sudo yum update --nogpgcheck
+sudo yum install perl-perfSONAR_PS-LookupService --nogpgcheck
+sudo yum install libxml2-devel
+wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+sudo rpm -e --nodeps perl-XML-LibXML-1.62001-2.fc8.3 
+sudo rpm -ivh --force perl-XML-LibXML-1.69-2.pSPS.i386.rpm
+}}}
+
+In this case, we had to perform and additional `sudo yum install libxml2-devel` command, and add the `--nogpgcheck` paramenter to `sudo yum update`.
+
+ 
+===== Installing fakeService on pl1.rcc.uottawa.ca =====
+
+Install script for fakeService:
+
+{{{
+sudo yum install svn cpan unzip make links ncftp ftp words
+sudo cpan install Data::Random
+svn co https://svn.internet2.edu/svn/perfSONAR-PS/
+cd perfSONAR-PS/branches/RELEASE_3.1.1/
+sudo cp -r Shared /opt/perfsonar_ps
+cd /opt/perfsonar_ps/Shared/client/fakeService 
+sudo perl fakeService.pl --verbose --config=./fakeService.config
+}}}
+
+
 == Test Results ==
 
 We will use mainly the visualization tool named ICE - Internet Computer network Eye, built by Ivo Kenji Koga and Tassio Ferreira Vale, from Universidade Salvador.  The tool is available at http://wiki.nuperc.unifacs.br/ice/.  A special bundle was modified in order to obtain the time elapsed between a query and a response from an LS server.
@@ -2062,6 +2336,16 @@ Database errors prevented the transaction from completing:
 For the the hLS at `onelab-1.fhi-fokus.de`, the same observation was noted:  at 30 registered services and up, the number of errors and the registration times increase; services begin to take tipically 5-10 minutes to successfully register.
 
 It is important to note that the fakeServices do try to register with very little interval in between different instances, since they are deployed in series, one after another.  This also causes them to behave in synchronism.
+<<<<<<< .mine
+
+*Note on `onelab-1-fhi-fokus.de` with 50 registered services*
+
+After approximately 5 days during which the hLS at `onelab-1-fhi-fokus.de` was operating with 50 registered services, the service stopped working.  Attempts to resume it fail:  a warning messages pops stating
+
+ `"2010/02/09 17:26:51 (6142) WARN> daemon.pl:232 main:: - Enabling echo service for each endpoint unless specified otherwise"`
+
+It is unclear whether this is a problem with the LS service, or with Planetlab.
+=======
 
 ==== XMLDB Error ====
 
@@ -2114,3 +2398,4 @@ This hints a XMLDB - XML database problem.  The fix used was:
   }}}
   
 After these procedures, the service successfully starts.  It is now yet clear whether this is a problem with the LS service implementation, or with Planetlab environment.
+>>>>>>> .r1322
