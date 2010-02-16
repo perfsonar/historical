@@ -6,7 +6,7 @@
 
 The following outlines the proposed architecture for monitoring circuits, and describes what has been implemented so far.
 
-== Circuit Monitoring ===
+== Overview ===
 
 === Constraints ===
 ==== Various Measurement Metrics ====
@@ -37,7 +37,7 @@ To allow for the addition of measurement data that may need to be collected usin
 
 There are two envisioned paradigms for storing the measurement data to allow clients to retrieve them: centralized and decentralized. In the centralized model, each institution has a single service that holds all measurement data. This has the advantage of allowing for a single well known location from which all data can be obtained. It also matches the current circuit reservation model which expects that clients will only interact with a single entity, the inter-domain controller, in a given institution. However, differences between circuit reservation and measurement collection and provision mean that this model will not work for all institutions.
 
-In the circuit reservation model, there needs to be one entity whose role it is to arbitrate access to the various resources. This leads naturally to the single inter-domain controller model. For measurement, there can be numerous different agents collecting network statistics. As a domain begins making more and more network measurements, the feasibility of a single locus of measurement data becomes unfeasible. An example of this would include a instution like ESnet, which is monitoring both OWAMP and SNMP data across their domains. The wide range of network elements contributing data to each archive means that the machine collecting each type of data is heavily loaded. Combining both types of data collection onto a single machine would put heavy strain on that machine, necessitating a much more expensive machine, and hard drive configuration. In order to scale effectively, domains like ESnet need the ability to split their measurement archives based on geographic location, type of measurement data, or some other metric. 
+In the circuit reservation model, there needs to be one entity whose role it is to arbitrate access to the various resources. This leads naturally to the single inter-domain controller model. For measurement, there can be numerous different agents collecting network statistics. As a domain begins making more and more network measurements, the feasibility of a single locus of measurement data becomes infeasible. An example of this would include a instution like ESnet, which is monitoring both OWAMP and SNMP data across their domains. The wide range of network elements contributing data to each archive means that the machine collecting each type of data is heavily loaded. Combining both types of data collection onto a single machine would put heavy strain on that machine, necessitating a much more expensive machine, and hard drive configuration. In order to scale effectively, domains like ESnet need the ability to split their measurement archives based on geographic location, type of measurement data, or some other metric. 
 
 The above does not mean to imply that all domains must behave in a decentralized fashion. For domains that can handle having a single locus of measurement data, the infrastructure should not prevent them from doing so. However, the circuit monitoring infrastructure must be able to handle a more decentralized approach for the domains that need or desire it.
 
@@ -62,6 +62,49 @@ The architecture allows for each domain to control of the information being made
 The above architecture also allows for a more decentralized approach to making available measurement data. Instead of having a single well known network oracle that must know everything about a circuit, the architecture uses a directory service (the LS) to find the services containing relevant circuit information. This permits domains to organize their data repositories in the way that is most reasonable to their organization's needs.
 
 The architecture also permits pooling of resources by allowing domains to share the LS, the TS or even the MAs. 
+
+== Architecture ==
+
+=== Circuit/Segment Descriptions ===
+
+The "circuit descriptor" is a high-level description of the end-to-end circuit itself, including things like the bandwidth, source, destination, and any other information specific to the end-to-end circuit.
+
+The circuit descriptor contains an identifier which clients can use to lookup the circuit. This format of this identifier is a URN containing a domain name portion and a domain-specific portion, the format agreed upon by the GLIF organization.
+
+The circuit descriptor also includes the path traversed by the end-to-end circuit. Instead of containing a detailed path of the circuit, the circuit descriptor's path contains the identifiers for domain-specific descriptions of their segment of the circuit. This enables clients to construct the end-to-end path while permitting domains to provide varying levels of information to individual clients.
+
+The segment descriptors describe the domain-specific view of the reservation. This can include things like bandwidth, ingress point, egress point, and any other information specific to that segment of the circuit. The client will use this information to both construct an end-to-end view of the circuit, as well as to lookup statistics about the circuit itself. The information given to clients can contain an abstract high-level view of the segment, or a more detailed description of the path that the segment takes through the network. This level of detail given to clients could be varied depending on the what level of access that client is authorized to have.
+
+The agent tasked with constructing circuit descriptors needs to know the identifiers for the domain-specific segment descriptors. This can be accomplished either by, somehow, asking each domain in turn what the identifiers are. An easier method is to have all parties involved agree to a simple algorithm for constructing their segment specific identifiers based on the circuit identifier. An example algorithm might take the circuit identifier and using that as the domain-specific portion of the identifier. If the circuit was named "urn:glif:internet2.edu:gri-123456", then ESnet segment of that circuit might be named "urn:glif:es.net:circuit_internet2.edu:gri-123456". This algorithmic approach allows for distributed domains to work together without necessitating communication every time a circuit is setup.
+
+=== Topology Lookup Infrastructure ===
+
+The circuit description and segment descriptions all need to be loaded into an infrastructure that allows clients to find them. The topology lookup infrastructure needs to work with the Lookup Service infrastructure to allow clients to discover where they can query for the circuit or segment descriptions. By working with the Lookup Service infrastructure, this topology lookup infrastructure can be centralized, decentralized or a hybrid.
+
+The topology service infrastructure allows clients to lookup the circuit and segment descriptions, and, if allowed by the domains, each domain's topology as well.
+
+A centralized approach to topology infrastructure would have a single topology service that all participating domains register their segment descriptions, circuit descriptions and network topologies with. This would provide a single point of failure for the participating domains, but would ease administrative burden.
+
+A completely decentralized approach would have each domain provide their own instance of a topology service. They would register their segment and circuit descriptions as well as their topologies with their domain's topology service instance. Clients would query the lookup service to discover each domain's topology service. This increases the administrative overhead, but increases the scalability of the overall system while removing any single point of failure.
+
+There are numerous gradiations between the completely centralized approach, and the completely decentralized. For example, only certain domains could deploy topology service infrastructure, and the other domains could simply piggy-back off either a centralized topology service, or another domain's topology service. 
+
+=== Lookup Service Infrastructure ===
+
+The lookup service infrastructure ties the system together. This infrastructure allows clients to discover the services providing all the various bits of information, without requiring them to maintain a static list of services. Similar to the Topology Lookup Infrastructure, the Lookup Service Infrastructure can be both centralized or decentralized, with a similar of upsides and downsides for each.
+
+=== Monitoring Infrastructure ===
+
+The monitoring infrastructure needs to be able to measure the statistics of the circuit. This can be accomplished via constant collection, on-demand collection or some combination. 
+
+It may be reasonable to monitor certain network elements whether circuits are enabled or not. For example, many devices will only have certain elements configured when a circuit is enabled. If monitoring is constantly looking for these configured elements, and measuring them when available, the collector can run constantly without negatively impacts. A downside to this approach is that the monitoring may not be specific to a given circuit, necessitating that the Circuit Description Agent know the metadata associated with this collection.
+
+Some administrators may not wish to have a collector constantly polling all elements of a given type from their hosts. In these cases, an agent will need to be constructed that enables monitoring when a circuit is brought up, and disables that monitoring when the circuit is brought down. In this case, the domain will need to have an agent, possibly human, that can enable monitoring of the appropriate network elements when a circuit is brought up. If this agent is programmatic, it will likely need the ability to convert the IDC's topological information about the circuit into the appropriate network elements to monitor. 
+
+Constant monitoring and on-demand monitoring could be combined to allow certain elements to be monitored constantly, while others are only measured on-demand. As long as the agent that enables monitoring knows which network elements to instantiate monitoring on, and the segment description agents knows how to construct the description such that it combines the static and dynamic aspects, this hybrid monitoring is feasible.
+
+The monitoring infrastructure needs to support registering this information in the Lookup Service infrastructure so that clients can discover it.
+
 
 == Last Updated ==
 
