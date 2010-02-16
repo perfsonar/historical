@@ -126,6 +126,324 @@ The interaction of the various services and the clients would work like the foll
   # The client uses the information in the segment descriptor, and asks the lookup infrastructure which measurement services can return performance statistics about the circuit. The lookup infrastructure directs the client to one or more measurement services.
   # The client requests the performance statistics from the measurement services who may retrieve the statistics directly from a known databasae, compute the statistics on the fly using existing collected statistics or may collect the statistics on the fly and return them.
 
+== Possible Information Model For Circuit/Segment Descriptors ==
+
+As part of the circuit creation process, a circuit descriptor is created that
+describes, from a very high level, the path that the circuit is taking.
+
+{{{
+<link id="urn:nml:internet2.edu:gri123456_downstream">
+  <source>urn:nml:internet2.edu:hostA_eth0</source> <!-- the source can be a URN or a full description of a domain, node, port or link -->
+  <destination>urn:nml:es.net:hostZ_eth1</destination> <!-- the destination can be a URN or a full description of a domain, node, port or link -->
+
+  <!-- Name of the Circuit. Specified as GRI, but could be a human-readable one -->
+  <name>gri123456</name>
+
+  <!-- Human-Readable Description of the Circuit -->
+  <description>Phoebus Circuit</description>
+
+  <!-- Capacity of the circuit in bps. --> 
+  <capacity>1000000000</capacity>  <!-- 1Gbps -->
+
+  <!-- Period when the circuit will be active for -->
+  <lifetime>
+     <start>1234177754</start>
+     <end>1234567890</end>
+  </lifetime>
+
+  <reverse-link>urn:nml:internet2.edu:gri123456_upstream</reverse-link>
+
+  <relation type="over">
+      <path>
+          <hop id="internet2">
+              <linkIdRef>urn:nml:internet2.edu:gri123456_downstream_segment</linkIdRef>
+              <nextHop>esnet</nextHop>
+          </hop>
+          <hop id="esnet">
+              <linkIdRef>urn:nml:es.net:gri123456_downstream_segment</linkIdRef>
+          </hop>
+      </path>
+  </relation>
+</link>
+
+<link id="urn:nml:internet2.edu:gri123456_upstream">
+  <source>urn:nml:internet2.edu:hostA_eth0</source> <!-- the source can be a URN or a full description of a domain, node, port or link -->
+  <destination>urn:nml:es.net:hostZ_eth1</destination> <!-- the destination can be a URN or a full description of a domain, node, port or link -->
+  <!-- Name of the Circuit. Specified as GRI, but could be a human-readable one -->
+  <name>gri123456</name>
+
+  <!-- Human-Readable Description of the Circuit -->
+  <description>Phoebus Circuit</description>
+
+  <!-- Capacity of the circuit in bps. --> 
+  <capacity>1000000000</capacity>  <!-- 1Gbps -->
+
+  <!-- Period when the circuit will be active for -->
+  <lifetime>
+     <start>1234177754</start>
+     <end>1234567890</end>
+  </lifetime>
+
+  <reverse-link>urn:nml:internet2.edu:gri123456_downstream</reverse-link>
+
+  <relation type="over">
+      <path>
+          <hop id="internet2">
+              <linkIdRef>urn:nml:internet2.edu:gri123456_upstream_segment</linkIdRef>
+              <nextHop>esnet</nextHop>
+          </hop>
+          <hop id="esnet">
+              <linkIdRef>urn:nml:es.net:gri123456_upstream_segment</linkIdRef>
+          </hop>
+      </path>
+  </relation>
+</link>
+}}}
+
+During the circuit creation process, each domain SHOULD setup their monitoring
+services to respond to requests for the ID specified for their domain. For
+example, the status MA for Internet2 could be setup to respond to requests for
+"urn:nml:internet2.edu:gri123456_segment", and have it return the up/down
+status of the circuit. This would, obviously, only make sense for the monitored
+properties that span the entire circuit like up/down status, packets/s,
+bytes/s, etc. The monitored data SHOULD correspond to just those
+counters/status for the circuit.
+
+However, a domain can also choose to provide clients with more information.
+They could create a descriptor for their segment of the circuit. The level of
+detail provided would be up to the individual domain. They would then register
+this descriptor with a Topology Service. Interested clients could then use the
+segment identifier given in the circuit descriptor to look up the segment
+descriptor.
+
+An example is provided in Figure 2 that looks similar to the circuit identifier
+given above in so far as its a path with element identifiers in each hop.
+Unlike the circuit descriptor, this segment descriptor contains hops for each
+port and link. The port and link ids in this descriptor might correspond to
+physical elements OR they might reference virtual elements created during
+circuit creation. Internet2 could configure its monitoring services to return
+information for each identifier inside its segment descriptor.
+
+{{{
+<link id="urn:nml:internet2.edu:gri123456_segment">
+  <relation type="over">
+      <bidirectionalPath>
+          <path direction="downstream">
+              <hop id="0">
+                  <portIdRef>urn:nml:internet2.edu:port_packrat_eth0</portIdRef>
+                  <nextHop>1</nextHop>
+              </hop>
+              <hop id="1">
+                  <portIdRef>urn:nml:internet2.edu:port_packrat_eth1</portIdRef>
+                  <nextHop>2</nextHop>
+              </hop>
+              <hop id="2">
+                  <linkIdRef>urn:nml:internet2.edu:link_packrat_newy</portIdRef>
+                  <nextHop>3</nextHop>
+              </hop>
+              <hop id="3">
+                  <portIdRef>urn:nml:internet2.edu:port_newy_1-A-4-1</portIdRef>
+                  <nextHop>4</nextHop>
+              </hop>
+	      <!-- there's a psuedo-"link" between these two hops, the
+		   cross-connect. It's ommitted here for brevity, but could be
+		   added in for completeness. -->
+              <hop id="4">
+                  <portIdRef>urn:nml:internet2.edu:port_newy_1-A-4-5</portIdRef>
+              </hop>
+          </path>
+
+          <path direction="upstream" />
+      </bidirectionalPath>
+  </relation>
+</link>
+}}}
+
+If Internet2 wished to make even more information available to a client, it
+could create descriptors of each of the elements and register those into a
+Topology Service. Its other option would be to include those descriptors in
+place of the identifiers. Even if it were to include them, the domain should
+register them into the Topology Service. An example of this form is available
+in Figure 3. Here, the path is identical to what it was in the previous segment
+identifier, but the elements are now fleshed out some.
+
+{{{
+<link id="urn:nml:internet2.edu:gri123456_segment">
+  <relation type="over">
+      <bidirectionalPath>
+          <path direction="downstream">
+              <hop id="0">
+                  <port id="urn:nml:internet2.edu:port_packrat_eth0">
+			<name>eth0</name>
+			<address type="ipv4">207.75.164.10</address>
+			<description>Commodity connection</description>
+                  </port>
+                  <nextHop>1</nextHop>
+              </hop>
+              <hop id="1">
+                  <port id="urn:nml:internet2.edu:port_packrat_eth1">
+			<name>eth1</name>
+			<address type="ipv4">207.75.164.8</address>
+			<description>Connection to NEWY Switch</description>
+                  </port>
+
+                  <nextHop>2</nextHop>
+              </hop>
+              <hop id="2">
+                  <link id="urn:nml:internet2.edu:link_packrat_newy">
+			<name>PACKRAT_NEWY-1</name>
+			<capacity>1000000000</capacity>
+			<description>Link connecting Packrat to the NEWY Router</description>
+		  </link>
+                  <nextHop>3</nextHop>
+              </hop>
+              <hop id="3">
+                  <port id="urn:nml:internet2.edu:port_newy_1-A-4-1">
+			<relation type="management">
+				<address type="dns">mss.newy32aoa.net.internet2.edu</address>
+			</relation>
+			<name>1-A-4-1</name>
+			<description>Connection to Packrat</description>
+                  </port>
+                  <nextHop>4</nextHop>
+              </hop>
+	      <!-- there's a psuedo-"link" between these two hops, the
+		   cross-connect. It's ommitted here for brevity, but could be
+		   added in for completeness. -->
+              <hop id="4">
+                  <port id="urn:nml:internet2.edu:port_newy_1-A-4-5">
+			<relation type="management">
+				<address type="dns">mss.newy32aoa.net.internet2.edu</address>
+			</relation>
+			<name>1-A-4-5</name>
+			<description>Connection to ESnet</description>
+                  </port>
+              </hop>
+          </path>
+
+          <path direction="upstream" />
+      </bidirectionalPath>
+  </relation>
+</link>
+}}}
+
+=== Virtual Elements ===
+
+During circuit creation, the domain might create virtual elements that
+correspond to just that subsegment of a port or link that is traversed by the
+circuit. These elements SHOULD be "over" physical hardware. If the domain makes
+status, counters or other information available corresponding to these
+elements, they SHOULD correspond to just those portions used by the circuit.
+
+{{{
+<layer2:link id="urn:nml:internet2.edu:gri123456_segment_0">
+  <vlan>3000</vlan>
+
+  <relation type="over">
+      <linkIdRef>urn:nml:internet2.edu:link_packrat_to_CHIC</linkIdRef>
+  </relation>
+
+  <relation type="upstreamPort">
+      <portIdRef>urn:nml:internet2.edu:port_packrat_eth0.3000</portIdRef>
+  </relation>
+  <relation type="downstreamPort">
+      <portIdRef>urn:nml:internet2.edu:port_NEWY_eth3.3000</portIdRef>
+  </relation>
+</layer2:link>
+
+<layer2:port id="urn:nml:internet2.edu:port_packrat_eth0.3000">
+  <name>eth0.3000</name>
+  <relation type="over">
+      <portIdRef>urn:nml:internet2.edu:port_eth0</portIdRef>
+  </relation>
+
+  <relation type="child">
+      <linkIdRef>urn:nml:internet2.edu:link_WASH_TO_NEWY</linkIdRef>
+  </relation>
+
+  <relation type="parent">
+      <nodeIdRef>urn:nml:internet2.edu:node_packrat</nodeIdRef>
+  </relation>
+</layer2:port>
+}}}
+
+The domain can provide even more information, if desired, by adding their
+static hardware definitions into a Topology Service. This hardware should also
+be monitored so that users can query the element's state independent of any
+circuits traversing it.
+
+{{{
+<link id="urn:nml:internet2.edu:link_packrat_to_CHIC">
+  <relation type="parent">
+      <portIdRef>urn:nml:internet2.edu:port_packrat_eth0</portIdRef>
+  </relation>
+  <name>The Link From Washington D.C. to New York</name>
+</link>
+
+<layer2:port id="urn:nml:internet2.edu:port_packrat_eth0">
+  <name>eth0</name>
+  <address type="mac">00:11:43:34:E0:23</address>
+  <relation type="under">
+      <portIdRef>urn:nml:internet2.edu:port_2001:468:1420:0:211:43ff:fe34:e023</portIdRef>
+      <portIdRef>urn:nml:internet2.edu:port_207.75.164.10</portIdRef>
+  </relation>
+  <relation type="parent">
+      <nodeIdRef>urn:nml:internet2.edu:node_packrat</nodeIdRef>
+  </relation>
+
+  <relation type="child">
+      <linkIdRef>urn:nml:internet2.edu:link_WASH_TO_NEWY</linkIdRef>
+  </relation>
+</layer2:port>
+
+<layer3:port id="urn:nml:internet2.edu:port_207.75.164.10">
+  <address type="ipv4">207.75.164.10</address>
+  <relation type="sibling">
+      <portIdRef>urn:nml:internet2.edu:port_2001:468:1420:0:211:43ff:fe34:e023">
+  </relation>
+  <relation type="over">
+      <portIdRef>urn:nml:internet2.edu:node_packrat_eth0</portIdRef>
+  </relation>
+  <relation type="parent">
+      <nodeIdRef>urn:nml:internet2.edu:node_packrat</nodeIdRef>
+  </relation>
+</layer3:port>
+
+<layer3:port id="urn:nml:internet2.edu:port_2001:468:1420:0:211:43ff:fe34:e023">
+  <address type="ipv6">2001:468:1420:0:211:43ff:fe34:e023</address>
+  <relation type="sibling">
+      <portIdRef>urn:nml:internet2.edu:port_207.75.164.10</portIdRef>
+  </relation>
+  <relation type="over">
+      <portIdRef>urn:nml:internet2.edu:node_packrat_eth0</portIdRef>
+  </relation>
+  <relation type="parent">
+      <nodeIdRef>urn:nml:internet2.edu:node_packrat</nodeIdRef>
+  </relation>
+</layer3:port>
+
+<layer3:port id="urn:nml:internet2.edu:port_packrat_lo">
+  <name>lo</name>
+  <address type="ipv4">127.0.0.1</address>
+
+  <relation type="parent">
+      <nodeIdRef>urn:nml:internet2.edu:node_packrat</nodeIdRef>
+  </relation>
+</layer3:port>
+
+<base:node id="urn:nml:internet2.edu:node_packrat">
+  <name>packrat</name>
+
+  <relation type="child">
+      <portIdRef>urn:nml:internet2.edu:port_207.75.164.10</portIdRef>
+      <portIdRef>urn:nml:internet2.edu:port_2001:468:1420:0:211:43ff:fe34:e023">
+      <portIdRef>urn:nml:internet2.edu:port_packrat_eth0</portIdRef>
+      <portIdRef>urn:nml:internet2.edu:port_packrat_lo</portIdRef>
+  </relation>
+</base:node>
+
+}}}
+
 == Last Updated ==
 
 $Id$
