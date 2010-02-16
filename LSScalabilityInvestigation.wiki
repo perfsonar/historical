@@ -2187,6 +2187,25 @@ md_number     10
 type     snmp
 }}}
 
+A simple script to run several fakeServices can be built into a file (e.g. `runfake`).  The example below runs 10 instances of fakeService in background:
+
+{{{
+for (( i = 1 ; i <= 10; i++ ))
+do
+        sudo perl fakeService.pl --config=./fakeService.config &
+done
+}}}
+
+The file must afterwards be made executable with, for instance:
+
+`sudo chmod 777 runfake`
+
+The fakeService instances can be killed with:
+
+`sudo killall perl`
+
+This command will also kill other `perl` jobs.  For Planetlab nodes what are executing fakeServices only, this is not a problem.
+
 
 === Planetlab planetlab2.cs.columbia.edu Exhausted Resources ===
 
@@ -2336,7 +2355,6 @@ Database errors prevented the transaction from completing:
 For the the hLS at `onelab-1.fhi-fokus.de`, the same observation was noted:  at 30 registered services and up, the number of errors and the registration times increase; services begin to take tipically 5-10 minutes to successfully register.
 
 It is important to note that the fakeServices do try to register with very little interval in between different instances, since they are deployed in series, one after another.  This also causes them to behave in synchronism.
-<<<<<<< .mine
 
 *Note on `onelab-1-fhi-fokus.de` with 50 registered services*
 
@@ -2345,7 +2363,7 @@ After approximately 5 days during which the hLS at `onelab-1-fhi-fokus.de` was o
  `"2010/02/09 17:26:51 (6142) WARN> daemon.pl:232 main:: - Enabling echo service for each endpoint unless specified otherwise"`
 
 It is unclear whether this is a problem with the LS service, or with Planetlab.
-=======
+
 
 ==== XMLDB Error ====
 
