@@ -35,7 +35,7 @@ The following outline some exceptions to the overall release process.  Also see 
 === Bugs Related to This Release ===
 
  * _*LS Reg Daemon*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=398 398] - _*Aaron*_ - LS returns URLs and strings containing ARRAY(0xABCDEF) instead of name
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=398 398] - _*Aaron*_ - ~~LS returns URLs and strings containing ARRAY(0xABCDEF) instead of name~~
  * _*Web/Publications*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=169 169] - _*Jason*_ - Add required hardware documentation
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff/Jason*_ - Create organized web-site for pS-Performance-Toolkit
@@ -47,7 +47,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * _*Jason*_ - ~~Update FAQ/documentation~~
      * _*Aaron*_ - ~~Update menus~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=373 373] - _*Jason*_ - Update pSPT FAQ
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=379 379] - _*Aaron*_ - update CD and splash screen images to 3.1.2
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=379 379] - _*Aaron*_ - ~~update CD and splash screen images to 3.1.2~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=385 385] - _*Jason*_ - ~~authorization dialog failed while adding community in admin GUI~~
  * _*pSPT Internals*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=313 313] - _*Aaron*_ - ~~syslogd goes crazy on ISO~~
@@ -56,11 +56,11 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=366 366] - _*Aaron*_ - ~~syslog-ng crashes regularly on NP Toolkit~~
      * Brian made some changes and is no longer seeing the crashes
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=376 376] - _*Aaron*_ - ~~Enable Verbose debugging on BWCTL/OWAMP/PSB by default~~
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=384 384] - _*Aaron*_ - Spelling error in NTP configuration file
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=384 384] - _*Aaron*_ - ~~Spelling error in NTP configuration file~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=374 374] - _*Andy*_ - ~~Large clock change causes NTP to stop updating and services to stop~~
      * Documentation updated
      * Moved to 3.2
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=387 387] - _*Aaron*_ - PID file format 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=387 387] - _*Aaron*_ - ~~PID file format~~ 
  * _*pSPT GUIs*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=325 325] - _*Aaron*_ - ~~Saving information in pSPT GUIs~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=326 326] - _*Aaron*_ - ~~pSPT Left Menu Enhancements~~
@@ -78,7 +78,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=391 391] - _*Maxim*_ - ~~pinger config script does not exit on option 5~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=392 392] - _*Maxim*_ - ~~/etc/init.d/PingER start doesn't~~
  * _*pSB*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=358 358] - _*Jeff/Aaron*_ - pS-Toolkit owampd stale file cleaner
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=358 358] - _*Jeff/Aaron*_ - ~~pS-Toolkit owampd stale file cleaner~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=365 365] - _*Aaron*_ - ~~support for constraining ports for perfsonarbuoy owamp tests~~
      * _*Jason*_ - ~~Update documentation~~
      * _*Aaron*_ - ~~Update GUIs and pSB~~   
@@ -86,8 +86,8 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=367 367] - _*Andy*_ - ~~OWAMP timestamp conversions slow down pSB MA requests~~
      * Complete for 3.1.2
      * [http://code.google.com/p/perfsonar-ps/issues/detail?id=377 377] contains work for 3.2
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=386 386] - _*Aaron*_ - Unchecked null concatentation in pSB 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=388 388] - _*Aaron*_ - MySQL database checks 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=386 386] - _*Aaron*_ - ~~Unchecked null concatentation in pSB~~
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=388 388] - _*Aaron*_ - ~~MySQL database checks~~
  * _*Documentation*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=390 390] - _*All*_ - ~~URLs in pS Package Documentation~~
      * _*Jason*_ - ~~SNMP MA, LS, pSB, perfAdmin~~
