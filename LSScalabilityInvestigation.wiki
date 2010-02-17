@@ -2169,7 +2169,7 @@ sudo perl fakeService.pl --verbose --config=./fakeService.config
 
 == Test Results ==
 
-We will use mainly the visualization tool named ICE - Internet Computer network Eye, built by Ivo Kenji Koga and Tassio Ferreira Vale, from Universidade Salvador.  The tool is available at http://wiki.nuperc.unifacs.br/ice/.  A special bundle was modified in order to obtain the time elapsed between a query and a response from an LS server.
+We will use mainly the visualization tool named ICE - Internet Computer network Eye, built by Ivo Kenji Koga and Tassio Ferreira Vale, from Universidade Salvador.  The tool is available at http://wiki.nuperc.unifacs.br/ice/.  A special bundle ([http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/WSPlayGroundViewBundle_timings.jar WSPlayGroundViewBundle with timings]) was modified in order to obtain the time elapsed between a query and a response from an LS server.
 
 The tool, built in Java, works by transmiting an XML request to the server, and showing the XML received XML response.  The timing, therefore, comprehends processing by the server, and also transmission delays between the client running ICE and the server.
 
@@ -2294,7 +2294,7 @@ After a number of days, the services in `moonshine`, `ale`, and most Planetlab n
 
 The ICE tool request/response timings are tabulated below.  The procedure in obtaining these numbers is:
 
- * Run the tool and perform a LSQueryRequest to a specific LS server, using @type='LSSTORE'.  The complete message is:
+ * Run the tool and perform a LSQueryRequest to a specific LS server, using @type='LSSTORE'.  The client is located in Newark, DE, through comcast.net network.  The complete message is:
 
 {{{
 <nmwg:message type="LSQueryRequest"
@@ -2316,7 +2316,7 @@ The ICE tool request/response timings are tabulated below.  The procedure in obt
 </nmwg:message>
 }}}
 
- * Measure the time between the transmission of the request, and receival of the response.  This is done by ICE.
+ * Measure the time between the transmission of the request, and reception of the response.  This is done by ICE.
 
 
 For the hLS, different quantities of fakeServices are registered.  The hLS is then queried using ICE and the response time is reported (the response time obviously includes the roundtrip communication between client/server).
