@@ -864,6 +864,8 @@ sub createStorage {
                 my %resSet = ();
                 $len = $#{$result};
                 for my $a ( 0 .. $len ) {
+		    next unless (defined $result->[$a][3]);
+
                     my $src_id = $result->[$a][0];
                     my $dst_id = $result->[$a][1];
 
@@ -1241,6 +1243,8 @@ sub createStorage {
                 my %resSet = ();
                 $len = $#{$result};
                 for my $a ( 0 .. $len ) {
+		    next unless (defined $result->[$a][3]);
+
                     my $src_id = $result->[$a][0];
                     my $dst_id = $result->[$a][1];
 
