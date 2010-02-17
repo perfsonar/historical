@@ -1209,7 +1209,7 @@ sub powstream {
     my @cmd = ( $powcmd, "-e", $facility, "-p", "-S", $myaddr );
     push @cmd, ( "-i", $interval );
     push @cmd, ( "-c", $packet_count );
-    push @cmd, ( "-P", $testports );
+    push @cmd, ( "-P", $testports ) if ($testports);
 
     if ( $do_send ) {
         push @cmd, ( "-t" );
