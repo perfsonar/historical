@@ -868,18 +868,18 @@ sub createStorage {
                     my $dst_id = $result->[$a][1];
 
                     my $src_str = "";
-		    $src_str .= $node{$src_id}{"name"};
+		    $src_str .= $node{$src_id}{"name"} if (defined $node{$src_id}{"name"});
 		    $src_str .= ",";
-		    $src_str .= $node{$src_id}{"port"};
+		    $src_str .= $node{$src_id}{"port"} if (defined $node{$src_id}{"port"});
 		    $src_str .= ",";
-		    $src_str .= $node{$src_id}{"type"};
+		    $src_str .= $node{$src_id}{"type"} if (defined $node{$src_id}{"type"});
 
                     my $dst_str = "";
-		    $dst_str .= $node{$dst_id}{"name"};
+		    $dst_str .= $node{$dst_id}{"name"} if (defined $node{$dst_id}{"name"});
 		    $dst_str .= ",";
-		    $dst_str .= $node{$dst_id}{"port"};
+		    $dst_str .= $node{$dst_id}{"port"} if (defined $node{$dst_id}{"port"});
 		    $dst_str .= ",";
-		    $dst_str .= $node{$dst_id}{"type"};
+		    $dst_str .= $node{$dst_id}{"type"} if (defined $node{$dst_id}{"type"});
 
                     push @{ $resSet{ $src_str }{ $dst_str }{ $result->[$a][3] } }, $result->[$a][2];
                 }
