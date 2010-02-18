@@ -11,6 +11,7 @@
       * *ACTION*: a
  # pSPT Release
    * Completed on Feb 17th
+ # results of gLS performance testing
  # Next Face to Face Meeting
    * Proposal 1:
      * April 24th (Sat) and April 25th (Sun) Before Spring Member Meeting in Washington DC
