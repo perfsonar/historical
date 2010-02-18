@@ -2325,8 +2325,8 @@ http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/response_
 
 The response outputs from `onelab-1.fhi-fokus.de` for 100 and 250 registered services, as obtained from the `view.cgi` script from perfAdmin, are below.
 
-* [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/onelab-1_fhi-fokus_de-output100.html Response output from onelab-1.fhi-fokus.de for 100 registered services.]
-* [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/onelab-1_fhi-fokus_de-output250.html Response output from onelab-1.fhi-fokus.de for 250 registered services.]
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/onelab-1_fhi-fokus_de-output100.html Response output from onelab-1.fhi-fokus.de for 100 registered services.]
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/onelab-1_fhi-fokus_de-output250.html Response output from onelab-1.fhi-fokus.de for 250 registered services.]
 
 
 === Output of `top` Command and Size of XMLDB Directory for 250 Registered fakeServices ===
