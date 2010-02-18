@@ -24,7 +24,10 @@
        * More time if we have an agressive (and we usually do) agenda
      * Cons:
        * After MM, we are all usually burnt out by then
- # TBD
+ # Google Summer of Code
+   * Applications from organizations due March 8th.
+   * Internet2 would not be able to accept more than 2 students (and thats a stretch)
+   * Is there interest in applying?  Would ESnet be able to absorb some mentoring duties if so?
  # TBD
  # TBD
  # *Future topics*:
