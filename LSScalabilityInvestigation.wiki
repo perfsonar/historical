@@ -2323,12 +2323,53 @@ For the hLS, different quantities of fakeServices are registered.  The hLS is th
 
 http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/response_timings.png
 
-The response output from `onelab-1.fhi-fokus.de` for 100 registered services, as obtained from the `view.cgi` script from perfAdmin, is below.
+The response outputs from `onelab-1.fhi-fokus.de` for 100 and 250 registered services, as obtained from the `view.cgi` script from perfAdmin, are below.
 
-[http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/onelab-1_fhi-fokus_de-output.html Response output from `onelab-1.fhi-fokus.de` for 100 registered services.]
+* [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/onelab-1_fhi-fokus_de-output100.html Response output from onelab-1.fhi-fokus.de for 100 registered services.]
+* [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/onelab-1_fhi-fokus_de-output250.html Response output from onelab-1.fhi-fokus.de for 250 registered services.]
+
+
+=== Output of `top` Command and Size of XMLDB Directory for 250 Registered fakeServices ===
+
+{{{
+top - 18:27:27 up 9 days,  8:57,  0 users,  load average: 1.59, 0.95, 0.78
+Tasks:   9 total,   3 running,   6 sleeping,   0 stopped,   0 zombie
+Cpu(s):  2.4%us,  1.1%sy,  0.0%ni, 96.0%id,  0.4%wa,  0.0%hi,  0.1%si,  0.0%st
+Mem:   2074280k total,  1963648k used,   110632k free,   187356k buffers
+Swap:  1048568k total,       32k used,  1048536k free,   888124k cached
+
+  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND           
+ 7656 perfsona  15   0 35928  17m 1200 S    1  0.9  56:59.84 daemon.pl          
+15364 perfsona  17   0  132m  26m 8952 R    1  1.3   0:00.04 daemon.pl          
+15365 perfsona  17   0  299m  23m 6516 R    1  1.2   0:00.03 daemon.pl          
+ 7655 perfsona  15   0 35928  17m  748 S    0  0.9   0:00.00 daemon.pl          
+ 7659 perfsona  17   0  389m 379m 8564 S    0 18.8  78:40.10 daemon.pl          
+ 7660 perfsona  20   0 45108  33m 8200 S    0  1.7   4:22.47 daemon.pl          
+14920 udel_per  16   0  2628 1416 1176 S    0  0.1   0:00.00 bash               
+
+15342 perfsona  15   0  299m  22m 5132 S    0  1.1   0:00.02 daemon.pl  
+
+
+$cd /var/lib/perfsonar/lookup_service/xmldb
+$ls -l
+total 202068
+-rw-r--r-- 1 perfsonar perfsonar       230 Feb 13 02:26 DB_CONFIG
+-rw-r----- 1 perfsonar perfsonar     24576 Feb 13 02:26 __db.001
+-rw-r----- 1 perfsonar perfsonar  58990592 Feb 13 02:26 __db.002
+-rw-r----- 1 perfsonar perfsonar  41951232 Feb 13 02:26 __db.003
+-rw-r----- 1 perfsonar perfsonar   2129920 Feb 13 02:26 __db.004
+-rw-r----- 1 perfsonar perfsonar 172990464 Feb 13 02:26 __db.005
+-rw-r----- 1 perfsonar perfsonar     40960 Feb 13 02:26 __db.006
+-rw-r----- 1 perfsonar perfsonar   2850816 Feb 18 17:45 glsstore-summary.dbxml
+-rw-r----- 1 perfsonar perfsonar   9904128 Feb 18 18:29 glsstore.dbxml
+-rw-rw---- 1 perfsonar perfsonar  10485760 Feb 18 18:28 log.0000001213
+-rw-rw---- 1 perfsonar perfsonar  10485760 Feb 18 18:29 log.0000001214
+}}}
 
 
 === Observations ===
+
+The response times increase as the number of registered services grow in a hLS.  In particular, the response time for server `onelab-1.fhi-fokus.de` is higher than server `moonshine`, but it must be taken into account that the first is a Planetlab virtual machine housed at Germany, whereas the second is located at the same geographical spot as the time measurement client (Newark, DE)
 
 Starting at 30 services registered (from the same client), the number of errors of the types below reported by `moonshine` hLS increases when the fakeServices first attempt to register.  Their registration also takes a long time to complete (be successful), during which several errors of *type 2* are reported.
 
@@ -2355,14 +2396,6 @@ Database errors prevented the transaction from completing:
 For the the hLS at `onelab-1.fhi-fokus.de`, the same observation was noted:  at 30 registered services and up, the number of errors and the registration times increase; services begin to take tipically 5-10 minutes to successfully register.
 
 It is important to note that the fakeServices do try to register with very little interval in between different instances, since they are deployed in series, one after another.  This also causes them to behave in synchronism.
-
-*Note on `onelab-1-fhi-fokus.de` with 50 registered services*
-
-After approximately 5 days during which the hLS at `onelab-1-fhi-fokus.de` was operating with 50 registered services, the service stopped working.  Attempts to resume it fail:  a warning messages pops stating
-
- `"2010/02/09 17:26:51 (6142) WARN> daemon.pl:232 main:: - Enabling echo service for each endpoint unless specified otherwise"`
-
-It is unclear whether this is a problem with the LS service, or with Planetlab.
 
 
 ==== XMLDB Error ====
