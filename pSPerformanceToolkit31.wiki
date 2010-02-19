@@ -1378,6 +1378,27 @@ Starting NTP server: ntpd.
  * *Q: Is it possible to boot the pSPT from a USB Key?*
  * *A:* Yes, Instructions are available here: http://jreyes.us/USB%20Knoppix%205.1.1%20install.html
 
+ * *Q: How do I interpret the Latency/OWAMP Graphs?*
+ * *A:*
+   * The following is a picture of this graph, it is termed an _Annotated Time Line_:
+   * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/AnnotatedTimeLine.png
+   * The graph is split into three major parts:
+     # There are 4 plotted lines on the top portion of the graph:
+       * _*Maximum*_ observed latency in the _Source to Destination_ direction
+       * _*Minimum*_ observed latency in the _Source to Destination_ direction
+       * _*Maximum*_ observed latency in the _Destination to Source_ direction
+       * _*Minimum*_ observed latency in the _Destination to Source_ direction
+     # There are also _annotations_ (labels on the graph) to mark the following events on the right hand side (if applicable):
+       * Loss of packets in either direction
+       * Duplication of packets in either direction
+     # The bottom of the graph is a _sliding window_ that is used to narrow or expand the resolution of the data in the top window:
+       * The sides of the window can be moved
+       * The entire window can be slid
+       * The _squiggly blue line_ is an interpretation of the above data.  Observation has show that this relates to the *Max* value for the *Destination to Source* direction.  This choice is due to how the graphs are plotted on the backend.  In practice the _slope_ of this line is all that matters.  
+   * Some notes on interpreting the data:
+     * The _minimum_ is interpreted as the shortest time it takes for any of the packets in the latency measurement (normally 10pps over the soan of a minute) to arrive.
+     * The _maximum_ is interpreted as the longest time it takes for any of the packets in the latency measurement (normally 10pps over the soan of a minute) to arrive.  This can sometimes cause _*spikes*_ to form on the graphs that offer a false sense the _true_ latency.  
+
 == Last Updated ==
 
 $Id$
