@@ -38,7 +38,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=398 398] - _*Aaron*_ - ~~LS returns URLs and strings containing ARRAY(0xABCDEF) instead of name~~
  * _*Web/Publications*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=169 169] - _*Jason*_ - Add required hardware documentation
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff/Jason*_ - Create organized web-site for pS-Performance-Toolkit
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=284 284] - _*Jeff/Jason*_ - ~~Create organized web-site for pS-Performance-Toolkit~~
      * _*Jason*_ - Review current state, find any holes
      * _*Jeff*_ - Edit/Approve
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Jason*_ - SNMP MA - ~~Indicate it is not running due to cacti~~
@@ -46,7 +46,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=368 368] - _*Jason/Aaron*_ - ~~Storage Configuration Clarifications~~
      * _*Jason*_ - ~~Update FAQ/documentation~~
      * _*Aaron*_ - ~~Update menus~~
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=373 373] - _*Jason*_ - Update pSPT FAQ
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=373 373] - _*Jason*_ - ~~Update pSPT FAQ~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=379 379] - _*Aaron*_ - ~~update CD and splash screen images to 3.1.2~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=385 385] - _*Jason*_ - ~~authorization dialog failed while adding community in admin GUI~~
  * _*pSPT Internals*_
