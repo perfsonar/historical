@@ -2329,7 +2329,7 @@ The response outputs from `onelab-1.fhi-fokus.de` for 100 and 250 registered ser
  * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/onelab-1_fhi-fokus_de-output250.html Response output from onelab-1.fhi-fokus.de for 250 registered services.]
 
 
-=== Output of `top` Command and Size of XMLDB Directory for 250 Registered fakeServices ===
+=== Output of `top` Command for 250 Registered fakeServices on `onelab-1.fhi-fokus.de` ===
 
 {{{
 top - 18:27:27 up 9 days,  8:57,  0 users,  load average: 1.59, 0.95, 0.78
@@ -2349,6 +2349,7 @@ Swap:  1048568k total,       32k used,  1048536k free,   888124k cached
 
 15342 perfsona  15   0  299m  22m 5132 S    0  1.1   0:00.02 daemon.pl  
 
+=== XMLDB Directory Size for 250 Registered fakeServices on `onelab-1.fhi-fokus.de` ===
 
 $cd /var/lib/perfsonar/lookup_service/xmldb
 $ls -l
@@ -2366,6 +2367,25 @@ total 202068
 -rw-rw---- 1 perfsonar perfsonar  10485760 Feb 18 18:29 log.0000001214
 }}}
 
+=== Output of `df -h` and `ps auxw` for 250 Registered fakeServices on `onelab-1.fhi-fokus.de` ===
+
+{{{
+$ df -h
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/hdv1             9.6G  2.6G  6.9G  28% /
+none                  9.6G  2.6G  6.9G  28% /tmp
+
+$ ps auxw
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+499       7655  0.0  0.5  35928 10672 ?        Ss   Feb13   0:00 perfsonar-daemon.pl (7655)
+499       7656  0.7  0.5  35928 11832 ?        S    Feb13  79:10 perfsonar-daemon.pl (7655) - Listener (9995)
+499       7659  1.1 19.8 530100 411368 ?       S    Feb13 115:24 perfsonar-daemon.pl (7655) - Service Maintenance
+499       7660  0.0  1.4  45108 29360 ?        S    Feb13   6:40 perfsonar-daemon.pl (7655) - LS Registration (9995:/perfSONAR_PS/se
+665      26750  0.0  0.0   2632  1416 ?        Ss   01:22   0:00 /bin/bash -l
+499      28532  0.0  0.6  36324 13884 ?        R    01:25   0:00 perfsonar-daemon.pl (7655) - Listener (9995) - 206.12.16.155 - /per
+665      28534  0.0  0.0   2448   824 ?        R+   01:25   0:00 ps auxw
+[udel_perfsonar@onelab-1 ~]$ 
+}}}
 
 === Observations ===
 
