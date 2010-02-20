@@ -2384,7 +2384,6 @@ USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
 665      26750  0.0  0.0   2632  1416 ?        Ss   01:22   0:00 /bin/bash -l
 499      28532  0.0  0.6  36324 13884 ?        R    01:25   0:00 perfsonar-daemon.pl (7655) - Listener (9995) - 206.12.16.155 - /per
 665      28534  0.0  0.0   2448   824 ?        R+   01:25   0:00 ps auxw
-[udel_perfsonar@onelab-1 ~]$ 
 }}}
 
 === Observations ===
