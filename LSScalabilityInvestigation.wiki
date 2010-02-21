@@ -2167,11 +2167,48 @@ sudo perl fakeService.pl --verbose --config=./fakeService.config
 }}}
 
 
-== Test Results ==
+== Report on Results ==
 
-We will use mainly the visualization tool named ICE - Internet Computer network Eye, built by Ivo Kenji Koga and Tassio Ferreira Vale, from Universidade Salvador.  The tool is available at http://wiki.nuperc.unifacs.br/ice/.  A special bundle ([http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/WSPlayGroundViewBundle_timings.jar WSPlayGroundViewBundle with timings]) was modified in order to obtain the time elapsed between a query and a response from an LS server.
+=== Goals ===
 
-The tool, built in Java, works by transmiting an XML request to the server, and showing the XML received XML response.  The timing, therefore, comprehends processing by the server, and also transmission delays between the client running ICE and the server.
+The purposes of the following tests are mainly:
+ *  Investigate scalability limits for the Lookup Service
+ *  Ascertain that data remains consistent with different loads on the LS service
+ *  Reproduce and inspect XMLDB locking issues
+ 
+=== Experimental Part ===
+
+==== Resources ====
+
+The servers will include machines at the Distributed and Meta-Systems Laboratory (DAMSL) at [http://www.udel.edu University of Delaware] and virtual machines from [http://www.planet-lab.org Planetlab].  They will be accessed remotely using SSH.  The Lookup Service and fakeService client will be installed and configured on these machines, as described earlier in this document.
+
+For querying the hLS and measuring response time, we will mainly utilize the visualization tool named ICE - Internet Computer network Eye, built by Ivo Kenji Koga and Tassio Ferreira Vale, from [http://www.unifacs.edu.br Universidade Salvador].  The tool is available at http://wiki.nuperc.unifacs.br/ice/.  A special bundle ([http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/WSPlayGroundViewBundle_timings.jar WSPlayGroundViewBundle with timings]) was modified in order to obtain the time elapsed between a query and a response from an LS server.
+
+The tool, built in Java, works by transmiting an XML request to the server, and showing the received XML response.  The timing, therefore, comprehends processing by the server, and also transmission delays between the client running ICE and the server.
+
+The complete XML query message sent to the hLS is:
+
+{{{
+<nmwg:message type="LSQueryRequest"
+		  id="msg1"
+		  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+		  xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">
+<nmwg:metadata id="meta1">  
+<xquery:subject id="sub1">
+  declare namespace perfsonar='http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/'; 
+  declare namespace nmwg='http://ggf.org/ns/nmwg/base/2.0/'; 
+  declare namespace psservice='http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/'; 
+  declare namespace nmwgt='http://ggf.org/ns/nmwg/topology/2.0/'; 
+  declare namespace netutil='http://ggf.org/ns/nmwg/characteristic/utilization/2.0/';            
+  /nmwg:store[@type='LSStore']/nmwg:metadata
+</xquery:subject>
+<nmwg:eventType>service.lookup.xquery</nmwg:eventType>    
+</nmwg:metadata>  
+<nmwg:data metadataIdRef="meta1" id="d1"/>
+</nmwg:message>
+}}}
+
+===== fakeService Client Configuration =====
 
 The fakeServices take basically the configuration exemplified below:
 
@@ -2187,7 +2224,9 @@ md_number     10
 type     snmp
 }}}
 
-A simple script to run several fakeServices can be built into a file (e.g. `runfake`).  The example below runs 10 instances of fakeService in background:
+Each client will re-register itself with the hLS every 60 seconds, a deliberate heavy load behavior.
+
+To automate deployment, a simple script to run several fakeServices can be built into a file (e.g. `runfake`).  The example below runs 10 instances of fakeService in background:
 
 {{{
 for (( i = 1 ; i <= 10; i++ ))
@@ -2196,18 +2235,33 @@ do
 done
 }}}
 
-The file must afterwards be made executable with, for instance:
+The file must afterwards be made executable.  For instance:
 
 `sudo chmod 777 runfake`
 
-The fakeService instances can be killed with:
+After the testing is concluded, the fakeService instances can be killed with:
 
 `sudo killall perl`
 
-This command will also kill other `perl` jobs.  For Planetlab nodes that are executing fakeServices only, this is not a problem.
+This command will also kill other `perl` jobs.  For Planetlab nodes that are executing fakeServices only, this is not a problem.  For other cases, proper slaughtering of the fakeServices must be devised.
 
+==== Procedure ====
 
-=== Planetlab planetlab2.cs.columbia.edu Exhausted Resources ===
+The testing procedure consists of:
+
+ * Build a cloud of hLSs and gLSs.
+ * Install fakeService clients on specific nodes.
+ * Choose a hLS and have the fakeService clients register to it in controlled numbers (10, 30, 50, 100, 250).
+  * Distribute the fakeService clients among nodes so as to avoid overloading a single node with too many clients.  Again, all fakeService clients will register to one hLS.
+ * Select a computer or location from where to deploy queries to the hLS.  Ideally, the location or computer must remain the same throughout all the measurements to be performed to the hLS being investigated.  For the following measurements, the client was located in Newark, DE, connected through comcast.net network.
+ * When registration of all fakeService clients is successful, query the hLS (type="LSQueryRequest) for `@type='LSSTORE'` and *measure* the time between the query and the hLS response.  Do this for all numbers of registered fakeService clients (10, 30, 50, 100, 250).
+ * Record the contents of selected responses and sizes of directories and databases for later analysis.
+
+=== Results and Discussion ===
+ 
+==== Miscellaneous ====
+
+===== Planetlab planetlab2.cs.columbia.edu Exhausted Resources =====
 
 The _columbia_ node was reset by Planetlab monitoring watchdog due to exhausted resources on Nov 1, 2009.  Currently, this node has one gLS and 10 `fakeService` instances.  Planetlab's resource mapping by the time of reset follows:
 
@@ -2276,7 +2330,9 @@ Swap:  1048568k total,   601920k used,   446648k free,   201672k cached
 14036 root      17   0 16524  13m 2648 S  0.0  1.3   0:11.02 perl
 }}}
 
-=== view.cgi script ===
+Unable to resolve this particular issue, it was chosen to reset and reinstall the LS on this node, using the _default configuration_ for DB_CONFIG.
+
+===== Attempting Install of view.cgi script =====
 
 It would be interesting if a timestamp were included in the output of this script, in order to convey the time elapsed between the request and response of the script.
 
@@ -2286,38 +2342,13 @@ An attempt to install perfAdmin in `plink.cs.uwaterloo.ca` was made with the com
  
 And it was successful.  Venturing `http://plink.cs.uwaterloo.ca/perfAdmin` should display the directory list, as written in the INSTALL.  It does not work, however.
 
-=== Status Nov 29, 2009 ===
+===== Status Nov 29, 2009 =====
 
 After a number of days, the services in `moonshine`, `ale`, and most Planetlab nodes were stopped, probably due to server rebooting.  The hLS at `planetlab2.cis.upenn.edu` refuses to start again, and node `planetlab2.cs.columbia.edu` is inaccessible.   These Planetlab nodes will be reinstalled.
 
-=== Response Timings ===
+==== Response Timings ====
 
-The ICE tool request/response timings are tabulated below.  The procedure in obtaining these numbers is:
-
- * Run the tool and perform a LSQueryRequest to a specific LS server, using @type='LSSTORE'.  The client is located in Newark, DE, through comcast.net network.  The complete message is:
-
-{{{
-<nmwg:message type="LSQueryRequest"
-		  id="msg1"
-		  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
-		  xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">
-<nmwg:metadata id="meta1">  
-<xquery:subject id="sub1">
-  declare namespace perfsonar='http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/'; 
-  declare namespace nmwg='http://ggf.org/ns/nmwg/base/2.0/'; 
-  declare namespace psservice='http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/'; 
-  declare namespace nmwgt='http://ggf.org/ns/nmwg/topology/2.0/'; 
-  declare namespace netutil='http://ggf.org/ns/nmwg/characteristic/utilization/2.0/';            
-  /nmwg:store[@type='LSStore']/nmwg:metadata
-</xquery:subject>
-<nmwg:eventType>service.lookup.xquery</nmwg:eventType>    
-</nmwg:metadata>  
-<nmwg:data metadataIdRef="meta1" id="d1"/>
-</nmwg:message>
-}}}
-
- * Measure the time between the transmission of the request, and reception of the response.  This is done by ICE.
-
+The ICE tool request/response timings are tabulated below.
 
 For the hLS, different quantities of fakeServices are registered.  The hLS is then queried using ICE and the response time is reported (the response time obviously includes the roundtrip communication between client/server).
 
@@ -2329,7 +2360,7 @@ The response outputs from `onelab-1.fhi-fokus.de` for 100 and 250 registered ser
  * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/onelab-1_fhi-fokus_de-output250.html Response output from onelab-1.fhi-fokus.de for 250 registered services.]
 
 
-=== Output of `top` Command for 250 Registered fakeServices on `onelab-1.fhi-fokus.de` ===
+==== Output of `top` Command for 250 Registered fakeServices on `onelab-1.fhi-fokus.de` ====
 
 {{{
 top - 18:27:27 up 9 days,  8:57,  0 users,  load average: 1.59, 0.95, 0.78
@@ -2349,7 +2380,7 @@ Swap:  1048568k total,       32k used,  1048536k free,   888124k cached
 
 15342 perfsona  15   0  299m  22m 5132 S    0  1.1   0:00.02 daemon.pl  
 
-=== XMLDB Directory Size for 250 Registered fakeServices on `onelab-1.fhi-fokus.de` ===
+==== XMLDB Directory Size for 250 Registered fakeServices on `onelab-1.fhi-fokus.de` ====
 
 $cd /var/lib/perfsonar/lookup_service/xmldb
 $ls -l
@@ -2367,7 +2398,7 @@ total 202068
 -rw-rw---- 1 perfsonar perfsonar  10485760 Feb 18 18:29 log.0000001214
 }}}
 
-=== Output of `df -h` and `ps auxw` for 250 Registered fakeServices on `onelab-1.fhi-fokus.de` ===
+==== Output of `df -h` and `ps auxw` for 250 Registered fakeServices on `onelab-1.fhi-fokus.de` ====
 
 {{{
 $ df -h
@@ -2467,6 +2498,6 @@ This hints a XMLDB - XML database problem.  The fix used was:
   sudo /etc/init.d/lookup_service start
   }}}
   
-After these procedures, the service successfully starts.  It is now yet clear whether this is a problem with the LS service implementation, or with Planetlab environment.
+After these procedures, the service successfully starts.  It is now yet clear whether this is a problem with the LS service implementation, or with Planetlab environment, or with the XMLDB database.
 
 This procedure can also be used to quickly restart the LS database and eliminate old registrations for services that do not exist anymore.
