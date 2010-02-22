@@ -41,7 +41,7 @@ These tests had the following characteristics:
 === Observations ===
 Some obeservations listed below:
  * A significant amount of time is spent in the gLS in each case
- * Many of the hLS requests in tests 2 and 3 timeout. I believe its because the test client was blocked by a firewall on some of the machines. If you remove the timeouts the average hLS test is quicker. The maximum seems to be 16s.
+ * Many of the hLS requests in tests 2 and 3 timeout. I believe its because the test client was blocked by a firewall on some of the machines. If you remove the timeouts the average hLS test is quicker.
  * Not shown in the results above is that NetLogger showed that nearly all the time in the gLS is being spent in dbxml as it processes the query.
 
 == Performance of Common Queries on Private gLS ==
