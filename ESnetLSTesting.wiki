@@ -78,3 +78,100 @@ This looked for all hLSes with a certain domain.
 The request without the "join" operations seems much faster. The slowdown seems to occur when adding the additional conditions to the gLS queries. 
 
 What's also strange is that the hLS queries in tests 2 and 3 have similar clauses. Perhaps the increase in the amount of data in a gLS is causing the additional slow-down on these types of statements?
+
+== Appendix: XQueries used in tests ==
+=== Find the topology server for ESnet ===
+==== gLS ====
+{{{
+declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/"; \
+declare namespace perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"; \
+declare namespace psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"; \
+declare namespace summary="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/"; \
+declare namespace nmtb="http://ogf.org/schema/network/topology/base/20070828/"; \
+for $metadata in /nmwg:store[@type="LSStore"]/nmwg:metadata \
+    let $metadata_id := $metadata/@id  \
+    let $data := /nmwg:store[@type="LSStore"]/nmwg:data[@metadataIdRef=$metadata_id] \
+    let $domainName := $data/nmwg:metadata/summary:subject/nmtb:domain/nmtb:name[@type="dns"] \
+    let $eventType := $data/nmwg:metadata/nmwg:eventType \
+    where ($metadata/perfsonar:subject/psservice:service/psservice:serviceType="ls" or \
+    $metadata/perfsonar:subject/psservice:service/psservice:serviceType="hLS") and $domainName="es.net" \
+    and $eventType="http://ggf.org/ns/nmwg/topology/query/xquery/20070809" \
+    return $metadata/perfsonar:subject/psservice:service/psservice:accessPoint
+}}}
+==== hLS ====
+{{{
+declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/"; \
+declare namespace perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"; \
+declare namespace psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"; \
+declare namespace nmtb="http://ogf.org/schema/network/base/20070828/"; \
+for $metadata in /nmwg:store[@type="LSStore"]/nmwg:metadata \
+    let $metadata_id := $metadata/@id  \
+    where $metadata/perfsonar:subject/psservice:service/psservice:serviceType="TS" \
+    return $metadata/perfsonar:subject/psservice:service";
+}}}
+=== Find all pSB MAs with throughput data for host albu-pt1.es.net ===
+==== gLS ====
+{{{
+declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";  \
+declare namespace perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/";  \
+declare namespace psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/";  \
+declare namespace summary="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/";  \
+declare namespace nmtb="http://ogf.org/schema/network/topology/base/20070828/";  \
+for $metadata in /nmwg:store[@type="LSStore"]/nmwg:metadata  \
+    let $metadata_id := $metadata/@id    \
+    let $data := /nmwg:store[@type="LSStore"]/nmwg:data[@metadataIdRef=$metadata_id]  \
+    let $domainName := $data/nmwg:metadata/summary:subject/nmtb:domain/nmtb:name[@type="dns"] \
+    let $eventType := $data/nmwg:metadata/nmwg:eventType \
+    where ($metadata/perfsonar:subject/psservice:service/psservice:serviceType="ls" or \
+    $metadata/perfsonar:subject/psservice:service/psservice:serviceType="hLS") and $domainName="es.net" \
+    and $eventType="http://ggf.org/ns/nmwg/tools/iperf/2.0" \
+    return $metadata/perfsonar:subject/psservice:service/psservice:accessPoint
+}}}
+==== hLS ====
+{{{
+declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";  \
+declare namespace perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/";  \
+declare namespace psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/";  \
+declare namespace nmwgt="http://ggf.org/ns/nmwg/topology/2.0/";  \
+declare namespace iperf="http://ggf.org/ns/nmwg/tools/iperf/2.0";  \
+for $metadata in /nmwg:store[@type="LSStore"]/nmwg:metadata  \
+    let $metadata_id := $metadata/@id \
+    let $data := /nmwg:store[@type="LSStore"]/nmwg:data[@metadataIdRef=$metadata_id]  \
+    let $eventType := $data/nmwg:metadata/nmwg:eventType  \
+    let $endpoint := $data/nmwg:metadata/iperf:subject/nmwgt:endpoint  \
+    let $src := $endpoint/nmwgt:src \
+    let $dst := $endpoint/nmwgt:dst \
+    where $metadata/perfsonar:subject/psservice:service/psservice:serviceType="MA" \
+    and ($src/@value="albu-pt1.es.net" or $src/@value="albu-pt1.es.net")   \
+    and $eventType="http://ggf.org/ns/nmwg/tools/iperf/2.0" \
+    return $metadata/perfsonar:subject/psservice:service
+}}}
+
+=== Find all pSB MAs for the community “LHC” ===
+==== gLS ====
+{{{
+declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/"; \
+declare namespace perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"; \
+declare namespace psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"; \
+declare namespace summary="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/"; \
+for $metadata in /nmwg:store[@type="LSStore"]/nmwg:metadata \
+    let $metadata_id := $metadata/@id   \
+    let $data := /nmwg:store[@type="LSStore"]/nmwg:data[@metadataIdRef=$metadata_id] \
+    let $keyword := $data/nmwg:metadata/summary:parameters/nmwg:parameter[@name="keyword"]  \
+    where ($metadata/perfsonar:subject/psservice:service/psservice:serviceType="ls" or  \
+    $metadata/perfsonar:subject/psservice:service/psservice:serviceType="hLS") and $keyword/@value="project:LHC"  \
+    return $metadata/perfsonar:subject/psservice:service/psservice:accessPoint
+}}}
+==== hLS ====
+{{{
+declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/"; \
+declare namespace perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"; \
+declare namespace psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"; \
+declare namespace nmtb="http://ogf.org/schema/network/base/20070828/"; \
+for $metadata in /nmwg:store[@type="LSStore"]/nmwg:metadata \
+    let $metadata_id := $metadata/@id   \
+    let $data := /nmwg:store[@type="LSStore"]/nmwg:data[@metadataIdRef=$metadata_id] \
+    let $keyword := $data/nmwg:metadata/nmwg:parameters/nmwg:parameter[@name="keyword"] \
+    where $metadata/perfsonar:subject/psservice:service/psservice:serviceType="MA" and $keyword="project:LHC" \
+    return $metadata/perfsonar:subject/psservice:service
+}}}
