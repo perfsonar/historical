@@ -15,7 +15,7 @@
      * Jason will review bugs, wants to limit new development
      * Targeting critical fixes for the most part
  # Results of gLS performance testing (Andy/Brian)
-   * [ESnetLSTesting ]
+   * See [ESnetLSTesting]
  # Next Face to Face Meeting - (if enough involvement)
      * April 24th (Sat) and April 25th (Sun) Before Spring Member Meeting in Washington DC
      * Pros:
