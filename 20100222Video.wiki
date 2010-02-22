@@ -12,19 +12,12 @@
  # pSPT Release
    * Completed on Feb 17th
  # results of gLS performance testing
- # Next Face to Face Meeting
-   * Proposal 1:
+ # Next Face to Face Meeting - (if enough involvement)
      * April 24th (Sat) and April 25th (Sun) Before Spring Member Meeting in Washington DC
      * Pros:
        * Before the MM so we are all a bit more 'fresh' to talk about things
      * Cons:
        * May have to stay at hotels in DC and move to MM hotel
-   * Proposal 2:
-     * April 28th (half day - Weds), April 29th (Full day - Thurs), April 30th (Half Day or not at all - Fri) After Spring Member Meeting in Washington DC
-     * Pros:
-       * More time if we have an agressive (and we usually do) agenda
-     * Cons:
-       * After MM, we are all usually burnt out by then
  # Google Summer of Code
    * Applications from organizations due March 8th.
    * Internet2 would not be able to accept more than 2 students (and thats a stretch)
