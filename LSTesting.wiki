@@ -1,4 +1,6 @@
-#Testing for gLSes and hLSes
+#summary Testing for gLSes and hLSes
+
+<wiki:toc max_depth="6" />
 
 = Introduction =
 
@@ -166,3 +168,7 @@ We found that only 99 out of 184 gave results. We didn't investigate these resul
 || 2 || Database errors prevented the transaction from completing ||
 || 1 || An internal error occurred while servicing this metadata/data block ||
 || *85* || *Total* ||
+
+== Last Updated ==
+
+$Id$

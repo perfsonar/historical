@@ -1,4 +1,6 @@
-This page details observations made during some testing of the gLS and hLS by ESnet.
+#summary This page details observations made during some testing of the gLS and hLS by ESnet.
+
+<wiki:toc max_depth="6" />
 
 == Performance of Common Queries on Production Services ==
 We defined three "common" queries we thought represented 
@@ -175,3 +177,7 @@ for $metadata in /nmwg:store[@type="LSStore"]/nmwg:metadata \
     where $metadata/perfsonar:subject/psservice:service/psservice:serviceType="MA" and $keyword="project:LHC" \
     return $metadata/perfsonar:subject/psservice:service
 }}}
+
+== Last Updated ==
+
+$Id$
