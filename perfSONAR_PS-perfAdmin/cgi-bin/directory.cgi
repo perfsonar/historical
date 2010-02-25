@@ -74,7 +74,11 @@ my %daemonMap = (
     "list.phoebus" => {
         "EVENTTYPE" => ["http://ggf.org/ns/nmwg/tools/phoebus/1.0"],
         "TYPE"      => "PHOEBUS"
-    }
+    },
+    "list.reddnet" => {
+        "EVENTTYPE" => ["http://ggf.org/ns/nmwg/tools/reddnet/1.0"],
+        "TYPE"      => "REDDNET"
+    }    
 );
 
 my @daemonList  = ();
@@ -189,7 +193,7 @@ along with this software.  If not, see
 
 =head1 COPYRIGHT
 
-Copyright (c) 2007-2009, Internet2
+Copyright (c) 2007-2010, Internet2
 
 All rights reserved.
 

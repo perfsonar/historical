@@ -99,7 +99,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/*
 
 %changelog
-* Wed Feb 9 2010 zurawski@internet2.edu 3.1-7
+* Wed Feb 24 2010 zurawski@internet2.edu 3.1-7
 - Documentation update
 - Bugfixes
  - http://code.google.com/p/perfsonar-ps/issues/detail?id=364

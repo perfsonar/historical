@@ -28,7 +28,7 @@ expected - all CGI scripts and the caching program are open source and included
 in the package.  The perfSONAR-PS team encourages suggestions and questions
 regarding this product.  For more information please join the mailing list:
 
-https://mail.internet2.edu/wws/subrequest/perfsonar-ps-users
+https://mail.internet2.edu/wws/subrequest/psps-users
 
 Installation:
 -------------
@@ -111,5 +111,5 @@ Finally, check the following websites for news of software releases:
 
 --------------------------------------------------------------------------------
 
-Tue Feb  9 18:19:16 EST 2010
+Thu Feb 25 12:28:53 EST 2010
 
