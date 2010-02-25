@@ -41,7 +41,7 @@ The registration message sends basic information about the service to the hLS.  
           <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/">
             <nmtb:name>ACCRE REDDnet Depot</nmtb:name>
             <nmtb:type>reddnet</nmtb:type>
-            <nmtb:description>REDDnet Depot at REDDnet in Vanderbilt University, Nashville TN USA</nmtb:description>
+            <nmtb:description>REDDnet Depot at ACCRE in Vanderbilt University, Nashville TN USA</nmtb:description>
             <nmtb:address type="uri">tcp://depot4.loc1.vanderbilt.reddnet.org:6714</nmtb:address>
           </nmtb:service>
         </perfsonar:subject>
@@ -69,7 +69,7 @@ Observations about the message:
    * Metadata - contains the _service_ information about the REDDnet depot.  This information may change but consists of:
      * _*name*_ - a localize name, for example: _*ACCRE REDDnet Depot*_
      * _*type*_ - always set this to _*reddnet*_
-     * _*description*_ - a localized description that should include a location, for example: _*REDDnet Depot at REDDnet in Vanderbilt University, Nashville TN USA*_
+     * _*description*_ - a localized description that should include a location, for example: _*REDDnet Depot at ACCRE in Vanderbilt University, Nashville TN USA*_
      * _*address*_ - The address and port of the resource, be sure to include both and also start with _*tcp://*_, for example: _*tcp://depot4.loc1.vanderbilt.reddnet.org:6714*_
    * Data - Will eventually contain data about the service.  We have not fully defined this yet, but information regarding capacity or system properties may appear here.  For now use the data section above as is.
  * Some other observations about the XML:
@@ -92,7 +92,6 @@ After sending the above message to an hLS (e.g. the REDDnet hLS is located here:
         </nmwg:key>
         <nmwg:eventType>success.ls.register</nmwg:eventType>
       </nmwg:metadata>
-      
       <nmwg:data metadataIdRef="metadata.7069141" id="data.14287208">
         <nmwg:datum xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" value="[1] Data elements have been registered with key [530ae76b5baaf94b4ef5189244e43353]"/>
       </nmwg:data>

@@ -1139,6 +1139,22 @@ Information: The server 'HOSTNAME' does not support this command line client
  
  * *Q: The [pSPerformanceToolkit31#Services_On_This_Node Services On This Node] screen shows many services in the non-running state when first started, what is wrong?*
  * *A:* Many of the services will be in this state because they are missing some key configuration items (e.g. from the [pSPerformanceToolkit31#Administrative_Info Administrative Info]).  After following the configuration steps check this screen again, most should be functional.
+   
+ * *Q: The [pSPerformanceToolkit31#Services_On_This_Node Services On This Node] screen doesn't have any IP addresses or hostnames for the services.  Some of the services are _Not Running_.  What is wrong?*
+ * *A:*
+   * If the pSPT cannot grab a DHCP lease or it is not statically configured, there will be no access to the internet.  Many of the services rely on knowing this information, and will therefore refuse to start unil this is corrected.     
+   * Example of a running service with a hostname:
+     * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/running_service.png
+   * Example of a running service, but without a hostname or ip address:
+     * http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit31/not_running_service.png
+   * To check to be sure your installation has this information, check the _*/usr/local/etc/default_accesspoint *_ file:
+{{{
+[knoppix@Knoppix ~]$ cat /usr/local/etc/default_accesspoint 
+external_address=lab253.internet2.edu
+default_accesspoint=lab253.internet2.edu
+default_ipv4_address=lab253.internet2.edu
+default_ipv6_address=
+}}}
  
  * *Q: I do not see my service in the [pSPerformanceToolkit31#Global_Set_Of_Services Global Set Of Services], where is it?*
  * *A:* Much like DNS, the information that will populate the Global Lookup Service will take time to propagate.  Please allow some time (e.g. a few hours) before your service will be fully visible.
