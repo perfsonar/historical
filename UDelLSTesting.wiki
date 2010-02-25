@@ -13,7 +13,7 @@ These tests aim to answer the following questions
 In addition to that we show some results about the usage of configuration parameters on perfSONAR deployment, e.g. serviceDescription and serviceName. These results do not reflect performance but it we show it for two reasons. First, as indication how really these parameters are useful. Second, give statistics about how perfSONAR community are using available features of perfSONAR.
 
 = gLS Testing =
-First step is to find the gLSes. We used the hints on http://www.perfsonar.net/gls.root.hints hints as source for the available gLSes. Second step is to query all gLSes for the available hLSes. We run the following XQuery on all gLSes registered on the root.hints.
+First step is to find the gLSes. We used the hints on http://www.perfsonar.net/gls.root.hints as source for the available gLSes. Second step is to query all gLSes for the available hLSes. We run the following XQuery on all gLSes registered on the root.hints.
 {{{
 <nmwg:message id="msg1" type="LSQueryRequest" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">
     <nmwg:metadata id="meta1">
@@ -160,7 +160,7 @@ For all hLSes registered at gLSes we run the following query to get all register
 }}}
 
 
-We found that only 99 out of 184 gave results. We didn't investigate these results 
+We found that only 99 out of 184 gave results.
 || *Number of not working hLSes* || *Reason* ||
 || 63 || Not investigated yet, but on random sample mostly is "Error sending request to service: 500 alarm" ||
 || 10 || Nothing returned for search. ||
@@ -168,6 +168,23 @@ We found that only 99 out of 184 gave results. We didn't investigate these resul
 || 2 || Database errors prevented the transaction from completing ||
 || 1 || An internal error occurred while servicing this metadata/data block ||
 || *85* || *Total* ||
+
+
+The following table shows the distribution of services per hLS. Note that each service can register to multiple hLSes. The results shows that the distribution of services is not balanced and just three hLSes are taking the vast majority of the load.
+|| *Number of registered services* || *Number of hLSes* || *Notes*||
+|| 1 || 37 || ||
+|| 2 || 27 || ||
+|| 3 || 28 || ||
+|| 4 || 4  || ||
+|| 56 || 1 || http://ndb1.internet2.edu:9995/perfSONAR_PS/services/hLS ||
+|| 97 || 1 || http://ps5.es.net:8095/perfSONAR_PS/services/hLS ||
+|| 99 || 1 || http://ps2.es.net:8095/perfSONAR_PS/services/hLS ||
+
+Each perfSONAR service can register at many hLSes. The following tables shows the number of hLSes that each service register at. Most services register once while some others register twice. But some services from es.net register three times.
+|| *Number hLSes registered at* || *Number of Services* || *Notes* ||
+|| 1 || 175 || ||
+|| 2 || 59 || ||
+|| 3 || 50 || All these service accessPoints are *owamp.es.net ||
 
 == Last Updated ==
 
