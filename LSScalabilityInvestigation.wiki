@@ -2443,6 +2443,7 @@ Swap:  1048568k total,       60k used,  1048508k free,  1726472k cached
 
 ==== XMLDB Directory Size for 10 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
 
+{{{
 $cd /var/lib/perfsonar/lookup_service/xmldb
 $ls -l
 total 168148
@@ -2496,6 +2497,7 @@ Swap:  1048568k total,       60k used,  1048508k free,  1609164k cached
 
 ==== XMLDB Directory Size for 100 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
 
+{{{
 $cd /var/lib/perfsonar/lookup_service/xmldb
 $ls -l
 total 191408
@@ -2559,6 +2561,7 @@ Swap:  1048568k total,       60k used,  1048508k free,  1522144k cached
 
 ==== XMLDB Directory Size for 250 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
 
+{{{
 $cd /var/lib/perfsonar/lookup_service/xmldb
 $ls -l
 total 195844
