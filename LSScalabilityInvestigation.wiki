@@ -2443,7 +2443,7 @@ Swap:  1048568k total,       60k used,  1048508k free,  1726472k cached
 28836 perfsona  15   0 39144  27m 7968 S    0  0.8   0:00.11 daemon.pl
 }}}
 
-==== XMLDB Directory Size for 10 Registered fakeServices on plonk.cs.uwaterloo.ca =====
+===== XMLDB Directory Size for 10 Registered fakeServices on plonk.cs.uwaterloo.ca =====
 
 {{{
 $cd /var/lib/perfsonar/lookup_service/xmldb
