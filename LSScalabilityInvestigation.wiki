@@ -2359,6 +2359,12 @@ The response outputs from `onelab-1.fhi-fokus.de` for 100 and 250 registered ser
  * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/onelab-1_fhi-fokus_de-output100.html Response output from onelab-1.fhi-fokus.de for 100 registered services.]
  * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/onelab-1_fhi-fokus_de-output250.html Response output from onelab-1.fhi-fokus.de for 250 registered services.]
 
+The response outputs from `onelab-1.fhi-fokus.de` for 100 and 250 registered services, as obtained from the `view.cgi` script from perfAdmin, are below.
+
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/plonk.cs.uwaterloo.ca-output10.html Response output from plonk.cs.uwaterloo.ca for 10 registered services.]
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/plonk.cs.uwaterloo.ca-output30.html Response output from plonk.cs.uwaterloo.ca for 30 registered services.]
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/plonk.cs.uwaterloo.ca-output250.html Response output from plonk.cs.uwaterloo.ca for 250 registered services.]
+
 
 ==== Output of `top` Command for 250 Registered fakeServices on `onelab-1.fhi-fokus.de` ====
 
@@ -2417,11 +2423,202 @@ USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
 665      28534  0.0  0.0   2448   824 ?        R+   01:25   0:00 ps auxw
 }}}
 
+==== Output of `top` Command for 10 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+
+{{{
+top - 18:51:52 up 121 days, 11:00,  0 users,  load average: 1.39, 1.50, 1.66
+Tasks:   6 total,   1 running,   5 sleeping,   0 stopped,   0 zombie
+Cpu(s):  7.7%us, 19.6%sy,  0.0%ni, 55.7%id, 16.6%wa,  0.0%hi,  0.4%si,  0.0%st
+Mem:   3368148k total,  3215112k used,   153036k free,    70824k buffers
+Swap:  1048568k total,       60k used,  1048508k free,  1726472k cached
+
+  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND                                                                   
+28834 perfsona  15   0 35920  17m 1216 S    0  0.5   0:00.38 daemon.pl                                                                 
+ 9990 udel_per  15   0  2276  960  796 R    0  0.0   0:00.00 top                                                                       
+28217 udel_per  15   0  2632 1424 1188 S    0  0.0   0:00.00 bash                                                                      
+28833 perfsona  17   0 35920  17m  756 S    0  0.5   0:00.00 daemon.pl                                                                 
+28835 perfsona  18   0 36580  23m 6708 S    0  0.7   0:00.03 daemon.pl                                                                 
+28836 perfsona  15   0 39144  27m 7968 S    0  0.8   0:00.11 daemon.pl
+}}}
+
+==== XMLDB Directory Size for 10 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+
+$cd /var/lib/perfsonar/lookup_service/xmldb
+$ls -l
+total 168148
+-rw-r--r-- 1 perfsonar perfsonar       230 Feb 13 01:46 DB_CONFIG
+-rw-r----- 1 perfsonar perfsonar     24576 Mar  1 18:32 __db.001
+-rw-r----- 1 perfsonar perfsonar  58990592 Mar  1 18:32 __db.002
+-rw-r----- 1 perfsonar perfsonar  41951232 Mar  1 18:32 __db.003
+-rw-r----- 1 perfsonar perfsonar   2129920 Mar  1 18:32 __db.004
+-rw-r----- 1 perfsonar perfsonar 172990464 Mar  1 18:32 __db.005
+-rw-r----- 1 perfsonar perfsonar     40960 Mar  1 18:32 __db.006
+-rw-r----- 1 perfsonar perfsonar    147456 Mar  1 18:32 glsstore-summary.dbxml
+-rw-r----- 1 perfsonar perfsonar    557056 Mar  1 18:54 glsstore.dbxml
+-rw-r----- 1 perfsonar perfsonar  10485760 Mar  1 18:54 log.0000000001
+}}}
+
+==== Output of `df -h` and `ps auxw` for 10 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+
+{{{
+$ df -h
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/hdv1             9.6G  2.4G  7.1G  25% /
+none                  9.6G  2.4G  7.1G  25% /tmp
+
+$ ps auxw
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+1042     13891  0.0  0.0   2404   676 ?        R+   18:56   0:00 ps auxw
+1042     28217  0.0  0.0   2632  1424 ?        Ss   18:31   0:00 /bin/bash -l
+499      28833  0.0  0.5  35920 17884 ?        Ss   18:32   0:00 perfsonar-daemon.pl (28833)
+499      28834  0.0  0.5  35920 18344 ?        S    18:32   0:00 perfsonar-daemon.pl (28833) - Listener (9995)
+499      28835  0.0  0.7  36580 24228 ?        S    18:32   0:00 perfsonar-daemon.pl (28833) - Service Maintenance
+499      28836  0.0  0.8  39144 28180 ?        S    18:32   0:00 perfsonar-daemon.pl (28833) - LS Registration (9995:/perfSONAR_PS/services/hLS)
+}}}
+
+==== Output of `top` Command for 100 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+
+{{{
+top - 19:34:22 up 121 days, 11:43,  0 users,  load average: 2.69, 2.79, 2.76
+Tasks:   6 total,   1 running,   5 sleeping,   0 stopped,   0 zombie
+Cpu(s):  8.0%us, 19.7%sy,  0.0%ni, 67.0%id,  4.8%wa,  0.0%hi,  0.5%si,  0.0%st
+Mem:   3368148k total,  3129140k used,   239008k free,   112664k buffers
+Swap:  1048568k total,       60k used,  1048508k free,  1609164k cached
+
+  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND                                                                                     
+15789 udel_per  15   0  2276  960  796 R    0  0.0   0:00.00 top                                                                                         
+28217 udel_per  15   0  2632 1432 1192 S    0  0.0   0:00.02 bash                                                                                        
+28833 perfsona  17   0 35920  17m  756 S    0  0.5   0:00.00 daemon.pl                                                                                   
+28834 perfsona  15   0 35920  17m 1216 S    0  0.5   0:05.71 daemon.pl                                                                                   
+28835 perfsona  18   0 36580  23m 6708 S    0  0.7   0:00.03 daemon.pl                                                                                   
+28836 perfsona  15   0 39144  27m 7968 S    0  0.8   0:00.11 daemon.pl                                                                                   
+}}}
+
+==== XMLDB Directory Size for 100 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+
+$cd /var/lib/perfsonar/lookup_service/xmldb
+$ls -l
+total 191408
+-rw-r--r-- 1 perfsonar perfsonar       230 Feb 13 01:46 DB_CONFIG
+-rw-r----- 1 perfsonar perfsonar     24576 Mar  1 18:32 __db.001
+-rw-r----- 1 perfsonar perfsonar  58990592 Mar  1 18:32 __db.002
+-rw-r----- 1 perfsonar perfsonar  41951232 Mar  1 18:32 __db.003
+-rw-r----- 1 perfsonar perfsonar   2129920 Mar  1 18:32 __db.004
+-rw-r----- 1 perfsonar perfsonar 172990464 Mar  1 18:32 __db.005
+-rw-r----- 1 perfsonar perfsonar     40960 Mar  1 18:32 __db.006
+-rw-r----- 1 perfsonar perfsonar    147456 Mar  1 18:32 glsstore-summary.dbxml
+-rw-r----- 1 perfsonar perfsonar   4382720 Mar  1 19:34 glsstore.dbxml
+-rw-rw---- 1 perfsonar perfsonar  10485760 Mar  1 19:28 log.0000000003
+-rw-rw---- 1 perfsonar perfsonar  10485760 Mar  1 19:34 log.0000000004
+}}}
+
+==== Output of `df -h` and `ps auxw` for 100 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+
+{{{
+$ df -h
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/hdv1             9.6G  2.4G  7.0G  26% /
+none                  9.6G  2.4G  7.0G  26% /tmp
+
+$ ps auxw
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+1042     16839  0.0  0.0   2404   672 ?        R+   19:35   0:00 ps auxw
+1042     28217  0.0  0.0   2632  1432 ?        Ss   18:31   0:00 /bin/bash -l
+499      28833  0.0  0.5  35920 17884 ?        Ss   18:32   0:00 perfsonar-daemon.pl (28833)
+499      28834  0.1  0.5  35920 18344 ?        S    18:32   0:05 perfsonar-daemon.pl (28833) - Listener (9995)
+499      28835  0.0  0.7  36580 24228 ?        S    18:32   0:00 perfsonar-daemon.pl (28833) - Service Maintenance
+499      28836  0.0  0.8  39144 28180 ?        S    18:32   0:00 perfsonar-daemon.pl (28833) - LS Registration (9995:/perfSONAR_PS/services/hLS)
+}}}
+
+==== Output of `top` Command for 250 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+
+{{{
+top - 20:05:26 up 121 days, 12:14,  0 users,  load average: 4.39, 4.09, 3.65
+Tasks:  36 total,   1 running,  35 sleeping,   0 stopped,   0 zombie
+Cpu(s): 10.8%us, 20.8%sy,  0.0%ni, 40.2%id, 27.5%wa,  0.1%hi,  0.6%si,  0.0%st
+Mem:   3368148k total,  3232264k used,   135884k free,   150056k buffers
+Swap:  1048568k total,       60k used,  1048508k free,  1522144k cached
+
+  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND                                                                                                        
+12793 perfsona  16   0  299m  23m 6532 S    1  0.7   0:00.04 daemon.pl                                                                                                      
+12786 perfsona  15   0  299m  23m 6520 S    1  0.7   0:00.02 daemon.pl                                                                                                      
+12787 perfsona  17   0  299m  23m 6496 S    1  0.7   0:00.02 daemon.pl                                                                                                      
+12789 perfsona  17   0  299m  23m 6500 S    1  0.7   0:00.02 daemon.pl                                                                                                      
+12795 perfsona  18   0  299m  23m 6488 S    1  0.7   0:00.02 daemon.pl                                                                                                      
+12798 perfsona  15   0  299m  23m 6516 S    1  0.7   0:00.02 daemon.pl                                                                                                      
+12799 perfsona  17   0  299m  23m 6504 S    1  0.7   0:00.02 daemon.pl                                                                                                      
+28834 perfsona  15   0 35920  17m 1216 S    1  0.5   0:17.71 daemon.pl                                                                                                      
+12693 perfsona  16   0  299m  28m  11m D    0  0.9   0:00.03 daemon.pl                                                                                                      
+12780 perfsona  15   0  299m  23m 6528 S    0  0.7   0:00.02 daemon.pl                                                                                                      
+12791 perfsona  16   0  299m  23m 6508 S    0  0.7   0:00.01 daemon.pl                                                                                                      
+12507 perfsona  15   0  299m  22m 5128 S    0  0.7   0:00.04 daemon.pl                                                                                                      
+12508 perfsona  15   0  299m  22m 5128 S    0  0.7   0:00.02 daemon.pl                                                                                                      
+12510 perfsona  16   0  299m  24m 6800 S    0  0.7   0:00.02 daemon.pl                                                                                                      
+12540 perfsona  15   0  299m  22m 5112 S    0  0.7   0:00.04 daemon.pl                                                                                
+}}}
+
+==== XMLDB Directory Size for 250 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+
+$cd /var/lib/perfsonar/lookup_service/xmldb
+$ls -l
+total 195844
+-rw-r--r-- 1 perfsonar perfsonar       230 Feb 13 01:46 DB_CONFIG
+-rw-r----- 1 perfsonar perfsonar     24576 Mar  1 18:32 __db.001
+-rw-r----- 1 perfsonar perfsonar  58990592 Mar  1 18:32 __db.002
+-rw-r----- 1 perfsonar perfsonar  41951232 Mar  1 18:32 __db.003
+-rw-r----- 1 perfsonar perfsonar   2129920 Mar  1 18:32 __db.004
+-rw-r----- 1 perfsonar perfsonar 172990464 Mar  1 18:32 __db.005
+-rw-r----- 1 perfsonar perfsonar     40960 Mar  1 18:32 __db.006
+-rw-r----- 1 perfsonar perfsonar    147456 Mar  1 18:32 glsstore-summary.dbxml
+-rw-r----- 1 perfsonar perfsonar   9920512 Mar  1 20:06 glsstore.dbxml
+-rw-rw---- 1 perfsonar perfsonar  10485760 Mar  1 20:06 log.0000000014
+-rw-rw---- 1 perfsonar perfsonar  10485760 Mar  1 20:06 log.0000000015
+}}}
+
+==== Output of `df -h` and `ps auxw` for 250 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+
+{{{
+$ df -h
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/hdv1             9.6G  2.4G  7.0G  26% /
+none                  9.6G  2.4G  7.0G  26% /tmp
+
+$ ps auxw
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+499      14226  0.1  0.6 306236 22956 ?        S    20:07   0:00 perfsonar-daemon.pl (28833) - Listener (9995) - 216.48.80.12 - /perfSONAR_PS/services/hLS
+499      14250  0.0  0.5  35920 17600 ?        S    20:07   0:00 perfsonar-daemon.pl (28833) - Listener (9995) - 206.12.16.154
+499      14293  0.2  0.6 306236 22932 ?        S    20:07   0:00 perfsonar-daemon.pl (28833) - Listener (9995) - 216.48.80.12 - /perfSONAR_PS/services/hLS
+499      14379  1.5  0.8 306368 29720 ?        S    20:07   0:00 perfsonar-daemon.pl (28833) - Listener (9995) - 142.150.238.12 - /perfSONAR_PS/services/hLS
+499      14388  2.0  0.6 306236 22892 ?        S    20:07   0:00 perfsonar-daemon.pl (28833) - Listener (9995) - 158.130.6.253 - /perfSONAR_PS/services/hLS
+499      14389  1.0  0.6 306236 22896 ?        S    20:07   0:00 perfsonar-daemon.pl (28833) - Listener (9995) - 129.97.74.12 - /perfSONAR_PS/services/hLS
+499      14403  1.0  0.6 306236 22864 ?        S    20:07   0:00 perfsonar-daemon.pl (28833) - Listener (9995) - 205.211.183.2 - /perfSONAR_PS/services/hLS
+499      14470  0.0  0.7 306368 24364 ?        D    20:07   0:00 perfsonar-daemon.pl (28833) - Listener (9995) - 205.211.183.2 - /perfSONAR_PS/services/hLS
+499      14471  0.0  0.6 306236 22420 ?        S    20:07   0:00 perfsonar-daemon.pl (28833) - Listener (9995) - 158.130.6.253 - /perfSONAR_PS/services/hLS
+499      14512  0.0  0.6 306236 22852 ?        S    20:07   0:00 perfsonar-daemon.pl (28833) - Listener (9995) - 129.97.74.12 - /perfSONAR_PS/services/hLS
+1042     14514  0.0  0.0   2448   824 ?        R+   20:07   0:00 ps auxw
+1042     28217  0.0  0.0   2632  1440 ?        Ss   18:31   0:00 /bin/bash -l
+499      28833  0.0  0.5  35920 17884 ?        Ss   18:32   0:00 perfsonar-daemon.pl (28833)
+499      28834  0.3  0.5  35920 18344 ?        S    18:32   0:18 perfsonar-daemon.pl (28833) - Listener (9995)
+499      28835  0.0  0.7  36580 24228 ?        S    18:32   0:00 perfsonar-daemon.pl (28833) - Service Maintenance
+499      28836  0.0  0.8  39144 28180 ?        S    18:32   0:00 perfsonar-daemon.pl (28833) - LS Registration (9995:/perfSONAR_PS/services/hLS)
+}}}
+
+==== Output of `vmstat 1` for 1 Second on `plonk.cs.uwaterloo.ca` ====
+
+The command `vmstat 1` was run on this server for approximately 1 minute, and the output for each group of registered services was recorded.
+
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/plonk.cs.uwaterloo.ca-vmstat10.txt Response output for 10 registered services.]
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/plonk.cs.uwaterloo.ca-vmstat30.txt Response output for 30 registered services.]
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/plonk.cs.uwaterloo.ca-vmstat50.txt Response output for 50 registered services.]
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/plonk.cs.uwaterloo.ca-vmstat100.txt Response output for 100 registered services.]
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/plonk.cs.uwaterloo.ca-vmstat250.txt Response output for 250 registered services.]
+  
 === Observations ===
 
-The response times increase as the number of registered services grow in a hLS.  In particular, the response time for server `onelab-1.fhi-fokus.de` is higher than server `moonshine`, but it must be taken into account that the first is a Planetlab virtual machine housed at Germany, whereas the second is located at the same geographical spot as the time measurement client (Newark, DE)
+The response times increase as the number of registered services grow in a hLS.  In particular, the response time for server `onelab-1.fhi-fokus.de` is higher than server `moonshine`, but it must be taken into account that the first is a Planetlab virtual machine housed at Germany, whereas the second is located at the same geographical spot as the time measurement client (Newark, DE).  The same is true for server `plonk.cs.uwaterloo.ca`.
 
-Starting at 30 services registered (from the same client), the number of errors of the types below reported by `moonshine` hLS increases when the fakeServices first attempt to register.  Their registration also takes a long time to complete (be successful), during which several errors of *type 2* are reported.
+Starting at 30 services registered, the number of errors of the types below reported by `moonshine` hLS increases when the fakeServices first attempt to register.  Their registration also takes a long time to complete (be successful), during which several errors of *type 2* are reported.
+The same behavior was reported for servers `onelab-1.fhi-fokus.de` and `plonk.cs.uwaterloo.ca`.  The latter, in particular, became noticeably slow in the responses and exhibited a higher number of errors *type 1* and *type 2*.
 
 Error *type 3* was also observed in rare occasions when querying the LS, after approximately 30 services and up where registered.
 
