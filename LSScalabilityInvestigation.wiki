@@ -2366,7 +2366,9 @@ The response outputs from `onelab-1.fhi-fokus.de` for 100 and 250 registered ser
  * [http://perfsonar-ps.googlecode.com/svn/wiki/LSScalabilityInvestigation/plonk.cs.uwaterloo.ca-output250.html Response output from plonk.cs.uwaterloo.ca for 250 registered services.]
 
 
-==== Output of `top` Command for 250 Registered fakeServices on `onelab-1.fhi-fokus.de` ====
+==== Recorded Outputs from Several Commands ====
+
+===== Output of top Command for 250 Registered fakeServices on onelab-1.fhi-fokus.de =====
 
 {{{
 top - 18:27:27 up 9 days,  8:57,  0 users,  load average: 1.59, 0.95, 0.78
@@ -2386,7 +2388,7 @@ Swap:  1048568k total,       32k used,  1048536k free,   888124k cached
 
 15342 perfsona  15   0  299m  22m 5132 S    0  1.1   0:00.02 daemon.pl  
 
-==== XMLDB Directory Size for 250 Registered fakeServices on `onelab-1.fhi-fokus.de` ====
+===== XMLDB Directory Size for 250 Registered fakeServices on onelab-1.fhi-fokus.de =====
 
 $cd /var/lib/perfsonar/lookup_service/xmldb
 $ls -l
@@ -2404,7 +2406,7 @@ total 202068
 -rw-rw---- 1 perfsonar perfsonar  10485760 Feb 18 18:29 log.0000001214
 }}}
 
-==== Output of `df -h` and `ps auxw` for 250 Registered fakeServices on `onelab-1.fhi-fokus.de` ====
+===== Output of df -h and ps auxw for 250 Registered fakeServices on onelab-1.fhi-fokus.de =====
 
 {{{
 $ df -h
@@ -2423,7 +2425,7 @@ USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
 665      28534  0.0  0.0   2448   824 ?        R+   01:25   0:00 ps auxw
 }}}
 
-==== Output of `top` Command for 10 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+===== Output of top Command for 10 Registered fakeServices on plonk.cs.uwaterloo.ca =====
 
 {{{
 top - 18:51:52 up 121 days, 11:00,  0 users,  load average: 1.39, 1.50, 1.66
@@ -2441,7 +2443,7 @@ Swap:  1048568k total,       60k used,  1048508k free,  1726472k cached
 28836 perfsona  15   0 39144  27m 7968 S    0  0.8   0:00.11 daemon.pl
 }}}
 
-==== XMLDB Directory Size for 10 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+==== XMLDB Directory Size for 10 Registered fakeServices on plonk.cs.uwaterloo.ca =====
 
 {{{
 $cd /var/lib/perfsonar/lookup_service/xmldb
@@ -2459,7 +2461,7 @@ total 168148
 -rw-r----- 1 perfsonar perfsonar  10485760 Mar  1 18:54 log.0000000001
 }}}
 
-==== Output of `df -h` and `ps auxw` for 10 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+===== Output of df -h and ps auxw for 10 Registered fakeServices on plonk.cs.uwaterloo.ca =====
 
 {{{
 $ df -h
@@ -2477,7 +2479,7 @@ USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
 499      28836  0.0  0.8  39144 28180 ?        S    18:32   0:00 perfsonar-daemon.pl (28833) - LS Registration (9995:/perfSONAR_PS/services/hLS)
 }}}
 
-==== Output of `top` Command for 100 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+===== Output of top Command for 100 Registered fakeServices on plonk.cs.uwaterloo.ca =====
 
 {{{
 top - 19:34:22 up 121 days, 11:43,  0 users,  load average: 2.69, 2.79, 2.76
@@ -2495,7 +2497,7 @@ Swap:  1048568k total,       60k used,  1048508k free,  1609164k cached
 28836 perfsona  15   0 39144  27m 7968 S    0  0.8   0:00.11 daemon.pl                                                                                   
 }}}
 
-==== XMLDB Directory Size for 100 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+===== XMLDB Directory Size for 100 Registered fakeServices on plonk.cs.uwaterloo.ca =====
 
 {{{
 $cd /var/lib/perfsonar/lookup_service/xmldb
@@ -2514,7 +2516,7 @@ total 191408
 -rw-rw---- 1 perfsonar perfsonar  10485760 Mar  1 19:34 log.0000000004
 }}}
 
-==== Output of `df -h` and `ps auxw` for 100 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+===== Output of df -h and ps auxw for 100 Registered fakeServices on plonk.cs.uwaterloo.ca =====
 
 {{{
 $ df -h
@@ -2532,7 +2534,7 @@ USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
 499      28836  0.0  0.8  39144 28180 ?        S    18:32   0:00 perfsonar-daemon.pl (28833) - LS Registration (9995:/perfSONAR_PS/services/hLS)
 }}}
 
-==== Output of `top` Command for 250 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+===== Output of top Command for 250 Registered fakeServices on plonk.cs.uwaterloo.ca =====
 
 {{{
 top - 20:05:26 up 121 days, 12:14,  0 users,  load average: 4.39, 4.09, 3.65
@@ -2559,7 +2561,7 @@ Swap:  1048568k total,       60k used,  1048508k free,  1522144k cached
 12540 perfsona  15   0  299m  22m 5112 S    0  0.7   0:00.04 daemon.pl                                                                                
 }}}
 
-==== XMLDB Directory Size for 250 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+===== XMLDB Directory Size for 250 Registered fakeServices on plonk.cs.uwaterloo.ca =====
 
 {{{
 $cd /var/lib/perfsonar/lookup_service/xmldb
@@ -2578,7 +2580,7 @@ total 195844
 -rw-rw---- 1 perfsonar perfsonar  10485760 Mar  1 20:06 log.0000000015
 }}}
 
-==== Output of `df -h` and `ps auxw` for 250 Registered fakeServices on `plonk.cs.uwaterloo.ca` ====
+===== Output of df -h and ps auxw for 250 Registered fakeServices on plonk.cs.uwaterloo.ca =====
 
 {{{
 $ df -h
@@ -2606,7 +2608,7 @@ USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
 499      28836  0.0  0.8  39144 28180 ?        S    18:32   0:00 perfsonar-daemon.pl (28833) - LS Registration (9995:/perfSONAR_PS/services/hLS)
 }}}
 
-==== Output of `vmstat 1` for 1 Second on `plonk.cs.uwaterloo.ca` ====
+===== Output of vmstat 1 for 1 Second on plonk.cs.uwaterloo.ca =====
 
 The command `vmstat 1` was run on this server for approximately 1 minute, and the output for each group of registered services was recorded.
 
