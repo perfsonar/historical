@@ -39,61 +39,64 @@ There are two envisioned paradigms for storing the measurement data to allow cli
 
 In the circuit reservation model, there needs to be one entity whose role it is to arbitrate access to the various resources. This leads naturally to the single inter-domain controller model. For measurement, there can be numerous different agents collecting network statistics. As a domain begins making more and more network measurements, the feasibility of a single locus of measurement data becomes infeasible. An example of this would include a instution like ESnet, which is monitoring both OWAMP and SNMP data across their domains. The wide range of network elements contributing data to each archive means that the machine collecting each type of data is heavily loaded. Combining both types of data collection onto a single machine would put heavy strain on that machine, necessitating a much more expensive machine, and hard drive configuration. In order to scale effectively, domains like ESnet need the ability to split their measurement archives based on geographic location, type of measurement data, or some other metric. 
 
-The above does not mean to imply that all domains must behave in a decentralized fashion. For domains that can handle having a single locus of measurement data, the infrastructure should not prevent them from doing so. However, the circuit monitoring infrastructure must be able to handle a more decentralized approach for the domains that need or desire it.
+The above does not mean to imply that all domains must behave in a decentralized fashion. For domains that can handle having a single locus of measurement data, the infrastructure must not prevent them from doing so. However, the circuit monitoring infrastructure must be able to handle a more decentralized approach for the domains that need or desire it.
 
 ==== Existing Monitoring Infrastructure ====
 
 Most domains that will be deploying dynamic circuit monitoring infrastructure will have an existing monitoring infrastructure in place. They are likely already collecting data such as SNMP statistics or alarm information. It is unlikely that domains will want to deploy a parallel monitoring infrastructure to gather the same information that they are already gathering. The SNMP MA provides a good example of easy integration. This measurement archive is able to integrate with existing Cacti, MRTG and Cricket installations with little work required of the site administrator. This ease of installation, and integration with existing monitoring infrastructure makes it more likely that a given domain will deploy the software.
 
+
+
+
+
 === Proposed High Level Architecture ===
 
-The architecture makes use of 3 overall measurement services: a service to allow clients to find services and relevant measurement data (LS), a service to allow clients to look up topological information (TS), and services that provide measurement data for clients (MA).
+The architecture makes use of 3 overall measurement services: a service to allow clients to find services and relevant measurement data, perfSONAR Lookup Service (LS), a service to allow clients to look up topological information, perfSONAR Topology Service (TS), and services that provide measurement data for clients, perfSONAR Measurement Archives (MA).
 
-In the model, a circuit is described by a circuit descriptor. The circuit descriptor describes the properties applicable to the entire end-to-end circuit, including bandwidth, duration, and other similar metadata. This descriptor is added to a TS. Clients can then query the LS using circuit properties, like circuit identifier, to find which TS contains the circuit descriptor for that circuit. The only required piece of metadata is a circuit identifier.
+In the model, a circuit, identified by a circuit identifier, is described by a circuit descriptor. The circuit descriptor describes the properties applicable to the entire end-to-end circuit, including bandwidth, duration, and other similar metadata. This descriptor is added to a TS. Clients query the LS using the circuit identifier to find which TS contains the circuit descriptor for that circuit.
 
-The circuit descriptor contains pointers to domain-specific segments that comprise the circuit. Each domain, or an entity working on its behalf, produces a segment descriptor that contains metadata about their segment of the circuit, along with as much topological detail as they desire to publish. These segment descriptors are then registered with a TS.
+The circuit descriptor contains a list of segment identifiers for the domain-specific segments that comprise the circuit. Each domain, or an entity working on its behalf, produces a segment descriptor that contains metadata about their segment of the circuit, along with as much topological detail as they desire to publish. These segment descriptors are then registered with a TS. Clients query the LS using the segment identifiers in the circuit descriptor to find which TSes contain the segment descriptors for each domain's segment.
 
-Clients can then use the LS to discover the TS containing the circuit descriptor. The client can then use the LS to discover which TS contains each segment descriptor. Once the client has the circuit descriptors and the segment descriptors, they can use the LS along with information contained within each descriptor to discover measurements that are applicable to each circuit segment, or the entire end-to-end circuit.
+Once the client has the circuit descriptors and the segment descriptors, they can use the LS along with information contained within each descriptor to find measurements that are applicable to each circuit segment, or the entire end-to-end circuit.
 
 ==== Benefits Of This Architecture ====
 
-The architecture allows for each domain to control of the information being made available about the circuits traversing their networks. Each domain controls what information it adds to the segment descriptor, and how the segment descriptor is made available. Since the segment descriptor contains the information that the client uses to discover measurement data, domains can control how much information the client knows is relevant to their circuits. 
+The architecture allows for each domain to control of the information being made available about the circuits traversing their networks. Each domain controls what information it adds to the segment descriptor, and how the segment descriptor is made available. Since the segment descriptor contains the information that the client uses to find measurement data, domains can control how much information the client knows is relevant to their circuits. 
 
-The above architecture also allows for a more decentralized approach to making available measurement data. Instead of having a single well known network oracle that must know everything about a circuit, the architecture uses a directory service (the LS) to find the services containing relevant circuit information. This permits domains to organize their data repositories in the way that is most reasonable to their organization's needs.
+The above architecture also allows for a more decentralized approach to making available measurement data. Instead of requiring a single well known network oracle that must know everything about a circuit, the architecture uses the LS to find the services containing relevant circuit information. This permits domains to organize their data repositories in the way that is most reasonable to their needs.
 
-The architecture also permits pooling of resources by allowing domains to share the LS, the TS or even the MAs. 
+The architecture also permits pooling of resources by allowing domains to share LSes, TSes or MAs. 
 
 == Architecture ==
 
 === Circuit/Segment Descriptions ===
 
-The "circuit descriptor" is a high-level description of the end-to-end circuit itself, including things like the bandwidth, source, destination, and any other information specific to the end-to-end circuit.
+There are 4 separate elements involved in describing circuits:
 
-The circuit descriptor contains an identifier which clients can use to lookup the circuit. This format of this identifier is a URN containing a domain name portion and a domain-specific portion, the format agreed upon by the GLIF organization.
-
-The circuit descriptor also includes the path traversed by the end-to-end circuit. Instead of containing a detailed path of the circuit, the circuit descriptor's path contains the identifiers for domain-specific descriptions of their segment of the circuit. This enables clients to construct the end-to-end path while permitting domains to provide varying levels of information to individual clients.
-
-The segment descriptors describe the domain-specific view of the reservation. This can include things like bandwidth, ingress point, egress point, and any other information specific to that segment of the circuit. The client will use this information to both construct an end-to-end view of the circuit, as well as to lookup statistics about the circuit itself. The information given to clients can contain an abstract high-level view of the segment, or a more detailed description of the path that the segment takes through the network. This level of detail given to clients could be varied depending on the what level of access that client is authorized to have.
+  * _*Circuit Identifier*_: Each circuit is identified by a unique identifier that clients use when looking up information about the end-to-end circuit. The format of this identifier is a URN containing a domain name portion and a domain-specific portion, the format agreed upon by the GLIF organization.
+  * _*Segment Identifier*_: Each domain's segment of the circuit is identified by a unique identifier that clients use when looking up information about that segment of the circuit. Like the circuit identifier, the format of this identifier is a URN containing a domain name portion and a domain-specific portion, the format agreed upon by the GLIF organization.
+  * _*Circuit Descriptor*_: The circuit descriptor is a high-level description of the end-to-end circuit itself, including things like the bandwidth, source, destination, and any other information specific to the end-to-end circuit. The circuit descriptor contains an ordered list of segment identifiers for the domain domain-specific segments that comprise the end-to-end circuit.
+  * _*Segment Descriptor*_: The segment descriptor provides the domain-specific aspects of the reservation. This can include things like bandwidth, ingress point, egress point and any other information specific to that segment of the circuit. 
 
 [http://perfsonar-ps.googlecode.com/svn/wiki/CircuitMonitoring/circuit_descriptor.png]
 
-The agent tasked with constructing circuit descriptors needs to know the identifiers for the domain-specific segment descriptors. This can be accomplished either by, somehow, asking each domain in turn what the identifiers are. An easier method is to have all parties involved agree to a simple algorithm for constructing their segment specific identifiers based on the circuit identifier. An example algorithm might take the circuit identifier and using that as the domain-specific portion of the identifier. If the circuit was named "urn:glif:internet2.edu:gri-123456", then ESnet segment of that circuit might be named "urn:glif:es.net:circuit_internet2.edu:gri-123456". This algorithmic approach allows for distributed domains to work together without necessitating communication every time a circuit is setup.
+The separation of elements is key to the architecture. It permits clients to find relevant information about the circuits while enabling domains to retain control over the information that clients can receive.
 
-=== Topology Lookup Infrastructure ===
+The circuit descriptor must be created by the source domain and registered into a Topology Service. The circuit descriptor must contain the segment identifiers for all the domains along the path, therefore, the source domain must know these segment descriptors. This could be accomplished with tighter integration with the circuit provisioning serivce, or by using an algorithmic approach for generating the identifier. An example algorithm might take the circuit identifier and using that as the domain-specific portion of the identifier. For example, a circuit identifier "urn:glif:internet2.edu:gri-123456" might have an ESnet segment identifier of "urn:glif:es.net:circuit_internet2.edu:gri-123456". The algorithmic approach allows for distributed domains to work together without necessitating communication every time a circuit is setup.
 
-The circuit description and segment descriptions all need to be loaded into an infrastructure that allows clients to find them. The topology lookup infrastructure needs to work with the Lookup Service infrastructure to allow clients to discover where they can query for the circuit or segment descriptions. By working with the Lookup Service infrastructure, this topology lookup infrastructure can be centralized, decentralized or a hybrid.
+=== Topology Service Infrastructure ===
 
-The topology service infrastructure allows clients to lookup the circuit and segment descriptions, and, if allowed by the domains, each domain's topology as well.
+Circuit descriptors and segment descriptors need to be loaded into a Topology Service to allow clients to find them. The Topology Service registers with the Lookup Service the circuit identifiers and segment identifiers for the circuit and segment descriptors it contains. The registration ensures that clients can query the Lookup Service using a circuit or segment descriptor and discover which Topology Service contains the circuit or segment descriptor. This indirection allows for the Topology Service infrastructure can be centralized, decentralized or a hybrid.
 
-A centralized approach to topology infrastructure would have a single topology service that all participating domains register their segment descriptions, circuit descriptions and network topologies with. This would provide a single point of failure for the participating domains, but would ease administrative burden.
+A centralized approach to topology infrastructure would have a single Topology Service that all participating domains register their segment descriptions, circuit descriptions and network topologies with. This would provide a single point of failure for the participating domains, but would ease administrative burden.
 
-A completely decentralized approach would have each domain provide their own instance of a topology service. They would register their segment and circuit descriptions as well as their topologies with their domain's topology service instance. Clients would query the lookup service to discover each domain's topology service. This increases the administrative overhead, but increases the scalability of the overall system while removing any single point of failure.
+A completely decentralized approach would have each domain provide their own Topology Service. They would register their segment and circuit descriptions with their domain's Topology Service. Clients would query the Lookup Service to discover each domain's Topology Service. This increases the administrative overhead, but increases the scalability of the overall system while removing any single point of failure.
 
-There are numerous gradiations between the completely centralized approach, and the completely decentralized. For example, only certain domains could deploy topology service infrastructure, and the other domains could simply piggy-back off either a centralized topology service, or another domain's topology service. 
+There are numerous gradiations between the completely centralized approach, and the completely decentralized. For example, only certain domains could deploy Topology Service infrastructure, and the other domains could simply piggy-back off either a centralized Topology Service, or another domain's Topology Service. 
 
 === Lookup Service Infrastructure ===
 
-The lookup service infrastructure ties the system together. This infrastructure allows clients to discover the services providing all the various bits of information, without requiring them to maintain a static list of services. Similar to the Topology Lookup Infrastructure, the Lookup Service Infrastructure can be both centralized or decentralized, with a similar of upsides and downsides for each.
+The perfSONAR Lookup Service Infrastructure ties the architecture together. This infrastructure allows clients to discover the Topology Services for obtaining circuit and segment descriptors, as well as the various Measurement Archives containing measurements. Similar to the Topology Lookup Infrastructure, the Lookup Service Infrastructure can be both centralized or decentralized, with a similar of upsides and downsides for each.
 
 === Monitoring Infrastructure ===
 
@@ -105,30 +108,45 @@ Some administrators may not wish to have a collector constantly polling all elem
 
 Constant monitoring and on-demand monitoring could be combined to allow certain elements to be monitored constantly, while others are only measured on-demand. As long as the agent that enables monitoring knows which network elements to instantiate monitoring on, and the segment description agents knows how to construct the description such that it combines the static and dynamic aspects, this hybrid monitoring is feasible.
 
-The monitoring infrastructure needs to support registering this information in the Lookup Service infrastructure so that clients can discover it.
+This monitored data is made available in a perfSONAR form using perfSONAR Measurement Archives, and is registered in the perfSONAR Lookup Service infrastructure so that clients can find it. 
 
-=== Overall Interaction ===
+=== Service Interactions ===
 
-The interaction of the various services and the clients would work like the following:
+==== Circuit Provisioning Time ====
 
-[http://perfsonar-ps.googlecode.com/svn/wiki/CircuitMonitoring/interactions.png]
+[http://perfsonar-ps.googlecode.com/svn/wiki/CircuitMonitoring/circuit_provisioning_interactions.png]
 
-  # The circuit creation service contacts the various routers and switches and sets up the new circuit
-  # The circuit creation service contacts the circuit monitoring agent, and informs it about the new circuit, including the internal path and other circuit metadata.
-  # If needed, the circuit creation service contacts the measurement services and informs them of any new elements that they need to measure or new information that they need to make available.
-  # The measurement services tell the lookup infrastructure about the new measurement information they can make available.
-  # The circuit creation service creates the circuit and segment descriptors, and registers them with the topology service.
-  # The topology service tells the lookup infrastructure about the circuit and segment descriptors it now contains.
-  # The client uses the circuit identifier, and asks the lookup infrastructure where it can find the circuit descriptor. The lookup infrastructure directs the client to the topology service.
-  # The client contacts the topology service and retrieves the circuit descriptor.
-  # The client uses the domain-specific segment identifier, and asks the lookup infrastructure where it can find the segment descriptor. The lookup infrastructure directs the client to the topology service.
-  # The client contacts the topology service and retrieves the segment descriptor.
-  # The client uses the information in the segment descriptor, and asks the lookup infrastructure which measurement services can return performance statistics about the circuit. The lookup infrastructure directs the client to one or more measurement services.
-  # The client requests the performance statistics from the measurement services who may retrieve the statistics directly from a known databasae, compute the statistics on the fly using existing collected statistics or may collect the statistics on the fly and return them.
+  # The Circuit Provisioning Service contacts the various routers and switches and sets up the new circuit
+  # The Circuit Provisioning Service contacts the circuit monitoring agent, and informs it about the new circuit, including the internal path and other circuit metadata.
+  # The Circuit Provisioning Service creates the circuit and segment descriptors, and registers them with the Topology Service.
+  # The Topology Service tells the Lookup Service about the circuit and segment descriptors it now contains.
+  # The Circuit Provisioning Service contacts the measurement services and informs them of any new elements that they need to measure or new information that they need to make available.
+  # The Measurement Services tell the Lookup Service about the new measurement information they can make available.
+
+==== Circuit Monitoring ====
+[http://perfsonar-ps.googlecode.com/svn/wiki/CircuitMonitoring/circuit_monitoring_interactions.png]
+
+  # The Measurement Agent queries the routers and switches for circuit statistics 
+  # The Measurement Agent stores the results into the Measurement Archive
+  # The Measurement Archive tells the Lookup Service about any new data that it has.
+
+==== Client Querying ====
+[http://perfsonar-ps.googlecode.com/svn/wiki/CircuitMonitoring/client_interactions.png]
+
+  # The client uses the circuit identifier, and asks the Lookup Service where it can find the circuit descriptor. The Lookup Service directs the client to the Topology Service.
+  # The client contacts the Topology Service and retrieves the circuit descriptor.
+  # The client finds the segment identifier for the red domain, and asks the Lookup Service where it can find that segment descriptor. The Lookup Service directs the client to the red domain's Topology Service.
+  # The client contacts the red domain's Topology Service and retrieves the segment descriptor.
+  # The client finds the segment identifier for the purple domain, and asks the Lookup Service where it can find that segment descriptor. The Lookup Service directs the client to the purple domain's Topology Service.
+  # The client contacts the purple domain's Topology Service and retrieves the segment descriptor.
+  # The client asks the Lookup Service which Measurement Services can return performance statistics about the red domain's segment of the circuit. The lookup infrastructure directs the client to one or more Measurement Services in the red domain.
+  # The client requests the performance statistics from the Measurement Services which may retrieve the statistics directly from a known databasae, compute the statistics on the fly using existing collected statistics or may collect the statistics on the fly and return them.
+  # The client asks the Lookup Service which Measurement Services can return performance statistics about the purple domain's segment of the circuit. The lookup infrastructure directs the client to one or more Measurement Services in the purple domain.
+  # The client requests the performance statistics from the Measurement Services which may retrieve the statistics directly from a known databasae, compute the statistics on the fly using existing collected statistics or may collect the statistics on the fly and return them.
 
 == Possible Information Model For Circuit/Segment Descriptors ==
 
-As part of the circuit creation process, a circuit descriptor is created that
+As part of the circuit provisioning process, a circuit descriptor is created that
 describes, from a very high level, the path that the circuit is taking.
 
 {{{
@@ -200,7 +218,7 @@ describes, from a very high level, the path that the circuit is taking.
 </link>
 }}}
 
-During the circuit creation process, each domain SHOULD setup their monitoring
+During the circuit provisioning process, each domain SHOULD setup their monitoring
 services to respond to requests for the ID specified for their domain. For
 example, the status MA for Internet2 could be setup to respond to requests for
 "urn:nml:internet2.edu:gri123456_segment", and have it return the up/down
@@ -221,7 +239,7 @@ given above in so far as its a path with element identifiers in each hop.
 Unlike the circuit descriptor, this segment descriptor contains hops for each
 port and link. The port and link ids in this descriptor might correspond to
 physical elements OR they might reference virtual elements created during
-circuit creation. Internet2 could configure its monitoring services to return
+circuit provisioning. Internet2 could configure its monitoring services to return
 information for each identifier inside its segment descriptor.
 
 {{{
@@ -329,7 +347,7 @@ identifier, but the elements are now fleshed out some.
 
 === Virtual Elements ===
 
-During circuit creation, the domain might create virtual elements that
+During circuit provisioning, the domain might create virtual elements that
 correspond to just that subsegment of a port or link that is traversed by the
 circuit. These elements SHOULD be "over" physical hardware. If the domain makes
 status, counters or other information available corresponding to these
