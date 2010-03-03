@@ -45,19 +45,15 @@ The above does not mean to imply that all domains must behave in a decentralized
 
 Most domains that will be deploying dynamic circuit monitoring infrastructure will have an existing monitoring infrastructure in place. They are likely already collecting data such as SNMP statistics or alarm information. It is unlikely that domains will want to deploy a parallel monitoring infrastructure to gather the same information that they are already gathering. The SNMP MA provides a good example of easy integration. This measurement archive is able to integrate with existing Cacti, MRTG and Cricket installations with little work required of the site administrator. This ease of installation, and integration with existing monitoring infrastructure makes it more likely that a given domain will deploy the software.
 
-
-
-
-
 === Proposed High Level Architecture ===
 
 The architecture makes use of 3 overall measurement services: a service to allow clients to find services and relevant measurement data, perfSONAR Lookup Service (LS), a service to allow clients to look up topological information, perfSONAR Topology Service (TS), and services that provide measurement data for clients, perfSONAR Measurement Archives (MA).
 
-In the model, a circuit, identified by a circuit identifier, is described by a circuit descriptor. The circuit descriptor describes the properties applicable to the entire end-to-end circuit, including bandwidth, duration, and other similar metadata. This descriptor is added to a TS. Clients query the LS using the circuit identifier to find which TS contains the circuit descriptor for that circuit.
+In the model, a circuit, identified by a circuit identifier, is described by a circuit descriptor which contains the properties applicable to the entire end-to-end circuit, including bandwidth, duration, and other similar metadata. This descriptor is added to a TS. Clients query the LS using the circuit identifier to find which TS contains the circuit descriptor for that circuit.
 
-The circuit descriptor contains a list of segment identifiers for the domain-specific segments that comprise the circuit. Each domain, or an entity working on its behalf, produces a segment descriptor that contains metadata about their segment of the circuit, along with as much topological detail as they desire to publish. These segment descriptors are then registered with a TS. Clients query the LS using the segment identifiers in the circuit descriptor to find which TSes contain the segment descriptors for each domain's segment.
+The circuit descriptor contains a list of segment identifiers for the domain-specific segments that comprise the circuit. Each domain, or an entity working on its behalf, produces a segment descriptor that contains information about their segment of the circuit, along with as much topological detail as they desire to publish. These segment descriptors are then registered with a TS. Clients query the LS using the segment identifiers in the circuit descriptor to find which TSes contain the segment descriptors for each domain's segment.
 
-Once the client has the circuit descriptors and the segment descriptors, they can use the LS along with information contained within each descriptor to find measurements that are applicable to each circuit segment, or the entire end-to-end circuit.
+Once the client has the circuit descriptors and the segment descriptors, they can use the LS along with information contained within the descriptors to find measurements that are applicable to each circuit segment, or the entire end-to-end circuit.
 
 ==== Benefits Of This Architecture ====
 
@@ -100,15 +96,23 @@ The perfSONAR Lookup Service Infrastructure ties the architecture together. This
 
 === Monitoring Infrastructure ===
 
-The monitoring infrastructure needs to be able to measure the statistics of the circuit. This can be accomplished via constant collection, on-demand collection or some combination. 
+==== Measurement Agents ====
 
-It may be reasonable to monitor certain network elements whether circuits are enabled or not. For example, many devices will only have certain elements configured when a circuit is enabled. If monitoring is constantly looking for these configured elements, and measuring them when available, the collector can run constantly without negatively impacts. A downside to this approach is that the monitoring may not be specific to a given circuit, necessitating that the Circuit Description Agent know the metadata associated with this collection.
+The monitoring infrastructure must include agents whose role is to take measurements of the circuit, using either passive or active techniques. This can be accomplished via constant collection, on-demand collection or some combination. 
 
-Some administrators may not wish to have a collector constantly polling all elements of a given type from their hosts. In these cases, an agent will need to be constructed that enables monitoring when a circuit is brought up, and disables that monitoring when the circuit is brought down. In this case, the domain will need to have an agent, possibly human, that can enable monitoring of the appropriate network elements when a circuit is brought up. If this agent is programmatic, it will likely need the ability to convert the IDC's topological information about the circuit into the appropriate network elements to monitor. 
+It may be reasonable to monitor certain network elements whether circuits are enabled or not. For example, many devices will only have certain elements configured when a circuit is enabled. If a measurement agent is constantly looking for these configured elements, and measuring them when available, the agent can run constantly without negatively impacts. 
 
-Constant monitoring and on-demand monitoring could be combined to allow certain elements to be monitored constantly, while others are only measured on-demand. As long as the agent that enables monitoring knows which network elements to instantiate monitoring on, and the segment description agents knows how to construct the description such that it combines the static and dynamic aspects, this hybrid monitoring is feasible.
+Some administrators may not wish to have a collector constantly polling all elements of a given type from their hosts. In these cases, at circuit setup time, the measurement agent(s) will need to be informed new network elements need to be monitored, and at circuit teardown time, will need to be told to stop monitoring those elements. In this case, the domain will need to have an agent, possibly human, that can enable monitoring of the appropriate network elements when a circuit is brought up.
 
-This monitored data is made available in a perfSONAR form using perfSONAR Measurement Archives, and is registered in the perfSONAR Lookup Service infrastructure so that clients can find it. 
+Constant monitoring and on-demand monitoring could be combined to allow certain elements to be monitored constantly, while others are only measured on-demand. As long as the appropriate measurement agents are notified, this hybrid monitoring is feasible.
+
+==== Measurement Archives ====
+
+The measurement data for circuits needs to be made available in perfSONAR Measurement Archives which must register with the Lookup Service Infrastructure so that clients can find it. 
+
+==== Required Metrics ====
+
+To ease client development, domains must make some metrics available in such a way that a client does not need to know how to interpret technology-specific measurement data. These metrics include, at a minimum, operational status, administrative status and utilization. The easiest way to make these metrics available is to have one or more services that clients can query using the segment identifier, and who will respond with the metrics. These metrics could be collected by a special measurement agent who collects and stores the data in a Measurement Archive along with the segment identifier. They could also be made available by a service which accepts the queries, collects the relevant technology-specific data, and transforms it into the specified technology-agnostic metric.
 
 === Service Interactions ===
 
