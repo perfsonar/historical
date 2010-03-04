@@ -47,7 +47,7 @@ Most domains that will be deploying dynamic circuit monitoring infrastructure wi
 
 === Proposed High Level Architecture ===
 
-The architecture makes use of 3 overall measurement services: a service to allow clients to find services and relevant measurement data, perfSONAR Lookup Service (LS), a service to allow clients to look up topological information, perfSONAR Topology Service (TS), and services that provide measurement data for clients, perfSONAR Measurement Archives (MA).
+The architecture makes use of 3 general types of services: a service to allow clients to find services and relevant measurement data, perfSONAR Lookup Service (LS), a service to allow clients to look up topological information, perfSONAR Topology Service (TS), and services that provide measurement data for clients, perfSONAR Measurement Archives (MA).
 
 In the model, a circuit, identified by a circuit identifier, is described by a circuit descriptor which contains the properties applicable to the entire end-to-end circuit, including bandwidth, duration, and other similar metadata. This descriptor is added to a TS. Clients query the LS using the circuit identifier to find which TS contains the circuit descriptor for that circuit.
 
@@ -94,17 +94,17 @@ There are numerous gradiations between the completely centralized approach, and 
 
 The perfSONAR Lookup Service Infrastructure ties the architecture together. This infrastructure allows clients to discover the Topology Services for obtaining circuit and segment descriptors, as well as the various Measurement Archives containing measurements. Similar to the Topology Lookup Infrastructure, the Lookup Service Infrastructure can be both centralized or decentralized, with a similar of upsides and downsides for each.
 
-=== Monitoring Infrastructure ===
+=== Measurement Infrastructure ===
 
-==== Measurement Agents ====
+==== Measurement Collectors ====
 
-The monitoring infrastructure must include agents whose role is to take measurements of the circuit, using either passive or active techniques. This can be accomplished via constant collection, on-demand collection or some combination. 
+The monitoring infrastructure must include agents whose role is to collect measurements of the circuit, using either passive or active techniques. This can be accomplished via constant collection, on-demand collection or some combination. 
 
-It may be reasonable to monitor certain network elements whether circuits are enabled or not. For example, many devices will only have certain elements configured when a circuit is enabled. If a measurement agent is constantly looking for these configured elements, and measuring them when available, the agent can run constantly without negatively impacts. 
+It may be reasonable to monitor certain network elements whether circuits are enabled or not. For example, many devices will only have certain elements configured when a circuit is enabled. If a measurement collector is constantly looking for these configured elements, and measuring them when available, the collector can run constantly without negatively impacts. 
 
-Some administrators may not wish to have a collector constantly polling all elements of a given type from their hosts. In these cases, at circuit setup time, the measurement agent(s) will need to be informed new network elements need to be monitored, and at circuit teardown time, will need to be told to stop monitoring those elements. In this case, the domain will need to have an agent, possibly human, that can enable monitoring of the appropriate network elements when a circuit is brought up.
+Some administrators may not wish to have a collector constantly polling all elements of a given type from their hosts. In these cases, at circuit setup time, the measurement collectors will need to be informed of the new network elements need to be monitored, and at circuit teardown time, will need to be told to stop monitoring those elements. In this case, the domain will need to have an agent, possibly human, that can enable monitoring of the appropriate network elements when a circuit is brought up.
 
-Constant monitoring and on-demand monitoring could be combined to allow certain elements to be monitored constantly, while others are only measured on-demand. As long as the appropriate measurement agents are notified, this hybrid monitoring is feasible.
+Constant monitoring and on-demand monitoring could be combined to allow certain elements to be monitored constantly, while others are only measured on-demand. As long as the appropriate measurement collectors are notified, this hybrid monitoring is feasible.
 
 ==== Measurement Archives ====
 
@@ -112,7 +112,7 @@ The measurement data for circuits needs to be made available in perfSONAR Measur
 
 ==== Required Metrics ====
 
-To ease client development, domains must make some metrics available in such a way that a client does not need to know how to interpret technology-specific measurement data. These metrics include, at a minimum, operational status, administrative status and utilization. The easiest way to make these metrics available is to have one or more services that clients can query using the segment identifier, and who will respond with the metrics. These metrics could be collected by a special measurement agent who collects and stores the data in a Measurement Archive along with the segment identifier. They could also be made available by a service which accepts the queries, collects the relevant technology-specific data, and transforms it into the specified technology-agnostic metric.
+To ease client development, domains must make some metrics available in such a way that a client does not need to know how to interpret technology-specific measurement data. These metrics include, at a minimum, operational status, administrative status and utilization. The easiest way to make these metrics available is to have one or more services that clients can query using the segment identifier, and who will respond with the metrics. These metrics could be collected by a special measurement collector that collects and stores the data in a Measurement Archive along with the segment identifier. They could also be made available by a service which accepts the queries, collects the relevant technology-specific data, and transforms it into the specified technology-agnostic metric.
 
 === Service Interactions ===
 
@@ -124,14 +124,15 @@ To ease client development, domains must make some metrics available in such a w
   # The Circuit Provisioning Service contacts the circuit monitoring agent, and informs it about the new circuit, including the internal path and other circuit metadata.
   # The Circuit Provisioning Service creates the circuit and segment descriptors, and registers them with the Topology Service.
   # The Topology Service tells the Lookup Service about the circuit and segment descriptors it now contains.
-  # The Circuit Provisioning Service contacts the measurement services and informs them of any new elements that they need to measure or new information that they need to make available.
-  # The Measurement Services tell the Lookup Service about the new measurement information they can make available.
+  # The Circuit Provisioning Service contacts the measurement collectors and informs them of any new elements that they need to measure or new information that they need to make available.
+  # The Circuit Provisioning Service begin storing data into Measurement Archives.
+  # The Measurement Archives tell the Lookup Service about the new measurement information they can make available.
 
 ==== Circuit Monitoring ====
 [http://perfsonar-ps.googlecode.com/svn/wiki/CircuitMonitoring/circuit_monitoring_interactions.png]
 
-  # The Measurement Agent queries the routers and switches for circuit statistics 
-  # The Measurement Agent stores the results into the Measurement Archive
+  # The Measurement Collector queries the routers and switches for circuit statistics 
+  # The Measurement Collector stores the results into the Measurement Archive
   # The Measurement Archive tells the Lookup Service about any new data that it has.
 
 ==== Client Querying ====
