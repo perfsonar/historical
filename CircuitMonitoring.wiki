@@ -122,10 +122,10 @@ To ease client development, domains must make some metrics available in such a w
 
   # The Circuit Provisioning Service contacts the various routers and switches and sets up the new circuit
   # The Circuit Provisioning Service contacts the circuit monitoring agent, and informs it about the new circuit, including the internal path and other circuit metadata.
-  # The Circuit Provisioning Service creates the circuit and segment descriptors, and registers them with the Topology Service.
+  # The Circuit Monitoring Agent creates the circuit and segment descriptors, and registers them with the Topology Service.
   # The Topology Service tells the Lookup Service about the circuit and segment descriptors it now contains.
-  # The Circuit Provisioning Service contacts the measurement collectors and informs them of any new elements that they need to measure or new information that they need to make available.
-  # The Circuit Provisioning Service begin storing data into Measurement Archives.
+  # The Circuit Monitoring Agent contacts the Measurement Collectors and informs them of any new elements that they need to measure or new information that they need to make available.
+  # The Measurement Collectors begin storing data into Measurement Archives.
   # The Measurement Archives tell the Lookup Service about the new measurement information they can make available.
 
 ==== Circuit Monitoring ====
