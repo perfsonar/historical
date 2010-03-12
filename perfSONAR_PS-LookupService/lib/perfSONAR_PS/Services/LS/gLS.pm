@@ -453,7 +453,7 @@ sub getHints {
                 $self->{LOGGER}->error( "There was an error accessing " . $url . "." );
                 next;
             }
-            open( HINTS, ">", $self->{CONF}->{"root_hints_file"} );
+            open( HINTS, ">", $self->{CONF}->{"root_hints_file"} ) or $self->{LOGGER}->error("Can't write to hints file " . $self->{CONF}->{"root_hints_file"});
             print HINTS $content;
             close( HINTS );
             return;
