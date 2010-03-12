@@ -6,6 +6,7 @@ Class::Accessor
 Class::Fields
 Config::General
 Data::Dumper
+Data::UUID
 Digest::MD5
 English
 Exporter

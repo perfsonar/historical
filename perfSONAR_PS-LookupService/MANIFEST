@@ -1,11 +1,11 @@
 MANIFEST
 Makefile
+bin/DCNBackup.pl
+bin/DCNLoad.pl
 bin/client.pl
 bin/configureDaemon.pl
 bin/daemon.pl
 bin/databaseDump.pl
-bin/DCNBackup.pl
-bin/DCNLoad.pl
 bin/makeDBConfig.pl
 dependencies
 doc/Changes

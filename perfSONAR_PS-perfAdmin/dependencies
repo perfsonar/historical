@@ -6,6 +6,8 @@ Carp
 Class::Accessor
 Class::Fields
 Config::General
+Data::Dumper
+Data::UUID
 Data::Validate::Domain,0.09
 Data::Validate::IP,0.08
 Date::Manip
@@ -21,6 +23,7 @@ LWP::UserAgent
 Log::Log4perl
 Net::CIDR,0.13
 Net::IPv6Addr
+Net::Ping
 POSIX
 Params::Validate
 Readonly

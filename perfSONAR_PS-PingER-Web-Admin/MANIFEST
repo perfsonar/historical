@@ -1,9 +1,9 @@
 MANIFEST
 Makefile
+doc/apache.conf
 etc/.htaccess
 etc/GeneralSystem.conf
 etc/logger.conf
-doc/apache.conf
 html/menu.css
 html/mystyle.css
 html/overlib/Mini/overlib_anchor_mini.js
@@ -60,6 +60,7 @@ lib/perfSONAR_PS/SONAR_DATATYPES/v2_0/NSMap.pm
 lib/perfSONAR_PS/SONAR_DATATYPES/v2_0/psservice/Message/Metadata/Subject/Service.pm
 lib/perfSONAR_PS/Transport.pm
 lib/perfSONAR_PS/Utils/DNS.pm
+lib/perfSONAR_PS/Utils/NetLogger.pm
 lib/perfSONAR_PS/Utils/ParameterValidation.pm
 lib/perfSONAR_PS/XML/Document.pm
 templates/.htaccess
