@@ -7,7 +7,7 @@ our $VERSION = 3.1;
 
 use base 'perfSONAR_PS::Services::Base';
 
-use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER', 'RES', 'HASH_TO_ID', 'ID_TO_HASH', 'STORE_FILE_MTIME', 'BAD_MTIME';
+use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER', 'RES', 'HASH_TO_ID', 'ID_TO_HASH', 'STORE_FILE_MTIME', 'BAD_MTIME', 'NETLOGGER';
 
 =head1 NAME
 
@@ -60,6 +60,7 @@ use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::SQL;
+use perfSONAR_PS::Utils::NetLogger;
 use perfSONAR_PS::Utils::ParameterValidation;
 
 my %ma_namespaces = (
@@ -111,7 +112,8 @@ ways:
 sub init {
     my ( $self, $handler ) = @_;
     $self->{LOGGER} = get_logger( "perfSONAR_PS::Services::MA::perfSONARBUOY" );
-
+    $self->{NETLOGGER} = get_logger( "NetLogger" );
+    
     unless ( exists $self->{CONF}->{"root_hints_url"} ) {
         $self->{CONF}->{"root_hints_url"} = q{};
         $self->{LOGGER}->info( "gLS Hints file was not set, automatic discovery of hLS instance disabled." );
@@ -469,7 +471,9 @@ map these to the key ids in the metadata database for easy lookup.
 sub buildHashedKeys {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { metadatadb => 1, metadatadb_type => 1 } );
-
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.buildHashedKeys.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
     my %hash_to_id = ();
     my %id_to_hash = ();
 
@@ -495,6 +499,8 @@ sub buildHashedKeys {
         unless ( $metadatadb ) {
             my $msg = "Database could not be opened.";
             $self->{LOGGER}->fatal( $msg );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.buildHashedKeys.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return ( -1, $msg );
         }
 
@@ -505,6 +511,8 @@ sub buildHashedKeys {
         if ( $len == -1 ) {
             my $msg = "Nothing returned for database search.";
             $self->{LOGGER}->error( $msg );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.buildHashedKeys.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return ( -1, $msg );
         }
 
@@ -519,6 +527,8 @@ sub buildHashedKeys {
     else {
         my $msg = "Wrong value for 'metadata_db_type' set.";
         $self->{LOGGER}->fatal( $msg );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.buildHashedKeys.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         return ( -1, $msg );
     }
 
@@ -526,7 +536,9 @@ sub buildHashedKeys {
         id_to_hash => \%id_to_hash,
         hash_to_id => \%hash_to_id,
     );
-
+    
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.buildHashedKeys.end");
+    $self->{NETLOGGER}->debug( $nlmsg );
     return ( 0, \%retval );
 }
 
@@ -543,7 +555,9 @@ by providing a fast handle that points directly to a key.
 sub createStorage {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { metadatadb => 0, error => 1 } );
-
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
     my %defaults = (
         DBHOST  => "localhost",
         CONFDIR => $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"}
@@ -558,6 +572,8 @@ sub createStorage {
             $parameters->{metadatadb} = $self->prepareDatabases;
             unless ( exists $parameters->{metadatadb} and $parameters->{metadatadb} ) {
                 $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $parameters->{"error"} );
+                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                $self->{NETLOGGER}->debug( $nlmsg );
                 return -1;
             }
         }
@@ -567,6 +583,8 @@ sub createStorage {
             $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$parameters->{"error"} } ) if $dbTr;
             undef $dbTr;
             $self->{LOGGER}->fatal( "Database error: \"" . $parameters->{"error"} . "\", aborting." );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return -1;
         }
     }
@@ -585,11 +603,15 @@ sub createStorage {
         }
         else {
             $self->{LOGGER}->fatal( "File cannot be written." );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return -1;
         }
     }
     else {
         $self->{LOGGER}->fatal( "Wrong value for 'metadata_db_type' set." );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         return -1;
     }
 
@@ -614,6 +636,8 @@ sub createStorage {
         my $dbReturn = $datedb->openDB;
         if ( $dbReturn == -1 ) {
             $self->{LOGGER}->fatal( "Database error, aborting." );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return -1;
         }
 
@@ -638,6 +662,8 @@ sub createStorage {
             $dbReturn = $tspecdb->openDB;
             if ( $dbReturn == -1 ) {
                 $self->{LOGGER}->fatal( "Database error, aborting." );
+                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                $self->{NETLOGGER}->debug( $nlmsg );
                 return -1;
             }
             $result = $tspecdb->query( { query => $query } );
@@ -743,6 +769,8 @@ sub createStorage {
             $dbReturn = $nodedb->openDB;
             if ( $dbReturn == -1 ) {
                 $self->{LOGGER}->fatal( "Database error, aborting." );
+                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                $self->{NETLOGGER}->debug( $nlmsg );
                 return -1;
             }
             $result = $nodedb->query( { query => $query } );
@@ -810,6 +838,8 @@ sub createStorage {
             $dbReturn = $nodedb->openDB;
             if ( $dbReturn == -1 ) {
                 $self->{LOGGER}->fatal( "Database error, aborting." );
+                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                $self->{NETLOGGER}->debug( $nlmsg );
                 return -1;
             }
             $result = $nodedb->query( { query => $query } );
@@ -856,6 +886,8 @@ sub createStorage {
                 $dbReturn = $datadb->openDB;
                 if ( $dbReturn == -1 ) {
                     $self->{LOGGER}->fatal( "Database error, aborting." );
+                    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                    $self->{NETLOGGER}->debug( $nlmsg );
                     return -1;
                 }
                 $result = $datadb->query( { query => $query } );
@@ -971,6 +1003,8 @@ sub createStorage {
                                 }
                                 else {
                                     $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
+                                    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                                    $self->{NETLOGGER}->debug( $nlmsg );
                                     return -1;
                                 }
                             }
@@ -1003,6 +1037,8 @@ sub createStorage {
         my $dbReturn = $datedb->openDB;
         if ( $dbReturn == -1 ) {
             $self->{LOGGER}->fatal( "Database error, aborting." );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return -1;
         }
         my $result = $datedb->query( { query => "select * from DATES order by year, month, day;" } );
@@ -1027,6 +1063,8 @@ sub createStorage {
             $dbReturn = $tspecdb->openDB;
             if ( $dbReturn == -1 ) {
                 $self->{LOGGER}->fatal( "Database error, aborting." );
+                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                $self->{NETLOGGER}->debug( $nlmsg );
                 return -1;
             }
             $result = $tspecdb->query( { query => $query } );
@@ -1123,6 +1161,8 @@ sub createStorage {
             $dbReturn = $nodedb->openDB;
             if ( $dbReturn == -1 ) {
                 $self->{LOGGER}->fatal( "Database error, aborting." );
+                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                $self->{NETLOGGER}->debug( $nlmsg );
                 return -1;
             }
             $result = $nodedb->query( { query => $query } );
@@ -1189,6 +1229,8 @@ sub createStorage {
             $dbReturn = $nodedb->openDB;
             if ( $dbReturn == -1 ) {
                 $self->{LOGGER}->fatal( "Database error, aborting." );
+                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                $self->{NETLOGGER}->debug( $nlmsg );
                 return -1;
             }
             $result = $nodedb->query( { query => $query } );
@@ -1235,6 +1277,8 @@ sub createStorage {
                 $dbReturn = $datadb->openDB;
                 if ( $dbReturn == -1 ) {
                     $self->{LOGGER}->fatal( "Database error, aborting." );
+                    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                    $self->{NETLOGGER}->debug( $nlmsg );
                     return -1;
                 }
                 $result = $datadb->query( { query => $query } );
@@ -1352,6 +1396,8 @@ sub createStorage {
                                 }
                                 else {
                                     $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
+                                    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                                    $self->{NETLOGGER}->debug( $nlmsg );
                                     return -1;
                                 }
                             }
@@ -1371,6 +1417,8 @@ sub createStorage {
             $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$parameters->{"error"} } ) if $dbTr;
             undef $dbTr;
             $self->{LOGGER}->fatal( "Database error: \"" . $parameters->{"error"} . "\", aborting." );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return -1;
         }
         else {
@@ -1382,6 +1430,8 @@ sub createStorage {
                 $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$parameters->{"error"} } ) if $dbTr;
                 undef $dbTr;
                 $self->{LOGGER}->fatal( "Database error: \"" . $parameters->{"error"} . "\", aborting." );
+                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                $self->{NETLOGGER}->debug( $nlmsg );
                 return -1;
             }
         }
@@ -1394,13 +1444,19 @@ sub createStorage {
         }
         else {
             $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return -1;
         }
     }
     else {
         $self->{LOGGER}->fatal( "Wrong value for 'metadata_db_type' set." );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         return -1;
     }
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+    $self->{NETLOGGER}->debug( $nlmsg );
     return 0;
 }
 
@@ -1413,6 +1469,9 @@ Given some parameters, generate a block.
 sub generateParameters {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { content => 1 } );
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.generateParameters.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
     my $p = q{};
     if ( keys %{ $parameters->{content} } > 0 ) {
         foreach my $c ( keys %{ $parameters->{content} } ) {
@@ -1427,6 +1486,9 @@ sub generateParameters {
         }
         $p .= "    </nmwg:parameters>\n";
     }
+    
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.generateParameters.end");
+    $self->{NETLOGGER}->debug( $nlmsg );
     return $p;
 }
 
@@ -1439,6 +1501,9 @@ Given some parameters for the key element, generate a data block.
 sub generateData {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { id => 1, testspec => 1, eT => 1, db => 1, user => 0, pass => 0 } );
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.generateData.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
     my $data = q{};
     $data .= "  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"data-" . $parameters->{id} . "\" metadataIdRef=\"metadata-" . $parameters->{id} . "\">\n";
     $data .= "    <nmwg:key id=\"key-" . $parameters->{id} . "\">\n";
@@ -1456,6 +1521,9 @@ sub generateData {
     $data .= "      </nmwg:parameters>\n";
     $data .= "    </nmwg:key>\n";
     $data .= "  </nmwg:data>\n";
+    
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.generateData.end");
+    $self->{NETLOGGER}->debug( $nlmsg );
     return $data;
 }
 
@@ -1468,12 +1536,22 @@ Return the proper type of address (ipv4, ipv6, hostname)
 sub addressType {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { address => 1 } );
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.addressType.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
     if ( is_ipv4( $parameters->{address} ) ) {
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.addressType.end", {ipType => 'ipv4'});
+        $self->{NETLOGGER}->debug( $nlmsg );
         return "ipv4";
     }
     elsif ( &Net::IPv6Addr::is_ipv6( $parameters->{address} ) ) {
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.addressType.end", {ipType => 'ipv6'});
+        $self->{NETLOGGER}->debug( $nlmsg );
         return "ipv6";
     }
+    
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.addressType.end", {ipType => 'hostname'});
+    $self->{NETLOGGER}->debug( $nlmsg );
     return "hostname";
 }
 
@@ -1513,14 +1591,21 @@ return this in response to a request.
 sub prepareDatabases {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 0 } );
-
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.prepareDatabases.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
     my $error = q{};
     my $metadatadb = new perfSONAR_PS::DB::XMLDB( { env => $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"}, cont => $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"}, ns => \%ma_namespaces, } );
     unless ( $metadatadb->openDB( { txn => q{}, error => \$error } ) == 0 ) {
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.prepareDatabases.end", {'status' => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         throw perfSONAR_PS::Error_compat( "error.perfSONAR-BUOY.xmldb", "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
         return;
     }
     $self->{LOGGER}->info( "Returning \"" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} . "\"" );
+    
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.prepareDatabases.end");
+    $self->{NETLOGGER}->debug( $nlmsg );
     return $metadatadb;
 }
 
@@ -1534,21 +1619,29 @@ We then sleep for some amount of time and do it again.
 
 sub registerLS {
     my ( $self, $sleep_time ) = validateParamsPos( @_, 1, { type => SCALARREF }, );
-
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         unless ( -d $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} ) {
             $self->{LOGGER}->fatal( "XMLDB is not defined, disallowing registration." );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.end", {'status' => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return -1;
         }
     }
     elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         unless ( -f $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} ) {
             $self->{LOGGER}->fatal( "Store file not defined, disallowing registration." );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.end", {'status' => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return -1;
         }
     }
     else {
         $self->{LOGGER}->fatal( "Metadata database is not configured, disallowing registration." );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.end", {'status' => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         return -1;
     }
 
@@ -1595,6 +1688,8 @@ sub registerLS {
         my $metadatadb = $self->prepareDatabases;
         unless ( $metadatadb ) {
             $self->{LOGGER}->error( "Database could not be opened." );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.end", {'status' => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return -1;
         }
         @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata", txn => q{}, error => \$error } );
@@ -1602,14 +1697,20 @@ sub registerLS {
     }
     else {
         $self->{LOGGER}->error( "Wrong value for 'metadata_db_type' set." );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.end", {'status' => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         return -1;
     }
 
     if ( $#resultsString == -1 ) {
         $self->{LOGGER}->error( "No data to register with LS" );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.end", {'status' => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         return -1;
     }
     $ls->registerStatic( \@resultsString );
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.end");
+    $self->{NETLOGGER}->debug( $nlmsg );
     return 0;
 }
 
@@ -1684,7 +1785,9 @@ sub handleEvent {
             doOutputMetadata  => 1,
         }
     );
-
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleEvent.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
     my @subjects = @{ $parameters->{subject} };
     my @filters  = @{ $parameters->{filterChain} };
     my $md       = $subjects[0];
@@ -1807,6 +1910,8 @@ sub handleEvent {
 
     if ( $parameters->{messageType} eq "MetadataKeyRequest" ) {
         $self->{LOGGER}->info( "MetadataKeyRequest initiated." );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleEvent.end", { type => $parameters->{messageType} });
+        $self->{NETLOGGER}->debug( $nlmsg );
         return $self->maMetadataKeyRequest(
             {
                 output             => $parameters->{output},
@@ -1820,6 +1925,8 @@ sub handleEvent {
     }
     elsif ( $parameters->{messageType} eq "SetupDataRequest" ) {
         $self->{LOGGER}->info( "SetupDataRequest initiated." );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleEvent.end", { type => $parameters->{messageType} });
+        $self->{NETLOGGER}->debug( $nlmsg );
         return $self->maSetupDataRequest(
             {
                 output             => $parameters->{output},
@@ -1832,9 +1939,14 @@ sub handleEvent {
         );
     }
     else {
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleEvent.end", { type => $parameters->{messageType}, status => -1 });
+        $self->{NETLOGGER}->debug( $nlmsg );
         throw perfSONAR_PS::Error_compat( "error.ma.message_type", "Invalid Message Type" );
         return;
     }
+    
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleEvent.end", { type => $parameters->{messageType}});
+    $self->{NETLOGGER}->debug( $nlmsg );
     return;
 }
 
@@ -1867,12 +1979,17 @@ sub maMetadataKeyRequest {
             message_parameters => 1
         }
     );
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maMetadataKeyRequest.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
     my $mdId  = q{};
     my $dId   = q{};
     my $error = q{};
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         $self->{METADATADB} = $self->prepareDatabases( { doc => $parameters->{output} } );
         unless ( $self->{METADATADB} ) {
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maMetadataKeyRequest.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             throw perfSONAR_PS::Error_compat( "Database could not be opened." );
             return;
         }
@@ -1880,6 +1997,8 @@ sub maMetadataKeyRequest {
     unless ( ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" )
         or ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) )
     {
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maMetadataKeyRequest.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         throw perfSONAR_PS::Error_compat( "Wrong value for 'metadata_db_type' set." );
         return;
     }
@@ -1916,6 +2035,9 @@ sub maMetadataKeyRequest {
         $self->{LOGGER}->debug( "Closing database." );
         $self->{METADATADB}->closeDB( { error => \$error } );
     }
+    
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maMetadataKeyRequest.end");
+    $self->{NETLOGGER}->debug( $nlmsg );
     return;
 }
 
@@ -1942,13 +2064,17 @@ sub metadataKeyRetrieveKey {
             output             => 1
         }
     );
-
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.metadataKeyRetrieveKey.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
     my $mdId    = "metadata." . genuid();
     my $dId     = "data." . genuid();
     my $hashKey = extract( find( $parameters->{key}, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
     unless ( $hashKey ) {
         my $msg = "Key error in metadata storage: cannot find 'maKey' in request message.";
         $self->{LOGGER}->error( $msg );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.metadataKeyRetrieveKey.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
     }
@@ -1957,6 +2083,8 @@ sub metadataKeyRetrieveKey {
     unless ( $hashId ) {
         my $msg = "Key error in metadata storage: 'maKey' cannot be found.";
         $self->{LOGGER}->error( $msg );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.metadataKeyRetrieveKey.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
     }
@@ -1974,6 +2102,8 @@ sub metadataKeyRetrieveKey {
     if ( $parameters->{metadatadb}->count( { query => $query } ) != 1 ) {
         my $msg = "Key error in metadata storage: 'maKey' should exist, but matching data not found in database.";
         $self->{LOGGER}->error( $msg );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.metadataKeyRetrieveKey.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
     }
@@ -1992,6 +2122,8 @@ sub metadataKeyRetrieveKey {
     my $params = find( $key2, ".//nmwg:parameters", 1 );
     $self->addSelectParameters( { parameter_block => $params, filters => $parameters->{filters} } );
     createData( $parameters->{output}, $dId, $mdId, $key2->toString, undef );
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.metadataKeyRetrieveKey.end", {status => -1});
+    $self->{NETLOGGER}->debug( $nlmsg );
     return;
 }
 
@@ -2019,7 +2151,9 @@ sub metadataKeyRetrieveMetadataData {
             output             => 1
         }
     );
-
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.metadataKeyRetrieveMetadataData.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
     my $mdId        = q{};
     my $dId         = q{};
     my $queryString = q{};
@@ -2121,6 +2255,8 @@ sub metadataKeyRetrieveMetadataData {
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
     }
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.metadataKeyRetrieveMetadataData.end");
+    $self->{NETLOGGER}->debug( $nlmsg );
     return;
 }
 
@@ -2156,6 +2292,8 @@ sub maSetupDataRequest {
             message_parameters => 1
         }
     );
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maSetupDataRequest.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
 
     my $mdId  = q{};
     my $dId   = q{};
@@ -2163,6 +2301,8 @@ sub maSetupDataRequest {
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         $self->{METADATADB} = $self->prepareDatabases( { doc => $parameters->{output} } );
         unless ( $self->{METADATADB} ) {
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maSetupDataRequest.end", { status => -1 });
+            $self->{NETLOGGER}->debug( $nlmsg );
             throw perfSONAR_PS::Error_compat( "Database could not be opened." );
             return;
         }
@@ -2170,6 +2310,8 @@ sub maSetupDataRequest {
     unless ( ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" )
         or ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) )
     {
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maSetupDataRequest.end", { status => -1 });
+        $self->{NETLOGGER}->debug( $nlmsg );
         throw perfSONAR_PS::Error_compat( "Wrong value for 'metadata_db_type' set." );
         return;
     }
@@ -2206,6 +2348,8 @@ sub maSetupDataRequest {
         $self->{LOGGER}->debug( "Closing database." );
         $self->{METADATADB}->closeDB( { error => \$error } );
     }
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maSetupDataRequest.end");
+    $self->{NETLOGGER}->debug( $nlmsg );
     return;
 }
 
@@ -2236,7 +2380,9 @@ sub setupDataRetrieveKey {
             output             => 1
         }
     );
-
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.setupDataRetrieveKey.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
     my $mdId    = q{};
     my $dId     = q{};
     my $results = q{};
@@ -2245,6 +2391,8 @@ sub setupDataRetrieveKey {
     unless ( $hashKey ) {
         my $msg = "Key error in metadata storage: cannot find 'maKey' in request message.";
         $self->{LOGGER}->error( $msg );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.setupDataRetrieveKey.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
     }
@@ -2254,6 +2402,8 @@ sub setupDataRetrieveKey {
     unless ( $hashId ) {
         my $msg = "Key error in metadata storage: 'maKey' cannot be found.";
         $self->{LOGGER}->error( $msg );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.setupDataRetrieveKey.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
     }
@@ -2272,6 +2422,8 @@ sub setupDataRetrieveKey {
     if ( $results->size() != 1 ) {
         my $msg = "Key error in metadata storage: 'maKey' should exist, but matching data not found in database.";
         $self->{LOGGER}->error( $msg );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.setupDataRetrieveKey.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
     }
@@ -2297,6 +2449,8 @@ sub setupDataRetrieveKey {
     if ( $results2->size() != 1 ) {
         my $msg = "Key error in metadata storage: 'metadataIdRef' " . $md_id_val . " should exist, but matching data not found in database.";
         $self->{LOGGER}->error( $msg );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.setupDataRetrieveKey.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
     }
@@ -2347,7 +2501,9 @@ sub setupDataRetrieveKey {
             message_parameters => $parameters->{message_parameters}
         }
     );
-
+    
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.setupDataRetrieveKey.end");
+    $self->{NETLOGGER}->debug( $nlmsg );
     return;
 }
 
@@ -2375,6 +2531,8 @@ sub setupDataRetrieveMetadataData {
             output             => 1
         }
     );
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.setupDataRetrieveMetadataData.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
 
     my $mdId = q{};
     my $dId  = q{};
@@ -2506,6 +2664,8 @@ sub setupDataRetrieveMetadataData {
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
     }
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.setupDataRetrieveMetadataData.end");
+    $self->{NETLOGGER}->debug( $nlmsg );
     return;
 }
 
@@ -2532,7 +2692,9 @@ sub handleData {
             dst                => 1
         }
     );
-
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleData.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
     my $type = extract( find( $parameters->{data}, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]", 1 ), 0 );
     if ( lc( $type ) eq "mysql" or lc( $type ) eq "sql" ) {
         $self->retrieveSQL(
@@ -2548,12 +2710,16 @@ sub handleData {
                 message_parameters => $parameters->{message_parameters}
             }
         );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleData.end");
     }
     else {
         my $msg = "Database \"" . $type . "\" is not yet supported";
         $self->{LOGGER}->error( $msg );
         getResultCodeData( $parameters->{output}, "data." . genuid(), $parameters->{id}, $msg, 1 );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleData.end", { status => -1 });
     }
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleData.end");
+    $self->{NETLOGGER}->debug( $nlmsg );
     return;
 }
 
@@ -2581,6 +2747,8 @@ sub retrieveSQL {
             dst                => 1
         }
     );
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
 
     my $timeType = "iso";
     if ( defined $parameters->{message_parameters}->{"timeType"} ) {
@@ -2654,6 +2822,8 @@ sub retrieveSQL {
             my $msg = "Database error, could not complete request.";
             $self->{LOGGER}->error( $msg );
             getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return;
         }
 
@@ -2664,6 +2834,8 @@ sub retrieveSQL {
             my $msg = "No data in database";
             $self->{LOGGER}->error( $msg );
             getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return;
         }
         my @dateList = ();
@@ -2690,6 +2862,8 @@ sub retrieveSQL {
             my $msg = "Database error, could not complete request.";
             $self->{LOGGER}->error( $msg );
             getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return;
         }
 
@@ -2701,6 +2875,8 @@ sub retrieveSQL {
             my $msg = "Id error, found \"" . join( " - ", @{$result1} ) . "\" for SRC and \"" . join( " - ", @{$result2} ) . "\" for DST addresses.";
             $self->{LOGGER}->error( $msg );
             getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return;
         }
 
@@ -2788,6 +2964,8 @@ sub retrieveSQL {
             my $msg = "Database error, could not complete request.";
             $self->{LOGGER}->error( $msg );
             getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return;
         }
 
@@ -2798,6 +2976,8 @@ sub retrieveSQL {
             my $msg = "No data in database";
             $self->{LOGGER}->error( $msg );
             getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return;
         }
         my @dateList = ();
@@ -2824,6 +3004,8 @@ sub retrieveSQL {
             my $msg = "Database error, could not complete request.";
             $self->{LOGGER}->error( $msg );
             getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return;
         }
 
@@ -2835,6 +3017,8 @@ sub retrieveSQL {
             my $msg = "Id error, found \"" . join( " - ", @{$result1} ) . "\" for SRC and \"" . join( " - ", @{$result2} ) . "\" for DST addresses.";
             $self->{LOGGER}->error( $msg );
             getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+            $self->{NETLOGGER}->debug( $nlmsg );
             return;
         }
 
@@ -2915,6 +3099,8 @@ sub retrieveSQL {
         my $msg = "Improper eventType found.";
         $self->{LOGGER}->error( $msg );
         getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         return;
     }
 
@@ -2924,6 +3110,8 @@ sub retrieveSQL {
         my $msg = "Query returned 0 results";
         $self->{LOGGER}->error( $msg );
         getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         return;
     }    
             
@@ -2934,6 +3122,8 @@ sub retrieveSQL {
         my $msg = "Database error, could not complete request.";
         $self->{LOGGER}->error( $msg );
         getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         return;
     }
 
@@ -2944,6 +3134,8 @@ sub retrieveSQL {
         my $msg = "Query returned 0 results";
         $self->{LOGGER}->error( $msg );
         getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+        $self->{NETLOGGER}->debug( $nlmsg );
         return;
     }
     else {
@@ -3037,6 +3229,8 @@ sub retrieveSQL {
             endData( $parameters->{output} );
         }
     }
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+    $self->{NETLOGGER}->debug( $nlmsg );
     return;
 }
 
@@ -3055,6 +3249,8 @@ sub addSelectParameters {
             filters         => 1,
         }
     );
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.addSelectParameters.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
 
     my $params       = $parameters->{parameter_block};
     my @filters      = @{ $parameters->{filters} };
@@ -3088,6 +3284,8 @@ sub addSelectParameters {
             }
         }
     }
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.addSelectParameters.end");
+    $self->{NETLOGGER}->debug( $nlmsg );
     return;
 }
 
