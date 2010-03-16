@@ -46,7 +46,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=412 412] - _*Aaron*_ - pSB/owamp not restarting powstream properly	 
    * Fix committed, needs testing - <font color=yellow>_*In Progress - 3/16*_</font>
  * _*hLS/gLS*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=375 375] - _*Andy/Jason*_ - hLS silently does not register with gLS if doesn't have write permissions to root_hints_file	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=375 375] - _*Andy/Jason*_ - ~~hLS silently does not register with gLS if doesn't have write permissions to root_hints_file~~
      * Andy to merge changes from other branch
  * _*LS Registration Daemon*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=405 405] - _*Aaron*_ - ~~Soften log messages for LS Registration Daemon~~
@@ -55,7 +55,7 @@ The following outline some exceptions to the overall release process.  Also see 
      * Fix committed, needs testing in other IE variants. Didn't upgrade dojo as the upgrade was found to not fix it. - <font color=yellow>_*In Progress - 3/16*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=342 342] - _*Aaron*_ - ~~make toolkit administrative information visible to non-admins~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=403 403] - _*Aaron*_ - ~~owamp test port range checking~~
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=411 411] - _*Aaron/Andy*_ - Expose LAN Topology in Reverse Traceroute
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=411 411] - _*Aaron/Andy*_ - ~~Expose LAN Topology in Reverse Traceroute~~
      * The part of the CGI that added the "-f 3" argument to traceroute has been commented out.
  * _*perfSONAR Software*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - _*Jason/Andy*_ - Package for the client modules
