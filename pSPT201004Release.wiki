@@ -38,10 +38,13 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*SNMP MA*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=4 4] - _*Aaron*_ - reread SNMP MA store.xml file
      * Aaron to merge changes from other branch.
+     * Branch merged, needs testing - <font color=yellow>_*In Progress - 3/16*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Aaron*_ -  SNMP MA - Indicate it is not running due to cacti
      * Tied to issue 4
+     * Store file regenerator added, needs testing - <font color=yellow>_*In Progress - 3/16*_</font>
  * _*pSB*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=412 412] - _*Aaron*_ - pSB/owamp not restarting powstream properly	 
+   * Fix committed, needs testing - <font color=yellow>_*In Progress - 3/16*_</font>
  * _*hLS/gLS*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=375 375] - _*Andy/Jason*_ - hLS silently does not register with gLS if doesn't have write permissions to root_hints_file	
      * Andy to merge changes from other branch
@@ -49,19 +52,25 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=405 405] - _*Aaron*_ - ~~Soften log messages for LS Registration Daemon~~
  * _*GUIs*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=307 307] - _*Aaron*_ - spiiner not working under IE 
-     * Aaron to upgrade dojo
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=342 342] - _*Aaron*_ - make toolkit administrative information visible to non-admins	
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=403 403] - _*Aaron*_ - owamp test port range checking	
+     * Fix committed, needs testing in other IE variants. Didn't upgrade dojo as the upgrade was found to not fix it. - <font color=yellow>_*In Progress - 3/16*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=342 342] - _*Aaron*_ - ~~make toolkit administrative information visible to non-admins~~
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=403 403] - _*Aaron*_ - ~~owamp test port range checking~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=411 411] - _*Aaron/Andy*_ - Expose LAN Topology in Reverse Traceroute
-     * Aaron to upgrade and modify reverse traceroute for now - consider options for future releases
+     * The part of the CGI that added the "-f 3" argument to traceroute has been commented out.
  * _*perfSONAR Software*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - _*Jason/Andy*_ - Package for the client modules
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=416 416] - _*Andy*_ - Netlogger integration into pSPT
      * Andy to upgrade hLS at a minimum.  
+     * The hLS and pSB netlogger code has been pulled in, though no netlogger logging has been added to the service's configuration. - <font color=yellow>_*In Progress - 3/16*_</font>
  * _*Disk Internals*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=383 383] - _*Aaron*_ - pSPT Software Upgrade
      * Check for releases of all supporting software.  NDT may want to stall due to buggy behavior on MLab
+     * NPAD has been upgraded to 1.5.6 - <font color=green>_*Done - 3/16*_</font>
+     * cacti has been upgraded to 0.8.6e, and an upgrade script written. Needs wider testing. - <font color=yellow>_*In Progress - 3/16*_</font>
+     * The kernel is being upgraded to 2.6.27.45 - <font color=yellow>_*In Progress - 3/16*_</font>
+     * NDT has been upgraded to 3.5.14. We'll likely upgrade to 3.6.1 pending some bugs being fixed - <font color=yellow>_*In Progress - 3/16*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=407 407] - _*Andy*_ - Exploring DNS queries	 
+     * nscd has been added to the base installation. Needs testing to verify everything is correct - <font color=yellow>_*In Progress - 3/16*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=408 408] - _*Andy*_ - cache.pl missing services
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=409 409] - _*Aaron*_ - ~~tcp state cache on pSPT~~
  * _*Documentation*_ 
