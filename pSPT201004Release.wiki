@@ -45,15 +45,15 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=412 412] - _*Aaron*_ - pSB/owamp not restarting powstream properly	 
    * Fix committed, needs testing - <font color=yellow>_*In Progress - 3/16*_</font>
  * _*hLS/gLS*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=375 375] - _*Andy/Jason*_ - ~~hLS silently does not register with gLS if doesn't have write permissions to root_hints_file~~
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=375 375] - _*Andy/Jason*_ - hLS silently does not register with gLS if doesn't have write permissions to root_hints_file~~
  * _*LS Registration Daemon*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=405 405] - _*Aaron*_ - ~~Soften log messages for LS Registration Daemon~~
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=405 405] - _*Aaron*_ - Soften log messages for LS Registration Daemon~~
  * _*GUIs*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=307 307] - _*Aaron*_ - spiiner not working under IE 
      * Fix committed, needs testing in other IE variants. Didn't upgrade dojo as the upgrade was found to not fix it. - <font color=yellow>_*In Progress - 3/16*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=342 342] - _*Aaron*_ - ~~make toolkit administrative information visible to non-admins~~
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=403 403] - _*Aaron*_ - ~~owamp test port range checking~~
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=411 411] - _*Aaron/Andy*_ - ~~Expose LAN Topology in Reverse Traceroute~~
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=342 342] - _*Aaron*_ - make toolkit administrative information visible to non-admins~~
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=403 403] - _*Aaron*_ - owamp test port range checking~~
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=411 411] - _*Aaron/Andy*_ - Expose LAN Topology in Reverse Traceroute~~
      * The part of the CGI that added the "-f 3" argument to traceroute has been commented out.
  * _*perfSONAR Software*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - _*Jason/Andy*_ - Package for the client modules
@@ -68,7 +68,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=407 407] - _*Andy*_ - Exploring DNS queries	 
      * nscd has been added to the base installation. Needs testing to verify everything is correct - <font color=yellow>_*In Progress - 3/16*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=408 408] - _*Andy*_ - cache.pl missing services
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=409 409] - _*Aaron*_ - ~~tcp state cache on pSPT~~
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=409 409] - _*Aaron*_ - tcp state cache on pSPT~~
  * _*Documentation*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=374 374] - _*Andy*_ - Large clock change causes NTP to stop updating and services to stop
      * Andy/Jason to update documentation of this known issue
