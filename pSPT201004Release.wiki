@@ -36,8 +36,8 @@ The following outline some exceptions to the overall release process.  Also see 
 === Bugs Related to This Release ===
 
  * _*SNMP MA*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=4 4] - _*Aaron*_ - reread SNMP MA store.xml file
-     * Branch merged, needs testing - <font color=yellow>_*In Progress - 3/16*_</font>
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=4 4] - _*Aaron*_ - reread SNMP MA store.xml file~~
+     * Branch merged, needs testing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Aaron*_ -  SNMP MA - Indicate it is not running due to cacti
      * Tied to issue 4
      * Store file regenerator added, needs testing - <font color=yellow>_*In Progress - 3/16*_</font>
