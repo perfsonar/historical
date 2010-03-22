@@ -46,7 +46,7 @@
  
 === ACTIONS ===
 
-  * _*ACTION*_: Marcos will communicate with Andy/Brian on the work he is doing with the gLS.  All parties shoudl work together on testing.
+  * _*ACTION*_: 
   * _*ACTION*_: Next meeting will be a topic meeting on gLS performance testing.  
 
 == Where ==
