@@ -43,6 +43,8 @@ The following outline some exceptions to the overall release process.  Also see 
      * Store file regenerator added, needs testing - <font color=yellow>_*In Progress - 3/16*_</font>
  * _*pSB*_
    * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=412 412] - _*Aaron*_ - pSB/owamp not restarting powstream properly~~
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=420 420] - _*Aaron*_ - psb 'master' scripts can periodically not restart properly~~
+     * Changed the signal handling some. It passes tests now, and appears to be working. 
  * _*hLS/gLS*_
    * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=375 375] - _*Andy/Jason*_ - hLS silently does not register with gLS if doesn't have write permissions to root_hints_file~~
  * _*LS Registration Daemon*_
