@@ -36,6 +36,18 @@ Possible new version: the initrd.img file contains the init scripts that setup t
   * perfSONARBUOY: mysql may need to upgrade the tables if the version of MySQL is upgraded.
   * cacti: mysql may need to upgrade the tables if the version of MySQL is upgraded. The RRD files should be in the "correct" location. The location may need moved if desired.
 
+== Saving Configuration ==
+
+The current iteration of the toolkit whitelists a handful of files and directories, and saves those files. These files are stored in a tarball on the backing store (/mnt/store/configs.tbz2), and are saved on shutdown, and once an hour (so that if a user makes changes, the files get saved).
+
+Saved configuration can complicate upgrades. If an upgrade needs to make changes to existing configuration (e.g. the perfSONAR logging options change), an upgrade script needs to be written which updates this data. The difficulty can lie with configuration files which get saved which may have strange side-effects. For example, in the current toolkit, all of /etc and /usr/local/etc are saved. If a user modifies some random file in there (e.g. /etc/profile), it may have unintended side effects during the transition to a new version of the LiveCD. One trick we currently use to minimize these issues is to only save configuration files that have changed. The script that saves the configuration files compares each file to its analog on the CD, and if they're the same, it does not save the file. Longer term, though, there are other files (e.g. /etc/passwd) that will change, and we may need to look into a more selective approach to saving existing configuration.
+
+== Saving Data ==
+
+The current iteration of the toolkit whitelists a handful of directories as data directories. On initial bootup, a set of directories are created on the backing store, one for each of the data directories, and the contents of the ISO's version of the data is copied over. At startup, these directories get overlaid using bind mounts. This ensures that all data is written directly to disk.
+
+Saved data complicates upgrades. If an upgrade needs to make changes to information in the data directories (e.g. upgrading cacti may need to make changes to the cacti database), an upgrade script needs to be written which updates this data.
+
 == Last Modified ==
 
 $Id$
