@@ -48,22 +48,17 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*LS Registration Daemon*_
    * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=405 405] - _*Aaron*_ - Soften log messages for LS Registration Daemon~~
  * _*GUIs*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=307 307] - _*Aaron*_ - spiiner not working under IE 
-     * Fix committed, needs testing in other IE variants. Didn't upgrade dojo as the upgrade was found to not fix it. - <font color=yellow>_*In Progress - 3/16*_</font>
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=307 307] - _*Aaron*_ - spiiner not working under IE ~~
    * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=342 342] - _*Aaron*_ - make toolkit administrative information visible to non-admins~~
    * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=403 403] - _*Aaron*_ - owamp test port range checking~~
    * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=411 411] - _*Aaron/Andy*_ - Expose LAN Topology in Reverse Traceroute~~
      * The part of the CGI that added the "-f 3" argument to traceroute has been commented out.
  * _*perfSONAR Software*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - _*Jason/Andy*_ - Package for the client modules
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=416 416] - _*Andy*_ - Netlogger integration into pSPT
-     * The hLS and pSB netlogger code has been pulled in, though no netlogger logging has been added to the service's configuration. - <font color=yellow>_*In Progress - 3/16*_</font>
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=416 416] - _*Andy*_ - Netlogger integration into pSPT~~
  * _*Disk Internals*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=383 383] - _*Aaron*_ - pSPT Software Upgrade
-     * NPAD has been upgraded to 1.5.6 - <font color=green>_*Done - 3/16*_</font>
-     * cacti has been upgraded to 0.8.6e, and an upgrade script written. Needs wider testing. - <font color=yellow>_*In Progress - 3/16*_</font>
-     * The kernel has been upgraded to 2.6.27.45. Needs wider testing - <font color=yellow>_*In Progress - 3/16*_</font>
-     * NDT has been upgraded to 3.5.14. We'll likely upgrade to 3.6.1 pending some bugs being fixed - <font color=yellow>_*In Progress - 3/16*_</font>
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=383 383] - _*Aaron*_ - pSPT Software Upgrade~~
+     * NPAD has been upgraded to 1.5.6, cacti has been upgraded to 0.8.6e, the kernel has been upgraded to 2.6.27.45.
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=407 407] - _*Andy*_ - Exploring DNS queries	 
      * nscd has been added to the base installation. Needs testing to verify everything is correct - <font color=yellow>_*In Progress - 3/16*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=408 408] - _*Andy*_ - cache.pl missing services
