@@ -38,7 +38,7 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*SNMP MA*_
    * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=4 4] - _*Aaron*_ - reread SNMP MA store.xml file~~
      * Branch merged, needs testing
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Aaron*_ -  SNMP MA - Indicate it is not running due to cacti
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Aaron*_ -  SNMP MA - Indicate it is not running due to cacti~~
      * Tied to issue 4
      * Store file regenerator added, needs testing - <font color=yellow>_*In Progress - 3/16*_</font>
  * _*pSB*_
@@ -61,11 +61,11 @@ The following outline some exceptions to the overall release process.  Also see 
  * _*Disk Internals*_
    * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=383 383] - _*Aaron*_ - pSPT Software Upgrade~~
      * NPAD has been upgraded to 1.5.6, cacti has been upgraded to 0.8.6e, the kernel has been upgraded to 2.6.27.45.
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=407 407] - _*Andy*_ - Exploring DNS queries	 
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=407 407] - _*Andy*_ - Exploring DNS queries~~
      * nscd has been added to the base installation. Needs testing to verify everything is correct - <font color=yellow>_*In Progress - 3/16*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=408 408] - _*Andy*_ - cache.pl missing services
    * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=409 409] - _*Aaron*_ - tcp state cache on pSPT~~
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=417 417] - _*Aaron*_ - improve toolkit logging
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=417 417] - _*Aaron*_ - improve toolkit logging~~
  * _*Documentation*_ 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=374 374] - _*Andy*_ - Large clock change causes NTP to stop updating and services to stop
      * Andy/Jason to update documentation of this known issue
