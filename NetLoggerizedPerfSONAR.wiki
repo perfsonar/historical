@@ -27,6 +27,7 @@ This simplest way to extract NetLogger timing info is to use the tool nl_interva
 
 {{{
  nl_interval logfile | sort -n -k 3 -r  | more
+ nl_interval -t hist logfile
 }}}
 
 You also might want to just look at the events or a particular guid. For example:
