@@ -12,6 +12,11 @@
    * Seeing a large amount of database 'lock' errors at Internet2 (ndb1 GLS)
      * Related to dbxml?
      * Related to recent fixes?
+   * _Testing_ gLS set up on a different machine at Internet2 (DC):
+     * Loaded into the main _gLS cloud_
+     * [http://dcn-ls.internet2.edu/view.cgi?hls=http://dc213.internet2.edu:9991/perfSONAR_PS/services/gLS]
+     * Using dbxml 2.5.16
+     * Logging set to _normal_ for now.  Will enable netlogging/debug mode if required
    * Issue notes:
      * DB must be locked at certain points in operation, normal when _writing_:
        * Cleaning
