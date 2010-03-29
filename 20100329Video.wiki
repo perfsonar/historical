@@ -19,9 +19,10 @@
      * Logging set to _normal_ for now.  Will enable netlogging/debug mode if required
    * Issue notes:
      * DB must be locked at certain points in operation, normal when _writing_:
-       * Cleaning
-       * Registration/Deregistration/Keepalive
-       * Summarization
+       * Cleaning (_read_, CPU, _write_)
+       * Registration/Deregistration/Keepalive of hLSs (CPU, _read_, _write_)
+       * Summarization (_read_, CPU, _write_)
+       * Syncing with other gLSs (_read_, CPU) 
      * DB errors occur when these overlap.
      * Critical sections (e.g. when we are actually _writing_) are kept as small as possible to mitigate the errors
      * _Read_ operations (Query) can overlap with _writes_.  
