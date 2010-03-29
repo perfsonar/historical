@@ -1,0 +1,35 @@
+=  Mar 29 2010 Conference Call 2:30 p.m. EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees: 
+ # gLS Testing Update
+   * Andy/Brian
+   * Marcos
+   * Ahmed
+ # pSPT 3.1.3 Release
+   * Andy commited alterations to the open/close procedure
+   * Seeing a large amount of database 'lock' errors at Internet2 (ndb1 GLS)
+     * Related to dbxml?
+     * Related to recent fixes?
+   * Issue notes:
+     * DB must be locked at certain points in operation, normal when _writing_:
+       * Cleaning
+       * Registration/Deregistration/Keepalive
+       * Summarization
+     * DB errors occur when these overlap.
+     * Critical sections (e.g. when we are actually _writing_) are kept as small as possible to mitigate the errors
+     * _Read_ operations (Query) can overlap with _writes_.  
+     * Literature at the time of development (2007) suggested that DB _connection_ (like a _handle_ in SQL terms) must be opened new with each thread/process that attaches to database.  
+     * Transaction management is a combination of the library and perfSONAR-PS try/catches to ensure concurrency
+ # Future Plans
+ 
+=== ACTIONS ===
+
+  * _*ACTION*_:  
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
