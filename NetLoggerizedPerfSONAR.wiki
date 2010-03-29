@@ -57,8 +57,7 @@ Just look for all instances of "NETLOGGER" and "NetLogger" in that file.
 To install nl_interval and other useful tools:
    
 {{{
- wget http://acs.lbl.gov/NetLogger-releases/src/4.1.2/netlogger-python-4.1.2.tar.gz
- tar xvzf netlogger-python-4.1.2.tar.gz
- cd netlogger-4.1.2/
+ svn co https://bosshog.lbl.gov/repos/netlogger/trunk/python NetLogger
+ cd NetLogger
  python setup.py install
 }}}
