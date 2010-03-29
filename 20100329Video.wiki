@@ -3,21 +3,52 @@
 == Agenda/Minutes ==
 
  # Attendees: 
+   * eric p
+   * andy
+   * jason
+   * maxim
+   * brian
+   * aaron
+   * joe
+   * ezra
+   * ahmed
  # gLS Testing Update
-   * Marcos update on resource consumption of LS and analysis of results
    * Ahmed update on profiling of common LS queries and registered information
+     * [UDelLSTesting]
+     * Testing on the _real_ infrastructure.  
+     * Results on page, but highlights
+       * 5 out of 9 gLSs are _active_ on average from the hints list.  Some down
+       * _Inbalance_ between the services on a pSPT hLSs and the hLSs of an organization (ESnet, Internet2)
+       * Measured some of the times it takes to register to a gLS, and information propagates around the cloud
+       * Cache.pl makes up about 1280/1300 queries to the moonshine gLS in a given day (20/1300 were _different_, perhaps the GN3 API)
+     * Discussion topics:
+       * Hints file = total number of gLSs, not _*active*_ gLSs.  Meta discussion on monitoring - Internet2 has a nagios instance to monitor our gLS (and Fermi/Udel).  GN3 didn't want to be monitored.  APAN does their own monitoring.  Idea is to monitor all.  This is a larger topic for DICE, e.g. perfSONAR Operations.  Need an OPS list to send alerts, etc.  
+       * _*Service Description*_ is not very descriptive (note that the pSPT uses a template for this).  Consider altering documentation to get something better. 
+       * pSPT services register to local hLS, _*only*_.  should we add hooks to allow registration to other hLSs (e.g. if a VO wanted to run one).  Would eliminate the number of hLSs out there but may force a centralization of functionality (e.g. who from a VO would be the site to run an hLS?). 
+   * Marcos (Andy) update on resource consumption of LS and analysis of results
+     * Marcos not present, Andy to give update
+     * [LSScalabilityInvestigation]
+     * Marcos is testing on PlanetLab, initially looking at scalability (number of services per hLS, number of hLSs per gLS, timings to get data, and distribute data).  
+     * Recently Eric and Andy have been working with Marcos to get more system information (memory, CPU, process/thread count)
+     * Eric P Reports: wanted to look at vmstat.  Got some numbers.  Not showing the LS to be io bound, cpu bound or memory(swap) bound.  Looking at the number of processes blocked - probably related to xmldb locking.  Also looking at context switching.  Still some interpretation to do on the data.  Also does not believe that XQuery/XPath is the problem.  
+     * Discussions:
+       * Should be playing with the dials in DB_CONFIG, specifically the lock hold time, number of locks.  Couple this with measuring (with NETLOGGER) the critical sections to see where we can improve things.
+       * Replacing XMLDB - is it time to do this?  Would be a rash thing to do, but maybe look at other databases and measure performance.  Could contemplate switching to SQL (not sqlite, maybe postgres/mysql).  What about _pay_ oracle with XML support?
    * Next steps
-     * Further testing?
+     * Testing and Simulation
+       * Andy and Jason to add more netlogging into the LS code.
+       * Jason to redoply (next week) on ndb1, with netlogging turned on.  Andy will do the same at ESnet.  
+       * Brian/Eric P to intrepret the results when we have them
+     * New Techonologies
+       * Andy/Eric P to look at other XMLDBs for a _drop in_ replacement.  SQL may be considered, but not immediately.  
+     * Andy will continue work on cache.pl (see issue 408) for the pSPT 3.1.3 release.
  # pSPT 3.1.3 Release
-   * Andy commited alterations to the open/close procedure
+   * Andy committed alterations to the open/close procedure
+     * Goal was to reduce the number of opens/closes
+     * Preserved the _one open/close per process_ rule that dbxml cares about
    * Seeing a large amount of database 'lock' errors at Internet2 (ndb1 GLS)
      * Related to dbxml?
      * Related to recent fixes?
-   * _Testing_ gLS set up on a different machine at Internet2 (DC):
-     * Loaded into the main _gLS cloud_
-     * [http://dcn-ls.internet2.edu/view.cgi?hls=http://dc213.internet2.edu:9991/perfSONAR_PS/services/gLS]
-     * Using dbxml 2.5.16
-     * Logging set to _normal_ for now.  Will enable netlogging/debug mode if required
    * Issue notes:
      * DB must be locked at certain points in operation, normal when _writing_:
        * Cleaning (_read_, CPU, _write_)
@@ -29,11 +60,27 @@
      * _Read_ operations (Query) can overlap with _writes_.  
      * Literature at the time of development (2007) suggested that DB _connection_ (like a _handle_ in SQL terms) must be opened new with each thread/process that attaches to database.  
      * Transaction management is a combination of the library and perfSONAR-PS try/catches to ensure concurrency
- # Future Plans
+ # Cache.pl Discussion
+   * Fix in progress (see issue 408)
+   * Plan is to install to pSPT for 3.1.3 release
+   * Would like to have this ready for RC1 (in the next week?)
+   * Andy: how it works
+     * Every pSPT gets a daemon.  Daemon will HTTP Conditional GET a tar file from well known locations.  Well known locations are stored on a _hints_ file.  Get the file if changed, untar into GUI directory on pSPT.  GUIs will work as they have always worked, but the pSPT will not run it's own cache script.
+     * Well known servers (ESnet, Internet2) will run a modified cache.pl script. Will store/save information.  Will tar up/replace the file to be fetched on changes.  
+   * Questions:
+     * How large is the file: 13k or so
+     * Why a tar: easier to fetch one thing, and it contains all the supporting files.  Some discussion on if we want to _change_ this into a structured json/xml file.  Note that this is an ugly hack that we dont want to live on too much longer.  This approach is fine.
+     * Consistency between instances: will be better than what we have now, but not perfect
+     * Will we backup the tars on the server side: right now no, maybe we should consider this (record of past/present instances).  
  
 === ACTIONS ===
 
-  * _*ACTION*_:  
+  * _*ACTION*_: Jason/Andy to add more netlogging to LS code
+  * _*ACTION*_: Jason to redeploy nettlogging at Internet2
+  * _*ACTION*_: Andy to redeploy netlogging at ESnet 
+  * _*ACTION*_: Brian/Eric P to analyze results when available
+  * _*ACTION*_: Eric P/Andy to look at XMLDB _drop in_ replacements
+  * _*ACTION*_: Marcos/Eric P/Andy should continue investigation into the vmstat results from planetlab to see what is blocking processes.
 
 == Where ==
 
