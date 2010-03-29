@@ -4,9 +4,10 @@
 
  # Attendees: 
  # gLS Testing Update
-   * Andy/Brian
-   * Marcos
-   * Ahmed
+   * Marcos update on resource consumption of LS and analysis of results
+   * Ahmed update on profiling of common LS queries and registered information
+   * Next steps
+     * Further testing?
  # pSPT 3.1.3 Release
    * Andy commited alterations to the open/close procedure
    * Seeing a large amount of database 'lock' errors at Internet2 (ndb1 GLS)
