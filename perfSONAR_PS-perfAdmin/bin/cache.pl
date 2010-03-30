@@ -18,6 +18,9 @@ applications.
 
 use XML::LibXML;
 use Carp;
+use Digest;
+use Archive::Tar;
+use File::Copy qw(move);
 use Getopt::Long;
 use Data::Validate::IP qw(is_ipv4);
 use Data::Validate::Domain qw( is_domain );
@@ -56,6 +59,7 @@ my $hints  = "http://www.perfsonar.net/gls.root.hints";
 my @private_list = ( "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16" );
 
 my $base = "/var/lib/perfsonar/perfAdmin/cache";
+my $archive_file = "/var/www/html/perfsonar/cache.tgz";
 
 my %hls     = ();
 my %matrix1 = ();
@@ -70,6 +74,7 @@ if ( $content ) {
 use Log::Log4perl qw(:easy);
 
 my $output_level = $INFO;
+
 
 my %logger_opts = (
     level  => $output_level,
@@ -539,6 +544,59 @@ foreach my $et ( keys %list ) {
     }
     close( OUT );
 
+}
+
+# read digest file
+my %digest_map = ();
+if(-e $base . "/checksum"){
+    open( CHKSUM, "<" . $base . "/checksum") or croak "can't open $base/checksum.";
+    while( <CHKSUM> ){
+        chomp $_;
+        if($_ !~ /.+:.+/){
+            next;
+        }
+        my ($chk_key, $chk_val) = split ":", $_;
+        $digest_map{$chk_key} = $chk_val;
+    }
+}
+
+#compare existing digests to calculated
+my $do_update = 0;
+my $digest = Digest->new("MD5");
+opendir DIR, $base or croak("cannot open directory $base");
+my @digest_files = readdir(DIR) or croak("cannot read directory $base");
+closedir DIR;
+my %new_digest_map = ();
+foreach my $digest_file( @digest_files ){
+    if($digest_file eq 'checksum' || $digest_file =~ '^\.'){
+        next;
+    }
+    $logger->debug("looking for changes in $digest_file");
+    open( FILE, "<" . $base . "/$digest_file") or croak "can't digest $base/$digest_file.";
+    my $tmp_digest = $digest->addfile(*FILE)->b64digest();
+    close FILE;
+    if((!defined $digest_map{$digest_file}) || $tmp_digest ne $digest_map{$digest_file}){
+        $logger->debug("$digest_file has been updated");
+        $do_update = 1;
+    }
+    $new_digest_map{$digest_file} = $tmp_digest;
+}
+
+if($do_update == 1){
+    #create new tarball
+    my @compress_files = ($base);
+    chdir $base;
+    Archive::Tar->create_archive('/tmp/ps-cache.tgz', COMPRESS_GZIP, keys %new_digest_map);
+    move '/tmp/ps-cache.tgz', $archive_file or croak "can't move file to $archive_file";
+    $logger->debug("generated new archive file $archive_file");
+    
+    #write new checksum file
+    open( CHKSUM, ">" . $base . "/checksum") or croak "can't open $base/checksum.";
+    foreach my $file_key(keys %new_digest_map){
+        print CHKSUM "$file_key:" . $new_digest_map{$file_key} . "\n";
+    }
+    
+    close CHKSUM;
 }
 
 sub query_hlses {
