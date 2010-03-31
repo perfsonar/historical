@@ -1415,6 +1415,17 @@ Starting NTP server: ntpd.
      * The _minimum_ is interpreted as the shortest time it takes for any of the packets in the latency measurement (normally 10pps over the soan of a minute) to arrive.
      * The _maximum_ is interpreted as the longest time it takes for any of the packets in the latency measurement (normally 10pps over the soan of a minute) to arrive.  This can sometimes cause _*spikes*_ to form on the graphs that offer a false sense the _true_ latency.  
 
+ * *Q: How do I reset the root/knoppix passwords if I can't remember either?*
+ * *A:* 
+   # Start the machine.
+   # During bootup, at the prompt labelled "boot:", :ype "linux single" and hit enter.
+   # The machine will boot, and display a "[root@Knoppix /]#" prompt. Type "/etc/init.d/mount_data_store.sh" and hit enter.
+   # Run "nptoolkit-configure.py" to reset the password.
+   # After set the passwords, exit from the Network Performance Toolkit customization script.
+   # Type "/usr/local/bin/nptoolkit-saveConfig.py" and hit enter.
+   # Type "reboot" and hit enter.
+   * Once the machine boots up again, login using the passwords set above.
+
 == Last Updated ==
 
 $Id$
