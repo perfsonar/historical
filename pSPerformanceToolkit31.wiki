@@ -1418,13 +1418,13 @@ Starting NTP server: ntpd.
  * *Q: How do I reset the root/knoppix passwords if I can't remember either?*
  * *A:* 
    # Start the machine.
-   # During bootup, at the prompt labelled "boot:", :ype "linux single" and hit enter.
-   # The machine will boot, and display a "[root@Knoppix /]#" prompt. Type "/etc/init.d/mount_data_store.sh" and hit enter.
+   # During bootup, at the prompt labelled "boot:", type "linux single" and hit enter.
+   # The machine will boot, and display a "`[`root@Knoppix /`]`#" prompt. Type "/etc/init.d/mount_data_store.sh" and hit enter.
    # Run "nptoolkit-configure.py" to reset the password.
    # After set the passwords, exit from the Network Performance Toolkit customization script.
    # Type "/usr/local/bin/nptoolkit-saveConfig.py" and hit enter.
    # Type "reboot" and hit enter.
-   * Once the machine boots up again, login using the passwords set above.
+   # Once the machine boots up again, login using the passwords set above.
 
 == Last Updated ==
 
