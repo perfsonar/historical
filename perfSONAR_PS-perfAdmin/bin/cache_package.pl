@@ -17,17 +17,17 @@ use lib "$RealBin/../lib";
 use Archive::Tar;
 use Carp;
 use Digest;
-use File::Copy qw(move);
+use File::Copy qw(copy move);
+use File::Temp qw(tempdir);
 
-
-my $base = "/var/lib/perfsonar/perfAdmin/cache";
+#my @directories = ("/var/lib/perfsonar/perfAdmin/cache", "/var/lib/perfsonar/PingER-GUI/cache");
+my @directories = ("/var/lib/perfsonar/perfAdmin/cache");
 my $archive_file = "/var/www/html/perfsonar/cache.tgz";
 
 #setup logger
 use Log::Log4perl qw(:easy);
 
 my $output_level = $INFO;
-
 
 my %logger_opts = (
     level  => $output_level,
@@ -39,58 +39,71 @@ Log::Log4perl->easy_init( \%logger_opts );
 
 my $logger = get_logger( "cache" );
 
-
-# read digest file
 my %digest_map = ();
-if(-e $base . "/checksum"){
-    open( CHKSUM, "<" . $base . "/checksum") or croak "can't open $base/checksum.";
-    while( <CHKSUM> ){
-        chomp $_;
-        if($_ !~ /.+:.+/){
-            next;
+
+# read the existing tarball and generate a checksum of each file.
+if(-e $archive_file) {
+    my $archive = Archive::Tar->new( $archive_file, 1 );
+    if ($archive) {
+        my @files = $archive->get_files;
+        foreach my $file (@files) {
+            $logger->info("Found: ".$file->full_path." in cache");
+            my $content = $file->get_content;
+            next unless ($content);
+
+	    my $digest = Digest->new("MD5");
+            $digest->add($content);
+            $digest_map{$file->full_path}=$digest->hexdigest;
         }
-        my ($chk_key, $chk_val) = split ":", $_;
-        $digest_map{$chk_key} = $chk_val;
     }
 }
 
 #compare existing digests to calculated
 my $do_update = 0;
 my $digest = Digest->new("MD5");
-opendir DIR, $base or croak("cannot open directory $base");
-my @digest_files = readdir(DIR) or croak("cannot read directory $base");
-closedir DIR;
-my %new_digest_map = ();
-foreach my $digest_file( @digest_files ){
-    if($digest_file eq 'checksum' || $digest_file =~ '^\.'){
-        next;
+foreach my $directory (@directories) {
+    opendir DIR, $directory or croak("cannot open directory $directory");
+    my @digest_files = readdir(DIR) or croak("cannot read directory $directory");
+    closedir DIR;
+    my %new_digest_map = ();
+    foreach my $digest_file( @digest_files ){
+        next if ($digest_file eq "." or $digest_file eq "..");
+
+        $logger->debug("looking for changes in $digest_file");
+        open( FILE, "<" . $directory. "/$digest_file") or croak "can't digest $directory/$digest_file.";
+        my $tmp_digest = $digest->addfile(*FILE)->hexdigest();
+        close FILE;
+        if((!defined $digest_map{$digest_file}) || $tmp_digest ne $digest_map{$digest_file}){
+            $logger->debug("$digest_file has been updated");
+            $do_update = 1;
+            last;
+        }
     }
-    $logger->debug("looking for changes in $digest_file");
-    open( FILE, "<" . $base . "/$digest_file") or croak "can't digest $base/$digest_file.";
-    my $tmp_digest = $digest->addfile(*FILE)->b64digest();
-    close FILE;
-    if((!defined $digest_map{$digest_file}) || $tmp_digest ne $digest_map{$digest_file}){
-        $logger->debug("$digest_file has been updated");
-        $do_update = 1;
-    }
-    $new_digest_map{$digest_file} = $tmp_digest;
+
+    last if ($do_update);
 }
 
 if($do_update == 1){
+    my $tempdir = tempdir( CLEANUP => 1);
+
+    my %files_to_tar = ();
+
+    # Copy the files to a temp location
+    foreach my $directory (@directories) {
+        opendir DIR, $directory or croak("cannot open directory $directory");
+        my @files = readdir(DIR) or croak("cannot read directory $directory");
+        foreach my $file (@files) {
+            copy($directory."/".$file, $tempdir."/".$file);
+            $files_to_tar{$file} = 1;
+        }
+    }
+ 
     #create new tarball
-    my @compress_files = ($base);
-    chdir $base;
-    Archive::Tar->create_archive('/tmp/ps-cache.tgz', COMPRESS_GZIP, keys %new_digest_map);
+    my @compress_files = ($tempdir);
+    chdir $tempdir;
+    Archive::Tar->create_archive('/tmp/ps-cache.tgz', "COMPRESS_GZIP", keys %files_to_tar);
     move '/tmp/ps-cache.tgz', $archive_file or croak "can't move file to $archive_file";
     $logger->debug("generated new archive file $archive_file");
-    
-    #write new checksum file
-    open( CHKSUM, ">" . $base . "/checksum") or croak "can't open $base/checksum.";
-    foreach my $file_key(keys %new_digest_map){
-        print CHKSUM "$file_key:" . $new_digest_map{$file_key} . "\n";
-    }
-    
-    close CHKSUM;
 }
 
 =head1 SEE ALSO
