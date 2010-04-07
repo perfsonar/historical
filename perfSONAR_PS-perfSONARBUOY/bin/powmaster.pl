@@ -100,6 +100,7 @@ use Digest::MD5;
 use Socket;
 use IO::Socket;
 use Fcntl qw(:flock);
+use Params::Validate qw(:all);
 
 my @SAVEARGV = @ARGV;
 my %options  = (
@@ -511,8 +512,9 @@ foreach $mset ( @meassets ) {
 
                 warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined( $debug ) );
                 $starttime = OWP::Utils::time2owptime( time );
-                $pid = powstream( $msetdesc, $me, $bindaddr, $send, $saddr, $testports, 0 );
-                @{ $pid2info{$pid} } = ( "powstream", $starttime, $msetdesc, $bindaddr, $me, $raddr, $send, $saddr, $testports, 0 );
+                my $powstream_args = { measurement_set => $msetdesc, local_node => $me, local_address => $bindaddr, remote_node => $send, remote_address => $saddr, test_ports => $testports, do_send => 0 };
+                $pid = powstream(%$powstream_args);
+                @{ $pid2info{$pid} } = ( "powstream", $starttime, $powstream_args );
             }
         }
 
@@ -582,8 +584,10 @@ foreach $mset ( @meassets ) {
 
                 warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined( $debug ) );
                 $starttime = OWP::Utils::time2owptime( time );
-                $pid = powstream( $msetdesc, $me, $bindaddr, $recv, $raddr, $testports, 1 );
-                @{ $pid2info{$pid} } = ( "powstream", $starttime, $msetdesc, $bindaddr, $me, $saddr, $recv, $raddr, $testports, 1 );
+
+                my $powstream_args = { measurement_set => $msetdesc, local_node => $me, local_address => $bindaddr, remote_node => $recv, remote_address => $raddr, test_ports => $testports, do_send => 1 };
+                $pid = powstream(%$powstream_args);
+                @{ $pid2info{$pid} } = ( "powstream", $starttime, $powstream_args );
 
             }
         }
@@ -666,15 +670,13 @@ while ( 1 ) {
                 kill 'HUP', $$;
             }
             elsif ( $$info[0] =~ /powstream/ ) {
-                shift @$info;
-                shift @$info;
+                my $powstream_args = $info->[2];
 
-                # $$info[2] is now "node"
-                warn "Restart powstream->$$info[2]:!";
+                warn "Restart powstream->".$powstream_args->{remote_node}.":!";
 
                 my $starttime = OWP::Utils::time2owptime( time );
-                $pid = powstream( @$info );
-                @{ $pid2info{$pid} } = ( "powstream", $starttime, @$info );
+                $pid = powstream( %$powstream_args );
+                @{ $pid2info{$pid} } = ( "powstream", $starttime, $powstream_args );
             }
         }
     }
@@ -1189,7 +1191,16 @@ SEND_DATA:
 # (Want it to happen before forking, and done once instead of for each
 # process.)
 sub powstream {
-    my ( $ms, $me, $myaddr, $onode, $oaddr, $testports, $do_send ) = @_;
+    my $args = validate(@_, { measurement_set => 1, local_node => 1, local_address => 1, remote_node => 1, remote_address => 1, test_ports => 1, do_send => 1 });
+
+    my $ms = $args->{measurement_set};
+    my $me = $args->{local_node};
+    my $myaddr = $args->{local_address};
+    my $onode = $args->{remote_node};
+    my $oaddr = $args->{remote_address};
+    my $testports = $args->{test_ports};
+    my $do_send = $args->{do_send};
+
     local ( *CHWFD, *CHRFD );
     my $val;
 
