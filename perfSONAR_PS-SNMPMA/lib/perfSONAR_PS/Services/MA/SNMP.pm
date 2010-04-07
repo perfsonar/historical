@@ -39,6 +39,7 @@ use Digest::MD5 qw(md5_hex);
 use English qw( -no_match_vars );
 use Params::Validate qw(:all);
 use Date::Manip;
+use File::Copy;
 
 use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Common;
@@ -282,6 +283,16 @@ sub init {
         }
     }
 
+    unless ( exists $self->{CONF}->{"snmp"}->{"maintenance_interval"} ) {
+        $self->{LOGGER}->debug( "Configuration value 'maintenance_interval' not present.  Searching for other values..." );
+
+        unless ( exists $self->{CONF}->{"snmp"}->{"maintenance_interval"} ) {
+            $self->{CONF}->{"snmp"}->{"maintenance_interval"} = 30;
+        }
+    }
+    $self->{LOGGER}->debug( "Setting 'maintenance_interval' to \"" . $self->{CONF}->{"snmp"}->{"maintenance_interval"} . "\" minutes." );
+    $self->{CONF}->{"snmp"}->{"maintenance_interval"} *= 60;
+
     $self->{CONF}->{"snmp"}->{"ls_chunk"} = 50;
     $handler->registerMessageHandler( "SetupDataRequest",   $self );
     $handler->registerMessageHandler( "MetadataKeyRequest", $self );
@@ -338,23 +349,6 @@ sub init {
                 $self->{LOGGER}->fatal( "Cannot load \"perfSONAR_PS::DB::Cricket\", aborting: " . $EVAL_ERROR );
                 return -1;
             }
-            else {
-                my $cricket = new perfSONAR_PS::DB::Cricket(
-                    {
-                        file    => $self->{CONF}->{"snmp"}->{"metadata_db_file"},
-                        home    => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"},
-                        install => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_cricket"},
-                        data    => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_data"},
-                        config  => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_config"},
-                        hints   => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_hints"}
-                    }
-                );
-                unless ( $cricket->openDB() > -1 ) {
-                    $self->{LOGGER}->fatal( "Cricket database is empty, stopping service." );
-                    return -1;
-                }
-                $cricket->closeDB();
-            }
         }
         elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
             eval { 
@@ -364,19 +358,14 @@ sub init {
                 $self->{LOGGER}->fatal( "Cannot load \"perfSONAR_PS::DB::Cacti\", aborting: " . $EVAL_ERROR );
                 return -1;
             }
-            else {
-                my $cacti = new perfSONAR_PS::DB::Cacti( { conf => $self->{CONF}->{"snmp"}->{"metadata_db_external_source"}, file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
-                unless ( $cacti->openDB() > -1 ) {
-                    $self->{LOGGER}->fatal( "Cacti database is empty, stopping service." );
-                    return -1;
-                }                
-                $cacti->closeDB();                
-            }
+
         }
         else {
             $self->{LOGGER}->fatal( "External monitoring source \"" . $self->{CONF}->{"snmp"}->{"metadata_db_external"} . "\" not currently supported." );
             return -1;
         }
+
+        $self->createStorage({});
     }
 
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
@@ -422,6 +411,88 @@ sub init {
     return 0;
 }
 
+sub createStorage {
+    my ($self, @args) = @_;
+    my $parameters = validateParams( @args, { error => 0 } );
+
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "none" ) {
+            return 0;
+    }
+
+    my $tmp_file;
+
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cricket" ) {
+        $tmp_file = $self->{CONF}->{"snmp"}->{"metadata_db_file"}.".tmp";
+
+        my $cricket = new perfSONAR_PS::DB::Cricket(
+                {
+                file    => $tmp_file,
+                home    => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"},
+                install => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_cricket"},
+                data    => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_data"},
+                config  => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_config"},
+                hints   => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_hints"}
+                }
+                );
+        unless ( $cricket->openDB() > -1 ) {
+            $self->{LOGGER}->fatal( "Problem reading cricket database." );
+            return -1;
+        }
+        $cricket->closeDB();
+    }
+    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
+        $tmp_file = $self->{CONF}->{"snmp"}->{"metadata_db_file"}.".tmp";
+
+        my $cacti = new perfSONAR_PS::DB::Cacti( { conf => $self->{CONF}->{"snmp"}->{"metadata_db_external_source"}, file => $tmp_file } );
+        unless ( $cacti->openDB() > -1 ) {
+            $self->{LOGGER}->fatal( "Problem reading cacti database." );
+            return -1;
+        }                
+        $cacti->closeDB();                
+    }
+
+    if (-f $tmp_file) {
+        my $current_md5;
+        my $new_md5;
+
+        if (open(FILE1,  $self->{CONF}->{"snmp"}->{"metadata_db_file"})) {
+            binmode(FILE1);
+            $current_md5 = Digest::MD5->new->addfile(*FILE1)->hexdigest;
+            close(FILE1);
+        }
+
+        if (open(FILE2,  $tmp_file)) {
+            binmode(FILE2);
+            $new_md5 = Digest::MD5->new->addfile(*FILE2)->hexdigest;
+            close(FILE2);
+        }
+
+        if (not $current_md5 or $current_md5 ne $new_md5) {
+            $self->{LOGGER}->debug("Updating store file");
+            move($tmp_file, $self->{CONF}->{"snmp"}->{"metadata_db_file"});
+        }
+	else {
+            $self->{LOGGER}->debug("newly generated file is the same as is currently loaded: $new_md5/$current_md5");
+	}
+    }
+
+    return 0;
+}
+
+=head2 maintenance( $self )
+
+Stub function indicating that we have 'maintenance' functions in this particular service.
+
+=cut
+
+sub maintenance {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, {} );
+
+    return $self->{CONF}->{"perfsonarbuoy"}->{"maintenance_interval"};
+}
+
+
 sub inline_maintenance {
     my ($self, @args) = @_;
     my $parameters = validateParams( @args, { } );
@@ -444,7 +515,7 @@ sub refresh_store_file {
             return -1;
         }
 
-        $self->{LOGGER}->debug("New: $mtime Old: ".$self->{STORE_FILE_MTIME});
+        $self->{LOGGER}->debug("New: $mtime Old: ".$self->{STORE_FILE_MTIME}) if ($mtime and $self->{STORE_FILE_MTIME});
 
         unless ($self->{STORE_FILE_MTIME} and $self->{STORE_FILE_MTIME} == $mtime) {
             my $error;
