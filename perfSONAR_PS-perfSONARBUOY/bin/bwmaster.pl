@@ -177,12 +177,41 @@ if ( $kill || $hup ) {
     die "Unable to retrieve PID from $datadir/bwmaster.pid"
         if !defined( $pid );
     chomp $pid;
-    my $sig = ( $kill ) ? 'TERM' : 'HUP';
-    if ( kill( $sig, $pid ) ) {
-        warn "Sent $sig to $pid\n";
-        exit( 0 );
+
+    if ($hup) {
+        if ( kill( 'HUP', $pid ) ) {
+            warn "Sent HUP to $pid\n";
+            exit( 0 );
+        }
+        die "Unable to send HUP to $pid: $!";
     }
-    die "Unable to send $sig to $pid: $!";
+    else {
+        unless ( kill( 0, $pid ) ) {
+            die "Unable to find process $pid: $!";
+        }
+
+        for (1..5) {
+            unless ( kill( 0, $pid ) ) {
+                warn "Sent TERM to $pid, and process appears to have exited\n";
+                exit( 0 );
+            }
+
+            unless ( kill( 'TERM', $pid ) ) {
+                die "Unable to send TERM to $pid: $!";
+            }
+
+            warn "Sent TERM to $pid\n";
+
+            my $wpid = waitpid( $pid, WNOHANG );
+            if ($wpid > 0) {
+                warn "Sent TERM to $pid, and process exited\n";
+                exit( 0 );
+            }
+
+            warn "Waiting for $pid to exit\n";
+            sleep(1);
+        }
+    }
 }
 
 # Set uid to lesser permissions immediately if we are running as root.
@@ -360,7 +389,7 @@ my ( $MD5 ) = new Digest::MD5
     or die "Unable to create md5 context";
 
 if ( !$foreground ) {
-    daemonize( PIDFILE => 'bwmaster.pid' )
+    daemonize( PIDFILE => 'bwmaster.pid', DEVNULL => $devnull )
         or die "Unable to daemonize process";
 }
 
@@ -607,15 +636,12 @@ while ( 1 ) {
             warn "Deleting: $pidlist" if ( defined( $debug ) );
         }
         $funcname  = "kill";
-        $interrupt = 1;
-        eval { kill 'TERM', keys %pid2info; };
-        $interrupt = 0;
+        kill 'TERM', keys %pid2info;
     }
     elsif ( $sigchld ) {
         ;
     }
     else {
-
         # sleep until a signal wakes us
         $funcname  = "select";
         $interrupt = 1;
@@ -631,29 +657,24 @@ while ( 1 ) {
     #
     # Signal received - update run-state.
     #
-    if ( $sigchld || $die || $reset ) {
-        my $wpid;
-        $sigchld = 0;
+    my $wpid;
+    $sigchld = 0;
+    while ( ( $wpid = waitpid( -1, WNOHANG ) ) > 0 ) {
+        next unless ( exists $pid2info{$wpid} );
 
-    REAPLOOP: while ( ( $wpid = waitpid( -1, WNOHANG ) ) > 0 ) {
-            next REAPLOOP unless ( exists $pid2info{$wpid} );
+        my $info = $pid2info{$wpid};
+        warn( "$$info[0]:$wpid exited: $?" ) if ( $debug );
 
-            my $info = $pid2info{$wpid};
-            syslog( 'debug', "$$info[0]:$wpid exited: $?" );
+        #
+        # Remove old state for this pid
+        #
+        delete $pid2info{$wpid};
 
-            #
-            # Remove old state for this pid
-            #
-            delete $pid2info{$wpid};
-
-            #
-            # Now jump out if exiting, or restart
-            # processes
-            #
-            if ( $reset || $die ) {
-                next REAPLOOP;
-            }
-
+        #
+        # Unless exiting or restarting, restart
+        # processes
+        #
+        unless ( $reset || $die ) {
             # restart everything if send_data died.
             if ( $$info[0] =~ /send_data/ ) {
                 warn "send_data($wpid) died, restarting!";
@@ -681,7 +702,7 @@ while ( 1 ) {
     }
     elsif ( $reset ) {
         next if ( ( keys %pid2info ) > 0 );
-        warn "Restarting...\n";
+        warn "Restarting...: ".$FindBin::Bin. "/" . $FindBin::Script." ".join(" ", @SAVEARGV);
         exec $FindBin::Bin. "/" . $FindBin::Script, @SAVEARGV;
     }
 }
