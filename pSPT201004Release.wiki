@@ -39,7 +39,7 @@ The following outline some exceptions to the overall release process.  Also see 
    * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=4 4] - _*Aaron*_ - reread SNMP MA store.xml file~~
    * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=340 340] - _*Aaron*_ -  SNMP MA - Indicate it is not running due to cacti~~
  * _*pSB*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=412 412] - _*Aaron*_ - pSB/owamp not restarting powstream properly
+   * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=412 412] - _*Aaron*_ - pSB/owamp not restarting powstream properly~~
    * ~~[http://code.google.com/p/perfsonar-ps/issues/detail?id=420 420] - _*Aaron*_ - psb 'master' scripts can periodically not restart properly~~
      * Changed the signal handling some. It passes tests now, and appears to be working. 
  * _*hLS/gLS*_
@@ -112,4 +112,3 @@ TBD
 == Last Updated ==
 
 $Id$
-
