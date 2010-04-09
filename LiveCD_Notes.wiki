@@ -48,6 +48,10 @@ The current iteration of the toolkit whitelists a handful of directories as data
 
 Saved data complicates upgrades. If an upgrade needs to make changes to information in the data directories (e.g. upgrading cacti may need to make changes to the cacti database), an upgrade script needs to be written which updates this data.
 
+== An alternative to the liveCD ==
+
+ [InstallDVD_Notes] - Potential alternative to the liveCD
+
 == Last Modified ==
 
 $Id$
