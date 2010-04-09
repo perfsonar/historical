@@ -51,7 +51,7 @@ identical to the Operating System update as the user experience would be.
 
 === Factory Reset ===
 
-If the system does not work due to anything else than a hardware failure, to the point the user want to fully return it to its initial state (equivalent to reboot with a liveCD), steps are the sames as the initial installation. Note that Clonezilla can install itself into a "recovery" partition, allowing for recovery even with the need to insert the installDVD into the machine (remote administration).
+If the system does not work due to anything other than a hardware failure, e.g.: to the point the user wants to fully return it to its initial state (equivalent to reboot with a liveCD), the steps are the sames as the initial installation. Note that Clonezilla can install itself into a "recovery" partition, allowing for recovery even with the need to insert the installDVD into the machine (remote administration).
 
 
 == Last Modified ==
