@@ -1,0 +1,59 @@
+#summary Notes on a potential alternative to the liveCD
+
+= Notes on an potential alternative to the liveCD =
+
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+This page describes an alternative to the perfSONAR-ps liveDVD, aiming to address the same set of requirements and use cases, while lowering the cost of development, maintenance, and potentially increasing stability of the system.
+
+The perfSONAR-ps distribution still comes on bootable DVD that is referred as "installDVD" in this proposal. The installDVD purpose is to install a Linux standard distribution (TBD), customized to run perfSONAR-ps. The installDVD also installs perfSONAR-ps. Unlike a standard Linux installer, the installDVD does not ask anything to the user. In fact, the user interface should the same as the liveDVD. The factory reset feature is made possible by simply re-installing the appliance.
+
+The advantages for the installDVD approach are:
+
+	* the appliance runs Linux in a mainstream fashion. standard operating system patches can be applied using standard tools.
+	* persistent state does not require technologies such as union/copy on write file system. This allows for a more stable system, easier to manage, but also saves development time.
+	* testing and Q.A. of the perfSONAR application itself can be done on the same reference platform, either it is based on DVD or added to an existing system (RPM, yum, etc).
+	* Less RAM is used (no need for a RAM disk)
+
+The drawback is that the initial installation of the appliance, while having the same user experience as the liveDVD, will take more time than just boot a liveDVD.
+
+
+
+== Implementation ==
+
+	* Install and configure Linux and perfSONAR-ps on the reference platform, exactly as specified in the perfSONAR-ps guide (this may imply revisiting the guide, if necessary). This should be the same configuration that what is tested when building the perfSONAR-ps sources, and, therefore, have the most testing.
+	* Deploy the perfSONAR-ps "appliance" packages: this is mostly the user interface, the same packages as the liveDVD would use. Some additional software may be required, but this should be minimal.
+	* At this stage, the system should be what would be running in liveDVD. 
+	* Clone the image, make a bootable DVD that will installed the cloned image without any user interaction. This is made simple to build using existing tools such as Clonezilla (http://clonezilla.org/). ESnet's Unix group has been using this tool for its production servers for a some time already and is recommending it. Some custom work would be necessary, but this does not seem to be extensive nor complicated.
+
+== Use Cases ==
+
+This section describes the user experience in some specific cases of interest.
+
+=== Initial Installation ===
+ * step 1: Insert the installDVD into the server and power up
+ * step 2: If a existing installation is found, the installDVD asks if the users really wants to re-install, keep the data.
+ * step 3: The Installation DVD formats, partitions the disks and install the appliance image. No question is asked to the user other than options to cancel installation, or chose to keep the data volumes if an existing set is found on the local drive.
+ * step 4: Remove the installDVD and reboot. The system then boots from local hard drive and behaves like the liveDVD.
+ * step 5: Play.
+
+=== Operating System update (including security patch) ===
+
+ * step 1: The appliance user interface is used to trigger software update (as defined in the overall perfSONAR appliance design), installing pacthes on the local drive.
+ * step 2; Reboot
+ * step 3: Play
+
+=== perfSONAR-ps update ===
+
+identical to the Operating System update as the user experience would be. 
+
+=== Factory Reset ===
+
+If the system does not work due to anything else than a hardware failure, to the point the user want to fully return it to its initial state (equivalent to reboot with a liveCD), steps are the sames as the initial installation. Note that Clonezilla can install itself into a "recovery" partition, allowing for recovery even with the need to insert the installDVD into the machine (remote administration).
+
+
+== Last Modified ==
+
+$Id$
