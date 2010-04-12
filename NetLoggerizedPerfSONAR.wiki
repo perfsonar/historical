@@ -53,7 +53,7 @@ When doing performance analysis with NetLogger, often you'll want to add additio
 Some good examples for how to add NetLogger calls can be found in Shared/lib/perfSONAR_PS/Transport.pm.
 Just look for all instances of "NETLOGGER" and "NetLogger" in that file.
 
-== NetLogger Tools install quickstart ==
+== NetLogger Tools installation quickstart ==
 
 To install nl_interval and other useful tools:
    
@@ -61,4 +61,19 @@ To install nl_interval and other useful tools:
  svn co https://bosshog.lbl.gov/repos/netlogger/trunk/python NetLogger
  cd NetLogger
  python setup.py install
+}}}
+
+== Dealing with Log Rotation ==
+
+To combine a set of numbered log file in timestamp order for NetLogger analysis, use something
+like this:
+{{{
+#!/bin/csh 
+set echo
+touch hLS-all.log
+set c=400
+while ( $c >= 1 )
+     cat hLS.netlogger.log.$c >> hLS-all.log
+     @ c = $c - 1
+end
 }}}
