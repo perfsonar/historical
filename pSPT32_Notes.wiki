@@ -6,13 +6,25 @@
 
 == Goals ==
 
-  * A CentOS base to replace the current Knoppix base
+  * A different base Linux version to replace the current Knoppix base
   * Multiple installation possibilities
     * A LiveCD version of the toolkit that functions similar to the current Knoppix-based version
     * A kickstart file to enable end users install their own version of the toolkit
     * A CD that users can boot and install the toolkit onto their hard drive
   * A method for upgrading existing systems to the new version
     * including saving existing configuration and data
+
+== Base ==
+
+The pS-Performance Toolkit 3.2 release will be based on CentOS 5.5. There are a
+number of reasons behind why CentOS 5.5 was selected as opposed to some other
+version of Linux.
+
+  * _*Widely Used*_: A large number of our end users are using CentOS or RedHat Enterprise Linux 5.x. They're comfortable with that versioning, and in some cases, the fact that we would be modifying CentOS makes security clearances and the like much easier.
+  * _*Freely Available*_: Anyone is able to download, use and redistribute CentOS without needing to get specific licenses. The ability to redistribute is what allows us to make available the toolkit without having to go through a number of lawyers figuring out what's needed.
+  * _*Stability*_: The CentOS 5.X series will be supported until 2014. Other distributions may or may not have long term support, and may not make package stability the highest priority (e.g. [http://lwn.net/Articles/377930/ Fedora])
+  * _*Existing Packages*_: The perfSONAR-PS group has made all of their tools and services available as RPMs. The use of CentOS allows us to make use of the work that MCNC has done in packaging things like Web100 and NDT.
+  * _*Various Installation Options*_: Once we have produced a kickstart installation routine for the toolkit, there are a number of utilities available that will allow us to use slightly modified versions of those kickstart files to produce things like bootable live CDs, installation CDs, etc. It also allows us to setup a repository allowing people to install the various utilities on their pre-existing CentOS or RedHat systems.
 
 == Upgrade Path ==
 === Configuration ===
@@ -26,7 +38,7 @@
   * administrative info: copy the old data to the new
   * enabled services: copy the old data to the new
 
-=== Upgrade Path (data) ===
+=== Data ===
   * NDT/NPAD: It might be reasonable to just lose the old data as most folks don't seem to care about the tests. This would need to be something that we make clear to users. If someone wants to save the data, we could possibly come up with a workaround.
   * PingER: mysql may need to upgrade the tables if the version of MySQL is upgraded.
   * perfSONARBUOY: mysql may need to upgrade the tables if the version of MySQL is upgraded.
