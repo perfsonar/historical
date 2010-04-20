@@ -8,14 +8,14 @@
 
   * A different base Linux version to replace the current Knoppix base
   * Multiple installation possibilities
-    * A LiveCD version of the toolkit that functions similar to the current Knoppix-based version
+    * A Live CD version of the toolkit that functions similar to the current Knoppix-based version
     * A kickstart file to enable end users install their own version of the toolkit
     * A CD that users can boot and install the toolkit onto their hard drive
   * A method for upgrading existing systems to the new version
     * including saving existing configuration and data
 
 == Base ==
-
+=== Base Distribution ===
 The pS-Performance Toolkit 3.2 release will be based on CentOS 5.5. There are a
 number of reasons behind why CentOS 5.5 was selected as opposed to some other
 version of Linux.
@@ -25,6 +25,54 @@ version of Linux.
   * _*Stability*_: The CentOS 5.X series will be supported until 2014. Other distributions may or may not have long term support, and may not make package stability the highest priority (e.g. [http://lwn.net/Articles/377930/ Fedora])
   * _*Existing Packages*_: The perfSONAR-PS group has made all of their tools and services available as RPMs. The use of CentOS allows us to make use of the work that MCNC has done in packaging things like Web100 and NDT.
   * _*Various Installation Options*_: Once we have produced a kickstart installation routine for the toolkit, there are a number of utilities available that will allow us to use slightly modified versions of those kickstart files to produce things like bootable live CDs, installation CDs, etc. It also allows us to setup a repository allowing people to install the various utilities on their pre-existing CentOS or RedHat systems.
+
+=== Tools/Services ===
+The measurement tools/services that will come with the toolkit:
+
+  * PingER
+  * perfSONAR-BUOY
+  * bwctl
+  * owamp
+  * NDT
+  * NPAD
+  * SNMP MA
+  * Cacti
+  * hLS
+  * LS registration daemon
+  * LS cache daemon
+
+=== Web Interface ===
+The web interface, for the initial version, will be a direct port of the web interface available on the current toolkit.
+
+== Live CD Version ==
+The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series of the toolkit, and will work in the same general fashion as the current toolkit: the user will boot the Live CD, and the configuration and data will be stored on the local hard drive.
+
+=== Ramdisk ===
+
+By default, all Live CDs utilize a ramdisk to allow writes to the filesystem. There are two issues with this situation:
+
+  * Ramdisk memory limitations: All the CDs that I've seen use a form of Ramdisk that does not allocate physical memory to support the size of the ramdisk. This means that if either memory or the ramdisk fill up, the ramdisk can no longer accept writes, and the OOM killer will start trying to kill random processes to reclaim space.
+  * Use of RAM to store temporary files: We could fix the ramdisk limitations above by fixing the size of the ramdisk to something less than ram size, and pre-allocating RAM to support it. However, that has two downsides: it wastes RAM, and it limits the size of the writeable area to some percentage of the size of RAM.
+
+Some Live CD implementations offer the ability to have all writes go to disk (e.g. RedHat/CentOS or Ubuntu). On reboot, those changes are overlayed over the information on the ISO. This has the downside of making it significantly more difficult to handle upgrades. In the current toolkit, we whitelist what gets saved instead of saving everything. This makes upgrades significantly more tractable because we know exactly what is being saved, instead of having everything saved (which could include changes to binary files and the like).
+
+In the current toolkit, we overlay the ramdisk with a file on disk (/mnt/store/NPTools/scratch) which forces all writes to go to the disk instead of the ramdisk which works around the two issues above. The scratch file gets re-initialized each time so that we throw away the old data. 
+
+The current toolkit uses a "feature" of aufs, the module that provides the overlays, that allows us to overlay the ramdisk with the file on disk. Unfortunately, that feature is not possible in the new version of aufs, and it won't work with the CentOS live cd. 
+
+Possible new version: the initrd.img file contains the init scripts that setup the ramdisk and the like. It might make sense to try and mount the backing store inside the initrd, and then setup the overlay to use the scratch file on disk if it exists. This would be more difficult than just adding a new RPM since we'd have to specifically modify the initrd, but it is likely cleaner, and may be the only way possible.
+
+=== Saving Configuration ===
+
+The current iteration of the toolkit whitelists a handful of files and directories, and saves those files. These files are stored in a tarball on the backing store (/mnt/store/configs.tbz2), and are saved on shutdown, and once an hour (so that if a user makes changes, the files get saved).
+
+Saved configuration can complicate upgrades. If an upgrade needs to make changes to existing configuration (e.g. the perfSONAR logging options change), an upgrade script needs to be written which updates this data. The difficulty can lie with configuration files which get saved which may have strange side-effects. For example, in the current toolkit, all of /etc and /usr/local/etc are saved. If a user modifies some random file in there (e.g. /etc/profile), it may have unintended side effects during the transition to a new version of the Live CD. One trick we currently use to minimize these issues is to only save configuration files that have changed. The script that saves the configuration files compares each file to its analog on the CD, and if they're the same, it does not save the file. Longer term, though, there are other files (e.g. /etc/passwd) that will change, and we may need to look into a more selective approach to saving existing configuration.
+
+=== Saving Data ===
+
+The current iteration of the toolkit whitelists a handful of directories as data directories. On initial bootup, a set of directories are created on the backing store, one for each of the data directories, and the contents of the ISO's version of the data is copied over. At startup, these directories get overlaid using bind mounts. This ensures that all data is written directly to disk.
+
+Saved data complicates upgrades. If an upgrade needs to make changes to information in the data directories (e.g. upgrading cacti may need to make changes to the cacti database), an upgrade script needs to be written which updates this data.
 
 == Upgrade Path ==
 === Configuration ===
@@ -44,33 +92,72 @@ version of Linux.
   * perfSONARBUOY: mysql may need to upgrade the tables if the version of MySQL is upgraded.
   * cacti: mysql may need to upgrade the tables if the version of MySQL is upgraded. The RRD files should be in the "correct" location. The location may need moved if desired.
 
-== LiveCD Version ==
-=== Ramdisk ===
+== Roadmap ==
 
-By default, all LiveCDs utilize a ramdisk to allow writes to the filesystem. There are two issues with this situation:
+=== Milestone Base 1 ===
+  * Produce packages all the tools/services, and any libraries or tools required for installation
+  * Setup an repository to hold all these packages
+  * NOTE: This does not include the web guis, and when the GUIs are packaged, the above packages may need to be changed
+  * Allow interested parties to install the packages, and provide feedback
 
-  * Ramdisk memory limitations: All the CDs that I've seen use a form of Ramdisk that does not allocate physical memory to support the size of the ramdisk. This means that if either memory or the ramdisk fill up, the ramdisk can no longer accept writes, and the OOM killer will start trying to kill random processes to reclaim space.
-  * Use of RAM to store temporary files: We could fix the ramdisk limitations above by fixing the size of the ramdisk to something less than ram size, and pre-allocating RAM to support it. However, that has two downsides: it wastes RAM, and it limits the size of the writeable area to some percentage of the size of RAM.
+=== Milestone Base 2 - Alpha ===
+  * Produce a kickstart file that will install all of the tools/services
+  * Distribute the kickstart to a few interested parties as an alpha release, if desired
 
-Some LiveCD implementations offer the ability to have all writes go to disk (e.g. RedHat/CentOS or Ubuntu). On reboot, those changes are overlayed over the information on the ISO. This has the downside of making it significantly more difficult to handle upgrades. In the current toolkit, we whitelist what gets saved instead of saving everything. This makes upgrades significantly more tractable because we know exactly what is being saved, instead of having everything saved (which could include changes to binary files and the like).
+=== Milestone Base 3 - Beta ===
+  * Produce a package of the web configuration GUI
+  * Modify the kickstart to include the web configuration GUI
+  * Distribute the kickstart to a few interested parties as an alpha release
 
-In the current toolkit, we overlay the ramdisk with a file on disk (/mnt/store/NPTools/scratch) which forces all writes to go to the disk instead of the ramdisk which works around the two issues above. The scratch file gets re-initialized each time so that we throw away the old data. 
+=== Milestone Base 4 ===
+  * Based on user feedback and testing, firm up the kickstart
 
-The current toolkit uses a "feature" of aufs, the module that provides the overlays, that allows us to overlay the ramdisk with the file on disk. Unfortunately, that feature is not possible in the new version of aufs, and it won't work with the CentOS live cd. 
+=== Milestone Install CD/DVD 1 - Beta ===
+  * Depends: Milestone Base 4
+  * Using the Base kickstart, produce an initial installation CD that includes all the RPMs and the kickstart on a single ISO
+  * Distribute this ISO to users for testing
+  * Migrate changes to the Base packages/kickstart as needed
 
-Possible new version: the initrd.img file contains the init scripts that setup the ramdisk and the like. It might make sense to try and mount the backing store inside the initrd, and then setup the overlay to use the scratch file on disk if it exists. This would be more difficult than just adding a new RPM since we'd have to specifically modify the initrd, but it is likely cleaner, and may be the only way possible.
+=== Milestone Install CD/DVD 2 ===
+  * Based on user feedback and testing, firm up the installation CD.
+  * Migrate changes to the Base packages/kickstart as needed
 
-=== Saving Configuration ===
+=== Milestone Live CD 1 - Alpha ===
+  * Depends: Milestone Base 4
+  * Using the Base kickstart, produce an initial Live CD version
+  * Distribute this Live CD to users for testing
+  * NOTE: it is not expected that this initial Live CD will allow for upgrading an existing installation
+  * Migrate changes to the Base packages/kickstart as needed
 
-The current iteration of the toolkit whitelists a handful of files and directories, and saves those files. These files are stored in a tarball on the backing store (/mnt/store/configs.tbz2), and are saved on shutdown, and once an hour (so that if a user makes changes, the files get saved).
+=== Milestone Live CD 2 - Beta ===
+  * Add functionality to the Live CD to allow it to upgrade an existing installation
+  * Fix bugs and issues based on user feedback and testing
+  * Distribute this Live CD to users for testing
+  * Migrate changes to the Base packages/kickstart as needed
 
-Saved configuration can complicate upgrades. If an upgrade needs to make changes to existing configuration (e.g. the perfSONAR logging options change), an upgrade script needs to be written which updates this data. The difficulty can lie with configuration files which get saved which may have strange side-effects. For example, in the current toolkit, all of /etc and /usr/local/etc are saved. If a user modifies some random file in there (e.g. /etc/profile), it may have unintended side effects during the transition to a new version of the LiveCD. One trick we currently use to minimize these issues is to only save configuration files that have changed. The script that saves the configuration files compares each file to its analog on the CD, and if they're the same, it does not save the file. Longer term, though, there are other files (e.g. /etc/passwd) that will change, and we may need to look into a more selective approach to saving existing configuration.
+=== Milestone Live CD 3 ===
+  * Based on user feedback and testing, firm up the Live CD.
+  * Migrate changes to the Base packages/kickstart as needed
 
-=== Saving Data ===
+=== Milestone Release Candidate 1 ===
+  * Depends: Milestone Live CD 3, Milestone Install CD/DVD 2
+  * Produce installation documentation for each of the installation methods
+  * Produce toolkit documentation for the various services and web guis
+  * Synchronize the changes needed to the Base by the various installation methods
+  * Produce a kickstart, an installation ISO and a Live CD ISO
+  * Distribute to interested parties
 
-The current iteration of the toolkit whitelists a handful of directories as data directories. On initial bootup, a set of directories are created on the backing store, one for each of the data directories, and the contents of the ISO's version of the data is copied over. At startup, these directories get overlaid using bind mounts. This ensures that all data is written directly to disk.
+=== Milestone Release Candidate X ===
+  * Firm up documentation based on user feedback
+  * Fix any issues based on user feedback and testing
+  * Produce updated kickstart, installation ISO and Live CD ISO
+  * Distribute to interested parties
+  * Repeat as necessary to fix issues
 
-Saved data complicates upgrades. If an upgrade needs to make changes to information in the data directories (e.g. upgrading cacti may need to make changes to the cacti database), an upgrade script needs to be written which updates this data.
+=== Milestone Final Release ===
+  * Finalize documentation
+  * Produce any wider release announcements
+  * Produce final versions of kickstart, installation ISO and Live CD ISO
 
 == Last Modified ==
 
