@@ -1,0 +1,23 @@
+=  May 5 2010 Conference Call 2:30 p.m. EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+   * TBD
+ # Followup on previous actions:
+   * _*ACTION*_: Brian/Eric P/Andy to analyze results when available
+   * _*ACTION*_: Brian send nl_cpu link out to others so cpu data can be correlated with netlogger tests.
+   * _*ACTION*_: Aaron and Eric will explore jointly and propose a development plan for the next version of the toolkit enabling both R/O media as well as a full-install option.  Conf call to discuss, next step is to flush out a roadmap for development
+ # TBD
+
+=== ACTIONS ===
+
+ * _*ACTION*_: TBD
+
+== Where ==
+
+ESnet conference bridge:
+
+ * GDS: 00113498255555
+ * Direct Dial:  mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-883-7860 then 8255555# at the prompt. 
