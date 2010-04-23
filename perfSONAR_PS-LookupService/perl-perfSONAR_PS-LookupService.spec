@@ -100,7 +100,7 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Wed Feb 9 2010 zurawski@internet2.edu 3.1-9
+* Fri Apr 23 2010 zurawski@internet2.edu 3.1-9
 - Documentation update
 
 * Tue Sep 22 2009 zurawski@internet2.edu 3.1-8

@@ -229,14 +229,17 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Wed Feb 9 2010 zurawski@internet2.edu 3.1-5
+* Fri Apr 23 2010 zurawski@internet2.edu 3.1-5
 - Documentation update
 - Bugfixes
  - http://code.google.com/p/perfsonar-ps/issues/detail?id=347
  - http://code.google.com/p/perfsonar-ps/issues/detail?id=364
  - http://code.google.com/p/perfsonar-ps/issues/detail?id=367
  - http://code.google.com/p/perfsonar-ps/issues/detail?id=376
- 
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=374
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=412
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=420
+  
 * Tue Sep 29 2009 zurawski@internet2.edu 3.1-4
 - useradd option change
 - Bugfixes

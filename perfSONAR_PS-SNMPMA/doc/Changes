@@ -22,4 +22,7 @@ version 3.1
       - perl-Clone needed by hLS (other?) RPM
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=279
       - Cacti restarting SNMP MA 
-
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=4
+      reread SNMP MA store.xml file   	 
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=340
+      SNMP MA - Indicate it is not running due to cacti 

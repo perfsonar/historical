@@ -54,5 +54,9 @@ version 3.1
       documentation patch for bwdb.pl & owdb.pl	 
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=315
       perfsonarbuoy_ma/doc/README testing section non-obvious
-
-
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=374
+      Large clock change causes NTP to stop updating and services to stop 
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=412
+      pSB/owamp not restarting powstream properly     
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=420
+      psb 'master' scripts can periodically not restart properly 

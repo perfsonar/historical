@@ -99,11 +99,12 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/*
 
 %changelog
-* Wed Feb 24 2010 zurawski@internet2.edu 3.1-7
+* Fri Apr 23 2010 zurawski@internet2.edu 3.1-7
 - Documentation update
 - Bugfixes
  - http://code.google.com/p/perfsonar-ps/issues/detail?id=364
- 
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=408
+  
 * Fri Oct 2 2009 zurawski@internet2.edu 3.1-6
 - Install missing lib (lib/perfSONAR_PS/Datatypes/Message.pm)
 
