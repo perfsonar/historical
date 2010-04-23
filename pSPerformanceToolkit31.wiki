@@ -1415,16 +1415,46 @@ Starting NTP server: ntpd.
      * The _minimum_ is interpreted as the shortest time it takes for any of the packets in the latency measurement (normally 10pps over the soan of a minute) to arrive.
      * The _maximum_ is interpreted as the longest time it takes for any of the packets in the latency measurement (normally 10pps over the soan of a minute) to arrive.  This can sometimes cause _*spikes*_ to form on the graphs that offer a false sense the _true_ latency.  
 
- * *Q: How do I reset the root/knoppix passwords if I can't remember either?*
- * *A:* 
-   # Start the machine.
-   # During bootup, at the prompt labelled "boot:", type "linux single" and hit enter.
-   # The machine will boot, and display a "`[`root@Knoppix /`]`#" prompt. Type "/etc/init.d/mount_data_store.sh" and hit enter.
-   # Run "nptoolkit-configure.py" to reset the password.
-   # After set the passwords, exit from the Network Performance Toolkit customization script.
-   # Type "/usr/local/bin/nptoolkit-saveConfig.py" and hit enter.
-   # Type "reboot" and hit enter.
-   # Once the machine boots up again, login using the passwords set above.
+ * *Q: BWCTL/OWAMP seem to exit immediately after starting/restarting.  Why won't they stay in a running state?*
+ * *A:*
+   * BWCTL and OWAMP rely on NTP (Network Time Protocol) to have an accurate representation of time for measurements.  The tools (and _*ntpd*_) will simply exit if the system clock is _too far_ from the recognized time.  To check the status of the _*ntpd*_ daemon:
+{{{
+[knoppix@Knoppix ~]$ ps axw | grep ntpd
+ 5146 ?        Ss     0:00 /usr/sbin/ntpd -p /var/run/ntpd.pid -u 115:121 -g
+}}}
+   * If _*ntpd*_ is not running, you will get nothing back:
+{{{
+[knoppix@Knoppix ~]$ ps axw | grep ntpd
+ 5140 pts/0    R+     0:00 grep ntpd
+}}}
+   * To bring your system clock back up to date, try the following steps:
+{{{
+sudo /etc/init.d/ntp stop 
+sudo ntpdate owamp.newy.net.internet2.edu
+sudo /etc/init.d/ntp start
+}}}
+   * To check your system clock on the pSPT, try the following command (after restarting _*ntpd*_):
+{{{
+[knoppix@Knoppix ~]$ ntpq -p -c rv
+     remote           refid      st t when poll reach   delay   offset  jitter
+==============================================================================
+*chronos.es.net  .PPS.            1 u   30   64    1   25.016    7.335   0.170
++navobs1.oar.net .USNO.           1 u   29   64    1    7.299    5.607   0.065
++tick.usno.navy. .USNO.           1 u   28   64    1   40.144    7.690   2.046
+-2001:468:1:12:: 130.207.244.240  2 u   27   64    1   27.212    5.913   0.052
+-2001:468:2:12:: 64.57.16.34      2 u   26   64    1   30.335    5.501   0.047
+assID=0 status=0644 leap_none, sync_ntp, 4 events, event_peer/strat_chg,
+version="ntpd 4.2.2p4@1.1585-o Sun Nov 22 16:42:02 UTC 2009 (1)",
+processor="i686", system="Linux/2.6.27.37-web100", leap=00, stratum=2,
+precision=-20, rootdelay=25.016, rootdispersion=946.806, peer=21397,
+refid=198.124.252.90,
+reftime=cf7c5bc9.8f99a127  Fri, Apr 23 2010 13:47:53.560, poll=6,
+clock=cf7c5bf1.8e0ffeba  Fri, Apr 23 2010 13:48:33.554, state=4,
+offset=7.335, frequency=-47.691, jitter=1.113, noise=2.593,
+stability=0.020, tai=0
+}}}
+   * If you find that your clock is stopping on a regular basis, the internal battery of your server may be failing.  Consult your server user's manual or on-line references for more information. 
+
 
 == Last Updated ==
 
