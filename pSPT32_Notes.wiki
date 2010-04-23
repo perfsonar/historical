@@ -13,6 +13,7 @@
     * A CD that users can boot and install the toolkit onto their hard drive
   * A method for upgrading existing systems to the new version
     * including saving existing configuration and data
+    * At minimum, this upgrade will be for the Live CD toolkit version, but it would be nice to allow folks to upgrade their Live CD-based systems to installed systems.
 
 == Base ==
 === Base Distribution ===
@@ -43,6 +44,9 @@ The measurement tools/services that will come with the toolkit:
 
 === Web Interface ===
 The web interface, for the initial version, will be a direct port of the web interface available on the current toolkit.
+
+== Install CD/DVD Version ==
+The Install CD/DVD version of the toolkit will provide end users an ISO that they can boot up that will install the Toolkit onto their system with a minimum of fuss. The version of the toolkit is not meant to be an upgrade for the existing 3.1 series.
 
 == Live CD Version ==
 The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series of the toolkit, and will work in the same general fashion as the current toolkit: the user will boot the Live CD, and the configuration and data will be stored on the local hard drive.
