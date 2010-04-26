@@ -5,8 +5,8 @@
 <wiki:toc max_depth="6" />
 
 == Useful Tools ==
-[http://fedoraproject.org/wiki/FedoraLiveCD livecd-tools] - Allows you to take a kickstart image and generate a Live CD.
-[http://revisor.fedoraunity.org/ Revisor] - Allows you to take a kickstart image and generate an installation ISO containing all the software packages. Can be used to create LiveCD ISOs as well.
+  * [http://fedoraproject.org/wiki/FedoraLiveCD livecd-tools] - Allows you to take a kickstart image and generate a Live CD.
+  * [http://revisor.fedoraunity.org/ Revisor] - Allows you to take a kickstart image and generate an installation ISO containing all the software packages. Can be used to create LiveCD ISOs as well.
 
 == Live CD ==
 
