@@ -4,6 +4,12 @@
 
 <wiki:toc max_depth="6" />
 
+== Useful Repositories ==
+  * [https://fedoraproject.org/wiki/EPEL EPEL]: contains a wide variety of Perl modules and other tools that the perfSONAR-PS tools depend on
+  * [http://dag.wieers.com/rpm/ DAG]: contains a wide variety of Perl modules and other tools that the perfSONAR-PS tools depend on
+  * [http://software.internet2.edu/ Internet2]: contains bwctl, owamp and perfSONAR-PS tools as well as some of their dependencies
+  * MCNC maintains a repository containing a number of useful RPMs: web100 kernel, web100 userland, ndt and some other tools
+
 == Useful Tools ==
   * [http://fedoraproject.org/wiki/FedoraLiveCD livecd-tools] - Allows you to take a kickstart image and generate a Live CD.
   * [http://revisor.fedoraunity.org/ Revisor] - Allows you to take a kickstart image and generate an installation ISO containing all the software packages. Can be used to create LiveCD ISOs as well.
