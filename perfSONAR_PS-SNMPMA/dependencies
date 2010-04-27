@@ -14,6 +14,7 @@ HTTP::Daemon
 IO::File
 LWP::Simple
 LWP::UserAgent
+Log::Log4perl
 Log::Dispatch
 Log::Dispatch::FileRotate
 Log::Dispatch::File
