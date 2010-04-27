@@ -20,7 +20,11 @@ HTML::Template
 IO::File
 LWP::Simple
 LWP::UserAgent
-Log::Log4perl
+Log::Dispatch
+Log::Dispatch::FileRotate
+Log::Dispatch::File
+Log::Dispatch::Syslog
+Log::Dispatch::Screen
 Net::CIDR,0.13
 Net::IPv6Addr
 Net::Ping

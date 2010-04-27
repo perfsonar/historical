@@ -6,7 +6,7 @@ Autoreq: 0
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 snmp_ma
 
-%define relnum 10
+%define relnum 11
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-SNMPMA

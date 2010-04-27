@@ -8,7 +8,7 @@
 %define init_script_owp_collector perfsonarbuoy_owp_collector
 %define init_script_owp_master perfsonarbuoy_owp_master
 
-%define relnum 5
+%define relnum 6
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfSONARBUOY
@@ -50,9 +50,13 @@ Requires:		perl(IO::File)
 Requires:		perl(IO::Socket)
 Requires:		perl(LWP::Simple)
 Requires:		perl(LWP::UserAgent)
-Requires:		perl(Log::Log4perl)
+Requires:		perl(Log::Dispatch)
+Requires:		perl(Log::Dispatch::FileRotate)
+Requires:		perl(Log::Dispatch::File)
+Requires:		perl(Log::Dispatch::Syslog)
+Requires:		perl(Log::Dispatch::Screen)
 Requires:		perl(Math::BigFloat)
-Requires:               perl(Math::Int64)
+Requires:       perl(Math::Int64)
 Requires:		perl(Module::Load)
 Requires:       perl(Net::IPv6Addr)
 Requires:		perl(Net::Ping)

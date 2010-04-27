@@ -4,7 +4,7 @@
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 lookup_service
 
-%define relnum 9
+%define relnum 10
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-LookupService
@@ -33,7 +33,11 @@ Requires:		perl(Hash::Merge)
 Requires:		perl(IO::File)
 Requires:		perl(LWP::Simple)
 Requires:		perl(LWP::UserAgent)
-Requires:		perl(Log::Log4perl)
+Requires:		perl(Log::Dispatch)
+Requires:		perl(Log::Dispatch::FileRotate)
+Requires:		perl(Log::Dispatch::File)
+Requires:		perl(Log::Dispatch::Syslog)
+Requires:		perl(Log::Dispatch::Screen)
 Requires:		perl(Module::Load)
 Requires:		perl(Net::CIDR)
 Requires:		perl(Net::IPTrie)

@@ -5,7 +5,7 @@
 %define crontab perfAdmin.cron
 %define apacheconf perfAdmin.conf
 
-%define relnum 7
+%define relnum 8
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfAdmin
@@ -34,7 +34,11 @@ Requires:		perl(HTML::Template)
 Requires:		perl(IO::File)
 Requires:		perl(LWP::Simple)
 Requires:		perl(LWP::UserAgent)
-Requires:		perl(Log::Log4perl)
+Requires:		perl(Log::Dispatch)
+Requires:		perl(Log::Dispatch::FileRotate)
+Requires:		perl(Log::Dispatch::File)
+Requires:		perl(Log::Dispatch::Syslog)
+Requires:		perl(Log::Dispatch::Screen)
 Requires:		perl(Net::CIDR)
 Requires:		perl(Net::IPv6Addr)
 Requires:		perl(Params::Validate)

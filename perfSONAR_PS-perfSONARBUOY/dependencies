@@ -25,9 +25,10 @@ IO::Socket
 IPC::Open3
 LWP::Simple
 LWP::UserAgent
-Log::Log4perl
 Log::Dispatch
 Log::Dispatch::FileRotate
+Log::Dispatch::File
+Log::Dispatch::Syslog
 Log::Dispatch::Screen
 Math::BigFloat
 Math::Int64
