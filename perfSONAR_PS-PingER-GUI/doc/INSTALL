@@ -100,7 +100,7 @@ Installation (YUM):
 Installation using YUM lets the package manager do the work of finding and
 installing the dependencies.  The following command is all that is needed:
 
-  yum install perl-perfSONAR_PS-PingER-GUI-3.1-11.pSPS.noarch.rpm
+  yum install perl-perfSONAR_PS-PingER-GUI-3.1-12.pSPS.noarch.rpm
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -115,9 +115,9 @@ Like YUM, installation with APT-RPM also manages the task of finding
 dependencies.  The following commands will install is needed:
 
   apt-get update
-  apt-get install perl-perfSONAR_PS-PingER-GUI-3.1-11.pSPS.i386.rpm
+  apt-get install perl-perfSONAR_PS-PingER-GUI-3.1-12.pSPS.i386.rpm
     or
-  apt-get install perl-perfSONAR_PS-PingER-GUI-3.1-11.pSPS.x86_64.rpm
+  apt-get install perl-perfSONAR_PS-PingER-GUI-3.1-12.pSPS.x86_64.rpm
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -132,23 +132,23 @@ If you do not wish to install the Internet2 Repository package, you may simply
 find the appropriate RPM for your architecture without using a package manger.
 For example if you are on an "i386" architecture:
 
-  wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-PingER-GUI-3.1-11.pSPS.i386.rpm
+  wget -c http://software.internet2.edu/rpms/i386/main/RPMS/perl-perfSONAR_PS-PingER-GUI-3.1-12.pSPS.i386.rpm
   
     or for 64bit Linux
     
-  wget -c http://software.internet2.edu/rpms/x86_64/main/RPMS/perl-perfSONAR_PS-PingER-GUI-3.1-11.pSPS.x86_64.rpm
+  wget -c http://software.internet2.edu/rpms/x86_64/main/RPMS/perl-perfSONAR_PS-PingER-GUI-3.1-12.pSPS.x86_64.rpm
      
   
 To install without package manager help:
 
-  rpm -ivh perl-perfSONAR_PS-PingER-GUI-3.1-11.pSPS.i386.rpm
+  rpm -ivh perl-perfSONAR_PS-PingER-GUI-3.1-12.pSPS.i386.rpm
   
 Note that this RPM may need other packages to install correctly: if these
 packages are not found on your system, you will need to manually download and
 install them before proceeding.  An alternate method is to still use a package
 manager in a "local" way (YUM only):
 
-  yum localinstall perl-perfSONAR_PS-PingER-GUI-3.1-11.pSPS.i386.rpm
+  yum localinstall perl-perfSONAR_PS-PingER-GUI-3.1-12.pSPS.i386.rpm
   
 This will search the available repositories for any necessary packages.
 
@@ -161,9 +161,9 @@ and used in the typical Unix/Linux fashion.  There are helper scripts included
 that may be used to download the necessary prerequisite software packages. The example below
 is for 32bit Linux:
 
-  wget -c http://software.internet2.edu/source/perfSONAR-PS/perfSONAR_PS-PingER-GUI-3.1.11.i386.tar.gz
-  tar -zxfv perfSONAR_PS-PingER-GUI-3.1.11.i386.tar.gz
-  cd perfSONAR_PS-PingER-GUI-3.1.11
+  wget -c http://software.internet2.edu/source/perfSONAR-PS/perfSONAR_PS-PingER-GUI-3.1.12.i386.tar.gz
+  tar -zxfv perfSONAR_PS-PingER-GUI-3.1.12.i386.tar.gz
+  cd perfSONAR_PS-PingER-GUI-3.1.12
   make install
   cd scripts
   ./install_dependencies.sh

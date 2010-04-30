@@ -5,7 +5,7 @@
 %define crontab pinger_cache.cron
 %define disttag pSPS
 %define apacheconf pinger_gui.conf
-%define relnum 10
+%define relnum 12
 %define _unpackaged_files_terminate_build 0
 
 Name:           perl-perfSONAR_PS-PingER-GUI
@@ -28,6 +28,7 @@ Requires:       perl(Config::General)
 Requires:       perl(Catalyst::Runtime)
 Requires:       perl(Catalyst::View::TT)
 Requires:       perl(Catalyst::Plugin::StackTrace)
+Requires:       perl(Catalyst::Engine::Apache2::MP20)
 Requires:       perl(Catalyst::Plugin::Static::Simple)
 Requires:       perl(Catalyst::Plugin::ConfigLoader)
 Requires:       perl(Catalyst::Action::RenderView)
@@ -67,7 +68,7 @@ Requires:       perl(Log::Log4perl) >= 1
 Requires:       perl(LWP::Simple)
 Requires:       perl(LWP::UserAgent)
 Requires:       perl(Math::BigFloat)
-Requires:       perl(Math::Int64)
+Requires:       perl(Math::BigInt)
 Requires:       perl(Module::Load)
 Requires:       perl(Moose) 
 Requires:       perl(Mouse) 
@@ -161,6 +162,7 @@ rm -rf $RPM_BUILD_ROOT
 %{install_base}/lib/ChartDirector/lib/perlchartdir5005.so
 %ifarch   x86_64
 %{install_base}/lib/ChartDirector/lib/libchartdiri64.so
+ %{install_base}/lib/ChartDirector/lib/libchartdirx86_64.so
 %{install_base}/lib/ChartDirector/lib/perlchartdir510i64mt.so
 %{install_base}/lib/ChartDirector/lib/perlchartdir510i64.so
 %{install_base}/lib/ChartDirector/lib/perlchartdir58i64mt.so
@@ -193,6 +195,10 @@ chown -R root:root /etc/cron.d/%{crontab}
 /etc/init.d/httpd restart
 
 %changelog
+
+* Wed Apr 28 2010 maxim@fnal.gov  3.1-12
+- added dep and extra Chartdirector lib
+
 * Tue Sep 22 2009 zurawski@internet2.edu 3.1-10
 - useradd option change
 
