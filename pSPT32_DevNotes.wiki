@@ -14,6 +14,60 @@
   * [http://fedoraproject.org/wiki/FedoraLiveCD livecd-tools] - Allows you to take a kickstart image and generate a Live CD.
   * [http://revisor.fedoraunity.org/ Revisor] - Allows you to take a kickstart image and generate an installation ISO containing all the software packages. Can be used to create LiveCD ISOs as well.
 
+== Configuration Change Effects ==
+
+=== External Address ===
+  * All perfSONAR services: service configuration file (or a shared configuration file)
+  * perfSONAR-BUOY: the default external address is used in the owmesh.conf
+  * Java OWAMP Client: default location is the external address, so when users hit test, it goes to the site they got the applet
+
+=== Add/Edit pSB/OWAMP Test ===
+  * perfSONAR-BUOY: owmesh.conf
+
+=== Add/Edit pSB/BWCTL Test ===
+  * perfSONAR-BUOY: owmesh.conf
+
+=== Add/Edit PingER Test ===
+  * PingER: pinger_landmarks.xml
+
+=== Change Organization Name ===
+  * NDT: html file has this info in it
+  * NPAD: html file has this info in it
+  * All perfSONAR services: service configuration file (or a shared configuration file)
+
+=== Change Host Location ===
+  * NDT: html file has this info in it
+  * NPAD: html file has this info in it
+  * All perfSONAR services: service configuration file (or a shared configuration file)
+
+=== Change Administrator Name ===
+  * NDT: html file has this info in it
+  * NPAD: html file has this info in it
+
+=== Change Administrator Email ===
+  * NDT: html file has this info in it
+  * NPAD: html file has this info in it
+
+=== Add/Remove Community ===
+  * LS Registration Daemon: daemon configuration file (or a shared configuration file)
+
+=== Update BWCTL Limits ===
+  * BWCTL: Update bwctld.limits and bwctld.keys
+
+=== Update OWAMP Limits ===
+  * OWAMP: Update owampd.limits and owampd.pfs
+
+=== Update NTP Configuration ===
+  * NTP: Update /etc/ntp.conf
+
+=== Enable/Disable Service ===
+  * OWAMP: 
+  * BWCTL: 
+  * all perfSONAR services: 
+  * SSH: 
+  * NDT: 
+  * NPAD: 
+
 == Live CD ==
 
 === Ramdisk ===
