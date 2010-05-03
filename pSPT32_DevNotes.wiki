@@ -72,37 +72,37 @@
 == Base ==
 === Packages ===
   * Kernel + web100
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * web100 userland
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * bwctl
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * owamp
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * iperf
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * nuttcp
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * perfSONAR-BUOY
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * PingER
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * SNMP MA
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * SNMP MA
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * NDT
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * NPAD
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * Lookup Service
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * LS Registration Daemon
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * LS Cache Daemon
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
   * Web GUI
-    * Status: <font color=red>todo</font>
+    * Status: <font color="red">todo</font>
 
 == Live CD ==
 

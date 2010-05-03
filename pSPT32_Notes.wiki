@@ -45,8 +45,8 @@ The measurement tools/services that will come with the toolkit:
 === Web Interface ===
 The web interface, for the initial version, will be a direct port of the web interface available on the current toolkit.
 
-== Install CD/DVD Version ==
-The Install CD/DVD version of the toolkit will provide end users an ISO that they can boot up that will install the Toolkit onto their system with a minimum of fuss. The version of the toolkit is not meant to be an upgrade for the existing 3.1 series.
+== Install CD Version ==
+The Install CD version of the toolkit will provide end users an ISO that they can boot up that will install the Toolkit onto their system with a minimum of fuss. The version of the toolkit is not meant to be an upgrade for the existing 3.1 series.
 
 == Live CD Version ==
 The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series of the toolkit, and will work in the same general fashion as the current toolkit: the user will boot the Live CD, and the configuration and data will be stored on the local hard drive.
@@ -54,69 +54,123 @@ The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series o
 == Roadmap ==
 
 === Milestone Base 1 ===
-  * Produce packages all the tools/services, and any libraries or tools required for installation
-  * Setup an repository to hold all these packages
-  * NOTE: This does not include the web guis, and when the GUIs are packaged, the above packages may need to be changed
-  * Allow interested parties to install the packages, and provide feedback
+  * Produce an initial set of packages for the tools/services that will be included in the Toolkit
+  * Tasks:
+    * Build RPM of owamp
+    * Build RPM of bwctl
+    * Build RPM of PingER
+    * Build RPM of Lookup Service
+    * Build RPM of LS Registration Daemon
+    * Build RPM of LS Cache Daemon
+    * Build RPM of perfSONAR-BUOY
+    * Build RPM of NDT
+    * Build RPM of NPAD
+    * Build RPM of web100 kernel
+    * Build RPM of web100 userland
+    * Build RPM of iperf
+    * Build RPM of nuttcp
 
 === Milestone Base 2 - Alpha ===
-  * Produce a kickstart file that will install all of the tools/services
-  * Distribute the kickstart to a few interested parties as an alpha release, if desired
-
+  * Produce an initial kickstart file that will install the Toolkit with the exception of the Web GUI
+  * Tasks:
+    * Create development yum repository
+    * Load all the above RPMs into the repository
+    * Build kickstart file that installs all of the RPMs from the repository
+    * Update the RPMs if needed (e.g. dependencies not accounted for or similar)
+    * Start internal testing of alpha kickstart - Release team to nominate
+ 
 === Milestone Base 3 - Beta ===
-  * Produce a package of the web configuration GUI
-  * Modify the kickstart to include the web configuration GUI
-  * Distribute the kickstart to a few interested parties as an alpha release
+  * Add the Web GUI to the Toolkit
+  * Tasks:
+    * Package the Web Configuration GUI
+      * Change existing configuration backend to change the default locations of configuration files (if changed)
+      * Build configuration daemon that the Web GUI can talk to to write new versions of configuration files and restart daemons
+      * Either modify backend or web GUIs to talk to daemon instead of writing files/restarting services directly
+    * Depending on how configuration is stored, make changes to the packaging of other services (e.g. if there's a centralized configuration file for common pS-PS configuration options)
+      * The configuration has a large number of shared components. Centralizing these shared configuration pieces would make it easier to [pSPT32_DevNotes#Configuration_Change_Effects update service/tool configuration] when the system configuration changes
+    * Add the Web Configuration GUI RPM to the yum repository
+    * Update the kickstart file to include the Web Configuration GUI
+    * Fix any issues encountered by alpha testers
+    * Start internal testing of beta kickstart - Release team to nominate
 
 === Milestone Base 4 ===
-  * Based on user feedback and testing, firm up the kickstart
+  * Produce a final cut of the Base Toolkit
+  * Tasks:
+    * Collect user feedback from the beta testers
+    * Fix any issues encountered by testers
 
-=== Milestone Install CD/DVD 1 - Beta ===
-  * Depends: Milestone Base 4
-  * Using the Base kickstart, produce an initial installation CD that includes all the RPMs and the kickstart on a single ISO
-  * Distribute this ISO to users for testing
-  * Migrate changes to the Base packages/kickstart as needed
+=== Milestone Install CD 1 - Beta ===
+  * Depends: Milestone Base 3
+  * Produce an initial installation ISO for testing
+  * Tasks:
+    * Generate a basic installation kickstart from the Base kickstart
+    * Migrate any changes to Base RPMs or kickstart to the Base
+    * Distribute the ISO to testers willing to test out the Toolkit
 
-=== Milestone Install CD/DVD 2 ===
-  * Based on user feedback and testing, firm up the installation CD.
-  * Migrate changes to the Base packages/kickstart as needed
+=== Milestone Install CD 2 ===
+  * Based on user feedback and testing, firm up the installation CD
+  * Tasks:
+    * Collect user feedback from the beta testers
+    * Fix any issues encountered by testers
+    * Migrate changes to the Base packages/kickstart as needed
 
 === Milestone Live CD 1 - Alpha ===
   * Depends: Milestone Base 4
-  * Using the Base kickstart, produce an initial Live CD version
-  * Distribute this Live CD to users for testing
-  * NOTE: it is not expected that this initial Live CD will allow for upgrading an existing installation
-  * Migrate changes to the Base packages/kickstart as needed
+  * Produce an initial Live CD instance that will save configuration/data to the backing store
+  * Tasks:
+    * Modify the standard Live CD to use the backing store instead of a ramdisk
+    * Modify the command-line tools (network setup, password setting, and creating backing store) to work on the CentOS base
+    * Build a tool to save the configuration to the backing store
+    * Build a tool to store the data on the backing store
+    * Package the above tools and include them in the Live CD kickstart
+    * Migrate any changes to Base RPMs or kickstart to the Base
+    * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit
 
 === Milestone Live CD 2 - Beta ===
-  * Add functionality to the Live CD to allow it to upgrade an existing installation
-  * Fix bugs and issues based on user feedback and testing
-  * Distribute this Live CD to users for testing
-  * Migrate changes to the Base packages/kickstart as needed
+  * Produce a Live CD instance that will upgrade an existing Knoppix-based installation
+  * Tasks:
+    * Produce tools capable of upgrading the existing backing store configuration/data to the new approach
+      * See [pSPT32_DevNotes#Upgrade_Path here] for some specifics on how upgrades might be handled
+    * Package the above tools and include them in the Live CD kickstart
+    * Collect user feedback from the alpha testers
+    * Fix any issues encountered by testers
+    * Migrate changes to the Base packages/kickstart as needed
+    * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit
 
 === Milestone Live CD 3 ===
-  * Based on user feedback and testing, firm up the Live CD.
+  * Based on user feedback and testing, firm up the Live CD
   * Migrate changes to the Base packages/kickstart as needed
+  * Tasks:
+    * Collect user feedback from the beta testers
+    * Fix any issues encountered by testers
+    * Migrate changes to the Base packages/kickstart as needed
+    * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit
 
 === Milestone Release Candidate 1 ===
-  * Depends: Milestone Live CD 3, Milestone Install CD/DVD 2
-  * Produce installation documentation for each of the installation methods
-  * Produce toolkit documentation for the various services and web guis
-  * Synchronize the changes needed to the Base by the various installation methods
-  * Produce a kickstart, an installation ISO and a Live CD ISO
-  * Distribute to interested parties
+  * Depends: Milestone Live CD 3, Milestone Install CD 2
+  * Synchronize any changes to the Base necessitated by the Live CD or Install CD, and produce release candidates and documentation for each
+  * Tasks:
+    * Produce installation documentation for each of the installation methods
+    * Produce toolkit documentation for the various services and web guis
+    * Synchronize the changes needed to the Base by the various installation methods
+    * Produce a kickstart, an installation ISO and a Live CD ISO
+    * Distribute the ISOs to testers willing to test out the Toolkit
 
 === Milestone Release Candidate X ===
-  * Firm up documentation based on user feedback
-  * Fix any issues based on user feedback and testing
-  * Produce updated kickstart, installation ISO and Live CD ISO
-  * Distribute to interested parties
+  * Based on user feedback and testing, firm up the Live CD and Install CD
   * Repeat as necessary to fix issues
+  * Tasks:
+    * Collect user feedback from the testers
+    * Fix any issues encountered by testers
+    * Firm up documentation based on user feedback
 
 === Milestone Final Release ===
-  * Finalize documentation
-  * Produce any wider release announcements
-  * Produce final versions of kickstart, installation ISO and Live CD ISO
+  * Produce final versions of the Live CD, Install CD and documentation
+  * Tasks:
+    * Finalize documentation
+    * Update relevant websites with release information
+    * Produce any wider release announcements
+    * Produce final versions of kickstart, installation ISO and Live CD ISO
 
 == Last Modified ==
 
