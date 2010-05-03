@@ -9,6 +9,7 @@
   * [http://dag.wieers.com/rpm/ DAG]: contains a wide variety of Perl modules and other tools that the perfSONAR-PS tools depend on
   * [http://software.internet2.edu/ Internet2]: contains bwctl, owamp and perfSONAR-PS tools as well as some of their dependencies
   * MCNC maintains a repository containing a number of useful RPMs: web100 kernel, web100 userland, ndt and some other tools
+  * [http://rpmfusion.org/ RPM Fusion]: contains a variety of software packaged for EL5 (and Fedora releases as well)
 
 == Useful Tools ==
   * [http://fedoraproject.org/wiki/FedoraLiveCD livecd-tools] - Allows you to take a kickstart image and generate a Live CD.
@@ -67,6 +68,41 @@
   * SSH: 
   * NDT: 
   * NPAD: 
+
+== Base ==
+=== Packages ===
+  * Kernel + web100
+    * Status: <font color=red>todo</font>
+  * web100 userland
+    * Status: <font color=red>todo</font>
+  * bwctl
+    * Status: <font color=red>todo</font>
+  * owamp
+    * Status: <font color=red>todo</font>
+  * iperf
+    * Status: <font color=red>todo</font>
+  * nuttcp
+    * Status: <font color=red>todo</font>
+  * perfSONAR-BUOY
+    * Status: <font color=red>todo</font>
+  * PingER
+    * Status: <font color=red>todo</font>
+  * SNMP MA
+    * Status: <font color=red>todo</font>
+  * SNMP MA
+    * Status: <font color=red>todo</font>
+  * NDT
+    * Status: <font color=red>todo</font>
+  * NPAD
+    * Status: <font color=red>todo</font>
+  * Lookup Service
+    * Status: <font color=red>todo</font>
+  * LS Registration Daemon
+    * Status: <font color=red>todo</font>
+  * LS Cache Daemon
+    * Status: <font color=red>todo</font>
+  * Web GUI
+    * Status: <font color=red>todo</font>
 
 == Live CD ==
 
