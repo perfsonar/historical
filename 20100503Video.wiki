@@ -3,18 +3,31 @@
 == Agenda/Minutes ==
 
  # Attendees:
-   * TBD
+   * Aaron, Andy, Jason, Brian, Eric, Maxim, Jeff, Marcos, Joe, Ahmed
  # Followup on previous actions:
-   * _*ACTION*_: Brian/Eric P/Andy to analyze results when available
+   * _*ACTION*_: Brian/Eric P/Andy to analyze results when available from hls/gls testing.
+      * Netlogger output analysis. Similar results to the Internet2 testing were seen.
    * _*ACTION*_: Brian send nl_cpu link out to others so cpu data can be correlated with netlogger tests.
    * _*ACTION*_: Aaron and Eric will explore jointly and propose a development plan for the next version of the toolkit enabling both R/O media as well as a full-install option.  Conf call to discuss, next step is to flush out a roadmap for development
  # Additional cache.pl changes (Andy)
+   * Andy made new performance and functionality available in the cache.pl script and updated the ESnet instance. There was discussion on the process for updating the global production infrastructure. The changes look reasonable.
  # Toolkit milestones (Aaron/Eric)
    * [pSPT32_Notes]
+   * Basic functionality was agreed to. There was discussion about potentially being able to skip the 'upgrade' functionality for this release.
+ # DICE service development work
+   * Joe asked about the appropriate venue to discuss DICE collaborative work. Consensus seemed to be the dice measurement list with development work being done where appropriate for the lead developers of the task.
 
 === ACTIONS ===
 
- * _*ACTION*_: TBD
+ * _*ACTION*_: Ahmed to continue testing with replay and will look for areas of the application that are causing database deadlocks.
+ * _*ACTION*_: Brian will send out the latest nl_cpu.
+ * _*ACTION*_: Brian will install nl_cpu on ESnet gls host.
+ * _*ACTION*_: Jason will install new nl_cpu on Internet2 gls host.
+ * _*ACTION*_: Jason will test the new cache.pl changes and install if there are no problems.
+ * _*ACTION*_: Joe will propose SOP for production global infrastructure.
+ * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
+ * _*ACTION*_: Aaron will more fully describe the requirements to support upgrading a toolkit host.
+
 
 == Where ==
 
