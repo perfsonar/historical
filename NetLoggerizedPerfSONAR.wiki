@@ -46,6 +46,15 @@ You might also try nl_view:
  nl_view -g -d r.log  | grep "^ *5\."
 }}}
 
+== CPU Monitoring ==
+
+For performance analysis it is very useful to be able to correlate CPU usage to NetLogger Application events.
+To collect vmstat results in NetLogger format, do something like this:
+{{{
+ nl_cpu -f /usr/local/perfSONAR/log/nl_cpu -r 7d
+}}}
+This will automatically rotate the log file every 7 days, and keep 10 weeks of logs
+
 == Adding Additional Instrumentation ==
 
 When doing performance analysis with NetLogger, often you'll want to add additional NetLogger calls to zero in on the performance bottleneck. NetLogger adds very little overhead, so there is no harm adding additional calls.
