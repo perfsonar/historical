@@ -87,7 +87,7 @@ The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series o
       * Build configuration daemon that the Web GUI can talk to to write new versions of configuration files and restart daemons
       * Either modify backend or web GUIs to talk to daemon instead of writing files/restarting services directly
     * Depending on how configuration is stored, make changes to the packaging of other services (e.g. if there's a centralized configuration file for common pS-PS configuration options)
-      * The configuration has a large number of shared components. Centralizing these shared configuration pieces would make it easier to [pSPT32_DevNotes#Configuration_Change_Effects update service/tool configuration] when the system configuration changes
+      * The configuration has a large number of shared components. Centralizing these shared configuration pieces would make it easier to [http://code.google.com/p/perfsonar-ps/wiki/pSPT32_DevNotes#Configuration_Change_Effects update service/tool configuration] when the system configuration changes
     * Add the Web Configuration GUI RPM to the yum repository
     * Update the kickstart file to include the Web Configuration GUI
     * Fix any issues encountered by alpha testers
@@ -130,7 +130,7 @@ The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series o
   * Produce a Live CD instance that will upgrade an existing Knoppix-based installation
   * Tasks:
     * Produce tools capable of upgrading the existing backing store configuration/data to the new approach
-      * See [pSPT32_DevNotes#Upgrade_Path here] for some specifics on how upgrades might be handled
+      * See [http://code.google.com/p/perfsonar-ps/wiki/pSPT32_DevNotes#Upgrade_Path here] for some specifics on how upgrades might be handled
     * Package the above tools and include them in the Live CD kickstart
     * Collect user feedback from the alpha testers
     * Fix any issues encountered by testers
