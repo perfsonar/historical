@@ -1,0 +1,29 @@
+=  May 10 2010 Conference Call 2:30 p.m. EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+   * ATBD
+ # Followup on previous actions:
+   * _*ACTION*_: Ahmed to continue testing with replay and will look for areas of the application that are causing database deadlocks.
+   * _*ACTION*_: Brian will send out the latest nl_cpu.
+   * _*ACTION*_: Brian will install nl_cpu on ESnet gls host.
+   * _*ACTION*_: ~~Jason will install new nl_cpu on Internet2 gls host.~~
+     * Complete 5/3/2010
+   * _*ACTION*_: Jason will test the new cache.pl changes and install if there are no problems.
+   * _*ACTION*_: Joe will propose SOP for production global infrastructure.
+   * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
+   * _*ACTION*_: Aaron will more fully describe the requirements to support upgrading a toolkit host.
+ # TBD
+ 
+=== ACTIONS ===
+
+ * _*ACTION*_: TBD
+
+== Where ==
+
+ESnet conference bridge:
+
+ * GDS: 00113498255555
+ * Direct Dial:  mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-883-7860 then 8255555# at the prompt. 
