@@ -5,11 +5,13 @@ face to face meetings are available here.  Please use the !MeetingTemplate when
 applicable.
 
 == Future Events ==
-   * [20100503Video] - Video Conference for May 5, 2010
+
+   * [20100510Video] - Video Conference for May 10, 2010
 
 == Past Events ==
 
  * 2010
+   * [20100503Video] - Video Conference for May 3, 2010
    * [20100419Video] - Video Conference for April 19, 2010
    * [20100412Video] - Video Conference for April 12, 2010
    * [20100329Video] - Video Conference for March 29, 2010

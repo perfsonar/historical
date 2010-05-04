@@ -1,4 +1,4 @@
-=  May 5 2010 Conference Call 2:30 p.m. EDT =
+=  May 3 2010 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
 
@@ -27,7 +27,6 @@
  * _*ACTION*_: Joe will propose SOP for production global infrastructure.
  * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
  * _*ACTION*_: Aaron will more fully describe the requirements to support upgrading a toolkit host.
-
 
 == Where ==
 
