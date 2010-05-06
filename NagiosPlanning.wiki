@@ -1,0 +1,65 @@
+This page contains information for planning the development of a new set of Nagios plug-ins. 
+
+==Summary of Current perfSONAR Nagios Plug-ins==
+ # *check_psb*
+  * _What it does_ - Query pSB MA for bwctl results and checks average bandwidth and number of tests against a threshold
+  * _How it works_
+   * _check_psb_ script executes external perl script _psb-csv.pl_
+   * _psb-csv.pl_ queries iperf data using XML interface and returns data in CSV format
+   * _check_psb_ looks at average bandwidth and number of tests in CSV data and sets return value based on whether it meets a certain threshold
+  * _Where is the code_
+   * ESnet cfengine trunk
+ # *check_topology*
+  * _What it does_ - Queries topology services and checks the number of bytes returned against a threshold
+  * _How it works_
+   * _check_topology_ script executes external perl script _client.pl_
+   * _client.pl_ sends XML request to topology service to fetch entire topology
+   * _check_topology_ looks at topology and sets return value based on the number of bytes
+  * _Where is the code_
+   * ESnet cfengine trunk
+ # *check_db.pl*
+  * _What it does_ - Queries a pSB MySQL database for owamp results between mesh of hosts in last minute and checks jitter, maximum delay and loss rate.
+  * _How it works_
+   * Queries database using hard-coded values for database parameters, time window, and hosts in mesh.
+   * Analyzes results and sets return values based on jitter, max delay and loss
+  * _Where is the code_
+   * https://svn.internet2.edu/svn/perfSONAR-PS/branches/CTP/nagios/check_db.pl
+ # *check_perfSONAR.pl* 
+  * _What it does_ - Sends an EchoRequest or SetupDataRequest and sets return value based on whether the request returns "success" or an error code. It has default Echo and SetupData requests but can also provide a custom request in a file as long as it is of the aforementioned types.
+  * _How it works_
+   * Reads in parameters from command-line to determine where to send request and what request to send.
+   * Sends XML request to service
+   * Looks for "success" or "error" string in relevant portion of response
+  * _Where is the code_
+   * https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_perfSONAR.pl
+
+==Proposed Plug-Ins==
+ * perfSONAR Service Health Plug-ins
+  * *ps_check_perfSONAR* - Send echo request or send query from config file. Fail if query times out or does not return results.
+   * More or less the current check_perfSONAR plug-in
+  * *ps_check_ls_reg* - Query LS for specific service with a given URL, service(s) with specified type, or service(s) with specified keyword. Set threshold on the number of services expected to be returned.  Can be configured to: 
+   # Just contact gls to check if hls registered
+   # Just check specific hls to see if service registered there
+   # Call gLS to get hLS and see if can find through that mechanism
+  * *ps_check_topology* - Check if topology registered. State change if significant change in number of nodes and/or links. 
+ * perfSONAR Data Analysis Plug-ins
+  * *ps_check_throughput* - Query pSB MA for BWCTL results between two endpoints for given time period. Based on plug-in configuration, possible state changes occur if:
+   * No results returned or less results than expected returned (i.e. missing test)
+   * Test is not bidirectional
+   * Throughput falls below a statically configured value 
+   * Throughput change deemed significant using algorithm such as Holt-Winters or plateau
+  * *ps_check_owdelay* - Query pSB MA for OWAMP results between two endpoints for given time period. Based on plug-in configuration, possible state changes occur if:
+   * No results returned or less results than expected returned (i.e. missing test)
+   * Test is not bidirectional
+   * Median delay not within threshold
+   * Delay variation (i.e IQR, jitter) not within threshold
+   * Packets sent not within threshold
+   * Loss not within threshold
+   * Errors not within threshold
+   * Duplicates not within threshold
+   * TTL not within threshold
+   * TTL changes
+  * *ps_check_pingdelay* - Query Pinger MA to get results between two endpoints for given time period.
+  * *ps_check_interfaces* - Query SNMP MA to get interface statistics.
+ * perfSONAR GUI Plug-ins
+  * *ps_check_serv_directory* - Query JSON of service directory page to make sure its displaying correct results.
