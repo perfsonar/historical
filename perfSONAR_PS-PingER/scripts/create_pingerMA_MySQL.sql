@@ -12,7 +12,7 @@ drop  table if exists host;
 CREATE TABLE   host (
  ip_name varchar(52) NOT NULL, 
  ip_number varchar(64) NOT NULL,
- comments text, 
+ comments varchar(1024), 
  PRIMARY KEY  (ip_name, ip_number) );
 
 #
@@ -54,8 +54,8 @@ CREATE TABLE   data  (
  clp float,
  iqrIpd float,
  lossPercent  float,
- rtts text, -- should be stored as csv of ping rtts
- seqNums text, -- should be stored as csv of ping sequence numbers
+ rtts varchar(1024), -- should be stored as csv of ping rtts
+ seqNums varchar(1024), -- should be stored as csv of ping sequence numbers
  INDEX (meanRtt, medianRtt, lossPercent, meanIpd, clp),
  FOREIGN KEY (metaID) references metaData (metaID),
  PRIMARY KEY  (metaID, timestamp));
