@@ -1,0 +1,42 @@
+#summary Standard Operating Procedures for Maintaining perfSONAR Global Infrastructure
+
+*DRAFT*
+
+= Introduction =
+
+PerfSONAR is a distributed infrastructure.  It is important that each domain
+maintains complete autonomy in how they manage their local infrastructure.
+However, some components of the infrastructure directly support the global
+community, and must be held up to a base line standard.  T
+
+The perfSONAR Lookup service is a global distributed infrastructure. The Global Lookup
+Services (GLS services) are important for the proper functioning of the entire infrastructure.
+
+= Expectations =
+The perfSONAR collaboration expects domains hosting GLS services to meet a set of
+minimal standards to include the service in the set of root GLS servers.
+
+  * The GLS service is a production 24 hours a day, 7 days a week, 365 days a year service.  
+  * The hardware supporting the service will be maintained in a production like manner.
+  * Changes to the GLS infrastructure will be managed using light-weight change management procedures.
+  * Servers that are not meeting expectations will be removed from the list of production GLS servers.
+
+
+= Standard Operating Procedures =
+
+==  Hardware ==
+
+  * Regular planned Maintenance should be announced to (insert mailing list here) at least 48 hours in advance.
+  * Unplanned or emergency maintenance should be announced as soon as possible.
+
+
+== Software ==
+
+  * The GLS should run a version of the gLS code that has been discussed on (insert mailer here).
+  * Changes to the gLS service should be manged using a change management procedure.
+    * document that here :-)
+
+
+
+
+*DRAFT*
