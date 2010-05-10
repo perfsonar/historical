@@ -9,6 +9,29 @@ Outcome:
     Registered:
         warn of registration
 
+Sample Response:
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"
+              xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
+              xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
+              messageIdRef="msg1" id="message.17136274"
+              type="LSRegisterResponse">
+  <nmwg:metadata metadataIdRef="serviceLookupInfo" id="metadata.15277364">
+    <nmwg:key xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="key.8485215">
+      <nmwg:parameters id="param.12623480">
+        <nmwg:parameter name="lsKey">5cfb07ea7a5b840ce4f8f48b842ac9c0</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+    <nmwg:eventType>success.ls.register</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.15277364" id="data.8499802">
+    <nmwg:datum xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+                value="[1] Data elements have been registered with key [5cfb07ea7a5b840ce4f8f48b842ac9c0]"/>
+  </nmwg:data>
+</nmwg:message>
+
 -->
 
 <nmwg:message type="LSRegisterRequest"
