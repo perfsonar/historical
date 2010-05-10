@@ -4,11 +4,6 @@
 
 = Introduction =
 
-PerfSONAR is a distributed infrastructure.  It is important that each domain
-maintains complete autonomy in how they manage their local infrastructure.
-However, some components of the infrastructure directly support the global
-community, and must be held up to a base line standard.  T
-
 The perfSONAR Lookup service is a global distributed infrastructure. The Global Lookup
 Services (GLS services) are important for the proper functioning of the entire infrastructure.
 
