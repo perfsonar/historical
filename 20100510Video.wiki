@@ -4,6 +4,10 @@
 
  # Attendees:
    * TBD   
+ # Excused:
+   * Maxim
+     *  Issue with pinger MP hanging on ATLAS boxes is resolved _again_
+     * will require extra re-factoring of the MP scheduler code to address issue when tests are scheduled too close (less than 5 minutes)
  # Followup on previous actions:
    * _*ACTION*_: Ahmed to continue testing with replay and will look for areas of the application that are causing database deadlocks.
    * _*ACTION*_: Brian will send out the latest nl_cpu.
