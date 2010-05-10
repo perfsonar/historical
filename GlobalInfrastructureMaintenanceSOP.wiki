@@ -19,7 +19,7 @@ minimal standards to include the service in the set of root gLS servers.
 ==  Hardware ==
 
   * The hardware supporting the gLS infrastructure should be modern server hardware with raid disks, UPS power, etc.
-
+  * It should have robust network connectivity.
 
 == Software ==
 
