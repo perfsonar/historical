@@ -19,6 +19,8 @@
    * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
    * _*ACTION*_: Aaron will more fully describe the requirements to support upgrading a toolkit host.
  # Nagios (Andy)
+ # pSPT 3.2 Status (Aaron/Eric)
+ # LS Testing (Whoever...)
  # TBD
  
 === ACTIONS ===
