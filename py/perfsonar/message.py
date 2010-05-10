@@ -297,6 +297,8 @@ class psMessageReader(psMessage):
         Generates a dict of information about a given element.
         """
         elementInfo = {}
+        if ele is None:
+            return elementInfo
         elementInfo['name'] = ele.tag.split('}')[1]
         elementInfo['ns'] = ele.tag.split('{')[1][:ele.tag.split('{')[1].find('}')]
         elementInfo['prefix'] = namespaces.nsToPrefix(elementInfo['ns'])
@@ -354,12 +356,15 @@ class psMessageReader(psMessage):
             return params
         for e in ele.iterchildren():
             try:
+                # value can be in an attribute 'value', or the text
+                # child of the element
+                value = e.get("value", e.text)
                 if params.has_key(e.attrib['name']):
                     if type(params[e.attrib['name']]) != type([]):
                         params[e.attrib['name']] = [params[e.attrib['name']]]
-                    params[e.attrib['name']].append(e.text)
+                    params[e.attrib['name']].append(value)
                 else:
-                    params[e.attrib['name']] = e.text
+                    params[e.attrib['name']] = value
             except:
                 er = 'Unable to get value from child element %s in %s' \
                     % (e, ele)
@@ -376,7 +381,8 @@ class psMessageReader(psMessage):
         key['keyid'] = eInfo['id']
         pe = self.findElementByName(ke, 'parameters')
         peInfo = self.getElementInformation(pe)
-        key['parametersid'] = peInfo['id']
+        if peInfo:
+            key['parametersid'] = peInfo['id']
         for k,v in self.makeSimpleDictFromElementNameAttr(pe).items():
             key[k] = v
         return key
@@ -449,7 +455,8 @@ class psMessageReader(psMessage):
         Returns a perfsonar.Metadata subclass object to give
         attribute-style access to a single named metadata block.
         """
-        return Metadata(self.findElementByID(eid), eid)
+        meta_elt = self.findElementByID(eid)
+        return Metadata(meta_elt, eid)
         
     def fetchMetadataAttributes(self,eid):
         """

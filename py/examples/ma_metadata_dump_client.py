@@ -1,6 +1,11 @@
+"""
+Dump metadata from an MA.
+"""
 from perfsonar.message import psMessageBuilder, psMessageReader
 from perfsonar.client import SimpleClient
 from optparse import OptionParser
+from lxml import etree
+
 import logging, sys
 log = logging.getLogger(__name__)
 
@@ -14,8 +19,8 @@ def makeSNMPMAmessage():
     psm.addDataBlock('data1', metadataIdRef='metadata1')
     
     return psm
-    
-def makepSBMAiperfMessage():
+
+def makeIperfMAMessage():
     psm = psMessageBuilder('metadataKeyRequest1', 'MetadataKeyRequest')
     psm.addMetadataBlock('meta1',
                         subject='subject.%s' % time.time(),
@@ -24,7 +29,7 @@ def makepSBMAiperfMessage():
     
     return psm
     
-def makepSBMAowampMessage():
+def makeOwampMAMessage():
     psm = psMessageBuilder('metadataKeyRequest1', 'MetadataKeyRequest')
     psm.addMetadataBlock('meta1',
                         subject='subject.%s' % time.time(),
@@ -34,49 +39,119 @@ def makepSBMAowampMessage():
     psm.addDataBlock('data1', metadataIdRef='meta1')
 
     return psm
+
+def makePingerMAMessage():
+    psm = psMessageBuilder('metadataKeyRequest1', 'MetadataKeyRequest')
+    psm.addMetadataBlock('meta1',
+                        subject='subject.%s' % time.time(),
+                        eventType='http://ggf.org/ns/nmwg/tools/pinger/2.0/')
+    psm.addDataBlock('data1', metadataIdRef='meta1')
+    return psm
     
+_BUILDERS = { 
+    'snmp' : makeSNMPMAmessage,
+    'owamp' : makeOwampMAMessage,
+    'iperf' : makeIperfMAMessage,
+    'pinger'  : makePingerMAMessage,
+}
+
+def pmsg(*args):
+    """Print message-level element"""
+    s = ' '.join(args)
+    print("  %s" % s)
+
+def pmsg2(*args):
+    """Print message-level sub-element"""
+    s = ' '.join(args)
+    print("    %s" % s)
+
+def pdata(*args):
+    """Print data block element."""
+    s = ' '.join(args)
+    print ("      %s" % s)
+
+def pmeta(*args):
+    """Print metadata block element."""
+    s = ' '.join(args)
+    print ("      %s" % s)
+
 def dumpMaResults(message, listall=False):
-    print 'id:', message.getMessageId()
-    print 'id ref:', message.getMessageIdRef()
-    print 'msg type:', message.getMessageType()
-    
+    pmsg("Message metadata")
+    pmsg2('id:', message.getMessageId())
+    pmsg2('id ref:', message.getMessageIdRef())
+    pmsg2('msg type:', message.getMessageType())
+    pmsg('Message data:')
+    NONE = 'NONE'
     for i in message.getDataBlockIds():
-        print '======'
+        pmsg2('Data block: %s' % i)
         d = message.getData(i)
-        print 'data id:', d.id
-        print 'key paramid:', d.key['parametersid']
-        print 'key maKey:', d.key['maKey']
-        print 'metadata ref:', d.attribs['metadataIdRef']
-        print 'associated metadata:'
+        #print 'data attributes:',d.attribs
+        pdata('data id:', d.id)
+        data_key = d.key
+        if data_key:            
+            pdata('key paramid:', data_key.get('parametersid', NONE))
+            pdata('key maKey:', data_key.get('maKey', NONE))
+        else:
+            pdata('key:',NONE)
+        pdata('metadata ref:', d.attribs.get('metadataIdRef', NONE))
+        pmsg2('Metadata for data block: %s' % i)
         # grab the associated metadata block
-        md = message.getMetadata(d.attribs['metadataIdRef'])
-        print '    metadata id:', md.id
-        print '    metadata ref:', md.attribs['metadataIdRef']
-        print '    subject id:', md.subject['id']
-        print '    interface info:'
+        md_ref = d.attribs.get('metadataIdRef', NONE)
+        pmeta('metadata ref:', md_ref)
+        md = message.getMetadata(md_ref)
+        pmeta('metadata id:', md.id)
+        subject = md.subject
+        if subject:
+            subj_id = md.subject.get('id', NONE)
+            pmeta('subject id:', subj_id)
+            if subj_id != NONE:
+                subj_elt = md.findElementByID(subj_id)
+                for child in subj_elt:
+                    pmeta("subject item: %s" % etree.tostring(child))
+            ignore = 'id', 'ns', 'prefix'
+            for k, v in subject.items():
+                if k not in ignore:
+                    pmeta('subject %s: %s' % (k, v))
+        else:
+            pmeta('subject id:',NONE)
+        pmeta('interface info:')
         for k,v in md.interface.items():
-            print '      %s - %s' % (k,v)
-        print '    event type:', md.eventType
-        print '    parameters:'
+            pmeta('%s - %s' % (k,v))
+        pmeta('event type:', md.eventType)
+        pmeta('parameters:')
+        if not md.params:
+            pmeta(NONE)
         for k,v in md.params.items():
-            print '      %s - %s' % (k,v)
+            pmeta('  %s = %s' % (k,v))
         if not listall:
             break
 
-if __name__ == '__main__':
+def main(args=None):
+    if args is None:
+        args = sys.argv
+    usage = "%prog [options]"
+    desc = ' '.join(__doc__.split())
     # -H rrdma.net.internet2.edu -p 8080 -u /perfSONAR_PS/services/snmpMA
     opts = OptionParser()
+    opts.add_option("-d", action="store_true", dest="dumpall",
+                    help="Dump all records to stdout "
+                    "(default: just the first record)", 
+                    default=False)
     opts.add_option("-H", "--host", dest="host", default='localhost',
-                    help="SNMP MA hostname (default: localhost)", metavar="HOST")
+                    help="SNMP MA hostname (default: %default)",
+                    metavar="HOST")
     opts.add_option("-p", "--port", dest="port", default=8080,
-                    help="Service port number (default: 8080)", metavar="PORT")
-    opts.add_option("-u", "--uri", dest="uri",
-                    help="Service URI (default: default: /)", metavar="URI")
+                    help="Service port number (default: %default)",
+                    metavar="PORT")
+    opts.add_option("-u", "--uri", dest="uri", default="/",
+                    help="Service URI (default: default: %default)",
+                    metavar="URI")
+    tk = _BUILDERS.keys()
+    opts.add_option('-t', '--type', dest="type", default=tk[0],
+                    help="Type of pS service. Options: " + 
+                    ", ".join(tk) + " (default: %default)")
     opts.add_option("-v", action="store_true", dest="verbose",
                     help="Use verbose: logging.DEBUG", default=False)
-    opts.add_option("-d", action="store_true", dest="dumpall",
-                    help="Dump all records to stdout (default: just the first record)", 
-                    default=False)
     (options, args) = opts.parse_args()
     
     loglevel = logging.INFO
@@ -84,17 +159,35 @@ if __name__ == '__main__':
         loglevel = logging.DEBUG
     
     logging.basicConfig(level=loglevel,
-                        format="%(levelname)s: %(name)s: %(funcName)s : %(message)s")
+                        format="%(levelname)s [%(name)s] %(message)s")
+    log = logging.getLogger("")
     # Get a psMessageBuilder object with the request message.
-    snmpMA = makeSNMPMAmessage()
+    if not _BUILDERS.has_key(options.type.lower()):
+        print("ERROR: Bad -t/--type: %s" % options.type)
+        opts.print_help()
+        return 1
+    request = _BUILDERS[options.type.lower()]()
+    log.info(request.tostring())
     client = SimpleClient(options.host, options.port, options.uri)
     # setMessage() will accept either a Builder or Reader object
     # or a properly formatted xml string.
-    client.setMessage(snmpMA)
+    client.setMessage(request)
     # Send the message and return the response in a psMessageReader
     # object.
-    message = client.sendAndGetResponse()
-    
+    try:
+        message = client.sendAndGetResponse()
+    except Exception, err:
+        log.fatal("in client.sendAndGetResponse(), %s" % err)
+        return -1
+    if log.isEnabledFor(logging.DEBUG):
+        print "***********************"
+        print message.tostring()
+        print "***********************"
+
     dumpMaResults(message, listall=options.dumpall)
     
-    pass
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
+
