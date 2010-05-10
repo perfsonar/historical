@@ -3,7 +3,7 @@
 == Agenda/Minutes ==
 
  # Attendees:
-   * Joe, Aaron, Jason, Andy, Jeff, Eric, Brian, Ahmed
+   * Joe, Aaron, Jason, Andy, Jeff, Eric, Brian, Ahmed, Marcos
  # Excused:
    * Maxim
      * Issue with pinger MP hanging on ATLAS boxes is resolved _again_
