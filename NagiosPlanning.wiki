@@ -32,6 +32,15 @@ This page contains information for planning the development of a new set of Nagi
    * Looks for "success" or "error" string in relevant portion of response
   * _Where is the code_
    * https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_perfSONAR.pl
+ # *check_pSB.pl* 
+  * _What it does_ - Sends an EchoRequest and a SetupDataRequest to a target server looking for results in a certain time period (defaults to 24 hours)
+  * _How it works_
+   * Supply a host:port/endPoint, and then a src, dst, and hours argument to check in the pSB database
+   * Will do an echo first to see if the service is alive
+   * Will follow with a SetupDataRequest after
+   * Counts the returned datum only, if there are results the check passes.
+  * _Where is the code_
+   * https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_pSB.pl
 
 ==Proposed Plug-Ins==
  * perfSONAR Service Health Plug-ins
