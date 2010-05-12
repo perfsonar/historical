@@ -1483,11 +1483,11 @@ cp /mnt/store/robots.txt /usr/local/web
     * To _*777*_ (e.g. _*rwxrwxrwx*_).  
 
  * *Q:*
-   * On the reverse ping interface if being *B* we launch a ping from *A* to *B* it is written something like:
+   * *On the reverse ping interface if being _B_ we launch a ping from _A_ to _B_ it is written something like:*
 {{{
 64 bytes from B: icmp_seq=1 ttl=128 time=0.546 ms
 }}}
-    * Should not this be written _64 bytes *to B* or *from A*_?*
+    * *Should not this be written 64 bytes _to B_ or _from A_?*
  * *A:*
    * The reverse ping CGI pings from the toolkit host to the address specified (defaulting to the address of the client querying the CGI).
 
