@@ -1472,7 +1472,7 @@ cp /mnt/store/robots.txt /usr/local/web
 {{{
 /etc/apache2/ssl/apache.pem
 }}}
-    * Since this is in /etc, it will survive reboots of the system.  
+   * Since this is in /etc, it will survive reboots of the system.  
 
  * *Q: Sometimes cacti graphs do not appear after adding a new host/graph template.  What can be done to fix this?*
  * *A:*
@@ -1480,7 +1480,7 @@ cp /mnt/store/robots.txt /usr/local/web
 {{{
 /var/lib/cacti/rra
 }}}
-    * To _*777*_ (e.g. _*rwxrwxrwx*_).  
+   * To _*777*_ (e.g. _*rwxrwxrwx*_).  
 
  * *Q:*
    * *On the reverse ping interface if being _B_ we launch a ping from _A_ to _B_ it is written something like:*
