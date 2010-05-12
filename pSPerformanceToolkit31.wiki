@@ -1487,7 +1487,7 @@ cp /mnt/store/robots.txt /usr/local/web
 {{{
 64 bytes from B: icmp_seq=1 ttl=128 time=0.546 ms
 }}}
-    * *Should not this be written 64 bytes _to B_ or _from A_?*
+   * *Should not this be written 64 bytes _to B_ or _from A_?*
  * *A:*
    * The reverse ping CGI pings from the toolkit host to the address specified (defaulting to the address of the client querying the CGI).
 
