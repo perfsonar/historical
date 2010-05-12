@@ -1,7 +1,7 @@
 This page is for discussion on the organization of various scripts that cache service information kept in the current LS infrastructure. 
 
 == Architecture ==
-The various components currently involved in caching information from the LS is described in the diagram below:
+The various components currently involved in caching information from the LS are described in the diagram below:
 http://perfsonar-ps.googlecode.com/svn/wiki/LSCaching/lscache-arch.png
 
 == Code Organization in SVN ==
