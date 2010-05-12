@@ -204,9 +204,14 @@ Always be sure to supply a log message when branching.
 
 === Who Should Merge ===
 
-The Release team will take the responsibility of merging the changes from a release branch back to the trunk *immediately after* a release.
+The Release team will take the responsibility of merging the changes from a release branch back to the trunk *immediately after* a release.  
 
-Developers are responsible for the upkeep and merging of their own branches.  The Release team will take no responsibility over a developers branch unless it is directly related to the progress of a release (e.g. a branch created from an in-progress release to fix a critical bug may be managed by the release team).  
+Developers are responsible for the upkeep and merging of their own branches.  This includes:
+   * Merging changes from the dev branch back into the trunk as needed.
+   * Merging changes from the trunk back into a dev branch (this ensures the developer is working with up to date code
+   * When its time to release - make sure changes from a dev branch are merged into the release branch. 
+  
+The Release team will take no responsibility over a developers branch unless it is directly related to the progress of a release (e.g. a branch created from an in-progress release to fix a critical bug may be managed by the release team).  
 
 === When To Merge ===
 
@@ -271,9 +276,10 @@ Questions about working in the trunk may always be directed to the Release or Pr
 
 Major development including new projects, enhancements, and bugfixes should be done in private branches.  Developers should be self policing in this environment, things to consider:
 
- - The trunk is like a stream - it will continue to flow.  Be sure to incorporate changes from the trunk into your branch often.
- - Your branch can support many developers, but be sure to isolate yourself into a truly private branch if you are working alone
-  - Checkpoint your branch as frequently as you can, particularly when a bugfix or enhancement is complete and tested.  This will allow others who will eventually branch the trunk take advantage of your changes ASAP.
+ * The trunk is like a stream - it will continue to flow.  Be sure to incorporate changes from the trunk into your branch often. 
+ * Your branch can support many developers, but be sure to isolate yourself into a truly private branch if you are working alone
+ * Checkpoint your branch as frequently as you can back to the trunk, particularly when a bugfix or enhancement is complete and tested.  This will allow others who will eventually branch the trunk take advantage of your changes ASAP.
+ * If your private branch changes are set to be released, be sure to merge back to the release branch.  Coordinate this activity with the Release Management team, but it is the responisbility of the developer to monitor the code proliveration from a private branch.  
 
 === Working in Release Branches ===
 
