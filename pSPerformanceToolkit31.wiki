@@ -1455,6 +1455,41 @@ stability=0.020, tai=0
 }}}
    * If you find that your clock is stopping on a regular basis, the internal battery of your server may be failing.  Consult your server user's manual or on-line references for more information. 
 
+ * *Q: Could a robots.txt file be added to avoid crawling and indexing from bots?*
+ * *A:*
+   * Yes, but note that the file would not be preserved between reboots by default.
+   * First, copy robots.txt to /mnt/store.
+   * Then, you'll need to edit /mnt/store/knoppix.local.sh, and add the following:
+{{{
+#!/bin/bash
+cp /mnt/store/robots.txt /usr/local/web
+}}}
+   * Save that, and make sure that the script is executable.
+
+ * *Q: Could the host's SSL certificate be changed?*
+ * *A:*
+   * Yes, copy the .pem file to
+{{{
+/etc/apache2/ssl/apache.pem
+}}}
+    * Since this is in /etc, it will survive reboots of the system.  
+
+ * *Q: Sometimes cacti graphs do not appear after adding a new host/graph template.  What can be done to fix this?*
+ * *A:*
+   * This is an untested solution, but you may change the directory permission on
+{{{
+/var/lib/cacti/rra
+}}}
+    * To _*777*_ (e.g. _*rwxrwxrwx*_).  
+
+ * *Q:*
+   * On the reverse ping interface if being *B* we launch a ping from *A* to *B* it is written something like:
+{{{
+64 bytes from B: icmp_seq=1 ttl=128 time=0.546 ms
+}}}
+    * Should not this be written _64 bytes *to B* or *from A*_?*
+ * *A:*
+   * The reverse ping CGI pings from the toolkit host to the address specified (defaulting to the address of the client querying the CGI).
 
 == Last Updated ==
 
