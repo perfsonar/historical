@@ -105,6 +105,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Tue Apr 27 2010 zurawski@internet2.edu 3.1-10
+- Fixing a dependency problem with logging libraries
+
 * Fri Apr 23 2010 zurawski@internet2.edu 3.1-9
 - Documentation update
 

@@ -5,7 +5,7 @@
 %define crontab perfAdmin.cron
 %define apacheconf perfAdmin.conf
 
-%define relnum 8
+%define relnum 9
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfAdmin
@@ -104,6 +104,12 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/*
 
 %changelog
+* Wed May 12 2010 zurawski@internet2.edu 3.1-9
+- Including additions to make cache packages.  
+
+* Tue Apr 27 2010 zurawski@internet2.edu 3.1-8
+- Fixing a dependency problem with logging libraries
+
 * Fri Apr 23 2010 zurawski@internet2.edu 3.1-7
 - Documentation update
 - Bugfixes

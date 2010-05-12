@@ -1,7 +1,7 @@
 PACKAGE=perfSONAR_PS-perfAdmin
 ROOTPATH=/opt/perfsonar_ps/perfAdmin
 VERSION=3.1
-RELEASE=8
+RELEASE=9
 
 default:
 	@echo No need to build the package. Just run \"make install\"

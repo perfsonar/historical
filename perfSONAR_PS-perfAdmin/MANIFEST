@@ -1,6 +1,7 @@
 MANIFEST
 Makefile
 bin/cache.pl
+bin/cache_package.pl
 cgi-bin/PingERGraph.cgi
 cgi-bin/bandwidthGraph.cgi
 cgi-bin/bandwidthGraphFlash.cgi

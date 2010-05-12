@@ -5,3 +5,5 @@
 #
 
 */30 * * * *  root  perl /opt/perfsonar_ps/perfAdmin/bin/cache.pl >& /dev/null
+*/30 * * * *  root  perl /opt/perfsonar_ps/perfAdmin/bin/cache_pacakge.pl >& /dev/null
+
