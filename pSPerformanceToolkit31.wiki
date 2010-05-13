@@ -1491,6 +1491,32 @@ cp /mnt/store/robots.txt /usr/local/web
  * *A:*
    * The reverse ping CGI pings from the toolkit host to the address specified (defaulting to the address of the client querying the CGI).
 
+ * *Q:*
+   * *I've run in to a problem with the 3.1.3 toolkit and Myricom 10G network cards. In 3.1.2, the myri10ge module was loaded before tg3, so my NICs were numbered:*
+     * *eth0 - Myricom 10G*
+     * *eth1 - Onboard NIC 1*
+     * *eth2 - Onboard NIC 2*
+   * *In 3.1.3, the myri10ge driver was not being loaded automatically. Manually loading it worked. However, because the tg3 driver had already been loaded, the NICs were now numbered:*
+     * *eth0 - Onboard NIC 1*
+     * *eth1 - Onboard NIC 2*
+     * *eth2 - Myricom 10G*
+   * *When I manually ran "modprobe myri10ge", the card then showed up as "eth2_rena".  I've done minimal configuration to this host (nothing beyond what nptoolkit-configure.py offers).  Has anyone else seen this behavior? Is there something I've missed?*
+ * *A:*
+   * The module version was changed between versions, and this may change system behavior for some cards.  In general things should work when manually loaded.  To automatically load the Myricom driver during booting (and before DHCP client starts), creat the file:
+{{{
+/mnt/store/knoppix.local.sh
+}}}
+   * With the contents:
+{{{
+#!/bin/bash
+modprobe myri10ge
+}}}
+   * And set the executable bit e.g.:
+{{{
+chmod 755 /mnt/store/knoppix.local.sh
+}}}   
+   * With the knoppix.local.sh script, the NICs may be still numbered in the second order (with the 10G card as eth2).  If this is a problem, the easiest solution to the renumbering problem is to disable the alternate NICs via the BIOS.
+
 == Last Updated ==
 
 $Id$
