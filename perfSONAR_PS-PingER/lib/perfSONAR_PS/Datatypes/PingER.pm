@@ -300,7 +300,7 @@ sub SetupDataRequest {
             }
             $self->get_LOGGER->debug( " Will query = ", sub { Dumper( $query ) } );
             unless ( $query && $query->{query_metaData} && ref( $query->{query_metaData} ) eq 'ARRAY' && scalar @{ $query->{query_metaData} } >= 1 ) {
-                $self->get_LOGGER->warn( " Nothing to query about for md=" . $requestmd->id );
+                $self->get_LOGGER->warn( " Nothing to query about for md=" . $requestmd->get_id);
                 $response->addResultResponse(
                     {
                         md        => $requestmd,
