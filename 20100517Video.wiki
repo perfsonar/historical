@@ -8,7 +8,7 @@
    * _*ACTION*_: Jason will follow up on pingER issues.
    * _*ACTION*_: Ahmed to continue testing with replay and will look for areas of the application that are causing database deadlocks.
    * _*ACTION*_: Jason will test the new cache.pl changes and install if there are no problems.
-   * _*ACTION*_: Joe will propose SOP for production global infrastructure.
+   * _*ACTION*_: Joe will propose SOP for production global infrastructure.  http://code.google.com/p/perfsonar-ps/wiki/GlobalInfrastructureMaintenanceSOP
    * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
    * _*ACTION*_: Aaron will more fully describe the requirements to support upgrading a toolkit host. (Include config file dependency analysis.)
    * _*ACTION*_: Everyone: review proposed nagios plugin list and offer Andy feedback. [ http://code.google.com/p/perfsonar-ps/wiki/NagiosPlanning ] 
