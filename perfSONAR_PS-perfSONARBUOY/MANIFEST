@@ -20,8 +20,10 @@ etc/daemon.conf
 etc/daemon_logger.conf
 etc/owmesh.conf
 etc/requests/EchoRequest.xml
-etc/requests/MetadataKeyRequest.xml
-etc/requests/SetupDataRequest.xml
+etc/requests/SetupDataRequest-bwctl.xml
+etc/requests/MetadataKeyRequest-bwctl.xml
+etc/requests/SetupDataRequest-owamp.xml
+etc/requests/MetadataKeyRequest-owamp.xml
 lib/OWP.pm
 lib/OWP/Archive.pm
 lib/OWP/Conf.pm

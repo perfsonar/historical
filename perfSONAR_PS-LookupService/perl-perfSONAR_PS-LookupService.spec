@@ -4,7 +4,7 @@
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 lookup_service
 
-%define relnum 10
+%define relnum 11
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-LookupService
@@ -105,6 +105,10 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Mon May 17 2010 zurawski@internet2.edu 3.1-11
+- Netlogger logging
+- Database optimizations
+
 * Tue Apr 27 2010 zurawski@internet2.edu 3.1-10
 - Fixing a dependency problem with logging libraries
 

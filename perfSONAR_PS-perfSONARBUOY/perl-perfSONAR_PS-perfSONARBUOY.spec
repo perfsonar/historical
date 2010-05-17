@@ -8,7 +8,7 @@
 %define init_script_owp_collector perfsonarbuoy_owp_collector
 %define init_script_owp_master perfsonarbuoy_owp_master
 
-%define relnum 6
+%define relnum 7
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfSONARBUOY
@@ -234,6 +234,10 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Mon May 17 2010 zurawski@internet2.edu 3.1-7
+- Netlogger logging
+- Updated request examples
+
 * Tue Apr 27 2010 zurawski@internet2.edu 3.1-6
 - Fixing a dependency problem with logging libraries
 
