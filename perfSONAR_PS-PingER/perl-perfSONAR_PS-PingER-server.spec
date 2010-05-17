@@ -1,10 +1,10 @@
 %define install_base /opt/perfsonar_ps/PingER
-%define logging_base /var/log/perfsonar
+%define logging_base /var/log/perfSONAR
 
 # init scripts must be located in the 'scripts' directory
-%define init_script_1 PingER
+%define init_script_1 PingER.sh
 %define disttag pSPS
-%define relnum 12
+%define relnum 13
 
 Name:           perl-perfSONAR_PS-PingER-server
 Version:        3.1
@@ -50,12 +50,13 @@ Requires:       perl(Hash::Merge)
 Requires:       perl(IO::File)
 Requires:       perl(IO::Interface)
 Requires:       perl(IO::Socket)
-Requires:       perl(Log::Dispatch::FileRotate)
 Requires:       perl(Log::Log4perl) >= 1
 Requires:       perl(LWP::Simple)
 Requires:       perl(LWP::UserAgent)
+Requires:       perl(Mail::Sender)
 Requires:       perl(Math::BigFloat)
 Requires:       perl(Math::BigInt)
+Requires:       perl(Math::Int64)
 Requires:       perl(Module::Load)
 Requires:       perl(Net::Ping)
 Requires:       perl(Net::DNS)
@@ -143,15 +144,16 @@ echo "-----------------------------------------------------------------"
 echo "                  P L E A S E  R E A D                           "
 echo "----- - - - - - - - - - -  - - - - - - -  --  --  - - - - - - - -"
 echo "    In order to finish PingER MP/MA installation You have to     "
-echo " Run:       /etc/init.d/PingER configure                         "
+echo " Run:  /etc/init.d/PingER.sh configure                           "
 echo " This will configure the MA/MP database and webservice's endpoint"
 echo " More information can be found in the                            "
 echo "    /opt/perfsonar_ps/PingER/doc/INSTALL file                    "
 echo "-----------------------------------------------------------------"
 
 %changelog
-* Mon Feb 08 2010 maxim@fnal.gov v3.1.12
-- fixes for issues # 391,392
+
+* Mon May 17 2010 maxim@fnal.gov v3.1.13
+- added pinger service check script with docs and crontab, fixed names
 
 * Tue Jan 08 2010 maxim@fnal.gov v3.1.11
 - removed perl prereq
