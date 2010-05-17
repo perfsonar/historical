@@ -1,0 +1,29 @@
+=  May 24 2010 Conference Call 2:30 p.m. EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+   * TBD
+ # Followup on previous actions:
+   * _*ACTION*_: Maxim will verify his check script helps and continue watching for the pinger issues.
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will add monitoring expectations to the SOP for production global infrastructure. Criteria for adding/removing gLSs from the hints files. Bringing this topic to DICE.
+   * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
+   * _*ACTION*_: Andy will update on the group on the Nagios development.
+   * _*ACTION*_: Everyone: review issue tracker and email a list of the issues they think is critical for 3.2.
+   * _*ACTION*_: Jason will modify the delayGraph.cgi GUI so OWAMP 'max' data is no longer plotted for 3.2.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+ # [IndexingStrategies Indexing Strategies] (Jason/Aaron/Jeff)
+ 
+=== ACTIONS ===
+
+   * _*ACTION*_: TBD
+
+
+== Where ==
+
+ESnet conference bridge:
+
+ * GDS: 00113498255555
+ * Direct Dial:  mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-883-7860 then 8255555# at the prompt. 
