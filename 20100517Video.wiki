@@ -21,7 +21,7 @@ the 95th percentile (or optionally replace all values > than the 95th percentile
        * write a client API where various types of filtering are built into the API
        * store a daily? histogram and the median in the database, so that they can be queried, and not recomputed every time (or maybe a running histogram of the last 7 days?)
    * Q: Who should do this?
-
+ # [IndexingStrategies Indexing Strategies] (Jason/Aaron/Jeff)
  
 === ACTIONS ===
 
