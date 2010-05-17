@@ -13,7 +13,10 @@
 
  # Actions from last call:
    * N/A
- # TBD
+ # Introductions and reason for interest
+ # Discussion of desired scope and result of effort
+ # Discussion of near-term roadmap
+ # Volunteers for material for the next telecon
  
 == Minutes ==
  
@@ -29,4 +32,3 @@ TBD
    * +1-734-615-7474 (Please use if you do not pay for Long Distance)
    * +1-866-411-0013 (toll free US/Canada Only)
  * Access code:	0125784
-
