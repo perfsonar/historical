@@ -15,8 +15,7 @@
    * _*ACTION*_: Everyone: review issue tracker and email a list of the issues they think is critical for 3.2.
  # Discussion of how to filter owamp data (Brian)
    * The current owamp plots shows lots of large spikes that are due to network activity on the host, not due to actual network latency. We need a way to filter this out.
-   * My proposed solution: modify delayGraph.cgi to compute the 95th percentile (http://en.wikipedia.org/wiki/Percentile)  and the median of the data returned, and not show any value above
-the 95th percentile (or optionally replace all values > than the 95th percentile with the median value) when generating the graph
+   * My proposed solution: modify delayGraph.cgi to compute the 95th percentile (http://en.wikipedia.org/wiki/Percentile)  and the median of the data returned, and not show any value above the 95th percentile (or optionally replace all values greater than the 95th percentile with the median value) when generating the graph
    * Future enhancements to this solution should include:
        * write a client API where various types of filtering are built into the API
        * store a daily? histogram and the median in the database, so that they can be queried, and not recomputed every time (or maybe a running histogram of the last 7 days?)
