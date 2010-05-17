@@ -3,14 +3,18 @@
 == Agenda/Minutes ==
 
  # Attendees:
-   * TBD
+   * Marcos, Maxim, Brian, Ahmed, Andy, Joe, Jason, Aaron, Kavitha, Jeff, Wei Ping
  # Followup on previous actions:
    * _*ACTION*_: Jason will follow up on pingER issues.
+       * Maxim has created a check script that will restart pinger if it fails.
    * _*ACTION*_: Ahmed to continue testing with replay and will look for areas of the application that are causing database deadlocks.
+       * Ahmed is attempting to try using xmldb with no transactions.
    * _*ACTION*_: Jason will test the new cache.pl changes and install if there are no problems.
    * _*ACTION*_: Joe will propose SOP for production global infrastructure.  http://code.google.com/p/perfsonar-ps/wiki/GlobalInfrastructureMaintenanceSOP
+        * Joe has a first draft.
    * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
    * _*ACTION*_: Aaron will more fully describe the requirements to support upgrading a toolkit host. (Include config file dependency analysis.)
+        * Aaron has a new document linked to from the dev plan showing this.
    * _*ACTION*_: Everyone: review proposed nagios plugin list and offer Andy feedback. [ http://code.google.com/p/perfsonar-ps/wiki/NagiosPlanning ] 
    * _*ACTION*_: Everyone: review issue tracker and email a list of the issues they think is critical for 3.2.
  # Discussion of how to filter owamp data (Brian)
@@ -21,10 +25,19 @@
        * store a daily? histogram and the median in the database, so that they can be queried, and not recomputed every time (or maybe a running histogram of the last 7 days?)
    * Q: Who should do this?
  # [IndexingStrategies Indexing Strategies] (Jason/Aaron/Jeff)
+   * Tabled to next week.
  
 === ACTIONS ===
 
-   * _*ACTION*_: TBD
+   * _*ACTION*_: Maxim will verify his check script helps and continue watching for the pinger issues.
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will add monitoring expectations to the SOP for production global infrastructure. Criteria for adding/removing gLSs from the hints files. Bringing this topic to DICE.
+   * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
+   * _*ACTION*_: Andy will update on the group on the Nagios development.
+   * _*ACTION*_: Everyone: review issue tracker and email a list of the issues they think is critical for 3.2.
+   * _*ACTION*_: Jason will modify the delayGraph.cgi GUI so OWAMP 'max' data is no longer plotted for 3.2.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+
 
 == Where ==
 
