@@ -113,19 +113,32 @@ Starting/Stopping:
 The service comes with init scripts that may be used to start and stop
 operation:
 
-  /etc/init.d/PingER start
-  /etc/init.d/PingER stop
-  /etc/init.d/PingER restart
+  /etc/init.d/PingER.sh start
+  /etc/init.d/PingER.shstop
+  /etc/init.d/PingER.sh restart
 
 Create symlinks to allow automated start/stop at the boot/shutdown time:
 	
-        ln -s /etc/init.d/PingER  /etc/rc2.d/S99pinger-ps
-        ln -s /etc/init.d/PingEr  /etc/rc6.d/K02pinger-ps
-        ln -s /etc/init.d/PingER  /etc/rc0.d/K02pinger-ps
+        ln -s /etc/init.d/PingER.sh  /etc/rc2.d/S99pinger-ps
+        ln -s /etc/init.d/PingER.sh  /etc/rc6.d/K02pinger-ps
+        ln -s /etc/init.d/PingER.sh  /etc/rc0.d/K02pinger-ps
 
 The service can also be run in a manual fashion (useful for debugging):
 
   perl bin/daemon.pl --verbose --conf=etc/daemon.conf
+  
+Keeping PingER running
+-----------------------
+
+In order to assure uninterruptable service it is recommended to configure a cronjob
+under the "root" account as:
+
+0,10,20,30,40,50 * * * * /opt/perfsonar_ps/PingER/bin/pinger_service_check.pl --mail='<ENTER_SYSADMIN_EMAIL_ACCOUNT>'  --restart 2>&1 > /dev/null
+---------------
+
+This script will be checking the health of the PingER MP and MA and will attempt to restart service if it will die for any reason.
+The email notification will be send to the specified email account.
+
 
 Testing:
 --------

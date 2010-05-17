@@ -1,21 +1,22 @@
 PACKAGE=perfSONAR_PS-PingER-server
 ROOTPATH=/opt/perfsonar_ps/PingER
 VERSION=3.1
+RELEASE=13
 
 default:
 	@echo No need to build the package. Just run \"make install\"
 
 dist:
-	mkdir /tmp/$(PACKAGE)
-	tar ch -T MANIFEST | tar x -C /tmp/$(PACKAGE)
-	tar czf $(PACKAGE)-$(VERSION).tar.gz -C /tmp $(PACKAGE)
-	rm -rf /tmp/$(PACKAGE)
+	mkdir /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
+	tar ch -T MANIFEST | tar x -C /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
+	tar czf $(PACKAGE)-$(VERSION).$(RELEASE).tar.gz -C /tmp $(PACKAGE)-$(VERSION).$(RELEASE)
+	rm -rf /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
 
 upgrade:
-	mkdir /tmp/$(PACKAGE)
-	tar ch --exclude=etc/* -T MANIFEST | tar x -C /tmp/$(PACKAGE)
-	tar czf $(PACKAGE)-$(VERSION)-upgrade.tar.gz -C /tmp $(PACKAGE)
-	rm -rf /tmp/$(PACKAGE)
+	mkdir /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
+	tar ch --exclude=etc/* -T MANIFEST | tar x -C /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
+	tar czf $(PACKAGE)-$(VERSION).$(RELEASE)-upgrade.tar.gz -C /tmp $(PACKAGE)-$(VERSION).$(RELEASE)
+	rm -rf /tmp/$(PACKAGE)-$(VERSION).$(RELEASE)
 
 install:
 	mkdir -p ${ROOTPATH}

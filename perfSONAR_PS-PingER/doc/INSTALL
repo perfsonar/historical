@@ -77,7 +77,7 @@ Installation (YUM):
 Like Apt, YUM installation also manages the task of finding dependencies.  The
 following command is all that is needed:
 
-  yum install perfSONAR_PS-PingER-server-v3.1-12.pSPS.noarch.rpm
+  yum install perfSONAR_PS-PingER-server-v3.1-13.pSPS.noarch.rpm
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -92,7 +92,7 @@ Installation through APT-RPM is easy, simply let the package manager do the work
 of managing the dependencies:
 
   apt-get update
-  apt-get install perfSONAR_PS-PingER-server-v3.1-12.pSPS.noarch.rpm
+  apt-get install perfSONAR_PS-PingER-server-v3.1-13.pSPS.noarch.rpm
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -106,17 +106,17 @@ Installation (Bare RPM):
 If you do not wish to install the Internet2 Repository package, you may simply
 install a noarch RPM:
 
-  wget -c http://tukki.fnal.gov/downloads/perfSONAR_PS-PingER-server-v3.1-12.pSPS.noarch.rpm 
+  wget -c http://lhcopnmon1-mgm.fnal.gov:9090/downloads/perfSONAR_PS-PingER-server-v3.1-13.pSPS.noarch.rpm 
   
 To install without package manager help:
 
-  rpm -ivh perfSONAR_PS-PingER-server-v3.1-12.pSPS.noarch.rpm
+  rpm -ivh perfSONAR_PS-PingER-server-v3.1-13.pSPS.noarch.rpm
   
 Note that this RPM may need packages to install correctly: if they are not found
 on your system manual download and install will be required.  An alternate
 method is to still use a package manager in a "local" way (YUM only):
 
-  yum localinstall perfSONAR_PS-PingER-server-v3.1-12.pSPS.noarch.rpm
+  yum localinstall perfSONAR_PS-PingER-server-v3.1-13.pSPS.noarch.rpm
   
 This will still search the available repositories for any necessary packages.
 
@@ -179,6 +179,20 @@ and
 
   cd perfSONAR_PS-PingER
   svn update
+
+
+Keeping PingER running
+-----------------------
+
+In order to assure uninterruptable service it is recommended to configure a cronjob
+under the "root" account as:
+
+0,10,20,30,40,50 * * * * /opt/perfsonar_ps/PingER/bin/pinger_service_check.pl --mail='<ENTER_SYSADMIN_EMAIL_ACCOUNT>'  --restart 2>&1 > /dev/null
+---------------
+
+This script will be checking the health of the PingER MP and MA and will attempt to restart service if it will die for any reason.
+The email notification will be send to the specified email account.
+
 
 --------------------------------------------------------------------------------
 

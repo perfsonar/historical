@@ -4,6 +4,7 @@ bin/create_landmarks.pl
 bin/daemon.pl
 bin/pinger_ConfigureDaemon
 bin/pinger_client.pl
+bin/pinger_service_check.pl
 doc/INSTALL
 doc/LICENSE
 doc/README
@@ -115,6 +116,6 @@ lib/perfSONAR_PS/Utils/ParameterValidation.pm
 lib/perfSONAR_PS/Utils/PingStats.pm
 lib/perfSONAR_PS/XML/Document.pm
 perl-perfSONAR_PS-PingER-server.spec
-scripts/PingER
+scripts/PingER.sh
 scripts/create_pingerMA_MySQL.sql
 scripts/create_pingerMA_SQLite.sql
