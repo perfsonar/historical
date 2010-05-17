@@ -14,6 +14,7 @@
  # Actions from last call:
    * N/A
  # Introductions and reason for interest
+   * [http://psps.perfsonar.net/client-doc.html Some existing documentation for writing clients with the current PERL code]
  # Discussion of desired scope and result of effort
  # Discussion of near-term roadmap
  # Volunteers for material for the next telecon
