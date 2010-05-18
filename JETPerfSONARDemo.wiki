@@ -1,5 +1,3 @@
-#JET perfSONAR Demonstration Project
-
 = Introduction =
 
 The [http://www.nitrd.gov/subcommittee/lsn/jet/index.html  Joint Engineering Team (JET)] is coordinating
@@ -54,5 +52,41 @@ changes.
 == Bandwidth ==
 
   * Each bandwidth tester will run a 30 second TCP test to all other testers once an hour.
+
+
+== Test Systems ==
+
+NOAA
+
+  * nettest.boulder.noaa.gov  - 10GE attached bandwidth test system in Bolder
+  * nettest-princeton.gfdl.noaa.gov - 10GE attached bandwidth test system in Princeton
+
+Latency test systems will be identified and deployed.
+
+
+Internet2
+		
+  * nms-rthr1.salt.net.internet2.edu - 1 GE Throughput in Salt Lake City
+  * nms-rthr1.newy.net.internet2.edu - 1 GE throughput in New York
+
+  * owamp.salt.net.internet2.edu - Latency in Salt Lake City
+  * owamp.newy.net.internet2.edu - Latenc in New York
+
+ESnet
+
+  * anl-pt1.es.net - 10GE attached bandwidth test system at Argonne in Chicago
+  * nersc-pt1.es.net - 10GE attached bandwidth test system at NERSC
+
+  * anl-owamp.es.net - GE attached latency test system at Argonne in Chicago
+  * nersc-owamp.es.net - GE attached latency test system at NERSC
+
+
+NLR
+
+
+UEN
+
+
+== Measurement Results ==
 
 
