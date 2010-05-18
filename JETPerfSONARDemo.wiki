@@ -4,7 +4,7 @@ The [http://www.nitrd.gov/subcommittee/lsn/jet/index.html  Joint Engineering Tea
 a perfSONAR Demonstration project.  The goal of this project is to better understand the
 issues with deploying multi-domain network measurement services in US federal and research networks.
  
-
+ 
 = Participants =
 
 ESnet
@@ -88,5 +88,3 @@ UEN
 
 
 == Measurement Results ==
-
-
