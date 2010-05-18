@@ -59,7 +59,8 @@ changes.
 NOAA
 
   * nettest.boulder.noaa.gov  - 10GE attached bandwidth test system in Bolder
-  * nettest-princeton.gfdl.noaa.gov - 10GE attached bandwidth test system in Princeton
+  * perfsonar-pri.gfdl.noaa.gov - 10GE attached bandwidth test system in Princeton
+  * owamp-pri.gfdl.noaa.gov - 1GE attached latency test system in Princeton
 
 Latency test systems will be identified and deployed.
 
@@ -70,7 +71,7 @@ Internet2
   * nms-rthr1.newy.net.internet2.edu - 1 GE throughput in New York
 
   * owamp.salt.net.internet2.edu - Latency in Salt Lake City
-  * owamp.newy.net.internet2.edu - Latenc in New York
+  * owamp.newy.net.internet2.edu - Latency in New York
 
 ESnet
 
@@ -89,7 +90,7 @@ UEN
 == Status ==
 
 || Domain || Latency Systems Deployed || Bandwidth Systems Deployed || Latency Tests Configured || Bandwidth Tests Configured ||
-|| NOAA || Yes || ? ||  || ||
+|| NOAA || Yes || Yes ||  || ||
 || Internet2 || Yes || Yes || ||  ||
 || ESnet || Yes || Yes || No || No || 
 || NLR || || || || ||
