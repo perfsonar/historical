@@ -86,5 +86,15 @@ NLR
 
 UEN
 
+== Status ==
+
+|| Domain || Latency Systems Deployed || Bandwidth Systems Deployed || Latency Tests Configured || Bandwidth Tests Configured ||
+|| NOAA || Yes || ? ||  || ||
+|| Internet2 || Yes || Yes || ||  ||
+|| ESnet || Yes || Yes || No || No || 
+|| NLR || || || || ||
+|| UEN || || || || ||
+
+
 
 == Measurement Results ==
