@@ -142,9 +142,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
             if ( $flags[0] ) {
                 print "        data.addColumn('number', '[Src to Dst] Min Delay (MSec)');\n";
-                print "        data.addColumn('number', '[Src to Dst] Max Delay (MSec)');\n";
                 $posMap{ $pos[0] } = $posCounter++;
-                $posMap{ $pos[1] } = $posCounter++;
             }
             if ( $flags[1] ) {
                 print "        data.addColumn('string', '[Src to Dst] Observed Loss');\n";
@@ -152,6 +150,10 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
                 $posMap{ $pos[2] } = $posCounter++;
                 $posMap{ $pos[3] } = $posCounter++;
             }
+            if ( $flags[0] ) {
+                print "        data.addColumn('number', '[Src to Dst] Max Delay (MSec)');\n";
+                $posMap{ $pos[1] } = $posCounter++;
+            }            
             if ( $flags[2] ) {
                 print "        data.addColumn('string', '[Src to Dst] Observed Duplicates');\n";
                 print "        data.addColumn('string', 'text2');\n";
@@ -162,15 +164,17 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             if ( $cgi->param( 'key2' ) ) {
                 if ( $flags[3] ) {
                     print "        data.addColumn('number', '[Dst to Src] Min Delay (MSec)');\n";
-                    print "        data.addColumn('number', '[Dst to Src] Max Delay (MSec)');\n";
                     $posMap{ $pos[6] } = $posCounter++;
-                    $posMap{ $pos[7] } = $posCounter++;
                 }
                 if ( $flags[4] ) {
                     print "        data.addColumn('string', '[Dst to Src] Observed Loss');\n";
                     print "        data.addColumn('string', 'text1');\n";
                     $posMap{ $pos[8] } = $posCounter++;
                     $posMap{ $pos[9] } = $posCounter++;
+                }
+                if ( $flags[3] ) {
+                    print "        data.addColumn('number', '[Dst to Src] Max Delay (MSec)');\n";
+                    $posMap{ $pos[7] } = $posCounter++;
                 }
                 if ( $flags[5] ) {
                     print "        data.addColumn('string', '[Dst to Src] Observed Duplicates');\n";
@@ -193,12 +197,14 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
                     print "        data.setValue(" . $counter . ", 0, new Date(" . $year[0] . "," . ( $year[1] - 1 ) . "," . $year[2] . "," . $time[0] . "," . $time[1] . "," . $time[2] . "));\n";
                     if ( exists $store{$time}{"min"}{"src"} and $store{$time}{"min"}{"src"} ) {
                         print "        data.setValue(" . $counter . ", " . $posMap{ $pos[0] } . ", " . ( $store{$time}{"min"}{"src"} * 1000 ) . ");\n" if $store{$time}{"min"}{"src"};
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[1] } . ", " . ( $store{$time}{"max"}{"src"} * 1000 ) . ");\n" if $store{$time}{"max"}{"src"};
                     }
                     if ( $store{$time}{"loss"}{"src"} ) {
                         print "        data.setValue(" . $counter . ", " . $posMap{ $pos[2] } . ", 'Loss Observed');\n";
                         print "        data.setValue(" . $counter . ", " . $posMap{ $pos[3] } . ", 'Lost " . $store{$time}{"loss"}{"src"} . " packets out of " . $store{$time}{"sent"}{"src"} . "');\n";
-                    }
+                    }                   
+                    if ( exists $store{$time}{"max"}{"src"} and $store{$time}{"max"}{"src"} ) {
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[1] } . ", " . ( $store{$time}{"max"}{"src"} * 1000 ) . ");\n" if $store{$time}{"max"}{"src"};
+                    }                                        
                     if ( $store{$time}{"dups"}{"src"} ) {
                         print "        data.setValue(" . $counter . ", " . $posMap{ $pos[4] } . ", 'Duplicates Observed');\n";
                         print "        data.setValue(" . $counter . ", " . $posMap{ $pos[5] } . ", '" . $store{$time}{"dups"}{"src"} . " duplicate packets out of " . $store{$time}{"sent"}{"src"} . "');\n";
@@ -206,11 +212,13 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
 
                     if ( exists $store{$time}{"min"}{"dst"} and $store{$time}{"min"}{"dst"} ) {
                         print "        data.setValue(" . $counter . ", " . $posMap{ $pos[6] } . ", " . ( $store{$time}{"min"}{"dst"} * 1000 ) . ");\n" if $store{$time}{"min"}{"dst"};
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[7] } . ", " . ( $store{$time}{"max"}{"dst"} * 1000 ) . ");\n" if $store{$time}{"max"}{"dst"};
                     }
                     if ( $store{$time}{"loss"}{"dst"} ) {
                         print "        data.setValue(" . $counter . ", " . $posMap{ $pos[8] } . ", 'Loss Observed');\n";
                         print "        data.setValue(" . $counter . ", " . $posMap{ $pos[9] } . ", 'Lost " . $store{$time}{"loss"}{"dst"} . " packets out of " . $store{$time}{"sent"}{"dst"} . "');\n";
+                    }
+                    if ( exists $store{$time}{"max"}{"dst"} and $store{$time}{"max"}{"dst"} ) {
+                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[7] } . ", " . ( $store{$time}{"max"}{"dst"} * 1000 ) . ");\n" if $store{$time}{"max"}{"dst"};
                     }
                     if ( $store{$time}{"dups"}{"dst"} ) {
                         print "        data.setValue(" . $counter . ", " . $posMap{ $pos[10] } . ", 'Duplicates Observed');\n";
