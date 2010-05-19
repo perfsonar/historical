@@ -55,23 +55,38 @@ The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series o
 
 === Milestone Base 1 ===
   * Produce an initial set of packages for the tools/services that will be included in the Toolkit
+  * Owner: Eric/Aaron
   * Tasks:
     * Build RPM of owamp
+        * Status: done
     * Build RPM of bwctl
+        * Status: done
     * Build RPM of PingER
+        * Status: done
     * Build RPM of Lookup Service
+        * Status: done
     * Build RPM of LS Registration Daemon
+        * Status: done
     * Build RPM of LS Cache Daemon
+        * Status: done
     * Build RPM of perfSONAR-BUOY
+        * Status: done
     * Build RPM of NDT
+        * Status: done
     * Build RPM of NPAD
+        * Status: done
     * Build RPM of web100 kernel
+        * Status: done
     * Build RPM of web100 userland
+        * Status: done
     * Build RPM of iperf
+        * Status: done
     * Build RPM of nuttcp
+        * Status: done
 
 === Milestone Base 2 - Alpha ===
   * Produce an initial kickstart file that will install the Toolkit with the exception of the Web GUI
+  * Owner: Eric
   * Tasks:
     * Create development yum repository
     * Load all the above RPMs into the repository
@@ -81,11 +96,15 @@ The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series o
  
 === Milestone Base 3 - Beta ===
   * Add the Web GUI to the Toolkit
+  * Owner: Aaron
   * Tasks:
     * Package the Web Configuration GUI
       * Change existing configuration backend to change the default locations of configuration files (if changed)
+        * Status: done
       * Build configuration daemon that the Web GUI can talk to to write new versions of configuration files and restart daemons
+        * Status: done
       * Either modify backend or web GUIs to talk to daemon instead of writing files/restarting services directly
+        * Status: done
     * Depending on how configuration is stored, make changes to the packaging of other services (e.g. if there's a centralized configuration file for common pS-PS configuration options)
       * The configuration has a large number of shared components. Centralizing these shared configuration pieces would make it easier to [http://code.google.com/p/perfsonar-ps/wiki/pSPT32_DevNotes#Configuration_Change_Effects update service/tool configuration] when the system configuration changes
     * Add the Web Configuration GUI RPM to the yum repository
@@ -102,6 +121,7 @@ The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series o
 === Milestone Install CD 1 - Beta ===
   * Depends: Milestone Base 3
   * Produce an initial installation ISO for testing
+  * Owner: Eric
   * Tasks:
     * Generate a basic installation kickstart from the Base kickstart
     * Migrate any changes to Base RPMs or kickstart to the Base
@@ -109,6 +129,7 @@ The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series o
 
 === Milestone Install CD 2 ===
   * Based on user feedback and testing, firm up the installation CD
+  * Owner: Eric
   * Tasks:
     * Collect user feedback from the beta testers
     * Fix any issues encountered by testers
@@ -117,10 +138,13 @@ The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series o
 === Milestone Live CD 1 - Alpha ===
   * Depends: Milestone Base 4
   * Produce an initial Live CD instance that will save configuration/data to the backing store
+  * Owner: Aaron
   * Tasks:
     * Modify the standard Live CD to use the backing store instead of a ramdisk
-    * Modify the command-line tools (network setup, password setting, and creating backing store) to work on the CentOS base
+    * Add a tool to create the backing store
+    * Add a tool to easily allow folks to set the root/'knoppix' passwords
     * Build a tool to save the configuration to the backing store
+      * Status: started
     * Build a tool to store the data on the backing store
     * Package the above tools and include them in the Live CD kickstart
     * Migrate any changes to Base RPMs or kickstart to the Base
@@ -128,6 +152,7 @@ The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series o
 
 === Milestone Live CD 2 - Beta ===
   * Produce a Live CD instance that will upgrade an existing Knoppix-based installation
+  * Owner: Aaron
   * Tasks:
     * Produce tools capable of upgrading the existing backing store configuration/data to the new approach
       * See [http://code.google.com/p/perfsonar-ps/wiki/pSPT32_DevNotes#Upgrade_Path here] for some specifics on how upgrades might be handled
@@ -140,6 +165,7 @@ The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series o
 === Milestone Live CD 3 ===
   * Based on user feedback and testing, firm up the Live CD
   * Migrate changes to the Base packages/kickstart as needed
+  * Owner: Aaron
   * Tasks:
     * Collect user feedback from the beta testers
     * Fix any issues encountered by testers
@@ -149,6 +175,7 @@ The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series o
 === Milestone Release Candidate 1 ===
   * Depends: Milestone Live CD 3, Milestone Install CD 2
   * Synchronize any changes to the Base necessitated by the Live CD or Install CD, and produce release candidates and documentation for each
+  * Owner: Eric/Aaron
   * Tasks:
     * Produce installation documentation for each of the installation methods
     * Produce toolkit documentation for the various services and web guis
@@ -159,6 +186,7 @@ The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series o
 === Milestone Release Candidate X ===
   * Based on user feedback and testing, firm up the Live CD and Install CD
   * Repeat as necessary to fix issues
+  * Owner: Eric/Aaron
   * Tasks:
     * Collect user feedback from the testers
     * Fix any issues encountered by testers
@@ -166,6 +194,7 @@ The Live CD version of the toolkit is meant to be an upgrade to the 3.1 series o
 
 === Milestone Final Release ===
   * Produce final versions of the Live CD, Install CD and documentation
+  * Owner: Eric/Aaron
   * Tasks:
     * Finalize documentation
     * Update relevant websites with release information
