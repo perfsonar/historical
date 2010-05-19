@@ -33,7 +33,7 @@
 == Minutes ==
  
  # Introductions and reason for interest
-   * Dan starts us off, wants to know why people are here.  He is involved with the FEDS project (data transfer management agent).  Specifically the monitoring - wants to pS but discovered there is not an easy way to get information.  Can go the long way, wants to see an API.  
+   * Dan starts us off, wants to know why people are here.  He is involved with the CEDPS project (see http://www.cedps.net/).  Specifically the monitoring - wants to pS but discovered there is not an easy way to get information.  Can go the long way, wants to see an API.  
    * Ezra doesn't want to deal with the low level knowledge since not always using perl (e.g. using Java, etc.).  Wants access to the information without having to know about structure of XML, etc. 
    * Maxim is doing ecenter.  Talks about PingER APIs and how the current APIs are just crude wrappers around XML generation (used in CGIs etc)
    * Andy wants to continue the work talked about at JTs to implement APIs for client/application developers
