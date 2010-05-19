@@ -64,31 +64,36 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
         $end   = $sec;
     }
 
-    my @flags = ( 0, 0, 0, 0, 0, 0 );
+    my @flags = ( 0, 0 );
     my %store = ();
-    
+
     #retrieve data for forward direction
-    foreach my $key1( split '_', $cgi->param('key') ){
-        &retrieveData('key' => $key1, 
-                      'start' => $start, 
-                      'end' => $end, 
-                      'flags' => \@flags,
-                      'store' => \%store, 
-                      'storeType' => 'src', 
-                      'ma' => $ma, 
-                      'parser' => $parser);
-    } 
+    foreach my $key1 ( split '_', $cgi->param( 'key' ) ) {
+        &retrieveData(
+            'key'       => $key1,
+            'start'     => $start,
+            'end'       => $end,
+            'flags'     => \@flags,
+            'store'     => \%store,
+            'storeType' => 'src',
+            'ma'        => $ma,
+            'parser'    => $parser
+        );
+    }
+
     #retrieve data for reverse direction
-    foreach my $key2( split '_', $cgi->param('key2') ){
-        &retrieveData('key' => $key2, 
-                      'start' => $start, 
-                      'end' => $end, 
-                      'flags' => \@flags,
-                      'store' => \%store, 
-                      'storeType' => 'dst', 
-                      'ma' => $ma, 
-                      'parser' => $parser);
-    } 
+    foreach my $key2 ( split '_', $cgi->param( 'key2' ) ) {
+        &retrieveData(
+            'key'       => $key2,
+            'start'     => $start,
+            'end'       => $end,
+            'flags'     => \@flags,
+            'store'     => \%store,
+            'storeType' => 'dst',
+            'ma'        => $ma,
+            'parser'    => $parser
+        );
+    }
 
     my $counter = 0;
     foreach my $time ( keys %store ) {
@@ -99,7 +104,7 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
     print "  <head>\n";
     print "    <title>perfSONAR-PS perfAdmin Delay Graph</title>\n";
 
-    if ( $flags[0] or $flags[3] ) {
+    if ( $flags[0] or $flags[1] ) {
         if ( scalar keys %store > 0 ) {
             my $title = q{};
             if ( $cgi->param( 'src' ) and $cgi->param( 'dst' ) ) {
@@ -127,10 +132,6 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
                 $title = "Observed Latency";
             }
 
-            my $posCounter = 1;
-            my @pos        = ( "src-min", "src-loss", "src-loss2", "dummy1", "src-dups", "src-dups2", "dst-min", "dst-loss", "dst-loss2", "dummy2", "dst-dups", "dst-dups2" );
-            my %posMap     = ();
-
             print "    <script type=\"text/javascript\" src=\"http://www.google.com/jsapi\"></script>\n";
             print "    <script type=\"text/javascript\">\n";
             print "      google.load(\"visualization\", \"1\", {packages:[\"annotatedtimeline\"]});\n";
@@ -139,49 +140,38 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
             print "        var data = new google.visualization.DataTable();\n";
 
             print "        data.addColumn('datetime', 'Time');\n";
-
-            if ( $flags[0] ) {
-                print "        data.addColumn('number', '[Src to Dst] Delay (MSec)');\n";
-                $posMap{ $pos[0] } = $posCounter++;
-            }
-            if ( $flags[1] ) {
-                print "        data.addColumn('string', '[Src to Dst] Observed Loss');\n";
-                print "        data.addColumn('string', 'text1');\n";
-                $posMap{ $pos[1] } = $posCounter++;
-                $posMap{ $pos[2] } = $posCounter++;
-            }        
-            if ( $flags[2] ) {
-                print "        data.addColumn('number');\n";
-                print "        data.addColumn('string', '[Src to Dst] Observed Duplicates');\n";
-                print "        data.addColumn('string', 'text2');\n";
-                $posMap{ $pos[3] } = $posCounter++;
-                $posMap{ $pos[4] } = $posCounter++;
-                $posMap{ $pos[5] } = $posCounter++;
-            }
+            print "        data.addColumn('number', '[Src to Dst] Delay (MSec)');\n";
+            print "        data.addColumn('string', '[Src to Dst] Observed Loss');\n";
+            print "        data.addColumn('string', 'text1');\n";
+            print "        data.addColumn('number');\n";
+            print "        data.addColumn('string', '[Src to Dst] Observed Duplicates');\n";
+            print "        data.addColumn('string', 'text2');\n";
 
             if ( $cgi->param( 'key2' ) ) {
-                if ( $flags[3] ) {
-                    print "        data.addColumn('number', '[Dst to Src] Delay (MSec)');\n";
-                    $posMap{ $pos[6] } = $posCounter++;
-                }                
-                if ( $flags[4] ) {
-                    print "        data.addColumn('string', '[Dst to Src] Observed Loss');\n";
-                    print "        data.addColumn('string', 'text1');\n";
-                    $posMap{ $pos[7] } = $posCounter++;
-                    $posMap{ $pos[8] } = $posCounter++;                    
-                }
-                if ( $flags[5] ) {
-                    print "        data.addColumn('number');\n";
-                    print "        data.addColumn('string', '[Dst to Src] Observed Duplicates');\n";
-                    print "        data.addColumn('string', 'text2');\n";
-                    $posMap{ $pos[9] } = $posCounter++;
-                    $posMap{ $pos[10] } = $posCounter++;
-                    $posMap{ $pos[11] } = $posCounter++;
-                }
+                print "        data.addColumn('number', '[Dst to Src] Delay (MSec)');\n";
+                print "        data.addColumn('string', '[Dst to Src] Observed Loss');\n";
+                print "        data.addColumn('string', 'text1');\n";
+                print "        data.addColumn('number');\n";
+                print "        data.addColumn('string', '[Dst to Src] Observed Duplicates');\n";
+                print "        data.addColumn('string', 'text2');\n";
             }
-
             print "        data.addRows(" . $counter . ");\n";
 
+            print "        data.setValue(0, 0, undefined);\n";
+            print "        data.setValue(0, 1, undefined);\n";
+            print "        data.setValue(0, 2, undefined);\n";
+            print "        data.setValue(0, 3, undefined);\n";
+            print "        data.setValue(0, 4, undefined);\n";
+            print "        data.setValue(0, 5, undefined);\n";
+            if ( $cgi->param( 'key2' ) ) {
+                print "        data.setValue(0, 6, undefined);\n";
+                print "        data.setValue(0, 7, undefined);\n";
+                print "        data.setValue(0, 8, undefined);\n";
+                print "        data.setValue(0, 9, undefined);\n";
+                print "        data.setValue(0, 10, undefined);\n";
+                print "        data.setValue(0, 11, undefined);\n";
+                print "        data.setValue(0, 12, undefined);\n";
+            }
             $counter = 0;
             foreach my $time ( sort keys %store ) {
                 my $date  = ParseDateString( "epoch " . $time );
@@ -192,49 +182,41 @@ if ( $cgi->param( 'key' ) and $cgi->param( 'url' ) ) {
                 if ( $#year > 1 and $#time > 1 ) {
                     print "        data.setValue(" . $counter . ", 0, new Date(" . $year[0] . "," . ( $year[1] - 1 ) . "," . $year[2] . "," . $time[0] . "," . $time[1] . "," . $time[2] . "));\n";
                     if ( exists $store{$time}{"min"}{"src"} and $store{$time}{"min"}{"src"} ) {
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[0] } . ", " . ( $store{$time}{"min"}{"src"} * 1000 ) . ");\n" if $store{$time}{"min"}{"src"};
-                    }  
+                        print "        data.setValue(" . $counter . ", 1, " . ( $store{$time}{"min"}{"src"} * 1000 ) . ");\n" if $store{$time}{"min"}{"src"};
+                    }
                     if ( $store{$time}{"loss"}{"src"} ) {
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[1] } . ", 'Loss Observed');\n";
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[2] } . ", 'Lost " . $store{$time}{"loss"}{"src"} . " packets out of " . $store{$time}{"sent"}{"src"} . "');\n";
-                    }                                                       
+                        print "        data.setValue(" . $counter . ", 2, 'Loss Observed (SRC to DST)');\n";
+                        print "        data.setValue(" . $counter . ", 3, 'Lost " . $store{$time}{"loss"}{"src"} . " packets out of " . $store{$time}{"sent"}{"src"} . "');\n";
+                    }
                     if ( $store{$time}{"dups"}{"src"} ) {
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[3] } . ", undefined);\n";
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[4] } . ", 'Duplicates Observed');\n";
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[5] } . ", '" . $store{$time}{"dups"}{"src"} . " duplicate packets out of " . $store{$time}{"sent"}{"src"} . "');\n";
+                        print "        data.setValue(" . $counter . ", 4, undefined);\n";
+                        print "        data.setValue(" . $counter . ", 5, 'Duplicates Observed (SRC to DST)');\n";
+                        print "        data.setValue(" . $counter . ", 6, '" . $store{$time}{"dups"}{"src"} . " duplicate packets out of " . $store{$time}{"sent"}{"src"} . "');\n";
                     }
 
                     if ( exists $store{$time}{"min"}{"dst"} and $store{$time}{"min"}{"dst"} ) {
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[6] } . ", " . ( $store{$time}{"min"}{"dst"} * 1000 ) . ");\n" if $store{$time}{"min"}{"dst"};
+                        print "        data.setValue(" . $counter . ", 7, " . ( $store{$time}{"min"}{"dst"} * 1000 ) . ");\n" if $store{$time}{"min"}{"dst"};
                     }
                     if ( $store{$time}{"loss"}{"dst"} ) {
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[7] } . ", 'Loss Observed');\n";
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[8] } . ", 'Lost " . $store{$time}{"loss"}{"dst"} . " packets out of " . $store{$time}{"sent"}{"dst"} . "');\n";
+                        print "        data.setValue(" . $counter . ", 8, 'Loss Observed (DST to SRC)');\n";
+                        print "        data.setValue(" . $counter . ", 9, 'Lost " . $store{$time}{"loss"}{"dst"} . " packets out of " . $store{$time}{"sent"}{"dst"} . "');\n";
                     }
                     if ( $store{$time}{"dups"}{"dst"} ) {
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[9] } . ", undefined);\n";
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[10] } . ", 'Duplicates Observed');\n";
-                        print "        data.setValue(" . $counter . ", " . $posMap{ $pos[11] } . ", '" . $store{$time}{"dups"}{"dst"} . " duplicate packets out of " . $store{$time}{"sent"}{"dst"} . "');\n";
+                        print "        data.setValue(" . $counter . ", 10, undefined);\n";
+                        print "        data.setValue(" . $counter . ", 11, 'Duplicates Observed (DST to SRC)');\n";
+                        print "        data.setValue(" . $counter . ", 12, '" . $store{$time}{"dups"}{"dst"} . " duplicate packets out of " . $store{$time}{"sent"}{"dst"} . "');\n";
                     }
                 }
                 $counter++;
             }
-
             print "        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));\n";
-            if ( $flags[1] or $flags[2] or $flags[4] or $flags[5] ) {
-                print "        chart.draw(data, {legendPosition: 'newRow', displayAnnotations: true, colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff']});\n";
-                # JZ 5/19/10
-                #
-                # Support for a 'filter box', being withheld for now.  
-                #print "        chart.draw(data, {legendPosition: 'newRow', displayAnnotations: true, displayAnnotationsFilter: true, colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff']});\n";
-            }
-            else {
-                print "        chart.draw(data, {legendPosition: 'newRow', colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff'], displayAnnotations: true});\n";
-                # JZ 5/19/10
-                #
-                # Support for a 'filter box', being withheld for now.                
-                #print "        chart.draw(data, {legendPosition: 'newRow', colors: ['#ff8800', '#ff0000', '#0088ff', '#0000ff'], displayAnnotations: true, displayAnnotationsFilter: true});\n";
-            }
+
+            print "        chart.draw(data, {legendPosition: 'newRow', displayAnnotations: true, colors: ['#ff0000', '#00ff00', '#0000ff']});\n";
+            # JZ 5/19/10
+            #
+            # Support for a 'filter box', being withheld for now.
+            #print "        chart.draw(data, {legendPosition: 'newRow', displayAnnotations: true, displayAnnotationsFilter: true, colors: ['#ff0000', '#00ff00', '#0000ff']});\n";
+
             print "        chart.hideDataColumns([4, 10]);\n";
             print "      }\n";
             print "    </script>\n";
@@ -274,18 +256,29 @@ else {
 Retrieve data based on a key using the given parameters
 
 =cut
-sub retrieveData(){
-    my $parameters = validateParams( @_, { 'key' => 1, 'start' => 1, 'end' => 1, 
-                                           'flags' => 1, 'store' => 1, 'storeType' => 1, 
-                                           'ma' => 1, 'parser' => 1 } );
+
+sub retrieveData() {
+    my $parameters = validateParams(
+        @_,
+        {
+            'key'       => 1,
+            'start'     => 1,
+            'end'       => 1,
+            'flags'     => 1,
+            'store'     => 1,
+            'storeType' => 1,
+            'ma'        => 1,
+            'parser'    => 1
+        }
+    );
     my @eventTypes = ();
-    
+
     my $subject = "  <nmwg:key id=\"key-1\">\n";
     $subject .= "    <nmwg:parameters id=\"parameters-key-1\">\n";
     $subject .= "      <nmwg:parameter name=\"maKey\">" . $parameters->{'key'} . "</nmwg:parameter>\n";
     $subject .= "    </nmwg:parameters>\n";
     $subject .= "  </nmwg:key>  \n";
-    
+
     my $result = $parameters->{'ma'}->setupDataRequest(
         {
             start      => $parameters->{'start'},
@@ -295,7 +288,7 @@ sub retrieveData(){
             eventTypes => \@eventTypes
         }
     );
-    
+
     my $doc1 = q{};
     eval { $doc1 = $parameters->{'parser'}->parse_string( $result->{"data"}->[0] ); };
     if ( $EVAL_ERROR ) {
@@ -303,12 +296,12 @@ sub retrieveData(){
         print "<body><h2 align=\"center\">Cannot parse XML response from service.</h2></body></html>";
         exit( 1 );
     }
-    
+
     my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
     if ( $datum1 ) {
         my $flagIndex = 0;
-        if($parameters->{'storeType'} eq 'dst'){
-            $flagIndex = 3;
+        if ( $parameters->{'storeType'} eq 'dst' ) {
+            $flagIndex = 1;
         }
         foreach my $dt ( $datum1->get_nodelist ) {
             my $s_secs = UnixDate( $dt->getAttribute( "startTime" ), "%s" );
@@ -323,20 +316,17 @@ sub retrieveData(){
 
             my $loss = $dt->getAttribute( "loss" );
             $loss = eval( $loss ) if $loss;
-            $parameters->{'flags'}->[$flagIndex + 1] = 1 if $loss;
 
             my $dups = $dt->getAttribute( "duplicates" );
             $dups = eval( $dups ) if $dups;
-            $parameters->{'flags'}->[$flagIndex + 2] = 1 if $dups;
 
-            $parameters->{'store'}->{$e_secs}{"min"}{$parameters->{'storeType'}}  = $min  if $e_secs and $min;
-            $parameters->{'store'}->{$e_secs}{"loss"}{$parameters->{'storeType'}} = $loss if $e_secs and $loss;
-            $parameters->{'store'}->{$e_secs}{"dups"}{$parameters->{'storeType'}} = $dups if $e_secs and $dups;
-            $parameters->{'store'}->{$e_secs}{"sent"}{$parameters->{'storeType'}} = $sent if $e_secs and $sent;
+            $parameters->{'store'}->{$e_secs}{"min"}{ $parameters->{'storeType'} }  = $min  if $e_secs and $min;
+            $parameters->{'store'}->{$e_secs}{"loss"}{ $parameters->{'storeType'} } = $loss if $e_secs and $loss;
+            $parameters->{'store'}->{$e_secs}{"dups"}{ $parameters->{'storeType'} } = $dups if $e_secs and $dups;
+            $parameters->{'store'}->{$e_secs}{"sent"}{ $parameters->{'storeType'} } = $sent if $e_secs and $sent;
         }
     }
 }
-
 
 __END__
 
