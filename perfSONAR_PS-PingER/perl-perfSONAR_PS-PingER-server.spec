@@ -85,6 +85,9 @@ Requires:       perl-DBD-MySQL
 Requires:       mysql-server 
 Requires:       libdbi-dbd-mysql
 ###Requires:       libdbi-dbd-sqlite
+Requires:       coreutils
+Requires:       shadow-utils
+Requires: 	chkconfig
 
 %description
 The perfSONAR_PS PingER MA/MP allows one to make ICMP ping data available in SQL databases using the perfSONAR 
@@ -140,6 +143,9 @@ mkdir -p /var/run/PingER
 chown -R perfsonar:perfsonar   /var/run/PingER
 mkdir -p /var/lib/PingER
 chown -R perfsonar:perfsonar   /var/lib/PingER
+
+/sbin/chkconfig --add %{init_script_1}
+
 echo "-----------------------------------------------------------------"
 echo "                  P L E A S E  R E A D                           "
 echo "----- - - - - - - - - - -  - - - - - - -  --  --  - - - - - - - -"

@@ -72,6 +72,12 @@ Requires:	    mysql
 Requires:	    mysql-server
 Requires:	    libdbi-dbd-mysql
 Requires:       perl-perfSONAR_PS-perfSONARBUOY-config
+
+Requires:       chkconfig
+Requires:       shadow-utils
+Requires:       coreutils
+Requires:       initscripts
+
 %description server
 The perfSONARBUOY server consists of the tools that interact with the database and collect measurements from local or remote beacons.
 

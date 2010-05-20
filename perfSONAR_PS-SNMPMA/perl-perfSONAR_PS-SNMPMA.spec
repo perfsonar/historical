@@ -81,6 +81,10 @@ Requires:		perl(XML::SAX::Exception)
 Requires:       	perl
 Requires:		rrdtool
 Requires:		rrdtool-perl
+Requires:		coreutils
+Requires:		which
+Requires:		shadow-utils
+Requires:		chkconfig
 
 %description
 The perfSONAR-PS SNMP MA is a measurement archive that is able to deliver gathered SNMP data (from tools such as Cricket/MRTG/Cacti) through a web services interface.  This particular version depends on RRDtool and related libaries to read the underlying data.    
