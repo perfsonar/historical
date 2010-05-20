@@ -1,5 +1,5 @@
 %define install_base /opt/perfsonar_ps/PingER
-%define logging_base /var/log/perfsonar
+%define logging_base /var/log/perfSONAR
 
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 PingER.sh
@@ -113,21 +113,36 @@ mkdir -p $RPM_BUILD_ROOT/etc/init.d
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_1} > scripts/%{init_script_1}.new
 install -m 755 scripts/%{init_script_1}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_1}
 
+mkdir -p $RPM_BUILD_ROOT/etc/PingER/db_config
+ln -s %{install_base}/etc/pinger-landmarks.xml $RPM_BUILD_ROOT/etc/PingER/pinger-landmarks.xml
+ln -s %{install_base}/etc/daemon.conf $RPM_BUILD_ROOT/etc/PingER/daemon.conf
+ln -s %{install_base}/etc/daemon_logger.conf $RPM_BUILD_ROOT/etc/PingER/daemon_logger.conf
+ln -s %{install_base}/scripts/create_pingerMA_MySQL.sql $RPM_BUILD_ROOT/etc/PingER/db_config/create_pingerMA_MySQL.sql
+ln -s %{install_base}/scripts/create_pingerMA_SQLite.sql $RPM_BUILD_ROOT/etc/PingER/db_config/create_pingerMA_SQLite.sql 
+ 
+chmod -R u+rwX,go+rX,go-w $RPM_BUILD_ROOT/*
+ 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(0644,perfsonar,perfsonar,0755)
+%defattr(-,perfsonar,perfsonar,-)
 %doc %{install_base}/doc/*
 %config(noreplace) %{install_base}/etc/*
-%attr(0755,perfsonar,perfsonar) %{install_base}/bin/*
-%attr(0755,perfsonar,perfsonar) %{install_base}/scripts/*
+%config(noreplace) /etc/PingER/*
+%{install_base}/bin/*
+%{install_base}/scripts/*
 %{install_base}/lib/*
-%attr(0755,perfsonar,perfsonar) /etc/init.d/*
+/etc/init.d/*
 
 %post
 mkdir -p %{logging_base}
 chown perfsonar:perfsonar %{logging_base}
+chown -R perfsonar:perfsonar /etc/PingER
+mkdir -p /var/run/PingER
+chown -R perfsonar:perfsonar   /var/run/PingER
+mkdir -p /var/lib/PingER
+chown -R perfsonar:perfsonar   /var/lib/PingER
 
 /sbin/chkconfig --add %{init_script_1}
 
