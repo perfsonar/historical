@@ -49,11 +49,15 @@ Most domains that will be deploying dynamic circuit monitoring infrastructure wi
 
 The architecture makes use of 3 general types of services: a service to allow clients to find services and relevant measurement data, perfSONAR Lookup Service (LS), a service to allow clients to look up topological information, perfSONAR Topology Service (TS), and services that provide measurement data for clients, perfSONAR Measurement Archives (MA).
 
+The clients in this architecture can include both central monitoring systems like E2EMon as well as individual applications running on end-site clients.
+
 In the model, a circuit, identified by a circuit identifier, is described by a circuit descriptor which contains the properties applicable to the entire end-to-end circuit, including bandwidth, duration, and other similar metadata. This descriptor is added to a TS. Clients query the LS using the circuit identifier to find which TS contains the circuit descriptor for that circuit.
 
 The circuit descriptor contains a list of segment identifiers for the domain-specific segments that comprise the circuit. Each domain, or an entity working on its behalf, produces a segment descriptor that contains information about their segment of the circuit, along with as much topological detail as they desire to publish. These segment descriptors are then registered with a TS. Clients query the LS using the segment identifiers in the circuit descriptor to find which TSes contain the segment descriptors for each domain's segment.
 
 Once the client has the circuit descriptors and the segment descriptors, they can use the LS along with information contained within the descriptors to find measurements that are applicable to each circuit segment, or the entire end-to-end circuit.
+
+Since clients will often make repeated queries to obtain updated performance statistics, they may cache any of the information discovered about the circuit, including the various descriptors, the location of topology servers and measurement archives. This caching allows them to short circuit much of the discovery process described above.
 
 ==== Benefits Of This Architecture ====
 
@@ -78,7 +82,9 @@ There are 4 separate elements involved in describing circuits:
 
 The separation of elements is key to the architecture. It permits clients to find relevant information about the circuits while enabling domains to retain control over the information that clients can receive.
 
-The circuit descriptor must be created by the source domain and registered into a Topology Service. The circuit descriptor must contain the segment identifiers for all the domains along the path, therefore, the source domain must know these segment descriptors. This could be accomplished with tighter integration with the circuit provisioning serivce, or by using an algorithmic approach for generating the identifier. An example algorithm might take the circuit identifier and using that as the domain-specific portion of the identifier. For example, a circuit identifier "urn:glif:internet2.edu:gri-123456" might have an ESnet segment identifier of "urn:glif:es.net:circuit_internet2.edu:gri-123456". The algorithmic approach allows for distributed domains to work together without necessitating communication every time a circuit is setup.
+The circuit descriptor must be created by the source domain and must be registered into a Topology Service. The circuit descriptor must contain the segment identifiers for all the domains along the path, therefore, the source domain must know these segment descriptors. This could be accomplished with tighter integration with the circuit provisioning serivce, or by using an algorithmic approach for generating the identifier. For example, one algorithm that might be used would take the circuit identifier and use it as the domain-specific portion of the identifier. A circuit identifier "urn:glif:internet2.edu:gri-123456" might have an ESnet segment identifier of "urn:glif:es.net:circuit_internet2.edu:gri-123456". Using an algorithm to generate the segment identifiers allows for distributed domains to work together without necessitating communication every time a circuit is setup.
+
+The segment descriptor can be created by the domain providing that segment of the circuit, or could be created by an entity acting on behalf of that domain. This descriptor must be registered into a Topology Service, either one provided by the domain, or one that has agreed to store the descriptor for the domain. The domain can provide more detail in the segment descriptor for trusted clients than they do for other clients. This could be done by having the segment descriptor contain an abstract path through the network, and allowing trusted clients to query to find out the infrastructure that underlies that abstract path. However, if the internal infrastructure is abstracted, the domain must provide a way for clients to discover measurement data using the abstract path.
 
 === Topology Service Infrastructure ===
 
@@ -112,7 +118,9 @@ The measurement data for circuits needs to be made available in perfSONAR Measur
 
 ==== Required Metrics ====
 
-To ease client development, domains must make some metrics available in such a way that a client does not need to know how to interpret technology-specific measurement data. These metrics include, at a minimum, operational status, administrative status and utilization. The easiest way to make these metrics available is to have one or more services that clients can query using the segment identifier, and who will respond with the metrics. These metrics could be collected by a special measurement collector that collects and stores the data in a Measurement Archive along with the segment identifier. They could also be made available by a service which accepts the queries, collects the relevant technology-specific data, and transforms it into the specified technology-agnostic metric.
+There are a number of metrics that are generally useful, but can be hard for clients to discern using technology specific measurements. These metrics include operational and administrative status and utilization. The method for discerning these characteristics is highly dependent on the infrastructure used to allocate the circuits, and any client wishing to monitor this information would need to understand the intricacies of the the wide array of networking infrastructure (e.g. Ethernet and VLAN, MPLS tunnels, or SONET) in order to accurately calculate those metrics.
+
+To ease client development, domains must make some metrics available such that clients do not need to know how to interpret technology-specific measurement data. These metrics include, at a minimum, operational status, administrative status and utilization. The easiest way to make these metrics available is to have one or more services that clients can query using the segment identifier, and who will respond with the metrics. These metrics could be collected by a special measurement collector that collects and stores the data in a Measurement Archive along with the segment identifier. They could also be made available by a service which accepts the queries, collects the relevant technology-specific data, and transforms it into the specified technology-agnostic metric.
 
 === Service Interactions ===
 
@@ -126,14 +134,14 @@ To ease client development, domains must make some metrics available in such a w
   # The Topology Service tells the Lookup Service about the circuit and segment descriptors it now contains.
   # The Circuit Monitoring Agent contacts the Measurement Collectors and informs them of any new elements that they need to measure or new information that they need to make available.
   # The Measurement Collectors begin storing data into Measurement Archives.
-  # The Measurement Archives tell the Lookup Service about the new measurement information they can make available.
+  # The Measurement Archives tell the Lookup Service about the measurement data they can make available.
 
 ==== Circuit Monitoring ====
 [http://perfsonar-ps.googlecode.com/svn/wiki/CircuitMonitoring/circuit_monitoring_interactions.png]
 
   # The Measurement Collector queries the routers and switches for circuit statistics 
   # The Measurement Collector stores the results into the Measurement Archive
-  # The Measurement Archive tells the Lookup Service about any new data that it has.
+  # The Measurement Archive tells the Lookup Service about the measurement data it has.
 
 ==== Client Querying ====
 [http://perfsonar-ps.googlecode.com/svn/wiki/CircuitMonitoring/client_interactions.png]
@@ -155,12 +163,9 @@ As part of the circuit provisioning process, a circuit descriptor is created tha
 describes, from a very high level, the path that the circuit is taking.
 
 {{{
-<link id="urn:nml:internet2.edu:gri123456_downstream">
+<link id="urn:nml:internet2.edu:gri123456_downstream"> <!-- The name of the circuit corresponds to the URI for the identifier -->
   <source>urn:nml:internet2.edu:hostA_eth0</source> <!-- the source can be a URN or a full description of a domain, node, port or link -->
   <destination>urn:nml:es.net:hostZ_eth1</destination> <!-- the destination can be a URN or a full description of a domain, node, port or link -->
-
-  <!-- Name of the Circuit. Specified as GRI, but could be a human-readable one -->
-  <name>gri123456</name>
 
   <!-- Human-Readable Description of the Circuit -->
   <description>Phoebus Circuit</description>
@@ -168,7 +173,9 @@ describes, from a very high level, the path that the circuit is taking.
   <!-- Capacity of the circuit in bps. --> 
   <capacity>1000000000</capacity>  <!-- 1Gbps -->
 
-  <!-- Period when the circuit will be active for -->
+  <!-- Period when the circuit will be active for. The start and end elements
+       are unix timestamps. There may be other ways to describe time, but it is
+       reasonable to specify a single representation for timestamps -->
   <lifetime>
      <start>1234177754</start>
      <end>1234567890</end>
@@ -178,11 +185,11 @@ describes, from a very high level, the path that the circuit is taking.
 
   <relation type="over">
       <path>
-          <hop id="internet2">
+          <hop id="internet2-1">
               <linkIdRef>urn:nml:internet2.edu:gri123456_downstream_segment</linkIdRef>
-              <nextHop>esnet</nextHop>
+              <nextHop>esnet-1</nextHop>
           </hop>
-          <hop id="esnet">
+          <hop id="esnet-1">
               <linkIdRef>urn:nml:es.net:gri123456_downstream_segment</linkIdRef>
           </hop>
       </path>
@@ -192,8 +199,6 @@ describes, from a very high level, the path that the circuit is taking.
 <link id="urn:nml:internet2.edu:gri123456_upstream">
   <source>urn:nml:internet2.edu:hostA_eth0</source> <!-- the source can be a URN or a full description of a domain, node, port or link -->
   <destination>urn:nml:es.net:hostZ_eth1</destination> <!-- the destination can be a URN or a full description of a domain, node, port or link -->
-  <!-- Name of the Circuit. Specified as GRI, but could be a human-readable one -->
-  <name>gri123456</name>
 
   <!-- Human-Readable Description of the Circuit -->
   <description>Phoebus Circuit</description>
@@ -211,11 +216,11 @@ describes, from a very high level, the path that the circuit is taking.
 
   <relation type="over">
       <path>
-          <hop id="internet2">
+          <hop id="internet2-1">
               <linkIdRef>urn:nml:internet2.edu:gri123456_upstream_segment</linkIdRef>
-              <nextHop>esnet</nextHop>
+              <nextHop>esnet-1</nextHop>
           </hop>
-          <hop id="esnet">
+          <hop id="esnet-1">
               <linkIdRef>urn:nml:es.net:gri123456_upstream_segment</linkIdRef>
           </hop>
       </path>
