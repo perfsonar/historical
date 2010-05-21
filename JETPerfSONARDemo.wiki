@@ -18,8 +18,9 @@ UEN
 Joe Metzger
 Jeff Boote
 Colin Morgan
-Brent Sweeny
+Grover Browning & Charles Kloote
 Joe Breen
+
 
 = Goals = 
 
@@ -84,6 +85,9 @@ ESnet
 
 NLR
 
+   * test.atla.nlrview.nlr.net - 10 GE Bandwidth
+   * test.newy.nlrview.nlr.net - 10 GE Bandwidth
+   * test.seat.nlrview.nlr.net   - 10 GE Bandwidth
 
 UEN
 
@@ -93,7 +97,7 @@ UEN
 || NOAA || Yes || Yes ||  || ||
 || Internet2 || Yes || Yes || ||  ||
 || ESnet || Yes || Yes || No || No || 
-|| NLR || || || || ||
+|| NLR || || Yes || || ||
 || UEN || || || || ||
 
 
