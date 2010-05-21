@@ -96,7 +96,7 @@ UEN
 || Domain || Latency Systems Deployed || Bandwidth Systems Deployed || Latency Tests Configured || Bandwidth Tests Configured ||
 || NOAA || Yes || Yes ||  || ||
 || Internet2 || Yes || Yes || ||  ||
-|| ESnet || Yes || Yes || No || No || 
+|| ESnet || Yes || Yes || No || Partially || 
 || NLR || || Yes || || ||
 || UEN || || || || ||
 
