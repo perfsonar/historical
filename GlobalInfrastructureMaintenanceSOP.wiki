@@ -5,7 +5,9 @@
 = Introduction =
 
 The perfSONAR Lookup service is a global distributed infrastructure. The Global Lookup
-Services (GLS services) are important for the proper functioning of the entire infrastructure.
+Services (GLS services) are important for the proper functioning of the entire infrastructure
+and so there are expectations, policies & procedures that should be followed to maintain the
+root of this tree.
 
 = Expectations =
 The perfSONAR collaboration expects domains hosting gLS services to meet a set of
@@ -32,6 +34,14 @@ minimal standards to include the service in the set of root gLS servers.
     * Changes must be deployed on 1 server at a time during a planned maintenance window.
 
 
+== Monitoring ==
+
+  * Domains providing the root functionality should have automated 7x24 monitoring of:
+    * The hardware providing the service
+    * The services being provided.
+  * Domains providing root functionality should have procedures & infrastructure in place to respond to service failures within 4 normal business hours.
+
+
 *Action Items*
   * Need to create a perfsonar-ops mailing list.
 
@@ -43,6 +53,13 @@ minimal standards to include the service in the set of root gLS servers.
   * Unplanned Maintenance
     * Send email to perfsonar-ops when maintenance or issue is discovered.
     * Send email to perfsonar-ops after the work is completed.
+
+
+  * Changes a gLS to the root hints file.
+    * Decisions to add hosts to this file will be made by the perfSONAR Steering Committee.
+    * Decisions to remove hosts from this file can be made by perfSONAR Steering Committee
+    * Service Operators of existing gLS services can request temporary, or permanent removal of their hosts from the file.
+ 
 
 
 
