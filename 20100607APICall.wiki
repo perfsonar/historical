@@ -1,6 +1,6 @@
-#summary 5/31/2010 API Conference Call
+#summary 6/7/2010 API Conference Call
 
-= May 31th 2010 API Conference Call 5:00 p.m. EDT/2:00 p.m. PDT =
+= June 7th 2010 API Conference Call 5:00 p.m. EDT/2:00 p.m. PDT =
 
 <wiki:toc max_depth="6" />
 
