@@ -14,7 +14,7 @@
    * _*ACTION*_: ~~Jason will modify the delayGraph.cgi GUI so OWAMP 'max' data is no longer plotted for 3.2.~~
      * Done on 5/19
    * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
- # [IndexingStrategies Indexing Strategies] (Jason/Aaron/Jeff)
+ # [IndexStrategies Indexing Strategies] (Jason/Aaron/Jeff)
  
 === ACTIONS ===
 
