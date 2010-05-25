@@ -7,22 +7,16 @@ This page organizes a list of user scenarios i.e. type of information required b
 = Details =
 
 _Time based queries:_
-#
-  Show throughput measurements since [date].
-  Show latency measurements since [date].
-  Show max/min throughput times for each day since [date].
-  Show max/min latency times for each day since [date].
-#
+# Show throughput measurements since date.
+# Show latency measurements since date.
+# Show max/min throughput times for each day since date.
+# Show max/min latency times for each day since date.
 
 _Host based queries:_
-#
-  Show hourly/daily/weekly throughput between [host1] and [host2].
-  Show hourly/daily/weekly latency between [host1] and [host2].
-#
+# Show hourly/daily/weekly throughput between host1 and host2.
+# Show hourly/daily/weekly latency between host1 and host2.
 
 _Magnitude (of data) based queries:_
-#
-  Show amount of data transferred between [host1] and [host2] since [date].
-#
+# Show amount of data transferred between host1 and host2 since date.
 
 and various combinations of the above.
