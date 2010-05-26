@@ -2704,6 +2704,16 @@ After these procedures, the service successfully starts.  It is now yet clear wh
 
 This procedure can also be used to quickly restart the LS database and eliminate old registrations for services that do not exist anymore.
 
+== Conclusions ==
+
+The vmstat outputs mainly indicate that:
+ * The LS is likely not CPU-bound.  CPU idle percentages are generally above 30%.
+ * The LS is likely not I/O-bound.  The _wa_ column under CPU (under 30%) and the value of the _b_ column under _procs_ suggest that in general processes are not waiting for I/O.
+ * The LS is likely not memory-bound.  The amount of free memory (_free_ under Memory) is constant, and _si_ and _so_ values under Swap are always zero.
+ * There are always processes being blocked and waiting for runtime, even while the other resources above are available.  This may indicate database locks.
+ 
+Next step is to investigate database (XMLDB) locks and general performance.  The report on this step will be done in a specific wiki page.
+
 == Last Updated ==
 
 $Id$
