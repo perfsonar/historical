@@ -66,7 +66,7 @@ The following are subtasks listed out for tracking purposes:
 || *Status* || <font color="yellow">_*IN PROGRESS - 5/28*_</font> || 
 || *Est. Completion* || xx/xx || 
 || *Owner* || Eric ||
-|| *Depends* || N/A ||
+|| *Depends* ||Milestone 1 ||
 
 The following are subtasks listed out for tracking purposes:
 
@@ -82,7 +82,7 @@ The following are subtasks listed out for tracking purposes:
 || *Status* || <font color="yellow">_*IN PROGRESS - 5/28*_</font> || 
 || *Est. Completion* || xx/xx || 
 || *Owner* || Aaron ||
-|| *Depends* || N/A ||
+|| *Depends* || Milestone 1 ||
 
 The following are subtasks listed out for tracking purposes:
 
@@ -103,12 +103,139 @@ The following are subtasks listed out for tracking purposes:
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
 || *Est. Completion* || xx/xx || 
 || *Owner* || TBD ||
-|| *Depends* || TBD ||
+|| *Depends* || Milestone 3 ||
 
 The following are subtasks listed out for tracking purposes:
 
  * Collect user feedback from the beta testers - <font color="red">_*NOT STARTED*_</font>
  * Fix any issues encountered by testers - <font color="red">_*NOT STARTED*_</font>
+
+=== Milestone LiveCD 1 ===
+
+|| *Summary* || Produce an initial Live CD instance that will save configuration/data to the backing store  ||
+|| *Status* || <font color="Yellow">_*IN PROGRESS*_</font> || 
+|| *Est. Completion* || xx/xx || 
+|| *Owner* || Aaron ||
+|| *Depends* || Milestone 4 ||
+
+The following are subtasks listed out for tracking purposes:
+
+ * Modify the standard Live CD to use the backing store instead of a ramdisk - <font color="red">_*NOT STARTED*_</font>
+ * Add a tool to create the backing store - <font color="red">_*NOT STARTED*_</font>
+ * Add a tool to easily allow folks to set the root/'knoppix' passwords - <font color="red">_*NOT STARTED*_</font>
+ * Build a tool to save the configuration to the backing store - <font color="yellow">_*In PROGRESS*_</font>
+ * Build a tool to store the data on the backing store - <font color="red">_*NOT STARTED*_</font>
+ * Package the above tools and include them in the Live CD kickstart - <font color="red">_*NOT STARTED*_</font>
+ * Migrate any changes to Base RPMs or kickstart to the Base - <font color="red">_*NOT STARTED*_</font>
+ * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit - <font color="red">_*NOT STARTED*_</font>
+
+=== Milestone LiveCD 2 ===
+
+|| *Summary* || Produce a Live CD instance that will upgrade an existing Knoppix-based installation  ||
+|| *Status* || <font color="red">_*NOT STARTED*_</font> || 
+|| *Est. Completion* || xx/xx || 
+|| *Owner* || Aaron ||
+|| *Depends* || Milestone LiveCD 1 ||
+
+The following are subtasks listed out for tracking purposes:
+
+ * Produce tools capable of upgrading the existing backing store configuration/data to the new approach - <font color="red">_*NOT STARTED*_</font>
+   * See [http://code.google.com/p/perfsonar-ps/wiki/pSPT32_DevNotes#Upgrade_Path here] for some specifics on how upgrades might be handled
+ * Package the above tools and include them in the Live CD kickstart - <font color="red">_*NOT STARTED*_</font>
+ * Collect user feedback from the alpha testers - <font color="red">_*NOT STARTED*_</font>
+ * Fix any issues encountered by testers - <font color="red">_*NOT STARTED*_</font>
+ * Migrate changes to the Base packages/kickstart as needed - <font color="red">_*NOT STARTED*_</font>
+ * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit - <font color="red">_*NOT STARTED*_</font>
+
+=== Milestone LiveCD 3 ===
+
+|| *Summary* || Based on user feedback and testing, firm up the Live CD.  Migrate changes to the Base packages/kickstart as needed  ||
+|| *Status* || <font color="red">_*NOT STARTED*_</font> || 
+|| *Est. Completion* || xx/xx || 
+|| *Owner* || Aaron ||
+|| *Depends* || Milestone LiveCD 2 ||
+
+The following are subtasks listed out for tracking purposes:
+
+ * Collect user feedback from the beta testers - <font color="red">_*NOT STARTED*_</font>
+ * Fix any issues encountered by testers - <font color="red">_*NOT STARTED*_</font>
+ * Migrate changes to the Base packages/kickstart as needed - <font color="red">_*NOT STARTED*_</font>
+ * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit - <font color="red">_*NOT STARTED*_</font>
+
+=== Milestone Install Disk 1 ===
+
+|| *Summary* || Produce an initial installation ISO for testing  ||
+|| *Status* || <font color="red">_*NOT STARTED*_</font> || 
+|| *Est. Completion* || xx/xx || 
+|| *Owner* || Eric ||
+|| *Depends* || Milestone 4 ||
+
+The following are subtasks listed out for tracking purposes:
+
+ * Generate a basic installation kickstart from the Base kickstart - <font color="red">_*NOT STARTED*_</font>
+ * Migrate any changes to Base RPMs or kickstart to the Base - <font color="red">_*NOT STARTED*_</font>
+ * Distribute the ISO to testers willing to test out the Toolkit - <font color="red">_*NOT STARTED*_</font>
+
+=== Milestone Install Disk 2 ===
+
+|| *Summary* || Based on user feedback and testing, firm up the installation CD  ||
+|| *Status* || <font color="red">_*NOT STARTED*_</font> || 
+|| *Est. Completion* || xx/xx || 
+|| *Owner* || Eric ||
+|| *Depends* || Milestone Install Disk 1 ||
+
+The following are subtasks listed out for tracking purposes:
+
+ * Collect user feedback from the beta testers - <font color="red">_*NOT STARTED*_</font>
+ * Fix any issues encountered by testers - <font color="red">_*NOT STARTED*_</font>
+ * Migrate changes to the Base packages/kickstart as needed - <font color="red">_*NOT STARTED*_</font>
+
+=== Milestone RC 1 ===
+
+|| *Summary* || Synchronize any changes to the Base necessitated by the Live CD or Install CD, and produce release candidates and documentation for each  ||
+|| *Status* || <font color="red">_*NOT STARTED*_</font> || 
+|| *Est. Completion* || xx/xx || 
+|| *Owner* || Aaron/Eric/Jason ||
+|| *Depends* || Milestone Install Disk 2, Milestone LiveCD 3  ||
+
+The following are subtasks listed out for tracking purposes:
+
+ * Produce installation documentation for each of the installation methods - <font color="red">_*NOT STARTED*_</font>
+ * Produce toolkit documentation for the various services and web guis - <font color="red">_*NOT STARTED*_</font>
+ * Synchronize the changes needed to the Base by the various installation methods - <font color="red">_*NOT STARTED*_</font>
+ * Produce a kickstart, an installation ISO and a Live CD ISO - <font color="red">_*NOT STARTED*_</font>
+ * Distribute the ISOs to testers willing to test out the Toolkit - <font color="red">_*NOT STARTED*_</font>
+
+=== Milestone RC 2 ===
+
+|| *Summary* || Based on user feedback and testing, firm up the Live CD and Install CD  ||
+|| *Status* || <font color="red">_*NOT STARTED*_</font> || 
+|| *Est. Completion* || xx/xx || 
+|| *Owner* || Aaron/Eric/Jason ||
+|| *Depends* || Milestone RC 1 ||
+
+The following are subtasks listed out for tracking purposes:
+
+ * Collect user feedback from the testers - <font color="red">_*NOT STARTED*_</font>
+ * Fix any issues encountered by testers - <font color="red">_*NOT STARTED*_</font>
+ * Firm up documentation based on user feedback - <font color="red">_*NOT STARTED*_</font>
+
+Milestone Release Candidate X: Open-ended.
+
+=== Milestone Final Release ===
+
+|| *Summary* || Produce final versions of the Live CD, Install CD and documentation  ||
+|| *Status* || <font color="red">_*NOT STARTED*_</font> || 
+|| *Est. Completion* || xx/xx || 
+|| *Owner* || Aaron/Eric/Jason ||
+|| *Depends* || Milestone RC 2 ||
+
+The following are subtasks listed out for tracking purposes:
+
+ * Finalize documentation - <font color="red">_*NOT STARTED*_</font>
+ * Update relevant websites with release information - <font color="red">_*NOT STARTED*_</font>
+ * Produce any wider release announcements - <font color="red">_*NOT STARTED*_</font>
+ * Produce final versions of kickstart, installation ISO and Live CD ISO - <font color="red">_*NOT STARTED*_</font>
 
 == Last Updated ==
 
