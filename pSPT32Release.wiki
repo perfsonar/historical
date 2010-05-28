@@ -36,7 +36,23 @@ Beta, and RC:
  
 == Release Schedule ==
 
-=== Milestone 1 ===
+|| *Milestone* || *Target Date* || *Status* ||
+|| Milestone Base 1 || xx/xx || <font color="green">_*DONE - 5/14*_</font> ||
+|| Milestone Base 2 || xx/xx || <font color="yellow">_*IN PROGRESS - 5/28*_</font> ||
+|| Milestone Base 3 || xx/xx || <font color="yellow">_*IN PROGRESS - 5/28*_</font> ||
+|| Milestone Base 4 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone LiveCD 1 || xx/xx || <font color="yellow">_*IN PROGRESS - 5/28*_</font> ||
+|| Milestone LiveCD 2 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone LiveCD 3 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone Install Disk 1 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone Install Disk 2 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone RC 1 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone RC 2 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone Final || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
+
+The following sections breakdown of each milestone of this release.
+
+=== Milestone Base 1 ===
 
 || *Summary* || Produce an initial set of packages for the tools/services that will be included on the pSPT  ||
 || *Status* || <font color="green">_*DONE - 5/14*_</font> || 
@@ -60,13 +76,13 @@ The following are subtasks listed out for tracking purposes:
  * ~~Build RPM of iperf~~ - <font color="green">_*DONE*_</font> 
  * ~~Build RPM of nuttcp~~ - <font color="green">_*DONE*_</font> 
 
-=== Milestone 2 ===
+=== Milestone Base 2 ===
 
 || *Summary* || Produce an initial kickstart file that will install the Toolkit with the exception of the Web GUI ||
 || *Status* || <font color="yellow">_*IN PROGRESS - 5/28*_</font> || 
 || *Est. Completion* || xx/xx || 
 || *Owner* || Eric ||
-|| *Depends* ||Milestone 1 ||
+|| *Depends* ||Milestone Base 1 ||
 
 The following are subtasks listed out for tracking purposes:
 
@@ -76,13 +92,13 @@ The following are subtasks listed out for tracking purposes:
  * Update the RPMs if needed (e.g. dependencies not accounted for or similar) - <font color="yellow">_*In PROGRESS*_</font>
  * Start internal testing of alpha kickstart - <font color="red">_*NOT STARTED*_</font>
 
-=== Milestone 3 ===
+=== Milestone Base 3 ===
 
 || *Summary* || Add the Web GUI to the Toolkit  ||
 || *Status* || <font color="yellow">_*IN PROGRESS - 5/28*_</font> || 
 || *Est. Completion* || xx/xx || 
 || *Owner* || Aaron ||
-|| *Depends* || Milestone 1 ||
+|| *Depends* || Milestone Base 1 ||
 
 The following are subtasks listed out for tracking purposes:
 
@@ -91,19 +107,19 @@ The following are subtasks listed out for tracking purposes:
    * ~~Build configuration daemon that the Web GUI can talk to to write new versions of configuration files and restart daemons~~ - <font color="green">_*DONE*_</font> 
    * ~~Either modify backend or web GUIs to talk to daemon instead of writing files/restarting services directly~~ - <font color="green">_*DONE*_</font> 
  * Depending on how configuration is stored, make changes to the packaging of other services (e.g. if there's a centralized configuration file for common pS-PS configuration options) - <font color="yellow">_*In PROGRESS*_</font>
-   * The configuration has a large number of shared components. Centralizing these shared configuration pieces would make it easier to [http://code.google.com/p/perfsonar-ps/wiki/pSPT32_DevNotes#Configuration_Change_Effects update service/tool configuration] when the system configuration changes - <font color="yellow">_*In PROGRESS*_</font>
-    * Add the Web Configuration GUI RPM to the yum repository - <font color="yellow">_*In PROGRESS*_</font>
-    * Update the kickstart file to include the Web Configuration GUI - <font color="yellow">_*In PROGRESS*_</font>
-    * Fix any issues encountered by alpha testers - <font color="yellow">_*In PROGRESS*_</font>
-    * Start internal testing of beta kickstart - <font color="yellow">_*In PROGRESS*_</font>
+   * The configuration has a large number of shared components. Centralizing these shared configuration pieces would make it easier to [http://code.google.com/p/perfsonar-ps/wiki/pSPT32_DevNotes#Configuration_Change_Effects update service/tool configuration] when the system configuration changes
+ * Add the Web Configuration GUI RPM to the yum repository - <font color="yellow">_*In PROGRESS*_</font>
+ * Update the kickstart file to include the Web Configuration GUI - <font color="yellow">_*In PROGRESS*_</font>
+ * Fix any issues encountered by alpha testers - <font color="yellow">_*In PROGRESS*_</font>
+ * Start internal testing of beta kickstart - <font color="yellow">_*In PROGRESS*_</font>
 
-=== Milestone 4 ===
+=== Milestone Base 4 ===
 
 || *Summary* || Produce a final cut of the Base Toolkit  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
 || *Est. Completion* || xx/xx || 
 || *Owner* || TBD ||
-|| *Depends* || Milestone 3 ||
+|| *Depends* || Milestone Base 3 ||
 
 The following are subtasks listed out for tracking purposes:
 
@@ -116,7 +132,7 @@ The following are subtasks listed out for tracking purposes:
 || *Status* || <font color="Yellow">_*IN PROGRESS*_</font> || 
 || *Est. Completion* || xx/xx || 
 || *Owner* || Aaron ||
-|| *Depends* || Milestone 4 ||
+|| *Depends* || Milestone Base 4 ||
 
 The following are subtasks listed out for tracking purposes:
 
@@ -168,7 +184,7 @@ The following are subtasks listed out for tracking purposes:
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
 || *Est. Completion* || xx/xx || 
 || *Owner* || Eric ||
-|| *Depends* || Milestone 4 ||
+|| *Depends* || Milestone Base 4 ||
 
 The following are subtasks listed out for tracking purposes:
 
@@ -237,6 +253,51 @@ The following are subtasks listed out for tracking purposes:
  * Produce any wider release announcements - <font color="red">_*NOT STARTED*_</font>
  * Produce final versions of kickstart, installation ISO and Live CD ISO - <font color="red">_*NOT STARTED*_</font>
 
+== Bugs Related to This Release ==
+
+ * _*SNMP MA*_
+   * TBD
+ * _*PingER*_
+   * TBD
+ * _*perfSONAR-BUOY*_
+   * TBD
+ * _*perfAdmin*_
+   * TBD
+ * _*Home Lookup Service*_
+   * TBD
+ * _*Global Lookup Service*_
+   * TBD
+ * _*Status MA*_
+   * TBD
+ * _*TL1 Collection*_
+   * TBD
+ * _*Topology Service*_ 
+   * TBD
+ * _*Clients*_
+   * TBD
+ * _*APIs*_
+   * TBD
+ * _*Documentation*_
+   * TBD
+ * _*Web*_
+   * TBD
+
+== Code Reviews ==
+
+Not applicable in this release.  
+
+== Documentation Reviews ==
+
+TBD
+
+== Testing ==
+
+TBD
+   
+== Lessons Learned ==
+
+TBD   
+   
 == Last Updated ==
 
 $Id$
