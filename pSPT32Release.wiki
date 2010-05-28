@@ -1,0 +1,112 @@
+#summary pSPT 3.2 Release
+
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+This page outlines details regarding the release of pSPT 3.2.  This is a
+multi-stage release of this software that will take several months and go
+through several iterations (Alpha, Beta, and RC status) before completing.  
+
+== Release Team ==
+
+The following people will be working to integrate the environment and lead the
+release process: 
+
+ * Jason Zurawski - Release Lead
+ * Aaron Brown - Integration Lead
+ * Eric Pouyoul - Integration
+
+== Testers ==
+
+The following testers have been identified to help in the testing of each Alpha,
+Beta, and RC:
+
+ * Jason Zurawski - Lead, Testing and Reporting Support
+ * Aaron Brown - Testing and Reporting Support
+ * Eric Pouyoul - Testing and Reporting Support
+ * Andy Lake
+ * Kavitha Kumar
+ * Ezra Kissel
+ * Guilherme Fernandes
+ * Brian Tierney
+ * Joe Metzger
+ * Jeff Boote
+ * Maxim Grigoriev
+ 
+== Release Schedule ==
+
+=== Milestone 1 ===
+
+|| *Summary* || Produce an initial set of packages for the tools/services that will be included on the pSPT  ||
+|| *Status* || <font color=green>_*DONE - 5/14*_</font> || 
+|| *Est. Completion* || N/A || 
+|| *Owner* || Eric/Aaron ||
+
+The following are subtasks listed out for tracking purposes:
+
+ * ~~Build RPM of OWAMP~~ - <font color=green>_*DONE*_</font> 
+ * ~~Build RPM of BWCTL~~ - <font color=green>_*DONE*_</font> 
+ * ~~Build RPM of PingER~~ - <font color=green>_*DONE*_</font> 
+ * ~~Build RPM of Lookup Service~~ - <font color=green>_*DONE*_</font> 
+ * ~~Build RPM of LS Registration Daemon~~ - <font color=green>_*DONE*_</font> 
+ * ~~Build RPM of LS Cache Daemon~~ - <font color=green>_*DONE*_</font> 
+ * ~~Build RPM of perfSONAR-BUOY~~ - <font color=green>_*DONE*_</font> 
+ * ~~Build RPM of NDT~~ - <font color=green>_*DONE*_</font> 
+ * ~~Build RPM of NPAD~~ - <font color=green>_*DONE*_</font> 
+ * ~~Build RPM of web100 kernel~~ - <font color=green>_*DONE*_</font> 
+ * ~~Build RPM of web100 userland~~ - <font color=green>_*DONE*_</font> 
+ * ~~Build RPM of iperf~~ - <font color=green>_*DONE*_</font> 
+ * ~~Build RPM of nuttcp~~ - <font color=green>_*DONE*_</font> 
+
+=== Milestone 2 ===
+
+|| *Summary* || Produce an initial kickstart file that will install the Toolkit with the exception of the Web GUI ||
+|| *Status* || <font color=yellow>_*IN PROGRESS - 5/28*_</font> || 
+|| *Est. Completion* || xx/xx || 
+|| *Owner* || Eric ||
+
+The following are subtasks listed out for tracking purposes:
+
+ * Create development yum repository - <font color=yellow>_*In PROGRESS*_</font> 
+ * Load all the above RPMs into the repository - <font color=yellow>_*In PROGRESS*_</font>
+ * Build kickstart file that installs all of the RPMs from the repository - <font color=yellow>_*In PROGRESS*_</font>
+ * Update the RPMs if needed (e.g. dependencies not accounted for or similar) - <font color=yellow>_*In PROGRESS*_</font>
+ * Start internal testing of alpha kickstart - <font color=red>_*NOT STARTED*_</font>
+
+=== Milestone 3 ===
+
+|| *Summary* || Add the Web GUI to the Toolkit  ||
+|| *Status* || <font color=yellow>_*IN PROGRESS - 5/28*_</font> || 
+|| *Est. Completion* || xx/xx || 
+|| *Owner* || Aaron ||
+
+The following are subtasks listed out for tracking purposes:
+
+ * ~~Package the Web Configuration GUI~~ - <font color=green>_*DONE*_</font> 
+   * ~~Change existing configuration backend to change the default locations of configuration files (if changed)~~ - <font color=green>_*DONE*_</font> 
+   * ~~Build configuration daemon that the Web GUI can talk to to write new versions of configuration files and restart daemons~~ - <font color=green>_*DONE*_</font> 
+   * ~~Either modify backend or web GUIs to talk to daemon instead of writing files/restarting services directly~~ - <font color=green>_*DONE*_</font> 
+ * Depending on how configuration is stored, make changes to the packaging of other services (e.g. if there's a centralized configuration file for common pS-PS configuration options) - <font color=yellow>_*In PROGRESS*_</font>
+   * The configuration has a large number of shared components. Centralizing these shared configuration pieces would make it easier to [http://code.google.com/p/perfsonar-ps/wiki/pSPT32_DevNotes#Configuration_Change_Effects update service/tool configuration] when the system configuration changes - <font color=yellow>_*In PROGRESS*_</font>
+    * Add the Web Configuration GUI RPM to the yum repository - <font color=yellow>_*In PROGRESS*_</font>
+    * Update the kickstart file to include the Web Configuration GUI - <font color=yellow>_*In PROGRESS*_</font>
+    * Fix any issues encountered by alpha testers - <font color=yellow>_*In PROGRESS*_</font>
+    * Start internal testing of beta kickstart - <font color=yellow>_*In PROGRESS*_</font>
+
+=== Milestone 4 ===
+
+|| *Summary* || Produce a final cut of the Base Toolkit  ||
+|| *Status* || <font color=red>_*NOT STARTED*_</font> || 
+|| *Est. Completion* || xx/xx || 
+|| *Owner* || TBD ||
+|| *Depends* || ||
+
+The following are subtasks listed out for tracking purposes:
+
+ * Collect user feedback from the beta testers - <font color=red>_*NOT STARTED*_</font>
+ * Fix any issues encountered by testers - <font color=red>_*NOT STARTED*_</font>
+
+== Last Updated ==
+
+$Id$
