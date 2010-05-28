@@ -39,13 +39,14 @@ Beta, and RC:
 === Milestone 1 ===
 
 || *Summary* || Produce an initial set of packages for the tools/services that will be included on the pSPT  ||
-|| *Status* || <font color=green>_*DONE - 5/14*_</font> || 
+|| *Status* || <font color="green">_*DONE - 5/14*_</font> || 
 || *Est. Completion* || N/A || 
 || *Owner* || Eric/Aaron ||
+|| *Depends* || N/A ||
 
 The following are subtasks listed out for tracking purposes:
 
- * ~~Build RPM of OWAMP~~ - <font color=green>_*DONE*_</font> 
+ * ~~Build RPM of OWAMP~~ - <font color="green">_*DONE*_</font> 
  * ~~Build RPM of BWCTL~~ - <font color=green>_*DONE*_</font> 
  * ~~Build RPM of PingER~~ - <font color=green>_*DONE*_</font> 
  * ~~Build RPM of Lookup Service~~ - <font color=green>_*DONE*_</font> 
@@ -65,6 +66,7 @@ The following are subtasks listed out for tracking purposes:
 || *Status* || <font color=yellow>_*IN PROGRESS - 5/28*_</font> || 
 || *Est. Completion* || xx/xx || 
 || *Owner* || Eric ||
+|| *Depends* || N/A ||
 
 The following are subtasks listed out for tracking purposes:
 
@@ -80,6 +82,7 @@ The following are subtasks listed out for tracking purposes:
 || *Status* || <font color=yellow>_*IN PROGRESS - 5/28*_</font> || 
 || *Est. Completion* || xx/xx || 
 || *Owner* || Aaron ||
+|| *Depends* || N/A ||
 
 The following are subtasks listed out for tracking purposes:
 
@@ -100,7 +103,7 @@ The following are subtasks listed out for tracking purposes:
 || *Status* || <font color=red>_*NOT STARTED*_</font> || 
 || *Est. Completion* || xx/xx || 
 || *Owner* || TBD ||
-|| *Depends* || ||
+|| *Depends* || TBD ||
 
 The following are subtasks listed out for tracking purposes:
 
