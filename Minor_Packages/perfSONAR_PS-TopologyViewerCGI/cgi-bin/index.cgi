@@ -21,12 +21,11 @@ my %conf   = $config->getall;
 
 my $cgi = CGI->new();
 
-my $INSTANCE = $conf{'ts_instance'};
+my $valid_instances = $conf{'ts_instance'};
 my $domain = $cgi->param("domain");
+my $ts_instance = $cgi->param("ts_instance");
 
-my $client = perfSONAR_PS::Client::Topology->new($INSTANCE);
-
-unless ($INSTANCE) {
+unless ($valid_instances) {
     print $cgi->header('text/html');
     print qq(<html>
                 <title>Topology Lookup Error</title>
@@ -38,12 +37,24 @@ unless ($INSTANCE) {
     exit 0;
 }
 
-unless ($domain) {
+unless (ref $valid_instances eq "ARRAY") {
+    $valid_instances = [ $valid_instances ];
+}
+
+unless ($domain and $ts_instance) {
     print $cgi->header('text/html');
     print qq(<html>
                 <title>Topology Lookup</title>
 		<form>
                 Enter Domain: <input type="text" name="domain" />
+                <select name="ts_instance">
+    );
+    foreach my $instance (@$valid_instances) {
+         print qq(<option value="$instance">$instance</option>);
+    }
+    print qq(
+                </select>
+		<br>
 		<input type="submit" value="Submit" />
 		</form>
              </html>
@@ -51,6 +62,28 @@ unless ($domain) {
     exit 0;
 }
 
+my $valid = 0;
+
+foreach my $instance (@$valid_instances) {
+     if ($instance eq $ts_instance) {
+         $valid = 1;
+         last;
+     }
+}
+
+unless ($valid) {
+    print $cgi->header('text/html');
+    print qq(<html>
+                <title>Topology Lookup Error</title>
+                <h1>Topology Lookup Error</h1>
+                <br>
+                Invalid topology service specified: $ts_instance
+             </html>
+    );
+    exit 0;
+}
+
+my $client = perfSONAR_PS::Client::Topology->new($ts_instance);
 my $urn = "urn:ogf:network:domain=$domain";
 
 my ($status, $res) = $client->xQuery('//*[@id="'.$urn.'"]');
