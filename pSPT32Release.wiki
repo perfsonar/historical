@@ -143,7 +143,7 @@ The following are subtasks listed out for tracking purposes:
  * Build a tool to easily allow folks to set the root/'knoppix' passwords - <font color="yellow">_*IN PROGRESS*_</font>
  * Build a tool to save the configuration to the backing store - <font color="yellow">_*IN PROGRESS*_</font>
  * Build a tool to store the data on the backing store - <font color="yellow">_*IN PROGRESS*_</font>
- * Package the above tools and include them in the Live CD kickstart - <font color="red">_*IN PROGRESS*_</font>
+ * Package the above tools and include them in the Live CD kickstart - <font color="yellow">_*IN PROGRESS*_</font>
    * Package tool to save configuration - <font color="yellow">_*IN PROGRESS*_</font>
    * Package tool to restore configuration - <font color="yellow">_*IN PROGRESS*_</font>
    * Package tool to set passwords - <font color="red">_*NOT STARTED*_</font>
