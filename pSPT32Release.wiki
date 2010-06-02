@@ -88,7 +88,7 @@ The following are subtasks listed out for tracking purposes:
 
  * Create development yum repository - <font color="yellow">_*In PROGRESS*_</font> 
  * Load all the above RPMs into the repository - <font color="yellow">_*In PROGRESS*_</font>
- * Build kickstart file that installs all of the RPMs from the repository - <font color="yellow">_*In PROGRESS*_</font>
+ * Build kickstart file that installs all of the RPMs from the repository - <font color="yellow">_*IN PROGRESS*_</font>
  * Update the RPMs if needed (e.g. dependencies not accounted for or similar) - <font color="yellow">_*In PROGRESS*_</font>
  * ~~~Start internal testing of alpha kickstart~~~ - <font color="purple">_*Merge Testing With Milestone Base 3*_</font>
    * The Milestone Base 3 work is far enough along that once we have a kickstart done, we can easily add the Web GUI to that kickstart
@@ -187,15 +187,15 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Install Disk 1 ===
 
 || *Summary* || Produce an initial installation ISO for testing  ||
-|| *Status* || <font color="red">_*NOT STARTED*_</font> || 
+|| *Status* || <font color="yellow">_*IN PROGREESS*_</font> || 
 || *Est. Completion* || Week of 6/14 || 
 || *Owner* || Eric ||
 || *Depends* || Milestone Base 4 ||
 
 The following are subtasks listed out for tracking purposes:
 
- * Generate a basic installation kickstart from the Base kickstart - <font color="red">_*NOT STARTED*_</font>
- * Migrate any changes to Base RPMs or kickstart to the Base - <font color="red">_*NOT STARTED*_</font>
+ * Generate a basic installation kickstart from the Base kickstart - <font color="green">_*DONE*_</font>
+ * Migrate any changes to Base RPMs or kickstart to the Base - <font color="green">_*DONE*_</font>
  * Distribute the ISO to testers willing to test out the Toolkit - <font color="red">_*NOT STARTED*_</font>
 
 === Milestone Install Disk 2 ===
