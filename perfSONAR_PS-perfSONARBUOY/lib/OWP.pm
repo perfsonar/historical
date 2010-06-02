@@ -94,6 +94,7 @@ sub daemonize {
         $_ = <$fh>;
         if ( defined $_ ) {
             my ( $pid ) = /(\d+)/;
+            die "PID from $args{'PIDFILE'} invalid: $!" unless $pid;
             chomp $pid;
             die "$FindBin::Script:$pid still running..."
                 if ( kill( 0, $pid ) );
