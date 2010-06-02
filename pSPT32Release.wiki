@@ -35,20 +35,20 @@ Beta, and RC:
  * Maxim Grigoriev
  
 == Release Schedule ==
-
+ 
 || *Milestone* || *Target Date* || *Status* ||
-|| Milestone Base 1 || xx/xx || <font color="green">_*DONE - 5/14*_</font> ||
-|| Milestone Base 2 || xx/xx || <font color="yellow">_*IN PROGRESS - 5/28*_</font> ||
-|| Milestone Base 3 || xx/xx || <font color="yellow">_*IN PROGRESS - 5/28*_</font> ||
-|| Milestone Base 4 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone LiveCD 1 || xx/xx || <font color="yellow">_*IN PROGRESS - 5/28*_</font> ||
-|| Milestone LiveCD 2 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone LiveCD 3 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone Install Disk 1 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone Install Disk 2 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone RC 1 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone RC 2 || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone Final || xx/xx || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone Base 1 || _N/A_ || <font color="green">_*DONE - 5/14*_</font> ||
+|| Milestone Base 2 || June 4th || <font color="yellow">_*IN PROGRESS - 6/2*_</font> ||
+|| Milestone Base 3 || June 11th || <font color="yellow">_*IN PROGRESS - 6/2*_</font> ||
+|| Milestone Base 4 || June 11th || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone LiveCD 1 || Week of 6/14 || <font color="yellow">_*IN PROGRESS - 6/2*_</font> ||
+|| Milestone LiveCD 2 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone LiveCD 3 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone Install Disk 1 || Week of 6/14 || <font color="yellow">_*IN PROGRESS- 6/2*_</font> ||
+|| Milestone Install Disk 2 || Week of 6/28 || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone RC 1 || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone RC 2 || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone Final || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
 The following sections breakdown of each milestone of this release.
 
@@ -79,9 +79,9 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Base 2 ===
 
 || *Summary* || Produce an initial kickstart file that will install the Toolkit with the exception of the Web GUI ||
-|| *Status* || <font color="yellow">_*IN PROGRESS - 5/28*_</font> || 
-|| *Est. Completion* || xx/xx || 
-|| *Owner* || Eric ||
+|| *Status* || <font color="yellow">_*IN PROGRESS - 6/2*_</font> || 
+|| *Est. Completion* || June 4th || 
+|| *Owner* || Eric/Aaron ||
 || *Depends* ||Milestone Base 1 ||
 
 The following are subtasks listed out for tracking purposes:
@@ -96,8 +96,8 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Base 3 ===
 
 || *Summary* || Add the Web GUI to the Toolkit  ||
-|| *Status* || <font color="yellow">_*IN PROGRESS - 5/28*_</font> || 
-|| *Est. Completion* || xx/xx || 
+|| *Status* || <font color="yellow">_*IN PROGRESS - 6/2*_</font> || 
+|| *Est. Completion* || June 11th || 
 || *Owner* || Aaron ||
 || *Depends* || Milestone Base 1 ||
 
@@ -119,8 +119,8 @@ The following are subtasks listed out for tracking purposes:
 
 || *Summary* || Produce a final cut of the Base Toolkit  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
-|| *Est. Completion* || xx/xx || 
-|| *Owner* || TBD ||
+|| *Est. Completion* || June 11th || 
+|| *Owner* || Jason ||
 || *Depends* || Milestone Base 3 ||
 
 The following are subtasks listed out for tracking purposes:
@@ -131,8 +131,8 @@ The following are subtasks listed out for tracking purposes:
 === Milestone LiveCD 1 ===
 
 || *Summary* || Produce an initial Live CD instance that will save configuration/data to the backing store  ||
-|| *Status* || <font color="Yellow">_*IN PROGRESS*_</font> || 
-|| *Est. Completion* || xx/xx || 
+|| *Status* || <font color="Yellow">_*IN PROGRESS - 6/2*_</font> || 
+|| *Est. Completion* || Week of 6/14 || 
 || *Owner* || Aaron ||
 || *Depends* || Milestone Base 4 ||
 
@@ -155,7 +155,7 @@ The following are subtasks listed out for tracking purposes:
 
 || *Summary* || Produce a Live CD instance that will upgrade an existing Knoppix-based installation  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
-|| *Est. Completion* || xx/xx || 
+|| *Est. Completion* || Post Joint Techs || 
 || *Owner* || Aaron ||
 || *Depends* || Milestone LiveCD 1 ||
 
@@ -173,7 +173,7 @@ The following are subtasks listed out for tracking purposes:
 
 || *Summary* || Based on user feedback and testing, firm up the Live CD.  Migrate changes to the Base packages/kickstart as needed  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
-|| *Est. Completion* || xx/xx || 
+|| *Est. Completion* || Post Joint Techs || 
 || *Owner* || Aaron ||
 || *Depends* || Milestone LiveCD 2 ||
 
@@ -188,7 +188,7 @@ The following are subtasks listed out for tracking purposes:
 
 || *Summary* || Produce an initial installation ISO for testing  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
-|| *Est. Completion* || xx/xx || 
+|| *Est. Completion* || Week of 6/14 || 
 || *Owner* || Eric ||
 || *Depends* || Milestone Base 4 ||
 
@@ -202,7 +202,7 @@ The following are subtasks listed out for tracking purposes:
 
 || *Summary* || Based on user feedback and testing, firm up the installation CD  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
-|| *Est. Completion* || xx/xx || 
+|| *Est. Completion* || Week of 6/28 || 
 || *Owner* || Eric ||
 || *Depends* || Milestone Install Disk 1 ||
 
