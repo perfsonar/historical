@@ -2,23 +2,47 @@
 
 == Agenda/Minutes ==
 
- # Attendees: Jason, Eric, Andy, Brian, Aaron, Kavitha, Marcos, Joe, Jeff, Ahmed
+ # Attendees:
    * TBD
- # Followup on previous actions:
-   * _*ACTION*_: Maxim will verify his check script helps and continue watching for the pinger issues.
-   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
-   * _*ACTION*_: Joe will add monitoring expectations to the SOP for production global infrastructure. Criteria for adding/removing gLSs from the hints files. Bringing this topic to DICE.
-   * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
-   * _*ACTION*_: Andy will update on the group on the Nagios development.
-   * _*ACTION*_: Everyone: review issue tracker and email a list of the issues they think is critical for 3.2.
-   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
-   * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
- # TBD
- 
+ # pSPT 3.2 Release
+   * See notes here: [pSPT32Release]
+   * Development
+     * Milestone review
+       * Are the milestones still accurate?
+       * Do we need more?  Do we need less?
+       * Are the target dates accurate?  More time, less time?
+     * Subtasks
+       * Are the subtasks still accurate?
+       * Do we need more?  Do we need less?      
+     * Progress
+       * Eric and Aaron - Please update these as you complete things
+   * Testing Groups
+     * Alpha/Beta testing = pSPS Group
+     * RC Testing = select external testers
+   * Testing products
+     * KS Files
+       * Are there netboot etc. CDs to go with the KS images?  If not are there instructions on how to use a standard CentOS netboot CD to do this?
+     * Live CD
+     * Installation CD/DVD
+   * Testing Timeframes
+     * Week of June 7th
+       * KS Images ready for Alpha testing, feedback due by Fri June 11th
+     * Week of June 14th
+       * LiveCD ready for Alpha testing, feedback due by Fri June 18th
+       * Additional KS testing if needed
+     * Week of June 21st
+       * LiveCD ready for Beta/RC testing, feedback due by Fri June 25th
+     * Week of June 28th
+       * LiveCD ready for RC 2 testing (June 30th, latest), feedback due by Fri July 5th   
+     * Week of July 5th
+       * Continued testing, no additional RCs planned during this time
+       * Final RC generation by July 5th
+     * Week of July 12th
+       * Joint Techs, RC of LiveCD available for download
+
 === ACTIONS ===
 
-   * _*ACTION*_: TBD.
-
+ * _*ACTION*_: TBD.
 
 == Where ==
 
