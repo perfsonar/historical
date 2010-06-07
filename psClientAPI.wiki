@@ -1,0 +1,8 @@
+#summary perfSONAR client API
+
+= Introduction =
+
+A standard, straightforward client API specification would be useful to users of perfSONAR. It could be implemented in a variety of languages.
+
+
+= Details =
