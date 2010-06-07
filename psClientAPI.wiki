@@ -9,26 +9,34 @@ A standard, straightforward client API specification would be useful to users of
 
 == Operations ==
 
+Input parameter format is: (Type) _param-name_ {default-value}: Description.
+
 create_client
   * Description: Construct and initialize a new client.
   * In:
-    * (String) `gls_hints_file` [""]: Use gLS root hints file, if given; default is 'http://www.perfsonar.net/gls.root.hints'
-    * (list of URL) `gls_urls` [empty list]:  list of gLS servers 
-    * (list of URL) hls_urls [empty list]: list of hLS servers
-    * (list of URL) service_urls [empty list]: list of services to query without consulting LS infrastructure
-  * Out: Client
+    * (String) gls_hints_file {""}: Use gLS root hints file, if given; default is 'http://www.perfsonar.net/gls.root.hints'
+    * (list of URL) gls_urls {empty list}:  list of gLS servers 
+    * (list of URL) hls_urls {empty list}: list of hLS servers
+    * (list of URL) service_urls {empty list}: list of services to query without consulting LS infrastructure
+  * Out: 
+    * Client
 
 get_data
   * Description: Specify data to be fetched
-  * IN: 
-    * (Client) _client_ [required]: Client instance from create_client()
-    * (String) _datatype_ [required]: Name of characteristic or tool 
-      (NetworkElements) elements // Subject of the data
-      (Parameters) data_params   // Additional metadata parameters
-      (TimeRange) timerange : DEFAULT=null // If non-empty, a time range filter
-  * OUT: list of DataSet
- 
+  * In: 
+    * (Client) client {required}: Client instance from create_client()
+    * (String) datatype {required}: Name of characteristic or tool 
+    * (NetworkElements) elements {required}:  Subject of the data
+    * (Parameters) data_params {required}: Additional metadata parameters
+    * (TimeRange) timerange {null}: If non-empty, a time range filter
+  * Out: 
+    * list of DataSet 
+
 get_measurements
   * Description: Retrieve the measurements in a given dataset
-  * IN: (DataSet) data_set
-  * OUT: list of Measurement
+  * In: 
+    * (DataSet) data_set
+  * OUT: 
+    * list of Measurement
+
+== Data types ==
