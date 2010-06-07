@@ -15,6 +15,11 @@
    * _*ACTION*_: V1 Of the API
    * _*ACTION*_: Use Cases
  # User Scenarios (Zafar)
+ # Presentation/discussion of V1 of the API
+
+== Background material ==
+
+* [http://code.google.com/p/perfsonar-ps/wiki/20100517APICall Minutes from 5/17 API Call]
 
 == Minutes ==
  
