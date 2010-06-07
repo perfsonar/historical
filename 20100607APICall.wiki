@@ -20,10 +20,151 @@
 == Background material ==
 
 * [http://code.google.com/p/perfsonar-ps/wiki/20100517APICall Minutes from 5/17 API Call]
+* Current V1 API specification (work in progress)
+{{{
+typedef Parameters (array or hash of name/value pairs)
+
+== Initialization ==
+/* Init includes various optional parameters which need to be cleaned up 
+Also might need a client_parameters call to make it generic.  */
+
+create_client(Parameters)
+/* Parameters include: */
+	 /* gls_hints_file=""   use gLS root hints file, if given; default is 'http://www.perfsonar.net/gls.root.hints'  */
+   /*   gls_urls=[],       /* list of gLS servers */
+   /*           hls_urls=[],       /* list of hLS servers */
+   /*           service_urls=[],   /* list of services to query without consulting LS infrastructure */
+
+== Get Data ==
+
+DataSetHandle /* state used to fetch data (including measurements and summaries) */
+get_data( String             type
+                  NetworkElements    elements,        /* the network elements involved in the measurement */
+                  DataParams  params,          /* parameters of the measurement to search for */
+                 TimeRange          time_range=NULL, /* if non-empty, a TimeRange filter */
+                  int                max_results=0,   /* never return more than this many results; 0=inf. */ 
+                  int                offset=10,       /* return up to this many results at a time */
+)
+
+The max_results/offset allows for pagination, though this would need to be
+handled (at least for the near term) in the client API.
+
+=== Iterate through measurement sets ===
+DataSet next_measurement_set(ResultHandle handle)
+
+=== Retrieve the measurements for the measurement set ===
+ResultHandle get_results(DataSet set)
+
+=== Iterate through the measurement data in that measurement set ===
+Result next_result(ResultHandle handle)
+
+==Data types==
+=== TimeRange ===
+TimeRange(double start_time, double end_time)
+* start_time: double (may be -1/NULL)
+* end_time: double (may be -1/NULL)
+
+TimeRange(start_time, -1/NULL): from start_time to the end of time
+TimeRange(-1/NULL, end_time):   from the beginning of time to end_time
+TimeRange(-1/NULL, -1/NULL):    from the beginning of time to the end of time
+
+=== DataSet ===
+* String             service_url          /* the URL from which the measurements are being retrieved */
+* String             type
+* NetworkElements    elements
+* DataParams  params
+* Summarization      summarization
+* TimeRange          time_range
+* int                max_results
+* int                offset
+
+=== Result ===
+This is an abstract supertype of GenericData and GenericSummarizationResult
+
+=== GenericData < Result ===
+* double timestamp
+* double value
+
+==== PingERData < GenericData ====
+* double timestamp
+* double value:          the median RTT value
+* double minRtt:
+* double meanRtt:
+* double medianRtt:
+* double lossPercent:
+* double clp:
+* double minIpd:
+* double maxIpd:
+* double iqrIpd:
+* double meanIpd:
+* double duplicates:
+* double outOfOrder:
+
+=== GenericSummarizationResult ===
+* TimeRange time
+* String    summarization_type
+* double    value
+
+==== MaxSummarizationResult ====
+==== MinSummarizationResult ====
+==== MedianSummarizationResult ====
+
+==== HistogramSummarizationResult ====
+* TimeRange time
+* String    summarization_type
+* double    value:                  NULL or -1
+* String    bucket_units:           The units of each bucket in the histogram
+* double    bucket_width:           The size of each bucket in the histogram
+* double    buckets[]:              The buckets in the histogram
+* double    bucket_values[]:        The values of each bucket
+
+  e.g.
+
+   bucket_units:   "packets"
+   bucket_width:   1   
+   buckets:        [1, 3, 4, 5, 10]
+   bucket_values:  [10, 4, 4, 1, 8]
+
+=== NetworkElements ===
+This is Topology Schema element.
+
+Examples:
+
+==== EndPointPair ====
+* String source
+* String destination
+
+==== Interface ====
+* String host
+* String hostAddress
+* String interfaceName
+* String interfaceAddress
+
+=== DataParams ===
+This is an abstract supertype of the various types of measurement parameters. 
+
+==== AvailableBandwidth ====
+==== Jitter ====
+==== RoundTripTime ====
+==== OneWayLatency ====
+==== IperfTest ====
+==== OwampTest ====
+==== PingERTest ====
+
+=== Summarization ===
+This is an abstract supertype of the various summarization types.
+
+* double aggregation_interval:    seconds of data to summarize in each returned SummarizationResult
+
+==== MinSummarization ====
+==== MaxSummarization ====
+==== MedianSummarization ====
+==== HistogramSummarization ====
+}}}
 
 == Minutes ==
  
-TBD
+  TBD
 
 === User Scenarios ===
  
