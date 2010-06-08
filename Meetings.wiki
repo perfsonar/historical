@@ -6,13 +6,14 @@ applicable.
 
 == Future Events ==
 
-   * [20100607APICall] - API Conference Call for June 7, 2010
-   * [20100607Video] - Video Conference for June 7, 2010 (Special Purpose - pSPT 3.2 Release)
+   * [20100614APICall] - API Conference Call for June 14, 2010
    * [20100614Video] - Video Conference for June 14, 2010
 
 == Past Events ==
 
  * 2010
+   * [20100607APICall] - API Conference Call for June 7, 2010
+   * [20100607Video] - Video Conference for June 7, 2010 (Special Purpose - pSPT 3.2 Release)
    * [20100524Video] - Video Conference for May 24, 2010
    * [20100517APICall] - API Conference Call for May 17, 2010
    * [20100517Video] - Video Conference for May 17, 2010

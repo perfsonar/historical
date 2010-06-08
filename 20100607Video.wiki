@@ -1,9 +1,7 @@
 =  June 7 2010 Conference Call 2:30 p.m. EDT =
 
-== Agenda/Minutes ==
+== Agenda ==
 
- # Attendees:
-   * TBD
  # pSPT 3.2 Release
    * See notes here: [pSPT32Release]
    * Development
@@ -40,9 +38,40 @@
      * Week of July 12th
        * Joint Techs, RC of LiveCD available for download
 
+=== Notes ===
+
+ # Attendees:
+   * Jason
+   * Marcos
+   * Aaron
+   * Andy
+   * Sowmya
+   * Joe
+   * Eric
+   * Kavitha
+ # Milestone Status
+   * Base 1 is done
+   * Base 2 is in progress (Aaron to create RPM repo in the next day or so)
+     * Eric having some trouble with RPM packages (e.g. some need very basic deps)
+   * Base 3 is also in progress. Web RPMs added to kick start already
+   * Base 4 is largly testing, and will start after 2 and 3 are done.  
+     * May need to push back due date.  Delays in building and availability of Eric.  
+   * LiveCD 1
+     * Tool itegration in progress.  Backing store/passwords.  Ramdisk procedure will take the longest, and wil dicate when this is done.  Aaron thinks this can be tested in parallel with the KS files.  
+   * Install DVD
+     * Eric in progress. Will be very hard to test due to the cost/availability of DVDs for many testers.  Should consider a process to break the DVD image into several CDs.  
+ # Missing milestones
+   * We need to have a boot CD ready to test the KS.  This is not covered in other milestones.  Jason will create.
+ # Dates
+   * Some dates will need to be ajusted - will re-evaluate at the end of this week.  
+ # Testers
+   * Andy/Sowmya/Brian (plus others?) from ESnet
+   * Who from UD?
+   * Jason/Kavitha/Aaron + some others at Internet2 (our TSG group)
+ 
 === ACTIONS ===
 
- * _*ACTION*_: TBD.
+ * _*ACTION*_: Jason to update release status and information.  
 
 == Where ==
 
@@ -50,4 +79,4 @@ ESnet conference bridge:
 
  * GDS: 00113498255555
  * Direct Dial:  mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
- * phone: 1-510-883-7860 then 8255555# at the prompt. 
+ * phone: 1-510-883-7860 then 8255 555# at the prompt. 
