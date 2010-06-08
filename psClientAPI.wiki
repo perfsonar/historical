@@ -110,7 +110,7 @@ Parameters
 import psapi
 
 # connect
-client = psapi.get_client() # use default roots
+client = psapi.create_client() # use default roots
 
 # create endpoint obj.
 endpoints = psapi.EndpointPair(source='hostA', dest='hostB')
