@@ -35,7 +35,7 @@ get_data
     * (`Client`) client {required}: Client instance from create_client()
     * (string) datatype {required}: Name of characteristic or tool 
     * (`Subject`) subject {required}:  Subject, in the perfsonar sense, of the data
-    * (`Parameters`) data_params {null}: Additional metadata parameters
+    * (`Parameters`) parameters {null}: Additional metadata parameters
     * (`TimeRange`) timerange {null}: If non-empty, a time range filter
   * Out: 
     * list of `DataSet` 
@@ -52,10 +52,6 @@ Client
   * Description: Data and associated metadata
   * Attributes:
     * (URL) service_url: The URL from which the measurements are being retrieved
-    * (URL) type: Name of characteristic or tool assoc. with measurements
-    * (`Subject`) subject: Subject of this data set
-    * (`Parameters`) data_params: Additional parameter metadata
-    * (`TimeRange`) time_range: Time range of the contained data
     * (list of `MeasurementSet`): Sets of Measurements associated with this data set
  
 !EndpointPair
@@ -84,8 +80,9 @@ Measurement
 !MeasurementSet
   * Description: One or more Measurement items, and associated metadata (subject and parameters), if different from the containing `DataSet` metadata.
   * Attributes:
+    * (URL) datatype: Name of characteristic or tool assoc. with measurements
     * (`Subject`) subject: Subject for this set of measurements. If empty, same as containing `DataSet` subject.
-    * (`Parameters`) data_params: Parameters that apply to all measurements in this set. May augment or override parameters in containing `DataSet`.
+    * (`Parameters`) parameters: Parameters that apply to all measurements in this set. May augment or override parameters in containing `DataSet`.
     * (list of Measurement) measurements: Measurements for this set
 
 !NetworkElements
@@ -120,14 +117,17 @@ client = psapi.create_client() # use default roots
 endpoints = psapi.EndpointPair(source='hostA', dest='hostB')
 
 # get data for endpoints
-data = client.get_data(subject=endpoints, datatype=psapi.THROUGHPUT)
+result = client.get_data(subject=endpoints, datatype=psapi.THROUGHPUT)
 
 # print the data values from each measurement set as
 # comma-separated values, without further interpretation
-for meas_set in data:
-  print("From: " + meas_set.service_url)
-  for meas in meas_set.measurements:
-     print(','.join(meas.header)) # print header items separated by a comma
-     for value in meas.values:
-         print(','.join(value)) # print value tuple items sep. by a comma
+for data_set in result:
+  print("Service: " + data_set.service_url)
+  for meas_set in data_set:
+    print("Subject: " + meas_set.subject)
+    print("Params : " + meas_set.parameters)
+    for meas in meas_set.measurements:
+       print(','.join(meas.header)) # print header items separated by a comma
+       for value in meas.values:
+           print(','.join(value)) # print value tuple items sep. by a comma
 }}} 
