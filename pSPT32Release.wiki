@@ -38,13 +38,14 @@ Beta, and RC:
  
 || *Milestone* || *Target Date* || *Status* ||
 || Milestone Base 1 || _N/A_ || <font color="green">_*DONE - 5/14*_</font> ||
-|| Milestone Base 2 || June 4th || <font color="yellow">_*IN PROGRESS - 6/2*_</font> ||
-|| Milestone Base 3 || June 11th || <font color="yellow">_*IN PROGRESS - 6/2*_</font> ||
+|| Milestone Base 2 || ~~June 4th~~ Week of June 7th || <font color="yellow">_*IN PROGRESS - 6/7*_</font> ||
+|| Milestone Base 3 || June 11th || <font color="yellow">_*IN PROGRESS - 6/7*_</font> ||
 || Milestone Base 4 || June 11th || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone LiveCD 1 || Week of 6/14 || <font color="yellow">_*IN PROGRESS - 6/2*_</font> ||
+|| Milestone Boot CD || June 11th || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone LiveCD 1 || Week of 6/14 || <font color="yellow">_*IN PROGRESS - 6/7*_</font> ||
 || Milestone LiveCD 2 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone LiveCD 3 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone Install Disk 1 || Week of 6/14 || <font color="yellow">_*IN PROGRESS- 6/2*_</font> ||
+|| Milestone Install Disk 1 || Week of 6/14 || <font color="yellow">_*IN PROGRESS- 6/7*_</font> ||
 || Milestone Install Disk 2 || Week of 6/28 || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone RC 1 || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone RC 2 || TBD || <font color="red">_*NOT STARTED*_</font> ||
@@ -79,14 +80,14 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Base 2 ===
 
 || *Summary* || Produce an initial kickstart file that will install the Toolkit with the exception of the Web GUI ||
-|| *Status* || <font color="yellow">_*IN PROGRESS - 6/2*_</font> || 
-|| *Est. Completion* || June 4th || 
+|| *Status* || <font color="yellow">_*IN PROGRESS - 6/7*_</font> || 
+|| *Est. Completion* || ~~June 4th~~ Week of June 7th || 
 || *Owner* || Eric/Aaron ||
 || *Depends* ||Milestone Base 1 ||
 
 The following are subtasks listed out for tracking purposes:
 
- * Create development yum repository - <font color="yellow">_*In PROGRESS*_</font> 
+ * ~~Create development yum repository~~ - <font color="green">_*DONE*_</font> 
  * Load all the above RPMs into the repository - <font color="yellow">_*In PROGRESS*_</font>
  * Build kickstart file that installs all of the RPMs from the repository - <font color="yellow">_*IN PROGRESS*_</font>
  * Update the RPMs if needed (e.g. dependencies not accounted for or similar) - <font color="yellow">_*In PROGRESS*_</font>
@@ -96,7 +97,7 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Base 3 ===
 
 || *Summary* || Add the Web GUI to the Toolkit  ||
-|| *Status* || <font color="yellow">_*IN PROGRESS - 6/2*_</font> || 
+|| *Status* || <font color="yellow">_*IN PROGRESS - 6/7*_</font> || 
 || *Est. Completion* || June 11th || 
 || *Owner* || Aaron ||
 || *Depends* || Milestone Base 1 ||
@@ -112,8 +113,8 @@ The following are subtasks listed out for tracking purposes:
    * The GUI work has left the configuration files separate for now.
  * Add the Web Configuration GUI RPM to the yum repository - <font color="yellow">_*In PROGRESS*_</font>
  * Update the kickstart file to include the Web Configuration GUI - <font color="yellow">_*In PROGRESS*_</font>
- * Fix any issues encountered by alpha testers - <font color="yellow">_*In PROGRESS*_</font>
- * Start internal testing of beta kickstart - <font color="yellow">_*In PROGRESS*_</font>
+ * Fix any issues encountered by alpha testers - <font color="red">_*NOT STARTED*_</font>
+ * Start internal testing of beta kickstart - <font color="red">_*NOT STARTED*_</font>
 
 === Milestone Base 4 ===
 
@@ -128,10 +129,20 @@ The following are subtasks listed out for tracking purposes:
  * Collect user feedback from the beta testers - <font color="red">_*NOT STARTED*_</font>
  * Fix any issues encountered by testers - <font color="red">_*NOT STARTED*_</font>
 
+=== Milestone Boot CD ===
+
+|| *Summary* || Produce a boot CD to test the KS images  ||
+|| *Status* || <font color="red">_*NOT STARTED*_</font> || 
+|| *Est. Completion* || June 11th || 
+|| *Owner* || Aaron/Eric ||
+|| *Depends* || Milestone Base 2 ||
+
+There are no subtasks associated with this milestone.  Use an existing CentOS boot CD with the custom KS image that points to our repositories.  
+
 === Milestone LiveCD 1 ===
 
 || *Summary* || Produce an initial Live CD instance that will save configuration/data to the backing store  ||
-|| *Status* || <font color="Yellow">_*IN PROGRESS - 6/2*_</font> || 
+|| *Status* || <font color="Yellow">_*IN PROGRESS - 6/7*_</font> || 
 || *Est. Completion* || Week of 6/14 || 
 || *Owner* || Aaron ||
 || *Depends* || Milestone Base 4 ||
