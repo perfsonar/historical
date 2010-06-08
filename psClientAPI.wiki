@@ -34,8 +34,8 @@ get_data
   * In: 
     * (`Client`) client {required}: Client instance from create_client()
     * (string) datatype {required}: Name of characteristic or tool 
-    * (`NetworkElements`) elements {required}:  Subject of the data
-    * (`Parameters`) data_params {required}: Additional metadata parameters
+    * (`NetworkElements`) subject {required}:  Subject of the data
+    * (`Parameters`) data_params {null}: Additional metadata parameters
     * (`TimeRange`) timerange {null}: If non-empty, a time range filter
   * Out: 
     * list of `DataSet` 
@@ -56,7 +56,7 @@ Client
     * (`NetworkElements`) elements: Metadata about the network
     * (`Parameters`) data_params: Additional parameter metadata
     * (`TimeRange`) time_range: Time range of the contained data
-    * (list of `Measurement`): Measurements associated with this data set
+    * (list of `MeasurementSet`): Sets of Measurements associated with this data set
  
 !EndpointPair
   * Description: subclass of !NetworkElements for 2 endpoint pairs
@@ -75,11 +75,18 @@ Interface
 Measurement
   * Description: Summarized or "raw" measurement result.
   * Attributes:
-    * (`TimeRange`) time:  Time range of the data. 
+    * (`TimeRange`) time_range:  Time range of the data. 
     * (URL) summarization: If non-empty, the type of summarization, e.g. "mean" or "histogram"
     * (list of string) header: If non-empty, the name associated with each value in the tuples of `values`. If empty, each tuple in values should be of length one (1).
     * (list of tuples) values: One or more tuples, each the same length as the `header`, containing associated data values.
     * (`Parameters`) data_params: parameters such as units, bucket_width, or trim_pct (for trimmed mean), that apply to the measurements
+
+!MeasurementSet
+  * Description: One or more sets of Measurement items
+  * Attributes:
+    * (URL) service_url: URL actually providing this set of measurements
+    * (`Parameters`) data_params: parameters that apply to all measurements in this set
+    * (list of Measurement) measurements: Measurements with this set
 
 !NetworkElements
   * Description: Abstract Topology schema element.
@@ -93,3 +100,30 @@ Parameters
   * Attributes:
     * (time) start_time: Time value, if empty then "beginning of time"
     * (time) end_time: Time value, if empty then "end of time"
+
+= Examples =
+
+== Fetch one throughput measurement between hostA and hostB ==
+
+*Python*-ish example
+{{{
+import psapi
+
+# connect
+client = psapi.get_client() # use default roots
+
+# create endpoint obj.
+endpoints = psapi.EndpointPair(source='hostA', dest='hostB')
+
+# get data for endpoints
+data = client.get_data(subject=endpoints, datatype=psapi.THROUGHPUT)
+
+# print the data values from each measurement set as
+# comma-separated values, without further interpretation
+for meas_set in data:
+  print("From: " + meas_set.service_url)
+  for meas in meas_set.measurements:
+     print(','.join(meas.header)) # print header items separated by a comma
+     for value in meas.values:
+         print(','.join(value)) # print value tuple items sep. by a comma
+}}} 
