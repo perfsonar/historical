@@ -12,8 +12,8 @@ It is assumed that the language in question has a standard way of representing, 
 
 == Formats ==
 
-* Input parameters use this format: (`Type`) _param-name_ {default-value}: Description.
-* Attributes drop the default value: (`Type`) _attribute-name_: Description
+  * Input parameters use this format: (`Type`) _param-name_ {default-value}: Description.
+  * Attributes drop the default value: (`Type`) _attribute-name_: Description
 
 = Specification = 
 
