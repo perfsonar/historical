@@ -4,39 +4,92 @@
 
 A standard, straightforward client API specification would be useful to users of perfSONAR. It could be implemented in a variety of languages.
 
+= Preliminaries =
 
-= Details =
+== Language mapping ==
+
+It is assumed that the language in question has a standard way of representing, and iterating over, lists of items. 
+
+== Formats ==
+
+* Input parameters use this format: (`Type`) _param-name_ {default-value}: Description.
+* Attributes drop the default value: (`Type`) _attribute-name_: Description
+
+= Specification = 
 
 == Operations ==
-
-Input parameter format is: (Type) _param-name_ {default-value}: Description.
 
 create_client
   * Description: Construct and initialize a new client.
   * In:
-    * (String) gls_hints_file {""}: Use gLS root hints file, if given; default is 'http://www.perfsonar.net/gls.root.hints'
+    * (string) gls_hints_file {""}: Use gLS root hints file, if given; default is 'http://www.perfsonar.net/gls.root.hints'
     * (list of URL) gls_urls {empty list}:  list of gLS servers 
     * (list of URL) hls_urls {empty list}: list of hLS servers
     * (list of URL) service_urls {empty list}: list of services to query without consulting LS infrastructure
   * Out: 
-    * Client
+    * `Client`
 
 get_data
   * Description: Specify data to be fetched
   * In: 
-    * (Client) client {required}: Client instance from create_client()
-    * (String) datatype {required}: Name of characteristic or tool 
-    * (NetworkElements) elements {required}:  Subject of the data
-    * (Parameters) data_params {required}: Additional metadata parameters
-    * (TimeRange) timerange {null}: If non-empty, a time range filter
+    * (`Client`) client {required}: Client instance from create_client()
+    * (string) datatype {required}: Name of characteristic or tool 
+    * (`NetworkElements`) elements {required}:  Subject of the data
+    * (`Parameters`) data_params {required}: Additional metadata parameters
+    * (`TimeRange`) timerange {null}: If non-empty, a time range filter
   * Out: 
-    * list of DataSet 
-
-get_measurements
-  * Description: Retrieve the measurements in a given dataset
-  * In: 
-    * (DataSet) data_set
-  * OUT: 
-    * list of Measurement
+    * list of `DataSet` 
 
 == Data types ==
+
+The data types are listed alphabetically.
+
+Client
+  * Description: Opaque handle for client operations
+  * Attributes: None
+
+!DataSet
+  * Description: Data and associated metadata
+  * Attributes:
+    * (URL) service_url: The URL from which the measurements are being retrieved
+    * (URL) type: Name of characteristic or tool assoc. with measurements
+    * (`NetworkElements`) elements: Metadata about the network
+    * (`Parameters`) data_params: Additional parameter metadata
+    * (`TimeRange`) time_range: Time range of the contained data
+    * (list of `Measurement`): Measurements associated with this data set
+ 
+!EndpointPair
+  * Description: subclass of !NetworkElements for 2 endpoint pairs
+  * Attributes:
+    * (string) source
+    * (string) destination
+
+Interface
+  * Description: subclass of !NetworkElements for host interfaces
+  * Attributes:
+    * (string) host
+    * (string) host_address
+    * (string) interface_name
+    * (string) interface_address
+
+Measurement
+  * Description: Summarized or "raw" measurement result.
+  * Attributes:
+    * (`TimeRange`) time:  Time range of the data. 
+    * (URL) summarization: If non-empty, the type of summarization, e.g. "mean" or "histogram"
+    * (list of string) header: If non-empty, the name associated with each value in the tuples of `values`. If empty, each tuple in values should be of length one (1).
+    * (list of tuples) values: One or more tuples, each the same length as the `header`, containing associated data values.
+    * (`Parameters`) data_params: parameters such as units, bucket_width, or trim_pct (for trimmed mean), that apply to the measurements
+
+!NetworkElements
+  * Description: Abstract Topology schema element.
+  * Subclasses: !EndpointPair, Interface
+
+Parameters
+  * Description: Generic name=value hash or array
+
+!TimeRange
+  * Description: Start and/or end time
+  * Attributes:
+    * (time) start_time: Time value, if empty then "beginning of time"
+    * (time) end_time: Time value, if empty then "end of time"
