@@ -132,7 +132,7 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Boot CD ===
 
 || *Summary* || Produce a boot CD to test the KS images  ||
-|| *Status* || <font color="red">_*NOT STARTED*_</font> || 
+|| *Status* || <font color="yellow">_*IN PROGRESS*_</font> || 
 || *Est. Completion* || June 11th || 
 || *Owner* || Aaron/Eric ||
 || *Depends* || Milestone Base 2 ||
