@@ -3337,15 +3337,39 @@ The coarser or finer result of the granularity setting seems to be highly depend
 	}}}
 	
 
-=== Subsequent Work ===
+== Performance of the Algorithm ==
 
-The algorithm for [http://en.wikipedia.org/wiki/Cut_(graph_theory) Minimum Cut] might also be a candidate for the summarization issue, and may be further investigated in future versions.
+The graph below brings the amount of time consumed by the Perl implementation of the heuristic in summarizing each test set, for each granularity setting; i.e., the running times.  For the measurement, the Mininum Subnet Mask was kept at 8.  The test environment was:  PC with Core 2 Quad Q9300 @ 2.5GHz and 4% average load on all cores; 4GiB RAM; Gigabyte GA-P35ds2 motherboard; Western Digital Caviar Blue WD50000AAKS hard drive, SATA 3Gib/s, 16MiB cache, 7200 RPM; Vista Ultimate 32-bit; Eclipse 3.4.1; Perl 5.10.0 ActiveState.
 
+The test sets were text files and were read to a data structure in memory.  The timing measurement commenced after all IP addresses in the file were read into the data structure, and stopped after the summarization was completed and contained within its own data structure in memory.  This way, the latency related to reading the data from a text file is not computed into the measurement (but for eventual operating system virtual memory reads and writes).
+
+Ten samples were taken for each IP set and each granularity.  The average was computed and the error margin taken, considering a confidence level of 0.05 (for a t-Student distribution, with t=2.262).
+
+Clearly, the algorithm exhibits a linear running time to the size of the input (number of IP addresses), i.e., O(n).  The particular values are platform-dependent; the linear, O(n) running time result is more relevant in displaying the performance of the algorithm.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/IPSummarization/running_time.png
+
+== Integration with gLS.pm code ==
+
+The algorithm was integrated into the LS code (gLS.pm) in a test branch.  It operates in the following manner:
+
+The function `ipSummarization` within this code receives a list of IPv4 addresses as input and calls the IP summarization algorithm.  The algorithm builds a PATRICIA tree by inserting each individual address, creating other IP address that represent the CIDR classes in the process.  Then, the tree is traversed and some IP addresses are chosen according to the heuristic decisions and parameters.  The algorithm returns a pointer to a list of IP addresses (that represent the summarized IP address list).
+
+Function `ipSummarization` makes use of the modules IpTrie.pm, IpTrieNode.pm, Trie.pm, and TrieNode.pm.  Refer to the README_IP_summarization.html file for more information on the algorithm.
+
+There are two parameters to control the algorithm (implemented through the file daemon.conf):
+
+ * summarization_granularity:  The granularity parameter controls the granularity or coarseness of the summarization.  It accepts values from 0 to 3; 0 results in finer summarizations, i.e., more summarizing nodes being generated; 3 results in coarser summarizations, i.e., fewer, more general summarizing nodes. The default is 1.
+ 
+ * summarization_minMask:  The minMask controls the minimum mask that a summarizing node must present.  Nodes that have a mask smaller than minMask will not be selected as summarizing nodes, thus guaranteeing that summarizing nodes do not become too general.  The parameter accepts values from 0 to MAX_KEY_LENGTH, where, for IPv4, MAX_KEY_LENGTH is 32.  Default is 8.
+ 
+== Final Integration and Deployment to Production ==
+
+To be decided by perfSONAR personnel.
 
 == Project Management ==
 
-Most details TBD, basic outline:
-
+Basic outline:
 
 || _*Dates*_ || _*Task*_ || _*People*_ ||
 || Weekly || Conference Call - Discuss progress || Jason, Martin, Student (Jeff) || 
