@@ -3363,6 +3363,56 @@ There are two parameters to control the algorithm (implemented through the file 
  
  * summarization_minMask:  The minMask controls the minimum mask that a summarizing node must present.  Nodes that have a mask smaller than minMask will not be selected as summarizing nodes, thus guaranteeing that summarizing nodes do not become too general.  The parameter accepts values from 0 to MAX_KEY_LENGTH, where, for IPv4, MAX_KEY_LENGTH is 32.  Default is 8.
  
+=== Configuration File Format ===
+
+This is an example of a full configuration file including the new two parameters for IP summarization.
+
+{{{
+<port 9995>
+    <endpoint /perfSONAR_PS/services/hLS>
+        <gls>
+				                                # just an hLS ... (ORG, CITY, STATE, COUNTRY)
+			root                            0
+				                                # data TTL = 4 days
+			ls_ttl                          5760
+				                                # 180 minute (3hr) registaration window
+			ls_registration_interval        180
+				                                # 120 miute cleaning/summary window
+			maintenance_interval	        120
+				                                # Database options (only change path)
+			metadata_db_file	            glsstore.dbxml
+			metadata_summary_db_file	    glsstore-summary.dbxml
+			metadata_db_name	            /var/lib/perfsonar/lookup_service/xmldb
+				                                # Service options (please customize)
+			service_accesspoint	            http://localhost:9995/perfSONAR_PS/services/hLS
+			service_description             ORG Home Lookup Service (CITY, STATE, COUNTRY)
+			service_name                    ORG Home Lookup Service
+			service_type	                hLS
+			
+			summarization_granularity       3   #integer between [0;3]; 0 is coarser, 3 is finer (larger summarization)
+            summarization_minMask          18   #minimum CIDR mask in summarization; for IPv4, 0 to 32
+                                                #summarized IP addresses will not have a mask smaller than minMask
+
+			
+		</gls>
+		disable	                            0
+		module	                            perfSONAR_PS::Services::LS::gLS
+	</endpoint>
+</port>
+	                                            # 180 minute (3hr) registaration window
+ls_registration_interval	                180
+disable_echo	                            0
+	                                            # Root hints info, url + local copy location
+root_hints_url	                            http://www.perfsonar.net/gls.root.hints
+root_hints_file	                            /var/lib/perfsonar/lookup_service/hls.root.hints
+	                                            # Daemon management, shouldn't need changing
+reaper_interval	                            20
+max_worker_lifetime	                        300
+max_worker_processes	                    30
+pid_dir                                     /var/run
+pid_file	                                lookup_service.pid
+}}}
+ 
 == Testing ==
 
 The LS with the new algorithm was deployed in server `moonshine` at University of Delaware as a hLS.  `fakeServices`, 30 in total, were deployed from a virtual node in [http://www.planet-lab.org PlanetLab].  Several different settings of granularity and minMask were verified, and both the original IP addresses from the `fakeServices` and the summarized addresses were recorded to files for debugging the integration.
