@@ -340,8 +340,8 @@ an explanation of each follows:
 || service_description || Yes || String || Description of this service ||
 || service_name || Yes || String || Name of this service ||
 || service_type || Yes || String || Type of this service (normally hLS) ||
-|| summarization_granularity || No || Integer [0;3] ||  Granularity setting for IP summarization heuristic; 0 is coarser, 3 is finer (larger summarization) <font color=red>_(Future Release)_</font> ||
-|| summarization_minMask || No || Integer [0;32] || Minimum CIDR mask for use in summarization; for IPv4, must be between 0 to 32. Summarized IP addresses will not have a mask smaller than minMask <font color=red>_(Future Release)_</font> ||
+|| summarization_granularity || No || Integer `[0;3]` ||  Granularity setting for IP summarization heuristic; 0 is coarser, 3 is finer (larger summarization) <font color=red>_(Future Release)_</font> ||
+|| summarization_minMask || No || Integer `[0;32]` || Minimum CIDR mask for use in summarization; for IPv4, must be between 0 to 32. Summarized IP addresses will not have a mask smaller than minMask <font color=red>_(Future Release)_</font> ||
 || disable || No || Boolean, 0 or 1 || Is this service active or not (normally 1) ||
 || module || Yes || String (module name) || Module name that controls this service (normally will not change) ||
 
