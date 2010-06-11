@@ -3363,6 +3363,14 @@ There are two parameters to control the algorithm (implemented through the file 
  
  * summarization_minMask:  The minMask controls the minimum mask that a summarizing node must present.  Nodes that have a mask smaller than minMask will not be selected as summarizing nodes, thus guaranteeing that summarizing nodes do not become too general.  The parameter accepts values from 0 to MAX_KEY_LENGTH, where, for IPv4, MAX_KEY_LENGTH is 32.  Default is 8.
  
+== Testing ==
+
+The LS with the new algorithm was deployed in server `moonshine` at University of Delaware as a hLS.  `fakeServices`, 30 in total, were deployed from a virtual node in [http://www.planet-lab.org PlanetLab].  Several different settings of granularity and minMask were verified, and both the original IP addresses from the `fakeServices` and the summarized addresses were recorded to files for debugging the integration.
+
+The algorithm was found to be summarizing the IP addresses as expected, and returning a proper list of addresses.
+
+It is suggested that one hLS with the new algorithm be deployed in a real environment with more services registering to it, and its operation be scrutinized together with its publishing of the summarized sets to the gLS cloud.  Also, verify the operation of the integrated code in gLS mode. 
+ 
 == Final Integration and Deployment to Production ==
 
 To be decided by perfSONAR personnel.
