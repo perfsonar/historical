@@ -3347,7 +3347,7 @@ Ten samples were taken for each IP set and each granularity.  The average was co
 
 Clearly, the algorithm exhibits a linear running time to the size of the input (number of IP addresses), i.e., O(n).  The particular values are platform-dependent; the linear, O(n) running time result is more relevant in displaying the performance of the algorithm.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/IPSummarization/running_time.png
+http://perfsonar-ps.googlecode.com/svn/wiki/IPSummarization/running_times.png
 
 == Integration with gLS.pm code ==
 
@@ -3393,11 +3393,11 @@ Basic outline:
    * Assist in researching proper algorithms
    * review progress of performance/effectiveness
  * Student
-   * Review existing design of algorithm and source code - <font color=green>_*Done - 3/10*_</font>
-   * Propose changes to algorithm - <font color=green>_*Done - 3/13*_</font>
-   * Implement changes (several prototypes) in source code - <font color=red>_*IN PROGRESS - 3/xx*_</font>
-   * Experimentation on data sets - <font color=red>_*IN PROGRESS - 3/xx*_</font>
-   * Evaluation of results (correctness, speed, effectiveness) - <font color=red>_*IN PROGRESS - 3/23*_</font>
+   * Review existing design of algorithm and source code
+   * Propose changes to algorithm
+   * Implement changes (several prototypes) in source code
+   * Experimentation on data sets
+   * Evaluation of results (correctness, speed, effectiveness)
    * Final source code review
    * Assist Jason in gLS integration
    * Assist Brian/Jason in test framework design, installation, testing
