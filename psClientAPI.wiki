@@ -6,6 +6,8 @@
 
 A standard, straightforward client API specification would be useful to users of perfSONAR. It could be implemented in a variety of languages.
 
+See also the [PsClientApiUseCases detailed use-cases].
+
 == Languages ==
 
 It is assumed that the language in question has a standard way of representing, and iterating over, lists of items. 
