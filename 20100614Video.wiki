@@ -13,7 +13,8 @@
    * _*ACTION*_: Everyone: review issue tracker and email a list of the issues they think is critical for 3.2.
    * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
    * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
- # TBD
+ # Team updates
+ # Release update
  
 === ACTIONS ===
 
