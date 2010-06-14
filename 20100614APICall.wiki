@@ -18,14 +18,13 @@
      * how, then, to deal with user-requested summarizations?
      * in the table-o-data model, how are known structures described -- enumerations of names for rows and columns? (do the "rows" of the table need a name, too?)
    # Need an API method to get "just" the metadata. Examples:
-     * what SNMP granularities are available, e.g. DataInfoRequest [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-SNMPMA/etc/requests/DataInfoRequest-1.xml XML example].
-     * which data (measurements) are available. e.g., results of MetadataKeyRequest with an empty subject.
+     * what SNMP granularities are available, e.g. !DataInfoRequest [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-SNMPMA/etc/requests/DataInfoRequest-1.xml XML example].
+     * which data (measurements) are available. e.g., results of !MetadataKeyRequest with an empty subject.
    # Need explicit timeout for synchronous calls
    # A TTL in the result so the client knows how often to ask for new data. Services would need to provid this -- can we specify a default?
    # Error handling and exceptions. This gets tricky when multiple services get involved:
-     * what to do if we are contacting multiple services
-underneath and some fail while others succeed. Does partial failure lead to partial results? Is total failure still an exception? How are the exceptions returned to the caller? 
-   # More generic "Topology" class instead of a class hierarchy with NetworkElements, EndpointPair? Should this be consistent with whether we make a class hierarchy for Data, or treated separately?
+     * what to do if we are contacting multiple services underneath and some fail while others succeed. Does partial failure lead to partial results? Is total failure still an exception? How are the exceptions returned to the caller? 
+   # More generic "Topology" class instead of a class hierarchy with !NetworkElements, !EndpointPair? Should this be consistent with whether we make a class hierarchy for Data, or treated separately?
    # Need to specify supported time formats
    # At least need to keep the possibility of an asychronous, "callback", API in mind
  # Next steps
