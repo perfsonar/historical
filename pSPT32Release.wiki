@@ -38,10 +38,10 @@ Beta, and RC:
  
 || *Milestone* || *Target Date* || *Status* ||
 || Milestone Base 1 || _N/A_ || <font color="green">_*DONE - 5/14*_</font> ||
-|| Milestone Base 2 || ~~June 4th~~ Week of June 7th || <font color="yellow">_*IN PROGRESS - 6/7*_</font> ||
-|| Milestone Base 3 || June 11th || <font color="yellow">_*IN PROGRESS - 6/7*_</font> ||
+|| Milestone Base 2 || ~~June 4th~~ Week of June 7th || <font color="green">_*DONE - 6/11*_</font> ||
+|| Milestone Base 3 || June 11th || <font color="green">_*DONE - 6/11*_</font> ||
 || Milestone Base 4 || June 11th || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone Boot CD || June 11th || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone Boot CD || June 11th || <font color="green">_*DONE*_</font> ||
 || Milestone LiveCD 1 || Week of 6/14 || <font color="yellow">_*IN PROGRESS - 6/7*_</font> ||
 || Milestone LiveCD 2 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone LiveCD 3 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
@@ -80,7 +80,7 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Base 2 ===
 
 || *Summary* || Produce an initial kickstart file that will install the Toolkit with the exception of the Web GUI ||
-|| *Status* || <font color="yellow">_*IN PROGRESS - 6/7*_</font> || 
+|| *Status* || <font color="green">_*DONE - 6/11*_</font> || 
 || *Est. Completion* || ~~June 4th~~ Week of June 7th || 
 || *Owner* || Eric/Aaron ||
 || *Depends* ||Milestone Base 1 ||
@@ -88,16 +88,16 @@ The following are subtasks listed out for tracking purposes:
 The following are subtasks listed out for tracking purposes:
 
  * ~~Create development yum repository~~ - <font color="green">_*DONE*_</font> 
- * Load all the above RPMs into the repository - <font color="yellow">_*In PROGRESS*_</font>
- * Build kickstart file that installs all of the RPMs from the repository - <font color="yellow">_*IN PROGRESS*_</font>
- * Update the RPMs if needed (e.g. dependencies not accounted for or similar) - <font color="yellow">_*In PROGRESS*_</font>
+ * ~~Load all the above RPMs into the repository~~ - <font color="green">_*DONE*_</font>
+ * ~~Build kickstart file that installs all of the RPMs from the repository~~ - <font color="green">_*DONE*_</font>
+ * ~~Update the RPMs if needed (e.g. dependencies not accounted for or similar)~~ - <font color="green">_*DONE*_</font>
  * ~~~Start internal testing of alpha kickstart~~~ - <font color="purple">_*Merge Testing With Milestone Base 3*_</font>
    * The Milestone Base 3 work is far enough along that once we have a kickstart done, we can easily add the Web GUI to that kickstart
 
 === Milestone Base 3 ===
 
 || *Summary* || Add the Web GUI to the Toolkit  ||
-|| *Status* || <font color="yellow">_*IN PROGRESS - 6/7*_</font> || 
+|| *Status* || <font color="green">_*DONE - 6/11*_</font> || 
 || *Est. Completion* || June 11th || 
 || *Owner* || Aaron ||
 || *Depends* || Milestone Base 1 ||
@@ -108,11 +108,11 @@ The following are subtasks listed out for tracking purposes:
    * ~~Change existing configuration backend to change the default locations of configuration files (if changed)~~ - <font color="green">_*DONE*_</font> 
    * ~~Build configuration daemon that the Web GUI can talk to to write new versions of configuration files and restart daemons~~ - <font color="green">_*DONE*_</font> 
    * ~~Either modify backend or web GUIs to talk to daemon instead of writing files/restarting services directly~~ - <font color="green">_*DONE*_</font> 
- * Depending on how configuration is stored, make changes to the packaging of other services (e.g. if there's a centralized configuration file for common pS-PS configuration options) - <font color="yellow">_*In PROGRESS*_</font>
+ * ~~Depending on how configuration is stored, make changes to the packaging of other services (e.g. if there's a centralized configuration file for common pS-PS configuration options)~~ - <font color="green">_*DONE*_</font>
    * The configuration has a large number of shared components. Centralizing these shared configuration pieces would make it easier to [http://code.google.com/p/perfsonar-ps/wiki/pSPT32_DevNotes#Configuration_Change_Effects update service/tool configuration] when the system configuration changes
    * The GUI work has left the configuration files separate for now.
- * Add the Web Configuration GUI RPM to the yum repository - <font color="yellow">_*In PROGRESS*_</font>
- * Update the kickstart file to include the Web Configuration GUI - <font color="yellow">_*In PROGRESS*_</font>
+ * ~~Add the Web Configuration GUI RPM to the yum repository~~ - <font color="green">_*DONE*_</font>
+ * ~~Update the kickstart file to include the Web Configuration GUI~~ - <font color="green">_*DONE*_</font>
  * Fix any issues encountered by alpha testers - <font color="red">_*NOT STARTED*_</font>
  * Start internal testing of beta kickstart - <font color="red">_*NOT STARTED*_</font>
 
@@ -132,7 +132,7 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Boot CD ===
 
 || *Summary* || Produce a boot CD to test the KS images  ||
-|| *Status* || <font color="yellow">_*IN PROGRESS*_</font> || 
+|| *Status* || <font color="green">_*DONE*_</font> || 
 || *Est. Completion* || June 11th || 
 || *Owner* || Aaron/Eric ||
 || *Depends* || Milestone Base 2 ||
