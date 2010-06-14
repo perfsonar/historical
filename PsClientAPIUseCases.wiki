@@ -1,7 +1,0 @@
-# Use-cases for perfSONAR client API
-
-= Introduction =
-
-This page lists use-cases for perfSONAR clients, and provides for each a high-level description of how this would be implemented using the psClientAPI
-
-= Details =
