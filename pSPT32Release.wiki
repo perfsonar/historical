@@ -157,6 +157,7 @@ The following are subtasks listed out for tracking purposes:
 || ~~perfAdmin OWAMP Graphs~~ || fixed || <font color="green">_*DONE*_</font> ||
 || PingER Fixes from  USATLAS || talk w/ maxim, find out all of the parts || <font color="red">_*NOT STARTED*_</font> ||
 || pSB Query fixes || in branch, need new RPMs || <font color="yellow">_*IN PROGRESS*_</font> ||
+|| Permissions for Web_Admin.log || know of problem, addressing || <font color="yellow">_*IN PROGRESS*_</font> ||
 
 === Milestone Boot CD ===
 
