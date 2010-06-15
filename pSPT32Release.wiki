@@ -120,14 +120,43 @@ The following are subtasks listed out for tracking purposes:
 
 || *Summary* || Produce a final cut of the Base Toolkit  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
-|| *Est. Completion* || June 11th || 
-|| *Owner* || Jason ||
+|| *Est. Completion* || ~~June 11th~~ June 15th || 
+|| *Owner* || Jason/Aaron ||
 || *Depends* || Milestone Base 3 ||
 
 The following are subtasks listed out for tracking purposes:
 
- * Collect user feedback from the beta testers - <font color="red">_*NOT STARTED*_</font>
- * Fix any issues encountered by testers - <font color="red">_*NOT STARTED*_</font>
+ * Collect user feedback from the beta testers - <font color="yellow">_*IN PROGRESS*_</font>
+ * Fix any issues encountered by testers - <font color="yellow">_*IN PROGRESS*_</font>
+
+|| *Issue* || *Synopsis* || *Status* ||
+|| Unecessary packages in pSPT, most likely from upstream CentOS defaults || Can remove some, not all || <font color="red">_*NOT STARTED*_</font> ||
+|| password for 'root' user on toolkit, should force a password change.  disallow ssh access || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| 'perfsonar' user on toolkit, would be similar to 'knoppix' user, use instead of root?  || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Add link to 'nptoolkit-configure.py' in PATH || Easy to do || <font color="red">_*NOT STARTED*_</font> ||
+|| Why reboot after configuring basic settings? || Relic from knoppix, can fix, just not now  || <font color="red">_*NOT STARTED*_</font> ||
+|| NTP defaults to RH/CentOS servers || Will look into replacing default config with ours || <font color="red">_*NOT STARTED*_</font> ||
+|| Zeroconf routing entry (169.254.0.0      *   255.255.0.0      U 0 0 0 eth0) || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| CSS does not display right under IE8 || Need a CSS expert to help, TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Fix PingER defaults (5 min tests) || Easy to fix || <font color="red">_*NOT STARTED*_</font> ||
+|| OWAMP displaying v6 addresses, maybe prefer v4?  also displaying junk in address (e.g. xxx%134508904) || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Pinger has 12-24-48 hours and Owamp 4-12-24 hours, do the same for both || Can do - need to worry about speed || <font color="red">_*NOT STARTED*_</font> ||
+|| pSPT Branding in the install/config/boot process || Will try || <font color="red">_*NOT STARTED*_</font> ||
+|| ~~Fix MOTD to remove knoppix user note~~ || fixed || <font color="green">_*DONE*_</font> ||
+|| ~~'adduser' dialog in 'nptoolkit-configure.py' doesn't ask for passwords~~ || fixed || <font color="green">_*DONE*_</font> ||
+|| ~~User's PATH may not include /sbin /usr/sbin /usr/local/sbin~~ || fixed || <font color="green">_*DONE*_</font> ||
+|| ~~Reboot after entering 'nptoolkit-configure.py', not setting things~~ || fixed || <font color="green">_*DONE*_</font> ||
+|| Blocking/redirecting access to http://HOST || Prefer to redirect, will look into || <font color="red">_*NOT STARTED*_</font> ||
+|| CSS for 'global services' has strange properties || need a CSS person to look at || <font color="red">_*NOT STARTED*_</font> ||
+|| open in same vs new window for 'global services' page || will look into || <font color="red">_*NOT STARTED*_</font> ||
+|| ~~JOWPing link wrong~~ || fixed || <font color="green">_*DONE*_</font> ||
+|| ~~Reverse traceroute/ping links do not work~~ || fixed || <font color="green">_*DONE*_</font> ||
+|| PingER GUI cannot be installed || dependicies still preventing this || <font color="red">_*NOT STARTED*_</font> ||
+|| Cacti auth, permission denied when trying to view graphs after entering information || need to verify || <font color="red">_*NOT STARTED*_</font> ||
+|| ~~Users not appearing in sudoers when granted admin permission || fixed, %wheel group now being added~~ || <font color="green">_*DONE*_</font> ||
+|| ~~perfAdmin OWAMP Graphs~~ || fixed || <font color="green">_*DONE*_</font> ||
+|| PingER Fixes from  USATLAS || talk w/ maxim, find out all of the parts || <font color="red">_*NOT STARTED*_</font> ||
+|| pSB Query fixes || in branch, need new RPMs || <font color="yellow">_*IN PROGRESS*_</font> ||
 
 === Milestone Boot CD ===
 
