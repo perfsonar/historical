@@ -94,7 +94,7 @@ UEN
 == Status ==
 
 || Domain || Latency Systems Deployed || Bandwidth Systems Deployed || Latency Tests Configured || Bandwidth Tests Configured ||
-|| NOAA || Yes || Yes ||  || ||
+|| NOAA || Yes || Yes ||  || Partially ||
 || Internet2 || Yes || Yes || ||  ||
 || ESnet || Yes || Yes || No || Partially || 
 || NLR || || Yes || || ||
@@ -103,3 +103,9 @@ UEN
 
 
 == Measurement Results ==
+
+   * ESnet
+      * https://stats1.es.net/cgi-bin/serviceTest.cgi?url=http://anl-pt1-mgt.es.net:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
+      * https://stats1.es.net/cgi-bin/serviceTest.cgi?url=http://nersc-pt1-mgt.es.net:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
+   * NOAA
+      * http://perfsonar-pri.gfdl.noaa.gov/gui/perfAdmin/serviceTest.cgi?url=http://localhost:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
