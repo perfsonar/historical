@@ -132,7 +132,7 @@ The following are subtasks listed out for tracking purposes:
 || *Issue* || *Synopsis* || *Status* ||
 || Unecessary packages in pSPT, most likely from upstream CentOS defaults || Can remove some, not all || <font color="red">_*NOT STARTED*_</font> ||
 || password for 'root' user on toolkit, should force a password change.  disallow ssh access || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| 'perfsonar' user on toolkit, would be similar to 'knoppix' user, use instead of root?  || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| ~~'perfsonar' user on toolkit, would be similar to 'knoppix' user, use instead of root?~~  || Denied || <font color="purple">_*WONT FIX*_</font> ||
 || Add link to 'nptoolkit-configure.py' in PATH || Easy to do || <font color="red">_*NOT STARTED*_</font> ||
 || Why reboot after configuring basic settings? || Relic from knoppix, can fix, just not now  || <font color="red">_*NOT STARTED*_</font> ||
 || NTP defaults to RH/CentOS servers || Will look into replacing default config with ours || <font color="red">_*NOT STARTED*_</font> ||
@@ -158,6 +158,9 @@ The following are subtasks listed out for tracking purposes:
 || PingER Fixes from  USATLAS || talk w/ maxim, find out all of the parts || <font color="red">_*NOT STARTED*_</font> ||
 || pSB Query fixes || in branch, need new RPMs || <font color="yellow">_*IN PROGRESS*_</font> ||
 || Permissions for Web_Admin.log || know of problem, addressing || <font color="yellow">_*IN PROGRESS*_</font> ||
+|| BWCTL Limits screen sets 'open mode' to off after editing || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| After authenticating to cacti, 'access denied' when switching from console to graph view || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Cacti does not poll devices after setup.  Potential clock sckew problem? || Edited 'poller_lastrun' variable to fix || <font color="red">_*NOT STARTED*_</font> ||
 
 === Milestone Boot CD ===
 
