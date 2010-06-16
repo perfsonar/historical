@@ -307,32 +307,26 @@ The following are subtasks listed out for tracking purposes:
 
 == Bugs Related to This Release ==
 
- * _*SNMP MA*_
-   * TBD
- * _*PingER*_
-   * TBD
  * _*perfSONAR-BUOY*_
-   * TBD
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=179 179] - _*Aaron/Jeff*_ - Add scripts to clean/migrate SQL data in pS-B	
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=352 352] - _*Aaron/Jeff*_ - upgrade script for pSB databases	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=421 421] - _*Andy/Aaron/Jason*_ - perfsonarBUOY asks mysql for ALL data in database rather than only the days needed
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=431 431] - _*Jeff/Aaron*_ - pSB Handling PID Files	 
  * _*perfAdmin*_
-   * TBD
- * _*Home Lookup Service*_
-   * TBD
- * _*Global Lookup Service*_
-   * TBD
- * _*Status MA*_
-   * TBD
- * _*TL1 Collection*_
-   * TBD
- * _*Topology Service*_ 
-   * TBD
- * _*Clients*_
-   * TBD
- * _*APIs*_
-   * TBD
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=423 423] - _*Jason*_ - Truncate values in perfAdmin Graphs to 2 decimal places
+ * _*Clients/APIs*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - _*Jason/Andy*_ - Package for the client modules
  * _*Documentation*_
-   * TBD
- * _*Web*_
-   * TBD
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=169 169] - _*Jason*_ - Add required hardware documentation	 
+ * _*Disk Internal*_
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - _*Aaron/Jason*_ - Firewall guidance	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - _*Aaron/Eric*_ - LinuxPPS Support	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=311 311] - _*Aaron/Eric*_ - ISO should be able to manually configure IPv6 address	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=393 393] - _*Aaron/Eric*_ - /usr/local/ usage	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=415 415] - _*Aaron*_ - upgrade iperf from v2.0.2 to 2.0.4 on the PS Toolkit	 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=427 427] - _*Aaron*_ - add type of the test in the Scheduled Tests table	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - _*Aaron/Eric*_ - myricom driver isn't up to date	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=440 440] - _*Aaron*_ - allow_open_mode is being reset by web gui for bwctl/owamp limits
 
 == Code Reviews ==
 
