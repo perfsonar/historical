@@ -100,7 +100,7 @@ UEN/Univ. of Utah
 || Internet2 || Yes || Yes || ||  ||
 || ESnet || Yes || Yes || No || Partially || 
 || NLR || || Yes || || ||
-|| UEN/Univ. of Utah || Yes || Yes || Partially || Partially |
+|| UEN/Univ. of Utah || Yes || Yes || Partially || Partially ||
 
 
 
