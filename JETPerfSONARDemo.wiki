@@ -11,7 +11,7 @@ ESnet
 Internet2
 NOAA
 NLR
-UEN
+UEN/Univ. of Utah
 
 = Contacts =
 
@@ -89,8 +89,10 @@ NLR
    * test.newy.nlrview.nlr.net - 10 GE Bandwidth
    * test.seat.nlrview.nlr.net   - 10 GE Bandwidth
 
-UEN
-
+UEN/Univ. of Utah
+   * personar-uen.chpc.utah.edu - 10 GE Bandwidth
+   * bandwidth.chpc.utah.edu - 10 GE Bandwidth
+   * latency.chpc.utah.edu - 1 GE Bandwidth
 == Status ==
 
 || Domain || Latency Systems Deployed || Bandwidth Systems Deployed || Latency Tests Configured || Bandwidth Tests Configured ||
@@ -98,7 +100,7 @@ UEN
 || Internet2 || Yes || Yes || ||  ||
 || ESnet || Yes || Yes || No || Partially || 
 || NLR || || Yes || || ||
-|| UEN || || || || ||
+|| UEN/Univ. of Utah || Yes || Yes || Partially || Partially ||
 
 
 
