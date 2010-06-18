@@ -51,7 +51,6 @@ This page lists use-cases for perfSONAR clients, and provides for each a high-le
 *Example Applications:* Utilization graphs, Weathermap, Nagios Plug-in
 
 *Additional notes:*
- * Lookup could be too broad in this situation if specific MA not provided. 
 
 == Use Case #4: List all router interfaces with collected SNMP data ==
 *Input (Required):*
