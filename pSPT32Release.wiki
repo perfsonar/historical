@@ -45,7 +45,7 @@ Beta, and RC:
 || Milestone LiveCD 1 || Week of 6/14 || <font color="yellow">_*IN PROGRESS - 6/7*_</font> ||
 || Milestone LiveCD 2 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone LiveCD 3 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone Install Disk 1 || Week of 6/14 || <font color="yellow">_*IN PROGRESS- 6/7*_</font> ||
+|| Milestone Install Disk 1 || ~~Week of 6/14~~ Week of 6/21 || <font color="yellow">_*IN PROGRESS- 6/18*_</font> ||
 || Milestone Install Disk 2 || Week of 6/28 || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone RC 1 || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone RC 2 || TBD || <font color="red">_*NOT STARTED*_</font> ||
@@ -119,15 +119,15 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Base 4 ===
 
 || *Summary* || Produce a final cut of the Base Toolkit  ||
-|| *Status* || <font color="yellow">_*DONE*_</font> || 
+|| *Status* || <font color="green">_*DONE*_</font> || 
 || *Est. Completion* || ~~June 11th~~ June 16th || 
 || *Owner* || Jason/Aaron ||
 || *Depends* || Milestone Base 3 ||
 
 The following are subtasks listed out for tracking purposes:
 
- * Collect user feedback from the beta testers - <font color="green">_*DONE*_</font>
- * Fix any issues encountered by testers - <font color="purple">_*HOLD OVER TO Milestone LiveCD 1*_</font>
+ * ~~Collect user feedback from the beta testers~~ - <font color="green">_*DONE*_</font>
+ * ~~Fix any issues encountered by testers~~ - <font color="purple">_*HOLD OVER TO Milestone LiveCD 1*_</font>
 
 || *Issue* || *Synopsis* || *Status* ||
 || ~~password for 'root' user on toolkit, should force a password change.  disallow ssh access~~ || Forces password change on first login || <font color="green">_*DONE*_</font> ||
@@ -164,16 +164,17 @@ There are no subtasks associated with this milestone.  Use an existing CentOS bo
 The following are subtasks listed out for tracking purposes:
 
  * Modify the standard Live CD to use the backing store instead of a ramdisk - <font color="red">_*NOT STARTED*_</font>
- * Build a tool to create the backing store - <font color="green">_*DONE*_</font>
- * Build a tool to easily allow folks to set the root passwords - <font color="green">_*DONE*_</font>
- * Build a tool to save the configuration to the backing store - <font color="green">_*DONE*_</font>
- * Build a tool to store the data on the backing store - <font color="green">_*DONE*_</font>
- * Package the above tools and include them in the Live CD kickstart - <font color="green">_*DONE*_</font>
-   * Package tool to save configuration - <font color="green">_*DONE*_</font>
-   * Package tool to restore configuration - <font color="green">_*DONE*_</font>
-   * Package tool to set passwords - <font color="green">_*DONE*_</font>
-   * Package tool to create backing store - <font color="green">_*DONE*_</font>
+ * ~~Build a tool to create the backing store~~ - <font color="green">_*DONE*_</font>
+ * ~~Build a tool to easily allow folks to set the root passwords~~ - <font color="green">_*DONE*_</font>
+ * ~~Build a tool to save the configuration to the backing store~~ - <font color="green">_*DONE*_</font>
+ * ~~Build a tool to store the data on the backing store~~ - <font color="green">_*DONE*_</font>
+ * ~~Package the above tools and include them in the Live CD kickstart~~ - <font color="green">_*DONE*_</font>
+   * ~~Package tool to save configuration~~ - <font color="green">_*DONE*_</font>
+   * ~~Package tool to restore configuration~~ - <font color="green">_*DONE*_</font>
+   * ~~Package tool to set passwords~~ - <font color="green">_*DONE*_</font>
+   * ~~Package tool to create backing store~~ - <font color="green">_*DONE*_</font>
  * Migrate any changes to Base RPMs or kickstart to the Base - <font color="red">_*NOT STARTED*_</font>
+ * Fix any issues encountered by testers for Milestone 4 - <font color="yellow">_*IN PROGRESS*_</font>
  * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit - <font color="red">_*NOT STARTED*_</font>
 
 || *Issue* || *Synopsis* || *Status* ||
@@ -236,15 +237,15 @@ The following are subtasks listed out for tracking purposes:
 
 || *Summary* || Produce an initial installation ISO for testing  ||
 || *Status* || <font color="yellow">_*IN PROGREESS*_</font> || 
-|| *Est. Completion* || Week of 6/14 || 
+|| *Est. Completion* || ~~Week of 6/14~~ Week of 6/21 || 
 || *Owner* || Eric ||
 || *Depends* || Milestone Base 4 ||
 
 The following are subtasks listed out for tracking purposes:
 
- * Generate a basic installation kickstart from the Base kickstart - <font color="green">_*DONE*_</font>
- * Migrate any changes to Base RPMs or kickstart to the Base - <font color="green">_*DONE*_</font>
- * Developing tools automating the build of the  ISO installation DVD - <font color="green">_*DONE*_</font>
+ * ~~Generate a basic installation kickstart from the Base kickstart~~ - <font color="green">_*DONE*_</font>
+ * ~~Migrate any changes to Base RPMs or kickstart to the Base~~ - <font color="green">_*DONE*_</font>
+ * ~~Developing tools automating the build of the  ISO installation DVD~~ - <font color="green">_*DONE*_</font>
  * Fix build of the Perl Minor-Packages -  - <font color="yellow">_*IN_PROGRESS*_</font>
  * Distribute the ISO to testers willing to test out the Toolkit - <font color="red">_*NOT STARTED*_</font>
 
