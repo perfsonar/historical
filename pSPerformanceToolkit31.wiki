@@ -1527,7 +1527,7 @@ chmod 755 /mnt/store/knoppix.local.sh
    * External USB CD drive.
    * The following Steps were followed:
      # Booted the system with the pS-Performance Toolkit v3.1.3 CD
-     # Logged in as knoppix and then _*sudo -i*_
+     # Log in as knoppix and then _*sudo -i*_
      # Run _*fdisk /dev/sda*_ and configured 2 partitions ...
        * primary part #1 - 142GB primary partition with a type of Linux (0x83)
        * primary part #2 - 4GB primary partition 2 with a type of Linux Swap (0x82)
@@ -1546,13 +1546,13 @@ mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sda1 /dev/sdb1
          * selected _*ext3*_ as the file system type
          * Entered knoppix as the _*whole name*_, and also as the _*user name*_
          * entered suitable passwords for knoppix and administrator
-         * entered a hostname for my system
+         * entered a hostname
          * selected MBR as the boot-loader option
        # Select Start Installation and let it finish
-     # I did see several setup warnings related to _*init.d*_ which didn't seem to have an effect on the installation
+     # May see several setup warnings related to _*init.d*_
      # Answered NO when asked to insert a floppy, which isn't required for this type of install
-     # Setup completed and put me back to the root prompt.
-     # For my RAID configuration, I also installed Grub to the 2nd Hard Drive, as follows...
+     # Setup complete, drop back to the root prompt.
+     # For RAID configuration, may considering using grub to the 2nd Hard Drive, as follows...
        * Run 'grub'
 {{{
 grub> device (hd0) /dev/sdb
@@ -1562,7 +1562,7 @@ grub> quit
 }}}
      # Removed the CD, and rebooted the system.
      # On 1st reboot, fsck will do a filesystem check on the boot hard drive (_*/dev/md0*_ or _*/dev/sda1*_)
-     # Logged in as root (using the password if it was previously set)
+     # Logged in as root (using the password previously set)
      # Ran _*visudo*_ and uncommented the knoppix user line. Saved the file.
      # Setup a RAID 1 for SWAP ...
 {{{
