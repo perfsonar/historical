@@ -5,3 +5,66 @@
 This page lists use-cases for perfSONAR clients, and provides for each a high-level description of how this would be implemented using the [PsClientApi perfSONAR client API].
 
 = Details =
+
+== Use Case #1: Return throughput/latency results between two endpoints in certain time period ==
+*Input (required):* 
+ * Type of data - bwctl, owamp, PinGER
+ * Endpoints
+ * Time period
+* Input (optional):*
+ * Test specific parameters
+*Services Contacted:*
+ * gLS (optional) - contact to find hLS with data about endpoints
+ * hLS(optional) - contact to find MAs with data about endpoints
+ * MA - contact to get desired data
+*Example Applications:* Graph on web page, Nagios plug-in, Weathermap showing utilization results
+
+*Additional notes:*
+
+
+== Use Case #2: List all endpoints with throughput/latency data available ==
+*Input (Required):*
+  * Type of data
+*Input (Optional):*
+  * Keyword
+  * Test specific parameters
+*Services Contacted:*
+  * gLS - should probably only be contacted if parameter such as keyword provided that constrains results
+  * hLS - see gLS.
+  * MA - returns the actual data 
+*Example Applications:* Web page (or other interactive UI) that allows user to select tests
+
+*Additional notes:*
+ * Lookup could be too broad in this situation if specific MA not provided. 
+ 
+
+== Use Case #3: Return X minute average utilization for Y time period on interface ==
+*Input (Required):*
+  * Type of data - utilization
+  * Interface
+  * Time period
+  * Resolution (i.e. 5 minute averages)
+*Input (Optional):*
+  * gLS - discover hLS(s) with utilization data about the interface
+  * hLS - discover MA(s) with utilization data about the interface
+  * MA - returns the actual data 
+*Example Applications:* Utilization graphs, Weathermap, Nagios Plug-in
+
+*Additional notes:*
+ * Lookup could be too broad in this situation if specific MA not provided. 
+
+== Use Case #4: List all router interfaces with collected SNMP data ==
+*Input (Required):*
+  * Type of data - utilization
+*Input (Optional):*
+  * Keyword
+  * Test specific parameters
+*Services Contacted:*
+*Services Contacted:*
+  * gLS - should probably only be contacted if parameter such as keyword provided that constrains results
+  * hLS - see gLS.
+  * MA - returns the actual data
+*Example Applications:* Interactive weathermap, Web page listing monitored interfaces
+
+*Additional notes:*
+ * Lookup could be too broad in this situation if specific MA not provided.
