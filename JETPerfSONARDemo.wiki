@@ -12,6 +12,7 @@ Internet2
 NOAA
 NLR
 UEN/Univ. of Utah
+NASA
 
 = Contacts =
 
@@ -20,6 +21,7 @@ Jeff Boote
 Colin Morgan
 Grover Browning & Charles Kloote
 Joe Breen
+Andy Germain
 
 
 = Goals = 
@@ -85,9 +87,9 @@ ESnet
 
 NLR
 
-   * test.atla.nlrview.nlr.net - 10 GE Bandwidth
-   * test.newy.nlrview.nlr.net - 10 GE Bandwidth
-   * test.seat.nlrview.nlr.net   - 10 GE Bandwidth
+   * test-10ge.atla.nlrview.nlr.net - 10 GE Bandwidth
+   * test-10ge.newy.nlrview.nlr.net - 10 GE Bandwidth
+   * test-10ge.seat.nlrview.nlr.net   - 10 GE Bandwidth
 
 UEN/Univ. of Utah
    * personar-uen.chpc.utah.edu - 10 GE Bandwidth
@@ -99,15 +101,18 @@ UEN/Univ. of Utah
 || NOAA || Yes || Yes ||  || Partially ||
 || Internet2 || Yes || Yes || ||  ||
 || ESnet || Yes || Yes || No || Partially || 
-|| NLR || || Yes || || ||
+|| NLR || Yes || Yes || || ||
 || UEN/Univ. of Utah || Yes || Yes || Partially || Partially ||
+|| NASA ||  || Yes || || Partially ||
 
 
 
 == Measurement Results ==
 
-   * ESnet
-      * https://stats1.es.net/cgi-bin/serviceTest.cgi?url=http://anl-pt1-mgt.es.net:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
-      * https://stats1.es.net/cgi-bin/serviceTest.cgi?url=http://nersc-pt1-mgt.es.net:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
-   * NOAA
-      * http://perfsonar-pri.gfdl.noaa.gov/gui/perfAdmin/serviceTest.cgi?url=http://localhost:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
+  * ESnet
+     * https://stats1.es.net/cgi-bin/serviceTest.cgi?url=http://anl-pt1-mgt.es.net:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
+     * https://stats1.es.net/cgi-bin/serviceTest.cgi?url=http://nersc-pt1-mgt.es.net:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
+  * NOAA
+    * http://perfsonar-pri.gfdl.noaa.gov/gui/perfAdmin/serviceTest.cgi?url=http://localhost:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
+  * NASA
+    * http://ensight.eos.nasa.gov/Organizations/JET/index.shtml
