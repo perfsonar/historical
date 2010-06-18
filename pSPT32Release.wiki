@@ -42,7 +42,7 @@ Beta, and RC:
 || Milestone Base 3 || June 11th || <font color="green">_*DONE - 6/11*_</font> ||
 || Milestone Base 4 || ~~June 11th~~ June 16th || <font color="green">_*DONE - 6/16*_</font> ||
 || Milestone Boot CD || June 11th || <font color="green">_*DONE - 6/11*_</font> ||
-|| Milestone LiveCD 1 || Week of 6/14 || <font color="yellow">_*IN PROGRESS - 6/7*_</font> ||
+|| Milestone LiveCD 1 || Week of 6/14 || <font color="yellow">_*IN PROGRESS - 6/18*_</font> ||
 || Milestone LiveCD 2 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone LiveCD 3 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone Install Disk 1 || ~~Week of 6/14~~ Week of 6/21 || <font color="yellow">_*IN PROGRESS- 6/18*_</font> ||
