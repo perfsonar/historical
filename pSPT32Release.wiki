@@ -40,7 +40,7 @@ Beta, and RC:
 || Milestone Base 1 || _N/A_ || <font color="green">_*DONE - 5/14*_</font> ||
 || Milestone Base 2 || ~~June 4th~~ Week of June 7th || <font color="green">_*DONE - 6/11*_</font> ||
 || Milestone Base 3 || June 11th || <font color="green">_*DONE - 6/11*_</font> ||
-|| Milestone Base 4 || ~~June 11th~~ June 16th || <font color="yellow">_*IN PROGRESS - 6/15*_</font> ||
+|| Milestone Base 4 || ~~June 11th~~ June 16th || <font color="green">_*DONE - 6/16*_</font> ||
 || Milestone Boot CD || June 11th || <font color="green">_*DONE - 6/11*_</font> ||
 || Milestone LiveCD 1 || Week of 6/14 || <font color="yellow">_*IN PROGRESS - 6/7*_</font> ||
 || Milestone LiveCD 2 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
@@ -119,49 +119,29 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Base 4 ===
 
 || *Summary* || Produce a final cut of the Base Toolkit  ||
-|| *Status* || <font color="yellow">_*IN PROGRESS*_</font> || 
+|| *Status* || <font color="yellow">_*DONE*_</font> || 
 || *Est. Completion* || ~~June 11th~~ June 16th || 
 || *Owner* || Jason/Aaron ||
 || *Depends* || Milestone Base 3 ||
 
 The following are subtasks listed out for tracking purposes:
 
- * Collect user feedback from the beta testers - <font color="yellow">_*IN PROGRESS*_</font>
- * Fix any issues encountered by testers - <font color="yellow">_*IN PROGRESS*_</font>
+ * Collect user feedback from the beta testers - <font color="green">_*DONE*_</font>
+ * Fix any issues encountered by testers - <font color="purple">_*HOLD OVER TO Milestone LiveCD 1*_</font>
 
 || *Issue* || *Synopsis* || *Status* ||
-|| Unecessary packages in pSPT, most likely from upstream CentOS defaults || Can remove some, not all || <font color="red">_*NOT STARTED*_</font> ||
 || ~~password for 'root' user on toolkit, should force a password change.  disallow ssh access~~ || Forces password change on first login || <font color="green">_*DONE*_</font> ||
 || ~~'perfsonar' user on toolkit, would be similar to 'knoppix' user, use instead of root?~~  || Denied || <font color="purple">_*WONT FIX*_</font> ||
-|| Add link to 'nptoolkit-configure.py' in PATH || Easy to do || <font color="red">_*NOT STARTED*_</font> ||
-|| Why reboot after configuring basic settings? || Relic from knoppix, can fix, just not now  || <font color="red">_*NOT STARTED*_</font> ||
-|| NTP defaults to RH/CentOS servers || Will look into replacing default config with ours || <font color="red">_*NOT STARTED*_</font> ||
-|| Zeroconf routing entry (169.254.0.0         255.255.0.0      U 0 0 0 eth0) || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| CSS does not display right under IE8 || Need a CSS expert to help, TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Fix PingER defaults (5 min tests) || Easy to fix || <font color="red">_*NOT STARTED*_</font> ||
-|| OWAMP displaying v6 addresses, maybe prefer v4?  also displaying junk in address (e.g. xxx%134508904) || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Pinger has 12-24-48 hours and Owamp 4-12-24 hours, do the same for both || Can do - need to worry about speed || <font color="red">_*NOT STARTED*_</font> ||
-|| pSPT Branding in the install/config/boot process || Will try || <font color="red">_*NOT STARTED*_</font> ||
 || ~~Fix MOTD to remove knoppix user note~~ || fixed || <font color="green">_*DONE*_</font> ||
 || ~~'adduser' dialog in 'nptoolkit-configure.py' doesn't ask for passwords~~ || fixed || <font color="green">_*DONE*_</font> ||
 || ~~User's PATH may not include /sbin /usr/sbin /usr/local/sbin~~ || fixed || <font color="green">_*DONE*_</font> ||
 || ~~Reboot after entering 'nptoolkit-configure.py', not setting things~~ || fixed || <font color="green">_*DONE*_</font> ||
-|| Blocking/redirecting access to http://HOST || Prefer to redirect, will look into || <font color="red">_*NOT STARTED*_</font> ||
 || ~~CSS for 'global services' has strange properties~~ || fixed || <font color="green">_*DONE*_</font> ||
-|| open in same vs new window for 'global services' page || will look into || <font color="red">_*NOT STARTED*_</font> ||
 || ~~JOWPing link wrong~~ || fixed || <font color="green">_*DONE*_</font> ||
 || ~~Reverse traceroute/ping links do not work~~ || fixed || <font color="green">_*DONE*_</font> ||
-|| PingER GUI cannot be installed || dependicies still preventing this || <font color="red">_*NOT STARTED*_</font> ||
 || ~~Users not appearing in sudoers when granted admin permission || fixed, %wheel group now being added~~ || <font color="green">_*DONE*_</font> ||
 || ~~perfAdmin OWAMP Graphs~~ || fixed || <font color="green">_*DONE*_</font> ||
-|| PingER Fixes from  USATLAS || talk w/ maxim, find out all of the parts || <font color="red">_*NOT STARTED*_</font> ||
-|| pSB Query fixes || in branch, need new RPMs || <font color="yellow">_*IN PROGRESS*_</font> ||
 || ~~Permissions for Web_Admin.log~~ || fixed || <font color="green">_*DONE*_</font> ||
-|| BWCTL Limits screen sets 'open mode' to off after editing || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| After authenticating to cacti, 'access denied' when switching from console to graph view || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Cacti does not poll devices after setup.  Potential clock sckew problem? || Edited 'poller_lastrun' variable to fix || <font color="red">_*NOT STARTED*_</font> ||
-|| Check ports/endpoints for all services (especially the perfAdmin links on the left sidebar) || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Ensure service watcher is restarting services/mysql properly || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
 === Milestone Boot CD ===
 
@@ -176,9 +156,9 @@ There are no subtasks associated with this milestone.  Use an existing CentOS bo
 === Milestone LiveCD 1 ===
 
 || *Summary* || Produce an initial Live CD instance that will save configuration/data to the backing store  ||
-|| *Status* || <font color="Yellow">_*IN PROGRESS - 6/7*_</font> || 
+|| *Status* || <font color="Yellow">_*IN PROGRESS - 6/18*_</font> || 
 || *Est. Completion* || Week of 6/14 || 
-|| *Owner* || Aaron ||
+|| *Owner* || Aaron/Jason ||
 || *Depends* || Milestone Base 4 ||
 
 The following are subtasks listed out for tracking purposes:
@@ -195,6 +175,29 @@ The following are subtasks listed out for tracking purposes:
    * Package tool to create backing store - <font color="green">_*DONE*_</font>
  * Migrate any changes to Base RPMs or kickstart to the Base - <font color="red">_*NOT STARTED*_</font>
  * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit - <font color="red">_*NOT STARTED*_</font>
+
+|| *Issue* || *Synopsis* || *Status* ||
+|| Unecessary packages in pSPT, most likely from upstream CentOS defaults || Can remove some, not all || <font color="red">_*NOT STARTED*_</font> ||
+|| Add link to 'nptoolkit-configure.py' in PATH || Easy to do || <font color="red">_*NOT STARTED*_</font> ||
+|| Why reboot after configuring basic settings? || Relic from knoppix, can fix, just not now  || <font color="red">_*NOT STARTED*_</font> ||
+|| NTP defaults to RH/CentOS servers || Will look into replacing default config with ours || <font color="red">_*NOT STARTED*_</font> ||
+|| Zeroconf routing entry (169.254.0.0         255.255.0.0      U 0 0 0 eth0) || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| CSS does not display right under IE8 || Need a CSS expert to help, TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Fix PingER defaults (5 min tests) || Easy to fix || <font color="red">_*NOT STARTED*_</font> ||
+|| OWAMP displaying v6 addresses, maybe prefer v4?  also displaying junk in address (e.g. xxx%134508904) || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Pinger has 12-24-48 hours and Owamp 4-12-24 hours, do the same for both || Can do - need to worry about speed || <font color="red">_*NOT STARTED*_</font> ||
+|| pSPT Branding in the install/config/boot process || Will try || <font color="red">_*NOT STARTED*_</font> ||
+|| Blocking/redirecting access to http://HOST || Prefer to redirect, will look into || <font color="red">_*NOT STARTED*_</font> ||
+|| open in same vs new window for 'global services' page || will look into || <font color="red">_*NOT STARTED*_</font> ||
+|| PingER GUI cannot be installed || dependicies still preventing this || <font color="red">_*NOT STARTED*_</font> ||
+|| PingER Fixes from  USATLAS || talk w/ maxim, find out all of the parts || <font color="red">_*NOT STARTED*_</font> ||
+|| pSB Query fixes || in branch, need new RPMs || <font color="yellow">_*IN PROGRESS*_</font> ||
+|| BWCTL Limits screen sets 'open mode' to off after editing || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| After authenticating to cacti, 'access denied' when switching from console to graph view || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Cacti does not poll devices after setup.  Potential clock sckew problem? || Edited 'poller_lastrun' variable to fix || <font color="red">_*NOT STARTED*_</font> ||
+|| Check ports/endpoints for all services (especially the perfAdmin links on the left sidebar) || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Ensure service watcher is restarting services/mysql properly || TBD || <font color="red">_*NOT STARTED*_</font> ||
+
 
 === Milestone LiveCD 2 ===
 
