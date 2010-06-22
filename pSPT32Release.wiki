@@ -42,11 +42,11 @@ Beta, and RC:
 || Milestone Base 3 || June 11th || <font color="green">_*DONE - 6/11*_</font> ||
 || Milestone Base 4 || ~~June 11th~~ June 16th || <font color="green">_*DONE - 6/16*_</font> ||
 || Milestone Boot CD || June 11th || <font color="green">_*DONE - 6/11*_</font> ||
-|| Milestone LiveCD 1 || Week of 6/14 || <font color="yellow">_*IN PROGRESS - 6/18*_</font> ||
+|| Milestone LiveCD 1 || Week of 6/14 (Development), Week of 6/21 (Testing) || <font color="yellow">_*IN PROGRESS - 6/21*_</font> ||
 || Milestone LiveCD 2 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone LiveCD 3 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone Install Disk 1 || ~~Week of 6/14~~ Week of 6/21 || <font color="yellow">_*IN PROGRESS- 6/18*_</font> ||
-|| Milestone Install Disk 2 || Week of 6/28 || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone Install Disk 1 || ~~Week of 6/14~~ ~~Week of 6/21~~ Week of 6/28  || <font color="yellow">_*IN PROGRESS- 6/22*_</font> ||
+|| Milestone Install Disk 2 || ~~Week of 6/28~~ Week of 7/5 || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone RC 1 || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone RC 2 || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone Final || TBD || <font color="red">_*NOT STARTED*_</font> ||
@@ -156,8 +156,9 @@ There are no subtasks associated with this milestone.  Use an existing CentOS bo
 === Milestone LiveCD 1 ===
 
 || *Summary* || Produce an initial Live CD instance that will save configuration/data to the backing store  ||
-|| *Status* || <font color="Yellow">_*IN PROGRESS - 6/18*_</font> || 
-|| *Est. Completion* || Week of 6/14 || 
+|| *Status* || <font color="Yellow">_*IN PROGRESS - 6/21*_</font> || 
+|| *Est. Completion (Development)* || Week of 6/14 || 
+|| *Est. Completion (Testing)* || Week of 6/21 ||
 || *Owner* || Aaron/Jason ||
 || *Depends* || Milestone Base 4 ||
 
@@ -173,9 +174,11 @@ The following are subtasks listed out for tracking purposes:
    * ~~Package tool to restore configuration~~ - <font color="green">_*DONE*_</font>
    * ~~Package tool to set passwords~~ - <font color="green">_*DONE*_</font>
    * ~~Package tool to create backing store~~ - <font color="green">_*DONE*_</font>
- * Migrate any changes to Base RPMs or kickstart to the Base - <font color="green">_*DONE*_</font>
- * Fix any issues encountered by testers for Milestone 4 - <font color="yellow">_*IN PROGRESS*_</font>
- * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit - <font color="red">_*NOT STARTED*_</font>
+ * ~~Migrate any changes to Base RPMs or kickstart to the Base~~ - <font color="green">_*DONE*_</font>
+ * ~~Fix any issues encountered by testers for Milestone 4~~ - <font color="green">_*DONE*_</font>
+ * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit - <font color="yellow">_*IN PROGRESS*_</font>
+
+Issues held over from Milestone Base 4:
 
 || *Issue* || *Synopsis* || *Status* ||
 || ~~Fix PingER defaults (5 min tests)~~ || Easy to fix || <font color="green">_*DONE*_</font> ||
@@ -194,6 +197,11 @@ The following are subtasks listed out for tracking purposes:
 || ~~BWCTL Limits screen sets 'open mode' to off after editing~~ || Fixed || <font color="green">_*DONE*_</font> ||
 || ~~update splashscreen/cd cover for version 3.2~~ || Fixed || <font color="green">_*DONE*_</font> ||
 
+New issues from Milestone Live CD 1:
+
+|| *Issue* || *Synopsis* || *Status* ||
+|| TBD || TBD || <font color="red">_*NOT STARTED*_</font> ||
+
 === Milestone LiveCD 2 ===
 
 || *Summary* || Produce a Live CD instance that will upgrade an existing Knoppix-based installation  ||
@@ -211,6 +219,8 @@ The following are subtasks listed out for tracking purposes:
  * Fix any issues encountered by testers - <font color="red">_*NOT STARTED*_</font>
  * Migrate changes to the Base packages/kickstart as needed - <font color="red">_*NOT STARTED*_</font>
  * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit - <font color="red">_*NOT STARTED*_</font>
+
+In progress issues from Milestone Base 4, Live CD 1:
 
 || *Issue* || *Synopsis* || *Status* ||
 || Unecessary packages in pSPT, most likely from upstream CentOS defaults || Can remove some, not all || <font color="red">_*NOT STARTED*_</font> ||
@@ -240,7 +250,7 @@ The following are subtasks listed out for tracking purposes:
 
 || *Summary* || Produce an initial installation ISO for testing  ||
 || *Status* || <font color="yellow">_*IN PROGREESS*_</font> || 
-|| *Est. Completion* || ~~Week of 6/14~~ Week of 6/21 || 
+|| *Est. Completion* || ~~Week of 6/14~~ ~~Week of 6/21~~ Week of 6/28 || 
 || *Owner* || Eric ||
 || *Depends* || Milestone Base 4 ||
 
@@ -259,7 +269,7 @@ The following are subtasks listed out for tracking purposes:
 
 || *Summary* || Based on user feedback and testing, firm up the installation CD  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
-|| *Est. Completion* || Week of 6/28 || 
+|| *Est. Completion* || ~~Week of 6/28~~ Week of 7/5 || 
 || *Owner* || Eric ||
 || *Depends* || Milestone Install Disk 1 ||
 
