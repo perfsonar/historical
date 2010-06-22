@@ -204,7 +204,7 @@ New issues from Milestone Live CD 1:
 || ~~Error on boot 'cannot remove /var/run/web_admin/sessions is a directory'~~ || fixed || <font color="green">_*DONE*_</font> ||
 || ~~Surpress mount, eth errors on boot~~ || fixed || <font color="green">_*DONE*_</font> ||
 || ~~User doesn't get a home directory on log in "Could not chdir to home directory /home/zurawski: No such file or directory".  This was after configuring the backing store, users, and then being forced to reboot~~ || Reboot forced, warning errors || <font color="green">_*DONE*_</font> ||
-|| ~~After enabling ssh, and trying to ssh to the host: "PTY allocation request failure on channel 0.  could not chdir to /home/zurawski" then freeze. || fixed || <font color="green">_*DONE*_</font> ||
+|| ~~After enabling ssh, and trying to ssh to the host: "PTY allocation request failure on channel 0.  could not chdir to /home/zurawski" then freeze.~~ || fixed || <font color="green">_*DONE*_</font> ||
 || Post-install log in /root || will fix before release || <font color="red">_*NOT STARTED*_</font> ||
 || ~~The create_backing_store wasn't reading /proc/partitions properly. Wouldn't mount the device unless blkid said it was ext3.~~ || fixed || <font color="green">_*DONE*_</font> ||
 || empty resolve.conf, domino effect to the LS cache daemon and NTP || watching for other instances || <font color="red">_*NOT STARTED*_</font> ||
