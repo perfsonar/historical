@@ -192,7 +192,7 @@ Issues held over from Milestone Base 4:
 || ~~Zeroconf routing entry~~  || Fixed || <font color="green">_*DONE*_</font> ||
 || ~~MySQL listening on external interfaces~~  || Fixed || <font color="green">_*DONE*_</font> ||
 || ~~Pinger has 12-24-48 hours and Owamp 4-12-24 hours, do the same for both~~ || Grabbing two full days of owamp data takes too long || <font color="purple">_*WONTFIX*_</font> ||
-|| ~~Blocking/redirecting access to http://HOST~~ || Fixed || <font color="green">_*DONE*_</font> ||
+|| ~~Blocking/redirecting access to http://HOST url~~ || Fixed || <font color="green">_*DONE*_</font> ||
 || ~~open in same vs new window for 'global services' page~~ || Fixed || <font color="green">_*DONE*_</font> ||
 || ~~BWCTL Limits screen sets 'open mode' to off after editing~~ || Fixed || <font color="green">_*DONE*_</font> ||
 || ~~update splashscreen/cd cover for version 3.2~~ || Fixed || <font color="green">_*DONE*_</font> ||
