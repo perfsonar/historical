@@ -7,12 +7,12 @@ issues with deploying multi-domain network measurement services in US federal an
  
 = Participants =
 
-ESnet
-Internet2
-NOAA
-NLR
-UEN/Univ. of Utah
-NASA
+* ESnet
+* Internet2
+* NOAA
+* NLR
+* UEN/Univ. of Utah/CHPC
+* NASA
 
 = Contacts =
 
@@ -92,7 +92,7 @@ NLR
    * test-10ge.seat.nlrview.nlr.net   - 10 GE Bandwidth
 
 UEN/Univ. of Utah
-   * personar-uen.chpc.utah.edu - 10 GE Bandwidth
+   * perfsonar-uen.chpc.utah.edu - 10 GE Bandwidth
    * bandwidth.chpc.utah.edu - 10 GE Bandwidth
    * latency.chpc.utah.edu - 1 GE Bandwidth
 == Status ==
