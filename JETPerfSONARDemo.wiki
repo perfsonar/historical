@@ -7,12 +7,12 @@ issues with deploying multi-domain network measurement services in US federal an
  
 = Participants =
 
-* ESnet
-* Internet2
-* NOAA
-* NLR
-* UEN/Univ. of Utah/CHPC
-* NASA
+  * ESnet
+  * Internet2
+  * NOAA
+  * NLR
+  * UEN/Univ. of Utah/CHPC
+  * NASA
 
 = Contacts =
 
