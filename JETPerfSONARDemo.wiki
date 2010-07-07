@@ -121,11 +121,14 @@ UEN/Univ. of Utah
      * http://ndb1.internet2.edu/perfAdmin/serviceTest.cgi?url=http://ndb1.internet2.edu:8086/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/owamp/2.0
 
 == Lessons Learned (should probably have another page link here) ==
-   * where is the documentation?
-     ** part of the install
-     ** perfsonar.net
-     ** I2 site
-     ** code.google.com site
+   * Newbies get lost in the plethora of perfSONAR* 
+     * What are all these perfSONAR things? (i.e. perfSONAR-MDM, perfSONAR-PS, perfSONAR-Buoy, etc.?)
+   * Newbies can get lost in finding out what should run/
+     * where is the documentation?
+       * part of the install
+       * perfsonar.net
+       * I2 site
+       * code.google.com site
 
 == Best Practices (should probably have another page link here) ==
   * security
