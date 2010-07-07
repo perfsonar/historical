@@ -119,9 +119,12 @@ UEN/Univ. of Utah
   * Internet2
     * http://ndb1.internet2.edu/perfAdmin/serviceTest.cgi?url=http://ndb1.internet2.edu:8086/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
 
-== Lessons Learned ==
+== Lessons Learned (should probably have another page link here) ==
 
-== Best Practices ==
+== Best Practices (should probably have another page link here) ==
 * security
 * Recommended base setups - walk through examples?
-* 
+* Questions to ask up front
+** Do you want to do a JAVA implementation?
+** Do you want to do a PERL implementation?
+** Do you want to 
