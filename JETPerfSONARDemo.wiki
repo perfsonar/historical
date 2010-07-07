@@ -123,7 +123,7 @@ UEN/Univ. of Utah
 == Lessons Learned (should probably have another page link here) ==
    * Newbies get lost in the plethora of perfSONAR* 
      * What are all these perfSONAR things? (i.e. perfSONAR-MDM, perfSONAR-PS, perfSONAR-Buoy, etc.?)
-   * Newbies can get lost in finding out what should run/
+   * Newbies can get lost in finding out what should download/install/run/
      * where is the documentation?
        * part of the install
        * perfsonar.net
