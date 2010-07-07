@@ -118,3 +118,10 @@ UEN/Univ. of Utah
     * http://ensight.eos.nasa.gov/Organizations/JET/index.shtml
   * Internet2
     * http://ndb1.internet2.edu/perfAdmin/serviceTest.cgi?url=http://ndb1.internet2.edu:8086/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
+
+== Lessons Learned ==
+
+== Best Practices ==
+* security
+* Recommended base setups - walk through examples?
+* 
