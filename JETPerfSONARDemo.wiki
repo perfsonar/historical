@@ -16,12 +16,12 @@ issues with deploying multi-domain network measurement services in US federal an
 
 = Contacts =
 
-Joe Metzger
-Jeff Boote
-Colin Morgan
-Grover Browning & Charles Kloote
-Joe Breen
-Andy Germain
+ * Joe Metzger
+ * Jeff Boote & Kavitha Kumar
+ * Colin Morgan
+ * Grover Browning & Charles Kloote
+ * Joe Breen
+ * Andy Germain
 
 
 = Goals = 
@@ -99,7 +99,7 @@ UEN/Univ. of Utah
 
 || Domain || Latency Systems Deployed || Bandwidth Systems Deployed || Latency Tests Configured || Bandwidth Tests Configured ||
 || NOAA || Yes || Yes ||  || Partially ||
-|| Internet2 || Yes || Yes || In-Progress || Partially ||
+|| Internet2 || Yes || Yes || Partially || Partially ||
 || ESnet || Yes || Yes || No || Partially || 
 || NLR || Yes || Yes || || ||
 || UEN/Univ. of Utah || Yes || Yes || Partially || Partially ||
@@ -117,7 +117,8 @@ UEN/Univ. of Utah
   * NASA
     * http://ensight.eos.nasa.gov/Organizations/JET/index.shtml
   * Internet2
-    * http://ndb1.internet2.edu/perfAdmin/serviceTest.cgi?url=http://ndb1.internet2.edu:8086/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
+     * http://ndb1.internet2.edu/perfAdmin/serviceTest.cgi?url=http://ndb1.internet2.edu:8086/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
+     * http://ndb1.internet2.edu/perfAdmin/serviceTest.cgi?url=http://ndb1.internet2.edu:8086/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/owamp/2.0
 
 == Lessons Learned (should probably have another page link here) ==
    * where is the documentation?
