@@ -140,3 +140,4 @@ UEN/Univ. of Utah
     * What are the base tests you want to run?  
     * Do you want to run latency and throughput?  Need 2+ machines
     * Do you have an existing external Cacti Server which you want to reference
+    * Do you want to separate the Measurement Archive (MA) from your Measurement Point (MP)
