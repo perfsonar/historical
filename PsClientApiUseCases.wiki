@@ -67,3 +67,9 @@ This page lists use-cases for perfSONAR clients, and provides for each a high-le
 
 *Additional notes:*
  * Lookup could be too broad in this situation if specific MA not provided.
+
+
+== Use Case #5: Trigger bwctl test via a web GUI ==
+
+To only present options that are supported, query for metadata saying if a bwctl MP supports UDP, max rate, etc.
+
