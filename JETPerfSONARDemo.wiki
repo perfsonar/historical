@@ -95,6 +95,11 @@ UEN/Univ. of Utah
    * perfsonar-uen.chpc.utah.edu - 10 GE Bandwidth
    * bandwidth.chpc.utah.edu - 10 GE Bandwidth
    * latency.chpc.utah.edu - 1 GE Bandwidth
+
+NASA
+  * wilson.sci.gsfc.nasa.gov 169.154.216.28  Bandwidth
+
+
 == Status ==
 
 || Domain || Latency Systems Deployed || Bandwidth Systems Deployed || Latency Tests Configured || Bandwidth Tests Configured ||
