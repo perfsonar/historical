@@ -205,13 +205,8 @@ New issues from Milestone Live CD 1:
 || ~~Surpress mount, eth errors on boot~~ || fixed || <font color="green">_*DONE*_</font> ||
 || ~~User doesn't get a home directory on log in "Could not chdir to home directory /home/zurawski: No such file or directory".  This was after configuring the backing store, users, and then being forced to reboot~~ || Reboot forced, warning errors || <font color="green">_*DONE*_</font> ||
 || ~~After enabling ssh, and trying to ssh to the host: "PTY allocation request failure on channel 0.  could not chdir to /home/zurawski" then freeze.~~ || fixed || <font color="green">_*DONE*_</font> ||
-|| Post-install log in /root || will fix before release || <font color="red">_*NOT STARTED*_</font> ||
 || ~~The create_backing_store wasn't reading /proc/partitions properly. Wouldn't mount the device unless blkid said it was ext3.~~ || fixed || <font color="green">_*DONE*_</font> ||
-|| empty resolve.conf, domino effect to the LS cache daemon and NTP || watching for other instances || <font color="red">_*NOT STARTED*_</font> ||
-|| LS Cache - won't need to 'update' this before release due to new cache service || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| weirdness with the disk configuration script.  If the disk has no partition info (but had an ext3 fs on it before the partition table was wiped), the script detects the raw device with 'unknown' partition type. || The script uses "blkid" to figure out the FS type, and there seem to be some combination of partition voodoo that prevents blkid from recognizing proper ext3 partitions. The only way to truly figure out whether it's ext3 or not is to try and mount the partition.  Need a FAQ entry || <font color="red">_*NOT STARTED*_</font> ||
 || ~~I select that disk and it asks me to format, I say 'no'.  Then it goes ahead to try and save the config info anyway (and succeeds!).  When I go back to reconfigure, the disk now shows 'ext3'.  In /mnt/store.new it creates NPTools dir.  When I repeat the steps above, there's just a NPTools.back dir.  At reboot, no config is restored at this point.~~ || Fixed || <font color="green">_*FIXED*_</font> ||
-|| TBD || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
 === Milestone LiveCD 2 ===
 
@@ -234,13 +229,18 @@ The following are subtasks listed out for tracking purposes:
 In progress issues from Milestone Base 4, Live CD 1:
 
 || *Issue* || *Synopsis* || *Status* ||
-|| Unecessary packages in pSPT, most likely from upstream CentOS defaults || Can remove some, not all || <font color="red">_*NOT STARTED*_</font> ||
+|| Unecessary packages in pSPT, most likely from upstream CentOS defaults || Can maybe remove some, definitely not all (pulled in for dependency reasons) || <font color="red">_*NOT STARTED*_</font> ||
 || Add link to 'nptoolkit-configure.py' in PATH || Easy to do || <font color="red">_*NOT STARTED*_</font> ||
 || CSS does not display right under IE8 || Need a CSS expert to help, TBD || <font color="red">_*NOT STARTED*_</font> ||
 || OWAMP displaying v6 addresses, maybe prefer v4?  also displaying junk in address (e.g. xxx%134508904) || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || PingER GUI cannot be installed || dependicies still preventing this || <font color="red">_*NOT STARTED*_</font> ||
 || PingER Fixes from  USATLAS || talk w/ maxim, find out all of the parts || <font color="red">_*NOT STARTED*_</font> ||
 || Cacti does not poll devices after setup.  Potential clock sckew problem? || Edited 'poller_lastrun' variable to fix || <font color="red">_*NOT STARTED*_</font> ||
+|| Post-install log in /root || will fix before release || <font color="red">_*NOT STARTED*_</font> ||
+|| empty resolve.conf, domino effect to the LS cache daemon and NTP || watching for other instances || <font color="red">_*NOT STARTED*_</font> ||
+|| LS Cache - won't need to 'update' this before release due to new cache service || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| weirdness with the disk configuration script.  If the disk has no partition info (but had an ext3 fs on it before the partition table was wiped), the script detects the raw device with 'unknown' partition type. || The script uses "blkid" to figure out the FS type, and there seem to be some combination of partition voodoo that prevents blkid from recognizing proper ext3 partitions. The only way to truly figure out whether it's ext3 or not is to try and mount the partition.  Need a FAQ entry || <font color="red">_*NOT STARTED*_</font> ||
+|| TBD || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
 === Milestone LiveCD 3 ===
 
