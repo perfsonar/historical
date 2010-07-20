@@ -1,0 +1,368 @@
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+This page outlines the design for the Traceroute MA and relevant MPs that populate it. An overview of the main components and how they interact is provided below:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/TracerouteMADesign/traceroute_design.png
+
+The diagram should look similar to the perfSONARBUOY architecture with a set of masters (the Traceroute Scheduler and On-demand Traceroute) that send measurement data to a collector (traceroute Collector) which writes the data to a MySQL database. Once in the database, clients can use the data through the Traceroute MA's XML interface. A descript of each component starting from the top of the diagram is provided in the remainder of this document.
+
+== Traceroute MA ==
+=== Description ===
+The Traceroute measurement archive is the perfSONAR service that resents data to clients throough an XML interface. It pulls its data from a MySQL database which is populated by the collector component (see below).
+=== Messages ===
+The Traceroute MA supports the following message types from the perfsonar schema:
+ * MetadataKeyRequest - Returns a list of metadata objects in the Traceroute MA and a set of keys that can be used to query data associated with individual metadata with a subsequent setupDataRequest.
+ * SetupDataRequest - Returns results of traceroute measurements that match the given subject and parameters. Accepted subject type are keys and endpointPairs.
+
+The format of the traceroute data is described here: http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/rnc/traceroute.rnc
+
+==== Examples ====
+*MetadataKeyRequest*
+{{{
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message type="MetadataKeyRequest" id="metadataKeyRequest1"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/">
+ 
+    <nmwg:metadata id="traceroutemeta1">
+        <traceroute:subject id="tracesub1">
+            <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\" />     
+        </traceroute:subject>
+        <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0/</nmwg:eventType>
+        <select:parameters id="param1">
+            <nmwg:parameter name="startTime">1121472000</nmwg:parameter>
+            <nmwg:parameter name="endTime">1121475600</nmwg:parameter>      
+        </select:parameters>   
+   </nmwg:metadata>
+  
+  <nmwg:data id="data2" metadataIdRef="meta1"/> 
+
+</nmwg:message>
+}}}
+
+*MetadataKeyResponse*
+{{{
+<nmwg:message type="MetadataKeyResponse"
+              messageIdRef="metadataKeyRequest1" 
+              id="metadataKeyResponse1" 
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/">
+    
+    <nmwg:metadata id="traceroutemeta1">
+        <traceroute:subject id="tracesub1">
+            <nmwgt:endPointPair>
+                <nmwgt:src type="hostname" value="lbl-pt1.es.net"/>
+                <nmwgt:dst type="hostname" value="bnl-pt1.es.net"/>
+            </nmwgt:endPointPair>      
+        </traceroute:subject>
+        <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0/</nmwg:eventType>
+        <traceroute:parameters id="trparam1">
+            <nmwg:parameter name="maxTtl">30</nmwg:parameter>
+            <nmwg:parameter name="waitTime">1</nmwg:parameter>         
+        </traceroute:parameters>   
+    </nmwg:metadata>
+   
+    <nmwg:data metadataIdRef="traceroutemeta1" id="keydata1">
+        <nmwg:key>
+            <nmwg:parameters id="params.0">
+                <nmwg:parameter name="maKey">6d48375b936741b47d75074a6338ce3d</nmwg:parameter>
+                <nmwg:parameter name="startTime">1121472000</nmwg:parameter>
+                <nmwg:parameter name="endTime">1121475600</nmwg:parameter>
+            </nmwg:parameters>
+        </nmwg:key>
+    </nmwg:data>
+    
+</nmwg:message>
+}}}
+
+*SetupDataRequest*
+{{{
+<nmwg:message type="SetupDataRequest" 
+              id="setupDataRequest1"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/">
+    <nmwg:metadata id="setupDataRequestMeta1">
+        <nmwg:key id="key-1">
+            <nmwg:parameters id="parameters-key-1">
+                <nmwg:parameter name="maKey">6d48375b936741b47d75074a6338ce3d</nmwg:parameter>
+            </nmwg:parameters>
+        </nmwg:key>
+    </nmwg:metadata>
+    <nmwg:data id="setupDataRequest1" metadataIdRef="setupDataRequestMeta1"/>
+</nmwg:message>
+}}}
+
+*SetupDataResponse*
+{{{
+<nmwg:message type="SetupDataResponse"
+              messageIdRef="setupDataRequest1" 
+              id="setupDataKeyResponse1" 
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/">
+    
+    <nmwg:metadata id="traceroutemeta1">
+        <traceroute:subject id="tracesub1">
+            <nmwgt:endPointPair>
+                <nmwgt:src type="hostname" value="lbl-pt1.es.net"/>
+                <nmwgt:dst type="hostname" value="bnl-pt1.es.net"/>
+            </nmwgt:endPointPair>      
+        </traceroute:subject>
+        <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0/</nmwg:eventType>
+        <traceroute:parameters id="trparam1">
+            <nmwg:parameter name="maxTtl">30</nmwg:parameter>
+            <nmwg:parameter name="waitTime">1</nmwg:parameter>         
+        </traceroute:parameters>   
+    </nmwg:metadata>      
+    
+    <nmwg:data metadataIdRef="traceroutemeta1" id="data1">      
+      <traceroute:datum ttl="1" queryNum="1" value=".103" hop="198.129.254.29" valueUnits="ms" numBytes="64" numBytesUnits="bytes" timeType="unix" timeValue="1108415421" />
+      <traceroute:datum ttl="2" queryNum="1" value="1.131" hop="134.55.219.10" valueUnits="ms" numBytes="64" numBytesUnits="bytes" timeType="unix" timeValue="1108415421" />
+      <traceroute:datum ttl="3" queryNum="1" value="1.531" hop="134.55.217.2" valueUnits="ms" numBytes="64" numBytesUnits="bytes" timeType="unix" timeValue="1108415421" />
+      <traceroute:datum ttl="4" queryNum="1" value="1.635" hop="134.55.209.98" valueUnits="ms" numBytes="64" numBytesUnits="bytes" timeType="unix" timeValue="1108415421" />
+      <traceroute:datum ttl="5" queryNum="1" value="28.643" hop="134.55.220.49" valueUnits="ms" numBytes="64" numBytesUnits="bytes" timeType="unix" timeValue="1108415421" />
+      <traceroute:datum ttl="6" queryNum="1" value="41.766" hop="134.55.209.46" valueUnits="ms" numBytes="64" numBytesUnits="bytes" timeType="unix" timeValue="1108415421" />
+      <traceroute:datum ttl="7" queryNum="1" value="52.348" hop="134.55.221.58" valueUnits="ms" numBytes="64" numBytesUnits="bytes" timeType="unix" timeValue="1108415421" />
+      <traceroute:datum ttl="8" queryNum="1" value="61.420" hop="134.55.217.53" valueUnits="ms" numBytes="64" numBytesUnits="bytes" timeType="unix" timeValue="1108415421" />
+      <traceroute:datum ttl="9" queryNum="1" value="74.536" hop="134.55.41.146" valueUnits="ms" numBytes="64" numBytesUnits="bytes" timeType="unix" timeValue="1108415421" />
+      <traceroute:datum ttl="10" queryNum="1" value="81.328" hop="134.55.41.122" valueUnits="ms" numBytes="64" numBytesUnits="bytes" timeType="unix" timeValue="1108415421" />
+      <traceroute:datum ttl="11" queryNum="1" value="83.445" hop="134.55.217.141" valueUnits="ms" numBytes="64" numBytesUnits="bytes" timeType="unix" timeValue="1108415421" />
+      <traceroute:datum ttl="12" queryNum="1" value="84.222" hop="198.124.238.38" valueUnits="ms" numBytes="64" numBytesUnits="bytes" timeType="unix" timeValue="1108415421" />
+    </nmwg:data> 
+</nmwg:message>
+
+}}}
+
+== MySQL Database ==
+=== Description ===
+The MySQL database acts as shared storage between the MA and the collector. This is where raw traceroute measurement data is kept after the collector receives new test results and where the MA polls data when it receives a new query.
+
+=== Database Schema ===
+The database will consist of tables with a name containing a prefix of the day in which they ran. This will be consistent with perfSONARBUOY tables and allow for easy backup and archiving of data. The structure of each tables is below
+
+{{{
+CREATE DATABASE traceroute_ma;
+
+CREATE TABLE YYYYMMDD_TESTSPEC (
+    id NOT NULL auto_increment,
+    subjKey VARCHAR NOT NULL,
+    srcType NOT NULL VARCHAR,
+    src NOT NULL VARCHAR,
+    dstType NOT NULL VARCHAR,
+    dst NOT NULL VARCHAR,
+    firstTTL INT,
+    maxTTL INT,
+    waitTime INT,
+    pause INT,
+    packetSize INT,
+    numBytes INT,
+    arguments VARCHAR,
+    PRIMARY KEY (id),
+    INDEX (srcType, src),
+    INDEX (dstType, dst),
+    INDEX (srcType, src, dst, dstType)
+)
+
+CREATE TABLE YYYYMMDD_MEASUREMENT (
+    id INT NOT NULL auto_increment,
+    testspec_id INT NOT NULL,
+    timestamp INT NOT NULL,
+    PRIMARY KEY (id),
+    INDEX (testspec_id)
+)
+
+CREATE TABLE YYYYMMDD_HOPS (
+    id INT NOT NULL auto_increment,
+    measurement_id INT NOT NULL,
+    ttl INT NOT NULL,
+    addrType VARCHAR NOT NULL,
+    addr VARCHAR NOT NULL,
+    numBytes INT,
+    delay INT,
+    PRIMARY KEY (id),
+    INDEX (Measurement_id)
+)
+}}}
+
+== Traceroute Collector ==
+=== Description ===
+The traceroute collector is a daemon that listens for connections from clients to register new data. It accepts data in a JSON format and then writes it to a MySQL database. 
+
+=== Data Registration Interface ===
+*Request*
+{{{
+
+{
+    tracerouteResults: [
+        {
+            src:  "",
+            dest: "",
+            firstTTL: NUM,
+            maxTTL: NUM,
+           "waitTime": NUM,
+           "pause": NUM,
+           "packetSize": NUM,
+           "arguments": "", 
+           "valueUnits": "", 
+           "numBytes": NUM, 
+           "results": [
+                {
+                  timestamp: NUM,
+                  hops: [
+                    {
+                        ttl: NUM, 
+                        delay: NUM,
+                        numBytes: NUM
+                        address: "",
+                        addressType: ""
+                    },
+                    ....
+                  ]
+                },
+               ....
+           ]
+         },
+         ....
+}
+
+}}}
+
+*Response*
+{{{
+{
+    status: NUM
+    msg: ""
+}
+
+}}}
+
+
+== Traceroute Scheduler ==
+=== Description ===
+The traceroute scheduler is a daemon that runs traceroute tests on periodic intervals. The test schedule will be input by reading owmesh.conf. Adding support for traceroute requires some new configuration options to be added to owmesh.conf that should live harmoniously with the current bwctl and owamp options. The changes should also not require any changes to existing owmesh.conf files that do not wish to run traceroute.
+
+As the scheduler runs traceroute tests it will write the output to a temporary file. A sender process will be responsible for uploading the data to the collector if its available. Creating this temporary data directory will allow data to be collected even if the collector is unavailable. It should also be somewhat similar to how the current powmaster and bwmaster currently behave.
+
+=== owmesh.conf additions ===
+ Below are the new options that would need to be added to the owmesh.conf file.
+ {{{
+
+TraceRtDataDir /var/lib/perfsonar/perfsonarbuoy_ma/traceroute
+TraceRtCentralHost      localhost:8571
+TraceRtCentralHostTimeout 600
+TraceRtCentralDataDir /var/lib/perfsonar/perfsonarbuoy_ma/traceroute/upload
+TraceRtCentralArchDir /var/lib/perfsonar/perfsonarbuoy_ma/traceroute/archive
+
+ADDRTYPES   [[BW4 BW6 LAT4 LAT6 TRACE4 TRACE6]]
+
+<TESTSPEC=TRACERT_2HR>
+DESCRIPTION                     2 Hour Traceroutes
+TOOL                            traceroute
+
+    # seconds - every 1 hour (on average)
+TraceRtTestInterval            7200
+
+    # alpha - percentage to vary each start interval by. (ranomize 
+    # +/- interval)
+TraceRtTestIntervalStartAlpha    25
+
+TraceRtFirstTTL 2
+TraceRtMaxTTL 64
+TraceRtWaitTime 1
+TraceRtPause 1
+TraceRtPacketSize 50
+TraceRtNumBytes 150 
+TraceRtArgs ""
+</TESTSPEC>
+
+<NODE=CENTOS_32_4>
+LONGNAME        CentOS 4 (32 Bit)
+CONTACTADDR        198.129.254.30
+BW4ADDR            198.129.254.30:4823
+TRACE4ADDR        198.129.254.30
+</NODE>
+
+# The next two are 'targets' of the test.  They are just running bwctl/owamp and
+#  do not need to be running a master collector (for star tests).  If we are
+#  running a mesh then we will need to run the collector/master.
+
+<NODE=CENTOS_32_5>
+LONGNAME        CentOS 5 (32 Bit)
+CONTACTADDR        198.124.238.38
+BW4ADDR            198.124.238.38:4823
+TRACE4ADDR        198.124.238.38
+NOAGENT
+</NODE>
+
+ 
+ }}}
+
+== On-demand Traceroute ==
+=== Description ===
+This function will accept requests from clients to run traceroutes. It will provide a simple JSON interface to describe the tests to run, run the test and publish it to the MA. One open issue is whether the first implementation should implement a simple authentication schema (i.e. HTTP AUTH) or rely on external IP ACLs.
+
+=== Traceroute Request Interface ===
+*Request*
+{{{
+
+{
+    traceroutes: [
+        {
+            src:  "",
+            dest: "",
+            firstTTL: NUM,
+            maxTTL: NUM,
+           "waitTime": NUM,
+           "pause": NUM,
+           "packetSize": NUM,
+           "arguments": "", 
+           "valueUnits": "", 
+           "numBytes": NUM, 
+         },
+         ....
+}
+
+}}}
+
+*Response*
+{{{
+
+{
+    tracerouteResults: [
+        {
+            src:  "",
+            dest: "",
+            firstTTL: NUM,
+            maxTTL: NUM,
+           "waitTime": NUM,
+           "pause": NUM,
+           "packetSize": NUM,
+           "arguments": "", 
+           "valueUnits": "", 
+           "numBytes": NUM, 
+           "results": [
+                {
+                  timestamp: NUM,
+                  hops: [
+                    {
+                        ttl: NUM, 
+                        delay: NUM,
+                        numBytes: NUM
+                        address: "",
+                        addressType: ""
+                    },
+                    ....
+                  ]
+                },
+               ....
+           ]
+         },
+         ....
+}
+
+}}}
