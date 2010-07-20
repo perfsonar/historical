@@ -13,8 +13,8 @@ public class Invoker {
         OptionParser parser = new OptionParser() {
             {
                 acceptsAll( asList( "h", "?" ), "show help then exit" );
-                accepts( "id", "domain id (\"domain.com\")" );
-                accepts( "url", "topology server URL (\"http://domain.com:9999/perfSONAR_PS/services/topology\")" );
+                accepts( "id", "domain id (\"domain.com\")" ).withRequiredArg();
+                accepts( "url", "TS URL (\"http://domain.com:9999/perfSONAR_PS/services/topology\")" ).withRequiredArg();
                 accepts( "help", "show extended help then exit" );
             }
         };

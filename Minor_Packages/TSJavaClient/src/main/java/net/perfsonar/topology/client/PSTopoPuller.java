@@ -26,6 +26,13 @@ public class PSTopoPuller {
         tsList[0] = url;
         TSLookupClient psClient = new TSLookupClient();
         psClient.setTSList(tsList);
+        if (id == null) {
+            throw new PSException("null id");
+        }
+        if (!id.startsWith("urn:ogf:network:domain=")) {
+            id = id.replaceFirst("urn:ogf:network:", "");
+            id = "urn:ogf:network:domain="+id;
+        }
         Element domain = psClient.getDomain(id); //, "http://ogf.org/schema/network/topology/base/20070828/");
         if (domain == null) {
             throw new IOException("No domain data from topology server");
