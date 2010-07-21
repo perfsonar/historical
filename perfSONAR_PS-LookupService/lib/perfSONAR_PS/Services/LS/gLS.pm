@@ -1420,7 +1420,13 @@ sub summarizeLS {
     # First delete the metadata + control items.  Insert the new ones right
     #   after.
     $self->{LOGGER}->debug( "Removing metadata for \"" . $mdKey . "\" so we can start clean." );
-    my @deleteMetadata = $summarydb->queryForName( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-control\"]/nmwg:metadata[\@id=\"" . $mdKey . "\" or \@metadataIdRef=\"" . $mdKey . "\"]", txn => $dbTr, error => \$error } );
+
+    # XXX: 7/21/2010 JZ
+    #
+    # This may be a bug.  We should be searching in the LSStore-summary area
+    #   instead of the LSStore.  We are deleting the 'summary of summaries'.
+#    my @deleteMetadata = $summarydb->queryForName( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-control\"]/nmwg:metadata[\@id=\"" . $mdKey . "\" or \@metadataIdRef=\"" . $mdKey . "\"]", txn => $dbTr, error => \$error } );
+    my @deleteMetadata = $summarydb->queryForName( { query => "/nmwg:store[\@type=\"LSStore-summary\" or \@type=\"LSStore-control\"]/nmwg:metadata[\@id=\"" . $mdKey . "\" or \@metadataIdRef=\"" . $mdKey . "\"]", txn => $dbTr, error => \$error } );
     $errorFlag++ if $error;
     my $dml = $#deleteMetadata;
     for my $y ( 0 .. $dml ) {
