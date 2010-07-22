@@ -71,5 +71,25 @@ This page lists use-cases for perfSONAR clients, and provides for each a high-le
 
 == Use Case #5: Trigger bwctl test via a web GUI ==
 
-To only present options that are supported, query for metadata saying if a bwctl MP supports UDP, max rate, etc.
+To only present in the GUI options that are supported by that MA, query for metadata saying if a bwctl MP supports UDP, max rate, etc.
+
+== Additional Use Cases ==
+
+=== Query Lookup Service only ===
+ * Find the topology server for ESnet
+ * Find all pSB MAs with throughput data for host albu-pt1.es.net
+ * Find all pSB MAs for the community “LHC”
+
+=== Pub/Sub Use Cases ===
+ * "real-time" data from Network device (e.g.: error counters from a router)
+ * Measurement Point with 10,000 consumers, and they don't want to poll (pub-sub critical for scalability)
+
+=== Large Data Use Cases ===
+ * Give me all bwctl or owamp data for the past 6 months for Host A to Host B
+ * Give me all bwctl or owamp data for the past 6 months for entire MA
+ * Give me all SNMP data for router interface X for the path 12 months
+
+=== Other Use Cases that may or may not affect the API ===
+ * ask a service for data, and if you don't have it, run a test
+
 
