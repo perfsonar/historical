@@ -93,4 +93,6 @@ _NOTE: Functionality of these plug-ins should be replaced by the ones listed abo
 
  * Related to above - when do we want to include these in a release?
 
+ * which "Future Features" are highest priority?
+
  * Are there additional features (either listed above or that people think of) that we need to add before including these in a release?
