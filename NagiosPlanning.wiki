@@ -44,14 +44,12 @@ This page contains information for planning the development of a new set of Nagi
 
 ==New Plug-Ins==
  * perfSONAR Service Health Plug-ins
- 
   * *ps_check_ls_reg* - Query LS for specific service with a given URL, service(s) with specified type, or service(s) with specified keyword. Set threshold on the number of services expected to be returned.  Can be configured to: 
    # Just contact gls to check if hls registered
    # Just check specific hls to see if service registered there
    # Call gLS to get hLS and see if can find through that mechanism
    * Status:
    * Code: 
-
   * *ps_check_topology* - Check if topology registered. State change if significant change in number of nodes and/or links. 
    * Status: Done
    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_topology.pl
@@ -62,6 +60,8 @@ This page contains information for planning the development of a new set of Nagi
    * Test is not bidirectional
    * Throughput falls below a statically configured value 
    * Throughput change deemed significant using algorithm such as Holt-Winters or plateau
+    * Status:
+    * Code: 
   * *ps_check_owdelay* - Query pSB MA for OWAMP results between two endpoints for given time period. Based on plug-in configuration, possible state changes occur if:
    * No results returned or less results than expected returned (i.e. missing test)
    * Test is not bidirectional
@@ -73,8 +73,8 @@ This page contains information for planning the development of a new set of Nagi
    * Duplicates not within threshold
    * TTL not within threshold
    * TTL changes
-   * Status:
-   * Code: 
+    * Status:
+    * Code: 
 
   * *ps_check_pingdelay* - Query Pinger MA to get results between two endpoints for given time period.
    * Status:
