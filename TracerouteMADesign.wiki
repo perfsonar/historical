@@ -148,45 +148,46 @@ The database will consist of tables with a name containing a prefix of the day i
 {{{
 CREATE DATABASE traceroute_ma;
 
-CREATE TABLE YYYYMMDD_TESTSPEC (
-    id NOT NULL auto_increment,
-    subjKey VARCHAR NOT NULL,
-    srcType NOT NULL VARCHAR,
-    src NOT NULL VARCHAR,
-    dstType NOT NULL VARCHAR,
-    dst NOT NULL VARCHAR,
+CREATE TABLE 20100721_TESTSPEC (
+    id INT NOT NULL auto_increment,
+    subjKey VARCHAR(20) NOT NULL,
+    srcType VARCHAR(10) NOT NULL ,
+    src VARCHAR(20) NOT NULL,
+    dstType VARCHAR(10) NOT NULL,
+    dst VARCHAR(20) NOT NULL,
     firstTTL INT,
     maxTTL INT,
     waitTime INT,
     pause INT,
     packetSize INT,
     numBytes INT,
-    arguments VARCHAR,
+    arguments VARCHAR(20),
     PRIMARY KEY (id),
     INDEX (srcType, src),
     INDEX (dstType, dst),
     INDEX (srcType, src, dst, dstType)
-)
+);
 
-CREATE TABLE YYYYMMDD_MEASUREMENT (
+CREATE TABLE 20100721_MEASUREMENT (
     id INT NOT NULL auto_increment,
     testspec_id INT NOT NULL,
     timestamp INT NOT NULL,
     PRIMARY KEY (id),
     INDEX (testspec_id)
-)
+);
 
-CREATE TABLE YYYYMMDD_HOPS (
+CREATE TABLE 20100721_HOPS (
     id INT NOT NULL auto_increment,
     measurement_id INT NOT NULL,
     ttl INT NOT NULL,
-    addrType VARCHAR NOT NULL,
-    addr VARCHAR NOT NULL,
+    addrType VARCHAR(10) NOT NULL,
+    addr VARCHAR(20) NOT NULL,
+    queryNum INT NOT NULL,
     numBytes INT,
     delay INT,
     PRIMARY KEY (id),
-    INDEX (Measurement_id)
-)
+    INDEX (measurement_id)
+);
 }}}
 
 == Traceroute Collector ==
@@ -307,6 +308,74 @@ NOAGENT
 This function will accept requests from clients to run traceroutes. It will provide a simple JSON interface to describe the tests to run, run the test and publish it to the MA. One open issue is whether the first implementation should implement a simple authentication schema (i.e. HTTP AUTH) or rely on external IP ACLs.
 
 === Traceroute Request Interface ===
+
+There are multiple options on this interface as there seems to be multiple thoughts on how Measurement Points (MPs) are implemented. I'll outline them below and they should be discussed as a group:
+
+1. Use "MeasurementRequest" and reponse message as described in the schema documents here: [http://packrat.internet2.edu/~aaron/perfsonar-clmp/schema/tracerouteRequest.rnc Request] and [http://packrat.internet2.edu/~aaron/perfsonar-clmp/schema/tracerouteRequest.rnc Response]
+
+*Example Request*
+{{{
+<nmwg:message type="MeasurementRequest"
+   id="msg1"
+       xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+       xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+       xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/">
+
+
+    <nmwg:metadata id="traceroutemeta1">
+        <traceroute:subject id="tracesub1">
+            <nmwgt:endPointPair>
+                <nmwgt:src type="hostname" value="lbl-pt1.es.net"/>
+                <nmwgt:dst type="hostname" value="bnl-pt1.es.net"/>
+            </nmwgt:endPointPair>      
+        </traceroute:subject>
+        <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0/</nmwg:eventType>
+        <traceroute:parameters id="trparam1">
+            <nmwg:parameter name="maxTtl">30</nmwg:parameter>
+            <nmwg:parameter name="waitTime">1</nmwg:parameter>         
+        </traceroute:parameters>   
+    </nmwg:metadata> 
+    
+   <nmwg:data id="1" metadataIdRef="tracerouteRequest" />
+</nmwg:message>
+}}}
+
+*
+
+2. Use a SetupDataRequest with a time specified as now
+*Example Request*
+{{{
+<nmwg:message type="SetupDataRequest"
+   id="msg1"
+       xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+       xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+   xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/">
+
+
+    <nmwg:metadata id="traceroutemeta1">
+        <traceroute:subject id="tracesub1">
+            <nmwgt:endPointPair>
+                <nmwgt:src type="hostname" value="lbl-pt1.es.net"/>
+                <nmwgt:dst type="hostname" value="bnl-pt1.es.net"/>
+            </nmwgt:endPointPair>      
+        </traceroute:subject>
+        <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0/</nmwg:eventType>
+        <traceroute:parameters id="trparam1">
+            <nmwg:parameter name="startTime">now</nmwg:parameter>
+            <nmwg:parameter name="maxTtl">30</nmwg:parameter>
+            <nmwg:parameter name="waitTime">1</nmwg:parameter>         
+        </traceroute:parameters>   
+    </nmwg:metadata>   
+    
+</nmwg:message>
+}}}
+
+*
+
+
+
+3. Custom JSON interface
+
 *Request*
 {{{
 
@@ -366,3 +435,496 @@ This function will accept requests from clients to run traceroutes. It will prov
 }
 
 }}}
+
+== Open Issues ==
+ # What is the best data format for the MP interface?
+ # Should we adjust the traceroute data format to look more like RFC 5388? IF yes should we include the XML format in the ietf namespace or should we create a perfSONAR namespace that uses the same information elements? Example of RFC 5388 XML below:
+ 
+ {{{
+ <?xml version="1.0"?>
+<traceRoute xmlns="urn:ietf:params:xml:ns:traceroute-1.0">
+  <Measurement>
+    <MeasurementMetadata>
+      <TestName>Test to bnl-pt1.es.net</TestName>
+      <OSName>Linux</OSName>
+      <OSVersion>2.6.18-164.9.1.el5</OSVersion>
+      <ToolVersion>6.4.2-XML GOLD+emf_prototrace0.2+sl_tostrace0.1</ToolVersion>
+      <ToolName>traceroute-nanog+XML</ToolName>
+      <CtlTargetAddress>
+        <inetAddressDns>bnl-pt1.es.net</inetAddressDns>
+      </CtlTargetAddress>
+      <CtlMaxTtl>64</CtlMaxTtl>
+      <CtlInitialTtl>1</CtlInitialTtl>
+      <CtlType>
+        <UDP/>
+      </CtlType>
+    </MeasurementMetadata>
+    <MeasurementResult>
+      <TestName>Test to bnl-pt1.es.net</TestName>
+      <ResultsStartDateAndTime>2010-07-22T20:49:59Z</ResultsStartDateAndTime>
+      <ResultsIpTgtAddr>
+        <inetAddressIpv4>198.124.238.38</inetAddressIpv4>
+      </ResultsIpTgtAddr>
+      <ProbeResults>
+        <hop>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>198.129.226.129</inetAddressIpv4>
+            </HopAddr>
+            <HopName>esnetrt3-opendev</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>1</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>198.129.226.129</inetAddressIpv4>
+            </HopAddr>
+            <HopName>esnetrt3-opendev</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>0</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>198.129.226.129</inetAddressIpv4>
+            </HopAddr>
+            <HopName>esnetrt3-opendev</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>0</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+        </hop>
+        <hop>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>198.129.77.45</inetAddressIpv4>
+            </HopAddr>
+            <HopName>lblmr2-esnetrt3</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>0</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>198.129.77.45</inetAddressIpv4>
+            </HopAddr>
+            <HopName>lblmr2-esnetrt3</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>0</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>198.129.77.45</inetAddressIpv4>
+            </HopAddr>
+            <HopName>lblmr2-esnetrt3</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>0</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+        </hop>
+        <hop>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.219.10</inetAddressIpv4>
+            </HopAddr>
+            <HopName>slacmr2-ip-lblmr2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>1</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.219.10</inetAddressIpv4>
+            </HopAddr>
+            <HopName>slacmr2-ip-lblmr2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>1</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.219.10</inetAddressIpv4>
+            </HopAddr>
+            <HopName>slacmr2-ip-lblmr2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>1</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+        </hop>
+        <hop>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.217.2</inetAddressIpv4>
+            </HopAddr>
+            <HopName>sunnsdn2-ip-slacmr2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>2</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.217.2</inetAddressIpv4>
+            </HopAddr>
+            <HopName>sunnsdn2-ip-slacmr2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>2</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.217.2</inetAddressIpv4>
+            </HopAddr>
+            <HopName>sunnsdn2-ip-slacmr2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>2</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+        </hop>
+        <hop>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.209.98</inetAddressIpv4>
+            </HopAddr>
+            <HopName>sunncr1-sunnsdn2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>2</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.209.98</inetAddressIpv4>
+            </HopAddr>
+            <HopName>sunncr1-sunnsdn2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>2</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.209.98</inetAddressIpv4>
+            </HopAddr>
+            <HopName>sunncr1-sunnsdn2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>2</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+        </hop>
+        <hop>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.220.49</inetAddressIpv4>
+            </HopAddr>
+            <HopName>denvcr2-sunncr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>29</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.220.49</inetAddressIpv4>
+            </HopAddr>
+            <HopName>denvcr2-sunncr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>29</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.220.49</inetAddressIpv4>
+            </HopAddr>
+            <HopName>denvcr2-sunncr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>29</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+        </hop>
+        <hop>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.209.46</inetAddressIpv4>
+            </HopAddr>
+            <HopName>kanscr1-ip-denvcr2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>42</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:49:59Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.209.46</inetAddressIpv4>
+            </HopAddr>
+            <HopName>kanscr1-ip-denvcr2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>42</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.209.46</inetAddressIpv4>
+            </HopAddr>
+            <HopName>kanscr1-ip-denvcr2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>78</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+        </hop>
+        <hop>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.221.58</inetAddressIpv4>
+            </HopAddr>
+            <HopName>chiccr1-ip-kanscr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>53</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.221.58</inetAddressIpv4>
+            </HopAddr>
+            <HopName>chiccr1-ip-kanscr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>53</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.221.58</inetAddressIpv4>
+            </HopAddr>
+            <HopName>chiccr1-ip-kanscr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>53</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+        </hop>
+        <hop>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.217.53</inetAddressIpv4>
+            </HopAddr>
+            <HopName>clevcr1-ip-chiccr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>62</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.217.53</inetAddressIpv4>
+            </HopAddr>
+            <HopName>clevcr1-ip-chiccr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>62</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.217.53</inetAddressIpv4>
+            </HopAddr>
+            <HopName>clevcr1-ip-chiccr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>62</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+        </hop>
+        <hop>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.41.146</inetAddressIpv4>
+            </HopAddr>
+            <HopName>bostcr1-ip-clevcr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>75</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.41.146</inetAddressIpv4>
+            </HopAddr>
+            <HopName>bostcr1-ip-clevcr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>75</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.41.146</inetAddressIpv4>
+            </HopAddr>
+            <HopName>bostcr1-ip-clevcr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>75</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+        </hop>
+        <hop>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.41.122</inetAddressIpv4>
+            </HopAddr>
+            <HopName>aofacr2-ip-bostcr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>82</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.41.122</inetAddressIpv4>
+            </HopAddr>
+            <HopName>aofacr2-ip-bostcr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>82</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.41.122</inetAddressIpv4>
+            </HopAddr>
+            <HopName>aofacr2-ip-bostcr1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>82</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:00Z</Time>
+          </probe>
+        </hop>
+        <hop>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.217.141</inetAddressIpv4>
+            </HopAddr>
+            <HopName>bnlmr2-ip-aofacr2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>84</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:01Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.217.141</inetAddressIpv4>
+            </HopAddr>
+            <HopName>bnlmr2-ip-aofacr2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>84</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:01Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>134.55.217.141</inetAddressIpv4>
+            </HopAddr>
+            <HopName>bnlmr2-ip-aofacr2</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>84</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:01Z</Time>
+          </probe>
+        </hop>
+        <hop>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>198.124.238.38</inetAddressIpv4>
+            </HopAddr>
+            <HopName>bnl-pt1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>84</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:01Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>198.124.238.38</inetAddressIpv4>
+            </HopAddr>
+            <HopName>bnl-pt1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>84</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:01Z</Time>
+          </probe>
+          <probe>
+            <HopAddr>
+              <inetAddressIpv4>198.124.238.38</inetAddressIpv4>
+            </HopAddr>
+            <HopName>bnl-pt1</HopName>
+            <ProbeRoundTripTime>
+              <roundTripTime>84</roundTripTime>
+            </ProbeRoundTripTime>
+            <ResponseStatus>responseReceived</ResponseStatus>
+            <Time>2010-07-22T20:50:01Z</Time>
+          </probe>
+        </hop>
+      </ProbeResults>
+      <ResultsEndDateAndTime>2010-07-22T20:50:01Z</ResultsEndDateAndTime>
+    </MeasurementResult>
+  </Measurement>
+</traceRoute>
+
+ }}}
