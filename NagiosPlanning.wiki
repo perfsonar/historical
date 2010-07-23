@@ -8,7 +8,7 @@ This page contains information for planning the development of a new set of Nagi
    * _psb-csv.pl_ queries iperf data using XML interface and returns data in CSV format
    * _check_psb_ looks at average bandwidth and number of tests in CSV data and sets return value based on whether it meets a certain threshold
   * _Where is the code_
-   * ESnet cfengine trunk
+   * ESnet cfengine trunk (to be replaced by new ps_check_throughput)
  # *check_topology*
   * _What it does_ - Queries topology services and checks the number of bytes returned against a threshold
   * _How it works_
@@ -16,7 +16,7 @@ This page contains information for planning the development of a new set of Nagi
    * _client.pl_ sends XML request to topology service to fetch entire topology
    * _check_topology_ looks at topology and sets return value based on the number of bytes
   * _Where is the code_
-   * ESnet cfengine trunk
+   * ESnet cfengine trunk (to be replaced by new ps_check_topology)
  # *check_db.pl*
   * _What it does_ - Queries a pSB MySQL database for owamp results between mesh of hosts in last minute and checks jitter, maximum delay and loss rate.
   * _How it works_
@@ -42,15 +42,20 @@ This page contains information for planning the development of a new set of Nagi
   * _Where is the code_
    * https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_pSB.pl
 
-==Proposed Plug-Ins==
+==New Plug-Ins==
  * perfSONAR Service Health Plug-ins
-  * *ps_check_perfSONAR* - Send echo request or send query from config file. Fail if query times out or does not return results.
-   * More or less the current check_perfSONAR plug-in
+ 
   * *ps_check_ls_reg* - Query LS for specific service with a given URL, service(s) with specified type, or service(s) with specified keyword. Set threshold on the number of services expected to be returned.  Can be configured to: 
    # Just contact gls to check if hls registered
    # Just check specific hls to see if service registered there
    # Call gLS to get hLS and see if can find through that mechanism
+   * Status:
+   * Code: 
+
   * *ps_check_topology* - Check if topology registered. State change if significant change in number of nodes and/or links. 
+   * Status: Done
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_topology.pl
+
  * perfSONAR Data Analysis Plug-ins
   * *ps_check_throughput* - Query pSB MA for BWCTL results between two endpoints for given time period. Based on plug-in configuration, possible state changes occur if:
    * No results returned or less results than expected returned (i.e. missing test)
@@ -68,7 +73,18 @@ This page contains information for planning the development of a new set of Nagi
    * Duplicates not within threshold
    * TTL not within threshold
    * TTL changes
+   * Status:
+   * Code: 
+
   * *ps_check_pingdelay* - Query Pinger MA to get results between two endpoints for given time period.
-  * *ps_check_interfaces* - Query SNMP MA to get interface statistics.
+   * Status:
+   * Code: 
+
+ * *ps_check_interfaces* - Query SNMP MA to get interface statistics.
+   * Status:
+   * Code: 
+
  * perfSONAR GUI Plug-ins
   * *ps_check_serv_directory* - Query JSON of service directory page to make sure its displaying correct results.
+   * Status:
+   * Code: 
