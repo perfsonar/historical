@@ -1,6 +1,75 @@
 This page contains information for planning the development of a new set of Nagios plug-ins. 
 
-==Summary of Current perfSONAR Nagios Plug-ins==
+== Plug-Ins==
+ * perfSONAR Service Health Plug-ins
+   
+  * *ps_check_gls* - Query one or more gLS to count registered hLSes that match certain parameters. Parameters specified can be one or more of the following: 
+    # hLS service URL(s)
+    # keyword(s)
+    # type of data stored in services registered with a particular hLS (bwctl, owamp, etc)
+   * Status: Ready for testing
+   * Future Features:
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_gls.pl
+   * Usage: {{-v|--verbose -h|--hintsURL <gls-hints-URL> -s|--serviceglsURL <serviceglsURL> -f|--hlsurlfile <hls url file> -k|--keyword <keyword search> -t|--type <type of service> -w|--warning <warning-threshold> -c|--critical <critical-threshold> -i|--initialConfig <config-file path>}}}                     
+
+  * *ps_check_hls* - Verify that that services such as an MA are registered in an hLS. The hLS(s) can be specified explicitly or the gLS infrastructure can be used if we don't care which hLS has the data. Services can be searched for based on URL, event type or keyword.
+   * Status: Ready for testing
+   * Future Features:
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_hls.pl
+   * Usage: {{{-s|--service <HLS-service-url> -t|--type <service-type> -k|--keyword <keyword search> -g|--glsMode <glsURl> -h|--hintsURL<hintsURL> -i|--initialConfig <Config file for service mapping> -w|--warning <threshold> -c|--critical <threshold>| -f|--hlsurlfile <hls url file>}}}
+   
+  * *ps_check_topology* - Check if topology is registered and state change if significant change in number of nodes
+    * Future Features:
+      * make sure topology has been updated recently
+    * Status: Ready for testing
+    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_topology.pl
+   * Usage: {{{-d|--domainName<domain-name> -u|--topologyURL <topology-service-URL> -i|--initialconfig<initial config file> -w|--warning <warning-threshold> -c|--critical <critical-threshold> -n|--namespace <namespace>}}}
+
+  * check_perfSONAR.pl* - Sends an EchoRequest or SetupDataRequest and sets return value based on whether the request returns "success" or an error code. It has default Echo and SetupData requests but can also provide a custom request in a file as long as it is of the aforementioned types.
+    * Status: Complete (same version that Jason wrote awhile back)
+    * Future Features:
+    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_perfSONAR.pl
+    * Usage: {{{check_perfSonar.pl URI [--server --port --endpoint] [--template #] [--interfaceIP=xxx.xxx.xxx.xxx --hostname=xxx.yyy.zzz --interfaceName=xo-0/0/0.0] [FILE]}}}
+    
+ * perfSONAR Data Analysis Plug-ins
+  * *ps_check_throughput* - Query pSB MA for BWCTL results between two endpoints for given time period. 
+    * Status: Ready for testing
+    * Future Features:
+     * Make sure there are results for all host pairs in the pSB configuration file 
+     * Test is not bidirectional
+     * Throughput change deemed significant using algorithm such as Holt-Winters or plateau
+    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_throughput.pl
+    * Usage:  {{{-s|--service <service-url> -w|--warning <threshold> -c|--critical <threshold>}}}
+
+  * *ps_check_owdelay* - Query pSB MA for OWAMP results between two endpoints for given time period. State changes if minimum delay falls below a specified value.
+    * Status: Ready for testing
+    * Future Features:  
+     * Look at buckets and get statitical measures (i.e. max, median, iqr, etc)
+     * Test is not bidirectional
+     * Make sure there are results for all host pairs in the pSB configuration file 
+     * Look at loss statistics
+    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_owdelay.pl
+    * Usage: {{{-s|--service <service-url> -w|--warning <threshold> -c|--critical <threshold>}}}
+
+  * *ps_check_pingdelay* - Query Pinger MA to get results between two endpoints for given time period.
+   * Status: Ready for testing
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_pinger.pl
+   * Usage: {{{-u|--url <service-url> -s|source=s <source> -d|destination <destination> -k|rttType<RTT type - minRtt,maxRtt,meanRtt> -f|function <function min,max,mean to analyze RTT> -r|--range <time-interval> -w|--warning <threshold> -c|--critical <threshold> }}}
+
+ * *ps_check_snmp* - Query SNMP MA to get interface statistics.
+  * Make sure that results exist for a list of key interfaces
+   * Status: Ready for testing
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_snmp.pl
+   * Usage: {{{-u|--snmpMAURL <pinger-MA-URL> -i|--interface<interface-address> -t|--timeInterval<time-interval-in-minutes> -d|--direction<traffic-direction> -w|--warning <warning-threshold> -c|--critical <critical-threshold> }}}
+
+ * perfSONAR GUI Plug-ins
+  * *ps_check_serv_directory* - Query JSON of service directory page to make sure its displaying correct results.
+   * Compare against a file containing key known services that should be up
+   * Status: not started
+   * Code: 
+
+== Old plug-ins ==
+_NOTE: Functionality of these plug-ins should be replaced by the ones listed above. They are listed here for historical purposes. _
  # *check_psb*
   * _What it does_ - Query pSB MA for bwctl results and checks average bandwidth and number of tests against a threshold
   * _How it works_
@@ -24,88 +93,13 @@ This page contains information for planning the development of a new set of Nagi
    * Analyzes results and sets return values based on jitter, max delay and loss
   * _Where is the code_
    * https://svn.internet2.edu/svn/perfSONAR-PS/branches/CTP/nagios/check_db.pl
- # *check_perfSONAR.pl* 
-  * _What it does_ - Sends an EchoRequest or SetupDataRequest and sets return value based on whether the request returns "success" or an error code. It has default Echo and SetupData requests but can also provide a custom request in a file as long as it is of the aforementioned types.
-  * _How it works_
-   * Reads in parameters from command-line to determine where to send request and what request to send.
-   * Sends XML request to service
-   * Looks for "success" or "error" string in relevant portion of response
-  * _Where is the code_
-   * https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_perfSONAR.pl
- # *check_pSB.pl* 
-  * _What it does_ - Sends an EchoRequest and a SetupDataRequest to a target server looking for results in a certain time period (defaults to 24 hours)
-  * _How it works_
-   * Supply a host:port/endPoint, and then a src, dst, and hours argument to check in the pSB database
-   * Will do an echo first to see if the service is alive
-   * Will follow with a SetupDataRequest after
-   * Counts the returned datum only, if there are results the check passes.
-  * _Where is the code_
-   * https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_pSB.pl
 
-==New Plug-Ins==
- * perfSONAR Service Health Plug-ins
-  * *ps_check_ls_reg* - Query LS for specific service with a given URL, service(s) with specified type, or service(s) with specified keyword. Set threshold on the number of services expected to be returned.  Can be configured to: 
-   # Just contact gls to check if hls registered
-   # Just check specific hls to see if service registered there
-   # Call gLS to get hLS and see if can find through that mechanism
-   * Status:
-   * Code: 
-   * Usage: 
-
-  * *ps_check_topology* - Check if topology is registered. 
-   *State change if significant change in number of nodes and/or links. 
-   * make sure topology has been updated recently
-    * Status: Done
-    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_topology.pl
-   * Usage: {{{-d|--domainName<domain-name> -u|--topologyURL <topology-service-URL> -i|--initialconfig<initial config file> -w|--warning <warning-threshold> -c|--critical <critical-threshold> -n|--namespace <namespace>}}}
-
- * perfSONAR Data Analysis Plug-ins
-  * *ps_check_throughput* - Query pSB MA for BWCTL results between two endpoints for given time period. Based on plug-in configuration, possible state changes occur if:
-   * No results returned or less results than expected returned (i.e. missing test)
-   * Test is not bidirectional
-   * Make sure there are results for all host pairs in the pSB configuration file 
-   * Throughput falls below a statically configured value 
-   * Throughput change deemed significant using algorithm such as Holt-Winters or plateau
-    * Status:
-    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_throughput.pl
-    * Usage:  {{{-s|--service <service-url> -w|--warning <threshold> -c|--critical <threshold>}}}
-
-  * *ps_check_owdelay* - Query pSB MA for OWAMP results between two endpoints for given time period. Based on plug-in configuration, possible state changes occur if:
-   * No results returned or less results than expected returned (i.e. missing test)
-   * Test is not bidirectional
-   * Make sure there are results for all host pairs in the pSB configuration file 
-   * Median delay not within threshold
-   * Delay variation (i.e IQR, jitter) not within threshold
-   * Packets sent not within threshold
-   * Loss not within threshold
-   * Errors not within threshold
-   * Duplicates not within threshold
-   * TTL not within threshold
-   * TTL changes
-    * Status:
-    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_owdelay.pl
-    * Usage: {{{-s|--service <service-url> -w|--warning <threshold> -c|--critical <threshold>}}}
-
-  * *ps_check_pingdelay* - Query Pinger MA to get results between two endpoints for given time period.
-   * Status:Done
-   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_pinger.pl
-   * Usage: {{{-u|--url <service-url> -s|source=s <source> -d|destination <destination> -k|rttType<RTT type - minRtt,maxRtt,meanRtt> -f|function <function min,max,mean to analyze RTT> -r|--range <time-interval> -w|--warning <threshold> -c|--critical <threshold> }}}
-
- * *ps_check_snmp* - Query SNMP MA to get interface statistics.
-  * Make sure that results exist for a list of key interfaces
-   * Status: Done
-   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_snmp.pl
-   * Usage: {{{-u|--snmpMAURL <pinger-MA-URL> -i|--interface<interface-address> -t|--timeInterval<time-interval-in-minutes> -d|--direction<traffic-direction> -w|--warning <warning-threshold> -c|--critical <critical-threshold> }}}
-
- * perfSONAR GUI Plug-ins
-  * *ps_check_serv_directory* - Query JSON of service directory page to make sure its displaying correct results.
-   * Compare against a file containing key known services that should be up
-   * Status: not started
-   * Code: 
 
 == Other notes: ==
+* Most checks should alert if query takes too long. The timeout functionality in Nagios may be enough for this.
 
-Most checks should alert if query takes too long.
+* Need to be able to integrate these into the NPToolkit, should be able to work with existing Nagios infrastructure, or use a pre-configured Nagios configuration on the NPToolkit itself.
 
-Need to be able to integrate these into the NPToolkit, should be able to work with existing Nagios infrastructure,
-or use a pre-configured Nagios configuration on the NPToolkit itself.
+* Related to above - when do we want to include these in a release?
+
+* Are there additional features (either listed above or that people think of) that we need to add before including these in a release?
