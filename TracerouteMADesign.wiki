@@ -311,7 +311,7 @@ This function will accept requests from clients to run traceroutes. It will prov
 
 There are multiple options on this interface as there seems to be multiple thoughts on how Measurement Points (MPs) are implemented. I'll outline them below and they should be discussed as a group:
 
-1. Use "MeasurementRequest" and reponse message as described in the schema documents here: [http://packrat.internet2.edu/~aaron/perfsonar-clmp/schema/tracerouteRequest.rnc Request] and [http://packrat.internet2.edu/~aaron/perfsonar-clmp/schema/tracerouteRequest.rnc Response]
+1. Use "MeasurementRequest" and reponse message as described in the schema documents here: [http://packrat.internet2.edu/~aaron/perfsonar-clmp/schema/tracerouteRequest.rnc Request] and [http://packrat.internet2.edu/~aaron/perfsonar-clmp/schema/tracerouteResponse.rnc Response]
 
 *Example Request*
 {{{
