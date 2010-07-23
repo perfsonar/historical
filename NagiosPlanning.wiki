@@ -48,8 +48,9 @@ This page contains information for planning the development of a new set of Nagi
    # Just contact gls to check if hls registered
    # Just check specific hls to see if service registered there
    # Call gLS to get hLS and see if can find through that mechanism
-   * Status:
-   * Code: 
+   * Status: Done
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_gls.pl
+https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_hls.pl
   * *ps_check_topology* - Check if topology registered. State change if significant change in number of nodes and/or links. 
    * Status: Done
    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_topology.pl
@@ -81,8 +82,8 @@ This page contains information for planning the development of a new set of Nagi
    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_pinger.pl
 
  * *ps_check_interfaces* - Query SNMP MA to get interface statistics.
-   * Status:
-   * Code: 
+   * Status: Done
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/
 
  * perfSONAR GUI Plug-ins
   * *ps_check_serv_directory* - Query JSON of service directory page to make sure its displaying correct results.
