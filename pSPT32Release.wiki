@@ -240,6 +240,7 @@ In progress issues from Milestone Base 4, Live CD 1:
 || empty resolve.conf, domino effect to the LS cache daemon and NTP || watching for other instances || <font color="red">_*NOT STARTED*_</font> ||
 || LS Cache - won't need to 'update' this before release due to new cache service || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || weirdness with the disk configuration script.  If the disk has no partition info (but had an ext3 fs on it before the partition table was wiped), the script detects the raw device with 'unknown' partition type. || The script uses "blkid" to figure out the FS type, and there seem to be some combination of partition voodoo that prevents blkid from recognizing proper ext3 partitions. The only way to truly figure out whether it's ext3 or not is to try and mount the partition.  Need a FAQ entry || <font color="red">_*NOT STARTED*_</font> ||
+|| The net installation defaults to DHCP, making it difficult to install on non-DHCP networks || <font color="green">_*DONE*_</font> ||
 || TBD || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
 === Milestone LiveCD 3 ===
