@@ -77,8 +77,8 @@ This page contains information for planning the development of a new set of Nagi
     * Code: 
 
   * *ps_check_pingdelay* - Query Pinger MA to get results between two endpoints for given time period.
-   * Status:
-   * Code: 
+   * Status:Done
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_pinger.pl
 
  * *ps_check_interfaces* - Query SNMP MA to get interface statistics.
    * Status:
