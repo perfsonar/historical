@@ -216,7 +216,8 @@ The traceroute collector is a daemon that listens for connections from clients t
                   timestamp: NUM,
                   hops: [
                     {
-                        ttl: NUM, 
+                        ttl: NUM,
+                        queryNum: NUM, 
                         delay: NUM,
                         numBytes: NUM
                         address: "",
