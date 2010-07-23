@@ -48,8 +48,9 @@ This page contains information for planning the development of a new set of Nagi
    # Just contact gls to check if hls registered
    # Just check specific hls to see if service registered there
    # Call gLS to get hLS and see if can find through that mechanism
-   * Status:
-   * Code: 
+   * Status: Done
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_gls.pl
+https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_hls.pl 
   * *ps_check_topology* - Check if topology registered. State change if significant change in number of nodes and/or links. 
    * Status: Done
    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_topology.pl
@@ -61,8 +62,8 @@ This page contains information for planning the development of a new set of Nagi
    * Make sure there are results for all host pairs in the pSB configuration file 
    * Throughput falls below a statically configured value 
    * Throughput change deemed significant using algorithm such as Holt-Winters or plateau
-    * Status:
-    * Code: 
+    * Status: Done
+    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_throughput.pl
   * *ps_check_owdelay* - Query pSB MA for OWAMP results between two endpoints for given time period. Based on plug-in configuration, possible state changes occur if:
    * No results returned or less results than expected returned (i.e. missing test)
    * Test is not bidirectional
@@ -75,8 +76,8 @@ This page contains information for planning the development of a new set of Nagi
    * Duplicates not within threshold
    * TTL not within threshold
    * TTL changes
-    * Status:
-    * Code: 
+    * Status: Done
+    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_owdelay.pl
 
   * *ps_check_pingdelay* - Query Pinger MA to get results between two endpoints for given time period.
    * Status:Done
@@ -84,8 +85,8 @@ This page contains information for planning the development of a new set of Nagi
 
  * *ps_check_interfaces* - Query SNMP MA to get interface statistics.
   * Make sure that results exist for a list of key interfaces
-   * Status:
-   * Code: 
+   * Status: Done
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_snmp.pl
 
  * perfSONAR GUI Plug-ins
   * *ps_check_serv_directory* - Query JSON of service directory page to make sure its displaying correct results.
