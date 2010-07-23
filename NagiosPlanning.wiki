@@ -48,12 +48,16 @@ This page contains information for planning the development of a new set of Nagi
    # Just contact gls to check if hls registered
    # Just check specific hls to see if service registered there
    # Call gLS to get hLS and see if can find through that mechanism
-   * Status: Done
-   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_gls.pl
-https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_hls.pl 
-  * *ps_check_topology* - Check if topology registered. State change if significant change in number of nodes and/or links. 
-   * Status: Done
-   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_topology.pl
+   * Status:
+   * Code: 
+   * Usage: 
+
+  * *ps_check_topology* - Check if topology is registered. 
+   *State change if significant change in number of nodes and/or links. 
+   * make sure topology has been updated recently
+    * Status: Done
+    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_topology.pl
+   * Usage: {{{-d|--domainName<domain-name> -u|--topologyURL <topology-service-URL> -i|--initialconfig<initial config file> -w|--warning <warning-threshold> -c|--critical <critical-threshold> -n|--namespace <namespace>}}}
 
  * perfSONAR Data Analysis Plug-ins
   * *ps_check_throughput* - Query pSB MA for BWCTL results between two endpoints for given time period. Based on plug-in configuration, possible state changes occur if:
@@ -62,8 +66,10 @@ https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_h
    * Make sure there are results for all host pairs in the pSB configuration file 
    * Throughput falls below a statically configured value 
    * Throughput change deemed significant using algorithm such as Holt-Winters or plateau
-    * Status: Done
+    * Status:
     * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_throughput.pl
+    * Usage:  {{{-s|--service <service-url> -w|--warning <threshold> -c|--critical <threshold>}}}
+
   * *ps_check_owdelay* - Query pSB MA for OWAMP results between two endpoints for given time period. Based on plug-in configuration, possible state changes occur if:
    * No results returned or less results than expected returned (i.e. missing test)
    * Test is not bidirectional
@@ -76,19 +82,30 @@ https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_h
    * Duplicates not within threshold
    * TTL not within threshold
    * TTL changes
-    * Status: Done
+    * Status:
     * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_owdelay.pl
+    * Usage: {{{-s|--service <service-url> -w|--warning <threshold> -c|--critical <threshold>}}}
 
   * *ps_check_pingdelay* - Query Pinger MA to get results between two endpoints for given time period.
    * Status:Done
    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_pinger.pl
+   * Usage: {{{-u|--url <service-url> -s|source=s <source> -d|destination <destination> -k|rttType<RTT type - minRtt,maxRtt,meanRtt> -f|function <function min,max,mean to analyze RTT> -r|--range <time-interval> -w|--warning <threshold> -c|--critical <threshold> }}}
 
- * *ps_check_interfaces* - Query SNMP MA to get interface statistics.
+ * *ps_check_snmp* - Query SNMP MA to get interface statistics.
   * Make sure that results exist for a list of key interfaces
    * Status: Done
    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_snmp.pl
+   * Usage: {{{-u|--snmpMAURL <pinger-MA-URL> -i|--interface<interface-address> -t|--timeInterval<time-interval-in-minutes> -d|--direction<traffic-direction> -w|--warning <warning-threshold> -c|--critical <critical-threshold> }}}
 
  * perfSONAR GUI Plug-ins
   * *ps_check_serv_directory* - Query JSON of service directory page to make sure its displaying correct results.
-   * Status:
+   * Compare against a file containing key known services that should be up
+   * Status: not started
    * Code: 
+
+== Other notes: ==
+
+Most checks should alert if query takes too long.
+
+Need to be able to integrate these into the NPToolkit, should be able to work with existing Nagios infrastructure,
+or use a pre-configured Nagios configuration on the NPToolkit itself.
