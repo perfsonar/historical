@@ -34,7 +34,7 @@ This page contains information for planning the development of a new set of Nagi
      * Test is not bidirectional
      * Throughput change deemed significant using algorithm such as Holt-Winters or plateau
     * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_throughput.pl
-    * Usage:  {{{-s|--service <service-url> -w|--warning <threshold> -c|--critical <threshold>}}}
+    * Usage:  {{{-u|--url <service-url> -s|--source <source-addr> -d|--destination <dest-addr> -r <number-seconds-in-past> -w|--warning <threshold> -c|--critical <threshold>}}}
   * *ps_check_owdelay* - Query pSB MA for OWAMP results between two endpoints for given time period. State changes if minimum delay falls below a specified value.
     * Status: Ready for testing
     * Future Features:  
@@ -43,7 +43,7 @@ This page contains information for planning the development of a new set of Nagi
      * Make sure there are results for all host pairs in the pSB configuration file 
      * Look at loss statistics
     * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_owdelay.pl
-    * Usage: {{{-s|--service <service-url> -w|--warning <threshold> -c|--critical <threshold>}}}
+    * Usage: {{{-u|--url <service-url> -s|--source <source-addr> -d|--destination <dest-addr> -r <number-seconds-in-past> -w|--warning <threshold> -c|--critical <threshold>}}}
   * *ps_check_pingdelay* - Query Pinger MA to get results between two endpoints for given time period.
    * Status: Ready for testing
    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_pinger.pl
