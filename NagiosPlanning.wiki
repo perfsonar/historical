@@ -86,7 +86,7 @@ _NOTE: Functionality of these plug-ins should be replaced by the ones listed abo
    * https://svn.internet2.edu/svn/perfSONAR-PS/branches/CTP/nagios/check_db.pl
 
 
-== Other notes: ==
+== Other notes/issues: ==
  * Most checks should alert if query takes too long. The timeout functionality in Nagios may be enough for this.
 
  * Need to be able to integrate these into the NPToolkit, should be able to work with existing Nagios infrastructure, or use a pre-configured Nagios configuration on the NPToolkit itself.
@@ -96,3 +96,5 @@ _NOTE: Functionality of these plug-ins should be replaced by the ones listed abo
  * which "Future Features" are highest priority?
 
  * Are there additional features (either listed above or that people think of) that we need to add before including these in a release?
+
+ * which of these should be enabled (and with what options) on the Toolkit by default?
