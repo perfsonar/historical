@@ -35,7 +35,8 @@ This page lists use-cases for perfSONAR clients, and provides for each a high-le
 *Example Applications:* Web page (or other interactive UI) that allows user to select tests
 
 *Additional notes:*
- * Lookup could be too broad in this situation if specific MA not provided. 
+ * Lookup could be too broad in this situation if specific MA not provided.
+ * IMHO - Some amount of topological reference should be required. And Organization, Community, Domain, Subnet... *something*. jwb
  
 
 == Use Case #3: Return X minute average utilization for Y time period on interface ==
@@ -51,6 +52,7 @@ This page lists use-cases for perfSONAR clients, and provides for each a high-le
 *Example Applications:* Utilization graphs, Weathermap, Nagios Plug-in
 
 *Additional notes:*
+  * Wondering how you would expect this to work if requested resolution is not there, but a higher resolution dataset is available that could be sampled... Is this part of the query for data, so it is not found? Or... Should the API search for 5 minutes and shorter and resample for you?
 
 == Use Case #4: List all router interfaces with collected SNMP data ==
 *Input (Required):*
@@ -67,6 +69,7 @@ This page lists use-cases for perfSONAR clients, and provides for each a high-le
 
 *Additional notes:*
  * Lookup could be too broad in this situation if specific MA not provided.
+ * Agree that lookup would be too broad, but don't like the idea that a specific MA should be required. Again, what if some kind of topological/contextual reference is required: domain, subnet, organization, community...
 
 
 == Use Case #5: Trigger bwctl test via a web GUI ==
@@ -91,5 +94,3 @@ To only present in the GUI options that are supported by that MA, query for meta
 
 === Other Use Cases that may or may not affect the API ===
  * ask a service for data, and if you don't have it, run a test
-
-
