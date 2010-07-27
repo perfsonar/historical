@@ -6,6 +6,17 @@
 
 Telecons occur roughly every two weeks on Monday at 5:00pm EDT.
 
+ * Dial-in numbers:
+   * +1-734-615-7474 (Please use if you do not pay for Long Distance)
+   * +1-866-411-0013 (toll free US/Canada Only)
+ * Access code:	0125784
+
+*Next call*: 2 August 2010 -- _Tentative_
+
+Notes from previous calls:
+ * [http://code.google.com/p/perfsonar-ps/wiki/20100607APICall 07 June 2010]
+ * [http://code.google.com/p/perfsonar-ps/wiki/20100614APICall 14 June 2010]
+
 == Goals ==
 
 A standard, straightforward client API specification would be useful to users of perfSONAR. It could be implemented in a variety of languages.
