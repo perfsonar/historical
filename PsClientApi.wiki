@@ -2,6 +2,10 @@
 
 = Introduction =
 
+== Coordination ==
+
+Telecons occur roughly every two weeks on Monday at 5:00pm EDT.
+
 == Goals ==
 
 A standard, straightforward client API specification would be useful to users of perfSONAR. It could be implemented in a variety of languages.
