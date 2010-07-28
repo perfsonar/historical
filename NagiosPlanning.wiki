@@ -2,32 +2,32 @@ This page contains information for planning the development of a new set of Nagi
 
 == Plug-Ins==
  * perfSONAR Infrastructure Checks
-  * *ps_check_gls* - Query one or more gLS to count registered hLSes that match certain parameters. Parameters specified can be one or more of the following: 
+  * *check_gls* - Query one or more gLS to count registered hLSes that match certain parameters. Parameters specified can be one or more of the following: 
     # hLS service URL(s)
     # keyword(s)
     # type of data stored in services registered with a particular hLS (bwctl, owamp, etc)
    * Status: Ready for testing
    * Future Features:
-   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_gls.pl
-   * Usage: {{{-v|--verbose -h|--hintsURL <gls-hints-URL> -s|--serviceglsURL <serviceglsURL> -f|--hlsurlfile <hls url file> -k|--keyword <keyword search> -t|--type <type of service> -w|--warning <warning-threshold> -c|--critical <critical-threshold> -i|--initialConfig <config-file path>}}}                     
-  * *ps_check_hls* - Verify that that services such as an MA are registered in an hLS. The hLS(s) can be specified explicitly or the gLS infrastructure can be used if we don't care which hLS has the data. Services can be searched for based on URL, event type or keyword.
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_gls.pl
+   * Usage: {{{-v|--verbose -h|--hintsURL <gls-hints-URL> -u|--url <serviceglsURL> -f|--hlsurlfile <hls url file> -k|--keyword <keyword search> -t|--type <type of service> -w|--warning <warning-threshold> -c|--critical <critical-threshold> -i|--initialConfig <config-file path>}}}                     
+  * *check_hls* - Verify that that services such as an MA are registered in an hLS. The hLS(s) can be specified explicitly or the gLS infrastructure can be used if we don't care which hLS has the data. Services can be searched for based on URL, event type or keyword.
    * Status: Ready for testing
    * Future Features:
-   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_hls.pl
-   * Usage: {{{-s|--service <HLS-service-url> -t|--type <service-type> -k|--keyword <keyword search> -g|--glsMode <glsURl> -h|--hintsURL<hintsURL> -i|--initialConfig <Config file for service mapping> -w|--warning <threshold> -c|--critical <threshold>| -f|--hlsurlfile <hls url file>}}}
-  * *ps_check_topology* - Check if topology is registered and state change if significant change in number of nodes
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_hls.pl
+   * Usage: {{{-u|--url <HLS-service-url> -t|--type <service-type> -k|--keyword <keyword search> -g|--glsMode <glsURl> -h|--hintsURL<hintsURL> -i|--initialConfig <Config file for service mapping> -w|--warning <threshold> -c|--critical <threshold>| -f|--hlsurlfile <hls url file>}}}
+  * *check_topology* - Check if topology is registered and state change if significant change in number of nodes
     * Future Features:
       * make sure topology has been updated recently
     * Status: Ready for testing
-    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_topology.pl
-   * Usage: {{{-d|--domainName<domain-name> -u|--topologyURL <topology-service-URL> -i|--initialconfig<initial config file> -w|--warning <warning-threshold> -c|--critical <critical-threshold> -n|--namespace <namespace>}}}
+    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_topology.pl
+   * Usage: {{{-d|--domainName<domain-name> -u|--url <topology-service-URL> -i|--initialconfig<initial config file> -w|--warning <warning-threshold> -c|--critical <critical-threshold> -n|--namespace <namespace>}}}
   * *check_perfSONAR.pl* - Sends an EchoRequest or SetupDataRequest and sets return value based on whether the request returns "success" or an error code. It has default Echo and SetupData requests but can also provide a custom request in a file as long as it is of the aforementioned types.
     * Status: Complete (same version that Jason wrote awhile back)
     * Future Features:
     * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_perfSONAR.pl
     * Usage: {{{check_perfSonar.pl URI [--server --port --endpoint] [--template #] [--interfaceIP=xxx.xxx.xxx.xxx --hostname=xxx.yyy.zzz --interfaceName=xo-0/0/0.0] [FILE]}}}
  * perfSONAR Data Analysis Plug-ins
-  * *ps_check_throughput* - Query pSB MA for BWCTL results and alert based on the average of the throughput values returned. You can query for all results in an MA, all results involving a particular endpoint, or all results between two endpoints. You can also specify whether you want the test to look at bidirectional data and alert if tests are not bidirectional. Examples below alert WARNING when average throughput falls below 1Gbps and alert CRITICAL when bandwidth falls below 500Mbps:
+  * *check_throughput* - Query pSB MA for BWCTL results and alert based on the average of the throughput values returned. You can query for all results in an MA, all results involving a particular endpoint, or all results between two endpoints. You can also specify whether you want the test to look at bidirectional data and alert if tests are not bidirectional. Examples below alert WARNING when average throughput falls below 1Gbps and alert CRITICAL when bandwidth falls below 500Mbps:
      * Check unidirectional results from bnl-pt1.es.net(198.124.238.38) to sunn-pt1.es.net(198.129.254.58).
       {{{check_throughput.pl -u http://bnl-pt1.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 1: -c .5: -s 198.124.238.38 -d 198.129.254.58}}}      
      * Check bidirectional results from bnl-pt1.es.net(198.124.238.38) to sunn-pt1.es.net(198.129.254.58). Alert if there is no data in either of the directions (i.e. the test is not bidirectional).
@@ -47,7 +47,7 @@ This page contains information for planning the development of a new set of Nagi
      * Throughput change deemed significant using algorithm such as Holt-Winters or plateau
     * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_throughput.pl
     * Usage:  {{{-u|--url <service-url> -s|--source <source-addr> -d|--destination <dest-addr> -r <number-seconds-in-past> -b|--bidirectional -w|--warning <threshold> -c|--critical <threshold>}}}
-  * *ps_check_owdelay* - Query pSB MA for OWAMP results and alert if average minimum delay or average loss falls below a certain threshold. You can query for all results in an MA, all results involving a particular endpoint, or all results between two endpoints. You can also specify whether you want the test to look at bidirectional data and alert if tests are not bidirectional. Examples:
+  * *check_owdelay* - Query pSB MA for OWAMP results and alert if average minimum delay or average loss falls below a certain threshold. You can query for all results in an MA, all results involving a particular endpoint, or all results between two endpoints. You can also specify whether you want the test to look at bidirectional data and alert if tests are not bidirectional. Examples:
    * Check unidirectional results from bnl-owamp.es.net(198.124.238.49) to sunn-owamp.es.net(198.129.254.78).
     * _Average Minumum Delay (Warning if above 45ms, critical if above 60ms)_: 
       {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w :45 -c 60: -s 198.124.238.49 -d 198.129.254.78}}}
@@ -88,17 +88,17 @@ This page contains information for planning the development of a new set of Nagi
     * Look at buckets and get statistical measures (i.e. max, median, iqr, etc)
    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_owdelay.pl
    * Usage: {{{-u|--url <service-url> -s|--source <source-addr> -d|--destination <dest-addr> -r <number-seconds-in-past> -b|--bidirectional -l|--loss-w|--warning <threshold> -c|--critical <threshold>}}}
-  * *ps_check_pingdelay* - Query Pinger MA to get results between two endpoints for given time period.
+  * *check_pinger* - Query Pinger MA to get results between two endpoints for given time period.
    * Status: Ready for testing
-   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_pinger.pl
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_pinger.pl
    * Usage: {{{-u|--url <service-url> -s|source=s <source> -d|destination <destination> -k|rttType<RTT type - minRtt,maxRtt,meanRtt> -f|function <function min,max,mean to analyze RTT> -r|--range <time-interval> -w|--warning <threshold> -c|--critical <threshold> }}}
-  * *ps_check_snmp* - Query SNMP MA to get interface statistics.
+  * *check_snmp* - Query SNMP MA to get interface statistics.
    * Make sure that results exist for a list of key interfaces
     * Status: Ready for testing
-    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_snmp.pl
-    * Usage: {{{-u|--snmpMAURL <pinger-MA-URL> -i|--interface<interface-address> -t|--timeInterval<time-interval-in-minutes> -d|--direction<traffic-direction> -w|--warning <warning-threshold> -c|--critical <critical-threshold> }}}
+    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_snmp.pl
+    * Usage: {{{-u|--url <pinger-MA-URL> -i|--interface<interface-address> -t|--timeInterval<time-interval-in-minutes> -d|--direction<traffic-direction> -w|--warning <warning-threshold> -c|--critical <critical-threshold> }}}
  * perfSONAR GUI Plug-ins
-  * *ps_check_serv_directory* - Query JSON of service directory page to make sure its displaying correct results.
+  * *check_serv_directory* - Query JSON of service directory page to make sure its displaying correct results.
    * Compare against a file containing key known services that should be up
    * Status: not started
    * Code: 
@@ -112,7 +112,7 @@ _NOTE: Functionality of these plug-ins should be replaced by the ones listed abo
    * _psb-csv.pl_ queries iperf data using XML interface and returns data in CSV format
    * _check_psb_ looks at average bandwidth and number of tests in CSV data and sets return value based on whether it meets a certain threshold
   * _Where is the code_
-   * ESnet cfengine trunk (to be replaced by new ps_check_throughput)
+   * ESnet cfengine trunk (to be replaced by new check_throughput)
  # *check_topology*
   * _What it does_ - Queries topology services and checks the number of bytes returned against a threshold
   * _How it works_
@@ -120,7 +120,7 @@ _NOTE: Functionality of these plug-ins should be replaced by the ones listed abo
    * _client.pl_ sends XML request to topology service to fetch entire topology
    * _check_topology_ looks at topology and sets return value based on the number of bytes
   * _Where is the code_
-   * ESnet cfengine trunk (to be replaced by new ps_check_topology)
+   * ESnet cfengine trunk (to be replaced by new check_topology)
  # *check_db.pl*
   * _What it does_ - Queries a pSB MySQL database for owamp results between mesh of hosts in last minute and checks jitter, maximum delay and loss rate.
   * _How it works_
