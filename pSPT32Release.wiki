@@ -42,12 +42,12 @@ Beta, and RC:
 || Milestone Base 3 || June 11th || <font color="green">_*DONE - 6/11*_</font> ||
 || Milestone Base 4 || ~~June 11th~~ June 16th || <font color="green">_*DONE - 6/16*_</font> ||
 || Milestone Boot CD || June 11th || <font color="green">_*DONE - 6/11*_</font> ||
-|| Milestone LiveCD 1 || Week of 6/14 (Development), Week of 6/21 (Testing) || <font color="yellow">_*IN PROGRESS - 6/21*_</font> ||
-|| Milestone LiveCD 2 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone LiveCD 3 || Post Joint Techs || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone Install Disk 1 || ~~Week of 6/14~~ ~~Week of 6/21~~ Week of 6/28  || <font color="yellow">_*IN PROGRESS- 6/22*_</font> ||
-|| Milestone Install Disk 2 || ~~Week of 6/28~~ Week of 7/5 || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone RC 1 || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone LiveCD 1 || Week of 6/14 (Development), Week of 6/21 (Testing) || <font color="green">_*DONE - 6/30*_</font> ||
+|| Milestone LiveCD 2 || Week of 8/2 || <font color="yellow">_*IN PROGRESS - 7/28*_</font> ||
+|| Milestone LiveCD 3 || Week of 8/16 || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone Install Disk 1 || ~~Week of 6/14~~ ~~Week of 6/21~~ ~~Week of 6/28~~ Week of 7/26 || <font color="yellow">_*IN PROGRESS- 7/28*_</font> ||
+|| Milestone Install Disk 2 || ~~Week of 6/28~~ Week of 8/16 || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone RC 1 || Week of 8/23 || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone RC 2 || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone Final || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
@@ -156,7 +156,7 @@ There are no subtasks associated with this milestone.  Use an existing CentOS bo
 === Milestone LiveCD 1 ===
 
 || *Summary* || Produce an initial Live CD instance that will save configuration/data to the backing store  ||
-|| *Status* || <font color="Yellow">_*IN PROGRESS - 6/21*_</font> || 
+|| *Status* || <font color="green">_*DONE - 6/30*_</font> || 
 || *Est. Completion (Development)* || Week of 6/14 || 
 || *Est. Completion (Testing)* || Week of 6/21 ||
 || *Owner* || Aaron/Jason ||
@@ -176,7 +176,7 @@ The following are subtasks listed out for tracking purposes:
    * ~~Package tool to create backing store~~ - <font color="green">_*DONE*_</font>
  * ~~Migrate any changes to Base RPMs or kickstart to the Base~~ - <font color="green">_*DONE*_</font>
  * ~~Fix any issues encountered by testers for Milestone 4~~ - <font color="green">_*DONE*_</font>
- * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit - <font color="yellow">_*IN PROGRESS*_</font>
+ * ~~Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit~~ - <font color="green">_*DONE*_</font>
 
 Issues held over from Milestone Base 4:
 
@@ -211,8 +211,8 @@ New issues from Milestone Live CD 1:
 === Milestone LiveCD 2 ===
 
 || *Summary* || Produce a Live CD instance that will upgrade an existing Knoppix-based installation  ||
-|| *Status* || <font color="yellow">_*IN PROGRESS*_</font> || 
-|| *Est. Completion* || Post Joint Techs || 
+|| *Status* || <font color="yellow">_*IN PROGRESS - 7/28*_</font> || 
+|| *Est. Completion* || Week of 8/2 || 
 || *Owner* || Aaron ||
 || *Depends* || Milestone LiveCD 1 ||
 
@@ -221,7 +221,7 @@ The following are subtasks listed out for tracking purposes:
  * Produce tools capable of upgrading the existing backing store configuration/data to the new approach - <font color="yellow">_*IN TESTING*_</font>
    * See [http://code.google.com/p/perfsonar-ps/wiki/pSPT32_DevNotes#Upgrade_Path here] for some specifics on how upgrades might be handled
  * Package the above tools and include them in the Live CD kickstart - <font color="yellow">_*IN TESTING*_</font>
- * Collect user feedback from the alpha testers - <font color="red">_*NOT STARTED*_</font>
+ * Collect user feedback from the alpha testers - <font color="yellow">_*IN PROGRESS - 7/28*_</font>
  * Fix any issues encountered by testers - <font color="red">_*NOT STARTED*_</font>
  * Migrate changes to the Base packages/kickstart as needed - <font color="red">_*NOT STARTED*_</font>
  * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit - <font color="red">_*NOT STARTED*_</font>
@@ -240,14 +240,14 @@ In progress issues from Milestone Base 4, Live CD 1:
 || empty resolve.conf, domino effect to the LS cache daemon and NTP || watching for other instances || <font color="red">_*NOT STARTED*_</font> ||
 || LS Cache - won't need to 'update' this before release due to new cache service || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || weirdness with the disk configuration script.  If the disk has no partition info (but had an ext3 fs on it before the partition table was wiped), the script detects the raw device with 'unknown' partition type. || The script uses "blkid" to figure out the FS type, and there seem to be some combination of partition voodoo that prevents blkid from recognizing proper ext3 partitions. The only way to truly figure out whether it's ext3 or not is to try and mount the partition.  Need a FAQ entry || <font color="red">_*NOT STARTED*_</font> ||
-|| The net installation defaults to DHCP, making it difficult to install on non-DHCP networks || <font color="green">_*DONE*_</font> ||
+|| The net installation defaults to DHCP, making it difficult to install on non-DHCP networks || Changed kickstart option || <font color="green">_*DONE*_</font> ||
 || TBD || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
 === Milestone LiveCD 3 ===
 
 || *Summary* || Based on user feedback and testing, firm up the Live CD.  Migrate changes to the Base packages/kickstart as needed  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
-|| *Est. Completion* || Post Joint Techs || 
+|| *Est. Completion* || Week of 8/16 || 
 || *Owner* || Aaron ||
 || *Depends* || Milestone LiveCD 2 ||
 
@@ -261,8 +261,8 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Install Disk 1 ===
 
 || *Summary* || Produce an initial installation ISO for testing  ||
-|| *Status* || <font color="yellow">_*IN PROGREESS*_</font> || 
-|| *Est. Completion* || ~~Week of 6/14~~ ~~Week of 6/21~~ Week of 6/28 || 
+|| *Status* || <font color="yellow">_*IN PROGREESS - 7/28*_</font> || 
+|| *Est. Completion* || ~~Week of 6/14~~ ~~Week of 6/21~~ ~~Week of 6/28~~ Week of 7/26 || 
 || *Owner* || Eric ||
 || *Depends* || Milestone Base 4 ||
 
@@ -281,7 +281,7 @@ The following are subtasks listed out for tracking purposes:
 
 || *Summary* || Based on user feedback and testing, firm up the installation CD  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
-|| *Est. Completion* || ~~Week of 6/28~~ Week of 7/5 || 
+|| *Est. Completion* || ~~Week of 6/28~~ ~~Week of 7/5~~ Week of 8/16 || 
 || *Owner* || Eric ||
 || *Depends* || Milestone Install Disk 1 ||
 
