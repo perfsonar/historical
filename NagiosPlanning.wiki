@@ -1,7 +1,7 @@
 This page contains information for planning the development of a new set of Nagios plug-ins. 
 
 == Plug-Ins==
- * perfSONAR Service Health Plug-ins
+ * perfSONAR Infrastructure Checks
   * *ps_check_gls* - Query one or more gLS to count registered hLSes that match certain parameters. Parameters specified can be one or more of the following: 
     # hLS service URL(s)
     # keyword(s)
@@ -27,23 +27,67 @@ This page contains information for planning the development of a new set of Nagi
     * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_perfSONAR.pl
     * Usage: {{{check_perfSonar.pl URI [--server --port --endpoint] [--template #] [--interfaceIP=xxx.xxx.xxx.xxx --hostname=xxx.yyy.zzz --interfaceName=xo-0/0/0.0] [FILE]}}}
  * perfSONAR Data Analysis Plug-ins
-  * *ps_check_throughput* - Query pSB MA for BWCTL results between two endpoints for given time period. 
+  * *ps_check_throughput* - Query pSB MA for BWCTL results and alert based on the average of the throughput values returned. You can query for all results in an MA, all results involving a particular endpoint, or all results between two endpoints. You can also specify whether you want the test to look at bidirectional data and alert if tests are not bidirectional. Examples below alert WARNING when average throughput falls below 1Gbps and alert CRITICAL when bandwidth falls below 500Mbps:
+     * Check unidirectional results from bnl-pt1.es.net(198.124.238.38) to sunn-pt1.es.net(198.129.254.58).
+      {{{check_throughput.pl -u http://bnl-pt1.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 1: -c .5: -s 198.124.238.38 -d 198.129.254.58}}}      
+     * Check bidirectional results from bnl-pt1.es.net(198.124.238.38) to sunn-pt1.es.net(198.129.254.58). Alert if there is no data in either of the directions (i.e. the test is not bidirectional).
+      {{{check_throughput.pl -u http://bnl-pt1.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 1: -c .5: -s 198.124.238.38 -d 198.129.254.58 -b}}}
+     * Check throughput for all outgoing tests from bnl-pt1.es.net(198.124.238.38).
+      {{{check_throughput.pl -u http://bnl-pt1.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 1: -c .5: -s 198.124.238.38}}}
+     * Check throughput for all incoming tests to bnl-pt1.es.net(198.124.238.38).
+      {{{check_throughput.pl -u http://bnl-pt1.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 1: -c .5: -d 198.124.238.38}}}
+     * Check throughput for all outgoing AND incoming tests from/to bnl-pt1.es.net(198.124.238.38). Also alert if any of the matched tests do not have data in both directions. _(NOTE: YOU ONLY NEED TO USE ONE OF THE COMMANDS BELOW. BOTH THE COMMANDS BELOW ARE EQUIVALENT AND RESULT IN THE EXACT SAME CHECK)_
+      {{{check_throughput.pl -u http://bnl-pt1.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 1: -c .5: -s 198.124.238.38 -b}}} *OR* {{{check_throughput.pl -u http://bnl-pt1.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 1: -c .5: -d 198.124.238.38 -b}}}
+     * Check throughput for all tests in the given MA.
+      {{{check_throughput.pl -u http://bnl-pt1.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 1: -c .5:}}}
+     * Check throughput for all tests in the given MA. Alert if any of the tests do not have data in both directions
+      {{{check_throughput.pl -u http://bnl-pt1.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 1: -c .5: -b}}}
     * Status: Ready for testing
     * Future Features:
-     * Make sure there are results for all host pairs in the pSB configuration file 
-     * Test is not bidirectional
      * Throughput change deemed significant using algorithm such as Holt-Winters or plateau
     * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_throughput.pl
-    * Usage:  {{{-u|--url <service-url> -s|--source <source-addr> -d|--destination <dest-addr> -r <number-seconds-in-past> -w|--warning <threshold> -c|--critical <threshold>}}}
-  * *ps_check_owdelay* - Query pSB MA for OWAMP results between two endpoints for given time period. State changes if minimum delay falls below a specified value.
-    * Status: Ready for testing
-    * Future Features:  
-     * Look at buckets and get statitical measures (i.e. max, median, iqr, etc)
-     * Test is not bidirectional
-     * Make sure there are results for all host pairs in the pSB configuration file 
-     * Look at loss statistics
-    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_owdelay.pl
-    * Usage: {{{-u|--url <service-url> -s|--source <source-addr> -d|--destination <dest-addr> -r <number-seconds-in-past> -w|--warning <threshold> -c|--critical <threshold>}}}
+    * Usage:  {{{-u|--url <service-url> -s|--source <source-addr> -d|--destination <dest-addr> -r <number-seconds-in-past> -b|--bidirectional -w|--warning <threshold> -c|--critical <threshold>}}}
+  * *ps_check_owdelay* - Query pSB MA for OWAMP results and alert if average minimum delay or average loss falls below a certain threshold. You can query for all results in an MA, all results involving a particular endpoint, or all results between two endpoints. You can also specify whether you want the test to look at bidirectional data and alert if tests are not bidirectional. Examples:
+   * Check unidirectional results from bnl-owamp.es.net(198.124.238.49) to sunn-owamp.es.net(198.129.254.78).
+    * _Average Minumum Delay (Warning if above 45ms, critical if above 60ms)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w :45 -c 60: -s 198.124.238.49 -d 198.129.254.78}}}
+    * _Average Loss (WARNING if loss > 0, CRITICAL if > 1 packet lost per minute)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 0 -c :1 -s 198.124.238.49 -d 198.129.254.78 -l}}}
+   * Check bidirectional results from bnl-owamp.es.net(198.124.238.49) to sunn-owamp.es.net(198.129.254.78). Alert if there is no data in either of the directions (i.e. the test is not bidirectional).
+    * _Average Minumum Delay (Warning if above 45ms, critical if above 60ms)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w :45 -c 60: -s 198.124.238.49 -d 198.129.254.78 -b}}}
+    * _Average Loss (WARNING if loss > 0, CRITICAL if > 1 packet lost per minute)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 0 -c :1 -s 198.124.238.49 -d 198.129.254.78 -l -b}}}
+   * Check results for all outgoing tests from bnl-owamp.es.net(198.124.238.49).
+    * _Average Minumum Delay (Warning if above 45ms, critical if above 60ms)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w :45 -c 60: -s 198.124.238.49}}}
+    * _Average Loss (WARNING if loss > 0, CRITICAL if > 1 packet lost per minute)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 0 -c :1 -s 198.124.238.49 -l}}}
+   * Check results for all incoming tests to bnl-owamp.es.net(198.124.238.49).
+    * _Average Minumum Delay (Warning if above 45ms, critical if above 60ms)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w :45 -c 60: -d 198.124.238.49}}}
+    * _Average Loss (WARNING if loss > 0, CRITICAL if > 1 packet lost per minute)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 0 -c :1 -d 198.124.238.49 -l}}}
+   * Check results for all outgoing AND incoming tests from/to bnl-owamp.es.net(198.124.238.49). Also alert if any of the matched tests do not have data in both directions.
+    * _Average Minumum Delay (Warning if above 45ms, critical if above 60ms)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w :45 -c 60: -s 198.124.238.49 -b}}} *OR* {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w :45 -c 60: -d 198.124.238.49 -b}}}
+    * _Average Loss (WARNING if loss > 0, CRITICAL if > 1 packet lost per minute)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 0 -c :1 -s 198.124.238.49 -l -b}}} *OR* {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 0 -c :1 -d 198.124.238.49 -l -b}}}
+   * Check results for all tests in the given MA.
+    * _Average Minumum Delay (Warning if above 45ms, critical if above 60ms)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w :45 -c 60:}}}
+    * _Average Loss (WARNING if loss > 0, CRITICAL if > 1 packet lost per minute)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 0 -c :1 -l}}}
+   * Check results for all tests in the given MA. Alert if any of the tests do not have data in both directions
+    * _Average Minumum Delay (Warning if above 45ms, critical if above 60ms)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w :45 -c 60: -b}}}
+    * _Average Loss (WARNING if loss > 0, CRITICAL if > 1 packet lost per minute)_: 
+      {{{check_owdelay.pl -u http://bnl-owamp.es.net:8085/perfSONAR_PS/services/pSB -r 3600 -w 0 -c :1 -l -b}}}
+   * Status: Ready for testing
+   * Future Features:  
+    * Look at buckets and get statistical measures (i.e. max, median, iqr, etc)
+   * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/check_owdelay.pl
+   * Usage: {{{-u|--url <service-url> -s|--source <source-addr> -d|--destination <dest-addr> -r <number-seconds-in-past> -b|--bidirectional -l|--loss-w|--warning <threshold> -c|--critical <threshold>}}}
   * *ps_check_pingdelay* - Query Pinger MA to get results between two endpoints for given time period.
    * Status: Ready for testing
    * Code: https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Shared/client/nagios/ps_check_pinger.pl
