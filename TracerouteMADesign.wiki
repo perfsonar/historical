@@ -306,44 +306,12 @@ NOAGENT
 
 == On-demand Traceroute ==
 === Description ===
-This function will accept requests from clients to run traceroutes. It will provide a simple JSON interface to describe the tests to run, run the test and publish it to the MA. One open issue is whether the first implementation should implement a simple authentication schema (i.e. HTTP AUTH) or rely on external IP ACLs.
+This function will accept requests from clients to run traceroutes. It will provide an XML interface to describe the tests to run, run the test and publish it to the MA. One open issue is whether the first implementation should implement a simple authentication schema (i.e. HTTP AUTH) or rely on external IP ACLs.
 
 === Traceroute Request Interface ===
 
-There are multiple options on this interface as there seems to be multiple thoughts on how Measurement Points (MPs) are implemented. I'll outline them below and they should be discussed as a group:
+The on-demand traceroute will be implemented  using a SetupDataRequest with a startTime specified as now.
 
-1. Use "MeasurementRequest" and reponse message as described in the schema documents here: [http://packrat.internet2.edu/~aaron/perfsonar-clmp/schema/tracerouteRequest.rnc Request] and [http://packrat.internet2.edu/~aaron/perfsonar-clmp/schema/tracerouteResponse.rnc Response]
-
-*Example Request*
-{{{
-<nmwg:message type="MeasurementRequest"
-   id="msg1"
-       xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
-       xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
-       xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/">
-
-
-    <nmwg:metadata id="traceroutemeta1">
-        <traceroute:subject id="tracesub1">
-            <nmwgt:endPointPair>
-                <nmwgt:src type="hostname" value="lbl-pt1.es.net"/>
-                <nmwgt:dst type="hostname" value="bnl-pt1.es.net"/>
-            </nmwgt:endPointPair>      
-        </traceroute:subject>
-        <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0/</nmwg:eventType>
-        <traceroute:parameters id="trparam1">
-            <nmwg:parameter name="maxTtl">30</nmwg:parameter>
-            <nmwg:parameter name="waitTime">1</nmwg:parameter>         
-        </traceroute:parameters>   
-    </nmwg:metadata> 
-    
-   <nmwg:data id="1" metadataIdRef="tracerouteRequest" />
-</nmwg:message>
-}}}
-
-*
-
-2. Use a SetupDataRequest with a time specified as now
 *Example Request*
 {{{
 <nmwg:message type="SetupDataRequest"
@@ -371,74 +339,7 @@ There are multiple options on this interface as there seems to be multiple thoug
 </nmwg:message>
 }}}
 
-*
-
-
-
-3. Custom JSON interface
-
-*Request*
-{{{
-
-{
-    traceroutes: [
-        {
-            src:  "",
-            dest: "",
-            firstTTL: NUM,
-            maxTTL: NUM,
-           "waitTime": NUM,
-           "pause": NUM,
-           "packetSize": NUM,
-           "arguments": "", 
-           "valueUnits": "", 
-           "numBytes": NUM, 
-         },
-         ....
-}
-
-}}}
-
-*Response*
-{{{
-
-{
-    tracerouteResults: [
-        {
-            src:  "",
-            dest: "",
-            firstTTL: NUM,
-            maxTTL: NUM,
-           "waitTime": NUM,
-           "pause": NUM,
-           "packetSize": NUM,
-           "arguments": "", 
-           "valueUnits": "", 
-           "numBytes": NUM, 
-           "results": [
-                {
-                  timestamp: NUM,
-                  hops: [
-                    {
-                        ttl: NUM, 
-                        delay: NUM,
-                        numBytes: NUM
-                        address: "",
-                        addressType: ""
-                    },
-                    ....
-                  ]
-                },
-               ....
-           ]
-         },
-         ....
-}
-
-}}}
-
 == Open Issues ==
- # What is the best data format for the MP interface?
  # Should we adjust the traceroute data format to look more like RFC 5388? IF yes should we include the XML format in the ietf namespace or should we create a perfSONAR namespace that uses the same information elements? Example of RFC 5388 XML below:
  
  {{{
