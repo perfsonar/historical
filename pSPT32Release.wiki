@@ -241,6 +241,9 @@ In progress issues from Milestone Base 4, Live CD 1:
 || LS Cache - won't need to 'update' this before release due to new cache service || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || weirdness with the disk configuration script.  If the disk has no partition info (but had an ext3 fs on it before the partition table was wiped), the script detects the raw device with 'unknown' partition type. || The script uses "blkid" to figure out the FS type, and there seem to be some combination of partition voodoo that prevents blkid from recognizing proper ext3 partitions. The only way to truly figure out whether it's ext3 or not is to try and mount the partition.  Need a FAQ entry || <font color="red">_*NOT STARTED*_</font> ||
 || The net installation defaults to DHCP, making it difficult to install on non-DHCP networks || Changed kickstart option || <font color="green">_*DONE*_</font> ||
+|| clicking on service graphs/throughput gives a blank page || could be logging related? investigating... || <font color="red">_*NOT STARTED*_</font> ||
+|| Timezone is reset to EDT on upgrade || Stored in a data file, may not be able to tell if this is changed... || <font color="red">_*NOT STARTED*_</font> ||
+|| certificate complaint in browsers (Error code: sec_error_reused_issuer_and_serial) || generate on first boot. It would need an init script or something || <font color="red">_*NOT STARTED*_</font> ||
 || TBD || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
 === Milestone LiveCD 3 ===
@@ -295,7 +298,7 @@ The following are subtasks listed out for tracking purposes:
 
 || *Summary* || Synchronize any changes to the Base necessitated by the Live CD or Install CD, and produce release candidates and documentation for each  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
-|| *Est. Completion* || xx/xx || 
+|| *Est. Completion* || Week of 8/23 || 
 || *Owner* || Aaron/Eric/Jason ||
 || *Depends* || Milestone Install Disk 2, Milestone LiveCD 3  ||
 
@@ -311,7 +314,7 @@ The following are subtasks listed out for tracking purposes:
 
 || *Summary* || Based on user feedback and testing, firm up the Live CD and Install CD  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
-|| *Est. Completion* || xx/xx || 
+|| *Est. Completion* || Week of 8/30 || 
 || *Owner* || Aaron/Eric/Jason ||
 || *Depends* || Milestone RC 1 ||
 
@@ -327,7 +330,7 @@ Milestone Release Candidate X: Open-ended.
 
 || *Summary* || Produce final versions of the Live CD, Install CD and documentation  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
-|| *Est. Completion* || xx/xx || 
+|| *Est. Completion* || Week of 9/6 || 
 || *Owner* || Aaron/Eric/Jason ||
 || *Depends* || Milestone RC 2 ||
 
