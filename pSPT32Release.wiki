@@ -45,11 +45,11 @@ Beta, and RC:
 || Milestone LiveCD 1 || Week of 6/14 (Development), Week of 6/21 (Testing) || <font color="green">_*DONE - 6/30*_</font> ||
 || Milestone LiveCD 2 || Week of 8/2 || <font color="yellow">_*IN PROGRESS - 7/28*_</font> ||
 || Milestone LiveCD 3 || Week of 8/16 || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone Install Disk 1 || ~~Week of 6/14~~ ~~Week of 6/21~~ ~~Week of 6/28~~ Week of 7/26 || <font color="yellow">_*IN PROGRESS- 7/28*_</font> ||
-|| Milestone Install Disk 2 || ~~Week of 6/28~~ Week of 8/16 || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone Install Disk 1 || ~~Week of 6/14~~ ~~Week of 6/21~~ ~~Week of 6/28~~ ~~Week of 7/26~~ TBD || <font color="pruple">_*STALLED - 7/29*_</font> ||
+|| Milestone Install Disk 2 || ~~Week of 6/28~~ ~~Week of 8/16~~ TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone RC 1 || Week of 8/23 || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone RC 2 || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone Final || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone RC 2 || Week of 8/30 || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone Final || Week of 9/6 || <font color="red">_*NOT STARTED*_</font> ||
 
 The following sections breakdown of each milestone of this release.
 
@@ -210,7 +210,7 @@ New issues from Milestone Live CD 1:
 
 === Milestone LiveCD 2 ===
 
-|| *Summary* || Produce a Live CD instance that will upgrade an existing Knoppix-based installation  ||
+|| *Summary* || Produce a Live CD instance that will upgrade an existing Knoppix-based installation.  Upgrade existing netinstall image.  ||
 || *Status* || <font color="yellow">_*IN PROGRESS - 7/28*_</font> || 
 || *Est. Completion* || Week of 8/2 || 
 || *Owner* || Aaron ||
@@ -218,6 +218,7 @@ New issues from Milestone Live CD 1:
 
 The following are subtasks listed out for tracking purposes:
 
+ * Upgrade netinstall image - <font color="yellow">_*IN TESTING*_</font>
  * Produce tools capable of upgrading the existing backing store configuration/data to the new approach - <font color="yellow">_*IN TESTING*_</font>
    * See [http://code.google.com/p/perfsonar-ps/wiki/pSPT32_DevNotes#Upgrade_Path here] for some specifics on how upgrades might be handled
  * Package the above tools and include them in the Live CD kickstart - <font color="yellow">_*IN TESTING*_</font>
@@ -248,7 +249,7 @@ In progress issues from Milestone Base 4, Live CD 1:
 
 === Milestone LiveCD 3 ===
 
-|| *Summary* || Based on user feedback and testing, firm up the Live CD.  Migrate changes to the Base packages/kickstart as needed  ||
+|| *Summary* || Based on user feedback and testing, firm up the Live CD and netinstall iso.  Migrate changes to the Base packages/kickstart as needed  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
 || *Est. Completion* || Week of 8/16 || 
 || *Owner* || Aaron ||
@@ -264,8 +265,8 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Install Disk 1 ===
 
 || *Summary* || Produce an initial installation ISO for testing  ||
-|| *Status* || <font color="yellow">_*IN PROGREESS - 7/28*_</font> || 
-|| *Est. Completion* || ~~Week of 6/14~~ ~~Week of 6/21~~ ~~Week of 6/28~~ Week of 7/26 || 
+|| *Status* || <font color="purple">_*STALLED - 7/29*_</font> || 
+|| *Est. Completion* || ~~Week of 6/14~~ ~~Week of 6/21~~ ~~Week of 6/28~~ ~~Week of 7/26~~ TBD || 
 || *Owner* || Eric ||
 || *Depends* || Milestone Base 4 ||
 
@@ -274,7 +275,8 @@ The following are subtasks listed out for tracking purposes:
  * ~~Generate a basic installation kickstart from the Base kickstart~~ - <font color="green">_*DONE*_</font>
  * ~~Migrate any changes to Base RPMs or kickstart to the Base~~ - <font color="green">_*DONE*_</font>
  * ~~Developing tools automating the build of the  ISO installation DVD~~ - <font color="green">_*DONE*_</font>
- * Fix build of the Perl Minor-Packages -  - <font color="yellow">_*IN_PROGRESS*_</font>
+ * Fix build of the Perl Minor-Packages - <font color="pruple">_*STALLED*_</font>
+   * Tom and Aaron to create a new RPM build procedure to mitigate this
  * Distribute the ISO to testers willing to test out the Toolkit - <font color="red">_*NOT STARTED*_</font>
 
 || *Issue* || *Synopsis* || *Status* ||
@@ -284,7 +286,7 @@ The following are subtasks listed out for tracking purposes:
 
 || *Summary* || Based on user feedback and testing, firm up the installation CD  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
-|| *Est. Completion* || ~~Week of 6/28~~ ~~Week of 7/5~~ Week of 8/16 || 
+|| *Est. Completion* || ~~Week of 6/28~~ ~~Week of 7/5~~ ~~Week of 8/16~~ TBD || 
 || *Owner* || Eric ||
 || *Depends* || Milestone Install Disk 1 ||
 
