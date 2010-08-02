@@ -2,7 +2,7 @@
 
 = Introduction =
 
-Python mockups of perfSONAR client API use-cases.
+Python mockups of perfSONAR client API use-cases (see PsClientApiUseCases).
 
 
 = Details =
