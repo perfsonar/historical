@@ -262,7 +262,7 @@ The LiveCD and Netinstall were distributed to the following people for external 
 || Ken Miller (PSU) || LiveCD/Netinstall || No || TBD ||
 || Scott Bertilson(UMin) || LiveCD/Netinstall || No || TBD ||
 || Gerry Creager (TAMU) || LiveCD/Netinstall || No || TBD ||
-|| Sandor Rozsa (Caltech/CERN) || LiveCD/Netinstall || No || TBD ||
+|| Sandor Rozsa (Caltech/CERN) || Netinstall || Pending || TBD ||
 || John Bigrow (BNL/USATLAS) || LiveCD/Netinstall || No || TBD ||
 || Philippe Laurens (MSU/USATLAS) || LiveCD/Netinstall || No || TBD ||
 || Robert Ball (UM/USATLAS) || LiveCD/Netinstall || No || TBD ||
@@ -271,7 +271,7 @@ The LiveCD and Netinstall were distributed to the following people for external 
 || Ezra Kissel (UDel) || LiveCD/Netinstall || No || TBD ||
 || Chris Small/Luke Fowler (IU GRNOC) || LiveCD/Netinstall || No || TBD ||
 || Jason Lee (NERSC) || LiveCD/Netinstall || No || TBD ||
-|| Chris Hawkinson (CENIC) || LiveCD/Netinstall || No || TBD ||
+|| Chris Hawkinson (CENIC) || LiveCD/Netinstall || Pending || TBD ||
 
 === Milestone LiveCD 3 ===
 
