@@ -211,7 +211,7 @@ New issues from Milestone Live CD 1:
 === Milestone LiveCD 2 ===
 
 || *Summary* || Produce a Live CD instance that will upgrade an existing Knoppix-based installation.  Upgrade existing netinstall image.  ||
-|| *Status* || <font color="yellow">_*IN PROGRESS - 7/28*_</font> || 
+|| *Status* || <font color="yellow">_*IN PROGRESS - 8/2*_</font> || 
 || *Est. Completion* || Week of 8/2 || 
 || *Owner* || Aaron ||
 || *Depends* || Milestone LiveCD 1 ||
@@ -222,16 +222,16 @@ The following are subtasks listed out for tracking purposes:
  * Produce tools capable of upgrading the existing backing store configuration/data to the new approach - <font color="yellow">_*IN TESTING*_</font>
    * See [http://code.google.com/p/perfsonar-ps/wiki/pSPT32_DevNotes#Upgrade_Path here] for some specifics on how upgrades might be handled
  * Package the above tools and include them in the Live CD kickstart - <font color="yellow">_*IN TESTING*_</font>
- * Collect user feedback from the alpha testers - <font color="yellow">_*IN PROGRESS - 7/28*_</font>
- * Fix any issues encountered by testers - <font color="red">_*NOT STARTED*_</font>
+ * Collect user feedback from the alpha testers - <font color="green">_*DONE*_</font>
+ * Fix any issues encountered by testers - <font color="yellow">_*IN PROGRESS*_</font>
  * Migrate changes to the Base packages/kickstart as needed - <font color="red">_*NOT STARTED*_</font>
- * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit - <font color="red">_*NOT STARTED*_</font>
+ * Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit - <font color="yellow">_*IN PROGRESS - 8/2*_</font>
 
 In progress issues from Milestone Base 4, Live CD 1:
 
 || *Issue* || *Synopsis* || *Status* ||
 || Unecessary packages in pSPT, most likely from upstream CentOS defaults || Can maybe remove some, definitely not all (pulled in for dependency reasons) || <font color="red">_*NOT STARTED*_</font> ||
-|| Add link to 'nptoolkit-configure.py' in PATH || Easy to do || <font color="green">_*DONE*_</font> ||
+|| ~~Add link to 'nptoolkit-configure.py' in PATH~~ || ~~Easy to do~~ || <font color="green">_*DONE*_</font> ||
 || CSS does not display right under IE8 || Need a CSS expert to help, TBD || <font color="red">_*NOT STARTED*_</font> ||
 || OWAMP displaying v6 addresses, maybe prefer v4?  also displaying junk in address (e.g. xxx%134508904) || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || PingER GUI cannot be installed || dependicies still preventing this || <font color="red">_*NOT STARTED*_</font> ||
@@ -241,14 +241,21 @@ In progress issues from Milestone Base 4, Live CD 1:
 || empty resolve.conf, domino effect to the LS cache daemon and NTP || watching for other instances || <font color="red">_*NOT STARTED*_</font> ||
 || LS Cache - won't need to 'update' this before release due to new cache service || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || weirdness with the disk configuration script.  If the disk has no partition info (but had an ext3 fs on it before the partition table was wiped), the script detects the raw device with 'unknown' partition type. || The script uses "blkid" to figure out the FS type, and there seem to be some combination of partition voodoo that prevents blkid from recognizing proper ext3 partitions. The only way to truly figure out whether it's ext3 or not is to try and mount the partition.  Need a FAQ entry || <font color="red">_*NOT STARTED*_</font> ||
-|| The net installation defaults to DHCP, making it difficult to install on non-DHCP networks || Changed kickstart network option to ask user || <font color="green">_*DONE*_</font> ||
-|| The net installation does not allow customization of the partition scheme || Changed kickstart to ask user questions about how to install || <font color="green">_*DONE*_</font> ||
+|| ~~The net installation defaults to DHCP, making it difficult to install on non-DHCP networks~~ || ~~Changed kickstart network option to ask user~~ || <font color="green">_*DONE*_</font> ||
+|| ~~The net installation does not allow customization of the partition scheme~~ || ~~Changed kickstart to ask user questions about how to install~~ || <font color="green">_*DONE*_</font> ||
 || clicking on service graphs/throughput gives a blank page || could be logging related? investigating... || <font color="red">_*NOT STARTED*_</font> ||
 || Timezone is reset to EDT on upgrade || Stored in a data file, may not be able to tell if this is changed... || <font color="red">_*NOT STARTED*_</font> ||
 || certificate complaint in browsers (Error code: sec_error_reused_issuer_and_serial) || generate on first boot. It would need an init script or something || <font color="red">_*NOT STARTED*_</font> ||
-|| Default TCP congestion control algorithm is BIC || Suggested change default to CUBIC || <font color="green">_*DONE*_</font> ||
+|| ~~Default TCP congestion control algorithm is BIC~~ || ~~Suggested change default to CUBIC~~ || <font color="green">_*DONE*_</font> ||
+|| ~~Add a 'pspt' user~~ || ~~not necessary, discussions show that root is sufficient or user can add extra accounts~~ || <font color="purple">_*WONT FIX*_</font> ||
+|| ~~Modify 'passwords' dialog to remove references to 'knoppix' user~~ || ~~fixed~~ || <font color="green">_*DONE*_</font> ||
+|| Document how to set root password || e.g. on first login to console || <font color="red">_*NOT STARTED*_</font> ||
+|| Document when to run 'nptoolkit-configure.py' || e.g. after first login || <font color="red">_*NOT STARTED*_</font> ||
+|| Document how to set MTU || '/etc/sysconfig/network-scripts/ifcfg-eth0, then add: MTU=9000' || <font color="red">_*NOT STARTED*_</font> ||
+|| Document how to change TCP congestion alg || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Document where RPMs (for a netinstall) will get downloaded from || E.g. if ACLs are needed, etc.  Currently downloads from ndb1.internet2.edu || <font color="red">_*NOT STARTED*_</font> ||
 || TBD || TBD || <font color="red">_*NOT STARTED*_</font> ||
-
+ 
 === Milestone LiveCD 3 ===
 
 || *Summary* || Based on user feedback and testing, firm up the Live CD and netinstall iso.  Migrate changes to the Base packages/kickstart as needed  ||
