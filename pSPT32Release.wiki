@@ -16,6 +16,7 @@ release process:
  * Jason Zurawski - Release Lead
  * Aaron Brown - Integration Lead
  * Eric Pouyoul - Integration
+ * Tom Throckmorton - Integration
 
 == Testers ==
 
@@ -45,8 +46,8 @@ Beta, and RC:
 || Milestone LiveCD 1 || Week of 6/14 (Development), Week of 6/21 (Testing) || <font color="green">_*DONE - 6/30*_</font> ||
 || Milestone LiveCD 2 || Week of 8/2 || <font color="yellow">_*IN PROGRESS - 7/28*_</font> ||
 || Milestone LiveCD 3 || Week of 8/16 || <font color="red">_*NOT STARTED*_</font> ||
-|| Milestone Install Disk 1 || ~~Week of 6/14~~ ~~Week of 6/21~~ ~~Week of 6/28~~ ~~Week of 7/26~~ TBD || <font color="purple">_*STALLED - 7/29*_</font> ||
-|| Milestone Install Disk 2 || ~~Week of 6/28~~ ~~Week of 8/16~~ TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| ~~Milestone Install Disk 1~~ || ~~Week of 6/14~~ ~~Week of 6/21~~ ~~Week of 6/28~~ ~~Week of 7/26~~ TBD || <font color="purple">_*PUSHED OFF - 8/2*_</font> ||
+|| ~~Milestone Install Disk 2~~ || ~~Week of 6/28~~ ~~Week of 8/16~~ TBD || <font color="purple">_*PUSHED OFF - 8/2*_</font> ||
 || Milestone RC 1 || Week of 8/23 || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone RC 2 || Week of 8/30 || <font color="red">_*NOT STARTED*_</font> ||
 || Milestone Final || Week of 9/6 || <font color="red">_*NOT STARTED*_</font> ||
@@ -245,7 +246,7 @@ In progress issues from Milestone Base 4, Live CD 1:
 || ~~The net installation does not allow customization of the partition scheme~~ || ~~Changed kickstart to ask user questions about how to install~~ || <font color="green">_*DONE*_</font> ||
 || clicking on service graphs/throughput gives a blank page || could be logging related? investigating... || <font color="red">_*NOT STARTED*_</font> ||
 || Timezone is reset to EDT on upgrade || Stored in a data file, may not be able to tell if this is changed... || <font color="red">_*NOT STARTED*_</font> ||
-|| certificate complaint in browsers (Error code: sec_error_reused_issuer_and_serial) || generate on first boot. It would need an init script or something || <font color="red">_*NOT STARTED*_</font> ||
+|| certificate complaint in browsers (Error code: sec_error_reused_issuer_and_serial) || generate on first boot. It would need an init script or something || <font color="red">_*NOT STARTssh richc@lhcmon.bnl.govED*_</font> ||
 || ~~Default TCP congestion control algorithm is BIC~~ || ~~Suggested change default to CUBIC~~ || <font color="green">_*DONE*_</font> ||
 || ~~Add a 'pspt' user~~ || ~~not necessary, discussions show that root is sufficient or user can add extra accounts~~ || <font color="purple">_*WONT FIX*_</font> ||
 || ~~Modify 'passwords' dialog to remove references to 'knoppix' user~~ || ~~fixed~~ || <font color="green">_*DONE*_</font> ||
@@ -259,14 +260,13 @@ In progress issues from Milestone Base 4, Live CD 1:
 The LiveCD and Netinstall were distributed to the following people for external testing:
 
 || *Tester* || *Type* || *Feedback Received* || *Comments* ||
-|| Ken Miller (PSU) || LiveCD/Netinstall || Pending || TBD ||
+|| Ken Miller (PSU) || LiveCD & Netinstall || Pending || TBD ||
 || Scott Bertilson(UMin) || LiveCD/Netinstall || No || TBD ||
 || Gerry Creager (TAMU) || LiveCD/Netinstall || No || TBD ||
 || Sandor Rozsa (Caltech/CERN) || Netinstall || Pending || TBD ||
-|| John Bigrow (BNL/USATLAS) || LiveCD/Netinstall || No || TBD ||
-|| Philippe Laurens (MSU/USATLAS) || LiveCD/Netinstall || No || TBD ||
-|| Robert Ball (UM/USATLAS) || LiveCD/Netinstall || No || TBD ||
-|| Warren Matthews (Sanford Lab) || LiveCD/Netinstall || No || TBD ||
+|| John Bigrow (BNL/USATLAS) || LiveCD || Pending || TBD ||
+|| Philippe Laurens (MSU/USATLAS) || LiveCD || No || TBD ||
+|| Robert Ball (UM/USATLAS) || LiveCD || No || TBD ||
 || Dan Pritts (Internet2 TSG) || LiveCD/Netinstall || No || TBD ||
 || Ezra Kissel (UDel) || LiveCD/Netinstall || No || TBD ||
 || Ian Bobbit (IU GRNOC) || LiveCD/Netinstall || Pending || TBD ||
@@ -291,7 +291,7 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Install Disk 1 ===
 
 || *Summary* || Produce an initial installation ISO for testing  ||
-|| *Status* || <font color="purple">_*STALLED - 7/29*_</font> || 
+|| *Status* || <font color="purple">_*PUSHED OFF - 8/2*_</font> This will be revisted in 3.2.1 || 
 || *Est. Completion* || ~~Week of 6/14~~ ~~Week of 6/21~~ ~~Week of 6/28~~ ~~Week of 7/26~~ TBD || 
 || *Owner* || Eric ||
 || *Depends* || Milestone Base 4 ||
@@ -311,7 +311,7 @@ The following are subtasks listed out for tracking purposes:
 === Milestone Install Disk 2 ===
 
 || *Summary* || Based on user feedback and testing, firm up the installation CD  ||
-|| *Status* || <font color="red">_*NOT STARTED*_</font> || 
+|| *Status* || <font color="purple">_*PUSHED OFF - 8/2*_</font> This will be revisted in 3.2.1 || 
 || *Est. Completion* || ~~Week of 6/28~~ ~~Week of 7/5~~ ~~Week of 8/16~~ TBD || 
 || *Owner* || Eric ||
 || *Depends* || Milestone Install Disk 1 ||
@@ -327,8 +327,8 @@ The following are subtasks listed out for tracking purposes:
 || *Summary* || Synchronize any changes to the Base necessitated by the Live CD or Install CD, and produce release candidates and documentation for each  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
 || *Est. Completion* || Week of 8/23 || 
-|| *Owner* || Aaron/Eric/Jason ||
-|| *Depends* || Milestone Install Disk 2, Milestone LiveCD 3  ||
+|| *Owner* || Aaron/~~Eric~~/Jason/Tom ||
+|| *Depends* || ~~Milestone Install Disk 2~~, Milestone LiveCD 3  ||
 
 The following are subtasks listed out for tracking purposes:
 
@@ -343,7 +343,7 @@ The following are subtasks listed out for tracking purposes:
 || *Summary* || Based on user feedback and testing, firm up the Live CD and Install CD  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
 || *Est. Completion* || Week of 8/30 || 
-|| *Owner* || Aaron/Eric/Jason ||
+|| *Owner* || Aaron/~~Eric~~/Jason/Tom ||
 || *Depends* || Milestone RC 1 ||
 
 The following are subtasks listed out for tracking purposes:
@@ -359,7 +359,7 @@ Milestone Release Candidate X: Open-ended.
 || *Summary* || Produce final versions of the Live CD, Install CD and documentation  ||
 || *Status* || <font color="red">_*NOT STARTED*_</font> || 
 || *Est. Completion* || Week of 9/6 || 
-|| *Owner* || Aaron/Eric/Jason ||
+|| *Owner* || Aaron/~~Eric~~/Jason/Tom ||
 || *Depends* || Milestone RC 2 ||
 
 The following are subtasks listed out for tracking purposes:
