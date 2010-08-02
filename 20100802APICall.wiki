@@ -11,7 +11,18 @@
 
 == Agenda ==
 
- # TBD
+ # Agenda bashing
+ # Review updated use-case document
+ # Two questions from Jeff Boote:
+ (1) I'm curious how the list of available datatypes will be kept up to date?
+ And how the API  will be extended to new data types. 
+ For specifically the use cases Jason mentions from the pS Workshop, that will be key. 
+ There are several researchers who will want to expose 'new' metrics.
+
+ (2)I'm not sure the topology related data types are expressive enough... 
+ For example, I'm 
+ not sure I see how to reference a 'node' unless it is a L3 node. In fact, not sure I see 
+ 'node' at all - that really isn't the same thing as an interface - right?
 
 === Notes ===
 
