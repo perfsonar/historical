@@ -256,6 +256,21 @@ In progress issues from Milestone Base 4, Live CD 1:
 || Document where RPMs (for a netinstall) will get downloaded from || E.g. if ACLs are needed, etc.  Currently downloads from ndb1.internet2.edu || <font color="red">_*NOT STARTED*_</font> ||
 || TBD || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
+The LiveCD and Netinstall were distributed to the following people for external testing:
+
+|| *Tester* || *Type* || *Feedback Received* || *Comments* ||
+|| Ken Miller (PSU) || LiveCD/Netinstall || No || TBD ||
+|| Scott Bertilson(UMin) || LiveCD/Netinstall || No || TBD ||
+|| Gerry Creager (TAMU) || LiveCD/Netinstall || No || TBD ||
+|| Sandor Rozsa (Caltech/CERN) || LiveCD/Netinstall || No || TBD ||
+|| John Bigrow (BNL/USATLAS) || LiveCD/Netinstall || No || TBD ||
+|| Philippe Laurens (MSU/USATLAS) || LiveCD/Netinstall || No || TBD ||
+|| Robert Ball (UM/USATLAS) || LiveCD/Netinstall || No || TBD ||
+|| Warren Matthews (Sanford Lab) || LiveCD/Netinstall || No || TBD ||
+|| Dan Pritts (Internet2 TSG) || LiveCD/Netinstall || No || TBD ||
+|| Ezra Kissel (UDel) || LiveCD/Netinstall || No || TBD ||
+|| Chris Small/Luke Fowler (IU GRNOC) || LiveCD/Netinstall || No || TBD ||
+
 === Milestone LiveCD 3 ===
 
 || *Summary* || Based on user feedback and testing, firm up the Live CD and netinstall iso.  Migrate changes to the Base packages/kickstart as needed  ||
