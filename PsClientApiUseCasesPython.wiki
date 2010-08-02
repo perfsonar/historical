@@ -4,6 +4,8 @@
 
 Python mockups of perfSONAR client API use-cases (see PsClientApiUseCases).
 
+Using specification in PsClientApi.
+
 *Contents:*
 <wiki:toc max_depth="1" />
 
