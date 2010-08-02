@@ -21,7 +21,9 @@ Notes from previous calls:
 
 A standard, straightforward client API specification would be useful to users of perfSONAR. It could be implemented in a variety of languages.
 
-See also the [PsClientApiUseCases detailed use-cases].
+See also:
+ * [PsClientApiUseCases Use-cases]
+ * [PsClientApiUseCasesPython Python mockups of use-cases]
 
 == Languages ==
 
