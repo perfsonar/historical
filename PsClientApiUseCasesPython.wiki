@@ -4,7 +4,110 @@
 
 Python mockups of perfSONAR client API use-cases (see PsClientApiUseCases).
 
+*Contents:*
+<wiki:toc max_depth="1" />
 
-= Details =
+= API =
 
-TBD
+{{{
+"""
+Mock-up of perfSONAR client API in Python.
+
+Created: 1 August 2010
+Author: Dan Gunter <dkgunter@lbl.gov> (dang)
+"""
+
+HINTS_ROOT = "http://www.perfsonar.net/gls.root.hints"
+
+class Client:
+    def __init__(self, 
+                 gls_hints_file="",
+                 gls_urls=[],
+                 hls_urls=[],
+                 service_urls=[]):
+        """
+        Construct and initialize a new client. 
+        """
+        pass
+
+    def get_data(self,
+                 datatype=None,
+                 subject=None,
+                 param={},
+                 timerange=None):
+          """
+          Fetch and return data.
+          """
+          pass
+
+## Data classes
+
+
+class TimeRange:
+      """
+      Start and/or end time.
+      """
+      def __init__(self, start=None, end=None):
+            pass
+
+ALL_TIMES = TimeRange()
+
+class Data:
+      """
+      Summarized or "raw" measurement or other result values.
+      """
+      def __init__(self, 
+                   time_range=ALL_TIMES,
+                   summ_type="",
+                   header=[],
+                   values=[],
+                   param={}):
+            pass
+
+class DataSet:
+      """
+      One or more Data items, and associated metadata (subject and
+      parameters), if different from the containing DataSet metadata.
+      """
+      def __init__(self, 
+                   service_url, 
+                   datatype, 
+                   subject, 
+                   param, 
+                   data):
+            pass
+
+## Topology classes
+
+class Subject:
+      """
+      Abstract perfSONAR Subject.
+      """
+      pass
+
+class NetworkElement(Subject):
+      """
+      Abstract Topology schema element.
+      """
+      pass
+
+class EndpointPair(NetworkElement):
+      """
+      Subclass of NetworkElement for 2 endpoint pairs.
+      """
+      def __init__(self, source, destination):
+          NetworkElement.__init__(self)
+          pass
+
+class Interface(NetworkElement):
+      """
+      Subclass of NetworkElement for host interfaces 
+      """
+      def __init__(self, 
+                   host=None,
+                   host_address=None,
+                   interface_name=None,
+                   interface_addr=None):
+          NetworkElement.__init__(self)
+          pass
+}}}
