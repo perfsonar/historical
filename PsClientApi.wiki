@@ -11,9 +11,10 @@ Telecons occur roughly every two weeks on Monday at 5:00pm EDT.
    * +1-866-411-0013 (toll free US/Canada Only)
  * Access code:	0125784
 
-*Next call*: [http://code.google.com/p/perfsonar-ps/wiki/20100802APICall 02 August 2010]
+*Next call*: [http://code.google.com/p/perfsonar-ps/wiki/20100816APICall 16 August 2010] (tentative)
 
 Notes from previous calls:
+ * [http://code.google.com/p/perfsonar-ps/wiki/20100802APICall 02 August 2010]
  * [http://code.google.com/p/perfsonar-ps/wiki/20100607APICall 07 June 2010]
  * [http://code.google.com/p/perfsonar-ps/wiki/20100614APICall 14 June 2010]
 
