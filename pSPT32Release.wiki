@@ -246,7 +246,7 @@ In progress issues from Milestone Base 4, Live CD 1:
 || ~~The net installation does not allow customization of the partition scheme~~ || ~~Changed kickstart to ask user questions about how to install~~ || <font color="green">_*DONE*_</font> ||
 || clicking on service graphs/throughput gives a blank page || could be logging related? investigating... || <font color="red">_*NOT STARTED*_</font> ||
 || Timezone is reset to EDT on upgrade || Stored in a data file, may not be able to tell if this is changed... || <font color="red">_*NOT STARTED*_</font> ||
-|| certificate complaint in browsers (Error code: sec_error_reused_issuer_and_serial) || generate on first boot. It would need an init script or something || <font color="red">_*NOT STARTssh richc@lhcmon.bnl.govED*_</font> ||
+|| certificate complaint in browsers (Error code: sec_error_reused_issuer_and_serial) || generate on first boot. It would need an init script or something || <font color="red">_*NOT STARTED*_</font> ||
 || ~~Default TCP congestion control algorithm is BIC~~ || ~~Suggested change default to CUBIC~~ || <font color="green">_*DONE*_</font> ||
 || ~~Add a 'pspt' user~~ || ~~not necessary, discussions show that root is sufficient or user can add extra accounts~~ || <font color="purple">_*WONT FIX*_</font> ||
 || ~~Modify 'passwords' dialog to remove references to 'knoppix' user~~ || ~~fixed~~ || <font color="green">_*DONE*_</font> ||
