@@ -262,7 +262,7 @@ The LiveCD and Netinstall were distributed to the following people for external 
 
 || *Tester* || *Type* || *Feedback Received* || *Comments* ||
 || Ken Miller (PSU) || LiveCD & Netinstall || Yes || IPv6 problems w/ NDT ||
-|| Sandor Rozsa (Caltech/CERN) || Netinstall || Pending || TBD ||
+|| Sandor Rozsa (Caltech/CERN) || Netinstall || Yes || 64 Bit support? ||
 || John Bigrow (BNL/USATLAS) || LiveCD || Pending || TBD ||
 || Robert Ball/Shawn McKee (UM/USATLAS) || LiveCD || Yes || Hostname/Resolve issues ||
 || Ian Bobbit (IU GRNOC) || LiveCD || Yes || Default network interface ||
@@ -277,13 +277,14 @@ The LiveCD and Netinstall were distributed to the following people for external 
 Problems noted by beta testers:
 
 || *Tester* || *Problem* || *Notes* || *Status* ||
-|| Ken || NDT/NPAD do not function w/ IPv6 || Adjust RPM packages. May need to experiement... || <font color="red">_*NOT STARTED*_</font> ||
+|| Ken || NDT/NPAD do not function w/ IPv6 || Adjust RPM packages/init script.  After doing so, protocol error w/ v4 tests || <font color="red">_*NOT STARTED*_</font> ||
 || Peter Laws (OU/NOAA) || LiveCD data not persistent, forgets passwords and settings || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Ian/Shawn || Visiting 'root' of the web (in https) gets the apache default page || Perhaps use a redirect? || <font color="red">_*NOT STARTED*_</font> ||
 || Ian || Seeing stale cache warning || How often does this grab, and can it be sped up on first boot? || <font color="red">_*NOT STARTED*_</font> ||
 || Ian || Problems saving configuration of regular testing || Was related to lack of external address - error messages could reflect this? || <font color="red">_*NOT STARTED*_</font> ||
 || Shawn || Empty resolve.conf, default DNS servers? || Better use of the RHEL network config tools || <font color="red">_*NOT STARTED*_</font> ||
 || Shawn || Empty hostname || edit "/etc/sysconfig/network" and fill in the HOSTNAME variable || <font color="red">_*NOT STARTED*_</font> ||
+|| Ken || RC1 Netinstall, doing a yum update changed the kernel away from web100 || How to handle this...add kernel to yum blacklist and force a manual upgrade?  live with an upgraded non-web100 kernel? || <font color="red">_*NOT STARTED*_</font> ||
 || TBD || TBD || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
 === Milestone LiveCD 3 ===
