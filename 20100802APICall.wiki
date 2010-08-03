@@ -7,7 +7,7 @@
 == Attendees ==
 
  * Attending:
-   * TBD
+   * Aaron, Andy, Ahmed, Marcos, Khavita, Dan. (regrets: Jeff B., Jason Z., DMS)
 
 == Agenda ==
 
@@ -26,11 +26,51 @@
 
 === Notes ===
 
- * TBD
+ * Walked through use-cases #1 through #5. Notes on each below.
+  # Return throughput/latency results between two endpoints in certain time period
+   * Need to enumerate constants for datatypes like "bwctl"
+   * Also should enumerate params for these. Use abstract/concrete classes as for Subject but allow name=value for extensibility.
+   * Timeout for get_data()? Resolved: have global default, per-Client default, per-call value.
+  # List all endpoints with throughput/latency data available
+    * Multiple DataSet-s need to be retrieved, where each one just has meta.
+    * Agreed not fundamentally different than #1, but client could use a hint that it's not worth pre-fetching any of the data.
+    * If there are multiple services contacted, what to do about partial results? Resolved that this is by default OK, but optionally the client can ask for an exception to be thrown if not all data is available.
+    * To allow for processing in parallel with arriving data, provide a callback interface that will return incremental results until there are no more, it is told to stop, or it times out.
+    * To scope this kind of query, the Subject needs to be something like "esnet.`*`"
+  # Return X minute average utilization for Y time period on interface
+    * What if the server has {{{X*c}}} minute resolution instead of {{{X}}}? Resolved that where possible the client should re-sample, and otherwise it should raise an exception.
+    * Getting available resolution is currently not possible, so clients are probably going to mostly live with the default. Unlike other parameters, a missing "resolution" param means "default" instead of "all".
+  # List all router interfaces with collected SNMP data
+    * Agreed that this was pretty much the same as (2) for the API
+  # Trigger bwctl test via a web GUI
+    * Agreed that triggering tests was out-of-scope for this API
+
+Other issues:
+  * Jeff Boote's points above are both answered by simply providing extensibility hooks, e.g. allow string values and inheritance for the Subject, etc. Need to make sure these can map cleanly to underlying protocols.
+
+  * Exceptions
+    * Everyone agreed that having Exceptions defined would be a Really Fine Thing To Do. Since participants East of the Mississippi wanted to go home at this point, they were willing to agree to any hop-headed scheme, including this initial organization suggested by Dan:
+      # error interpreting the input arguments
+      # errors finding services
+      # errors connecting to services (including AA)
+      # errors fetching data or metadata from a service
+      # errors interpreting the data returned
 
 === Actions ===
 
- * _*ACTION*_: TBD  
+ * _*ACTION*_: Add enumerations for common datatypes to API
+ * _*ACTION*_: Add Parameters abstract type, with subtypes for commonly used ones. Still allow arbitrary name=value pairs to be used, for extensibility. 
+ * _*ACTION*_: Add interface to get/set global, per-Client, and per-call timeouts
+ * _*ACTION*_: Add interface to give get_data() a "hint" that only metadata is needed
+ * _*ACTION*_: Modify get_data() to return a *group* of DataSet objects, one per unique combination of metadata, per-call
+ * _*ACTION*_: Add interface to get_data() to optionally throw an exception on incomplete data.
+ * _*ACTION*_: Add callback signature, and parameter to get_data(), for incremental results.
+ * _*ACTION*_: Add Subject subclass(es) useful for scoping lookups to domain, e.g. a "bag of address patterns" like {{{esnet.*, internet2.edu.*}}}.
+ * _*ACTION*_: Write initial set of Exception classes (see "Exceptions" blurb above)
+ * _*ACTION*_: Add Subject extensibility hooks. At least so raw XML strings can be passed through, but ideally something easier to use than that.
+
+_*Reconvene in 2 weeks (16 August)*_
+
 
 == Where ==
 
