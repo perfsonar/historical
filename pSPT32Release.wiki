@@ -272,15 +272,15 @@ The LiveCD and Netinstall were distributed to the following people for external 
 Problems noted by beta testers:
 
 || *Tester* || *Problem* || *Notes* || *Status* ||
-|| ~~Shawn~~ || ~~Empty resolve.conf, default DNS servers?~~ || ~~Better use of the RHEL network config tools~~ || <font color="pruple">_*REPEAT*_</font> ||
+|| ~~Shawn~~ || ~~Empty resolve.conf, default DNS servers?~~ || ~~Better use of the RHEL network config tools~~ || <font color="purple">_*REPEAT*_</font> ||
 || ~~Ian~~ || ~~Seeing stale cache warning~~ || ~~How often does this grab, and can it be sped up on first boot?~~ || <font color="purple">_*REPEAT*_</font> ||
+|| David Lahann || Typo in the '/opt/perfsonar_ps/toolkit/scripts/discover_external_address' configuration file to allow internal addressing || TBD || <font color="yellow">_*IN PROGRESS*_</font> ||
 || Ken || NDT/NPAD do not function w/ IPv6 || Adjust RPM packages/init script.  After doing so, protocol error w/ v4 tests || <font color="red">_*NOT STARTED*_</font> ||
 || Peter Laws (OU/NOAA) || LiveCD data not persistent, forgets passwords and settings || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Ian/Shawn || Visiting 'root' of the web (in https) gets the apache default page || Perhaps use a redirect? || <font color="red">_*NOT STARTED*_</font> ||
 || Ian || Problems saving configuration of regular testing || Was related to lack of external address - error messages could reflect this? || <font color="red">_*NOT STARTED*_</font> ||
 || Shawn || Empty hostname || edit "/etc/sysconfig/network" and fill in the HOSTNAME variable || <font color="red">_*NOT STARTED*_</font> ||
 || Ken || RC1 Netinstall, doing a yum update changed the kernel away from web100 || How to handle this...add kernel to yum blacklist and force a manual upgrade?  live with an upgraded non-web100 kernel? || <font color="red">_*NOT STARTED*_</font> ||
-|| David Lahann || Typo in the '/opt/perfsonar_ps/toolkit/scripts/discover_external_address' configuration file to allow internal addressing || TBD || <font color="yellow">_*IN PROGRESS*_</font> ||
 || TBD || TBD || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
 === Milestone LiveCD 3 ===
@@ -408,12 +408,12 @@ The following bugs were held over for the next minor release:
 The following new bugs were identified, and are not classified yet:
 
 || *Issue* || *Synopsis* || *Status* ||
-|| Unecessary packages in pSPT, most likely from upstream CentOS defaults || Can maybe remove some, definitely not all (pulled in for dependency reasons) || <font color="pruple">_*HELD OVER FOR 3.2.1*_</font>  ||
-|| OWAMP displaying v6 addresses, maybe prefer v4?  also displaying junk in address (e.g. xxx%134508904) || TBD || <font color="pruple">_*HELD OVER FOR 3.2.1*_</font>  ||
-|| empty resolve.conf, domino effect to the LS cache daemon and NTP || watching for other instances || <font color="pruple">_*HELD OVER FOR 3.2.1*_</font>  ||
-|| LS Cache - won't need to 'update' this before release due to new cache service || TBD || <font color="pruple">_*HELD OVER FOR 3.2.1*_</font>  ||
-|| Timezone is reset to EDT on upgrade || Stored in a data file, may not be able to tell if this is changed... || <font color="pruple">_*HELD OVER FOR 3.2.1*_</font>  ||
-|| TBD || TBD || <font color="pruple">_*HELD OVER FOR 3.2.1*_</font> ||
+|| Unecessary packages in pSPT, most likely from upstream CentOS defaults || Can maybe remove some, definitely not all (pulled in for dependency reasons) || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| OWAMP displaying v6 addresses, maybe prefer v4?  also displaying junk in address (e.g. xxx%134508904) || TBD || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| empty resolve.conf, domino effect to the LS cache daemon and NTP || watching for other instances || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| LS Cache - won't need to 'update' this before release due to new cache service || TBD || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Timezone is reset to EDT on upgrade || Stored in a data file, may not be able to tell if this is changed... || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| TBD || TBD || <font color="purple">_*HELD OVER FOR 3.2.1*_</font> ||
          
 == Code Reviews ==
 
