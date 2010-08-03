@@ -255,6 +255,7 @@ In progress issues from Milestone Base 4, Live CD 1:
 || Document how to set MTU || '/etc/sysconfig/network-scripts/ifcfg-eth0, then add: MTU=9000' || <font color="red">_*NOT STARTED*_</font> ||
 || Document how to change TCP congestion alg || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Document where RPMs (for a netinstall) will get downloaded from || E.g. if ACLs are needed, etc.  Currently downloads from ndb1.internet2.edu || <font color="red">_*NOT STARTED*_</font> ||
+|| upgrade the kernel to the newest RH version || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || TBD || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
 The LiveCD and Netinstall were distributed to the following people for external testing:
@@ -272,6 +273,18 @@ The LiveCD and Netinstall were distributed to the following people for external 
 || Ian Bobbit (IU GRNOC) || LiveCD/Netinstall || Pending || TBD ||
 || Jason Lee (NERSC) || LiveCD/Netinstall || No || TBD ||
 || Chris Hawkinson (CENIC) || LiveCD/Netinstall || Pending || TBD ||
+
+Problems noted by beta testers:
+
+|| *Tester* || *Problem* || *Notes* || *Status* ||
+|| Ken || NDT/NPAD do not function w/ IPv6 || Adjust RPM packages. May need to experiement... || <font color="red">_*NOT STARTED*_</font> ||
+|| Peter Laws (OU/NOAA) || LiveCD data not persistent, forgets passwords and settings || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Ian/Shawn || Visiting 'root' of the web (in https) gets the apache default page || Perhaps use a redirect? || <font color="red">_*NOT STARTED*_</font> ||
+|| Ian || Seeing stale cache warning || How often does this grab, and can it be sped up on first boot? || <font color="red">_*NOT STARTED*_</font> ||
+|| Ian || Problems saving configuration of regular testing || Was related to lack of external address - error messages could reflect this? || <font color="red">_*NOT STARTED*_</font> ||
+|| Shawn || Empty resolve.conf, default DNS servers? || Better use of the RHEL network config tools || <font color="red">_*NOT STARTED*_</font> ||
+|| Shawn || Empty hostname || edit "/etc/sysconfig/network" and fill in the HOSTNAME variable || <font color="red">_*NOT STARTED*_</font> ||
+|| TBD || TBD || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
 === Milestone LiveCD 3 ===
 
