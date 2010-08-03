@@ -8,6 +8,8 @@ This page outlines the steps necessary to deploy an LS infrastructure for a priv
 
 The following sections will describe how to set up and configure the software packages, along with the necessary modifications that need to be made to supporting software (e.g. perfSONAR services and GUIs).  We will finish with a simple example network that features services, LS instances, and a GUI that will be able to locate measurement data.
 
+_*N.B.*_ This deployment strategy describes changes to the perfSONAR-PS code base released as RPMs _*only*_.  This procedure is not guaranteed to work with the [http://psps.perfsonar.net/toolkit pS Performance Toolkit].  
+
 == Setup ==
 
 The following image describes the general idea of information services in the perfSONAR infrastructure
