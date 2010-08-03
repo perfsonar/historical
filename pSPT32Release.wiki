@@ -261,18 +261,18 @@ In progress issues from Milestone Base 4, Live CD 1:
 The LiveCD and Netinstall were distributed to the following people for external testing:
 
 || *Tester* || *Type* || *Feedback Received* || *Comments* ||
-|| Ken Miller (PSU) || LiveCD & Netinstall || Pending || TBD ||
-|| Scott Bertilson(UMin) || LiveCD/Netinstall || No || TBD ||
-|| Gerry Creager (TAMU) || LiveCD/Netinstall || No || TBD ||
+|| Ken Miller (PSU) || LiveCD & Netinstall || Yes || IPv6 problems w/ NDT ||
 || Sandor Rozsa (Caltech/CERN) || Netinstall || Pending || TBD ||
 || John Bigrow (BNL/USATLAS) || LiveCD || Pending || TBD ||
+|| Robert Ball/Shawn McKee (UM/USATLAS) || LiveCD || Yes || Hostname/Resolve issues ||
+|| Ian Bobbit (IU GRNOC) || LiveCD || Yes || Default network interface ||
+|| Chris Hawkinson (CENIC) || TBD || Pending || TBD ||
+|| Scott Bertilson(UMin) || TBD || No || TBD ||
+|| Gerry Creager (TAMU) || TBD || No || TBD ||
 || Philippe Laurens (MSU/USATLAS) || LiveCD || No || TBD ||
-|| Robert Ball (UM/USATLAS) || LiveCD || No || TBD ||
-|| Dan Pritts (Internet2 TSG) || LiveCD/Netinstall || No || TBD ||
-|| Ezra Kissel (UDel) || LiveCD/Netinstall || No || TBD ||
-|| Ian Bobbit (IU GRNOC) || LiveCD/Netinstall || Pending || TBD ||
-|| Jason Lee (NERSC) || LiveCD/Netinstall || No || TBD ||
-|| Chris Hawkinson (CENIC) || LiveCD/Netinstall || Pending || TBD ||
+|| Dan Pritts (Internet2 TSG) || TBD || No || TBD ||
+|| Ezra Kissel (UDel) || TBD || No || TBD ||
+|| Jason Lee (NERSC) || TBD || No || TBD ||
 
 Problems noted by beta testers:
 
