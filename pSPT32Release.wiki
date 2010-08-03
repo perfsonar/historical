@@ -285,6 +285,7 @@ Problems noted by beta testers:
 || Shawn || Empty resolve.conf, default DNS servers? || Better use of the RHEL network config tools || <font color="red">_*NOT STARTED*_</font> ||
 || Shawn || Empty hostname || edit "/etc/sysconfig/network" and fill in the HOSTNAME variable || <font color="red">_*NOT STARTED*_</font> ||
 || Ken || RC1 Netinstall, doing a yum update changed the kernel away from web100 || How to handle this...add kernel to yum blacklist and force a manual upgrade?  live with an upgraded non-web100 kernel? || <font color="red">_*NOT STARTED*_</font> ||
+|| David Lahann || Typo in the '/opt/perfsonar_ps/toolkit/scripts/discover_external_address' configuration file to allow internal addressing || TBD || <font color="yellow">_*IN PROGRESS*_</font> ||
 || TBD || TBD || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
 === Milestone LiveCD 3 ===
