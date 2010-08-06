@@ -2189,7 +2189,7 @@ sub metadataKeyRetrieveMetadataData {
     if ( $eventTypes->size() or $supportedEventTypes->size() ) {
         $queryString = $queryString . "[./nmwg:key/nmwg:parameters/nmwg:parameter[(\@name=\"supportedEventType\" or \@name=\"eventType\")";
         foreach my $e ( sort keys %et ) {
-            $queryString = $queryString . " and (\@value=\"" . $e . "\" or text()=\"" . $e . "\")";
+            $queryString = $queryString . " or (\@value=\"" . $e . "\" or text()=\"" . $e . "\")";
         }
         $queryString = $queryString . "]]";
     }
@@ -2571,7 +2571,7 @@ sub setupDataRetrieveMetadataData {
     if ( $eventTypes->size() or $supportedEventTypes->size() ) {
         $queryString = $queryString . "[./nmwg:key/nmwg:parameters/nmwg:parameter[(\@name=\"supportedEventType\" or \@name=\"eventType\")";
         foreach my $e ( sort keys %et ) {
-            $queryString = $queryString . " and (\@value=\"" . $e . "\" or text()=\"" . $e . "\")";
+            $queryString = $queryString . " or (\@value=\"" . $e . "\" or text()=\"" . $e . "\")";
         }
         $queryString = $queryString . "]]";
     }
