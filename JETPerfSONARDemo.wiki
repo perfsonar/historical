@@ -140,18 +140,23 @@ NASA
        * perfsonar.net
        * I2 site
        * code.google.com site
+   * Be careful in where the perfSonar bandwidth test system is deployed, as you could accidentally create a DOS on your network. (ckm) 
 
 == Best Practices (should probably have another page link here) ==
   * security
     * What is the sensitivity of the data?
     * What is the sensitivity of the network to active measurement?
+    * Be careful of access allowed to the perfSonar server, as a remote anonymous user can connect to your server and run tests from it to another device (ckm)
   * Recommended base setups - walk through examples?
   * Questions to ask up front
     * Do you want to do a JAVA implementation?
     * Do you want to do a PERL implementation?
     * Do you want to have a Knoppix CD based implementation?
+    * If you don't want to run Knoppix, are the recommendations on what OS to use and the best way to install the tool set? Are there any rpm's? (ckm)
     * Do you want to lock down what nets or users can run tests?
     * What are the base tests you want to run?  
     * Do you want to run latency and throughput?  Need 2+ machines
-    * Do you have an existing external Cacti Server which you want to reference
-    * Do you want to separate the Measurement Archive (MA) from your Measurement Point (MP)
+    * Do you have an existing external Cacti Server which you want to reference?
+    * Do you want to separate the Measurement Archive (MA) from your Measurement Point (MP)?
+    * Do you need to increase the Input/Output Queue size (max 4096) on your cisco devices? (ckm)
+    * Are you plugging the bandwidth test server into an oversubscribed line card?  If so, is it going to impact an servers in production? (ckm)
