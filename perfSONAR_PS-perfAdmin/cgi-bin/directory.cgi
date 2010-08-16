@@ -29,7 +29,7 @@ my $CGI      = CGI->new();
 
 my %serviceMap = (
     "list.snmpma" => {
-        "EVENTTYPE" => [ "http://ggf.org/ns/nmwg/characteristic/utilization/2.0", "http://ggf.org/ns/nmwg/tools/snmp/2.0" ],
+        "EVENTTYPE" => [ "http://ggf.org/ns/nmwg/characteristic/utilization/2.0", "http://ggf.org/ns/nmwg/tools/snmp/2.0", "utilization" ],
         "TYPE"      => "SNMP"
     },
     "list.psb.bwctl" => {
@@ -43,6 +43,18 @@ my %serviceMap = (
     "list.pinger" => {
         "EVENTTYPE" => [ "http://ggf.org/ns/nmwg/tools/pinger/2.0/", "http://ggf.org/ns/nmwg/tools/pinger/2.0" ],
         "TYPE"      => "PINGER"
+    },
+    "list.ts" => {
+        "EVENTTYPE" => [ "http://ggf.org/ns/nmwg/topology/20070809" ],
+        "TYPE"      => "TS"
+    },
+    "list.idc" => {
+        "EVENTTYPE" => [ "http://oscars.es.net/OSCARS" ],
+        "TYPE"      => "IDC"
+    },
+    "list.idcnb" => {
+        "EVENTTYPE" => [ "http://docs.oasis-open.org/wsn/br-2" ],
+        "TYPE"      => "IDCNB"
     }
 );
 
@@ -127,6 +139,8 @@ if ( -d $base ) {
     my @anch     = ();
     my $counter1 = 0;
     foreach my $file ( keys %serviceMap ) {
+        my $query = 1;
+        $query = 0 if $file eq "list.idc" or $file eq "list.ts" or $file eq "list.idcnb";
         if ( -f $base . "/" . $file ) {
             open( READ, "<" . $base . "/" . $file ) or next;
             my @content = <READ>;
@@ -136,7 +150,7 @@ if ( -d $base ) {
             my $counter2 = 0;
             foreach my $c ( @content ) {
                 my @service = split( /\|/, $c );
-                push @temp, { SERVICE => $service[0], NAME => $service[1], TYPE => $service[2], DESC => $service[3], COUNT1 => $counter1, COUNT2 => $counter2, EVENTTYPE => $serviceMap{$file}{"EVENTTYPE"}[0] };
+                push @temp, { SERVICE => $service[0], NAME => $service[1], TYPE => $service[2], DESC => $service[3], COUNT1 => $counter1, COUNT2 => $counter2, EVENTTYPE => $serviceMap{$file}{"EVENTTYPE"}[0], QUERY => $query };
                 $counter2++;
             }
             push @serviceList, { TYPE => $serviceMap{$file}{"TYPE"}, CONTENTS => \@temp };

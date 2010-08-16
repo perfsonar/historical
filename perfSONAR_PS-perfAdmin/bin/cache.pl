@@ -355,6 +355,7 @@ foreach my $h ( keys %hls_results ) {
                     if ( $value eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" ) {
                         $value = "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0";
                     }
+                    
                     # more eventTypes as needed...
 
                     # we should be tracking things here, eliminate duplicates
@@ -487,7 +488,7 @@ close( HLS );
 my %counter = ();
 foreach my $et ( keys %list ) {
     my $file = q{};
-    if ( $et eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" or $et eq "http://ggf.org/ns/nmwg/tools/snmp/2.0" ) {
+    if ( $et eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" or $et eq "http://ggf.org/ns/nmwg/tools/snmp/2.0" or $et eq "utilization" ) {
         $file = "list.snmpma";
     }
     elsif ( $et eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" or $et eq "http://ggf.org/ns/nmwg/tools/pinger/2.0" ) {
@@ -496,7 +497,7 @@ foreach my $et ( keys %list ) {
     elsif ( $et eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" or $et eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0" or $et eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" or $et eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" ) {
         $file = "list.psb.bwctl";
     }
-    elsif ( $et eq "http://ggf.org/ns/nmwg/tools/owamp/2.0" ) {
+    elsif ( $et eq "http://ggf.org/ns/nmwg/tools/owamp/2.0" or $et eq "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" ) {
         $file = "list.psb.owamp";
     }
     elsif ( $et eq "http://ggf.org/ns/nmwg/tools/bwctl/1.0" ) {
@@ -517,8 +518,17 @@ foreach my $et ( keys %list ) {
     elsif ( $et eq "http://ggf.org/ns/nmwg/tools/ping/1.0" ) {
         $file = "list.ping";
     }
+    elsif ( $et eq "http://ggf.org/ns/nmwg/topology/20070809" ) {
+        $file = "list.ts";
+    }
     elsif ( $et eq "http://ggf.org/ns/nmwg/tools/phoebus/1.0" ) {
         $file = "list.phoebus";
+    }
+    elsif ( $et eq "http://docs.oasis-open.org/wsn/br-2" ) {
+        $file = "list.idcnb";
+    }
+    elsif ( $et eq "http://oscars.es.net/OSCARS" ) {
+        $file = "list.idc";
     }
     next unless $file;
 

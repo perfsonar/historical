@@ -186,9 +186,11 @@
           <tmpl_var name=DESC>
         </td>       
         <td align="center">
-
+          <tmpl_if name=QUERY>
           <input type="submit" value="Query" id="<tmpl_var name=COUNT1>_<tmpl_var name=COUNT2>" name="<tmpl_var name=COUNT1>_<tmpl_var name=COUNT2>" onClick="window.open('./serviceTest.cgi?url=<tmpl_var name=SERVICE>&eventType=<tmpl_var name=EVENTTYPE>','graphwindow_<tmpl_var name=COUNT1>_<tmpl_var name=COUNT2>','width=800,height=600,status=yes,scrollbars=yes,resizable=yes,status=yes,toolbar=yes,location=yes,menubar=yes')" />
-
+          <tmpl_else>
+          <br>
+          </tmpl_if>
         </td>     
       </tr>
       </tmpl_loop>
