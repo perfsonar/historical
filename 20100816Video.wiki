@@ -1,0 +1,39 @@
+=  Aug 16 2010 Conference Call 2:30 p.m. EDT =
+== Agenda/Minutes ==
+ # Attendees:
+   *  Andy, Somya, Brian, Jason, Marcos, Aaron, Kavitha, Jeff
+ # Followup on previous actions:
+   * _*ACTION*_: Maxim, Jason and Aaron will incorporate pinger check script into release 3.2. (Sub-action: Aaron will check with Maxim on this.)
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will send out the SOP expectations to the list to see if everyone on this list agrees. If we are in agreement in pS-PS, Joe will take it to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
+   * _*ACTION*_: Andy will evaluate the current traceroute rnc file and the rfc to determine what schema the tracerouteMA should use. Compatibility is the goal.
+      * Andy will move forward with the current rnc file which looks like a subset of the rfc. We can upgrade later if wanted.
+   * _*ACTION*_: Jason will talk with Maxim to determine what can be done to fix the pingER GUI and will discuss the results with Atlas to determine if there will be user concerns.
+      * Tom T. will be trying to fix it. Atlas would rather the release was not delayed.
+   * _*ACTION*_: Andy and/or Somya will deploy nagios checks against ESnet and Ineternet2 gLSs
+      * Andy has deployed some of them. Andy will send out a link.
+ # Team Updates
+   * Marcos: Has finished ip summarization development. He will come up with a test plan.
+   * Brian:  Would like to have a focused session in the near future to talk about 3.3 priorities.
+   * Andy: Started coding traceroute-ma in a branch. Doing a quick proof-of-concept now and will integrate into pS-B later. Looking at packaging nagios plugins.
+   * Aaron: rc-2 release of pS-PTK.
+   * Somya: Working on a GUI to show top/bottom performing links based on owamp/bwctl data.
+   * Jason: rc-2 is out, trying to get testers. Have a reasonable list of bugs. Jason will sort through them and determine critical vs non-critical bugs. Aiming for first week of sept for final release.
+   * Kavitha: nothing
+   * Jeff: nothing
+ # Next call will be 8/23
+=== ACTIONS ===
+   * _*ACTION*_: Maxim, Jason and Aaron will incorporate pinger check script into release 3.2. (Sub-action: Aaron will check with Maxim on this.)
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will send out the SOP expectations to the list to see if everyone on this list agrees. If we are in agreement in pS-PS, Joe will take it to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
+   * _*ACTION*_: Jason will sort through current bugs to determine what must be fixed for 3.2 to be finalized.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities.
+== Where ==
+ESnet conference bridge:
+ * GDS: 00113498255555
+ * Direct Dial:  mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-883-7860 then 8255555# at the prompt. 
