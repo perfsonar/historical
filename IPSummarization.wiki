@@ -3351,11 +3351,41 @@ http://perfsonar-ps.googlecode.com/svn/wiki/IPSummarization/running_times.png
 
 == Integration with gLS.pm code ==
 
-The algorithm was integrated into the LS code (gLS.pm) in a test branch.  It operates in the following manner:
+The algorithm was integrated into the LS code (gLS.pm) in a test branch.  It comprises the files:
 
-The function `ipSummarization` within this code receives a list of IPv4 addresses as input and calls the IP summarization algorithm.  The algorithm builds a PATRICIA tree by inserting each individual address, creating other IP address that represent the CIDR classes in the process.  Then, the tree is traversed and some IP addresses are chosen according to the heuristic decisions and parameters.  The algorithm returns a pointer to a list of IP addresses (that represent the summarized IP address list).
+{{{
+gLS.pm
+IpTrie.pm
+IpTrieNode.pm
+Trie.pm
+TrieNode.pm
+README_IP_summarization.html
+daemon.conf
+}}}
 
-Function `ipSummarization` makes use of the modules IpTrie.pm, IpTrieNode.pm, Trie.pm, and TrieNode.pm.  Refer to the README_IP_summarization.html file for more information on the algorithm.
+All files, but `daemon.conf` reside in the same place as gLS.pm (perfSONAR_PS::Services::LS); file `daemon.conf` continues in its original place.
+
+The Perl library Net::IP must be installed prior to execution.  The command:
+
+{{{
+sudo cpan install Net::IP
+}}}
+
+or
+
+{{{
+sudo yum --nogpgcheck install perl-Net-IP
+}}}
+
+(choose depending on which one Linux wants to accept) installs the required library.  The Lookup Service installation scripts must be modified in order to automatically include this library.
+
+=== Operation ===
+
+The integrated code operates in the following manner:
+
+The function `ipSummarization` within gLS.pm receives a list of IPv4 addresses as input and calls the IP summarization algorithm.  The algorithm builds a PATRICIA tree by inserting each individual address, creating other IP address that represent the CIDR classes in the process.  Then, the tree is traversed and some IP addresses are chosen according to the heuristic decisions and parameters.  The algorithm returns a pointer to a list of IP addresses (that represent the summarized IP address list).
+
+Function `ipSummarization` makes use of the modules IpTrie.pm, IpTrieNode.pm, Trie.pm, and TrieNode.pm, all residing in the same place as the file gLS.pm (see above).  Refer to the README_IP_summarization.html file for more information on the algorithm.  The original gLS code was modified only in the function `ipSummarization`, and also the inclusion of some lines to manipulate the additional parameters described next.  No other part of the original gLS code was altered; the LS original functions, besides the IP summarization, should continue to work as before.
 
 There are two parameters to control the algorithm (implemented through the file daemon.conf):
 
@@ -3390,7 +3420,7 @@ This is an example of a full configuration file including the new two parameters
 			service_type	                hLS
 			
 			summarization_granularity       1   #integer between [0;3]; 0 is coarser, 3 is finer (larger summarization)
-                        summarization_minMask           8   #minimum CIDR mask in summarization; for IPv4, 0 to 32
+            summarization_minMask           8   #minimum CIDR mask in summarization; for IPv4, 0 to 32
                                                             #summarized IP addresses will not have a mask smaller than minMask
 
 			
@@ -3419,7 +3449,34 @@ The LS with the new algorithm was deployed in server `moonshine` at University o
 
 The algorithm was found to be summarizing the IP addresses as expected, and returning a proper list of addresses.
 
-It is suggested that one hLS with the new algorithm be deployed in a real environment with more services registering to it, and its operation be scrutinized together with its publishing of the summarized sets to the gLS cloud.  Also, verify the operation of the integrated code in gLS mode. 
+Another round of testing comprised one hLS and one gLS both located in separate virtual nodes in [http://www.planet-lab.org PlanetLab].  This test consisted in:
+
+ * 20 `fakeServices` (10 services from domain 110.100.x.y, and 10 services from domain 200.100.x.y) registering to the hLS, and this hLS publishing the summarization to the gLS.
+ * First, both the hLS and the gLS were started with the legacy code, and the complete LSStore was queried and saved in a file for each service.
+ * Second, both the hLS and the gLS were started with the new IP summarization code; the same 10 `fakeServices` registered to the hLS, and the complete LSStore was queried and saved in a file for each service.
+ * Outputs from the legacy and new code were compared.
+ 
+To query the complete LSStore from the services, the view.cgi script from perfAdmin was used.
+
+The two LS services are:
+
+{{{
+http://plonk.cs.uwaterloo.ca:9995/perfSONAR_PS/services/gLS
+http://plink.cs.uwaterloo.ca:9995/perfSONAR_PS/services/hLS
+}}}
+
+The outputs collected from each service are below:
+
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/IPSummarization/plink_cs_uwaterloo_ca9995-perfSONAR_PS-services-hLS-legacy.html hLS output for the legacy summarization algorithm.]
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/IPSummarization/plink_cs_uwaterloo_ca9995-perfSONAR_PS-services-hLS-new.html hLS output for the new summarization algorithm.]
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/IPSummarization/plonk_cs_uwaterloo_ca9995-perfSONAR_PS-services-gLS-legacy.html gLS output for the legacy summarization algorithm.]
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/IPSummarization/plonk_cs_uwaterloo_ca9995-perfSONAR_PS-services-gLS-new.html gLS output for the new summarization algorithm.]
+ 
+The difference in the compression level of the IP summarization between the legacy and new algorithms is evident, by glancing at the outputs of the gLS.  Moreover, the outputs initially attest that the overall functions of the LS, apart from IP summarization, are working accordingly, both for gLS and hLS modes.
+ 
+These results above are for `fakeServices`.  It is furthermore suggested -- for more comprehensive testing and to verify that all of the untouched part of the original LS code remains operational -- that one hLS with the new algorithm be deployed in a real environment with more "legitimate" services registering to it, and its operation be scrutinized (proper registration, response to queries) together with its publishing of the summarized sets (IP addresses and metadata) to the gLS cloud.  The "legitimate" services could be instances configured specifically for this purpose, or non-critical instances already in use.
+
+Also, verify the operation of the integrated code in gLS mode.  This gLS could integrate the normal gLS cloud (such that it would synchronize a large database of services) and allowed to operate for a limited time, during which it would be watched closely.
  
 == Final Integration and Deployment to Production ==
 
