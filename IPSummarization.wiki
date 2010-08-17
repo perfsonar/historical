@@ -3351,7 +3351,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/IPSummarization/running_times.png
 
 == Integration with gLS.pm code ==
 
-The algorithm was integrated into the LS code (gLS.pm) in a test branch.  It comprises the files:
+The algorithm was integrated into the LS code (gLS.pm) in a test branch (branches/jz-lsperformance in perfSONAR svn).  It comprises the files:
 
 {{{
 gLS.pm
