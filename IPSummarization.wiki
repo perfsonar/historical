@@ -3473,7 +3473,9 @@ The outputs collected from each service are below:
  * [http://perfsonar-ps.googlecode.com/svn/wiki/IPSummarization/plonk_cs_uwaterloo_ca9995-perfSONAR_PS-services-gLS-new.html gLS output for the new summarization algorithm.]
  
 The difference in the compression level of the IP summarization between the legacy and new algorithms is evident, by glancing at the outputs of the gLS.  Moreover, the outputs initially attest that the overall functions of the LS, apart from IP summarization, are working accordingly, both for gLS and hLS modes.
- 
+
+=== Further Testing ===
+
 These results above are for `fakeServices`.  It is furthermore suggested -- for more comprehensive testing and to verify that all of the untouched part of the original LS code remains operational -- that one hLS with the new algorithm be deployed in a real environment with more "legitimate" services registering to it, and its operation be scrutinized (proper registration, response to queries) together with its publishing of the summarized sets (IP addresses and metadata) to the gLS cloud.  The "legitimate" services could be instances configured specifically for this purpose, or non-critical instances already in use.
 
 Also, verify the operation of the integrated code in gLS mode.  This gLS could integrate the normal gLS cloud (such that it would synchronize a large database of services) and allowed to operate for a limited time, during which it would be watched closely.
