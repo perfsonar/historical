@@ -3420,7 +3420,7 @@ This is an example of a full configuration file including the new two parameters
 			service_type	                hLS
 			
 			summarization_granularity       1   #integer between [0;3]; 0 is coarser, 3 is finer (larger summarization)
-            summarization_minMask           8   #minimum CIDR mask in summarization; for IPv4, 0 to 32
+			summarization_minMask           8   #minimum CIDR mask in summarization; for IPv4, 0 to 32
                                                             #summarized IP addresses will not have a mask smaller than minMask
 
 			
