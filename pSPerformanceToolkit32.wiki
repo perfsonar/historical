@@ -113,11 +113,11 @@ Options can be presented at this time (e.g. going into single user mode) but if 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/boot-msg.png
 
-The pS Performance Toolkit features a system check to be sure some *_very_* minimal system requirements are met.  The following warning is used when the system memory is too low:
+Some services will not start on first load, and as such there may be red <font color="red">FAILED</font> warnings on the screen.  This is normal.  In particular, NTP (the time service) will not be active when the server starts.  This will cause some tools like BWCTL to fail as well.  Over time (usually around an hour) NTP will stabalize and the pSPT will automatically re-start failed services.  For a picture of NTP failing on boot, see below:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/disk-warn.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/boot-ntp.png
 
-The system is configured to search for addresses via DHCP by default.  This may cause the system to pause for a short amount of time if there is no DHCP server on the target network.  Note that in the [pSPerformanceToolkit32#Console Console Configuration] phase a static IP can be specified.  The following shows the DHCP client getting an address:
+The system is configured to search for addresses via DHCP by default.  This may cause the system to pause for a short amount of time if there is no DHCP server on the target network.  Note that in the [pSPerformanceToolkit32#Console Console Configuration] phase a static IP can be specified.  The following shows the messages that will appear when the host searches for available network interfaces.  Note that we get a successful DHCP address on *eth0*:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/dhcp.png
 
@@ -127,14 +127,23 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/login.png
 
 To log in to your new system, use the _*root*_ user, and a blank password:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/login-knoppix.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/login-centos.png
+
+After logging in for the first time, the root user is *required* to set a new non-blank password.  Note that CentOS requires this to be a password of moderate strength, and will prompt the user to pick something it feels is strong.  After finishing this step, login is complete.  See the image below:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/login-changepw.png
+
 
 The message at login describes the two main forms of [pSPerformanceToolkit32#Configuration Configuration]:
 
 {{{
-To start configuration, login as user knoppix and run 'sudo nptoolkit-configure.py'.
-Once you set passwords, you can login to the web interface and finish configuration.
-The web interface should be available at: https://lab246.internet2.edu/
+To start configuration, run:
+
+sudo /opt/perfsonar_ps/toolkit/scripts/nptoolkit-configure.py
+
+Once you set passwords, you can login to the web interface and finish configuration. The web interface should be available at: 
+
+https://[host address]/toolkit
 }}}
 
 == Configuration ==
