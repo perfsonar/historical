@@ -389,6 +389,13 @@ The following issues remain after the RC testing.  These will either be addresse
 || Empty hostname || edit "/etc/sysconfig/network" and fill in the HOSTNAME variable || <font color="red">_*NOT STARTED*_</font> ||
 || RC1 Netinstall, doing a yum update changed the kernel away from web100 || How to handle this...add kernel to yum blacklist and force a manual upgrade?  live with an upgraded non-web100 kernel? || <font color="red">_*NOT STARTED*_</font> ||
 || Manually entering a host for a bwctl regular test, save and get a positive result, host is not added.  Further digging points to a problem with the entered port number.  See email for more info || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Add a Link to the perfAdmin LS view on the service status page for the hLS || TBD ... also may want a more sanitized view instead of raw xml || <font color="red">_*NOT STARTED*_</font> ||
+|| Ensure that DB backup script backs up to /var/log, this will place it in the backing store || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Add /var/lib/perfsonar to backing store || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Host status (e.g. disk/memory/cpu) on the service status page || TBD, can do it with proc for now, but what about ganglia? || <font color="red">_*NOT STARTED*_</font> ||
+|| Add FAQ item about different localizations in dojo - and the possibility that new errors can be introduced (e.g. spacing) || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Add NTP status to the status page for each host (e.g. something simple like synced or not) || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Add EU servers to NTP List || TBD || <font color="red">_*NOT STARTED*_</font> ||
 
 == Bugs Related to This Release ==
 
@@ -414,11 +421,11 @@ The following bugs were held over for the next minor release:
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - _*Aaron/Eric*_ - myricom driver isn't up to date
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=352 352] - _*Aaron/Jeff*_ - upgrade script for pSB databases
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - _*Aaron/Jason*_ - Firewall guidance	 
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - _*Aaron/Eric*_ - LinuxPPS Support	 
-  
-  
-The following new bugs were identified, and are not classified yet:
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - _*Aaron/Eric*_ - LinuxPPS Support
 
+== Unclassified Bugs ==
+
+The following new bugs were identified, and are not classified yet:
 
 || *Issue* || *Synopsis* || *Status* ||
 || Unecessary packages in pSPT, most likely from upstream CentOS defaults || Can maybe remove some, definitely not all (pulled in for dependency reasons) || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
@@ -426,9 +433,8 @@ The following new bugs were identified, and are not classified yet:
 || empty resolve.conf, domino effect to the LS cache daemon and NTP || watching for other instances || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
 || LS Cache - won't need to 'update' this before release due to new cache service || TBD || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
 || Timezone is reset to EDT on upgrade || Stored in a data file, may not be able to tell if this is changed... || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
-    
-         
-         
+
+
 == Code Reviews ==
 
 Not applicable in this release.  
