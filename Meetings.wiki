@@ -5,10 +5,11 @@ face to face meetings are available here.  Please use the !MeetingTemplate when
 applicable.
 
 == Future Events ==
-   * [20100816Video] - Video Conference for Aug 16, 2010
+   * [20100823Video] - Video Conference for Aug 23, 2010
 == Past Events ==
 
  * 2010
+   * [20100816Video] - Video Conference for Aug 16, 2010
    * [20100802Video] - Video Conference for Aug 2, 2010
    * [20100726Video] - Video Conference for July 26, 2010
    * [20100614APICall] - API Conference Call for June 14, 2010
