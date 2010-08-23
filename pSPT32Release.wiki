@@ -416,7 +416,9 @@ The following bugs were held over for the next minor release:
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - _*Aaron/Jason*_ - Firewall guidance	 
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - _*Aaron/Eric*_ - LinuxPPS Support	 
   
+  
 The following new bugs were identified, and are not classified yet:
+
 
 || *Issue* || *Synopsis* || *Status* ||
 || Unecessary packages in pSPT, most likely from upstream CentOS defaults || Can maybe remove some, definitely not all (pulled in for dependency reasons) || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
@@ -424,7 +426,8 @@ The following new bugs were identified, and are not classified yet:
 || empty resolve.conf, domino effect to the LS cache daemon and NTP || watching for other instances || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
 || LS Cache - won't need to 'update' this before release due to new cache service || TBD || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
 || Timezone is reset to EDT on upgrade || Stored in a data file, may not be able to tell if this is changed... || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
-|| TBD || TBD || <font color="purple">_*HELD OVER FOR 3.2.1*_</font> ||
+    
+         
          
 == Code Reviews ==
 
