@@ -1,24 +1,39 @@
 =  Aug 23 2010 Conference Call 2:30 p.m. EDT =
 == Agenda/Minutes ==
  # Attendees:
-   *  
+   * Ken, Jason, Joe, Brian, Andy, Kavitha, Aaron
  # Followup on previous actions:
    * _*ACTION*_: Maxim, Jason and Aaron will incorporate pinger check script into release 3.2. (Sub-action: Aaron will check with Maxim on this.)
+     * Move to 3.2.1.
    * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
    * _*ACTION*_: Joe will send out the SOP expectations to the list to see if everyone on this list agrees. If we are in agreement in pS-PS, Joe will take it to DICE.
    * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
    * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
    * _*ACTION*_: Jason will sort through current bugs to determine what must be fixed for 3.2 to be finalized.
+     * done
    * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities.
  # Team Updates
    * *Only things people think can't wait until next week*
  # pS-PTK 3.2 release update (Jason/Aaron)
+   * No new major bugs found. Putting out another RC-3 which will hopefully become final.
+   * Discussion on tcp options.
+   * Discussion of performance problems for BNL after upgrade.
  # pS-PS/owamp latency relation to Hades (Joe)
    * DICE - common diagnostic service Q1 2011
+   * Need to think about how pS-PTK and pS-PS in general need to be modified in support of a common DICE diagnostic service.
  # hls Nagios checks (Brian)
+   * Lots of warnings right now. Things look fragile. What can we do?
+   * First step is making sure the measurements are good. Once we are sure of that, we can go on to: modifying configurable options, verify interaction between components is good, and then instrument services to determine problems within services.
  # pS-PS 3.3 functionality
+   * Aim for a half day VC the second week of Sept.
  # Next call will be 8/23
 === ACTIONS ===
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will take SOP to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities.
+   * _*ACTION*_: All - Review release wiki page to determine if any are critical for 3.2. [pSPT32Release]
+   * _*ACTION*_: Jeff and Aaron will discuss how the tcp options will be set for 3.2 with Tom.
 == Where ==
 ESnet conference bridge:
  * GDS: 00113498255555
