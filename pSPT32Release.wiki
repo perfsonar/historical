@@ -44,12 +44,12 @@ Beta, and RC:
 || Milestone Base 4 || ~~June 11th~~ June 16th || <font color="green">_*DONE - 6/16*_</font> ||
 || Milestone Boot CD || June 11th || <font color="green">_*DONE - 6/11*_</font> ||
 || Milestone LiveCD 1 || Week of 6/14 (Development), Week of 6/21 (Testing) || <font color="green">_*DONE - 6/30*_</font> ||
-|| Milestone LiveCD 2 || Week of 8/2 || <font color="yellow">_*DONE - 8/13*_</font> ||
-|| Milestone LiveCD 3 || Week of 8/16 || <font color="yellow">_*IN PROGRESS - 8/23*_</font> ||
+|| Milestone LiveCD 2 || ~~Week of 8/2~~ Week of 8/13 || <font color="green">_*DONE - 8/13*_</font> ||
+|| ~~Milestone LiveCD 3~~ || ~~Week of 8/16~~ || <font color="purple">_*NOT NEEDED*_</font> ||
 || ~~Milestone Install Disk 1~~ || ~~Week of 6/14~~ ~~Week of 6/21~~ ~~Week of 6/28~~ ~~Week of 7/26~~ TBD || <font color="purple">_*PUSHED OFF - 8/2*_</font> ||
 || ~~Milestone Install Disk 2~~ || ~~Week of 6/28~~ ~~Week of 8/16~~ TBD || <font color="purple">_*PUSHED OFF - 8/2*_</font> ||
-|| ~~Milestone RC 1~~ || ~~Week of 8/23~~ || ~~<font color="red">_*NOT STARTED*_</font>~~ ||
-|| ~~Milestone RC 2~~ || ~~Week of 8/30~~ || ~~<font color="red">_*NOT STARTED*_</font>~~ ||
+|| ~~Milestone RC 1~~ || ~~Week of 8/23~~ || <font color="purple">_*NOT NEEDED*_</font> ||
+|| ~~Milestone RC 2~~ || ~~Week of 8/30~~ || <font color="purple">_*NOT NEEDED*_</font> ||
 || Milestone Final || Week of 9/6 || <font color="yellow">_*IN PROGRESS*_</font> ||
 
 The following sections breakdown of each milestone of this release.
