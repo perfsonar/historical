@@ -382,7 +382,7 @@ The following issues remain after the RC testing.  These will either be addresse
 || Document where RPMs (for a netinstall) will get downloaded from || <font color="purple">No</font> || E.g. if ACLs are needed, etc.  Currently downloads from ndb1.internet2.edu || <font color="red">_*NOT STARTED*_</font> ||
 || upgrade the kernel to the newest RH version || <font color="red">Yes</font> || TBD || <font color="yellow">_*IN PROGRESS*_</font> ||
 || Typo in the '/opt/perfsonar_ps/toolkit/scripts/discover_external_address' configuration file to allow internal addressing || <font color="red">Yes</font> || TBD || <font color="yellow">_*IN PROGRESS*_</font> ||
-|| NDT/NPAD do not function w/ IPv6 || Adjust RPM packages/init script.  After doing so, protocol error w/ v4 tests || <font color="purple">No</font> || <font color="red">_*NOT STARTED*_</font> ||
+|| NDT/NPAD do not function w/ IPv6 || <font color="purple">No</font> || Adjust RPM packages/init script.  After doing so, protocol error w/ v4 tests || <font color="red">_*NOT STARTED*_</font> ||
 || LiveCD data not persistent, forgets passwords and settings || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || ~~Visiting 'root' of the web (in https) gets the apache default page~~ || <font color="red">Yes</font> || || <font color="green">_*FIXED*_</font> ||
 || Problems saving configuration of regular testing || <font color="red">Yes</font> || Was related to lack of external address - error messages could reflect this? || <font color="red">_*NOT STARTED*_</font> ||
