@@ -384,14 +384,14 @@ The following issues remain after the RC testing.  These will either be addresse
 || ~~Typo in the '/opt/perfsonar_ps/toolkit/scripts/discover_external_address' configuration file to allow internal addressing~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
 || NDT/NPAD do not function w/ IPv6 || <font color="purple">No</font> || Adjust RPM packages/init script.  After doing so, protocol error w/ v4 tests || <font color="red">_*NOT STARTED*_</font> ||
 || LiveCD data not persistent, forgets passwords and settings || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| ~~Visiting 'root' of the web (in https) gets the apache default page~~ || <font color="red">Yes</font> || || <font color="green">_*FIXED*_</font> ||
-|| ~~Problems saving configuration of regular testing~~ || <font color="red">Yes</font> || Was related to lack of external address - error messages could reflect this? || <font color="green">_*FIXED*_</font> ||
+|| ~~Visiting 'root' of the web (in https) gets the apache default page~~ || <font color="red">Yes</font> || || <font color="green">_*DONE*_</font> ||
+|| ~~Problems saving configuration of regular testing~~ || <font color="red">Yes</font> || Was related to lack of external address - error messages could reflect this? || <font color="green">_*DONE*_</font> ||
 || Empty hostname || <font color="purple">No</font> || edit "/etc/sysconfig/network" and fill in the HOSTNAME variable || <font color="red">_*NOT STARTED*_</font> ||
 || RC1 Netinstall, doing a yum update changed the kernel away from web100 || <font color="red">Yes</font> || How to handle this...add kernel to yum blacklist and force a manual upgrade?  live with an upgraded non-web100 kernel? || <font color="red">_*NOT STARTED*_</font> ||
 || Manually entering a host for a bwctl regular test, save and get a positive result, host is not added.  Further digging points to a problem with the entered port number.  See email for more info || <font color="purple">No</font> || Had to do with a dojo issue with french localization. Will need to upgrade dojo and hope it fixes the issue || <font color="red">_*NOT STARTED*_</font> ||
 || Add a Link to the perfAdmin LS view on the service status page for the hLS || <font color="purple">No</font> || TBD ... also may want a more sanitized view instead of raw xml || <font color="red">_*NOT STARTED*_</font> ||
 || Ensure that DB backup script backs up to /var/log, this will place it in the backing store || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Add /var/lib/perfsonar to backing store || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| ~~Add /var/lib/perfsonar/perfsonarbuoy_ma to backing store~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
 || Host status (e.g. disk/memory/cpu) on the service status page || <font color="purple">No</font> || TBD, can do it with proc for now, but what about ganglia? || <font color="red">_*NOT STARTED*_</font> ||
 || Add FAQ item about different localizations in dojo - and the possibility that new errors can be introduced (e.g. spacing) || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Add NTP status to the status page for each host (e.g. something simple like synced or not) || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
