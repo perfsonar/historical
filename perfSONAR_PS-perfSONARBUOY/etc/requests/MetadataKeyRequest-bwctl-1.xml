@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  perfSONAR-PS pSB MetadataKeyRequest Message (for BWCTL data)
+  
+  Use: 
+    perl client.pl URL MetadataKeyRequest-bwctl-1.xml
+    
+  Expected Response (Note that the lack of parameters returned 3 possible
+                     matches):
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="metadataKeyRequest1" id="message.4407555" type="MetadataKeyResponse">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.9052495" metadataIdRef="metadata-116">
+    <iperf:subject xmlns:iperf="http://ggf.org/ns/nmwg/tools/iperf/2.0/" id="subject-116">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src value="64.57.16.130" type="ipv4"/>
+        <nmwgt:dst value="64.57.17.82" type="ipv4"/>
+      </nmwgt:endPointPair>
+    </iperf:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>
+    <nmwg:parameters id="parameters-116">
+      <nmwg:parameter name="protocol">UDP</nmwg:parameter>
+      <nmwg:parameter name="windowSize">1</nmwg:parameter>
+      <nmwg:parameter name="bandwidthLimit">900</nmwg:parameter>
+      <nmwg:parameter name="bufferLength">8192</nmwg:parameter>
+      <nmwg:parameter name="timeDuration">10</nmwg:parameter>
+    </nmwg:parameters>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.9052495" id="data.12321489">
+    <nmwg:key>
+      <nmwg:parameters id="params.0">
+        <nmwg:parameter name="maKey">6ed3620ea64060bc8be5ded244b97fa9</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.15094923" metadataIdRef="metadata-117">
+    <iperf:subject xmlns:iperf="http://ggf.org/ns/nmwg/tools/iperf/2.0/" id="subject-117">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src value="64.57.16.130" type="ipv4"/>
+        <nmwgt:dst value="64.57.17.82" type="ipv4"/>
+      </nmwgt:endPointPair>
+    </iperf:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>
+    <nmwg:parameters id="parameters-117">
+      <nmwg:parameter name="protocol">TCP</nmwg:parameter>
+      <nmwg:parameter name="windowSize">4</nmwg:parameter>
+      <nmwg:parameter name="timeDuration">60</nmwg:parameter>
+    </nmwg:parameters>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.15094923" id="data.10153162">
+    <nmwg:key>
+      <nmwg:parameters id="params.0">
+        <nmwg:parameter name="maKey">64c28f3d5ff49077c2605bdfd0ef719d</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.6106150" metadataIdRef="metadata-118">
+    <iperf:subject xmlns:iperf="http://ggf.org/ns/nmwg/tools/iperf/2.0/" id="subject-118">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src value="64.57.16.130" type="ipv4"/>
+        <nmwgt:dst value="64.57.17.82" type="ipv4"/>
+      </nmwgt:endPointPair>
+    </iperf:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>
+    <nmwg:parameters id="parameters-118">
+      <nmwg:parameter name="protocol">TCP</nmwg:parameter>
+      <nmwg:parameter name="timeDuration">60</nmwg:parameter>
+    </nmwg:parameters>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.6106150" id="data.8184108">
+    <nmwg:key>
+      <nmwg:parameters id="params.0">
+        <nmwg:parameter name="maKey">6f3a843a12de4f44fd6730b605be652e</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+  
+</nmwg:message>
+
+  Error Response (If the metadata is not found)
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="metadataKeyRequest1" id="message.2487095" type="MetadataKeyResponse">
+
+  <nmwg:metadata metadataIdRef="meta1" id="metadata.4237759">
+    <nmwg:eventType>error.ma.storage</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.4237759" id="data.14859327">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">Database "/var/lib/perfsonar/perfsonarbuoy_ma/store.xml" returned 0 results for search</nmwgr:datum>
+  </nmwg:data>
+
+</nmwg:message>
+
+-->
+
+<nmwg:message type="MetadataKeyRequest" id="metadataKeyRequest1"
+              xmlns:iperf= "http://ggf.org/ns/nmwg/tools/iperf/2.0/"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
+
+  <!-- get one metric, no parameters, not using a key, 
+       no specified data range -->
+  
+  <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <iperf:subject xmlns:iperf= "http://ggf.org/ns/nmwg/tools/iperf/2.0/" id="s-in-iperf-1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="ipv4" value="64.57.16.130" />
+        <nmwgt:dst type="ipv4" value="64.57.17.82" />
+      </nmwgt:endPointPair>
+    </iperf:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>
+  </nmwg:metadata> 
+  <nmwg:data id="data1" metadataIdRef="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"/>
+
+</nmwg:message>

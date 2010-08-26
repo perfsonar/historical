@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  perfSONAR-PS pSB SetupDataRequest Message (for OWAMP data)
+  
+  Use: 
+    perl client.pl URL SetupDataRequest-owamp-5.xml
+    
+  Expected Response (Note data content will depend on selected data range):
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="setupDataRequest1" id="message.1451974" type="SetupDataResponse">
+  <nmwg:metadata metadataIdRef="meta4c" id="metadata.6029196">
+    <nmwg:key xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+      <nmwg:parameters id="params.0">
+        <nmwg:parameter name="maKey">2d826ba1a78c47e6f9bacd9838729276</nmwg:parameter>
+        <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="startTime">1282746000</nmwg:parameter>
+        <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="endTime">1282746060</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.6029196" id="data.6407172">
+    <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921/" minTTL="252" min_delay="0.0151153" maxError="0.000340462" max_delay="0.015151" timeType="iso" duplicates="0" endTime="Wed Aug 25 14:20:09.2638497491 UTC 2010" loss="0" startTime="Wed Aug 25 14:19:12.3377823037 UTC 2010" sent="600" maxTTL="252"/>
+  </nmwg:data>
+</nmwg:message>
+
+  Expected Alternate Response:
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="setupDataRequest1" id="message.5559414" type="SetupDataResponse">
+
+  <nmwg:metadata metadataIdRef="meta4c" id="metadata.12432789">
+    <nmwg:key xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+      <nmwg:parameters id="params.0">
+        <nmwg:parameter name="maKey">2d826ba1a78c47e6f9bacd9838729276</nmwg:parameter>
+        <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="startTime">1482746000</nmwg:parameter>
+        <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="endTime">1482746060</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.12432789" id="data.8512243">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">Query returned 0 results</nmwgr:datum>
+  </nmwg:data>
+
+</nmwg:message>
+
+  Error Response (key not found or bad):
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="setupDataRequest1" id="message.15178942" type="SetupDataResponse">
+
+  <nmwg:metadata metadataIdRef="meta4c" id="metadata.3517422">
+    <nmwg:eventType>error.ma.storage_result</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.3517422" id="data.13691893">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">Key error in metadata storage: 'maKey' cannot be found.</nmwgr:datum>
+  </nmwg:data>
+
+</nmwg:message>
+
+-->
+
+<nmwg:message type="SetupDataRequest" id="setupDataRequest1"
+              xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
+
+  <!--
+  Use this parameter to let the server know you are capable of 
+  understanding datum elements that match the eventType namespace 
+  (instead of just nmwg:)
+  -->
+
+  <!--
+  <nmwg:parameters>
+    <nmwg:parameter name="eventNameSpaceSynchronization">true</nmwg:parameter>
+  </nmwg:parameters> 
+  -->
+
+  <!-- using a key, specified data range with cooked key -->   
+  
+  <nmwg:metadata id="meta5" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:key>
+      <nmwg:parameters id="params.0">
+        <nmwg:parameter name="maKey">2d826ba1a78c47e6f9bacd9838729276</nmwg:parameter>
+        <nmwg:parameter name="startTime">1282746000</nmwg:parameter>
+        <nmwg:parameter name="endTime">1282746060</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata> 
+  <nmwg:data id="data5" metadataIdRef="meta5" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"/>  
+
+</nmwg:message>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  perfSONAR-PS pSB MetadataKeyRequest Message (for OWAMP data)
+  
+  Use: 
+    perl client.pl URL MetadataKeyRequest-owamp-5.xml
+    
+  Expected Response:
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="metadataKeyRequest1" id="message.9384924" type="MetadataKeyResponse">
+
+  <nmwg:metadata metadataIdRef="meta5" id="metadata.5634051">
+    <nmwg:key>
+      <nmwg:parameters id="params.0">
+        <nmwg:parameter name="maKey">2d826ba1a78c47e6f9bacd9838729276</nmwg:parameter>
+        <nmwg:parameter name="startTime">1282746000</nmwg:parameter>
+        <nmwg:parameter name="endTime">1282747000</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.5634051" id="data.15349245">
+    <nmwg:key xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+      <nmwg:parameters id="params.0">
+        <nmwg:parameter name="maKey">2d826ba1a78c47e6f9bacd9838729276</nmwg:parameter>
+        <nmwg:parameter name="startTime">1282746000</nmwg:parameter>
+        <nmwg:parameter name="endTime">1282747000</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+</nmwg:message>
+
+  Error Response (If the key is not found or bad):
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="metadataKeyRequest1" id="message.16575129" type="MetadataKeyResponse">
+
+  <nmwg:metadata metadataIdRef="meta3" id="metadata.12713869">
+    <nmwg:eventType>error.ma.storage_result</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.12713869" id="data.8289168">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">Key error in metadata storage: 'maKey' cannot be found.</nmwgr:datum>
+  </nmwg:data>
+
+</nmwg:message>
+
+-->
+
+<nmwg:message type="MetadataKeyRequest" id="metadataKeyRequest1"
+              xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
+  
+  <!-- get one metric, using a key, specified data range with cooked key -->   
+  
+  <nmwg:metadata id="meta5" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:key>
+      <nmwg:parameters id="params.0">
+        <nmwg:parameter name="maKey">2d826ba1a78c47e6f9bacd9838729276</nmwg:parameter>
+        <nmwg:parameter name="startTime">1282746000</nmwg:parameter>
+        <nmwg:parameter name="endTime">1282747000</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata> 
+  <nmwg:data id="data5" metadataIdRef="meta5" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"/>    
+
+</nmwg:message>
