@@ -1,7 +1,7 @@
 =  Aug 30 2010 Conference Call 2:30 p.m. EDT =
 == Agenda/Minutes ==
  # Attendees:
-   * 
+   * Andy, Eric, Somya, Jeff, Maxim, Jason, Aaron, Kavitha
  # Followup on previous actions:
    * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
    * _*ACTION*_: Joe will take SOP to DICE.
@@ -10,10 +10,28 @@
    * _*ACTION*_: All - Review release wiki page to determine if any are critical for 3.2. [pSPT32Release]
    * _*ACTION*_: Jeff and Aaron will discuss how the tcp options will be set for 3.2 with Tom.
  # Team Updates
-   *
+   * Andy: working on a traceroute mp that reads the owmesh.conf file, and works with pS-B. Illinois university having perf issues.
+   * Eric: Nothing
+   * Somya: Working on creating rpms for nagios plugins. Still working on dependency issues.
+   * Jeff: Nothing
+   * Maxim: Nothing
+   * Jason: Added ganglia MA. Added/Edited messages for pS-B as examples to answer EU questions. Atlas will monitor T2 sites with Nagios at BNL. Atlas still having perf problems with OU.
+   * Aaron: Debugging throughput performance for Atlas/pS-PTK. Will cover later durinng release update.
+   * Kavitha: Nothing
  # pS-PTK 3.2 release update (Jason/Aaron)
+   * Major issue is that 3.2 throughput performance is not as good.
+     * nic driver change and tcp options changes didn't help
+     * may be interrupt balancing in the kernel.
+     * will attempt to disable kernel interrupt balancing on a bnl 3.1.3 host
+     * will attempt to enable kernel interrupt balancing on 3.2 and test
  # Next call will be 9/13
 === ACTIONS ===
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will take SOP to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. Aim for a half day VC the second week of Sept.
+   * _*ACTION*_: All - Review release wiki page to determine if any are critical for 3.2. [pSPT32Release]
+   * _*ACTION*_: Jeff and Aaron will discuss how the tcp options will be set for 3.2 with Tom.
 == Where ==
 ESnet conference bridge:
  * GDS: 00113498255555
