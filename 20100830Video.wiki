@@ -1,0 +1,21 @@
+=  Aug 30 2010 Conference Call 2:30 p.m. EDT =
+== Agenda/Minutes ==
+ # Attendees:
+   * 
+ # Followup on previous actions:
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will take SOP to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. Aim for a half day VC the second week of Sept.
+   * _*ACTION*_: All - Review release wiki page to determine if any are critical for 3.2. [pSPT32Release]
+   * _*ACTION*_: Jeff and Aaron will discuss how the tcp options will be set for 3.2 with Tom.
+ # Team Updates
+   *
+ # pS-PTK 3.2 release update (Jason/Aaron)
+ # Next call will be 9/13
+=== ACTIONS ===
+== Where ==
+ESnet conference bridge:
+ * GDS: 00113498255555
+ * Direct Dial:  mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-883-7860 then 8255555# at the prompt. 
