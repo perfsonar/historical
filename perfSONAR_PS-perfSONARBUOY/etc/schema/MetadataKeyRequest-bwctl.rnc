@@ -1,0 +1,48 @@
+# ##############################################################################
+# 
+# File:      MetadataKeyRequest-bwctl.rnc - Schema for MetadataKeyRequest
+#            (BWCTL) messages
+# Version:   $Id$
+# Purpose:   Using the NMBase definitions, craft a specific shema for Metadata
+#            Key Request messages
+# 
+# ##############################################################################
+
+# NMWG Base namesapce and iperf namespace
+namespace nmwg = "http://ggf.org/ns/nmwg/base/2.0/"
+namespace iperf = "http://ggf.org/ns/nmwg/tools/iperf/2.0/"
+
+# Use the iperf schema file, but change some of the open ended defaults
+include "support/iperf.rnc" {
+    Type = 
+        attribute type { 
+            "MetadataKeyRequest" 
+        } 
+
+    IperfSubject =
+        element iperf:subject {
+            Identifier &
+            MetadataIdentifierRef? &        
+            (                   
+                EndpointPair
+            )
+        } |
+        element nmwg:subject {
+            Identifier &
+            MetadataIdentifierRef? &        
+            (                   
+                EndpointPair
+            )
+        }
+
+    IperfParameters =
+        element iperf:parameters {
+            Identifier &        
+            IperfParameter+
+        } |
+        element nmwg:parameters {
+            Identifier &        
+            IperfParameter+
+        }
+}
+

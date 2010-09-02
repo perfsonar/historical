@@ -1,0 +1,56 @@
+# ##############################################################################
+# 
+# File:      SetupDataResponse-owamp.rnc - Schema for SetupDataResponse
+#            (OWAMP) messages
+# Version:   $Id$
+# Purpose:   Using the NMBase definitions, craft a specific shema for Setup Data
+#            Response messages
+# 
+# ##############################################################################
+
+# NMWG Base namesapce and iperf namespace
+namespace nmwg = "http://ggf.org/ns/nmwg/base/2.0/"
+namespace owd = "http://ggf.org/ns/nmwg/characteristic/delay/one-way/20070914/"
+namespace summary = "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921/"
+namespace owamp = "http://ggf.org/ns/nmwg/tools/owamp/2.0/"
+namespace nmwgr = "http://ggf.org/ns/nmwg/result/2.0/"
+
+# Use the iperf schema file, but change some of the open ended defaults
+include "support/owdsummary.rnc" {
+    Type = 
+        attribute type { 
+            "SetupDataResponse" 
+        } 
+
+    SummarySubject =
+        element nmwg:subject {
+            Identifier &
+            MetadataIdentifierRef? &        
+            EndpointPair 
+        } |
+        element owamp:subject {
+            Identifier &
+            MetadataIdentifierRef? &        
+            EndpointPair 
+        } |
+        element summary:subject {
+            Identifier &
+            MetadataIdentifierRef? &        
+            EndpointPair 
+        }
+
+    SummaryParameters =
+        element nmwg:parameters {
+                Identifier &        
+                SummaryParameter+
+        } |
+        element owamp:parameters {
+                Identifier &        
+                SummaryParameter+
+        } |
+        element summary:parameters {
+                Identifier &        
+                SummaryParameter+
+        }
+}
+

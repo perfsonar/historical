@@ -1,0 +1,162 @@
+# ##############################################################
+# 
+# File:         filter.rnc - Extensions to support different
+#                            namespaced parameters.
+# Version:      $Id: filter.rnc 341 2008-04-24 21:52:11Z boote $
+# Purpose:      This extension to the basic parameters could be
+#               used to help make any implementation code decide
+#               on unmarshalling how to handle special cases.
+#               Our particular purpose with these constructs is
+#               to apply database or statistical operations to 
+#               datasets.
+# Reference:    http://books.xmlschemata.org/relaxng/page2.html
+#                         
+# ##############################################################
+
+
+# ##############################################################
+# Namespace definitions
+# ##############################################################
+namespace select = "http://ggf.org/ns/nmwg/ops/select/2.0/"
+namespace average = "http://ggf.org/ns/nmwg/ops/average/2.0/"
+namespace mean = "http://ggf.org/ns/nmwg/ops/mean/2.0/"
+namespace median = "http://ggf.org/ns/nmwg/ops/median/2.0/"
+namespace max = "http://ggf.org/ns/nmwg/ops/max/2.0/"
+namespace min = "http://ggf.org/ns/nmwg/ops/min/2.0/"
+namespace cdf = "http://ggf.org/ns/nmwg/ops/cdf/2.0/"
+namespace histogram = "http://ggf.org/ns/nmwg/ops/histogram/2.0/"
+
+
+# ##############################################################
+# TBD
+#
+# Example (using select): 
+# 
+# 
+# ##############################################################
+
+FilterMetadataBlock = 
+        (
+                SelectSubject? &
+                (
+                        SelectParameters |
+                        Parameters
+                )?
+        ) |
+        (
+                AverageSubject? &
+                (
+                        AverageParameters |
+                        Parameters
+                )?
+        ) |
+        (
+                MeanSubject? &
+                (
+                        MeanParameters |
+                        Parameters
+                )?
+        ) |
+        (
+                MedianSubject? &
+                (
+                        MedianParameters |
+                        Parameters
+                )?
+        ) |
+        (
+                MaxSubject? &
+                (
+                        MaxParameters |
+                        Parameters
+                )?
+        ) |
+        (
+                MinSubject? &
+                (
+                        MinParameters |
+                        Parameters
+                )?
+        ) |                                        
+        (
+                CDFSubject? &
+                (
+                        CDFParameters |
+                        Parameters
+                )?
+        ) |        
+        (
+                HistogramSubject? &
+                (
+                        HistogramParameters |
+                        Parameters
+                )?
+        )
+
+FilterParameters =
+        (
+                SelectParameters |
+                AverageParameters |
+                MeanParameters |
+                MedianParameters |
+                MaxParameters |
+                MinParameters |
+                CDFParameters |
+                HistogramParameters
+        )
+
+
+SelectSubject = 
+        element select:subject { SubjectContent }
+
+SelectParameters = 
+        element select:parameters { ParametersContent }
+
+
+AverageSubject = 
+        element average:subject { SubjectContent }
+        
+AverageParameters = 
+        element average:parameters { ParametersContent }
+
+
+MeanSubject = 
+        element mean:subject { SubjectContent }
+
+MeanParameters = 
+        element mean:parameters { ParametersContent }
+
+        
+MedianSubject = 
+        element median:subject { SubjectContent }
+        
+MedianParameters = 
+        element median:parameters { ParametersContent }
+
+        
+MaxSubject = 
+        element max:subject { SubjectContent }
+                
+MaxParameters = 
+        element max:parameters { ParametersContent }
+
+        
+MinSubject = 
+        element min:subject { SubjectContent }
+                
+MinParameters = 
+        element min:parameters { ParametersContent }
+
+        
+CDFSubject = 
+        element cdf:subject { SubjectContent }
+                
+CDFParameters = 
+        element cdf:parameters { ParametersContent }
+
+        
+HistogramSubject = 
+        element histogram:subject { SubjectContent }
+                
+HistogramParameters = 
+        element histogram:parameters { ParametersContent }                                

@@ -1,0 +1,141 @@
+# ##############################################################
+# 
+# File:         nmtopo_l2.rnc - Schema to describe topological 
+#                               features to be used in subject 
+#                               elements.
+# Version:      $Id: nmtopo-l2.rnc 189 2007-01-31 20:46:21Z boote $
+# Purpose:      This file lays out some major network topologies
+#               used in measurement.  
+# Reference:    http://books.xmlschemata.org/relaxng/page2.html
+#                         
+# ##############################################################
+
+
+# ##############################################################
+# Namespace definitions
+# ##############################################################
+namespace nmtl2 = "http://ggf.org/ns/nmwg/topology/l2/3.0/"
+namespace nmwgtopo3 = "http://ggf.org/ns/nmwg/topology/base/3.0/"
+
+
+## ########################
+## l2 interface
+## ########################
+
+L2Interface = 
+        element nmtl2:interface {
+                L2InterfaceContent
+        }
+
+L2InterfaceContent = 
+        Identifier? &
+        L2InterfaceIdRef? &
+        L2Role? &
+        element nmtl2:type { xsd:string }? &
+        element nmtl2:address {
+                L2Address
+        }? &
+        element nmtl2:name { 
+                attribute type { xsd:string }? &
+                xsd:string
+        }? &
+        element nmtl2:description { xsd:string }? &
+        element nmtl2:ifHostName { xsd:string }? &
+        element nmtl2:ifIndex { xsd:string }? &
+        element nmtl2:capacity { xsd:string }?
+
+L2Address = 
+        (
+                attribute value { xsd:string } |
+                text
+        ) &
+        attribute type { xsd:string }
+
+
+## ########################
+## l2 link
+## ########################
+
+L2Link = 
+        element nmtl2:link {
+                L2LinkContent
+        }
+
+L2LinkContent =
+        Identifier? &
+        L2LinkIdRef? &
+        element nmtl2:index { xsd:string }? &                
+        element nmtl2:type { xsd:string }? &        
+        element nmtl2:name { 
+                attribute type { xsd:string }? &
+                xsd:string
+        }? &
+        element nmtl2:globalName { 
+                attribute type { xsd:string }? &
+                xsd:string
+        }? &        
+        L2Interface* &
+        L2Link* &        
+        Node*
+        
+
+## ########################
+## l2 network
+## ########################        
+        
+L2Network =
+        element nmtl2:network {
+                L2NetworkContent
+        }
+
+L2NetworkContent =
+        Identifier? &
+        L2NetworkIdRef? &
+        element nmtl2:name { 
+                attribute type { xsd:string }? &
+                xsd:string
+        }? &
+        element nmtl2:type { xsd:string }? &                        
+        element nmtl2:vlan { xsd:string }? &
+        L2Interface* &
+        L2Link* &
+        Node*
+
+
+## ########################
+## l2 path
+## ########################
+
+L2Path = 
+        element nmtl2:path {
+                L2PathContent
+        }
+
+L2PathContent = 
+        Identifier &
+        L2PathIdRef? &        
+        L2Link*
+
+
+## ########################
+## l2 misc
+## ########################
+
+L2Role = 
+        (
+                attribute role { xsd:string } |
+                element nmtl2:role { xsd:string }
+        )
+
+L2InterfaceIdRef =
+            attribute interfaceIdRef { xsd:string }        
+
+L2LinkIdRef =
+            attribute linkIdRef { xsd:string }
+
+L2NetworkIdRef =
+            attribute networkIdRef { xsd:string }
+
+L2PathIdRef =
+            attribute pathIdRef { xsd:string }
+
