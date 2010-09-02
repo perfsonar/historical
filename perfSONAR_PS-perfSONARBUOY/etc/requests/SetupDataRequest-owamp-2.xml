@@ -98,7 +98,7 @@
   <!-- NOTE: the use of the nmwg subject here, we want to be generic --> 
 
   <nmwg:metadata id="meta2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <nmwg:subject>
+    <nmwg:subject id="id">
       <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
         <nmwgt:src value="64.57.16.226" type="ipv4" />
         <nmwgt:dst value="64.57.16.98" type="ipv4" />

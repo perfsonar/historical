@@ -103,7 +103,7 @@
   <!-- get one metric, not using a key, specifying some test parameters -->
 
   <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <nmwg:subject>
+    <nmwg:subject id="sub1">
       <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
         <nmwgt:src type="ipv4" value="64.57.16.30" />
         <nmwgt:dst type="ipv4" value="64.57.17.82" />
