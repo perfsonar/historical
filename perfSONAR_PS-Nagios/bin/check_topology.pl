@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use FindBin qw($RealBin);
-use lib "$RealBin/../../lib/";
+use lib "$RealBin/../lib/";
 use Nagios::Plugin;
 use perfSONAR_PS::Common qw( find findvalue );
 use perfSONAR_PS::Client::Topology;
@@ -13,11 +13,11 @@ my $np = Nagios::Plugin->new( shortname => 'check_topology',
 
 #get arguments
 $np->add_arg(spec=> "u|url=s",
-             help => "URL of the topology service to contact",
+             help => "URL of the topology service MA to contact",
              required => 1);
              
 $np->add_arg(spec=> "d|domainName=s",
-             help => "Domain name used in the topology",
+             help => "domain name used in topology",
              required => 1);
                                
 $np->add_arg(spec=> "w|warning=s",
