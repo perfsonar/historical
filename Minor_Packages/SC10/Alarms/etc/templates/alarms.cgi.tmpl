@@ -1,0 +1,144 @@
+<HTML>
+	<HEAD>
+		<TITLE>SC09 Wan Optical Status</TITLE>
+		<meta http-equiv=refresh content=60>
+	</HEAD>
+	<BODY>
+	<center>
+	<h2>
+	<table><tr>
+	<td width="10%" valign="top" align="right">
+	<img src="images/perfsonar_powered.png">
+	</td>
+
+	<td align="center">
+	<img src=[% images_path %]/sc09-logo.jpg>
+	</td>
+	<td>
+	<h2>
+		Supercomputing 2009 WAN Optical Monitoring
+	</h2>
+	</td>
+	<td width="10%" valign="top" align="right">
+	</td>
+	</tr></table>
+
+	<form name="nextRange">
+		<input type="hidden" name="startTime" value="[% nextStartTime %]" />
+		<input type="hidden" name="endTime" value="[% nextEndTime %]" />
+	</form>
+	<form name="nowRange">
+	</form>		
+	<form name="prevRange">
+		<input type="hidden" name="startTime" value="[% prevStartTime %]" />
+		<input type="hidden" name="endTime" value="[% prevEndTime %]" />
+	</form>
+
+	<table width=100%><tr>
+		<td align="left" valign="left" width=20%>
+			<a href="javascript:document.prevRange.submit()">Previous [% duration %] Minutes</a>
+		</td>
+		<td align="center" valign="center" width=60%>
+		Active alarms between [% start %] and [% end %]
+		</td>
+		<td align="right" valign="right" width=20%>
+		[% IF nextStartTime && nextEndTime %]
+		<a href="javascript:document.nextRange.submit()">Next [% duration %] Minutes</a>
+		[% END %]
+		<a href="javascript:document.nowRange.submit()">Current Interval</a>
+		</td>
+	</tr><table>
+	</h3>
+	<hr>
+	<table cellpadding=5 cellspacing=1>
+		<TR>
+			<TD><b>Node Name</b></TD>
+			<TD><b>Facility</b></TD>
+			<TD><b>Severity</b></TD>
+			<TD><b>Alarm Type</b></TD>
+			<TD><b>Service Affecting?</b></TD>
+			<TD><b>Start Time</b></TD>
+			<TD><b>Alarm Description</b></TD>
+		</TR>
+		[% IF alarms.size == 0 && no_data_hosts.size == 0 %]
+			<td colspan=7 bgcolor=green><center><font size=+1><b>No Active Alarms</b></font></td>
+		[% ELSE %]
+			[% FOREACH alarm IN alarms %]
+			<tr>
+				<td bgcolor=[% alarm.color %]>
+					<font size=-1>
+						[% alarm.machineName %]
+					</font>
+				</td>
+				<td bgcolor=[% alarm.color %]>
+					<font size=-1>
+						[% alarm.alarmFacility %]
+					</font>
+				</td>
+				<td bgcolor=[% alarm.color %]>
+					<font size=-1>
+						[% alarm.alarmSeverity %]
+					</font>
+				</td>
+				<td bgcolor=[% alarm.color %]>
+					<font size=-1>
+						[% alarm.alarmType %]
+					</font>
+				</td>
+				<td bgcolor=[% alarm.color %]>
+					<font size=-1>
+						[% alarm.alarmServiceAffecting %]
+					</font>
+				</td>
+				<td bgcolor=[% alarm.color %]>
+					<font size=-1>
+						[% alarm.alarmStartTime %]
+					</font>
+				</td>
+				<td bgcolor=[% alarm.color %]>
+					<font size=-1>
+						[% alarm.alarmDescription %]
+					</font>
+				</td>
+			[% END %]
+
+			[% FOREACH host IN no_data_hosts %]
+			<tr>
+				<td bgcolor="grey">
+					<font size=-1>
+						[% host %]
+					</font>
+				</td>
+				<td bgcolor="grey" colspan=6>
+					<font size=-1>
+						No data about device
+					</font>
+				</td>
+			</tr>
+			[% END %]
+		[% END %]
+	</table>
+	<br>
+
+	<table border=0 cellpadding=5>
+		<tr>
+			<td valign=top><img src=[% images_path %]/ciena-logo.gif></td>
+			<td valign=center><img src=[% images_path %]/cisco-logo.gif></td>
+			<td valign=center><img src=[% images_path %]/fujitsu.jpg></td>
+			<td valign=top><img src=[% images_path %]/infinera.jpg></td>
+			<td valign=center><img src=[% images_path %]/nortel-logo-new.gif></td>
+		</tr>
+	</table>
+
+	<table border=0 cellpadding=4>
+		<tr>
+			<td valign=center><img src=[% images_path %]/internet2.jpg></td>
+			<td valign=center><img src=[% images_path %]/level3-logo.gif></td>
+			<td valign=top><img src=[% images_path %]/nero-logo.gif></td>
+			<td valign=top><img src=[% images_path %]/nlr-logo.gif></td>
+			<td valign=center><img src=[% images_path %]/qwest-logo.gif></td>
+		</tr>
+	</table>
+
+	</BODY>
+</HTML>

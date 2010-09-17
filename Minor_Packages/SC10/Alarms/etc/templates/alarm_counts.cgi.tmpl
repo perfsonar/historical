@@ -1,0 +1,118 @@
+<HTML>
+	<HEAD>
+		<TITLE>SC09 Wan Optical Status</TITLE>
+		<meta http-equiv=refresh content=60>
+	</HEAD>
+	<BODY>
+	<center>
+	<h2>
+	<center>
+	<h3>
+		Supercomputing 2009 WAN Optical Monitoring
+	</h3>
+	</center>
+
+	<form name="nextRange">
+		<input type="hidden" name="startTime" value="[% nextStartTime %]" />
+		<input type="hidden" name="endTime" value="[% nextEndTime %]" />
+	</form>
+	<form name="nowRange">
+	</form>		
+	<form name="prevRange">
+		<input type="hidden" name="startTime" value="[% prevStartTime %]" />
+		<input type="hidden" name="endTime" value="[% prevEndTime %]" />
+	</form>
+
+	<table width=100%><tr>
+		<td align="left" valign="left" width=20%>
+		<a href="javascript:document.prevRange.submit()">Previous [% duration %] Minutes</a>
+		</td>
+		<td align="center" valign="center" width=60%>
+		Active alarms between [% start %] and [% end %]
+		</td>
+		<td align="right" valign="right" width=20%>
+		[% IF nextStartTime && nextEndTime %]
+		<a href="javascript:document.nextRange.submit()">Next [% duration %] Minutes</a>
+		[% END %]
+
+		<a href="javascript:document.nowRange.submit()">Current Interval</a>
+		</td>
+	</tr><table>
+	</h3>
+	<hr>
+	<table width=100%>
+	<tr>
+	<td align="center">
+	<img src="[% images_path %]/sc09-logo.jpg">
+	</td>
+	<td>
+	<table cellpadding=5 cellspacing=1 align="center">
+		<TR>
+			<TD width=40%><b>Node Name</b></TD>
+			<TD width=20%><b>Critical&nbsp;Alarms</b></TD>
+			<TD width=20%><b>Major&nbsp;Alarms</b></TD>
+			<TD width=20%><b>Minor&nbsp;Alarms</b></TD>
+		</TR>
+		[% FOREACH machine IN machines %]
+		<tr>
+			[% IF (machine.measurementAlarms > 0 && machine.nonMeasurementAlarms == 0) || machine.no_data == 1 %]
+			<!-- [% machine.no_data %] -->
+			<!-- [% machine.measurementAlarms %] -->
+			<!-- [% machine.nonMeasurementAlarms %] -->
+			<td bgcolor="purple">
+				<a style="color: black" href="alarms.cgi?node=[%- machine.name -%]">[% machine.name %]</a>
+			</td>
+			<td colspan=3 bgcolor="lightgrey">
+			Problems retrieving alarms from device
+			</td>
+			[% ELSE %]
+
+			[% IF machine.criticalAlarms > 0; SET machine.criticalAlarmsColor = "red"; ELSE; SET machine.criticalAlarmsColor = "green"; END %]
+			[% IF machine.majorAlarms > 0; SET machine.majorAlarmsColor = "orange"; ELSE; SET machine.majorAlarmsColor = "green"; END %]
+			[% IF machine.minorAlarms > 0; SET machine.minorAlarmsColor = "yellow"; ELSE; SET machine.minorAlarmsColor = "green"; END %]
+
+			
+			<td bgcolor="purple">
+				<a style="color: black" href="alarms.cgi?node=[%- machine.name -%]">[% machine.name %]</a>
+			</td>
+			<td bgcolor=[% machine.criticalAlarmsColor %]>
+				<center><b>[% machine.criticalAlarms %]</b></center>
+			</td>
+			<td bgcolor=[% machine.majorAlarmsColor %]>
+				<center><b>[% machine.majorAlarms %]</b></center>
+			</td>
+			<td bgcolor=[% machine.minorAlarmsColor %]>
+				<center><b>[% machine.minorAlarms %]</b></center>
+			</td>
+			[% END %]
+		[% END %]
+	</table>
+	</td>
+	<td align="left">
+	<img src="[% images_path %]/perfsonar_powered.png">
+	</td>
+	</tr>
+	</table>
+	<br>
+
+	<table border=0 cellpadding=5>
+		<tr>
+			<td valign=top><img src="[% images_path %]/ciena-logo.gif"></td>
+			<td valign=center><img src="[% images_path %]/cisco-logo.gif"></td>
+			<td valign=center><img src="[% images_path %]/fujitsu.jpg"></td>
+			<td valign=top><img src="[% images_path %]/infinera.jpg"></td>
+			<td valign=center><img src="[% images_path %]/nortel-logo-new.gif"></td>
+		</tr>
+	</table>
+
+	<table border=0 cellpadding=4>
+		<tr>
+			<td valign=center><img src="[% images_path %]/internet2.jpg"></td>
+			<td valign=center><img src="[% images_path %]/level3-logo.gif"></td>
+			<td valign=top><img src="[% images_path %]/nero-logo.gif"></td>
+			<td valign=top><img src="[% images_path %]/nlr-logo.gif"></td>
+			<td valign=top><img src="[% images_path %]/qwest-logo.gif"></td>
+		</tr>
+	</table>
+	</BODY>
+</HTML>
