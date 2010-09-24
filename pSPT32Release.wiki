@@ -394,13 +394,13 @@ The following issues remain after the RC testing.  These will either be addresse
 || certificate complaint in browsers (Error code: sec_error_reused_issuer_and_serial) || <font color="red">Yes</font> || generate on first boot. It would need an init script or something || <font color="red">_*NOT STARTED*_</font> ||
 || Remove PingER GUI Link from sidebar || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || NDT/NPAD do not function w/ IPv6 || <font color="red">Yes</font> || Adjust RPM packages/init script.  After doing so, protocol error w/ v4 tests || <font color="red">_*NOT STARTED*_</font> ||
-|| Add a Link to the perfAdmin LS view on the service status page for the hLS || <font color="red">Yes</font> || TBD ... also may want a more sanitized view instead of raw xml || <font color="red">_*NOT STARTED*_</font> ||
 || Ensure that DB backup script backs up to /var/log, this will place it in the backing store || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Update MOTD as needed || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Default to RENO/HTCP for tcp congestion algs, alter init script to set these based on use of NDT/NPAD || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Updates to RPM based Software || <font color="red">Yes</font> || run yum update... || <font color="red">_*NOT STARTED*_</font> ||
 || Updates to non RPM software (npad, reverse traceroute/ping, myricom drivers) || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Use old version of dbxml build (2.3.11) instead of the newer build that was causing LS errors || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Add a Link to the perfAdmin LS view on the service status page for the hLS || <font color="purple">no</font> || TBD ... also may want a more sanitized view instead of raw xml || <font color="red">_*NOT STARTED*_</font> ||
 || CSS does not display right under IE8 || <font color="purple">No</font> || Need a CSS expert to help, TBD || <font color="red">_*NOT STARTED*_</font> ||
 || PingER GUI cannot be installed || <font color="purple">No</font> || dependicies still preventing this || <font color="red">_*NOT STARTED*_</font> ||
 || PingER Fixes from  USATLAS || <font color="purple">No</font> || talk w/ maxim, find out all of the parts || <font color="red">_*NOT STARTED*_</font> ||
