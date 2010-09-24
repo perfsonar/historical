@@ -45,12 +45,13 @@ Beta, and RC:
 || Milestone Boot CD || June 11th || <font color="green">_*DONE - 6/11*_</font> ||
 || Milestone LiveCD 1 || Week of 6/14 (Development), Week of 6/21 (Testing) || <font color="green">_*DONE - 6/30*_</font> ||
 || Milestone LiveCD 2 || ~~Week of 8/2~~ Week of 8/13 || <font color="green">_*DONE - 8/13*_</font> ||
-|| Milestone LiveCD 3 || ~~Week of 8/16~~ Week of 8/30 || <font color="yellow">_*IN PROGRESS*_</font> ||
+|| Milestone LiveCD 3 || ~~Week of 8/16~~ ~~Week of 8/30~~ Week of 9/6 || <font color="green">_*DONE - 9/13*_</font> ||
+|| Milestone LiveCD 4 || Week of 9/27 || <font color="yellow">_*IN PROGRESS*_</font> ||
 || ~~Milestone Install Disk 1~~ || ~~Week of 6/14~~ ~~Week of 6/21~~ ~~Week of 6/28~~ ~~Week of 7/26~~ TBD || <font color="purple">_*PUSHED OFF - 8/2*_</font> ||
 || ~~Milestone Install Disk 2~~ || ~~Week of 6/28~~ ~~Week of 8/16~~ TBD || <font color="purple">_*PUSHED OFF - 8/2*_</font> ||
 || ~~Milestone RC 1~~ || ~~Week of 8/23~~ || <font color="purple">_*NOT NEEDED*_</font> ||
 || ~~Milestone RC 2~~ || ~~Week of 8/30~~ || <font color="purple">_*NOT NEEDED*_</font> ||
-|| Milestone Final || Week of 9/6 || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone Final || ~~Week of 9/6~~ Week of 10/4 || <font color="red">_*NOT STARTED*_</font> ||
 
 The following sections breakdown of each milestone of this release.
 
@@ -271,8 +272,8 @@ Problems noted by beta testers:
 === Milestone LiveCD 3 ===
 
 || *Summary* || ~~Based on user feedback and testing, firm up the Live CD and netinstall iso.  Migrate changes to the Base packages/kickstart as needed~~ Testing Solutions to Performance Bug  ||
-|| *Status* || <font color="yellow">_*IN PROGRESS*_</font> || 
-|| *Est. Completion* || ~~Week of 8/16~~ Week of 8/30 || 
+|| *Status* || <font color="green">_*DONE*_</font> || 
+|| *Est. Completion* || ~~Week of 8/16~~ ~~Week of 8/30~~ Week of 9/6 || 
 || *Owner* || Aaron/Tom ||
 || *Depends* || Milestone LiveCD 2 ||
 
@@ -284,6 +285,16 @@ Problems noted by beta testers:
  * ~~Distribute the ISO to testers willing to test out the Live CD instance of the Toolkit~~ - <font color="purple">_*NOT NEEDED*_</font>
 
 This milestone was resurected to deal with the performance bug.  
+
+=== Milestone LiveCD 4 ===
+
+|| *Summary* || Final Release to test performance bug + other fixes ||
+|| *Status* || <font color="yellow">_*IN PROGRESS*_</font> || 
+|| *Est. Completion* || Week of 9/27 || 
+|| *Owner* || Aaron/Jason ||
+|| *Depends* || Milestone LiveCD 3 ||
+
+TBD
 
 === Milestone Install Disk 1 ===
 
