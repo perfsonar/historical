@@ -294,7 +294,8 @@ This milestone was resurected to deal with the performance bug.
 || *Owner* || Aaron/Jason ||
 || *Depends* || Milestone LiveCD 3 ||
 
-TBD
+ * Finalize blocking issues
+ * 1 More Round of beta testing
 
 === Milestone Install Disk 1 ===
 
@@ -366,9 +367,9 @@ Milestone Release Candidate X: Open-ended.
 
 || *Summary* || Produce final versions of the Live CD, Install CD and documentation  ||
 || *Status* || <font color="yellow">_*STALLED*_</font> || 
-|| *Est. Completion* || Week of 9/6 || 
-|| *Owner* || Aaron/~~Eric~~/Jason/Tom ||
-|| *Depends* || ~~Milestone RC 2~~ Milestone LiveCD 2 ||
+|| *Est. Completion* || ~~Week of 9/6~~ Week of 10/6 || 
+|| *Owner* || Aaron/~~Eric~~/Jason/~~Tom~~ ||
+|| *Depends* || ~~Milestone RC 2~~ ~~Milestone LiveCD 2~~ Milestone LiveCD 4 ||
 
 The following are subtasks listed out for tracking purposes:
 
@@ -390,24 +391,33 @@ The following issues remain after the RC testing.  These will either be addresse
 || need an init script (or similar) that goes through and sets the TCP/Ethernet parameters to not break NDT/NPAD || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Performance degretation between 3.1.3 and 3.2rc2 at USATLAS sites. || <font color="red">Yes</font> || Have tried solutions on running instances including swapping out the drivers, and examining ksoftirqd.  Need to examone kernel irq balancing and the userspace version as well as new drivers on a re-compiled kernel || <font color="yellow">_*IN PROGRESS*_</font> ||
 || when you rebuild the livecd, the uid/gids can change.  since the permissions are fixed on disk, that might prove problematic || <font color="red">Yes</font> || Script to change is proposed || <font color="red">_*NOT STARTED*_</font> ||
+
+
+
+|| certificate complaint in browsers (Error code: sec_error_reused_issuer_and_serial) || <font color="red">Yes</font> || generate on first boot. It would need an init script or something || <font color="red">_*NOT STARTED*_</font> ||
+|| Remove PingER GUI Link from sidebar || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| NDT/NPAD do not function w/ IPv6 || <font color="red">Yes</font> || Adjust RPM packages/init script.  After doing so, protocol error w/ v4 tests || <font color="red">_*NOT STARTED*_</font> ||
+|| Add a Link to the perfAdmin LS view on the service status page for the hLS || <font color="red">Yes</font> || TBD ... also may want a more sanitized view instead of raw xml || <font color="red">_*NOT STARTED*_</font> ||
+|| Ensure that DB backup script backs up to /var/log, this will place it in the backing store || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Update MOTD as needed || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Default to RENO/HTCP for tcp congestion algs, alter init script to set these based on use of NDT/NPAD || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Updates to RPM based Software || <font color="red">Yes</font> || run yum update... || <font color="red">_*NOT STARTED*_</font> ||
+|| Updates to non RPM software (npad, reverse traceroute/ping, myricom drivers) || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| Use old version of dbxml build (2.3.11) instead of the newer build that was causing LS errors || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || CSS does not display right under IE8 || <font color="purple">No</font> || Need a CSS expert to help, TBD || <font color="red">_*NOT STARTED*_</font> ||
 || PingER GUI cannot be installed || <font color="purple">No</font> || dependicies still preventing this || <font color="red">_*NOT STARTED*_</font> ||
 || PingER Fixes from  USATLAS || <font color="purple">No</font> || talk w/ maxim, find out all of the parts || <font color="red">_*NOT STARTED*_</font> ||
 || Cacti does not poll devices after setup.  Potential clock sckew problem? || <font color="purple">No</font> || Edited 'poller_lastrun' variable to fix || <font color="red">_*NOT STARTED*_</font> ||
 || weirdness with the disk configuration script.  If the disk has no partition info (but had an ext3 fs on it before the partition table was wiped), the script detects the raw device with 'unknown' partition type. || <font color="purple">No</font> || The script uses "blkid" to figure out the FS type, and there seem to be some combination of partition voodoo that prevents blkid from recognizing proper ext3 partitions. The only way to truly figure out whether it's ext3 or not is to try and mount the partition.  Need a FAQ entry || <font color="red">_*NOT STARTED*_</font> ||
 || clicking on service graphs/throughput gives a blank page || <font color="purple">No</font> || could be logging related? investigating... || <font color="red">_*NOT STARTED*_</font> ||
-|| certificate complaint in browsers (Error code: sec_error_reused_issuer_and_serial) || <font color="purple">No</font> || generate on first boot. It would need an init script or something || <font color="red">_*NOT STARTED*_</font> ||
 || Document how to set root password || <font color="purple">No</font> || e.g. on first login to console || <font color="red">_*NOT STARTED*_</font> ||
 || Document when to run 'nptoolkit-configure.py' || <font color="purple">No</font> || e.g. after first login || <font color="red">_*NOT STARTED*_</font> ||
 || Document how to set MTU || <font color="purple">No</font> || '/etc/sysconfig/network-scripts/ifcfg-eth0, then add: MTU=9000' || <font color="red">_*NOT STARTED*_</font> ||
 || Document how to change TCP congestion alg || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Document where RPMs (for a netinstall) will get downloaded from || <font color="purple">No</font> || E.g. if ACLs are needed, etc.  Currently downloads from ndb1.internet2.edu || <font color="red">_*NOT STARTED*_</font> ||
-|| NDT/NPAD do not function w/ IPv6 || <font color="purple">No</font> || Adjust RPM packages/init script.  After doing so, protocol error w/ v4 tests || <font color="red">_*NOT STARTED*_</font> ||
 || LiveCD data not persistent, forgets passwords and settings || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Empty hostname || <font color="purple">No</font> || edit "/etc/sysconfig/network" and fill in the HOSTNAME variable || <font color="red">_*NOT STARTED*_</font> ||
 || Manually entering a host for a bwctl regular test, save and get a positive result, host is not added.  Further digging points to a problem with the entered port number.  See email for more info || <font color="purple">No</font> || Had to do with a dojo issue with french localization. Will need to upgrade dojo and hope it fixes the issue || <font color="red">_*NOT STARTED*_</font> ||
-|| Add a Link to the perfAdmin LS view on the service status page for the hLS || <font color="purple">No</font> || TBD ... also may want a more sanitized view instead of raw xml || <font color="red">_*NOT STARTED*_</font> ||
-|| Ensure that DB backup script backs up to /var/log, this will place it in the backing store || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Host status (e.g. disk/memory/cpu) on the service status page || <font color="purple">No</font> || TBD, can do it with proc for now, but what about ganglia? || <font color="red">_*NOT STARTED*_</font> ||
 || Add FAQ item about different localizations in dojo - and the possibility that new errors can be introduced (e.g. spacing) || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
 || Add NTP status to the status page for each host (e.g. something simple like synced or not) || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
