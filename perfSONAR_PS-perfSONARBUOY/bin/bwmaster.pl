@@ -985,6 +985,16 @@ sub send_file {
     }
 
     if (
+        $val = $conf->get_val(
+            TESTSPEC => $ms->{'TESTSPEC'},
+            ATTR     => 'BWTestVariation'
+        )
+        )
+    {
+        $req{'BWTESTVARIATION'} = $val;
+    }
+
+    if (
         $conf->get_val(
             TESTSPEC => $ms->{'TESTSPEC'},
             ATTR     => 'BWUDP'

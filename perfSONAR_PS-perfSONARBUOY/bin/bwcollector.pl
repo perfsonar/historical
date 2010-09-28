@@ -904,8 +904,12 @@ sub add_session {
         return 1;
     }
 
+    my $allowed_variation = 3; #default to 3 seconds
+    if( exists $reqh->{'BWTESTVARIATION'} ){
+        $allowed_variation = $reqh->{'BWTESTVARIATION'};
+    }
     my $testlen = $reqh->{'BWTESTDURATION'};
-    if ( ( $max_ei < $testlen ) || ( ( $max_ei - $testlen ) > 1.0 ) ) {
+    if ( ( $max_ei < $testlen ) || ( ( $max_ei - $testlen ) > $allowed_variation ) ) {
         warn "IGNORED: termination problem $testname file = $add_file";
         return 1;
     }
