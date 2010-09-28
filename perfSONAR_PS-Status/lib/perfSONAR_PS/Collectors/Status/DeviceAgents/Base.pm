@@ -86,7 +86,8 @@ sub run {
         if ( $self->{NEXT_RUNTIME} ) {
             $self->{DATA_CLIENT}->closeDB;
 
-            sleep( $self->{NEXT_RUNTIME} - time );
+            my $sleep_time = $self->{NEXT_RUNTIME} - time;
+            sleep( $sleep_time ) if ($sleep_time > 0);
         }
 
         $self->{NEXT_RUNTIME} = time + $self->{POLLING_INTERVAL};
