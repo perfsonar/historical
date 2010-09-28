@@ -2,7 +2,7 @@
 #
 # Init file for perfSONAR SNMP MA Service
 #
-# chkconfig: 2345 60 20
+# chkconfig: 2345 65 20
 # description: perfSONAR SNMP MA Service
 #
 
@@ -51,6 +51,7 @@ do
 
 	if $PERFSONAR ; then
 	    echo "$0 $ARG: perfSONAR SNMP MA Service started"
+            touch /var/lock/subsys/snmp_ma
 	else
 	    echo "$0 $ARG: perfSONAR SNMP MA Service could not be started"
 	    ERROR=3
@@ -63,6 +64,7 @@ do
 	fi
 	if kill $PID ; then
 	    echo "$0 $ARG: perfSONAR SNMP MA Service stopped"
+            rm /var/lock/subsys/snmp_ma
 	else
 	    echo "$0 $ARG: perfSONAR SNMP MA Service could not be stopped"
 	    ERROR=4

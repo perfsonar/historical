@@ -443,7 +443,12 @@ sub createStorage {
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
         $tmp_file = $self->{CONF}->{"snmp"}->{"metadata_db_file"}.".tmp";
 
-        my $cacti = new perfSONAR_PS::DB::Cacti( { conf => $self->{CONF}->{"snmp"}->{"metadata_db_external_source"}, file => $tmp_file } );
+        my $cacti_host     = $self->{CONF}->{snmp}->{cacti_host};
+        my $cacti_database = $self->{CONF}->{snmp}->{cacti_database};
+        my $cacti_username = $self->{CONF}->{snmp}->{cacti_username};
+        my $cacti_password = $self->{CONF}->{snmp}->{cacti_password};
+
+        my $cacti = new perfSONAR_PS::DB::Cacti( { db_host => $cacti_host, db_name => $cacti_database, db_user => $cacti_username, db_pass => $cacti_password, file => $tmp_file } );
         unless ( $cacti->openDB() > -1 ) {
             $self->{LOGGER}->fatal( "Problem reading cacti database." );
             return -1;
@@ -489,7 +494,7 @@ sub maintenance {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, {} );
 
-    return $self->{CONF}->{"perfsonarbuoy"}->{"maintenance_interval"};
+    return $self->{CONF}->{"snmp"}->{"maintenance_interval"};
 }
 
 
