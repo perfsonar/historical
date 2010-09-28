@@ -2,7 +2,7 @@
 #
 # Init file for perfSONAR perfSONAR-BUOY BWCTL Collection Service
 #
-# chkconfig: 2345 60 20
+# chkconfig: 2345 65 20
 # description: perfSONAR perfSONAR-BUOY BWCTL Collection Service
 #
 
@@ -18,12 +18,16 @@ start)
         [ -x $TOOL_EXE ] && $cmd && echo 'perfSONAR-BUOY BWCTL Measurement Collector Daemon Started'
 	if [ $? != 0 ]; then
 		echo "Couldn't start perfSONAR-BUOY BWCTL Measurement Collector Daemon"
+        else
+            touch /var/lock/subsys/perfsonarbuoy_bw_collector
 	fi
         ;;
 stop)
         [ -x $TOOL_EXE ] && $cmd -k && echo 'perfSONAR-BUOY BWCTL Measurement Collector Daemon Stopped'
 	if [ $? != 0 ]; then
 		echo "Couldn't stop perfSONAR-BUOY BWCTL Measurement Collector Daemon"
+        else
+            rm /var/lock/subsys/perfsonarbuoy_bw_collector
 	fi
         ;;
 restart)
@@ -35,6 +39,8 @@ restart)
 
 		if [ $? != 0 ]; then
 			echo "Couldn't start perfSONAR-BUOY BWCTL Measurement Collector Daemon"
+                else
+                    touch /var/lock/subsys/perfsonarbuoy_bw_collector
 		fi
 	fi
 

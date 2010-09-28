@@ -2,7 +2,7 @@
 #
 # Init file for perfSONAR perfSONAR-BUOY OWAMP Collection Service
 #
-# chkconfig: 2345 60 20
+# chkconfig: 2345 65 20
 # description: perfSONAR perfSONAR-BUOY OWAMP Collection Service
 #
 
@@ -18,12 +18,16 @@ start)
         [ -x $TOOL_EXE ] && $cmd && echo 'perfSONAR-BUOY OWAMP Measurement Collector Daemon Started'
 	if [ $? != 0 ]; then
 		echo "Couldn't start perfSONAR-BUOY OWAMP Measurement Collector Daemon"
+        else
+            touch /var/lock/subsys/perfsonarbuoy_owp_collector
 	fi
         ;;
 stop)
         [ -x $TOOL_EXE ] && $cmd -k && echo 'perfSONAR-BUOY OWAMP Measurement Collector Daemon Stopped'
 	if [ $? != 0 ]; then
 		echo "Couldn't stop perfSONAR-BUOY OWAMP Measurement Collector Daemon"
+        else
+            rm /var/lock/subsys/perfsonarbuoy_owp_collector
 	fi
         ;;
 restart)
@@ -35,6 +39,8 @@ restart)
 
 		if [ $? != 0 ]; then
 			echo "Couldn't start perfSONAR-BUOY OWAMP Measurement Collector Daemon"
+                else
+                    touch /var/lock/subsys/perfsonarbuoy_owp_collector
 		fi
 	fi
 

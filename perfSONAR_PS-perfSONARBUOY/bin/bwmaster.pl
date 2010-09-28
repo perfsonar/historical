@@ -99,6 +99,7 @@ use Digest::MD5;
 use Socket;
 use IO::Socket;
 use Fcntl qw(:flock);
+use Params::Validate qw(:all);
 
 my @SAVEARGV = @ARGV;
 my %options  = (
@@ -442,7 +443,7 @@ $SIG{PIPE} = 'IGNORE';
 # and returns. (As bwctl finishes files, send_data adds each file
 # to it's work que.)
 my $pid = send_data( $conf, $rfd, @dirlist );
-@{ $pid2info{$pid} } = ( "send_data" );
+$pid2info{$pid} = { process_type => "send_data" };
 
 #
 # bwctl setup loop - creates a bwctl process for each path that should
@@ -534,9 +535,10 @@ foreach $mset ( @meassets ) {
                 my ( $bindaddr ) = $rhost;
 
                 warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined( $debug ) );
-                $starttime = OWP::Utils::time2owptime( time );
-                $pid = bwctl( $msetdesc, $bindaddr, $recv, $raddr, $send, $saddr );
-                @{ $pid2info{$pid} } = ( "bwctl", $starttime, $msetdesc, $bindaddr, $recv, $raddr, $send, $saddr );
+                $starttime = time;
+                my $bwctl_args = { measurement_set => $msetdesc, local_address => $bindaddr, send_node => $send, send_address => $saddr, recv_node => $recv, recv_address => $raddr };
+                $pid = bwctl( %$bwctl_args );
+                $pid2info{$pid} = { process_type => "bwctl", start_time => $starttime, cmd_args => $bwctl_args };
             }
         }
 
@@ -604,10 +606,10 @@ foreach $mset ( @meassets ) {
                 my ( $bindaddr ) = $shost;
 
                 warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined( $debug ) );
-                $starttime = OWP::Utils::time2owptime( time );
-                $pid = bwctl( $msetdesc, $bindaddr, $recv, $raddr, $send, $saddr );
-                @{ $pid2info{$pid} } = ( "bwctl", $starttime, $msetdesc, $bindaddr, $recv, $raddr, $send, $saddr );
-
+                $starttime = time;
+                my $bwctl_args = { measurement_set => $msetdesc, local_address => $bindaddr, send_node => $send, send_address => $saddr, recv_node => $recv, recv_address => $raddr };
+                $pid = bwctl( %$bwctl_args );
+                $pid2info{$pid} = { process_type => "bwctl", start_time => $starttime, cmd_args => $bwctl_args };
             }
         }
     }
@@ -663,7 +665,7 @@ while ( 1 ) {
         next unless ( exists $pid2info{$wpid} );
 
         my $info = $pid2info{$wpid};
-        warn( "$$info[0]:$wpid exited: $?" ) if ( $debug );
+        warn( "$info->{process_type}:$wpid exited: $?" ) if ( $debug );
 
         #
         # Remove old state for this pid
@@ -676,20 +678,18 @@ while ( 1 ) {
         #
         unless ( $reset || $die ) {
             # restart everything if send_data died.
-            if ( $$info[0] =~ /send_data/ ) {
+            if ( $info->{process_type} =~ /send_data/ ) {
                 warn "send_data($wpid) died, restarting!";
                 kill 'HUP', $$;
             }
-            elsif ( $$info[0] =~ /bwctl/ ) {
-                shift @$info;
-                shift @$info;
+            elsif ( $info->{process_type} =~ /bwctl/ ) {
+                my $bwctl_args = $info->{cmd_args};
 
-                # $$info[2] is now "node"
-                warn "Restart bwctl->$$info[2]:!";
+                warn "Restart bwctl->".$bwctl_args->{send_node}."->".$bwctl_args->{recv_node}.":!";
 
-                my $starttime = OWP::Utils::time2owptime( time );
-                $pid = bwctl( @$info );
-                @{ $pid2info{$pid} } = ( "bwctl", $starttime, @$info );
+                my $starttime = time;
+                $pid = bwctl( %$bwctl_args );
+                $pid2info{$pid} = $info;
             }
         }
     }
@@ -1140,7 +1140,15 @@ SEND_FILES:
 }
 
 sub bwctl {
-    my ( $ms, $myaddr, $recv, $raddr, $send, $saddr ) = @_;
+    my $args = validate(@_, { measurement_set => 1, local_address => 1, send_node => 1, send_address => 1, recv_node => 1, recv_address => 1 });
+
+    my $ms     = $args->{measurement_set};
+    my $myaddr = $args->{local_address};
+    my $recv   = $args->{recv_node};
+    my $raddr  = $args->{recv_address};
+    my $send   = $args->{send_node};
+    my $saddr  = $args->{send_address};
+
     local ( *CHWFD, *CHRFD );
     my $val;
     my @cmd = ( $bwcmd, "-T", "iperf", "-e", $facility, "-p", "-B", $myaddr );

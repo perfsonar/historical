@@ -2,7 +2,7 @@
 #
 # Init file for perfSONAR perfSONAR-BUOY BWCTL Measurement Service
 #
-# chkconfig: 2345 60 20
+# chkconfig: 2345 65 20
 # description: perfSONAR perfSONAR-BUOY BWCTL Measurement Service
 #
 
@@ -20,12 +20,16 @@ start)
         [ -x $TOOL_EXE ] && $cmd && echo 'perfSONAR-BUOY BWCTL Measurement Service Started'
 	if [ $? != 0 ]; then
 		echo "Couldn't start perfSONAR-BUOY BWCTL Measurement Service"
+        else
+            touch /var/lock/subsys/perfsonarbuoy_bw_master
 	fi
         ;;
 stop)
         [ -x $TOOL_EXE ] && $cmd -k && echo 'perfSONAR-BUOY BWCTL Measurement Service Stopped'
 	if [ $? != 0 ]; then
 		echo "Couldn't stop perfSONAR-BUOY BWCTL Measurement Service"
+        else
+            rm /var/lock/subsys/perfsonarbuoy_bw_master
 	fi
         ;;
 restart)
@@ -36,6 +40,8 @@ restart)
 
 		if [ $? != 0 ]; then
 			echo "Couldn't start perfSONAR-BUOY BWCTL Measurement Service"
+                else
+                    touch /var/lock/subsys/perfsonarbuoy_bw_master
 		fi
 	fi
 

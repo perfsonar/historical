@@ -103,12 +103,21 @@ Requires:		perl(Sys::Syslog)
 Requires:		perl(Time::HiRes)
 Requires:		perl(XML::LibXML) >= 1.60
 Requires:       perl-perfSONAR_PS-perfSONARBUOY-config
+Requires:       chkconfig
+Requires:       shadow-utils
+Requires:       coreutils
+Requires:       initscripts
+
+
 %description client
 The perfSONARBUOY client conists of tools that perform measurements on the beacons as well as client applications that can interact with the web service.
 
 %package config
 Summary:        perfSONAR_PS perfSONARBUOY Configuration Information
 Group:          Applications/Network
+Requires:       shadow-utils
+Requires:       coreutils
+
 %description config
 The perfSONARBUOY config package contains a configuration file that both the server and client packages require to operate.  
 
@@ -190,6 +199,7 @@ rm -rf $RPM_BUILD_ROOT
 %{install_base}/bin/bwdb.pl
 %{install_base}/bin/owdb.pl
 %{install_base}/bin/daemon.pl
+%{install_base}/bin/clean_pSB_db.pl
 %{install_base}/scripts/install_dependencies.sh
 %{install_base}/scripts/prepare_environment_server.sh
 %{install_base}/scripts/perfsonarbuoy_ma
@@ -204,6 +214,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,perfsonar,perfsonar,-)
 %doc %{install_base}/doc/*
 %config(noreplace) %{install_base}/etc/requests
+%config(noreplace) %{install_base}/etc/schema
 %{install_base}/bin/client.pl
 %{install_base}/bin/bwmaster.pl
 %{install_base}/bin/powmaster.pl

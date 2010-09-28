@@ -2,7 +2,7 @@
 #
 # Init file for perfSONAR perfSONAR-BUOY MA Service
 #
-# chkconfig: 2345 60 20
+# chkconfig: 2345 65 20
 # description: perfSONAR perfSONAR-BUOY MA Service
 #
 
@@ -51,6 +51,7 @@ do
 
 	if $PERFSONAR ; then
 	    echo "$0 $ARG: perfSONAR perfSONAR-BUOY MA Service started"
+            touch /var/lock/subsys/perfsonarbuoy_ma
 	else
 	    echo "$0 $ARG: perfSONAR perfSONAR-BUOY MA Service could not be started"
 	    ERROR=3
@@ -63,6 +64,7 @@ do
 	fi
 	if kill $PID ; then
 	    echo "$0 $ARG: perfSONAR perfSONAR-BUOY MA Service stopped"
+            rm /var/lock/subsys/perfsonarbuoy_ma
 	else
 	    echo "$0 $ARG: perfSONAR perfSONAR-BUOY MA Service could not be stopped"
 	    ERROR=4
