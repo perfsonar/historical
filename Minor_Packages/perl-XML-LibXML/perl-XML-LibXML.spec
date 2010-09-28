@@ -4,20 +4,25 @@
 %define disttag pSPS
 
 Name:           perl-XML-LibXML
-Version:        1.69
-Release:        2.%{disttag}
+Version:        1.70
+Release:        1.%{disttag}
 Summary:        Perl Binding for libxml2
 License:        Distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/XML-LibXML/
 Source0:        http://www.cpan.org/modules/by-module/XML/XML-LibXML-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRequires:       perl
+BuildRequires:       libxml2
+BuildRequires:       libxml2-devel
+BuildRequires:       perl-XML-SAX
 Requires:       perl
 Requires:       libxml2
 Requires:       libxml2-devel
 Requires:       perl(XML::LibXML::Common) >= 0.13
 Requires:       perl(XML::NamespaceSupport) >= 1.07
 Requires:       perl(XML::SAX) >= 0.11
+Requires:       coreutils
 
 %description
 This module is an interface to libxml2, providing XML and HTML parsers with
@@ -43,8 +48,6 @@ find $RPM_BUILD_ROOT -type f -name .packlist -exec rm -f {} \;
 find $RPM_BUILD_ROOT -type f -name '*.bs' -size 0 -exec rm -f {} \;
 find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null \;
 
-%{__mv} scripts $RPM_BUILD_ROOT/tmp
-
 %{_fixperms} $RPM_BUILD_ROOT/*
 
 %check || :
@@ -57,13 +60,12 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc Changes LICENSE README
 /usr/*
-/tmp/*
-
-%post
-/tmp/./perl-XML-LibXML_post.sh
-%{__rm} /tmp/perl-XML-LibXML_post.sh
 
 %changelog
+* Mon Jun 7 2010 Aaron Brown 1.70-1
+- Update to a newer version
+- Remove the custom %post scripts
+
 * Mon Jul 6 2009 Jason Zurawski 1.69-2
 - Compat changes for 64 bit linux.
 

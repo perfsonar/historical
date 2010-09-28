@@ -4,8 +4,8 @@
 %define disttag pSPS
 
 Name:           perl-Data-Validate-IP
-Version:        0.08
-Release:        3.%{disttag}
+Version:        0.11
+Release:        2.%{disttag}
 Summary:        Ip validation methods
 License:        GPL+ or Artistic
 Group:          Development/Libraries
@@ -16,6 +16,7 @@ BuildArch:      noarch
 Requires:       perl(Net::Netmask)
 Requires:       perl(Test::Simple)
 Requires:       perl
+Requires:       coreutils
 
 %description
 This module collects ip validation routines to make input validation, and
@@ -36,12 +37,11 @@ make pure_install PERL_INSTALL_ROOT=$RPM_BUILD_ROOT
 find $RPM_BUILD_ROOT -type f -name .packlist -exec rm -f {} \;
 find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null \;
 
-%{__mv} scripts $RPM_BUILD_ROOT/tmp
-
 %{_fixperms} $RPM_BUILD_ROOT/*
 
 %check || :
-make test
+%{!?_without_checks:%{__make} test}
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -50,13 +50,15 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc Changes README
 /usr/*
-/tmp/*
-
-%post
-/tmp/./perl-Data-Validate-IP_post.sh
-%{__rm} /tmp/perl-Data-Validate-IP_post.sh
 
 %changelog
+* Wed Aug 18 2010 Tom Throckmorton <throck@mcnc.org> - 0.11-2
+- minor spec changes to enable rebuild via mock
+
+* Mon Jun 7 2010 Aaron Brown 0.11-1
+- Update to a newer version
+- Remove the custom %post scripts
+
 * Mon Jul 6 2009 Jason Zurawski 0.08-3
 - Compat changes for 64 bit linux.
 
