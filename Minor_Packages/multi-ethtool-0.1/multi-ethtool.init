@@ -1,0 +1,202 @@
+#!/bin/sh
+#
+# $Id$
+#
+# multi-ethtool
+#
+# chkconfig: - 05 99
+# description:	manages multiple ethernet parameters
+# 
+# see:
+# http://code.google.com/p/perfsonar-ps/issues/detail?id=122
+# https://bugzilla.redhat.com/show_bug.cgi?id=179877
+#
+# config: /etc/sysconfig/multi-ethtool
+#
+
+# Source function library.
+. /etc/init.d/functions
+
+# get global settings
+if [ -f /etc/sysconfig/multi-ethtool ] ; then
+    . /etc/sysconfig/multi-ethtool
+else
+    echo -n $"/etc/sysconfig/multi-ethtool does not exist."; warning; echo
+    exit 5
+fi
+
+# find all the interfaces besides loopback.
+# ignore aliases, alternative configurations, and editor backup files
+interfaces=$(ls /etc/sysconfig/network-scripts/ifcfg* | \
+	    LANG=C sed -e "$__sed_discard_ignored_files" \
+		       -e '/\(ifcfg-lo\|:\|ifcfg-.*-range\)/d' \
+		       -e '/ifcfg-[A-Za-z0-9\._-]\+$/ { s/^ifcfg-//g;s/[0-9]/ &/}' | \
+	    LANG=C sort -k 1,1 -k 2n | \
+	    LANG=C sed 's/ //' | \
+	    LANG=C cut -d/ -f 5 | \
+        LANG=C sed -e 's/ifcfg-//g' )
+
+# vars
+VAR_SUBSYS_TCP_TUNING="/var/lock/subsys/multi-ethtool"
+SAVE_FILE="/var/run/multi-ethtool"
+
+# ethtool functions
+# TODO parameterize these values in /etc/sysconfig/multi-ethtool, so that the
+# user can selectively adjust without needing to edit this script
+
+# Interrupt coalescing settings
+ETHTOOL_IC_GET() {
+/usr/sbin/ethtool -c "$1" |egrep 'rx-frames:|rx-usecs:' > $SAVE_FILE.$1
+}
+
+ETHTOOL_IC_SET() {
+for i in "$1"; do
+    /usr/sbin/ethtool -C $i rx-frames 1
+    /usr/sbin/ethtool -C $i rx-usecs 0
+done
+}
+
+ETHTOOL_IC_RESTORE() {
+cat "$SAVE_FILE.$1" | sed -e s/://g |while read value; do
+    /usr/sbin/ethtool -C "$1" $value
+done
+}
+
+# TCP segmentation offload toggling
+ETHTOOL_TSO_ON() {
+/usr/sbin/ethtool -K "$1" tso on
+}
+
+ETHTOOL_TSO_OFF() {
+/usr/sbin/ethtool -K "$1" tso off
+}
+
+start() {
+ret=0
+# Do not save and apply if we've already run
+#if [ ! -r "$VAR_SUBSYS_TCP_TUNING" ]; then
+	#keys=$(cat "$ETHTOOL" | grep -v '^#' | grep '=' | cut -d "=" -f 1)
+	# save current settings for interrupt coalescing
+	echo $"Saving current interrupt coalescing settings..."
+	rm -f "{$SAVE_FILE*}"
+	for interface in $interfaces; do
+        # test if this interface supports IC adjustments
+        /sbin/ethtool -c $interface > /dev/null 2>&1
+        RETVAL=$?
+        if [ $RETVAL -eq 0 ]; then
+            # save off the current settings
+	        ETHTOOL_IC_GET $interface > "$SAVE_FILE.$interface"
+
+	        # apply multi-ethtool settings
+	        echo -n $"disabling interrupt coalescing for interface $interface: "
+	        ETHTOOL_IC_SET $interface
+	        if [ $? -eq 0 ]; then
+	            success; echo
+	        else
+	            failure; echo; ret=1
+	        fi
+            # the nic/driver don't support IC, via ethtool, at least
+        else
+            echo -n "$interface doesn't support interrupt coalescing:"
+            warning ; echo; ret=1
+        fi
+    done
+
+	# now disable TCP server offload
+	for interface in $interfaces; do
+	    echo -n $"disabling TCP server offload: "
+	    ETHTOOL_TSO_OFF $interface
+	    if [ $? -eq 0 ]; then
+	        success; echo
+	    else
+	        failure; echo; ret=1
+	    fi
+    done
+
+    touch $VAR_SUBSYS_TCP_TUNING
+    return $ret
+}
+
+stop() {
+    ret=0
+
+	    echo -n $"Reverting to saved settings: "
+        for interface in $interfaces; do
+            if [ -r "$SAVE_FILE.$interface" ]; then
+                ETHTOOL_IC_RESTORE $interface
+            else
+                echo "no saved settings for $interface"
+            fi
+        done
+
+	    if [ $? -eq 0 ]; then
+	        success; echo
+	    else
+	        failure; echo; ret=1
+        fi
+
+	# re-enable TCP server offload
+    for interface in $interfaces; do
+	    echo -n $"enabling TCP server offload: "
+	    ETHTOOL_TSO_ON $interface
+	    if [ $? -eq 0 ]; then
+		    success; echo
+	    else
+		    failure; echo; ret=1
+	    fi
+    done
+
+    # cleanup
+	/bin/rm -f "$SAVE_FILE"*
+
+    rm -f $VAR_SUBSYS_TCP_TUNING
+    return $ret
+}
+
+status() {
+    if [ ! -f "$VAR_SUBSYS_TCP_TUNING" ]; then
+	    echo $"running with original base settings"
+	    return 3
+    else
+        echo $"multi-ethtool settings are in effect:"
+        #keys=$(cat "$ETHTOOL" | grep -v '^#' | grep '=' | cut -d "=" -f 1)
+        for key in $keys; do
+	        ETHTOOL_GET $key
+        done
+    fi
+    return 0
+}
+
+case "$1" in
+    start)
+	[ -f "$VAR_SUBSYS_TCP_TUNING" ] && exit 0
+	start
+	RETVAL=$?
+	;;
+    stop)
+	[ -f "$VAR_SUBSYS_TCP_TUNING" ] || exit 0
+	stop
+	RETVAL=$?
+	;;
+    restart|force-reload)
+	[ -f "$VAR_SUBSYS_TCP_TUNING" ] && stop
+	start
+	RETVAL=$?
+	;;
+    condrestart|try-restart)
+	[ -f "$VAR_SUBSYS_TCP_TUNING" ] || exit 0
+	stop
+	start
+	RETVAL=$?
+	;;
+    status)
+	status
+	RETVAL=$?
+	;;
+    *)
+	echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+	RETVAL=2
+	;;
+esac
+
+exit $RETVAL

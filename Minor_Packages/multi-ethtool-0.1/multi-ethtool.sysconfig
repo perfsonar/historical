@@ -1,0 +1,5 @@
+# multi-tool service configuration
+
+#IC_SETTINGS="rx-frames 1  rx-usecs 0"
+RX-FRAMES="1"
+RX-USECS="0"

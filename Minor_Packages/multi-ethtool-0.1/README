@@ -1,0 +1,40 @@
+Overview
+--------
+
+multi-ethtool is a script that allows you to change multiple ethernet
+parameters via standard service calls.  The only supported interfaces for
+changing these parameters at startup are by setting ETHTOOL_OPTS in the
+ifcfg-ethX, which will get honored in /etc/sysconfig/network-scripts/ifup-eth
+(though that is limited to a single ethtool invocation), or via udev rules,
+which does allow multiple options to be set, though these will be applied only
+at boot, and cannot change dynamically or on demand.
+
+The intent of this script is to be called by other services that require extra
+ethernet settings.
+
+Using multi-ethtool
+-----------
+
+To start multi-ethtool you can start the service with the service command:
+
+   service multi-ethtool start
+
+If you want to enable the service in the system, use the chkconfig command:
+
+   chkconfig multi-ethtool on
+
+
+BUGS
+----------------
+
+Probably, though note that lacking features != bugs
+
+See also:
+
+https://bugzilla.redhat.com/show_bug.cgi?id=179877
+https://bugzilla.redhat.com/show_bug.cgi?id=519535
+
+More Information
+----------------
+
+Please have a look at /etc/sysconfig/multi-ethtool for tuning parameters.

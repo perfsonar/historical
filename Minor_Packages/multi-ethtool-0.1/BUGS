@@ -1,0 +1,5 @@
+- when changing parameters on the same interface which is being used to access
+  a running system (e.g. when logged in remotely via SSH), the connection will
+  stall while the new parameters take effect; therefore, it may be preferable
+  to chkconfig this service on and then restart.  This behavior may be
+  negligble for web clients, but this has not been tested.
