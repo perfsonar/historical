@@ -105,7 +105,7 @@ database.
 
 Check logging config file: 
      
-  /etc/PingER/logger.conf
+  /opt/perfsonar_ps/PingER/etc/daemon_logger.conf
 
 Starting/Stopping:
 ------------------
@@ -113,15 +113,15 @@ Starting/Stopping:
 The service comes with init scripts that may be used to start and stop
 operation:
 
-  /etc/init.d/PingER.sh start
-  /etc/init.d/PingER.shstop
-  /etc/init.d/PingER.sh restart
+  /etc/init.d/PingER start
+  /etc/init.d/PingER stop
+  /etc/init.d/PingER restart
 
 Create symlinks to allow automated start/stop at the boot/shutdown time:
 	
-        ln -s /etc/init.d/PingER.sh  /etc/rc2.d/S99pinger-ps
-        ln -s /etc/init.d/PingER.sh  /etc/rc6.d/K02pinger-ps
-        ln -s /etc/init.d/PingER.sh  /etc/rc0.d/K02pinger-ps
+        ln -s /etc/init.d/PingER /etc/rc2.d/S99PingER
+        ln -s /etc/init.d/PingER /etc/rc6.d/K02PingER
+        ln -s /etc/init.d/PingER /etc/rc0.d/K02PingER
 
 The service can also be run in a manual fashion (useful for debugging):
 

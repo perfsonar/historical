@@ -2,14 +2,14 @@
 #
 # Init file for perfSONAR Collector Daemon
 #
-# chkconfig: 2345 60 20
+# chkconfig: 2345 65 20
 # description: perfSONAR Collector Daemon
 #
 
 PREFIX=/opt/perfsonar_ps/PingER
 BINDIR=${PREFIX}/bin
-CONFDIR=/etc/PingER
-VARDIR=/var/run/PingER
+CONFDIR=${PREFIX}/etc
+VARDIR=/var/run
 SERVICE=daemon.pl
 CONFIGBIN=${BINDIR}/pinger_ConfigureDaemon
 
@@ -57,6 +57,7 @@ do
 
 	if $PERFSONAR ; then
 	    echo "$0 $ARG: $SERVICE started"
+            touch /var/lock/subsys/PingER
 	else
 	    echo "$0 $ARG: $SERVICE could not be started"
 	    ERROR=3
@@ -69,6 +70,7 @@ do
 	fi
 	if kill $PID ; then
 	    echo "$0 $ARG: $SERVICE stopped"
+            rm /var/lock/subsys/PingER
 	else
 	    echo "$0 $ARG: $SERVICE could not be stopped"
 	    ERROR=4

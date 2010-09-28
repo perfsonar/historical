@@ -23,7 +23,7 @@ use Data::Dumper;
 use Cwd;
 use Date::Parse;
 
-my $dirname =  '/etc/PingER';
+my $dirname =  '/opt/perfsonar_ps/PingER/etc';
 
 my $was_installed = 0;
 my $DEFAULT_FILE;
@@ -33,7 +33,7 @@ if ( $was_installed ) {
     $confdir = "XXX_CONFDIR_XXX";
 }
 else {
-    $confdir = '/etc/PingER';
+    $confdir =  '/opt/perfsonar_ps/PingER/etc';
 }
 
 $DEFAULT_FILE = $confdir . "/daemon.conf";
@@ -325,7 +325,7 @@ sub config_pinger {
 
     $config->{$modulename}->{"db_type"} = &ask( "Enter the database type to read from (sqlite,mysql) ", "mysql", $config->{$modulename}->{"db_type"}, '^(sqlite|mysql)$' );
 
-    my $dirname = '/etc/PingER/db_config';
+    my $dirname =  '/opt/perfsonar_ps/PingER/scripts';
 
     if ( $config->{$modulename}->{"db_type"} eq "sqlite" ) {
         $config->{$modulename}->{"db_file"} = &ask( "Enter the filename of the SQLite database ", "pinger.db", $config->{$modulename}->{"db_file"}, '.+' );
@@ -442,7 +442,6 @@ sub cleanup_pinger {
 
     $config->{$modulename}->{"db_type"} = &ask( "Enter the database type to read from (sqlite,mysql) ", "mysql", $config->{$modulename}->{"db_type"}, '^(sqlite|mysql)$' );
 
-    my $dirname = '/etc/PingER/db_config';
     my $date =  &ask( "\nEnter date as mm-dd-yyyy ( example: 06-01-2009 ) to delete all records older than that", '', undef, '^\d\d\-\d\d\-\d{4}$');           
     unless($date) {
      print " No cleanup because date have not been entered...\n";
