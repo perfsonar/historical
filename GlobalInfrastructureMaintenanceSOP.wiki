@@ -27,7 +27,7 @@ minimal standards to include the service in the set of root gLS servers.
 
   * Changes to the gLS software on any particular server will be done in coordination with the other gLS operators.
   * Changes to the gLS software will go through the following process before being installed on a production gLS server:
-    * Proposed change must be discussed on perfsonar-def@perfsonar.net.
+    * Proposed change must be discussed on perfsonar-dev@perfsonar.net.
     * Code implementing the changes must be committed to the SVN repository
     * The changes must be reviewed by someone other than the author.
     * The new version must be tested by someone other than the author.
