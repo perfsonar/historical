@@ -4,6 +4,10 @@
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 lookup_service
 
+# sysconfig scripts must be located in the 'scripts' directory, and prefixed
+# with "sysconfig-" (e.g. sysconfig-lookup_service)
+%define sysconfig_1   lookup_service
+
 %define relnum 11
 %define disttag pSPS
 
@@ -77,6 +81,8 @@ mkdir -p $RPM_BUILD_ROOT/etc/init.d
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_1} > scripts/%{init_script_1}.new
 install -D -m 755 scripts/%{init_script_1}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_1}
 
+install -D scripts/sysconfig-%{sysconfig_1} $RPM_BUILD_ROOT/etc/sysconfig/%{sysconfig_1}
+
 %post
 mkdir -p /var/log/perfsonar
 chown perfsonar:perfsonar /var/log/perfsonar
@@ -100,6 +106,7 @@ rm -rf $RPM_BUILD_ROOT
 %{install_base}/scripts/*
 %{install_base}/lib/*
 /etc/init.d/*
+/etc/sysconfig/*
 
 %preun
 if [ $1 -eq 0 ]; then

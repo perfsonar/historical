@@ -6,6 +6,15 @@
 # description: perfSONAR Lookup Service
 #
 
+# get local lookup service configuration
+if [ -f /etc/sysconfig/lookup_service ];then
+        . /etc/sysconfig/lookup_service
+fi
+
+# defaults, if not specified in local configuration
+[ "$RESET_DATABASE" = "" ] && RESET_DATABASE=NO
+[ "$CLEAN_DATABASE" = "" ] && CLEAN_DATABASE=YES
+
 PREFIX=/opt/perfsonar_ps/lookup_service
 BINDIR=${PREFIX}/bin
 CONFDIR=${PREFIX}/etc
@@ -15,12 +24,18 @@ CONFFILE=${CONFDIR}/daemon.conf
 LOGGERFILE=${CONFDIR}/daemon_logger.conf
 PIDFILE=lookup_service.pid
 
+DATABASE_DIRECTORY=/var/lib/perfsonar/lookup_service/xmldb
+
 USER=perfsonar
 GROUP=perfsonar
 
 FULL_PIDFILE=${RUNDIR}/lookup_service.pid
 
 PERFSONAR="${BINDIR}/daemon.pl --config=${CONFFILE} --pidfile=${PIDFILE} --piddir=${RUNDIR} --logger=${LOGGERFILE} --user=${USER} --group=${GROUP}"
+
+if [ "$CLEAN_DATABASE" == "NO" ]; then
+	PERFSONAR="${PERFSONAR} --noclean"
+fi
 
 ERROR=0
 ARGV="$@"
@@ -49,8 +64,14 @@ do
     start)
 	echo $PERFSONAR
 
+	# Delete the database contents on startup
+        if [ "$RESET_DATABASE" == "YES" ]; then
+	    rm -rf $DATABASE_DIRECTORY/*
+        fi
+
 	if $PERFSONAR ; then
 	    echo "$0 $ARG: perfSONAR Lookup Service started"
+            touch /var/lock/subsys/lookup_service
 	else
 	    echo "$0 $ARG: perfSONAR Lookup Service could not be started"
 	    ERROR=3
@@ -63,6 +84,7 @@ do
 	fi
 	if kill $PID ; then
 	    echo "$0 $ARG: perfSONAR Lookup Service stopped"
+            rm /var/lock/subsys/lookup_service
 	else
 	    echo "$0 $ARG: perfSONAR Lookup Service could not be stopped"
 	    ERROR=4

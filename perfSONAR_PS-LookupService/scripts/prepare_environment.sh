@@ -28,6 +28,9 @@ $MAKEROOT chown -R perfsonar:perfsonar /var/lib/perfsonar/lookup_service
 echo "Linking init script..."
 $MAKEROOT ln -s /opt/perfsonar_ps/lookup_service/scripts/lookup_service /etc/init.d/lookup_service
 
+echo "Setting up sysconfig..."
+$MAKEROOT ln -s /opt/perfsonar_ps/lookup_service/scripts/sysconfig-lookup_service /etc/sysconfig/lookup_service
+
 echo "Running chkconfig..."
 $MAKEROOT /sbin/chkconfig --add lookup_service
 

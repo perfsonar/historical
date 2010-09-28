@@ -62,3 +62,4 @@ scripts/install_dependencies.sh
 scripts/lookup_service
 scripts/prepare_environment.sh
 scripts/psCreateLookupDB
+scripts/sysconfig-lookup_service
