@@ -6,7 +6,7 @@ Autoreq: 0
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 snmp_ma
 
-%define relnum 11
+%define relnum 12
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-SNMPMA
@@ -140,6 +140,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Tue Jul 27 2010 aaron@internet2.edu 3.1-12
+- Add an option to reread the store file when its updated
+
 * Tue Apr 27 2010 zurawski@internet2.edu 3.1-11
 - Fixing a dependency problem with logging libraries
 

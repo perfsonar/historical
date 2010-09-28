@@ -1,7 +1,7 @@
 PACKAGE=perfSONAR_PS-SNMPMA
 ROOTPATH=/opt/perfsonar_ps/snmp_ma
 VERSION=3.1
-RELEASE=11
+RELEASE=12
 
 default:
 	@echo No need to build the package. Just run \"make install\"
