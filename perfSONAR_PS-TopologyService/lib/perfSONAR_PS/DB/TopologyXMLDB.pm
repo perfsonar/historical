@@ -3,7 +3,7 @@ package perfSONAR_PS::DB::TopologyXMLDB;
 use strict;
 use warnings;
 
-our $VERSION = 3.1;
+our $VERSION = 3.2;
 
 use fields 'READ_ONLY', 'DB_OPEN', 'DB_NAMESPACES', 'DB_FILE', 'DB_CONTAINER', 'DATADB', 'LOGGER', 'INITIALIZED';
 
@@ -857,9 +857,9 @@ L<Log::Log4perl>, L<Data::Dumper>, L<perfSONAR_PS::DB::XMLDB>,
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Topology::Common>,
 L<perfSONAR_PS::Topology::ID>, L<English>
 
-To join the 'perfSONAR Users' mailing list, please visit:
+To join the 'perfSONAR-PS Users' mailing list, please visit:
 
-  https://mail.internet2.edu/wws/info/perfsonar-user
+  https://lists.internet2.edu/sympa/info/perfsonar-ps-users
 
 The perfSONAR-PS subversion repository is located at:
 

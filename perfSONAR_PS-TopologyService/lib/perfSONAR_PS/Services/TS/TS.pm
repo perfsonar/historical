@@ -3,7 +3,7 @@ package perfSONAR_PS::Services::TS::TS;
 use warnings;
 use strict;
 
-our $VERSION = 3.1;
+our $VERSION = 3.2;
 
 =head1 NAME
 
@@ -621,9 +621,9 @@ L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>,
 L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::Topology::Common>,
 L<perfSONAR_PS::Client::Topology::XMLDB>
 
-To join the 'perfSONAR Users' mailing list, please visit:
+To join the 'perfSONAR-PS Users' mailing list, please visit:
 
-  https://mail.internet2.edu/wws/info/perfsonar-user
+  https://lists.internet2.edu/sympa/info/perfsonar-ps-users
 
 The perfSONAR-PS subversion repository is located at:
 
@@ -650,7 +650,7 @@ along with this software.  If not, see
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2009, Internet2 and the University of Delaware
+Copyright (c) 2004-2010, Internet2 and the University of Delaware
 
 All rights reserved.
 

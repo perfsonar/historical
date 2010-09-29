@@ -4,16 +4,17 @@
 %define init_script_1 topology_service
 # %define init_script_2 ls_registration_daemon
 
+%define relnum  1
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-TopologyService
-Version:        3.1
-Release:        3.%{disttag}
+Version:        3.2
+Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS Topology Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-TopologyService/
-Source0:        perfSONAR_PS-TopologyService-%{version}.tar.gz
+Source0:        perfSONAR_PS-TopologyService-%{version}.%{relnum}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       perl(Carp)
@@ -53,7 +54,7 @@ The perfSONAR-PS Topology Service delivers stored topology information when quer
 /usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
-%setup -q -n perfSONAR_PS-TopologyService
+%setup -q -n perfSONAR_PS-TopologyService-%{version}.%{relnum}
 
 %build
 
