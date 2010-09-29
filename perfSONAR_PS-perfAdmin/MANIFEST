@@ -9,6 +9,7 @@ cgi-bin/delayGraph.cgi
 cgi-bin/directory.cgi
 cgi-bin/serviceTest.cgi
 cgi-bin/tree.cgi
+cgi-bin/topoGraph.cgi
 cgi-bin/utilizationGraph.cgi
 cgi-bin/utilizationGraphFlash.cgi
 cgi-bin/view.cgi
