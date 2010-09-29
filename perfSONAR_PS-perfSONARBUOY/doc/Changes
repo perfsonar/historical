@@ -1,3 +1,18 @@
+version 3.2
+  * Bugfixes
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=390
+      URLs in pS Package Documentation
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=386
+      Unchecked null concatentation in pSB
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=388
+      MySQL database checks
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=365
+      support for constraining ports for perfsonarbuoy owamp tests
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=333
+      figure out good owamp data noise filter
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=318
+      Read failed: (Success)
+
 version 3.1
   * Initial RPM release.
   * The following development changes where added since the last release (0.9)
@@ -54,9 +69,19 @@ version 3.1
       documentation patch for bwdb.pl & owdb.pl	 
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=315
       perfsonarbuoy_ma/doc/README testing section non-obvious
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=317
+      psB owamp test data presentation is misleading
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=374
       Large clock change causes NTP to stop updating and services to stop 
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=412
       pSB/owamp not restarting powstream properly     
     - http://code.google.com/p/perfsonar-ps/issues/detail?id=420
       psb 'master' scripts can periodically not restart properly 
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=364
+      Same test displayed muliple times by serviceTest.cgi
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=347
+      psB needs option to specify local *receive* UDP ports used by powstream  
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=376
+      Enable Verbose debugging on BWCTL/OWAMP/PSB by default
+    - http://code.google.com/p/perfsonar-ps/issues/detail?id=367
+      OWAMP timestamp conversions slow down pSB MA requests    

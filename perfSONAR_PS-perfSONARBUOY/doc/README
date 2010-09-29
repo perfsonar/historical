@@ -763,11 +763,11 @@ Subscribe to the user mailing lists if you are seeking help on some problem
 related to this software.  Announcements regarding availability of new releases
 will also be sent to these locations
 
-  perfSONAR-PS Users Group - https://mail.internet2.edu/wws/info/psps-users
-  perfSONAR-PS Announcements - https://mail.internet2.edu/wws/info/psps-announce
+  perfSONAR-PS Users Group - https://lists.internet2.edu/sympa/info/perfsonar-ps-users
+  perfSONAR-PS Announcements - https://lists.internet2.edu/sympa/info/perfsonar-ps-announce
 
-  Performance Node Users - https://mail.internet2.edu/wws/info/performance-node-users
-  Performance Node Announcements - https://mail.internet2.edu/wws/info/performance-node-announce
+  Performance Node Users - https://lists.internet2.edu/sympa/info/performance-node-users
+  Performance Node Announcements - https://lists.internet2.edu/sympa/info/performance-node-announce
 
 Also if you are using package management software and have installed the
 Internet2 software repository, a typical upgrade should download new releases:
@@ -785,4 +785,4 @@ Finally, check the following websites for news of software releases:
 
 --------------------------------------------------------------------------------
 
-Mon May 17 11:01:46 EDT 2010
+Wed Sep 29 10:31:17 EDT 2010

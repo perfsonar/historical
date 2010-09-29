@@ -254,6 +254,13 @@ fi
 * Wed Sep 29 2010 zurawski@internet2.edu 3.2-1
 - Updated examples
 - Added schema files
+- Bugfixes
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=390
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=386
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=388
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=365
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=333
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=318
 
 * Mon May 17 2010 zurawski@internet2.edu 3.1-7
 - Netlogger logging
