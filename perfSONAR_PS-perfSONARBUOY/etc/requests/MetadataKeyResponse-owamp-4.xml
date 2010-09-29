@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="metadataKeyRequest1" id="message.12940735" type="MetadataKeyResponse">
+
+  <nmwg:metadata metadataIdRef="meta4c" id="metadata.13725095">
+    <nmwg:key>
+      <nmwg:parameters id="params.0">
+        <nmwg:parameter name="maKey">2d826ba1a78c47e6f9bacd9838729276</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.13725095" id="data.6854151">
+    <nmwg:key xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+      <nmwg:parameters id="params.0">
+        <nmwg:parameter name="maKey">2d826ba1a78c47e6f9bacd9838729276</nmwg:parameter>
+        <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="startTime">1121472000</nmwg:parameter>
+        <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="endTime">1121904000</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+
+</nmwg:message>
+
+<!--
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="metadataKeyRequest1" id="message.16575129" type="MetadataKeyResponse">
+
+  <nmwg:metadata metadataIdRef="meta3" id="metadata.12713869">
+    <nmwg:eventType>error.ma.storage_result</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.12713869" id="data.8289168">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">Key error in metadata storage: 'maKey' cannot be found.</nmwgr:datum>
+  </nmwg:data>
+
+</nmwg:message>
+
+-->
+

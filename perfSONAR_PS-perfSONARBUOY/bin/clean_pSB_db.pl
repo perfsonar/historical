@@ -2,7 +2,7 @@
 
 use strict;
 
-our $VERSION = 3.1;
+our $VERSION = 3.2;
 
 =head1 NAME
 
@@ -365,7 +365,7 @@ L<perfSONAR_PS::Config::OWP::Conf>
 
 To join the 'perfSONAR Users' mailing list, please visit:
 
-  https://mail.internet2.edu/wws/info/perfsonar-user
+  https://lists.internet2.edu/sympa/info/perfsonar-ps-users
 
 The perfSONAR-PS subversion repository is located at:
 

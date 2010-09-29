@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="metadataKeyRequest1" id="message.6414732" type="MetadataKeyResponse">
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.17093212" metadataIdRef="metadata-608">
+    <owamp:subject xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/" id="subject-608">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src value="64.57.16.226" type="ipv4"/>
+        <nmwgt:dst value="64.57.16.98" type="ipv4"/>
+      </nmwgt:endPointPair>
+    </owamp:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:eventType>
+    <nmwg:parameters id="parameters-608">
+      <nmwg:parameter name="count">10800</nmwg:parameter>
+      <nmwg:parameter name="bucket_width">0.0001</nmwg:parameter>
+      <nmwg:parameter name="schedule">
+        <interval type="exp">0.1</interval>
+      </nmwg:parameter>
+    </nmwg:parameters>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.17093212" id="data.15436274">
+    <nmwg:key>
+      <nmwg:parameters id="params.0">
+        <nmwg:parameter name="maKey">2d826ba1a78c47e6f9bacd9838729276</nmwg:parameter>
+        <nmwg:parameter name="startTime">1282746000</nmwg:parameter>
+        <nmwg:parameter name="endTime">1282747000</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+  
+</nmwg:message>
+
+<!--
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="metadataKeyRequest1" id="message.10801068" type="MetadataKeyResponse">
+  
+  <nmwg:metadata metadataIdRef="meta1" id="metadata.1954757">
+    <nmwg:eventType>error.ma.storage</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.1954757" id="data.6094184">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">Database "/var/lib/perfsonar/perfsonarbuoy_ma/store.xml" returned 0 results for search</nmwgr:datum>
+  </nmwg:data>
+
+</nmwg:message>
+
+-->
+

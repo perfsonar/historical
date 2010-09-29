@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="metadataKeyRequest1" id="message.3784156" type="MetadataKeyResponse">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.8533224" metadataIdRef="metadata-116">
+    <iperf:subject xmlns:iperf="http://ggf.org/ns/nmwg/tools/iperf/2.0/" id="subject-116">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src value="64.57.16.130" type="ipv4"/>
+        <nmwgt:dst value="64.57.17.82" type="ipv4"/>
+      </nmwgt:endPointPair>
+    </iperf:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0</nmwg:eventType>
+    <nmwg:parameters id="parameters-116">
+      <nmwg:parameter name="protocol">UDP</nmwg:parameter>
+      <nmwg:parameter name="windowSize">1</nmwg:parameter>
+      <nmwg:parameter name="bandwidthLimit">900</nmwg:parameter>
+      <nmwg:parameter name="bufferLength">8192</nmwg:parameter>
+      <nmwg:parameter name="timeDuration">10</nmwg:parameter>
+    </nmwg:parameters>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.8533224" id="data.5026540">
+    <nmwg:key>
+      <nmwg:parameters id="params.0">
+        <nmwg:parameter name="maKey">6ed3620ea64060bc8be5ded244b97fa9</nmwg:parameter>
+        <nmwg:parameter name="startTime">1282746000</nmwg:parameter>
+        <nmwg:parameter name="endTime">1282747000</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:data>
+  
+</nmwg:message>
+
+<!--
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="metadataKeyRequest1" id="message.2487095" type="MetadataKeyResponse">
+
+  <nmwg:metadata metadataIdRef="meta1" id="metadata.4237759">
+    <nmwg:eventType>error.ma.storage</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.4237759" id="data.14859327">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">Database "/var/lib/perfsonar/perfsonarbuoy_ma/store.xml" returned 0 results for search</nmwgr:datum>
+  </nmwg:data>
+
+</nmwg:message>
+
+-->
+
+

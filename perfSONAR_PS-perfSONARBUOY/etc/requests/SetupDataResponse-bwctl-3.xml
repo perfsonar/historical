@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="setupDataRequest1" id="message.6285447" type="SetupDataResponse">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.4651450" metadataIdRef="meta1">
+    <nmwg:key xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="key-1">
+      <nmwg:parameters id="parameters-key-1">
+        <nmwg:parameter name="maKey">6ed3620ea64060bc8be5ded244b97fa9</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.4651450" id="data.11395227">
+    <iperf:datum xmlns:iperf="http://ggf.org/ns/nmwg/tools/iperf/2.0/" timeType="iso" jitter="0.002" sent="138890" throughput="9.10234e+08" timeValue="Tue May 12 22:03:41.1681164619 UTC 2009"/>
+    <iperf:datum xmlns:iperf="http://ggf.org/ns/nmwg/tools/iperf/2.0/" timeType="iso" jitter="0.003" sent="138890" throughput="9.10234e+08" timeValue="Wed May 13 05:12:01.2083013369 UTC 2009"/>
+       
+    <iperf:datum xmlns:iperf="http://ggf.org/ns/nmwg/tools/iperf/2.0/" timeType="iso" jitter="0.002" sent="138890" throughput="9.10228e+08" timeValue="Wed Aug 25 11:01:31.3918981026 UTC 2010"/>
+  </nmwg:data>
+  
+</nmwg:message>
+
+<!--
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="setupDataRequest1" id="message.5177241" type="SetupDataResponse">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.12966215" metadataIdRef="meta2c">
+    <nmwg:key xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="key-1">
+      <nmwg:parameters id="parameters-key-1">
+        <nmwg:parameter name="maKey">6ed3620ea64060bc8be5ded244b97fa9</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.12966215" id="data.9201190">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">Query returned 0 results</nmwgr:datum>
+  </nmwg:data>
+  
+</nmwg:message>
+
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="SetupDataRequest1" id="message.2487095" type="SetupDataResponse">
+
+  <nmwg:metadata metadataIdRef="meta1" id="metadata.4237759">
+    <nmwg:eventType>error.ma.storage</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.4237759" id="data.14859327">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">Database "/var/lib/perfsonar/perfsonarbuoy_ma/store.xml" returned 0 results for search</nmwgr:datum>
+  </nmwg:data>
+
+</nmwg:message>
+
+-->
+
+

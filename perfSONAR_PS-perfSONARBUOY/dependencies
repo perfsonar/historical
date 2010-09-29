@@ -43,6 +43,7 @@ Sys::Hostname
 Sys::Syslog
 Term::ReadKey
 Time::HiRes
+Time::Local
 XML::LibXML,1.66
 base
 vars

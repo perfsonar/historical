@@ -8,11 +8,11 @@
 %define init_script_owp_collector perfsonarbuoy_owp_collector
 %define init_script_owp_master perfsonarbuoy_owp_master
 
-%define relnum 7
+%define relnum 1
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfSONARBUOY
-Version:        3.1
+Version:        3.2
 Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS perfSONAR-BUOY Measurement Archive and Collection System
 License:        distributable, see LICENSE
@@ -251,6 +251,10 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Wed Sep 29 2010 zurawski@internet2.edu 3.2-1
+- Updated examples
+- Added schema files
+
 * Mon May 17 2010 zurawski@internet2.edu 3.1-7
 - Netlogger logging
 - Updated request examples
