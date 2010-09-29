@@ -5,11 +5,11 @@
 %define crontab perfAdmin.cron
 %define apacheconf perfAdmin.conf
 
-%define relnum 9
+%define relnum 1
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfAdmin
-Version:        3.1
+Version:        3.2
 Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS perfAdmin
 License:        distributable, see LICENSE
@@ -104,6 +104,13 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/*
 
 %changelog
+* Wed Sep 29 2010 zurawski@internet2.edu 3.2-1
+- Package fixes (build using mock)
+- Bugfixes
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=436
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=432
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=390
+
 * Wed May 12 2010 zurawski@internet2.edu 3.1-9
 - Including additions to make cache packages.  
 
