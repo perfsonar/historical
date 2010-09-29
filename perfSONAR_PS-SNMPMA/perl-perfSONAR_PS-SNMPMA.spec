@@ -141,7 +141,10 @@ fi
 
 %changelog
 * Wed Sep 29 2010 zurawski@internet2.edu 3.2-1
-- 
+- Updated init scripts
+- Package fixes (build using mock)
+- Bugfixes
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=390
 
 * Tue Jul 27 2010 aaron@internet2.edu 3.1-12
 - Add an option to reread the store file when its updated
