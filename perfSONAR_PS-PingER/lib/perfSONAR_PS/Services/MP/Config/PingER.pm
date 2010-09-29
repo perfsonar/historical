@@ -99,6 +99,7 @@ sub load {
             foreach my $ip ( $port->getChildrenByLocalName( 'ipAddress' ) ) {
                 $ipAddress = $ip->textContent;
                 chomp( $ipAddress );
+		last if $ipAddress;
             }
         }
 
@@ -107,8 +108,9 @@ sub load {
         foreach my $tag ( $node->getChildrenByLocalName( 'hostName' ) ) {
             $destination = $tag->textContent;
             chomp( $destination );
+	    last if $destination;
         }
-
+    
         # get the tests and populat datastructure
         foreach my $test ( $node->getChildrenByLocalName( 'parameters' ) ) {
 
@@ -154,7 +156,7 @@ sub load {
 
             # add the destination details
             $hash->{destinationIp} = $ipAddress   if $ipAddress;
-            $hash->{destination}   = $destination if $destination;
+            $hash->{destination}   = $destination?$destination:$ipAddress;
 
             $config->{ $nodeid . ':' . $id } = $hash;
             $found++;
