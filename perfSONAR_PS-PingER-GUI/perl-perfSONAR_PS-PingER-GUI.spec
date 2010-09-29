@@ -5,7 +5,7 @@
 %define crontab pinger_cache.cron
 %define disttag pSPS
 %define apacheconf pinger_gui.conf
-%define relnum 12
+%define relnum 13
 %define _unpackaged_files_terminate_build 0
 
 Name:           perl-perfSONAR_PS-PingER-GUI
@@ -25,11 +25,10 @@ Requires:       perl(DateTime::Format::Builder) >= 0.7901
 Requires:       perl(Carp) >= 0.41
 Requires:       perl(Carp::Clan) >= 0.41
 Requires:       perl(Config::General) 
-Requires:       perl(Catalyst::Runtime)
+Requires:       perl(Catalyst::Runtime) < 5.8
 Requires:       perl(Catalyst::View::TT)
 Requires:       perl(Catalyst::Plugin::StackTrace)
 Requires:       perl(Catalyst::Engine::Apache2::MP20)
-Requires:       perl(Catalyst::Plugin::Static::Simple)
 Requires:       perl(Catalyst::Plugin::ConfigLoader)
 Requires:       perl(Catalyst::Action::RenderView)
 Requires:       perl(Class::Data::Inheritable)
@@ -70,8 +69,6 @@ Requires:       perl(LWP::UserAgent)
 Requires:       perl(Math::BigFloat)
 Requires:       perl(Math::BigInt)
 Requires:       perl(Module::Load)
-Requires:       perl(Moose) 
-Requires:       perl(Mouse) 
 Requires:       perl(Net::Ping)
 Requires:       perl(Net::DNS)
 Requires:       perl(Net::CIDR)
@@ -147,7 +144,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{install_base}/doc/*
 %{install_base}/bin/*
 %{install_base}/scripts/*
-%{install_base}/lib/Any/*
+%{install_base}/lib/Catalyst/*
+%{install_base}/lib/Data/*
 %{install_base}/lib/perfSONAR_PS/*
 %{install_base}/lib/PingerGUI/*
 %{install_base}/lib/PingerGUI.pm
@@ -195,6 +193,8 @@ chown -R root:root /etc/cron.d/%{crontab}
 /etc/init.d/httpd restart
 
 %changelog
+* Wed Aug 04 2010 maxim@fnal.gov  3.1-13
+- removed deps for Moose, added modules from cpan of the correct version
 
 * Wed Apr 28 2010 maxim@fnal.gov  3.1-12
 - added dep and extra Chartdirector lib

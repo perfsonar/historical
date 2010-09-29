@@ -19,7 +19,7 @@ use Catalyst qw/-Debug
                 Static::Simple
 		StackTrace 
 		/;
-our $VERSION = '3.1.6'; 
+our $VERSION = '3.1.12'; 
 
 # Configure the application.
 #

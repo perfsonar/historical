@@ -6,7 +6,9 @@ doc/Changes
 doc/INSTALL
 doc/LICENSE
 doc/README
-lib/Any/Moose.pm
+lib/Data/Visitor.pm
+lib/Data/Visitor/Callback.pm
+lib/Catalyst/Plugin/Static/Simple.pm
 lib/ChartDirector/LICENSE.TXT
 lib/ChartDirector/lib/chartdir.lic
 lib/ChartDirector/lib/fonts/helvB.pfc
