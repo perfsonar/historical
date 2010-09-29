@@ -97,6 +97,18 @@ The service can also be run in a manual fashion (useful for debugging):
 
   (sudo) perl bin/daemon.pl --verbose --conf=etc/daemon.conf
 
+The Lookup service has to options that may be set via the init subsystem.  After
+installation the '/etc/sysconfig/lookup_service' and see the following options:
+
+  RESET_DATABASE=NO
+  CLEAN_DATABASE=YES
+
+'RESET_DATABASE' is an option that will delete the database on each service
+restart.  It is recomended that all hLS instances set this to 'YES'.
+'CLEAN_DATABASE' should always be set to 'YES' except in the hLS intances that
+are being used for the IDC services.  Setting this to 'NO' will never remove any
+expired records from the database.  
+
 Testing:
 --------
 
