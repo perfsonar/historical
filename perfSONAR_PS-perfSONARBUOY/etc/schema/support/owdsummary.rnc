@@ -170,7 +170,7 @@ SummaryDatum =
                 (
                     attribute maxTTL { xsd:unsignedInt } |
                     element summary:maxTTL { xsd:unsignedInt }
-                )? &                
+                )? &
 # Units is seconds
 # *_ipdv_jitter definitions from RFC 3393 (Section 4.5)
 # Basically, consecutive packets are selected for computing ipdv.
