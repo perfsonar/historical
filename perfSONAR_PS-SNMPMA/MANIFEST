@@ -25,6 +25,18 @@ etc/requests/SetupDataRequest-2.xml
 etc/requests/SetupDataRequest-3.xml
 etc/requests/SetupDataRequest-4.xml
 etc/requests/SetupDataRequest-5.xml
+etc/requests/DataInfoRequest-Ganglia-1.xml
+etc/requests/DataInfoRequest-Ganglia-2.xml
+etc/requests/MetadataKeyRequest-Ganglia-1.xml
+etc/requests/MetadataKeyRequest-Ganglia-2.xml
+etc/requests/MetadataKeyRequest-Ganglia-3.xml
+etc/requests/MetadataKeyRequest-Ganglia-4.xml
+etc/requests/MetadataKeyRequest-Ganglia-5.xml
+etc/requests/SetupDataRequest-Ganglia-1.xml
+etc/requests/SetupDataRequest-Ganglia-2.xml
+etc/requests/SetupDataRequest-Ganglia-3.xml
+etc/requests/SetupDataRequest-Ganglia-4.xml
+etc/requests/SetupDataRequest-Ganglia-5.xml
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
 lib/perfSONAR_PS/Client/LS/Remote.pm
@@ -34,6 +46,7 @@ lib/perfSONAR_PS/Common.pm
 lib/perfSONAR_PS/DB/Cacti.pm
 lib/perfSONAR_PS/DB/Cricket.pm
 lib/perfSONAR_PS/DB/File.pm
+lib/perfSONAR_PS/DB/Ganglia.pm
 lib/perfSONAR_PS/DB/RRD.pm
 lib/perfSONAR_PS/DB/SQL.pm
 lib/perfSONAR_PS/DB/XMLDB.pm

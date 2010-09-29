@@ -7,7 +7,7 @@ use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER', 'NETLOGGER', 'HASH
 use strict;
 use warnings;
 
-our $VERSION = 3.1;
+our $VERSION = 3.2;
 
 =head1 NAME
 
@@ -72,7 +72,8 @@ my %ma_namespaces = (
     nmtl4     => "http://ogf.org/schema/network/topology/l4/20070828/",
     nmtopo    => "http://ogf.org/schema/network/topology/base/20070828/",
     nmtb      => "http://ogf.org/schema/network/topology/base/20070828/",
-    nmwgr     => "http://ggf.org/ns/nmwg/result/2.0/"
+    nmwgr     => "http://ggf.org/ns/nmwg/result/2.0/",
+    ganglia   => "http://ggf.org/ns/nmwg/tools/ganglia/2.0/"
 );
 
 =head1 API
@@ -107,7 +108,7 @@ sub init {
     $self->{NETLOGGER} = get_logger( "NetLogger" );
 
     unless ( exists $self->{CONF}->{"root_hints_url"} ) {
-        $self->{CONF}->{"root_hints_url"} = q{};     
+        $self->{CONF}->{"root_hints_url"} = q{};
         $self->{LOGGER}->info( "gLS Hints file was not set, automatic discovery of hLS instance disabled." );
     }
 
@@ -144,9 +145,7 @@ sub init {
         }
     }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        eval { 
-            load perfSONAR_PS::DB::XMLDB; 
-        };
+        eval { load perfSONAR_PS::DB::XMLDB; };
         if ( $EVAL_ERROR ) {
             $self->{LOGGER}->fatal( "Couldn't load perfSONAR_PS::DB::XMLDB: $EVAL_ERROR" );
             return -1;
@@ -303,7 +302,15 @@ sub init {
         and $self->{CONF}->{"snmp"}->{"metadata_db_external"} )
     {
         if ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "none" ) {
+
             # do nothing
+        }
+        elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "ganglia" ) {
+            eval { load perfSONAR_PS::DB::Ganglia; };
+            if ( $EVAL_ERROR ) {
+                $self->{LOGGER}->fatal( "Cannot load \"perfSONAR_PS::DB::Ganglia\", aborting: " . $EVAL_ERROR );
+                return -1;
+            }
         }
         elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cricket" ) {
 
@@ -335,25 +342,21 @@ sub init {
 
                 unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_hints"} and $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_hints"} ) {
                     $self->{LOGGER}->info( "Cricket 'metadata_db_external_cricket_hints' not specified, skipping." );
-                }                
+                }
             }
             else {
                 $self->{LOGGER}->fatal( "Cannot find cricket; please set environmental variable CRICKET_HOME or 'metadata_db_external_cricket_home' in the configuration file." );
                 return -1;
             }
 
-            eval { 
-                load perfSONAR_PS::DB::Cricket; 
-            };
+            eval { load perfSONAR_PS::DB::Cricket; };
             if ( $EVAL_ERROR ) {
                 $self->{LOGGER}->fatal( "Cannot load \"perfSONAR_PS::DB::Cricket\", aborting: " . $EVAL_ERROR );
                 return -1;
             }
         }
         elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
-            eval { 
-                load perfSONAR_PS::DB::Cacti; 
-            };
+            eval { load perfSONAR_PS::DB::Cacti; };
             if ( $EVAL_ERROR ) {
                 $self->{LOGGER}->fatal( "Cannot load \"perfSONAR_PS::DB::Cacti\", aborting: " . $EVAL_ERROR );
                 return -1;
@@ -365,11 +368,11 @@ sub init {
             return -1;
         }
 
-        $self->createStorage({});
+        $self->createStorage( {} );
     }
 
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        my $status = $self->refresh_store_file({ error => \$error });
+        my $status = $self->refresh_store_file( { error => \$error } );
         unless ( $status == 0 ) {
             $self->{LOGGER}->fatal( "Couldn't initialize store file: $error" );
             return -1;
@@ -391,8 +394,8 @@ sub init {
             }
         }
 
-        my ($status, $res) = $self->buildHashedKeys({ metadatadb => $metadatadb, metadatadb_type => "xmldb" });
-        unless ($status == 0) {
+        my ( $status, $res ) = $self->buildHashedKeys( { metadatadb => $metadatadb, metadatadb_type => "xmldb" } );
+        unless ( $status == 0 ) {
             $self->{LOGGER}->fatal( "Error building key database: $res" );
             return -1;
         }
@@ -411,29 +414,35 @@ sub init {
     return 0;
 }
 
+=head2 createStorage( $self { error } )
+
+Function to re-create the storage (store.xml) file on a regular basis.  
+
+=cut
+
 sub createStorage {
-    my ($self, @args) = @_;
+    my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { error => 0 } );
 
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "none" ) {
-            return 0;
+        return 0;
     }
 
     my $tmp_file;
 
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cricket" ) {
-        $tmp_file = $self->{CONF}->{"snmp"}->{"metadata_db_file"}.".tmp";
+        $tmp_file = $self->{CONF}->{"snmp"}->{"metadata_db_file"} . ".tmp";
 
         my $cricket = new perfSONAR_PS::DB::Cricket(
-                {
+            {
                 file    => $tmp_file,
                 home    => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"},
                 install => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_cricket"},
                 data    => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_data"},
                 config  => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_config"},
                 hints   => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_hints"}
-                }
-                );
+            }
+        );
         unless ( $cricket->openDB() > -1 ) {
             $self->{LOGGER}->fatal( "Problem reading cricket database." );
             return -1;
@@ -441,7 +450,7 @@ sub createStorage {
         $cricket->closeDB();
     }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
-        $tmp_file = $self->{CONF}->{"snmp"}->{"metadata_db_file"}.".tmp";
+        $tmp_file = $self->{CONF}->{"snmp"}->{"metadata_db_file"} . ".tmp";
 
         my $cacti_host     = $self->{CONF}->{snmp}->{cacti_host};
         my $cacti_database = $self->{CONF}->{snmp}->{cacti_database};
@@ -452,33 +461,33 @@ sub createStorage {
         unless ( $cacti->openDB() > -1 ) {
             $self->{LOGGER}->fatal( "Problem reading cacti database." );
             return -1;
-        }                
-        $cacti->closeDB();                
+        }
+        $cacti->closeDB();
     }
 
-    if (-f $tmp_file) {
+    if ( -f $tmp_file ) {
         my $current_md5;
         my $new_md5;
 
-        if (open(FILE1,  $self->{CONF}->{"snmp"}->{"metadata_db_file"})) {
-            binmode(FILE1);
-            $current_md5 = Digest::MD5->new->addfile(*FILE1)->hexdigest;
-            close(FILE1);
+        if ( open( FILE1, $self->{CONF}->{"snmp"}->{"metadata_db_file"} ) ) {
+            binmode( FILE1 );
+            $current_md5 = Digest::MD5->new->addfile( *FILE1 )->hexdigest;
+            close( FILE1 );
         }
 
-        if (open(FILE2,  $tmp_file)) {
-            binmode(FILE2);
-            $new_md5 = Digest::MD5->new->addfile(*FILE2)->hexdigest;
-            close(FILE2);
+        if ( open( FILE2, $tmp_file ) ) {
+            binmode( FILE2 );
+            $new_md5 = Digest::MD5->new->addfile( *FILE2 )->hexdigest;
+            close( FILE2 );
         }
 
-        if (not $current_md5 or $current_md5 ne $new_md5) {
-            $self->{LOGGER}->debug("Updating store file");
-            move($tmp_file, $self->{CONF}->{"snmp"}->{"metadata_db_file"});
+        if ( not $current_md5 or $current_md5 ne $new_md5 ) {
+            $self->{LOGGER}->debug( "Updating store file" );
+            move( $tmp_file, $self->{CONF}->{"snmp"}->{"metadata_db_file"} );
         }
-	else {
-            $self->{LOGGER}->debug("newly generated file is the same as is currently loaded: $new_md5/$current_md5");
-	}
+        else {
+            $self->{LOGGER}->debug( "newly generated file is the same as is currently loaded: $new_md5/$current_md5" );
+        }
     }
 
     return 0;
@@ -497,61 +506,60 @@ sub maintenance {
     return $self->{CONF}->{"snmp"}->{"maintenance_interval"};
 }
 
-
 sub inline_maintenance {
-    my ($self, @args) = @_;
-    my $parameters = validateParams( @args, { } );
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, {} );
 
     $self->refresh_store_file();
 }
 
 sub refresh_store_file {
-    my ($self, @args) = @_;
+    my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { error => 0 } );
 
     my $store_file = $self->{CONF}->{"snmp"}->{"metadata_db_file"};
 
     if ( -f $store_file ) {
-        my ($mtime) = (stat ( $store_file ) )[9];
-        if ($self->{BAD_MTIME} and $mtime == $self->{BAD_MTIME}) {
-            my $msg = "Previously seen bad store file" ;
+        my ( $mtime ) = ( stat( $store_file ) )[9];
+        if ( $self->{BAD_MTIME} and $mtime == $self->{BAD_MTIME} ) {
+            my $msg = "Previously seen bad store file";
             $self->{LOGGER}->error( $msg );
-            ${ $parameters->{error} } = $msg if ($parameters->{error});
+            ${ $parameters->{error} } = $msg if ( $parameters->{error} );
             return -1;
         }
 
-        $self->{LOGGER}->debug("New: $mtime Old: ".$self->{STORE_FILE_MTIME}) if ($mtime and $self->{STORE_FILE_MTIME});
+        $self->{LOGGER}->debug( "New: $mtime Old: " . $self->{STORE_FILE_MTIME} ) if ( $mtime and $self->{STORE_FILE_MTIME} );
 
-        unless ($self->{STORE_FILE_MTIME} and $self->{STORE_FILE_MTIME} == $mtime) {
+        unless ( $self->{STORE_FILE_MTIME} and $self->{STORE_FILE_MTIME} == $mtime ) {
             my $error;
             my $new_metadatadb = perfSONAR_PS::DB::File->new( { file => $store_file } );
             $new_metadatadb->openDB( { error => \$error } );
             unless ( $new_metadatadb ) {
                 my $msg = "Couldn't initialize store file: $error";
                 $self->{LOGGER}->error( $msg );
-                ${ $parameters->{error} } = $msg if ($parameters->{error});
+                ${ $parameters->{error} } = $msg if ( $parameters->{error} );
                 $self->{BAD_MTIME} = $mtime;
                 return -1;
             }
 
-            my ($status, $res) = $self->buildHashedKeys({ metadatadb => $new_metadatadb, metadatadb_type => "file" });
-            unless ($status == 0) {
+            my ( $status, $res ) = $self->buildHashedKeys( { metadatadb => $new_metadatadb, metadatadb_type => "file" } );
+            unless ( $status == 0 ) {
                 my $msg = "Error building key database: $res";
                 $self->{LOGGER}->fatal( $msg );
-                ${ $parameters->{error} } = $msg if ($parameters->{error});
+                ${ $parameters->{error} } = $msg if ( $parameters->{error} );
                 $self->{BAD_MTIME} = $mtime;
                 return -1;
             }
 
-            $self->{METADATADB} = $new_metadatadb;
-            $self->{HASH_TO_ID} = $res->{hash_to_id};
-            $self->{ID_TO_HASH} = $res->{id_to_hash};
+            $self->{METADATADB}       = $new_metadatadb;
+            $self->{HASH_TO_ID}       = $res->{hash_to_id};
+            $self->{ID_TO_HASH}       = $res->{id_to_hash};
             $self->{STORE_FILE_MTIME} = $mtime;
-            $self->{LOGGER}->debug("Setting mtime to $mtime");
+            $self->{LOGGER}->debug( "Setting mtime to $mtime" );
         }
     }
 
-    ${ $parameters->{error} } = "" if ($parameters->{error});
+    ${ $parameters->{error} } = "" if ( $parameters->{error} );
     return 0;
 }
 
@@ -662,7 +670,7 @@ sub buildHashedKeys {
     my %hash_to_id = ();
     my %id_to_hash = ();
 
-    my $metadatadb = $parameters->{metadatadb};
+    my $metadatadb      = $parameters->{metadatadb};
     my $metadatadb_type = $parameters->{metadatadb_type};
 
     if ( $metadatadb_type eq "file" ) {
@@ -684,7 +692,7 @@ sub buildHashedKeys {
         unless ( $metadatadb ) {
             my $msg = "Database could not be opened.";
             $self->{LOGGER}->fatal( $msg );
-            return (-1, $msg);
+            return ( -1, $msg );
         }
 
         my $parser = XML::LibXML->new();
@@ -694,7 +702,7 @@ sub buildHashedKeys {
         if ( $len == -1 ) {
             my $msg = "Nothing returned for database search.";
             $self->{LOGGER}->error( $msg );
-            return (-1, $msg);
+            return ( -1, $msg );
         }
 
         for my $x ( 0 .. $len ) {
@@ -708,7 +716,7 @@ sub buildHashedKeys {
     else {
         my $msg = "Wrong value for 'metadata_db_type' set.";
         $self->{LOGGER}->fatal( $msg );
-        return (-1, $msg);
+        return ( -1, $msg );
     }
 
     my %retval = (
@@ -716,7 +724,7 @@ sub buildHashedKeys {
         hash_to_id => \%hash_to_id,
     );
 
-    return (0, \%retval);
+    return ( 0, \%retval );
 }
 
 =head2 needLS($self {})
@@ -1259,7 +1267,7 @@ sub metadataKeyRetrieveMetadataData {
     }
 
     $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
-    
+
     my $results             = $parameters->{metadatadb}->querySet( { query => $queryString } );
     my %et                  = ();
     my $eventTypes          = find( $parameters->{metadata}, "./nmwg:eventType", 0 );
@@ -1291,9 +1299,9 @@ sub metadataKeyRetrieveMetadataData {
         }
         $queryString = $queryString . "]]";
     }
-    
+
     $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
-    
+
     my $dataResults = $parameters->{metadatadb}->querySet( { query => $queryString } );
     if ( $results->size() > 0 and $dataResults->size() > 0 ) {
         my %mds = ();
@@ -1482,7 +1490,7 @@ sub dataInfoRetrieveKey {
     }
 
     my $mdIdRef;
-     my @filters = @{ $parameters->{filters} };
+    my @filters = @{ $parameters->{filters} };
     if ( $#filters > -1 ) {
         $mdIdRef = $filters[-1][0]->getAttribute( "id" );
     }
@@ -1490,10 +1498,10 @@ sub dataInfoRetrieveKey {
         $mdIdRef = $parameters->{metadata}->getAttribute( "id" );
     }
 
-# XXX jz 1/26/09
-# For now if the store file already contains the first/last time info we are 
-#  going to return it as is.  We need to check to be sure this hasn't been
-#  updated by something external (e.g. cricket)
+    # XXX jz 1/26/09
+    # For now if the store file already contains the first/last time info we are
+    #  going to return it as is.  We need to check to be sure this hasn't been
+    #  updated by something external (e.g. cricket)
 
     my $done = extract( find( $results->get_node( 1 ), ".//nmwg:parameter[\@name=\"firstTime\"]", 1 ), 1 );
     if ( $done ) {
@@ -1606,9 +1614,9 @@ sub dataInfoRetrieveMetadataData {
         }
         $queryString = $queryString . "]]";
     }
-    
+
     $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
-    
+
     my $dataResults = $parameters->{metadatadb}->querySet( { query => $queryString } );
     if ( $results->size() > 0 and $dataResults->size() > 0 ) {
         my %mds = ();
@@ -1623,10 +1631,10 @@ sub dataInfoRetrieveMetadataData {
             next if ( not $curr_d_mdIdRef or not exists $mds{$curr_d_mdIdRef} );
             my $curr_md = $mds{$curr_d_mdIdRef};
 
-# XXX jz 1/26/09
-# For now if the store file already contains the first/last time info we are 
-#  going to return it as is.  We need to check to be sure this hasn't been
-#  updated by something external (e.g. cricket)
+            # XXX jz 1/26/09
+            # For now if the store file already contains the first/last time info we are
+            #  going to return it as is.  We need to check to be sure this hasn't been
+            #  updated by something external (e.g. cricket)
 
             my $done = extract( find( $d, ".//nmwg:parameter[\@name=\"firstTime\"]", 1 ), 1 );
             if ( $done ) {
@@ -1648,7 +1656,7 @@ sub dataInfoRetrieveMetadataData {
 
                 my $key2 = $d->cloneNode( 1 );
                 my $params = find( $key2, ".//nmwg:parameters", 1 );
-            
+
                 my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1 );
                 my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );
                 $rrd->openDB;
@@ -1964,9 +1972,9 @@ sub setupDataRetrieveMetadataData {
         }
         $queryString = $queryString . "]]";
     }
-    
+
     $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
-    
+
     my $dataResults = $parameters->{metadatadb}->querySet( { query => $queryString } );
     my %used = ();
     for my $x ( 0 .. $dataResults->size() ) {
@@ -2460,7 +2468,10 @@ sub getDataRRD {
     my $parameters = validateParams(
         @args,
         {
-            directory => 1, file => 1, timeSettings => 1, rrdtool => 1
+            directory    => 1,
+            file         => 1,
+            timeSettings => 1,
+            rrdtool      => 1
         }
     );
     my $logger = get_logger( "perfSONAR_PS::Services::MA::General" );
@@ -2521,9 +2532,9 @@ L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::Error_compat>,
 L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>, 
 L<perfSONAR_PS::Utils::ParameterValidation>, L<perfSONAR_PS::Utils::NetLogger>
 
-To join the 'perfSONAR Users' mailing list, please visit:
+To join the 'perfSONAR-PS Users' mailing list, please visit:
 
-  https://mail.internet2.edu/wws/info/perfsonar-user
+  https://lists.internet2.edu/sympa/info/perfsonar-ps-users
 
 The perfSONAR-PS subversion repository is located at:
 
@@ -2551,7 +2562,7 @@ along with this software.  If not, see
 
 =head1 COPYRIGHT
 
-Copyright (c) 2007-2009, Internet2
+Copyright (c) 2007-2010, Internet2
 
 All rights reserved.
 

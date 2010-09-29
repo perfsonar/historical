@@ -8,6 +8,7 @@ Digest::MD5
 Error
 Exporter
 File::Basename
+File::Copy
 File::Temp
 Getopt::Long
 HTTP::Daemon
@@ -24,6 +25,7 @@ Module::Load
 Net::Ping
 Params::Validate
 Socket
+Storable
 Sys::Hostname
 Term::ReadKey
 Time::HiRes
