@@ -4,16 +4,17 @@
 %define init_script_1 perfsonar-status-service
 %define init_script_2 perfsonar-status-collector
 
+%define relnum 1
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-Status
-Version:        3.1
-Release:        3.%{disttag}
+Version:        3.2
+Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR-PS Status Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://www.internet2.edu/performance/pS-PS/
-Source0:        perfSONAR_PS-Status-%{version}.tar.gz
+Source0:        perfSONAR_PS-Status-%{version}.%{relnum}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       perl(Carp)
@@ -46,6 +47,10 @@ Requires:       perl(XML::LibXML) >= 1.61
 Requires:       perl(base)
 Requires:       perl(warnings)
 Requires:       perl
+Requires:		coreutils
+Requires:		which
+Requires:		shadow-utils
+Requires:		chkconfig
 
 %description
 The perfSONAR-PS Status Service is capable of storing the historical 'status' of network devices.  This service comes packaged with a collector that is capable of gathering this information via methods such as SNMP or custom scripts.  The data is stored in MySQL capable databases.  
@@ -55,14 +60,14 @@ The perfSONAR-PS Status Service is capable of storing the historical 'status' of
 /usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
-%setup -q -n perfSONAR_PS-Status
+%setup -q -n perfSONAR_PS-Status-%{version}.%{relnum}
 
 %build
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} install
+make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} rpminstall
 
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
 
