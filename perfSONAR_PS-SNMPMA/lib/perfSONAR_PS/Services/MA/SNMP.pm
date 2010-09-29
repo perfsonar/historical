@@ -430,7 +430,16 @@ sub createStorage {
 
     my $tmp_file;
 
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cricket" ) {
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "ganglia" ) {
+        $tmp_file = $self->{CONF}->{"snmp"}->{"metadata_db_file"} . ".tmp";
+        my $ganglia = new perfSONAR_PS::DB::Ganglia( { rrd => $self->{CONF}->{"snmp"}->{"rrdtool"}, conf => $self->{CONF}->{"snmp"}->{"metadata_db_external_source"}, file => $tmp_file } );
+        unless ( $ganglia->openDB() > -1 ) {
+            $self->{LOGGER}->fatal( "Problem reading ganglia database." );
+            return -1;
+        }
+        $ganglia->closeDB();
+    }
+    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cricket" ) {
         $tmp_file = $self->{CONF}->{"snmp"}->{"metadata_db_file"} . ".tmp";
 
         my $cricket = new perfSONAR_PS::DB::Cricket(
@@ -487,6 +496,7 @@ sub createStorage {
         }
         else {
             $self->{LOGGER}->debug( "newly generated file is the same as is currently loaded: $new_md5/$current_md5" );
+            system( "rm -f " . $tmp_file );
         }
     }
 
@@ -506,12 +516,24 @@ sub maintenance {
     return $self->{CONF}->{"snmp"}->{"maintenance_interval"};
 }
 
+=head2 inline_maintenance( $self )
+
+Stub function to call the process that will re-generate the store file.  
+
+=cut
+
 sub inline_maintenance {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, {} );
 
     $self->refresh_store_file();
 }
+
+=head2 refresh_store_file( $self  {error } )
+
+Regenerate the store file if it has gotten old.  
+
+=cut
 
 sub refresh_store_file {
     my ( $self, @args ) = @_;
@@ -2553,6 +2575,7 @@ $Id$
 
 Jason Zurawski, zurawski@internet2.edu
 Aaron Brown, aaron@internet2.edu
+Guilherme Fernandes, fernande@cis.udel.edu
 
 =head1 LICENSE
 
@@ -2562,7 +2585,7 @@ along with this software.  If not, see
 
 =head1 COPYRIGHT
 
-Copyright (c) 2007-2010, Internet2
+Copyright (c) 2007-2010, Internet2 and the University of Delaware
 
 All rights reserved.
 
