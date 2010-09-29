@@ -8,11 +8,11 @@
 # with "sysconfig-" (e.g. sysconfig-lookup_service)
 %define sysconfig_1   lookup_service
 
-%define relnum 11
+%define relnum 1
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-LookupService
-Version:        3.1
+Version:        3.2
 Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS Lookup Service
 License:        distributable, see LICENSE
@@ -115,6 +115,14 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Wed Sep 29 2010 zurawski@internet2.edu 3.2-1
+- Updated init scripts
+- Package fixes (build using mock)
+- Bugfixes
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=213
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=297	 
+  - http://code.google.com/p/perfsonar-ps/issues/detail?id=390
+
 * Mon May 17 2010 zurawski@internet2.edu 3.1-11
 - Netlogger logging
 - Database optimizations
