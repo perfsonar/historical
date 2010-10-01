@@ -400,25 +400,7 @@ The following issues remain after the RC testing.  These will either be addresse
 || ~~Updates to RPM based Software~~ || <font color="red">Yes</font> || run yum update... || <font color="green">_*DONE*_</font> ||
 || ~~Updates to non RPM software (npad, reverse traceroute/ping, myricom drivers)~~ || <font color="red">Yes</font> || TBD || <font color="purple">_*WONT FIX*_</font> ||
 || ~~Use old version of dbxml build (2.3.11) instead of the newer build that was causing LS errors~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
-|| Add a Link to the perfAdmin LS view on the service status page for the hLS || <font color="purple">No</font> || TBD ... also may want a more sanitized view instead of raw xml || <font color="red">_*NOT STARTED*_</font> ||
-|| CSS does not display right under IE8 || <font color="purple">No</font> || Need a CSS expert to help, TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| PingER GUI cannot be installed || <font color="purple">No</font> || dependicies still preventing this || <font color="red">_*NOT STARTED*_</font> ||
-|| PingER Fixes from  USATLAS || <font color="purple">No</font> || talk w/ maxim, find out all of the parts || <font color="red">_*NOT STARTED*_</font> ||
-|| Cacti does not poll devices after setup.  Potential clock sckew problem? || <font color="purple">No</font> || Edited 'poller_lastrun' variable to fix || <font color="red">_*NOT STARTED*_</font> ||
-|| weirdness with the disk configuration script.  If the disk has no partition info (but had an ext3 fs on it before the partition table was wiped), the script detects the raw device with 'unknown' partition type. || <font color="purple">No</font> || The script uses "blkid" to figure out the FS type, and there seem to be some combination of partition voodoo that prevents blkid from recognizing proper ext3 partitions. The only way to truly figure out whether it's ext3 or not is to try and mount the partition.  Need a FAQ entry || <font color="red">_*NOT STARTED*_</font> ||
-|| clicking on service graphs/throughput gives a blank page || <font color="purple">No</font> || could be logging related? investigating... || <font color="red">_*NOT STARTED*_</font> ||
-|| Document how to set root password || <font color="purple">No</font> || e.g. on first login to console || <font color="red">_*NOT STARTED*_</font> ||
-|| Document when to run 'nptoolkit-configure.py' || <font color="purple">No</font> || e.g. after first login || <font color="red">_*NOT STARTED*_</font> ||
-|| Document how to set MTU || <font color="purple">No</font> || '/etc/sysconfig/network-scripts/ifcfg-eth0, then add: MTU=9000' || <font color="red">_*NOT STARTED*_</font> ||
-|| Document how to change TCP congestion alg || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Document where RPMs (for a netinstall) will get downloaded from || <font color="purple">No</font> || E.g. if ACLs are needed, etc.  Currently downloads from ndb1.internet2.edu || <font color="red">_*NOT STARTED*_</font> ||
-|| LiveCD data not persistent, forgets passwords and settings || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Empty hostname || <font color="purple">No</font> || edit "/etc/sysconfig/network" and fill in the HOSTNAME variable || <font color="red">_*NOT STARTED*_</font> ||
-|| Manually entering a host for a bwctl regular test, save and get a positive result, host is not added.  Further digging points to a problem with the entered port number.  See email for more info || <font color="purple">No</font> || Had to do with a dojo issue with french localization. Will need to upgrade dojo and hope it fixes the issue || <font color="red">_*NOT STARTED*_</font> ||
-|| Host status (e.g. disk/memory/cpu) on the service status page || <font color="purple">No</font> || TBD, can do it with proc for now, but what about ganglia? || <font color="red">_*NOT STARTED*_</font> ||
-|| Add FAQ item about different localizations in dojo - and the possibility that new errors can be introduced (e.g. spacing) || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Add NTP status to the status page for each host (e.g. something simple like synced or not) || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Add EU servers to NTP List || <font color="purple">No</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
+
 
 == Bugs Related to This Release ==
 
@@ -456,6 +438,25 @@ The following new bugs were identified, and are not classified yet:
 || empty resolve.conf, domino effect to the LS cache daemon and NTP || watching for other instances || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
 || LS Cache - won't need to 'update' this before release due to new cache service || TBD || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
 || Timezone is reset to EDT on upgrade || Stored in a data file, may not be able to tell if this is changed... || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Add a Link to the perfAdmin LS view on the service status page for the hLS || TBD ... also may want a more sanitized view instead of raw xml || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| CSS does not display right under IE8 || Need a CSS expert to help, TBD || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| PingER GUI cannot be installed || dependicies still preventing this || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| PingER Fixes from  USATLAS || talk w/ maxim, find out all of the parts || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Cacti does not poll devices after setup.  Potential clock sckew problem? || Edited 'poller_lastrun' variable to fix || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| weirdness with the disk configuration script.  If the disk has no partition info (but had an ext3 fs on it before the partition table was wiped), the script detects the raw device with 'unknown' partition type. || The script uses "blkid" to figure out the FS type, and there seem to be some combination of partition voodoo that prevents blkid from recognizing proper ext3 partitions. The only way to truly figure out whether it's ext3 or not is to try and mount the partition.  Need a FAQ entry || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| clicking on service graphs/throughput gives a blank page || could be logging related? investigating... || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Document how to set root password || e.g. on first login to console || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Document when to run 'nptoolkit-configure.py' || e.g. after first login || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Document how to set MTU || '/etc/sysconfig/network-scripts/ifcfg-eth0, then add: MTU=9000' || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Document how to change TCP congestion alg || TBD || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Document where RPMs (for a netinstall) will get downloaded from || E.g. if ACLs are needed, etc.  Currently downloads from ndb1.internet2.edu || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| LiveCD data not persistent, forgets passwords and settings || TBD || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Empty hostname || edit "/etc/sysconfig/network" and fill in the HOSTNAME variable || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Manually entering a host for a bwctl regular test, save and get a positive result, host is not added.  Further digging points to a problem with the entered port number.  See email for more info || Had to do with a dojo issue with french localization. Will need to upgrade dojo and hope it fixes the issue || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Host status (e.g. disk/memory/cpu) on the service status page || TBD, can do it with proc for now, but what about ganglia? || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Add FAQ item about different localizations in dojo - and the possibility that new errors can be introduced (e.g. spacing) || TBD || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Add NTP status to the status page for each host (e.g. something simple like synced or not) || TBD || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
+|| Add EU servers to NTP List || TBD || <font color="purple">_*HELD OVER FOR 3.2.1*_</font>  ||
 
 == Code Reviews ==
 
