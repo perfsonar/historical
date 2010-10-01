@@ -46,12 +46,12 @@ Beta, and RC:
 || Milestone LiveCD 1 || Week of 6/14 (Development), Week of 6/21 (Testing) || <font color="green">_*DONE - 6/30*_</font> ||
 || Milestone LiveCD 2 || ~~Week of 8/2~~ Week of 8/13 || <font color="green">_*DONE - 8/13*_</font> ||
 || Milestone LiveCD 3 || ~~Week of 8/16~~ ~~Week of 8/30~~ Week of 9/6 || <font color="green">_*DONE - 9/13*_</font> ||
-|| Milestone LiveCD 4 || Week of 9/27 || <font color="yellow">_*IN PROGRESS*_</font> ||
+|| Milestone LiveCD 4 || Week of 9/27 || <font color="green">_*DONE - 9/28*_</font> ||
 || ~~Milestone Install Disk 1~~ || ~~Week of 6/14~~ ~~Week of 6/21~~ ~~Week of 6/28~~ ~~Week of 7/26~~ TBD || <font color="purple">_*PUSHED OFF - 8/2*_</font> ||
 || ~~Milestone Install Disk 2~~ || ~~Week of 6/28~~ ~~Week of 8/16~~ TBD || <font color="purple">_*PUSHED OFF - 8/2*_</font> ||
 || ~~Milestone RC 1~~ || ~~Week of 8/23~~ || <font color="purple">_*NOT NEEDED*_</font> ||
 || ~~Milestone RC 2~~ || ~~Week of 8/30~~ || <font color="purple">_*NOT NEEDED*_</font> ||
-|| Milestone Final || ~~Week of 9/6~~ Week of 10/4 || <font color="red">_*NOT STARTED*_</font> ||
+|| Milestone Final || ~~Week of 9/6~~ Week of 10/4 || <font color="yellow">_*IN PROGRESS*_</font> ||
 
 The following sections breakdown of each milestone of this release.
 
@@ -289,13 +289,13 @@ This milestone was resurected to deal with the performance bug.
 === Milestone LiveCD 4 ===
 
 || *Summary* || Final Release to test performance bug + other fixes ||
-|| *Status* || <font color="yellow">_*IN PROGRESS*_</font> || 
+|| *Status* || <font color="green">_*DONE*_</font> || 
 || *Est. Completion* || Week of 9/27 || 
 || *Owner* || Aaron/Jason ||
 || *Depends* || Milestone LiveCD 3 ||
 
- * Finalize blocking issues
- * 1 More Round of beta testing
+ * ~~Finalize blocking issues~~
+ * ~~1 More Round of beta testing~~
 
 === Milestone Install Disk 1 ===
 
@@ -366,8 +366,8 @@ Milestone Release Candidate X: Open-ended.
 === Milestone Final Release ===
 
 || *Summary* || Produce final versions of the Live CD, Install CD and documentation  ||
-|| *Status* || <font color="yellow">_*STALLED*_</font> || 
-|| *Est. Completion* || ~~Week of 9/6~~ Week of 10/6 || 
+|| *Status* || <font color="yellow">_*IN PROGRESS*_</font> || 
+|| *Est. Completion* || ~~Week of 9/6~~ Week of 10/4 || 
 || *Owner* || Aaron/~~Eric~~/Jason/~~Tom~~ ||
 || *Depends* || ~~Milestone RC 2~~ ~~Milestone LiveCD 2~~ Milestone LiveCD 4 ||
 
@@ -385,21 +385,21 @@ The following issues remain after the RC testing.  These will either be addresse
 || ~~Visiting 'root' of the web (in https) gets the apache default page~~ || <font color="red">Yes</font> || || <font color="green">_*DONE*_</font> ||
 || ~~Problems saving configuration of regular testing~~ || <font color="red">Yes</font> || Was related to lack of external address - error messages could reflect this? || <font color="green">_*DONE*_</font> ||
 || ~~Add /var/lib/perfsonar/perfsonarbuoy_ma to backing store~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
-|| Post-install log in /root || <font color="red">Yes</font> || easy fix. will fix before release || <font color="red">_*NOT STARTED*_</font> ||
-|| upgrade the kernel to the newest RH version || <font color="red">Yes</font> || TBD || <font color="yellow">_*IN PROGRESS*_</font> ||
-|| RC1 Netinstall, doing a yum update changed the kernel away from web100 || <font color="red">Yes</font> || How to handle this...add kernel to yum blacklist and force a manual upgrade?  live with an upgraded non-web100 kernel? || <font color="red">_*NOT STARTED*_</font> ||
-|| need an init script (or similar) that goes through and sets the TCP/Ethernet parameters to not break NDT/NPAD || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Performance degretation between 3.1.3 and 3.2rc2 at USATLAS sites. || <font color="red">Yes</font> || Have tried solutions on running instances including swapping out the drivers, and examining ksoftirqd.  Need to examone kernel irq balancing and the userspace version as well as new drivers on a re-compiled kernel || <font color="yellow">_*IN PROGRESS*_</font> ||
-|| when you rebuild the livecd, the uid/gids can change.  since the permissions are fixed on disk, that might prove problematic || <font color="red">Yes</font> || Script to change is proposed || <font color="red">_*NOT STARTED*_</font> ||
-|| certificate complaint in browsers (Error code: sec_error_reused_issuer_and_serial) || <font color="red">Yes</font> || generate on first boot. It would need an init script or something || <font color="red">_*NOT STARTED*_</font> ||
-|| Remove PingER GUI Link from sidebar || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| NDT/NPAD do not function w/ IPv6 || <font color="red">Yes</font> || Adjust RPM packages/init script.  After doing so, protocol error w/ v4 tests || <font color="red">_*NOT STARTED*_</font> ||
-|| Ensure that DB backup script backs up to /var/log, this will place it in the backing store || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Update MOTD as needed || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Default to RENO/HTCP for tcp congestion algs, alter init script to set these based on use of NDT/NPAD || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Updates to RPM based Software || <font color="red">Yes</font> || run yum update... || <font color="red">_*NOT STARTED*_</font> ||
-|| Updates to non RPM software (npad, reverse traceroute/ping, myricom drivers) || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
-|| Use old version of dbxml build (2.3.11) instead of the newer build that was causing LS errors || <font color="red">Yes</font> || TBD || <font color="red">_*NOT STARTED*_</font> ||
+|| ~~Post-install log in /root~~ || <font color="red">Yes</font> || easy fix. will fix before release || <font color="green">_*DONE*_</font> ||
+|| ~~upgrade the kernel to the newest RH version~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
+|| RC1 Netinstall, doing a yum update changed the kernel away from web100 || <font color="red">Yes</font> || How to handle this...add kernel to yum blacklist and force a manual upgrade?  live with an upgraded non-web100 kernel? || <font color="yellow">_*IN PROGRESS*_</font> ||
+|| ~~need an init script (or similar) that goes through and sets the TCP/Ethernet parameters to not break NDT/NPAD~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
+|| ~~Performance degretation between 3.1.3 and 3.2rc2 at USATLAS sites.~~ || <font color="red">Yes</font> || Have tried solutions on running instances including swapping out the drivers, and examining ksoftirqd.  Need to examone kernel irq balancing and the userspace version as well as new drivers on a re-compiled kernel || <font color="green">_*DONE*_</font> ||
+|| ~~when you rebuild the livecd, the uid/gids can change.  since the permissions are fixed on disk, that might prove problematic~~ || <font color="red">Yes</font> || Script to change is proposed || <font color="green">_*DONE*_</font> ||
+|| ~~certificate complaint in browsers (Error code: sec_error_reused_issuer_and_serial)~~ || <font color="red">Yes</font> || generate on first boot. It would need an init script or something || <font color="green">_*DONE*_</font> ||
+|| ~~Remove PingER GUI Link from sidebar~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
+|| NDT/NPAD do not function w/ IPv6 || <font color="purple">no</font> || Adjust RPM packages/init script.  After doing so, protocol error w/ v4 tests || <font color="purple">_*CANT FIX THIS TIME*_</font> ||
+|| ~~Ensure that DB backup script backs up to /var/log, this will place it in the backing store~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
+|| ~~Update MOTD as needed~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
+|| ~~Default to RENO/HTCP for tcp congestion algs, alter init script to set these based on use of NDT/NPAD~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
+|| ~~Updates to RPM based Software~~ || <font color="red">Yes</font> || run yum update... || <font color="green">_*DONE*_</font> ||
+|| ~~Updates to non RPM software (npad, reverse traceroute/ping, myricom drivers)~~ || <font color="red">Yes</font> || TBD || <font color="pruple">_*WONT FIX*_</font> ||
+|| ~~Use old version of dbxml build (2.3.11) instead of the newer build that was causing LS errors~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
 || Add a Link to the perfAdmin LS view on the service status page for the hLS || <font color="purple">no</font> || TBD ... also may want a more sanitized view instead of raw xml || <font color="red">_*NOT STARTED*_</font> ||
 || CSS does not display right under IE8 || <font color="purple">No</font> || Need a CSS expert to help, TBD || <font color="red">_*NOT STARTED*_</font> ||
 || PingER GUI cannot be installed || <font color="purple">No</font> || dependicies still preventing this || <font color="red">_*NOT STARTED*_</font> ||
