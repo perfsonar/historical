@@ -409,7 +409,7 @@ The following issues remain after the RC testing.  These will either be addresse
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=421 421] - _*Andy/Aaron/Jason*_ - ~~perfsonarBUOY asks mysql for ALL data in database rather than only the days needed~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=431 431] - _*Jeff/Aaron*_ - ~~pSB Handling PID Files~~
  * _*perfAdmin*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=423 423] - _*Jason*_ - Truncate values in perfAdmin Graphs to 2 decimal places
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=423 423] - _*Jason*_ - ~~Truncate values in perfAdmin Graphs to 2 decimal places~~
  * _*Clients/APIs*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - _*Jason/Andy*_ - Package for the client modules
  * _*Documentation*_
