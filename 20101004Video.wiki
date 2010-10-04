@@ -1,6 +1,6 @@
 =  Oct 04 2010 Conference Call 2:30 p.m. EDT =
 == Agenda/Minutes ==
- # Attendees:
+ # Attendees: Andy, Somya, Aaron, Nils, Kavitha, Jeff
  # Followup on previous actions:
    * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
    * _*ACTION*_: Joe will take SOP to DICE.
@@ -9,12 +9,26 @@
       * Will be resolved by work Somya is doing on testservice.cgi.
    * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities.
    * _*ACTION*_: All - Review release wiki page to determine if any are critical for 3.2. [pSPT32Release]
-   * _*ACTION*_: Jeff and Aaron will discuss how the tcp options will be set for 3.2 with Tom.
  # Team Updates
+   * Somya: worked on servicetest GUI. Would be helpful if others would review.
+   * Aaron: Worked on pS-PTK release.
+   * Nils: nothing
+   * Kavitha: nothing
+   * Andy: Added config option for pS-B bwctl integrity. Increased listener queue for pS-PS services. Need to create tracerouteMA documentation.
+   * Jeff: DICE meeting. Most relevant thing is Circuit Monitoring to be discussed later.
  # Release Update (Aaron)
+   * RC4 in testing - tcp cc algorithm change is the big difference. New RC (5) will be avail for internal testing. Hoping RC5 will end up being the final release. Dependencies not installed properly by default, annoying hacks needed to make it work correctly.
  # DICE Circuit Monitoring (Jeff/Aaron)
  # Next call will be 10/11
 === ACTIONS ===
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will take SOP to DICE.
+      * DICE meeting next week.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+      * Will be resolved by work Somya is doing on testservice.cgi.
+   * _*ACTION*_: All: review 
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC.
+   * _*ACTION*_: Jeff and Andy will individually talk with Brian/Joe about strategies for dealing with Circuit Monitoring.
 == Where ==
 ESnet conference bridge:
  * GDS: 00113498255555
