@@ -41,6 +41,8 @@ my @store = ( "LSStore", "LSStore-summary", "LSStore-control" );
 
 foreach my $e ( @eT ) {
     foreach my $s ( @store ) {
+        my $MDCOUNT = 0;
+        my $DCOUNT = 0;
         my $METADATA = q{};
         my $q        = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n/nmwg:store[\@type=\"" . $s . "\"]/nmwg:metadata\n";
         my $result   = $ls->queryRequestLS( { query => $q, eventType => $e, format => 1 } );
@@ -54,6 +56,7 @@ foreach my $e ( @eT ) {
                 my $md = find( $doc->getDocumentElement, ".//nmwg:metadata", 0 );
                 foreach my $m ( $md->get_nodelist ) {
                     $METADATA .= escapeString( $m->toString ) . "\n";
+                    $MDCOUNT++;
                 }
             }
         }
@@ -71,6 +74,7 @@ foreach my $e ( @eT ) {
                         my $md = find( $doc->getDocumentElement, ".//nmwg:metadata", 0 );
                         foreach my $m ( $md->get_nodelist ) {
                             $METADATA .= escapeString( $m->toString ) . "\n";
+                            $MDCOUNT++;
                         }
                     }
                 }
@@ -96,6 +100,7 @@ foreach my $e ( @eT ) {
                 my $data = find( $doc->getDocumentElement, ".//nmwg:data", 0 );
                 foreach my $d ( $data->get_nodelist ) {
                     $DATA .= escapeString( $d->toString ) . "\n";
+                    $DCOUNT++;
                 }
             }
         }
@@ -113,6 +118,7 @@ foreach my $e ( @eT ) {
                         my $data = find( $doc->getDocumentElement, ".//nmwg:data", 0 );
                         foreach my $d ( $data->get_nodelist ) {
                             $DATA .= escapeString( $d->toString ) . "\n";
+                            $DCOUNT++;
                         }
                     }
                 }
@@ -125,7 +131,7 @@ foreach my $e ( @eT ) {
             }
         }
 
-        push @data, { COLLECTION => $e, STORE => $s, METADATA => $METADATA, DATA => $DATA };
+        push @data, { COLLECTION => $e, STORE => $s, METADATA => $METADATA, DATA => $DATA, MDCOUNT => $MDCOUNT, DCOUNT => $DCOUNT };
     }
 }
 
