@@ -5,6 +5,21 @@
  # Attendees: TBD
  # Followup on previous actions:
    * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+     * Jason: Alternate DB open that doesn't invoke the transaction subsystem.  Compare vs. trunk on ndb1.  2 Parallel instances of the gLS, both in the hints file:
+     * Comparison on searching for the 'DB_LOCK_DEADLOCK' error in the logs
+{{{
+[root@ndb1 log]# grep DB_LOCK_DEADLOCK gLS_prop.log* | grep "2010/10/15" | wc -l 
+8999
+[root@ndb1 log]# grep DB_LOCK_DEADLOCK gLS_trunk.log* | grep "2010/10/15" | wc -l
+25434
+}}}
+     * Comparison on searching for the 'ERROR' error in the logs
+{{{
+[root@ndb1 log]# grep ERROR gLS_prop.log* | grep "2010/10/15" | wc -l
+15834
+[root@ndb1 log]# grep ERROR gLS_trunk.log* | grep "2010/10/15" | wc -l
+35617
+}}}
    * _*ACTION*_: Joe will take SOP to DICE.
    * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
      * Will be resolved by work Somya is doing on testservice.cgi.
