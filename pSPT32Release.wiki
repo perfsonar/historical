@@ -51,7 +51,7 @@ Beta, and RC:
 || ~~Milestone Install Disk 2~~ || ~~Week of 6/28~~ ~~Week of 8/16~~ TBD || <font color="purple">_*PUSHED OFF - 8/2*_</font> ||
 || ~~Milestone RC 1~~ || ~~Week of 8/23~~ || <font color="purple">_*NOT NEEDED*_</font> ||
 || ~~Milestone RC 2~~ || ~~Week of 8/30~~ || <font color="purple">_*NOT NEEDED*_</font> ||
-|| Milestone Final || ~~Week of 9/6~~ Week of 10/4 || <font color="yellow">_*IN PROGRESS*_</font> ||
+|| Milestone Final || ~~Week of 9/6~~ Week of 10/18 || <font color="yellow">_*IN PROGRESS*_</font> ||
 
 The following sections breakdown of each milestone of this release.
 
@@ -367,7 +367,7 @@ Milestone Release Candidate X: Open-ended.
 
 || *Summary* || Produce final versions of the Live CD, Install CD and documentation  ||
 || *Status* || <font color="yellow">_*IN PROGRESS*_</font> || 
-|| *Est. Completion* || ~~Week of 9/6~~ Week of 10/4 || 
+|| *Est. Completion* || ~~Week of 9/6~~ Week of 10/18 || 
 || *Owner* || Aaron/~~Eric~~/Jason/~~Tom~~ ||
 || *Depends* || ~~Milestone RC 2~~ ~~Milestone LiveCD 2~~ Milestone LiveCD 4 ||
 
@@ -387,7 +387,7 @@ The following issues remain after the RC testing.  These will either be addresse
 || ~~Add /var/lib/perfsonar/perfsonarbuoy_ma to backing store~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
 || ~~Post-install log in /root~~ || <font color="red">Yes</font> || easy fix. will fix before release || <font color="green">_*DONE*_</font> ||
 || ~~upgrade the kernel to the newest RH version~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
-|| RC1 Netinstall, doing a yum update changed the kernel away from web100 || <font color="red">Yes</font> || How to handle this...add kernel to yum blacklist and force a manual upgrade?  live with an upgraded non-web100 kernel? || <font color="yellow">_*IN PROGRESS*_</font> ||
+|| RC1 Netinstall, doing a yum update changed the kernel away from web100 || <font color="red">Yes</font> || How to handle this...add kernel to yum blacklist and force a manual upgrade?  live with an upgraded non-web100 kernel? || <font color="green">_*DONE_</font> ||
 || ~~need an init script (or similar) that goes through and sets the TCP/Ethernet parameters to not break NDT/NPAD~~ || <font color="red">Yes</font> || TBD || <font color="green">_*DONE*_</font> ||
 || ~~Performance degretation between 3.1.3 and 3.2rc2 at USATLAS sites.~~ || <font color="red">Yes</font> || Have tried solutions on running instances including swapping out the drivers, and examining ksoftirqd.  Need to examone kernel irq balancing and the userspace version as well as new drivers on a re-compiled kernel || <font color="green">_*DONE*_</font> ||
 || ~~when you rebuild the livecd, the uid/gids can change.  since the permissions are fixed on disk, that might prove problematic~~ || <font color="red">Yes</font> || Script to change is proposed || <font color="green">_*DONE*_</font> ||
@@ -413,7 +413,7 @@ The following issues remain after the RC testing.  These will either be addresse
  * _*Clients/APIs*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - _*Jason/Andy*_ - Package for the client modules
  * _*Documentation*_
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=169 169] - _*Jason*_ - Add required hardware documentation	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=169 169] - _*Jason*_ - ~~Add required hardware documentation~~
  * _*Disk Internal*_
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=415 415] - _*Aaron*_ - ~~upgrade iperf from v2.0.2 to 2.0.4 on the PS Toolkit~~
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=427 427] - _*Aaron*_ - ~~add type of the test in the Scheduled Tests table~~
