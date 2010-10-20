@@ -191,27 +191,33 @@ After choosing _*Option 3*_ from the menu, the following menu will appear:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/networking-1.png
 
-Note that the particular host used in this guide was equipped with only one interface.  If there are multiple interfaces present they will show up in the menu.  To alter the DNS server, choose option 1:
+
+Note that if you have experience with older versions of the pS Performance Toolkit this new network configuration screen will seem different.  It is based on the RHEL configuration tools.  There are two options:
+
+ * _*Edit Devices*_: Use this to change between Static and DHCP on the network interfaces
+ * _*Edit DNS Configuration*_: Use this to change DNS settings for the host
+
+We will select the top option first:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/networking-2.png
 
-In this case the DNS list may be empty, so the option to _add_ a server is all that is available.  To add a server to the list of DNS servers, choose option 1:
+On this screen you will see many network devices that can be configured.  Note: due to complications in the menu system, the pS Performance Toolkit developers have _pre-loaded_ the settings for up to to 5 devices.  Not all of these devices will be active on a given machine.  In general eth0 or eth1 may be used (and will have a descriptive name as discovered in the boot process).  Highlight one of the devices to configure it, and press _enter_.  The following shows configuration that utilizes DHCP, after making changes press _OK_:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/networking-3.png
 
-After this step we could _add_ another server, or delete an existing server.  We will choose to exit.  The second option allows configuration of the interfaces:
+The following shows configuration that utilizes a static address, after making changes press _OK_:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/networking-4.png
 
-This option allows the operator to set the networking options (e.g. _*DHCP*_ vs _*Static IP*_, _*MTU*_ size).  The final option, _*Primary Interface*_, is an option that relates to _perfSONAR_ services.  Each service will _advertise_ existence in a global directory.  If for some reason the target system is dual homed, for perfSONAR to work correctly the _*externally facing*_ interface should be advertised instead of something internal.
-
-finally, the changes must be saved:
+To exit the interface configuration press _Save_ when you are finished.  The _*Edit DNS Configuration*_ screen allows you to make changes to the DNS settings on the host, after you are finished press _OK_:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/networking-5.png
 
-After completing this series of questions, the menu will re-appear and mark that this step has been visited:
+After making any changes, please press _Save & Quit_ to exit.  You will be dropped back to the configuration menu:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/menu-4.png 
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/networking-6.png
+
+Note that there will not be any notable change to the color in the _*Configure Networking*_ menu since this is an optional step.  
 
 ==== User Management ====
 
