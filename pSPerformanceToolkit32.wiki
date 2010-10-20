@@ -319,36 +319,42 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/getaddress-2.
 
 Enter this address in a web browser, and the following screen will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-home.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-home-1.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-home-2.png
 
 The menu on the left side of the screen has the following areas that can be viewed and configured, this guide will examine each:
 
  * User Tools
-   * [pSPerformanceToolkit32#Services_On_This_Node Services On This Node]
-   * [pSPerformanceToolkit32#Global_Set_Of_Services Global Set Of Services]
-   * [pSPerformanceToolkit32#JOWAMP JOWAMP]
+   * [pSPerformanceToolkit32#Local_Performance_Services Local Performance Services]
+   * [pSPerformanceToolkit32#Global_Performance_Services Global Performance Services]
+   * [pSPerformanceToolkit32#Java_OWAMP_Client Java OWAMP Client]
    * [pSPerformanceToolkit32#Reverse_Traceroute Reverse Traceroute]
    * [pSPerformanceToolkit32#Reverse_Ping Reverse Ping]
-   * [pSPerformanceToolkit32#PingER_UI PingER UI]
  * Service Graphs
-   * [pSPerformanceToolkit32#perfAdmin_BWCTL BWCTL]
-   * [pSPerformanceToolkit32#perfAdmin_OWAMP OWAMP]
-   * [pSPerformanceToolkit32#perfAdmin_PingER PingER]
-   * [pSPerformanceToolkit32#perfAdmin_SNMP SNMP]
+   * [pSPerformanceToolkit32#perfAdmin_BWCTL Throughput (BWCTL)]
+   * [pSPerformanceToolkit32#perfAdmin_OWAMP One-Way Latency (OWAMP)]
+   * [pSPerformanceToolkit32#perfAdmin_PingER Ping Latency (PingER)]
+   * [pSPerformanceToolkit32#perfAdmin_SNMP SNMP Utilization]
    * [pSPerformanceToolkit32#Cacti_Graphs Cacti Graphs]
  * Toolkit Administration
-   * [pSPerformanceToolkit32#Administrative_Info Administrative Info]
-   * [pSPerformanceToolkit32#BWCTL_Limits BWCTL Limits]
-   * [pSPerformanceToolkit32#OWAMP_Limits OWAMP Limits]
+   * [pSPerformanceToolkit32#Administrative_Information Administrative Information]
+   * [pSPerformanceToolkit32#External_BWCTL_Limits External BWCTL Limits]
+   * [pSPerformanceToolkit32#External_OWAMP_Limits External OWAMP Limits]
    * [pSPerformanceToolkit32#Enabled_Services Enabled Services]
    * [pSPerformanceToolkit32#NTP NTP]
-   * [pSPerformanceToolkit32#Scheduled_Testing Scheduled Testing]
-     * [pSPerformanceToolkit32#Scheduled_BWCTL BWCTL]
-     * [pSPerformanceToolkit32#Scheduled_PingER PingER]
-     * [pSPerformanceToolkit32#Scheduled_OWAMP OWAMP]
-   * [pSPerformanceToolkit32#Cacti_Administration Cacti Administration]
+   * [pSPerformanceToolkit32#Scheduled_Testing Scheduled Tests]
+     * [pSPerformanceToolkit32#Scheduled_BWCTL BWCTL Tests]
+     * [pSPerformanceToolkit32#Scheduled_PingER PingER Tests]
+     * [pSPerformanceToolkit32#Scheduled_OWAMP OWAMP Tests]
+   * [pSPerformanceToolkit32#Cacti_Administration Cacti SNMP Monitoring]
+ * Toolkit Information
+   * [pSPerformanceToolkit32#Configuration_Help Configuration Help]
+   * [pSPerformanceToolkit32#Frequently_Asked_Question Frequently Asked Questions]
+   * [pSPerformanceToolkit32#About About]   
+   * [pSPerformanceToolkit32#Credits Credits]
 
-==== Services On This Node ====
+==== Local Performance Services ====
 
 The _*home*_ page, is linked via the _Services On This Node_ button:
 
@@ -362,7 +368,7 @@ This page lists the measurement tools currently on this node as well as the vers
 
 A service may be in the _*Not Running*_ state for a number of reasons, initially it is likely that the service has not been configured. If when examining this list a service is in this state, and the operator feels it shouldn't be, please try to restart the service and check the logs.  
 
-==== Global Set Of Services ====
+==== Global Performance Services ====
 
 Using the _perfSONAR Lookup Service_, the pS Performance Toolkit is able to locate and display information on other perfSONAR services, world-wide.  The [pSPerformanceToolkit32#Global_Set_Of_Services Global Set Of Services] page displays the global set of perfSONAR services:
 
@@ -370,7 +376,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-global.pn
 
 The time when the set of services was retrieved is displayed at the top of the page. The toolkit regularly runs a script to query the global services. This information is used by the [pSPerformanceToolkit32#Global_Set_Of_Services Global Set Of Services] page as well as other pages, including [pSPerformanceToolkit32#Scheduled_Testing Scheduled Testing] page. Note that if the date seems rather old the script could be experiencing an error - please consult the logs if this is the case.  
 
-==== JOWAMP ====
+==== Java OWAMP Client ====
 
 JOWAMP is a Java client of the OWAMP tool that executes an owamp test from the web browser to the server located on that particular node.  Because JOWAMP is a Java applet, it must run in the browser and may trigger several warnings.  These warnings convey information about executing code that is not _signed_ within the browser.  The warnings will look similar to this (will vary by web browser):
 
@@ -411,20 +417,6 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-tracerout
 The [http://www.slac.stanford.edu/comp/net/ Reverse Ping] tool was developed at [http://www.slac.stanford.edu SLAC] and is similar to the [pSPerformanceToolkit32#Reverse_Traceroute Reverse Traceroute].  It allows a user to run a ping from the performance node to the web browser of the initializing machine.  The GUI appears as so:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-traceroute-3.png
-
-==== PingER UI ====
-
-The PingER UI is a tool designed to display and analyse data from the PingER tool:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-pinger-1.png
-
-This GUI can be used to display the results of any PingER instance, in this case we select an instance that is different from the performance node itself:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-pinger-2.png
-
-Graphs are displayed inline:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-pinger-3.png
 
 ==== perfAdmin BWCTL ====
 
@@ -510,7 +502,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-cacti-1.p
 
 [pSPerformanceToolkit32#Cacti_Administration Cacti Administration] describes how to configure Cacti.  
 
-==== Administrative Info ====
+==== Administrative Information ====
 
 This section requires authentication, the following box may appear before you may access any of the functionality:
 
@@ -571,7 +563,7 @@ We would recommend choosing keywords that:
 
 Use as many community names as necessary to properly categorize the data from the installation.
 
-==== BWCTL Limits ====
+==== External BWCTL Limits ====
 
 This section requires authentication, the following box may appear before you may access any of the functionality:
 
@@ -612,7 +604,7 @@ When done, press the _save_ button to commit your changes to disk, and restart t
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
-==== OWAMP Limits ====
+==== External OWAMP Limits ====
 
 This section requires authentication, the following box may appear before you may access any of the functionality:
 
@@ -995,7 +987,21 @@ network device is present.
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_14.png
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_15.png
 
+==== Configuration Help ==== 
 
+TBD
+
+==== Frequently Asked Question ==== 
+
+TBD
+
+==== About ==== 
+
+TBD
+
+==== Credits ==== 
+
+TBD
 
 == Last Updated ==
 
