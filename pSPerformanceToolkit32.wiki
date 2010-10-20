@@ -158,41 +158,9 @@ The screen will display the results of the formatting step.  Note that a machine
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-4.png
 
-After completing this series of questions, the menu will re-appear and mark that this step has been visited:
+If you choose to reboot later, the menu will re-appear and mark that this step has been visited:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-5.png
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-4.png
-
-Note that if the disk was previously formatted, the following warning will appear to signify data may be lost:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-6.png
-
-
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/menu-2.png
-
-
-
-
-
-
-
 
 ==== Passwords ====
 
