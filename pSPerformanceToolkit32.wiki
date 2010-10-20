@@ -223,35 +223,75 @@ Note that there will not be any notable change to the color in the _*Configure N
 
 After choosing _*Option 4*_ from the menu, the following menu will appear with options:
 
- * Add a user
- * Delete a user
- * Change a user's password
+ * _*Add a new user*_
+ * _*Delete a user*_
+ * _*Change a user's password*_
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-1.png
 
-_*Option 1*_ allows a new user to be added to the system:
+_*Option 1*_ allows a new user to be added to the system. simple enter the name of the user (or enter nothing and press _enter_ to exit):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-2.png
 
-_*Option 2*_ will delete a user.  Note the user must be on the system first or the delete will fail:
+There will be some options for the new user.  First, is the user allowed to log in via SSH:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-3.png
 
-To delete the user properly:
+Note that for the user to be able to log in via SSH, SSH must be enabled on the machine.  See section [] for more details.  Also, you can choose to put the user in the administrative group (e.g. allowing the user to use sudo to run commands):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-4.png
 
-_*Option 3*_ will change the password of a user.  Note the user must be on the system first or the change will fail:
+Enter the password for the user:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-5.png
 
-To properly change the user's password:
+And you will need to verify it again.  Note that the system will check for weak passwords, although it will not stop you from entering one:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-6.png
 
-After completing this series of questions, the menu will re-appear and mark that this step has been visited:
+After you are done, you will be placed into the user management menu:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/menu-6.png 
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-7.png
+
+Selecting _*Option 2*_ will allow you to remove a user's account, simply type in a username:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-8.png
+
+After typing in a _valid_ account, you will be asked if you want to remove the home directory:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-9.png
+
+After you are done, you will be placed into the user management menu:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-10.png
+
+Note that entering an _invalid_ username will simply exit, and return to the user management menu:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-11.png
+
+Selecting _*Option 3*_ will allow you change the password for a user's account, simply type in a username:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-12.png
+
+Enter the password for the user:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-13.png
+
+And you will need to verify it again.  Note that the system will check for weak passwords, although it will not stop you from entering one:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-14.png
+
+After you are done, you will be placed into the user management menu:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-15.png
+
+Note that entering an _invalid_ username will simply exit, and return to the user management menu:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-16.png
+
+Upon hitting exit, you will be returned to the main menu:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-17.png
 
 ==== Exit ====
 
@@ -264,21 +304,6 @@ The screen may appear similar to the following and the system will enter the boo
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/reboot-2.png
 
 Note that if [pSPerformanceToolkit32#Storage Storage] was not entered, you will be returned to the console.  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 === Web ===
 
