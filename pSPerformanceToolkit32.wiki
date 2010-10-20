@@ -440,11 +440,19 @@ The results of the traceroute are displayed as they complete:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-traceroute-2.png
 
+Note that one of the intentions of this tool is to perform reverse traceroute tests to other hosts in the hopes of detecting asymmetric routing behaviour.  To traceroute to another host, enter the host address into the form, and press the _Enter_ key:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-traceroute-3.png
+
 ==== Reverse Ping ====
 
 The [http://www.slac.stanford.edu/comp/net/ Reverse Ping] tool was developed at [http://www.slac.stanford.edu SLAC] and is similar to the [pSPerformanceToolkit32#Reverse_Traceroute Reverse Traceroute].  It allows a user to run a ping from the performance node to the web browser of the initializing machine.  The GUI appears as so:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-traceroute-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ping-1.png
+
+Note that one of the intentions of this tool is to perform reverse ping tests to other hosts in the hopes of detecting asymmetric delay behaviour.  To ping to another host, enter the host address into the form, and press the _Enter_ key:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ping-2.png
 
 ==== perfAdmin BWCTL ====
 
