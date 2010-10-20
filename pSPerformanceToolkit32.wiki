@@ -402,7 +402,11 @@ The time when the set of services was retrieved is displayed at the top of the p
 
 ==== Java OWAMP Client ====
 
-JOWAMP is a Java client of the OWAMP tool that executes an owamp test from the web browser to the server located on that particular node.  Because JOWAMP is a Java applet, it must run in the browser and may trigger several warnings.  These warnings convey information about executing code that is not _signed_ within the browser.  The warnings will look similar to this (will vary by web browser):
+JOWAMP is a Java client of the OWAMP tool that executes an owamp test from the web browser to the server located on that particular node.  The code is still experimental, as such we have several warnings related to use of the code including this initial warning that will appear when you first invoke the link:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-jowamp-0.png
+
+Because JOWAMP is a Java applet, it must run in the browser and may trigger several warnings.  These warnings convey information about executing code that is not _signed_ within the browser.  The warnings will look similar to this (will vary by web browser):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-jowamp-1.png
 
