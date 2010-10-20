@@ -164,19 +164,26 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-5.png
 
 ==== Passwords ====
 
-After choosing _*Option 2*_ from the menu, the system will prompt for 2 new passwords:
+After choosing _*Option 2*_ from the menu, the system will attempt to change the _*system*_ passwords.  There are two options as to which passwords may be available:
 
- * _*root*_ user
- * _*knoppix*_ user
+ * _*root*_ and _*knoppix*_ users.  This would be the case of existing pS Performance Toolkit v3.1.x installs that were upgraded.
+ * _*root*_ user only.  This would be the case of new pS Performance Toolkit v3.2.x installs.  
 
-Note that each time this menu option is used, both users will be promoted for.  To set the password of either user individually please see [pSPerformanceToolkit32#User_Management User Management].  The screen will look similar to this:
+The following message may appear if you have already set the passwords.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/pass.png
- 
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/pass-1.png
 
-After completing this series of questions, the menu will re-appear and mark that this step has been visited:
+Answering _*no*_ will exist to the menu, answering _*yes*_ will bring up the following dialog.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/menu-3.png 
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/pass-2.png
+
+The system is designed to sense weak passwords, and the following warning may appear if a password with little strength is selected.  Note that it will not prevent you from using a weak password, just warn you.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/pass-3.png
+
+Systems feature a _*knoppix*_ user will ask to change this password at the same time as _*root*_.  After you complete this step you will be dropped back to the menu.  Note that this step will now appear in <font color="green">green</font>.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/pass-4.png
 
 ==== Networking ====
 
