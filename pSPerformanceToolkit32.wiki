@@ -219,6 +219,28 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/networking-6.
 
 Note that there will not be any notable change to the color in the _*Configure Networking*_ menu since this is an optional step.  
 
+===== MTU Changes =====
+
+There is currently no option to set the MTU size via the _Networking_ dialog.  To manually set the MTU:
+
+ * cd into _*/etc/sysconfig/network-scripts*_
+ * Edit the ifcfg-eth file for the interface you wish to edit.  Commonly the file will look like this:
+{{{
+DEVICE=eth0
+BOOTPROTO=dhcp
+ONBOOT=yes
+HWADDR=00:0c:29:98:5a:12
+TYPE=Ethernet
+}}}
+ * Add the following line (Assuming you wish to set to _*Jumbo*_ frames):
+{{{
+MTU=9000
+}}} 
+ * Save the file, and restart networking:
+{{{
+sudo /etc/init.d/network restart
+}}}
+
 ==== User Management ====
 
 After choosing _*Option 4*_ from the menu, the following menu will appear with options:
@@ -356,25 +378,27 @@ The menu on the left side of the screen has the following areas that can be view
 
 ==== Local Performance Services ====
 
-The _*home*_ page, is linked via the _Services On This Node_ button:
+The _*home*_ page, is linked via the _Local Performance Services_ button:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-home.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-home-1.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-home-2.png
 
 This page lists the measurement tools currently on this node as well as the versions of each piece of software.  There are 3 states for each tool:
 
  * _*Running*_ - The service is functioning normally
- * _*Not Running*_ - The service is stopped
+ * _*Not Running*_ - The service is stopped either accidentally or due to a problem. 
  * _*Disabled*_ - The service has been disabled via the [pSPerformanceToolkit32#Enabled_Services Enabled Services] dialog.  
 
 A service may be in the _*Not Running*_ state for a number of reasons, initially it is likely that the service has not been configured. If when examining this list a service is in this state, and the operator feels it shouldn't be, please try to restart the service and check the logs.  
 
 ==== Global Performance Services ====
 
-Using the _perfSONAR Lookup Service_, the pS Performance Toolkit is able to locate and display information on other perfSONAR services, world-wide.  The [pSPerformanceToolkit32#Global_Set_Of_Services Global Set Of Services] page displays the global set of perfSONAR services:
+Using the _perfSONAR Lookup Service_, the pS Performance Toolkit is able to locate and display information on other perfSONAR services, world-wide.  The _Global Performance Services_ page displays the global set of perfSONAR services:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-global.png
 
-The time when the set of services was retrieved is displayed at the top of the page. The toolkit regularly runs a script to query the global services. This information is used by the [pSPerformanceToolkit32#Global_Set_Of_Services Global Set Of Services] page as well as other pages, including [pSPerformanceToolkit32#Scheduled_Testing Scheduled Testing] page. Note that if the date seems rather old the script could be experiencing an error - please consult the logs if this is the case.  
+The time when the set of services was retrieved is displayed at the top of the page. The toolkit regularly runs a script to query the global services. This information is used by the _Global Performance Services_ page as well as other pages, including [pSPerformanceToolkit32#Scheduled_Testing Scheduled Tests] page. Note that if the date seems rather old the script could be experiencing an error - please consult the _*/var/log/perfsonar/ls_cache_daemon.log*_ log if this is the case.  
 
 ==== Java OWAMP Client ====
 
