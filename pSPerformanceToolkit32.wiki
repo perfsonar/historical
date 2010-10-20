@@ -456,7 +456,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ping-2.pn
 
 ==== perfAdmin BWCTL ====
 
-_perfAdmin_ is a series of CGI scripts that display data from perfSONAR services.  Each pS Performance Toolkit contains a _perfSONAR-BUOY_ instance that is capable of making regular BWCTL tests to other hosts.  This GUI is used to show the results of these tests.  
+_perfAdmin_ is a series of CGI scripts that display data from perfSONAR services.  Each pS Performance Toolkit contains a _perfSONAR-BUOY_ instance that is capable of making [pSPerformanceToolkit32#Scheduled_BWCTL regular BWCTL tests] to other hosts.  This GUI is used to show the results of these tests.  
 
 The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
 
@@ -478,7 +478,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-pa-throug
 
 ==== perfAdmin OWAMP ====
 
-_perfAdmin_ is a series of CGI scripts that display data from perfSONAR services.  Each pS Performance Toolkit contains a _perfSONAR-BUOY_ instance that is capable of making regular OWAMP tests to other hosts.  This GUI is used to show the results of these tests.  
+_perfAdmin_ is a series of CGI scripts that display data from perfSONAR services.  Each pS Performance Toolkit contains a _perfSONAR-BUOY_ instance that is capable of making [pSPerformanceToolkit32#Scheduled_OWAMP regular OWAMP tests] to other hosts.  This GUI is used to show the results of these tests.  
 
 The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
 
@@ -500,7 +500,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-pa-owd-3.
 
 ==== perfAdmin PingER ====
 
-_perfAdmin_ is a series of CGI scripts that display data from perfSONAR services.  Each pS Performance Toolkit contains a _PingER_ instance that is capable of making regular Ping tests to other hosts.  This GUI is used to show the results of these tests.  
+_perfAdmin_ is a series of CGI scripts that display data from perfSONAR services.  Each pS Performance Toolkit contains a _PingER_ instance that is capable of making [pSPerformanceToolkit32#Scheduled_PingER regular Ping tests] to other hosts.  This GUI is used to show the results of these tests.  
 
 The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
 
@@ -516,7 +516,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-pa-pinger
 
 ==== perfAdmin SNMP ====
 
-_perfAdmin_ is a series of CGI scripts that display data from perfSONAR services.  Each pS Performance Toolkit contains a _Cacti_ instance that is capable of collecting regular SNMP tests and exposing these via the _SNMP MA_.  This GUI is used to show the results of these tests.  
+_perfAdmin_ is a series of CGI scripts that display data from perfSONAR services.  Each pS Performance Toolkit contains a [pSPerformanceToolkit32#Cacti_Administration Cacti] instance that is capable of collecting regular SNMP tests and exposing these via the _SNMP MA_.  This GUI is used to show the results of these tests.  
 
 The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
 
@@ -540,7 +540,11 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-cacti-1.p
 
 ==== Administrative Information ====
 
-This section requires authentication, the following box may appear before you may access any of the functionality:
+This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
+
+The following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
@@ -601,7 +605,11 @@ Use as many community names as necessary to properly categorize the data from th
 
 ==== External BWCTL Limits ====
 
-This section requires authentication, the following box may appear before you may access any of the functionality:
+This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
+
+The following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
@@ -642,7 +650,11 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
 ==== External OWAMP Limits ====
 
-This section requires authentication, the following box may appear before you may access any of the functionality:
+This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
+
+The following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
@@ -672,7 +684,11 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
 ==== Enabled Services ====
 
-This section requires authentication, the following box may appear before you may access any of the functionality:
+This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
+
+The following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
@@ -709,7 +725,11 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
 ==== NTP ====
 
-This section requires authentication, the following box may appear before you may access any of the functionality:
+This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
+
+The following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
@@ -771,7 +791,11 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
 ==== Scheduled Testing ====
 
-This section requires authentication, the following box may appear before you may access any of the functionality:
+This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
+
+The following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
@@ -904,7 +928,11 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
 ==== Cacti Administration ====
 
-This section requires authentication, the following box may appear before you may access any of the functionality:
+This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
+
+The following box may appear before you may access any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
