@@ -299,7 +299,7 @@ If the [pSPerformanceToolkit32#Storage Storage] or [pSPerformanceToolkit32#Netwo
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/reboot.png
 
-Note that if [pSPerformanceToolkit32#Storage Storage] was not entered, you will be returned to the console.  
+Note that if neither were entered, you will be returned to the console.  
 
 === Web ===
 
