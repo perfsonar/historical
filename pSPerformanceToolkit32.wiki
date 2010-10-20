@@ -313,7 +313,7 @@ In some cases, the message will have a URL like _https://`[`host address`]`/_:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/getaddress-1.png
 
-If this is the case, login and run _ifconfig_. The URL will be the IP address after _inet addr_. In the following example, the URL will be _https://192.168.69.143/_:
+If this is the case, login and run _ifconfig_. The URL will be the IP address after _inet addr_. In the following example, the URL will be _https://192.168.69.137/_:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/getaddress-2.png
 
