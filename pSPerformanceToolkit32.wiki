@@ -295,13 +295,9 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-17.png
 
 ==== Exit ====
 
-If the [pSPerformanceToolkit32#Storage Storage] was entered (e.g. even if a change was not requested) the system will request a reboot:
+If the [pSPerformanceToolkit32#Storage Storage] or [pSPerformanceToolkit32#Networking Networking] settings were changed (e.g. even if a change was not requested) the system will request a reboot:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/reboot.png
-
-The screen may appear similar to the following and the system will enter the boot phase again:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/reboot-2.png
 
 Note that if [pSPerformanceToolkit32#Storage Storage] was not entered, you will be returned to the console.  
 
