@@ -923,7 +923,7 @@ Enter the following information:
 After saving, the test is setup but there are hosts associated with the test.  These can be added either by:
 
  * Manually entering hostnames/IP addresses
- * Searching the perfSONAR information services 
+ * Searching the perfSONAR information services for [pSPerformanceToolkit32#Communities communities]
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-3.png
 
@@ -935,7 +935,7 @@ The host will be added to the list of tests hosts.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-5.png
 
-Use of the _Communities_ keywords will also reveal hosts that are in the same community as your host.  Below shows the search for hosts in the _*Internet2*_ community:
+Use of the [pSPerformanceToolkit32#Communities Communities] keywords will also reveal hosts that are in the same community as your host.  Below shows the search for hosts in the _*Internet2*_ community:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-6.png
 
@@ -957,7 +957,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled
 
 ===== Scheduled PingER =====
 
-PingER functions in a similar manner to [pSPerformanceToolkit32#Scheduled_BWCTL BWCTL].  Upon adding a PingER test via the _Add New Ping Test_ button, the following dialog may appear appear if the system is already configured to test with BWCTL (this will not appear if a BWCTL test was not scheduled):
+The screen will look similar to this initially:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-1.png
 
@@ -968,28 +968,47 @@ Enter the following information when the dialog appears:
  * _*Packets Sent Per Test*_ - How many Ping Packets per test.  Note that sending more will increase the total length of a test.
  * _*Time Between Packets*_ - The interval between Ping Packets.  Setting this higher will increase the total length of a test
  * _*Size Of Test Packets*_ - How large of a Ping packet to use in testing.  
-
+ 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-2.png
 
-After entering these values, the test is saved, but it does not have test hosts (yet):
+After saving, the test is setup but there are hosts associated with the test.  These can be added either by:
+
+ * Manually entering hostnames/IP addresses
+ * Searching the perfSONAR information services for [pSPerformanceToolkit32#Communities communities]
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-3.png
 
-Adding test hosts can be done by [pSPerformanceToolkit32#Communities community], or _manually_.  If a community is clicked from the list, the following dialog will appear:
+The user can manually enter a test host as seen in this example:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-4.png
 
-A host can be selected from this list to add to the test.  Once selected the host will show up in the testing dialog. 
+The host will be added to the list of tests hosts. 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-5.png
 
-When done, press the _save_ button to commit your changes to disk, and restart the affected services.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+Use of the [pSPerformanceToolkit32#Communities Communities] keywords will also reveal hosts that are in the same community as your host.  Below shows the search for hosts in the _*Internet2*_ community:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-6.png
+
+When the list returns, they will display on the page.  The user can then click and add new hosts to the test that are already in the same community.  Below is what happens after adding a host from this list:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-7.png
+
+When done, press the _save_ button to commit your changes to disk, and restart the affected services.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-8.png
+
+Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
+After saving, the screen will look similar to this:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-9.png
+
 ===== Scheduled OWAMP =====
 
-OWAMP functions in a similar manner to [pSPerformanceToolkit32#Scheduled_BWCTL BWCTL].  Upon adding a OWAMP test via the _Add New One-Way Delay Test_ button, the following dialog may appear appear if the system is already configured to test with BWCTL (this will not appear if a BWCTL test was not scheduled):
+The screen will look similar to this initially:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-1.png
 
@@ -1001,37 +1020,40 @@ Unlike PingER and BWCTL tests, OWAMP tests run constantly. Enter the following i
  
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-2.png
 
-After entering these values, the test is saved, but it does not have test hosts (yet):
+After saving, the test is setup but there are hosts associated with the test.  These can be added either by:
+
+ * Manually entering hostnames/IP addresses
+ * Searching the perfSONAR information services for [pSPerformanceToolkit32#Communities communities]
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-3.png
 
-Adding test hosts can be done by [pSPerformanceToolkit32#Communities community], or _manually_.  If a community is clicked from the list, the following dialog will appear:
+The user can manually enter a test host as seen in this example:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-4.png
 
-A host can be selected from this list to add to the test.  Once selected the host will show up in the testing dialog. 
+The host will be added to the list of tests hosts. 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-5.png
 
-Manually adding a host is also possible, simply fill in the fields with the name and port of a host to test against:
+Use of the [pSPerformanceToolkit32#Communities Communities] keywords will also reveal hosts that are in the same community as your host.  Below shows the search for hosts in the _*Internet2*_ community:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-6.png
 
-After completing, the host will show up in the testing dialog. 
+When the list returns, they will display on the page.  The user can then click and add new hosts to the test that are already in the same community.  Below is what happens after adding a host from this list:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-7.png
 
-As of version 3.1.2, it is possible to configure the port range for OWAMP tests via the administrative GUI.  The button _Configure OWAMP Test Port Range_ will appear after setting up a regular OWAMP test:
+When done, press the _save_ button to commit your changes to disk, and restart the affected services.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-8.png
 
-When clicked the following dialog will appear.  The range may be entered.  After setting, be sure to save your changes.  
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-9.png
-
-When done, press the _save_ button to commit your changes to disk, and restart the affected services.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
+
+After saving, the screen will look similar to this:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-9.png
 
 ==== Cacti Administration ====
 
