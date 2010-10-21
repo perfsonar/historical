@@ -847,17 +847,33 @@ The following NTP clocks have been identified as being valuable to use:
    * d.ntp.monipe.rnp.br	RNP Time Server #4 - Brazil
    * e.ntp.monipe.rnp.br	RNP Time Server #5 - Brazil
 
-_*N.B.*_: Routing has a large impact on if an NTP time source is _reachable_ and _close_ from your particular instance.  It is recommended that the _Select Closest Servers_ option be used:
+If you happen to know of a closer or better time source, the _Add New NTP Server_ button can be pressed.  The image below shows the process of adding a new server.  
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-2.png
 
-After running the closest servers will be selected, and servers that were unreachable will be marked in red:
+After adding a new server, it will show up in the list.  Note that it will be selected for you automatically.  
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-3.png
 
-When done, press the _save_ button to commit your changes to disk, and restart the affected services.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+_*N.B.*_: Routing has a large impact on if an NTP time source is _reachable_ and _close_ from your particular instance.  It is recommended that the _Select Closest Servers_ option be used:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-4.png
+
+After running the closest servers will be selected, and servers that were unreachable will be marked in red:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-5.png
+
+When done, press the _save_ button to commit your changes to disk, and restart the affected services.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-6.png
+
+Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
+
+The results of saving are seen below:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-7.png
 
 ==== Scheduled Testing ====
 
