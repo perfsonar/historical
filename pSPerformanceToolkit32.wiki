@@ -37,7 +37,7 @@ user@host:~$ md5sum pS-Performance_Toolkit-NetInstall-3.2.iso;cat pS-Performance
 0ba36d4bc5e01048df4e0c9134230c90  pS-Performance_Toolkit-NetInstall-3.2.iso
 }}}
 
-If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  After burning, please insert the CD into your target machine to boot.  Some items to consider:
+If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  After burning, please insert the CD into the target machine to boot.  Some items to consider:
 
  * The target machine should have some way to access the console.  This can be via an attached monitor and keyboard or via remote access through serial ports or KVMs.
  * The target machine's BIOS must allow the machine to boot from CD.  If the CD does not boot, adjust the BIOS (normally access via *_F12_*, *_F2_*, *_Del_*, etc.) and try again.  
@@ -57,7 +57,7 @@ b61438371f562256edb727d28d3b8e0c  pS-Performance_Toolkit-LiveCD-3.2.iso
 b61438371f562256edb727d28d3b8e0c  pS-Performance_Toolkit-LiveCD-3.2.iso
 }}}
 
-If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  After burning, please insert the CD into your target machine to boot.  Some items to consider:
+If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  After burning, please insert the CD into the target machine to boot.  Some items to consider:
 
  * The target machine should have some way to access the console.  This can be via an attached monitor and keyboard or via remote access through serial ports or KVMs.
  * The target machine's BIOS must allow the machine to boot from CD.  If the CD does not boot, adjust the BIOS (normally access via *_F12_*, *_F2_*, *_Del_*, etc.) and try again.  
@@ -83,11 +83,11 @@ The system will configure and start up services next.  It is normal to see some 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/login.png
 
-If you are upgrading from an existing LiveCD deployment (3.1.x or 3.2.x) you may have existing users on the system already, possibly _*knoppix*_ and _*root*_.  The existing passwords for these users will still be on the system after you upgrade.  If you are starting with a fresh install, to log in to your new system, use the _*root*_ user, and a blank password:
+If upgrading from an existing LiveCD deployment (3.1.x or 3.2.x) there may be existing users on the system already, possibly _*knoppix*_ and _*root*_.  The existing passwords for these users will still be on the system after the upgrade.  If starting with a fresh install, to log in to the new system, use the _*root*_ user, and a blank password:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/login-centos.png
 
-Note that while the _*root*_ user starts with a blank password, SSH is disabled by default.  The only way to log on to your new system is via the console.  
+Note that while the _*root*_ user starts with a blank password, SSH is disabled by default.  The only way to log on to the new system is via the console.  
 
 After logging in for the first time, the root user is *required* to set a new non-blank password.  Note that CentOS requires this to be a password of moderate strength, and will prompt the user to pick something it feels is strong.  After finishing this step, login is complete.  See the image below:
 
@@ -101,7 +101,7 @@ To start configuration, run:
 
 sudo /opt/perfsonar_ps/toolkit/scripts/nptoolkit-configure.py
 
-Once you set passwords, you can login to the web interface and finish configuration. The web interface should be available at: 
+Once the passwords are set, login to the web interface and finish configuration. The web interface should be available at: 
 
 https://[host address]/toolkit
 }}}
@@ -150,7 +150,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-2.png
 
 An internal check requests that the disk have the minimum 10GB of capacity.  It is possible to proceed with a smaller disk, but not recommended.  Note that any partition combination is acceptable, as long as the minimum size is respected.  Note that for simplicity a single partition will give the pSPT the most access to storage.
 
-If the drive is unformatted or is not formatted with the ext3 filesystem, there will be an option for format the drive in question. While Linux can natively read and write many filesystems, some (specifically NTFS and FAT) do not contain support for features required by the toolkit. _*N.B.*_: formatting a hard drive will render any existing old data un-readable.  Please be sure you wish to use the target hard drive before proceeding:
+If the drive is unformatted or is not formatted with the ext3 filesystem, there will be an option for format the drive in question. While Linux can natively read and write many filesystems, some (specifically NTFS and FAT) do not contain support for features required by the toolkit. _*N.B.*_: formatting a hard drive will render any existing old data un-readable.  Please be sure the target hard drive is proper before proceeding:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-3.png
 
@@ -158,7 +158,7 @@ The screen will display the results of the formatting step.  Note that a machine
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-4.png
 
-If you choose to reboot later, the menu will re-appear and mark that this step has been visited:
+If the user chooses to reboot later, the menu will re-appear and mark that this step has been visited:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-5.png
 
@@ -169,7 +169,7 @@ After choosing _*Option 2*_ from the menu, the system will attempt to change the
  * _*root*_ and _*knoppix*_ users.  This would be the case of existing pS Performance Toolkit v3.1.x installs that were upgraded.
  * _*root*_ user only.  This would be the case of new pS Performance Toolkit v3.2.x installs.  
 
-The following message may appear if you have already set the passwords.
+The following message may appear if the passwords were already set.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/pass-1.png
 
@@ -177,11 +177,11 @@ Answering _*no*_ will exist to the menu, answering _*yes*_ will bring up the fol
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/pass-2.png
 
-The system is designed to sense weak passwords, and the following warning may appear if a password with little strength is selected.  Note that it will not prevent you from using a weak password, just warn you.  
+The system is designed to sense weak passwords, and the following warning may appear if a password with little strength is selected.  Note that it will not prevent the user from using a weak password, the system will just warn the password is weak.  
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/pass-3.png
 
-Systems feature a _*knoppix*_ user will ask to change this password at the same time as _*root*_.  After you complete this step you will be dropped back to the menu.  Note that this step will now appear in <font color="green">green</font>.
+Systems feature a _*knoppix*_ user will ask to change this password at the same time as _*root*_.  After completing this step, the system will drop back to the menu.  Note that this step will now appear in <font color="green">green</font>.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/pass-4.png
 
@@ -192,7 +192,7 @@ After choosing _*Option 3*_ from the menu, the following menu will appear:
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/networking-1.png
 
 
-Note that if you have experience with older versions of the pS Performance Toolkit this new network configuration screen will seem different.  It is based on the RHEL configuration tools.  There are two options:
+Note that if the user has experience with older versions of the pS Performance Toolkit this new network configuration screen will seem different.  It is based on the RHEL configuration tools.  There are two options:
 
  * _*Edit Devices*_: Use this to change between Static and DHCP on the network interfaces
  * _*Edit DNS Configuration*_: Use this to change DNS settings for the host
@@ -201,7 +201,7 @@ We will select the top option first:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/networking-2.png
 
-On this screen you will see many network devices that can be configured.  Note: due to complications in the menu system, the pS Performance Toolkit developers have _pre-loaded_ the settings for up to to 5 devices.  Not all of these devices will be active on a given machine.  In general eth0 or eth1 may be used (and will have a descriptive name as discovered in the boot process).  Highlight one of the devices to configure it, and press _enter_.  The following shows configuration that utilizes DHCP, after making changes press _OK_:
+On this screen the user will see many network devices that can be configured.  Note: due to complications in the menu system, the pS Performance Toolkit developers have _pre-loaded_ the settings for up to to 5 devices.  Not all of these devices will be active on a given machine.  In general eth0 or eth1 may be used (and will have a descriptive name as discovered in the boot process).  Highlight one of the devices to configure it, and press _enter_.  The following shows configuration that utilizes DHCP, after making changes press _OK_:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/networking-3.png
 
@@ -209,11 +209,11 @@ The following shows configuration that utilizes a static address, after making c
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/networking-4.png
 
-To exit the interface configuration press _Save_ when you are finished.  The _*Edit DNS Configuration*_ screen allows you to make changes to the DNS settings on the host, after you are finished press _OK_:
+To exit the interface configuration press _Save_ when finished.  The _*Edit DNS Configuration*_ screen allows the user to make changes to the DNS settings on the host, when finished press _OK_:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/networking-5.png
 
-After making any changes, please press _Save & Quit_ to exit.  You will be dropped back to the configuration menu:
+After making any changes, please press _Save & Quit_ to exit.  The system will drop back to the configuration menu:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/networking-6.png
 
@@ -224,7 +224,7 @@ Note that there will not be any notable change to the color in the _*Configure N
 There is currently no option to set the MTU size via the _Networking_ dialog.  To manually set the MTU:
 
  * cd into _*/etc/sysconfig/network-scripts*_
- * Edit the ifcfg-eth file for the interface you wish to edit.  Commonly the file will look like this:
+ * Edit the ifcfg-eth file for the interface in question.  Commonly the file will look like this:
 {{{
 DEVICE=eth0
 BOOTPROTO=dhcp
@@ -232,7 +232,7 @@ ONBOOT=yes
 HWADDR=00:0c:29:98:5a:12
 TYPE=Ethernet
 }}}
- * Add the following line (Assuming you wish to set to _*Jumbo*_ frames):
+ * Add the following line (Assuming _*Jumbo*_ frames):
 {{{
 MTU=9000
 }}} 
@@ -259,7 +259,7 @@ There will be some options for the new user.  First, is the user allowed to log 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-3.png
 
-Note that for the user to be able to log in via SSH, SSH must be enabled on the machine.  See section [] for more details.  Also, you can choose to put the user in the administrative group (e.g. allowing the user to use sudo to run commands):
+Note that for the user to be able to log in via SSH, SSH must be enabled on the machine.  See section [] for more details.  Also, it is possible to put the user in the administrative group (e.g. allowing the user to use sudo to run commands):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-4.png
 
@@ -267,23 +267,23 @@ Enter the password for the user:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-5.png
 
-And you will need to verify it again.  Note that the system will check for weak passwords, although it will not stop you from entering one:
+Verify the password again.  Note that the system will check for weak passwords, although it will not stop the user from using a weak password:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-6.png
 
-After you are done, you will be placed into the user management menu:
+After finishing, the system will drop back into the user management menu:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-7.png
 
-Selecting _*Option 2*_ will allow you to remove a user's account, simply type in a username:
+Selecting _*Option 2*_ will remove a user's account, simply type in a username:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-8.png
 
-After typing in a _valid_ account, you will be asked if you want to remove the home directory:
+After typing in a _valid_ account, there is an option to remove the home directory:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-9.png
 
-After you are done, you will be placed into the user management menu:
+After finishing, the system will drop back into the user management menu:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-10.png
 
@@ -291,7 +291,7 @@ Note that entering an _invalid_ username will simply exit, and return to the use
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-11.png
 
-Selecting _*Option 3*_ will allow you change the password for a user's account, simply type in a username:
+Selecting _*Option 3*_ will change the password for a user's account, simply type in a username:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-12.png
 
@@ -299,11 +299,11 @@ Enter the password for the user:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-13.png
 
-And you will need to verify it again.  Note that the system will check for weak passwords, although it will not stop you from entering one:
+Verify the password again.  Note that the system will check for weak passwords, although it will not stop the user from using a weak password:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-14.png
 
-After you are done, you will be placed into the user management menu:
+After finishing, the system will drop back into the user management menu:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-15.png
 
@@ -311,7 +311,7 @@ Note that entering an _invalid_ username will simply exit, and return to the use
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-16.png
 
-Upon hitting exit, you will be returned to the main menu:
+Upon hitting exit, the system will drop back into the user management menu:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-17.png
 
@@ -321,7 +321,7 @@ If the [pSPerformanceToolkit32#Storage Storage] or [pSPerformanceToolkit32#Netwo
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/reboot.png
 
-Note that if neither were entered, you will be returned to the console.  
+Note that if neither were entered, the system will return to the console.   
 
 === Web ===
 
@@ -402,7 +402,7 @@ The time when the set of services was retrieved is displayed at the top of the p
 
 ==== Java OWAMP Client ====
 
-JOWAMP is a Java client of the OWAMP tool that executes an owamp test from the web browser to the server located on that particular node.  The code is still experimental, as such we have several warnings related to use of the code including this initial warning that will appear when you first invoke the link:
+JOWAMP is a Java client of the OWAMP tool that executes an owamp test from the web browser to the server located on that particular node.  The code is still experimental, as such we have several warnings related to use of the code including this initial warning that will appear when the link is first clicked:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-jowamp-0.png
 
@@ -428,7 +428,7 @@ If for some reason an error was experienced, the following items should be check
 
  * _*Firewalls*_ - Check to be sure the performance node and the system with the web browser are either un-firewalled or have setting that would allow OWAMP traffic.  See the [http://www.internet2.edu/performance/owamp/ OWAMP] page for more details.
  * _*NTP*_ - Be sure the performance node has a stable NTP numbers.  The machine with the web browser does not need NTP, but should have synchronized time.  
- * _*Browser Security*_ - Check to be sure your browser allows web applets to be executed, and that all of the warnings were agreed too in the previous steps.  
+ * _*Browser Security*_ - Check to be sure the browser allows web applets to be executed, and that all of the warnings were agreed too in the previous steps.  
 
 ==== Reverse Traceroute ====
 
@@ -540,11 +540,11 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-cacti-1.p
 
 ==== Administrative Information ====
 
-This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+This section requires authentication, and as such requires that the certificate be approved for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
 
-The following box may appear before you may access any of the functionality:
+The following box may appear before accessing any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
@@ -562,7 +562,7 @@ The information will appear in the web form after entry:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-admin-3.png
 
-Clicking on the communities will add them to your configuration:
+Clicking on the communities will add them to the configuration:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-admin-4.png
 
@@ -574,21 +574,21 @@ Adding new communities can be done in this manner:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-admin-6.png
 
-Lastly, hit _save_ to be sure your changes are saved.  
+Lastly, hit _save_ to be sure the changes are saved.  
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-admin-7.png
 
-The following message will confirm that you have saved the changes.
+The following message will confirm that the changes were saved.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-admin-8.png
 
-Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+Note that if the user chooses to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
 ===== Communities =====
 
-A community identification is a self organizing way to form affiliations within the perfSONAR world.  For instance, if a perfSONAR service if associated with a specific scientific project (e.g. LHC, eVLBI), or has access to a certain network (Internet2, NLR, ESnet), these values can be entered as "community" values and exported into the perfSONAR Information Services.  Participating in this procedure allows others in your community an easy way to identify specific instances throughout the world as being affiliated.  Adding a community value or values is recommended, but not required.  
+A community identification is a self organizing way to form affiliations within the perfSONAR world.  For instance, if a perfSONAR service if associated with a specific scientific project (e.g. LHC, eVLBI), or has access to a certain network (Internet2, NLR, ESnet), these values can be entered as "community" values and exported into the perfSONAR Information Services.  Participating in this procedure allows others in the community an easy way to identify specific instances throughout the world as being affiliated.  Adding a community value or values is recommended, but not required.  
 
 Selecting which _*communities*_ to identify this installation can be confusing to answer for new users.  This particular question is trying to associate some _loosely coupled_ labels to the data that the pS Performance Toolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music (e.g. a photo of a dog might have labels: _Dog_, _Rover_, etc. but someone else may choose different labels).  In general there is no _wrong way_ to choose a keyword.  Choose keywords that best describe the circumstances that surround this installation.  
 
@@ -609,11 +609,11 @@ Use as many community names as necessary to properly categorize the data from th
 
 ==== External BWCTL Limits ====
 
-This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+This section requires authentication, and as such requires that the certificate be approved for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
 
-The following box may appear before you may access any of the functionality:
+The following box may appear before accessing any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
@@ -677,11 +677,11 @@ This screen shows the results of adding the network.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-bwctllimits-10.png
 
-When done, press the _save_ button to commit your changes to disk, and restart the affected services.
+When done, press the _Save_ button to commit the changes to disk, and restart the affected services.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-bwctllimits-11.png
 
-Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+Note that if the user chooses to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
@@ -691,11 +691,11 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-bwctllimi
 
 ==== External OWAMP Limits ====
 
-This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+This section requires authentication, and as such requires that the certificate be approved for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
 
-The following box may appear before you may access any of the functionality:
+The following box may appear before accessing any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
@@ -739,11 +739,11 @@ This screen shows the results of adding the network.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-owamplimits-9.png
 
-When done, press the _save_ button to commit your changes to disk, and restart the affected services.
+When done, press the _Save_ button to commit the changes to disk, and restart the affected services.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-owamplimits-10.png
 
-Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+Note that if the user chooses to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
@@ -753,11 +753,11 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-owamplimi
 
 ==== Enabled Services ====
 
-This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+This section requires authentication, and as such requires that the certificate be approved for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
 
-The following box may appear before you may access any of the functionality:
+The following box may appear before accessing any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
@@ -778,7 +778,7 @@ A breakdown of each service:
  * _*BWCTL*_ - Allows clients at other sites to run Throughput tests to this host
  * _*OWAMP*_ - Allows clients at other sites to run One-Way Latency tests to this host
  * _*SSH*_ - Allows administrators to remotely connect to this host using SSH
- * _*SNMP MA*_ - Makes available SNMP statistics collected by Cacti (Note: you must configure cacti for this to work)
+ * _*SNMP MA*_ - Makes available SNMP statistics collected by Cacti (Note: Cacti must be configured for this to work)
 
 To ease the decision process of selecting the _appropriate_ services for a given deployment (e.g. deploying only _bandwidth-centric_ services) there are two buttons at the bottom of the page:
 
@@ -789,17 +789,17 @@ After selecting which services to enable, press _save_ to save the changes:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-enabled-save.png
 
-Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+Note that if the user chooses to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
 ==== NTP ====
 
-This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+This section requires authentication, and as such requires that the certificate be approved for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
 
-The following box may appear before you may access any of the functionality:
+The following box may appear before accessing any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
@@ -847,15 +847,15 @@ The following NTP clocks have been identified as being valuable to use:
    * d.ntp.monipe.rnp.br	RNP Time Server #4 - Brazil
    * e.ntp.monipe.rnp.br	RNP Time Server #5 - Brazil
 
-If you happen to know of a closer or better time source, the _Add New NTP Server_ button can be pressed.  The image below shows the process of adding a new server.  
+If the user happens to know of a closer or better time source, the _Add New NTP Server_ button can be pressed.  The image below shows the process of adding a new server.  
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-2.png
 
-After adding a new server, it will show up in the list.  Note that it will be selected for you automatically.  
+After adding a new server, it will show up in the list.  Note that it will be selected automatically.  
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-3.png
 
-_*N.B.*_: Routing has a large impact on if an NTP time source is _reachable_ and _close_ from your particular instance.  It is recommended that the _Select Closest Servers_ option be used:
+_*N.B.*_: Routing has a large impact on if an NTP time source is _reachable_ and _close_ from a particular instance.  It is recommended that the _Select Closest Servers_ option be used:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-4.png
 
@@ -863,11 +863,11 @@ After running the closest servers will be selected, and servers that were unreac
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-5.png
 
-When done, press the _save_ button to commit your changes to disk, and restart the affected services.
+When done, press the _save_ button to commit the changes to disk, and restart the affected services.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-6.png
 
-Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+Note that if the user chooses to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
@@ -877,11 +877,11 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-7.png
 
 ==== Scheduled Testing ====
 
-This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+This section requires authentication, and as such requires that the certificate be approved for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
 
-The following box may appear before you may access any of the functionality:
+The following box may appear before accessing any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
@@ -916,9 +916,9 @@ Enter the following information:
  * _*Test Duration*_ - How long of a BWCTL test to run.  The general rule of thumb is that if the round-trip times to all hosts being tested to are less than 50ms, the test duration should be at least 10 seconds. If the round-trip times to all hosts being tested to are less than 100ms, the test duration should be at least 20 seconds. If the round-trip times for any host being tested to is more than 100ms, the test duration should be at least 30 seconds. _*N.B.*_ that this number, along with _Time Between Tests_, will dictate how _busy_ the system, and the local network will be.  
  * _*Bandwidth Tester*_ - Currently only _iperf_ is allowed here. 
  * _*Protocol*_ - TCP or UDP testing.  
- * _*UDP Bandwidth*_ - Seen only when UDP testing is selected, allows you to specify the requested bandwidth for UDP testing.
- * _*Use Auto-tuning*_ - Allow the linux kernel to tune the buffers or set your own buffer sizes.
- * _*Window Size*_ - Seen only when _*Use Auto-tuning*_ is not checked, allows you to specify a send window size.  
+ * _*UDP Bandwidth*_ - Seen only when UDP testing is selected, allows the user to specify the requested bandwidth for UDP testing.
+ * _*Use Auto-tuning*_ - Allow the linux kernel to tune the buffers or set different own buffer sizes.
+ * _*Window Size*_ - Seen only when _*Use Auto-tuning*_ is not checked, allows the user to specify a send window size.  
 
 After saving, the test is setup but there are hosts associated with the test.  These can be added either by:
 
@@ -935,7 +935,7 @@ The host will be added to the list of tests hosts.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-5.png
 
-Use of the [pSPerformanceToolkit32#Communities Communities] keywords will also reveal hosts that are in the same community as your host.  Below shows the search for hosts in the _*Internet2*_ community:
+Use of the [pSPerformanceToolkit32#Communities Communities] keywords will also reveal hosts that are in the same community as the host.  Below shows the search for hosts in the _*Internet2*_ community:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-6.png
 
@@ -943,11 +943,11 @@ When the list returns, they will display on the page.  The user can then click a
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-7.png
 
-When done, press the _save_ button to commit your changes to disk, and restart the affected services.
+When done, press the _save_ button to commit the changes to disk, and restart the affected services.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-8.png
 
-Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+Note that if the user chooses to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
@@ -960,7 +960,7 @@ Finally, if there is an attempt to schedule tests that conflict, e.g.:
  * Schedule BWCTL tests when there are OWAMP or PingER tests already scheduled
  * Schedule Latency tests such as OWAMP or PingER when there are already BWCTL tests scheduled
 
-The system will warn you of conflicting measurement goals.  The warning is shown below.   
+The system will warn of conflicting measurement goals.  The warning is shown below.   
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-error.png
 
@@ -995,7 +995,7 @@ The host will be added to the list of tests hosts.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-5.png
 
-Use of the [pSPerformanceToolkit32#Communities Communities] keywords will also reveal hosts that are in the same community as your host.  Below shows the search for hosts in the _*Internet2*_ community:
+Use of the [pSPerformanceToolkit32#Communities Communities] keywords will also reveal hosts that are in the same community as the host.  Below shows the search for hosts in the _*Internet2*_ community:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-6.png
 
@@ -1003,11 +1003,11 @@ When the list returns, they will display on the page.  The user can then click a
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-7.png
 
-When done, press the _save_ button to commit your changes to disk, and restart the affected services.
+When done, press the _save_ button to commit the changes to disk, and restart the affected services.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-8.png
 
-Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+Note that if the user chooses to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
@@ -1020,7 +1020,7 @@ Finally, if there is an attempt to schedule tests that conflict, e.g.:
  * Schedule BWCTL tests when there are OWAMP or PingER tests already scheduled
  * Schedule Latency tests such as OWAMP or PingER when there are already BWCTL tests scheduled
 
-The system will warn you of conflicting measurement goals.  The warning is shown below.   
+The system will warn of conflicting measurement goals.  The warning is shown below.   
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-error.png
 
@@ -1053,7 +1053,7 @@ The host will be added to the list of tests hosts.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-5.png
 
-Use of the [pSPerformanceToolkit32#Communities Communities] keywords will also reveal hosts that are in the same community as your host.  Below shows the search for hosts in the _*Internet2*_ community:
+Use of the [pSPerformanceToolkit32#Communities Communities] keywords will also reveal hosts that are in the same community as the host.  Below shows the search for hosts in the _*Internet2*_ community:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-6.png
 
@@ -1065,11 +1065,11 @@ It is also possible to configure the port range for OWAMP tests via the administ
 
 vhttp://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-10.png
 
-When done, press the _save_ button to commit your changes to disk, and restart the affected services.
+When done, press the _save_ button to commit the changes to disk, and restart the affected services.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-8.png
 
-Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+Note that if the user chooses to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
@@ -1082,17 +1082,17 @@ Finally, if there is an attempt to schedule tests that conflict, e.g.:
  * Schedule BWCTL tests when there are OWAMP or PingER tests already scheduled
  * Schedule Latency tests such as OWAMP or PingER when there are already BWCTL tests scheduled
 
-The system will warn you of conflicting measurement goals.  The warning is shown below.   
+The system will warn of conflicting measurement goals.  The warning is shown below.   
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-error.png
 
 ==== Cacti Administration ====
 
-This section requires authentication, and as such requires that you approve the certificate for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
+This section requires authentication, and as such requires that the certificate be approved for the pS Performance Toolkit.  The following warning will appear.  Note that the pS Performance Toolkit uses a _self-generated_ and _self-signed_ certificate, this was done for simplicity in installation, and will cause this warning to appear in most browsers.  Adding an exception is normally required before viewing:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth-0.png
 
-The following box may appear before you may access any of the functionality:
+The following box may appear before accessing any of the functionality:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-auth.png
 
@@ -1108,7 +1108,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_1.png
 
 ===== Cacti Config Step 2 =====
 
-After logging in you will see the _home_ screen.  In the middle there
+After logging in, the _home_ screen is visible.  In the middle there
 will be an option to *Create devices*.  This is where we will begin.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_2.png
@@ -1124,9 +1124,9 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_3.png
 
 ===== Cacti Config Step 4 =====
 
-The next screen features many places to add information about your new
+The next screen features many places to add information about the new
 network device.  Note that the red circles are representative of the most
-common places to make changes.  When you are finished press *Create*.
+common places to make changes.  When finished press *Create*.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_4.png
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_5.png
@@ -1145,8 +1145,8 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_6.png
 The next screen displays the possible interfaces that are available for 
 data display.  Note that this may be a *large* number.  In general it is
 efficient to simply click the *all* checkbox at the top unless there are 
-certain interfaces you wish you only poll or perhaps leave out.  After
-checking this, scroll to the bottom.
+certain interfaces to poll, or not poll.  After checking this, scroll to
+the bottom.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_7.png
 
@@ -1175,7 +1175,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_9.png
 
 ===== Cacti Config Step 9 =====
 
-Select *Default Tree*.  It is also possible to create your own tree at this
+Select *Default Tree*.  It is also possible to create a new tree at this
 stage if desired.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_10.png
@@ -1190,8 +1190,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_11.png
 ===== Cacti Config Step 11 =====
 
 Select *Host* from the drop down.  This will automatically populate the
-next drop down with the network device you have set up.  When you are
-set click *Create*.
+next drop down with the network device.  When done, click *Create*.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_12.png
 
@@ -1205,7 +1204,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_13.png
 
 ===== Cacti Config Step 13 =====
 
-By default you can view the _localhost_ statistics, but below this the new
+By default the user can view the _localhost_ statistics, but below this the new
 network device is present.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_14.png
