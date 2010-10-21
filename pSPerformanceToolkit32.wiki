@@ -14,12 +14,12 @@ The system recommendations for the pS Performance toolkit are now located [http:
 
 Version 3.2 of the pS Performance Toolkit consists of two primary installation mediums:
 
- * !NetInstall CD
+ * [pSPerformanceToolkit32#NetInstall_CD NetInstall CD]
    * Allows the entire OS image to be installed directly to a host's hard disk
    * Requires network connectivity to download necessary packages
    * Does not support _upgrade_ functions from prior versions of the pS Performance Toolkit
    * Allows an upgrade path directly from the host via _*yum*_ - no physical access to the machine will be required.  
- * Live CD
+ * [pSPerformanceToolkit32#Live_CD Live CD]
    * Classic use case.  
      * Can run without harming hosts's hard disk contents
      * Can run and store measurements on hosts's hard disk
