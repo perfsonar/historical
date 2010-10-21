@@ -910,29 +910,50 @@ Enter the following information:
  * _*Description*_ - Enter a name for this test, e.g. _10 Second BWCTL Tests, every 4 Hours_.  _*N.B.*_ that this will be used to reference the test on the GUI.  
  * _*Time Between Tests*_ - How often to run the BWCTL tests.  _*N.B.*_ that this number, along with _Test Duration_, will dictate how _busy_ the system, and the local network will be.  
  * _*Test Duration*_ - How long of a BWCTL test to run.  The general rule of thumb is that if the round-trip times to all hosts being tested to are less than 50ms, the test duration should be at least 10 seconds. If the round-trip times to all hosts being tested to are less than 100ms, the test duration should be at least 20 seconds. If the round-trip times for any host being tested to is more than 100ms, the test duration should be at least 30 seconds. _*N.B.*_ that this number, along with _Time Between Tests_, will dictate how _busy_ the system, and the local network will be.  
- * _*Tester*_ - Currently only _iperf_ is allowed here. 
+ * _*Bandwidth Tester*_ - Currently only _iperf_ is allowed here. 
  * _*Protocol*_ - TCP or UDP testing.  
+ * _*UDP Bandwidth*_ - Seen only when UDP testing is selected, allows you to specify the requested bandwidth for UDP testing.
  * _*Use Auto-tuning*_ - Allow the linux kernel to tune the buffers or set your own buffer sizes.
+ * _*Window Size*_ - Seen only when _*Use Auto-tuning*_ is not checked, allows you to specify a send window size.  
 
 After entering these values, the test is saved, but it does not have test hosts (yet):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-2.png
 
-Adding test hosts can be done by [pSPerformanceToolkit32#Communities community], or _manually_.  If a community is clicked from the list, the following dialog will appear:
+After saving, the test is setup but there are hosts associated with the test.  These can be added either by:
+
+ * Manually entering hostnames/IP addresses
+ * Searching the perfSONAR information services 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-3.png
 
-A host can be selected from this list to add to the test:
+The user can manually enter a test host as seen in this example:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-4.png
 
-Once selected the host will show up in the testing dialog.  
+The host will be added to the list of tests hosts. 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-5.png
 
-When done, press the _save_ button to commit your changes to disk, and restart the affected services.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+Use of the _Communities_ keywords will also reveal hosts that are in the same community as your host.  Below shows the search for hosts in the _*Internet2*_ community:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-6.png
+
+When the list returns, they will display on the page.  The user can then click and add new hosts to the test that are already in the same community.  Below is what happens after adding a host from this list:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-7.png
+
+When done, press the _save_ button to commit your changes to disk, and restart the affected services.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-8.png
+
+Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
+
+After saving, the screen will look similar to this:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-9.png
 
 ===== Scheduled PingER =====
 
