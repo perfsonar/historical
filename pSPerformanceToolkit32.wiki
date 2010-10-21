@@ -895,15 +895,19 @@ The _Scheduled Testing_ screen allows the user to schedule several types of regu
 
 The screen will look similar to this initially:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-1.png
 
 The following sections detail setting up tests for each of these measurement types.
 
 ===== Scheduled BWCTL =====
 
-Upon adding a BWCTL test via the _Add New Throughput Test_ button, the following dialog will appear:
+The screen will look similar to this initially:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-1.png
+
+Upon adding a BWCTL test via the _Add New Throughput Test_ button, the following dialog will appear:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-2.png
 
 Enter the following information:
 
@@ -915,10 +919,6 @@ Enter the following information:
  * _*UDP Bandwidth*_ - Seen only when UDP testing is selected, allows you to specify the requested bandwidth for UDP testing.
  * _*Use Auto-tuning*_ - Allow the linux kernel to tune the buffers or set your own buffer sizes.
  * _*Window Size*_ - Seen only when _*Use Auto-tuning*_ is not checked, allows you to specify a send window size.  
-
-After entering these values, the test is saved, but it does not have test hosts (yet):
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-2.png
 
 After saving, the test is setup but there are hosts associated with the test.  These can be added either by:
 
