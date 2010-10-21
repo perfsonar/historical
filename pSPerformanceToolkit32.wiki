@@ -1043,6 +1043,10 @@ When the list returns, they will display on the page.  The user can then click a
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-7.png
 
+It is also possible to configure the port range for OWAMP tests via the administrative GUI. The button _Configure OWAMP Test Port Range_ appears after setting up a regular OWAMP test.  Enter a range to limit OWAMP testing for firewall reasons:
+
+vhttp://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-10.png
+
 When done, press the _save_ button to commit your changes to disk, and restart the affected services.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-8.png
