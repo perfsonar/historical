@@ -769,15 +769,16 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-enabled.p
 
 A breakdown of each service:
 
- * _*SSH*_ - Allows administrators to remotely connect to this host using SSH
+ * _*PingER*_ - Enables this host to perform scheduled ping tests. These tests will periodically ping configured hosts giving administrators a view of the latency from their site over time.
+ * _*perfSONAR-BUOY Throughput Testing*_ - Enables this host to perform scheduled throughput tests. These tests will run periodically giving administrators a view of the throughput to and from their site over time. _*N.B.*_: Enabling this will disable _*OWAMP*_, _*PingER*_ and _*perfSONAR-BUOY Latency Testing*_.  These can be manually re-selected if desired.  
+ * _*perfSONAR-BUOY Latency Testing*_ - Enables this host to perform scheduled one-way latency tests. These tests will run periodically giving administrators a view of the latency from their site over time.  _*N.B.*_: Enabling this will disable _*perfSONAR-BUOY Throughput Testing*_, _*BWCTL*_, _*NDT*_, and _*NPAD*_. These can be manually re-selected if desired. 
+ * _*perfSONAR-BUOY Measurement Archive*_ - Makes available the data collected by the perfSONAR-BUOY Latency and Throughput tests.
  * _*NDT*_ - Allows clients at other sites to run NDT tests to this host.
  * _*NPAD*_ - Allows clients at other sites to run NPAD tests to this host.
  * _*BWCTL*_ - Allows clients at other sites to run Throughput tests to this host
  * _*OWAMP*_ - Allows clients at other sites to run One-Way Latency tests to this host
- * _*PingER*_ - Enables this host to perform scheduled ping tests. These tests will periodically ping configured hosts giving administrators a view of the latency from their site over time.
- * _*perfSONAR-BUOY Measurement Archive*_ - Makes available the data collected by the perfSONAR-BUOY Latency and Throughput tests.
- * _*perfSONAR-BUOY Throughput Testing*_	Enables this host to perform scheduled throughput tests. These tests will run periodically giving administrators a view of the throughput to and from their site over time.  _*N.B.*_: Enabling this will disable _*OWAMP*_, _*PingER*_ and _*perfSONAR-BUOY Latency Testing*_.
- * _*perfSONAR-BUOY Latency Testing*_	Enables this host to perform scheduled one-way latency tests. These tests will run periodically giving administrators a view of the latency from their site over time.  _*N.B.*_: Enabling this will disable _*perfSONAR-BUOY Throughput Testing*_, _*BWCTL*_, _*NDT*_, and _*NPAD*_. 
+ * _*SSH*_ - Allows administrators to remotely connect to this host using SSH
+ * _*SNMP MA*_ - Makes available SNMP statistics collected by Cacti (Note: you must configure cacti for this to work)
 
 To ease the decision process of selecting the _appropriate_ services for a given deployment (e.g. deploying only _bandwidth-centric_ services) there are two buttons at the bottom of the page:
 
