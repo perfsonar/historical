@@ -644,7 +644,7 @@ Note that if we click the _*UDP*_ check box, we get more items in the dialog.  W
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-bwctllimits-3.png
 
-Note that after clicking _Save_ we have a some text in <font color="red">red</>. 
+Note that after clicking _Save_ we have a some text in <font color="red">red</font>. 
  
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-bwctllimits-4.png
 
@@ -657,7 +657,7 @@ In the next image we will take the second approach, and edit the _*Privileged Cl
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-bwctllimits-5.png
 
-After making the edits, the screen no longer shows any <font color="red">red</> text, indicating that the settings meet the rules of the limits file.  
+After making the edits, the screen no longer shows any <font color="red">red</font> text, indicating that the settings meet the rules of the limits file.  
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-bwctllimits-6.png
 
@@ -715,13 +715,41 @@ Clicking an _edit_ link brings up a dialog:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-owamplimits-2.png
 
-Users and networks can be added in a similar manner. 
+Note there are protections in place to prevent the _*Privileged Clients*_ section from being more restrictive than the _*Unprivileged Clients*_ section.  The picture below has made a change to _*Privileged Clients*_, the message indicates that to be consistent, a change to _*Unprivileged Clients*_ has been made as well.  
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-owamplimits-3.png
 
-When done, press the _save_ button to commit your changes to disk, and restart the affected services.  Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
+Note that if _*Unprivileged Clients*_ was changed to be a less restrictive value than _*Privileged Clients*_, there will be a warning in <font color="red">red</font>.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-owamplimits-5.png
+
+The next dialog allows us to add a user that can use the OWAMP tools.  Note that this functionality is normally used to add a person to a more privileged group than they would otherwise be able to access.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-owamplimits-6.png
+
+This screen shows the results of adding the new user.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-owamplimits-7.png
+
+Networks can also be added into the hierarchy of resources, this screen shows us adding a subbet (a /24) into the _*Privileged Clients*_ permissions.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-owamplimits-8.png
+
+This screen shows the results of adding the network. 
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-owamplimits-9.png
+
+When done, press the _save_ button to commit your changes to disk, and restart the affected services.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-owamplimits-10.png
+
+Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
+
+After saving the following screen is seen.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-owamplimits-11.png
 
 ==== Enabled Services ====
 
