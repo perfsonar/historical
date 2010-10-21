@@ -955,6 +955,15 @@ After saving, the screen will look similar to this:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-9.png
 
+Finally, if there is an attempt to schedule tests that conflict, e.g.:
+
+ * Schedule BWCTL tests when there are OWAMP or PingER tests already scheduled
+ * Schedule Latency tests such as OWAMP or PingER when there are already BWCTL tests scheduled
+
+The system will warn you of conflicting measurement goals.  The warning is shown below.   
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-error.png
+
 ===== Scheduled PingER =====
 
 The screen will look similar to this initially:
@@ -1005,6 +1014,15 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 After saving, the screen will look similar to this:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-9.png
+
+Finally, if there is an attempt to schedule tests that conflict, e.g.:
+
+ * Schedule BWCTL tests when there are OWAMP or PingER tests already scheduled
+ * Schedule Latency tests such as OWAMP or PingER when there are already BWCTL tests scheduled
+
+The system will warn you of conflicting measurement goals.  The warning is shown below.   
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-error.png
 
 ===== Scheduled OWAMP =====
 
@@ -1058,6 +1076,15 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 After saving, the screen will look similar to this:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-9.png
+
+Finally, if there is an attempt to schedule tests that conflict, e.g.:
+
+ * Schedule BWCTL tests when there are OWAMP or PingER tests already scheduled
+ * Schedule Latency tests such as OWAMP or PingER when there are already BWCTL tests scheduled
+
+The system will warn you of conflicting measurement goals.  The warning is shown below.   
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-error.png
 
 ==== Cacti Administration ====
 
