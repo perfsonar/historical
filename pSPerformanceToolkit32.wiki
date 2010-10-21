@@ -578,6 +578,10 @@ Lastly, hit _save_ to be sure your changes are saved.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-admin-7.png
 
+The following message will confirm that you have saved the changes.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-admin-8.png
+
 Note that if you choose to leave this page before saving the following warning may appear (depending on the web browser used):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
