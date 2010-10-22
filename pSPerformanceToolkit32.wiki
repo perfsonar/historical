@@ -32,12 +32,12 @@ The following sections describe the installation procedure for each of the produ
 The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.2.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.2.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
-user@host:~$ md5sum pS-Performance_Toolkit-NetInstall-3.2.iso;cat pS-Performance_Toolkit-NetInstall-3.2.iso.md5 
-0ba36d4bc5e01048df4e0c9134230c90  pS-Performance_Toolkit-NetInstall-3.2.iso
-0ba36d4bc5e01048df4e0c9134230c90  pS-Performance_Toolkit-NetInstall-3.2.iso
+user@host:~$ md5sum pS-Performance_Toolkit-NetInstall-3.2.iso;cat pS-Performance_Toolkit-NetInstall-3.2.iso.md5
+e1b30070021121398966e770b5dd2143  pS-Performance_Toolkit-NetInstall-3.2.iso
+e1b30070021121398966e770b5dd2143  pS-Performance_Toolkit-NetInstall-3.2.iso
 }}}
 
-If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  After burning, please insert the CD into the target machine to boot.  Some items to consider:
+If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  If the value _*DOES NOT*_ match, consider re-downloading the file.  After burning, please insert the CD into the target machine to boot.  Some items to consider:
 
  * The target machine should have some way to access the console.  This can be via an attached monitor and keyboard or via remote access through serial ports or KVMs.
  * The target machine's BIOS must allow the machine to boot from CD.  If the CD does not boot, adjust the BIOS (normally access via *_F12_*, *_F2_*, *_Del_*, etc.) and try again.  
@@ -53,11 +53,11 @@ The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit
 
 {{{
 user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.2.iso;cat pS-Performance_Toolkit-LiveCD-3.2.iso.md5 
-b61438371f562256edb727d28d3b8e0c  pS-Performance_Toolkit-LiveCD-3.2.iso
-b61438371f562256edb727d28d3b8e0c  pS-Performance_Toolkit-LiveCD-3.2.iso
+e0f8338433802695a9f3ce6d68c25df4  pS-Performance_Toolkit-LiveCD-3.2.iso
+e0f8338433802695a9f3ce6d68c25df4  pS-Performance_Toolkit-LiveCD-3.2.iso
 }}}
 
-If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  After burning, please insert the CD into the target machine to boot.  Some items to consider:
+If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  If the value _*DOES NOT*_ match, consider re-downloading the file.  After burning, please insert the CD into the target machine to boot.  Some items to consider:
 
  * The target machine should have some way to access the console.  This can be via an attached monitor and keyboard or via remote access through serial ports or KVMs.
  * The target machine's BIOS must allow the machine to boot from CD.  If the CD does not boot, adjust the BIOS (normally access via *_F12_*, *_F2_*, *_Del_*, etc.) and try again.  
@@ -78,6 +78,8 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/boot-ntp.png
 The system is configured to search for addresses via DHCP by default.  This may cause the system to pause for a short amount of time if there is no DHCP server on the target network.  Note that in the [pSPerformanceToolkit32#Console Console Configuration] phase a static IP can be specified.  The following shows the messages that will appear when the host searches for available network interfaces.  Note that we get a successful DHCP address on *eth0*:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/dhcp.png
+
+Also note that the pS Performance Toolkit searches for connectivity on several interfaces, possible more than are available on the target system.  This is also normal, the added interfaces will not alter the behavior or operation of the host.  
 
 The system will configure and start up services next.  It is normal to see some of these services fail (they will be configured in the [pSPerformanceToolkit32#Console Console] and [pSPerformanceToolkit32#Web Web] portions so they do start up properly).  The final step is to present the console to the user:
 
@@ -105,6 +107,8 @@ Once the passwords are set, login to the web interface and finish configuration.
 
 https://[host address]/toolkit
 }}}
+
+An important thing to note is that in the description above, there is no IP address or hostname found for this host currently.  This will need to be rectified in the [pSPerformanceToolkit32#Console console configuration] step.  
 
 == Configuration ==
 
@@ -144,7 +148,7 @@ After choosing _*Option 1*_ from the menu, the following prompt will appear list
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-1.png
 
-After choosing a drive, this message will appear:
+After choosing a drive, this message may appear:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-2.png
 
@@ -181,7 +185,7 @@ The system is designed to sense weak passwords, and the following warning may ap
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/pass-3.png
 
-Systems feature a _*knoppix*_ user will ask to change this password at the same time as _*root*_.  After completing this step, the system will drop back to the menu.  Note that this step will now appear in <font color="green">green</font>.
+Systems that feature a _*knoppix*_ user will ask to change this password at the same time as _*root*_.  After completing this step, the system will drop back to the menu.  Note that this step will now appear in <font color="green">green</font>.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/pass-4.png
 
@@ -707,6 +711,13 @@ The _OWAMP Limits_ screen allows the operator to set limits on the resources tha
  * Disk usage: OWAMP tests record information about all packets received which are stored on disk. The disk usage allows administrators to configure the amount of disk space that users can request for their OWAMP tests. 
  * Saving vs deleting test results: The OWAMP records stored on disk can be deleted when they are fetched or stored for later retrieval. Administrators can configure when the test results are deleted.
 
+Note a subtle nuance to the two classes of limitations:
+ 
+ # _*Privileged*_ clients will take the highest precedence
+ # _*Un-privileged*_ clients are derived from _*Privileged*_ client permissions
+ 
+For example, if a maximum bandwidth of _10 MB_ was set for the _*Privileged*_ clients, then the _*Un-privileged*_ clients will be able to use less than or equal to this amount - never more.  Take this into consideration when setting the limits. 
+
 The screen defaults to these settings:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-owamplimits-1.png
@@ -816,7 +827,7 @@ The following screen shows a default NTP configuration:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-1.png
 
-The following NTP clocks have been identified as being valuable to use:
+The following NTP clocks have been identified as being valuable to use, note that many of these are available via R&E connectivity and may not be available via non R&E peerings:
 
  * United States - Eastern Timezone
    * chronos.es.net	ESnet - New York, NY USA
@@ -1063,7 +1074,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled
 
 It is also possible to configure the port range for OWAMP tests via the administrative GUI. The button _Configure OWAMP Test Port Range_ appears after setting up a regular OWAMP test.  Enter a range to limit OWAMP testing for firewall reasons:
 
-vhttp://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-10.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-10.png
 
 When done, press the _save_ button to commit the changes to disk, and restart the affected services.
 
@@ -1102,9 +1113,7 @@ The following steps will explain the basic setup of Cacti (e.g. to poll a networ
 
 ===== Cacti Config Step 1 =====
 
-Visit the Cacti instance:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_1.png
+Visit the Cacti instance by clicking the link on the main page.  
 
 ===== Cacti Config Step 2 =====
 
@@ -1212,19 +1221,19 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/Cacti_15.png
 
 ==== Configuration Help ==== 
 
-TBD
+This link will re-direct to the current installation instructions for the pS Performance Toolkit.
 
 ==== Frequently Asked Question ==== 
 
-TBD
+This link will re-direct to the [http://psps.perfsonar.net/toolkit/FAQs.html FAQ] page.
 
 ==== About ==== 
 
-TBD
+This link will re-direct to the [http://psps.perfsonar.net/toolkit/ pS Performance Toolkit Home Page].
 
 ==== Credits ==== 
 
-TBD
+This link honors organizations that have [http://psps.perfsonar.net/toolkit/credits.html helped] to develop, integrate, and test the pS Performance Toolkit.  
 
 == Last Updated ==
 
