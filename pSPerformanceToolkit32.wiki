@@ -47,7 +47,71 @@ If the calculated value matches the downloaded value, the ISO image is complete 
 
 After booting the following screen will appear:
 
-<font color="red">TBD</font>
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-1.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-2.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-3.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-4.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-5.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-6.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-7.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-8.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-9.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-10.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-11.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-12.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-13.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-14.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-15.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-16.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-17.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-18.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-19.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-20.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-21.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-22.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-23.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-24.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-25.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-26.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-27.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-28.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-29.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-30.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-31.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-32.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-33.png
 
 === Live CD ===
 
