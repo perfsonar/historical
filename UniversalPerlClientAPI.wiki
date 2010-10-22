@@ -1,0 +1,53 @@
+= Universal Data Client  API, Perl =
+
+This package was created for all interested in the universal API for the data requests.
+It supports any available MA - owamp, pinger, bwctl, snmp, traceroute.
+This API eliminates need for any use of the XML in the data requests. The metadata requests are implemented as well for each service but are not exposed.
+The API consists of the single class called - Client which instatinates the Client object and passes all service specific parameteres to the particular implementation.
+Each service's client is implemented as standalone class and coulde be used separately.
+The package exists under the Ecenter namespace since this is the by-product of the Ecenter project.
+This distribution is located under the *branches/ecenter_client_api/Shared/client/ecenter*
+on the ps-ps SVN repository.
+
+== Usage, for more examples run perldoc on each file ==
+{{{
+ my $client =  Ecenter::Client->new({type=> 'bwctl', 
+                                     args => {src_ip => '131.222.232.222',  
+                                              dst_ip =>'134.564.232.226'});
+  $client->start(time()-1800);
+  $client->end(time());
+  $client->url('http://psps/services/psb');
+  my $data = $client->get_data;
+  #
+  # or in one command !
+  #
+  my $data =  Ecenter::Client->new({ type   => 'bwctl',
+                                     start => time() -1800, end => time(), 
+                                     url    => 'http://psps/services/pinger_ma'
+			            args = { src_ip => '131.222.232.222',
+			                      dst_ip =>'134.564.232.226'}
+			            })->get_data;
+  #
+  #  if resolution is set then data points will be refactored to the requested number - 
+  #  resolution means number of datapoints to return
+  #  Must be set before calling get_data, any other call will refactor results 
+  #  only to the smaller number of data points.
+  # 
+  $client->resolution(20);
+  #
+  #  data array ref is stored in the data field
+  #  
+  my $data = $client->data;
+ }}}
+
+== Data format ==
+
+Data is returned in the form of the Perl's reference to the array:
+{{{
+ [
+    [ <timestamp>, {<service datum key> => <service datum value>,...,<service datum key> => <service datum value>} ],
+ ...
+    [ <timestamp>, {<service datum key> => <service datum value>,...,<service datum key> => <service datum value>} ],
+ ]
+}}}
+There is no separation by the metadata keys. You have to know what you asking for. The implemented use case is the one where request is sent with the pair of source destination IP addresses or hostnames. You can use src_regexp and dst_regexp in the case of PingER MA but it will return data array for all found metadata.
