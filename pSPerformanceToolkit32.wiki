@@ -158,7 +158,9 @@ If the drive is unformatted or is not formatted with the ext3 filesystem, there 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-3.png
 
-The screen will display the results of the formatting step.  Note that a machine reboot is required before the system will be completely usable.  The remainder of the menu can be navigated before the reboot will be requested:
+The screen will display the results of the formatting step.  Note that a machine reboot is required before the system will be completely usable.  It is _*strongly recommended*_ that you reboot immediately, particularly before [pSPerformanceToolkit32#User_Management adding users] or [pSPerformanceToolkit32#Networking altering networking].  There is a strong possibility that the changes you make will not be saved to the disk.
+
+The remainder of the menu can be navigated before the reboot will be requested:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-4.png
 
