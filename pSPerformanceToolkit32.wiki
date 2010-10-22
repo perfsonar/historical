@@ -6,6 +6,8 @@
 
 The following guide describes in detail the steps required to set up version 3.2 of the perfSONAR performance Toolkit ([http://psps.perfsonar.net/toolkit/ pS Performance Toolkit 3.2]).  It is important to follow each step in order.  Upon getting stuck, consult the [http://psps.perfsonar.net/toolkit/FAQs.html FAQ] or join the [https://lists.internet2.edu/sympa/info/performance-node-users mailing list].
 
+For installation instructions specific to version 3.1 of the pS Performance Toolkit, please visit [http://code.google.com/p/perfsonar-ps/wiki/pSPerformanceToolkit31].
+
 == System Requirements ==
 
 The system recommendations for the pS Performance toolkit are now located [http://psps.perfsonar.net/toolkit/hardware.html here].

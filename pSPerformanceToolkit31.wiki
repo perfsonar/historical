@@ -6,6 +6,8 @@
 
 The following guide describes in detail the steps required to set up version 3.1 of the perfSONAR performance Toolkit ([http://internet2.edu/performance/pS-PerformanceToolkit/ pS Performance Toolkit 3.1]).  It is important to follow each step in order.  Upon getting stuck, consult the [pSPerformanceToolkit31#FAQ FAQ] at the end of this document or join the [https://mail.internet2.edu/wws/info/performance-node-users mailing list].
 
+For installation instructions specific to version 3.2 of the pS Performance Toolkit, please visit [http://code.google.com/p/perfsonar-ps/wiki/pSPerformanceToolkit32].
+
 == System Requirements ==
 
 The pS Performance Toolkit requires modern hardware to function properly.  The following are basic guidelines to selecting hardware to power the measurement tools.
