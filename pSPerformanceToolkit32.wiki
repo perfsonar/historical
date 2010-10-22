@@ -23,8 +23,8 @@ Version 3.2 of the pS Performance Toolkit consists of two primary installation m
    * Allows an upgrade path directly from the host via _*yum*_ - no physical access to the machine will be required.  
  * [pSPerformanceToolkit32#Live_CD Live CD]
    * Classic use case.  
-     * Can run without harming hosts's hard disk contents
-     * Can run and store measurements on hosts's hard disk
+     * Can run without harming host's hard disk contents
+     * Can run and store measurements on host's hard disk
    * Ability to upgrade from prior versions of the pS Performance Toolkit
  
 The following sections describe the installation procedure for each of the products.
@@ -73,7 +73,7 @@ Options can be presented at this time (e.g. going into single user mode) but if 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/boot-msg.png
 
-Some services will not start on first load, and as such there may be red <font color="red">FAILED</font> warnings on the screen.  This is normal.  In particular, NTP (the time service) will not be active when the server starts.  This will cause some tools like BWCTL to fail as well.  Over time (usually around an hour) NTP will stabalize and the pSPT will automatically re-start failed services.  For a picture of NTP failing on boot, see below:
+Some services will not start on first load, and as such there may be red <font color="red">FAILED</font> warnings on the screen.  This is normal.  In particular, NTP (the time service) will not be active when the server starts.  This will cause some tools like BWCTL to fail as well.  Over time (usually around an hour) NTP will stabilize and the pSPT will automatically re-start failed services.  For a picture of NTP failing on boot, see below:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/boot-ntp.png
 
@@ -81,7 +81,7 @@ The system is configured to search for addresses via DHCP by default.  This may 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/dhcp.png
 
-Also note that the pS Performance Toolkit searches for connectivity on several interfaces, possible more than are available on the target system.  This is also normal, the added interfaces will not alter the behavior or operation of the host.  
+Also note that the pS Performance Toolkit searches for connectivity on several interfaces, possibly more than are available on the target system.  This is also normal, the added interfaces will not alter the behavior or operation of the host.  
 
 The system will configure and start up services next.  It is normal to see some of these services fail (they will be configured in the [pSPerformanceToolkit32#Console Console] and [pSPerformanceToolkit32#Web Web] portions so they do start up properly).  The final step is to present the console to the user:
 
@@ -142,7 +142,7 @@ There are 5 options that may be configured through this menu:
  * [pSPerformanceToolkit32#User_Management User Management] - Add additional users to the system
  * [pSPerformanceToolkit32#Exit Exit] - After exiting the menu
 
-The following sections detail the actions available in each section.  Note that as a menu item is addressed, they will change color.  Options in <font color="magenta">magenta</font> have yet to be configured, and options in <font color="green">green</font> have already been configured.  It is possible to re-configure green items as required.  
+The following sections detail the actions available under each option.  Note that as a menu item is addressed, they will change color.  Options in <font color="magenta">magenta</font> have yet to be configured, and options in <font color="green">green</font> have already been configured.  It is possible to re-configure green items as required.  
 
 ==== Storage ====
 
@@ -156,7 +156,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-2.png
 
 An internal check requests that the disk have the minimum 10GB of capacity.  It is possible to proceed with a smaller disk, but not recommended.  Note that any partition combination is acceptable, as long as the minimum size is respected.  Note that for simplicity a single partition will give the pSPT the most access to storage.
 
-If the drive is unformatted or is not formatted with the ext3 filesystem, there will be an option for format the drive in question. While Linux can natively read and write many filesystems, some (specifically NTFS and FAT) do not contain support for features required by the toolkit. _*N.B.*_: formatting a hard drive will render any existing old data un-readable.  Please be sure the target hard drive is proper before proceeding:
+If the drive is unformatted or is not formatted with the ext3 filesystem, there will be an option for format the drive in question. While Linux can natively read and write many filesystems, some (specifically NTFS and FAT) do not contain support for features required by the toolkit. _*N.B.*_: formatting a hard drive will render any existing old data un-readable.  Please be sure to select the proper target hard drive before proceeding:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/drive-3.png
 
@@ -181,7 +181,7 @@ The following message may appear if the passwords were already set.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/pass-1.png
 
-Answering _*no*_ will exist to the menu, answering _*yes*_ will bring up the following dialog.
+Answering _*no*_ will exit to the menu, answering _*yes*_ will bring up the following dialog.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/pass-2.png
 
@@ -259,7 +259,7 @@ After choosing _*Option 4*_ from the menu, the following menu will appear with o
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-1.png
 
-_*Option 1*_ allows a new user to be added to the system. simple enter the name of the user (or enter nothing and press _enter_ to exit):
+_*Option 1*_ allows a new user to be added to the system. Simply enter the name of the user (or enter nothing and press _enter_ to exit):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/user-2.png
 
@@ -499,7 +499,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-pa-owd-2.
 There are three sections to the GUI:
 
  * _*Current Data*_ - Data that has been collected in the past week.  
- * _*Summary Graph*_ - Shows the aggregate average observed into and out of each host.  
+ * _*Summary Table*_ - Shows the aggregate average observed into and out of each host.  
  * _*Historical Data*_ - Data that is present in the system, but older than a week.  
 
 Graphs can be produced for individual tests:
@@ -582,7 +582,7 @@ Adding new communities can be done in this manner:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-admin-6.png
 
-Lastly, hit _save_ to be sure the changes are saved.  
+Lastly, hit _Save_ to be sure the changes are saved.  
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-admin-7.png
 
@@ -596,9 +596,9 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/non-save.png
 
 ===== Communities =====
 
-A community identification is a self organizing way to form affiliations within the perfSONAR world.  For instance, if a perfSONAR service if associated with a specific scientific project (e.g. LHC, eVLBI), or has access to a certain network (Internet2, NLR, ESnet), these values can be entered as "community" values and exported into the perfSONAR Information Services.  Participating in this procedure allows others in the community an easy way to identify specific instances throughout the world as being affiliated.  Adding a community value or values is recommended, but not required.  
+A community identification is a self organizing way to form affiliations within the perfSONAR world.  For instance, if a perfSONAR service is associated with a specific scientific project (e.g. LHC, eVLBI), or has access to a certain network (Internet2, NLR, ESnet), these values can be entered as "community" values and exported into the perfSONAR Information Services.  Participating in this procedure allows others in the community an easy way to identify specific instances throughout the world as being affiliated.  Adding a community value or values is recommended, but not required.  
 
-Selecting which _*communities*_ to identify this installation can be confusing to answer for new users.  This particular question is trying to associate some _loosely coupled_ labels to the data that the pS Performance Toolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music (e.g. a photo of a dog might have labels: _Dog_, _Rover_, etc. but someone else may choose different labels).  In general there is no _wrong way_ to choose a keyword.  Choose keywords that best describe the circumstances that surround this installation.  
+Selecting which _*communities*_ identify this installation can be confusing to answer for new users.  This particular question is trying to associate some _loosely coupled_ labels to the data that the pS Performance Toolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music (e.g. a photo of a dog might have labels: _Dog_, _Rover_, etc. but someone else may choose different labels).  In general there is no _wrong way_ to choose a keyword.  Choose keywords that best describe the circumstances that surround this installation.  
 
 Some examples of valid answers are:
 
@@ -677,7 +677,7 @@ This screen shows the results of adding the new user.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-bwctllimits-8.png
 
-Networks can also be added into the hierarchy of resources, this screen shows us adding a subbet (a /24) into the _*Privileged Clients*_ permissions.  
+Networks can also be added into the hierarchy of resources, this screen shows us adding a subnet (a /24) into the _*Privileged Clients*_ permissions.  
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-bwctllimits-9.png
 
@@ -800,7 +800,7 @@ To ease the decision process of selecting the _appropriate_ services for a given
  * _*Only Enable Bandwidth Services*_ - Turns on bandwidth testing applications, and turns off other services
  * _*Only Enable Latency Services*_ - Turns on latency testing applications, and turns off other services
 
-After selecting which services to enable, press _save_ to save the changes:
+After selecting which services to enable, press _Save_ to save the changes:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-enabled-save.png
 
@@ -878,7 +878,7 @@ After running the closest servers will be selected, and servers that were unreac
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-5.png
 
-When done, press the _save_ button to commit the changes to disk, and restart the affected services.
+When done, press the _Save_ button to commit the changes to disk, and restart the affected services.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-ntp-6.png
 
@@ -958,7 +958,7 @@ When the list returns, they will display on the page.  The user can then click a
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-7.png
 
-When done, press the _save_ button to commit the changes to disk, and restart the affected services.
+When done, press the _Save_ button to commit the changes to disk, and restart the affected services.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-bwctl-8.png
 
@@ -1018,7 +1018,7 @@ When the list returns, they will display on the page.  The user can then click a
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-7.png
 
-When done, press the _save_ button to commit the changes to disk, and restart the affected services.
+When done, press the _Save_ button to commit the changes to disk, and restart the affected services.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-pinger-8.png
 
@@ -1080,7 +1080,7 @@ It is also possible to configure the port range for OWAMP tests via the administ
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-10.png
 
-When done, press the _save_ button to commit the changes to disk, and restart the affected services.
+When done, press the _Save_ button to commit the changes to disk, and restart the affected services.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/web-scheduled-owamp-8.png
 
