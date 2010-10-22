@@ -119,6 +119,8 @@ my $metadata_list = $res;
 
 $client->close();
 
+print STDERR Dumper($metadata_list);
+
 # construct the "alarms" table like Template Toolkit will be expecting
 my $found_alarm = 0;
 my @output_alarms = ();

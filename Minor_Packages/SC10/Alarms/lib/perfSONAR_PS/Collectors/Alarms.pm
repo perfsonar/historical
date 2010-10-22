@@ -181,6 +181,8 @@ sub collectMeasurements {
     my($self, $sleeptime) = @_;
     my ($status, $res);
 
+    my $next_runtime = time + $self->{CONF}->{"collection_interval"};
+
     $self->{LOGGER}->info("Collecting alarms");
 
     ($status, $res) = $self->{DB_CLIENT}->open();
@@ -221,10 +223,18 @@ sub collectMeasurements {
         $self->{LOGGER}->debug("Metadata ID: $metadata_id\n");
 
         my $localTime = time;
-        $self->{LOGGER}->debug("Pre getAlarms()");
-        ($status, $res) = $router->{AGENT}->get_alarms();
-        $self->{LOGGER}->debug("Post getAlarms()");
-        my $machineTime = $router->{AGENT}->getMachineTime();
+        my $machineTime;
+        if ($router->{AGENT}->connect() == 0) {
+            $self->{LOGGER}->debug("Calling get_alarms");
+            ($status, $res) = $router->{AGENT}->get_alarms();
+            $router->{AGENT}->disconnect();
+            $machineTime = $router->{AGENT}->getMachineTime();
+        }
+        else {
+            $self->{LOGGER}->debug("Couldn't connect");
+            $status = -1;
+            $res = "Problem connecting to host";
+        }
 
         my $alarms;
 
@@ -234,13 +244,13 @@ sub collectMeasurements {
         else {
             $self->{LOGGER}->debug("Get alarms returned junk");
             # Generate a measurement alarm
-           
+
             my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-            $mday++;
+            $mon++;
             $year += 1900;
 
             my %alarm = ();
-            $alarm{alarmType} = "MEASUREMENT";
+            $alarm{alarmType} = "MEASUREMENT-CONNECTFAILED";
             $alarm{serviceAffecting} = "NSA";
             $alarm{description} = "Measurement Software Couldn't Connect To Device";
             $alarm{facility} = "pS-Alarms-Collector";
@@ -250,11 +260,32 @@ sub collectMeasurements {
             $alarm{date} = $mon."-".$mday;
             $alarm{year} = $year;
 
-            my @tmp = ();
-            push @tmp, \%alarm;
-            $alarms = \@tmp;
+            $alarms = [ \%alarm ];
 
             $machineTime = "$year-$mon-$mday $hour:$min:$sec";
+        }
+
+        # No alarms, add the 'MEASUREMENT-NOALARMS' Alarm...
+        if (scalar(@$alarms) == 0) {
+            $self->{LOGGER}->debug("Get alarms returned no alarms");
+           
+            my ($switch_date, $switch_time) = split(' ', $machineTime);
+
+            my ($switch_year, $switch_month, $switch_day) = split('-', $switch_date);
+            my ($switch_hour, $switch_minute, $switch_second) = split(':', $switch_time);
+
+            my %alarm = ();
+            $alarm{alarmType} = "MEASUREMENT-NOALARMS";
+            $alarm{serviceAffecting} = "NSA";
+            $alarm{description} = "Measurement Software Found No Alarms";
+            $alarm{facility} = "pS-Alarms-Collector";
+            $alarm{facility_type} = "perfSONAR";
+            $alarm{severity} = 'MN';
+            $alarm{time} = $switch_hour."-".$switch_minute."-".$switch_second;
+            $alarm{date} = $switch_month."-".$switch_day;
+            $alarm{year} = $switch_year;
+
+            $alarms = [ \%alarm ];
         }
 
         foreach my $alarm (@$alarms) {
@@ -313,6 +344,10 @@ sub collectMeasurements {
 
             my $diff = $localTime - $currentMachineTimestamp;
 
+            print STDERR "currentMachineTimestamp: $currentMachineTimestamp ($router_year/$router_month/$router_day $router_hour:$router_minute:$router_second)\n";
+            print STDERR "LocalTime: $localTime\n";
+            print STDERR "Diff: $diff\n";
+
             # Convert the start time to a timestamp and use the diff to calculate the 'local' start time
             my $machine_start_year = $alarm->{year};
             my ($machine_start_month, $machine_start_day) = split('-', $alarm->{date});
@@ -347,7 +382,9 @@ sub collectMeasurements {
     }
 
     if ($sleeptime) {
-        $$sleeptime = $self->{CONF}->{"collection_interval"};
+        $$sleeptime = $next_runtime - time;
+
+        $$sleeptime = 0 if ($$sleeptime <= 0);
     }
 
     return;
