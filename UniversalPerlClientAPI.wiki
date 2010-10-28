@@ -89,4 +89,18 @@ Where:
   * _service datum key_ - name of the returned datum - for example utililzation
   * _service datum value_ - actual value of the returned datum
 
-There is no separation by the metadata keys. You have to know what you asking for. The implemented use case is the one where request is sent with the pair of source destination IP addresses or hostnames. You can use src_regexp and dst_regexp in the case of PingER MA but it will return data array for all found metadata.
+There is no separation by the metadata keys. You have to know what you asking for. The implemented use case is the one where request is sent with the pair of source destination IP addresses or hostnames. For example, you can use src_regexp and dst_regexp in the case of PingER MA but it will return data array for all found metadata.
+
+== API ==
+
+Each service represented by the own class which implemetes remote call to the MA.
+
+  * Ecenter::Data::Owamp 
+  * Ecenter::Data::PingER
+  * Ecenter::Data::Snmp
+  * Ecenter::Data::Traceroute
+  * Ecenter::Data::Bwctl
+
+The centrilized class - Ecenter::Client is nothing else but a proxy to each of this implementations. One can create the object of any of those classes and use it directly
+to get data from the remote MA. Each class implement the same methods for the dat and
+metadata retrieval - get_data and get_metadata. The returned data structure is formatted the same way for every class. There is no need to call *get\_metadata* before calling *get\_data*, the *get\_data* call will call it automatically if metadata is not provided.
