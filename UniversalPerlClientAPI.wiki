@@ -95,7 +95,7 @@ There is no separation by the metadata keys. You have to know what you asking fo
 
 Each service represented by the own class which implemetes remote call to the MA.
 
-  * Ecenter::Data::Owamp 
+  * Ecenter::Data::Owamp
   * Ecenter::Data::PingER
   * Ecenter::Data::Snmp
   * Ecenter::Data::Traceroute
@@ -104,3 +104,5 @@ Each service represented by the own class which implemetes remote call to the MA
 The centrilized class - Ecenter::Client is nothing else but a proxy to each of this implementations. One can create the object of any of those classes and use it directly
 to get data from the remote MA. Each class implement the same methods for the dat and
 metadata retrieval - get_data and get_metadata. The returned data structure is formatted the same way for every class. There is no need to call *get_metadata* before calling *get_data*, the *get_data* call will call it automatically if metadata is not provided.
+
+Each class has own testing module when one can see the usage example. All tests are located under the *branches/ecenter_client_api/Shared/client/ecenter/t* directory.
