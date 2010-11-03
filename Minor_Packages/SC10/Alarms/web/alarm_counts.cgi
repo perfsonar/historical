@@ -59,6 +59,9 @@ if ($conf{"filter"}) {
 }
 
 my $cgi = CGI->new();
+my $specific_duration = $cgi->param("duration");
+  
+$duration = $specific_duration if (defined $specific_duration);
 
 my $start;
 my $end;

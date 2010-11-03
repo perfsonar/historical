@@ -22,7 +22,7 @@ my $alarms_template_file = "alarms.cgi.tmpl";
 my $alarms_template_dir  = "$Bin/../etc/templates";
 my $database = "alarms.db";
 my $images_path = "images";
-my $timezone = "America/Los_Angeles";
+my $timezone = "America/Chicago";
 
 my $config =  new Config::General($CONFIG_FILE);
 my %conf = $config->getall;
@@ -61,6 +61,9 @@ if ($conf{"filter"}) {
 my $cgi = CGI->new();
 
 my $node = $cgi->param("node");
+my $specific_duration = $cgi->param("duration");
+
+$duration = $specific_duration if (defined $specific_duration);
 
 my $start;
 my $end;

@@ -17,11 +17,12 @@ use perfSONAR_PS::Utils::TL1::Ciena;
 use perfSONAR_PS::Utils::TL1::Cisco;
 use perfSONAR_PS::Utils::TL1::Infinera;
 use perfSONAR_PS::Utils::TL1::Fujitsu;
+use perfSONAR_PS::Utils::TL1::Alcatel;
 use Digest::MD5  qw(md5_hex);
 
 use base 'perfSONAR_PS::Collectors::Base';
 
-use fields 'DB_CLIENT', 'ROUTERS';
+use fields 'DB_CLIENT', 'ROUTERS', 'PREV_CONNECT_FAILED';
 
 our $VERSION = 0.09;
 
@@ -79,6 +80,8 @@ sub init {
     }
 
     $self->{DB_CLIENT}->close();
+
+    $self->{PREV_CONNECT_FAILED} = {};
 
     return 0;
 }
@@ -152,6 +155,8 @@ sub parseRouter {
         $new_agent = perfSONAR_PS::Utils::TL1::Infinera->new();
     } elsif ($type eq "fujitsu") {
         $new_agent = perfSONAR_PS::Utils::TL1::Fujitsu->new();
+    } elsif ($type eq "alcatel") {
+        $new_agent = perfSONAR_PS::Utils::TL1::Alcatel->new();
     } else {
         my $msg = "Router has unknown type, $type, must be either 'ome', 'cisco' or 'ciena'";
         $self->{LOGGER}->error($msg);
@@ -240,6 +245,8 @@ sub collectMeasurements {
 
         if ($status == 0) {
             $alarms = $res;
+
+            $self->{PREV_CONNECT_FAILED}->{$metadata_id} = undef;
         }
         else {
             $self->{LOGGER}->debug("Get alarms returned junk");
@@ -249,20 +256,27 @@ sub collectMeasurements {
             $mon++;
             $year += 1900;
 
-            my %alarm = ();
-            $alarm{alarmType} = "MEASUREMENT-CONNECTFAILED";
-            $alarm{serviceAffecting} = "NSA";
-            $alarm{description} = "Measurement Software Couldn't Connect To Device";
-            $alarm{facility} = "pS-Alarms-Collector";
-            $alarm{facility_type} = "perfSONAR";
-            $alarm{severity} = 'CR';
-            $alarm{time} = $hour."-".$min."-".$sec;
-            $alarm{date} = $mon."-".$mday;
-            $alarm{year} = $year;
-
-            $alarms = [ \%alarm ];
-
             $machineTime = "$year-$mon-$mday $hour:$min:$sec";
+
+            if ($self->{PREV_CONNECT_FAILED}->{$metadata_id}) {
+                $alarms = [ $self->{PREV_CONNECT_FAILED}->{$metadata_id} ];
+            }
+            else {
+                my %alarm = ();
+                $alarm{alarmType} = "MEASUREMENT-CONNECTFAILED";
+                $alarm{serviceAffecting} = "NSA";
+                $alarm{description} = "Measurement Software Couldn't Connect To Device";
+                $alarm{facility} = "pS-Alarms-Collector";
+                $alarm{facility_type} = "perfSONAR";
+                $alarm{severity} = 'CR';
+                $alarm{time} = $hour."-".$min."-".$sec;
+                $alarm{date} = $mon."-".$mday;
+                $alarm{year} = $year;
+
+                $alarms = [ \%alarm ];
+
+                $self->{PREV_CONNECT_FAILED}->{$metadata_id} = \%alarm;
+            }
         }
 
         # No alarms, add the 'MEASUREMENT-NOALARMS' Alarm...
