@@ -129,7 +129,7 @@ The next screen will allow the user to choose which _package groups_ can be inst
 
  * Administration Tools
  * Authoring and Publishing
- * Base
+ * <font color="red">_*Base*_</font> - Enabled by default
  * Beagle
  * Clustering
  * Cluster Storages
@@ -172,7 +172,7 @@ The next screen will allow the user to choose which _package groups_ can be inst
  * Server Configuration Tools
  * Sound and Video
  * System Tools
- * Text-based Internet
+ * <font color="red">_*Text-based Internet*_</font> - Enabled by default
  * Tomboy
  * Virtualization
  * Web Development
