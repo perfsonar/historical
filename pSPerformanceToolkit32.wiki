@@ -564,6 +564,54 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/reboot.png
 
 Note that if neither were entered, the system will return to the console.   
 
+==== Timezone Configuration ====
+
+Timezone configuration is no longer a part of the pS Performance Toolkit configuration scripts, but it can be accomplished using some CentOS tools.  Invoking the following tool:
+
+{{{
+sudo tzselect
+}}}
+
+Will start the process:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/tz1.png
+
+There will be several menus where the user can narrow down the specific region they are located in:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/tz2.png
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/tz3.png
+
+Once the user settles on a given timzone, there will be a confirmation step:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/tz4.png
+
+Finally, instructions will be given to make the choice of timezone permanent.  Note that the suggested instructions may be used for the global profile file as well:
+
+{{{
+/etc/profile
+}}}
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/tz5.png
+
+The other solution, as recommended by RedHat in [http://www.redhat.com/advice/tips/timezone.html this] article, suggest editing the:
+
+{{{
+/etc/sysconfig/clock
+}}}
+
+file.  The file by default will have the following information:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/tz6.png
+
+To change the value to a more appropriate timezone, consult:
+
+{{{
+/usr/share/zoneinfo/*
+}}}
+
+for a list of timezones, or use the value that was displayed in the steps above.  
+
 === Web ===
 
 Configuration over the web is available after the machine has come online.  First, determine the URL to go to for configuration.
