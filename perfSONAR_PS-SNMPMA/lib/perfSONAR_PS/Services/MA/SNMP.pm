@@ -49,6 +49,7 @@ use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
+use perfSONAR_PS::DB::ESxSNMP;
 use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Utils::NetLogger;
 
@@ -2126,6 +2127,19 @@ sub handleData {
             }
         );
     }
+    elsif ( $type eq "esxsnmp" ) {
+        $self->retrieveESxSNMP(
+
+            {    
+                d                  => $parameters->{data},
+                mid                => $parameters->{id},
+                output             => $parameters->{output},
+                time_settings      => $parameters->{time_settings},
+                et                 => $parameters->{et},
+                message_parameters => $parameters->{et}
+            }    
+        );   
+    }    
     else {
         my $msg = "Database \"" . $type . "\" is not yet supported";
         $self->{LOGGER}->error( $msg );
@@ -2428,6 +2442,144 @@ sub retrieveRRD {
     return;
 }
 
+=head2 retrieveESxSNMP($self, $d, $mid, $output, $et, $message_parameters)
+
+Given some 'startup' knowledge such as the name of the database and any
+credentials to connect with it, we start a connection and query the database
+for given values.  These values are prepared into XML response content and
+return in the response message.
+
+=cut
+
+sub retrieveESxSNMP {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            d                  => 1,
+            mid                => 1,
+            time_settings      => 1,
+            output             => 1,
+            et                 => 1,
+            message_parameters => 1
+        }
+    );
+
+    my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.retrieveESxSNMP.setup.start" );
+    $self->{NETLOGGER}->debug( $msg );
+
+    my $timeSettings = $parameters->{time_settings};
+
+    my ( $sec, $frac ) = Time::HiRes::gettimeofday;
+    my $datumns  = 0;
+    my $timeType = q{};
+
+    if ( defined $parameters->{message_parameters}->{"eventNameSpaceSynchronization"}
+        and lc( $parameters->{message_parameters}->{"eventNameSpaceSynchronization"} ) eq "true" )
+    {
+        $datumns = 1;
+    }
+
+    if ( defined $parameters->{message_parameters}->{"timeType"} ) {
+        if ( lc( $parameters->{message_parameters}->{"timeType"} ) eq "unix" ) {
+            $timeType = "unix";
+        }
+        elsif ( lc( $parameters->{message_parameters}->{"timeType"} ) eq "iso" ) {
+            $timeType = "iso";
+        }
+    }
+
+    my $name = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"name\"]",  1 ), 1 );
+
+    unless ( $name ) {
+        $self->{LOGGER}->error( "Data element " .  $parameters->{d}->getAttribute( "id" ) . " name not specified" );
+        throw perfSONAR_PS::Error_compat( "error.ma.storage", "Unable to open associated database" );
+    }
+
+    my $id = "data." . genuid();
+
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.retrieveESxSNMP.setup.end" );
+    $self->{NETLOGGER}->debug( $msg );
+
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.getDataESxSNMP.start", { name => $name, } );
+    $self->{NETLOGGER}->debug( $msg );
+
+    my $cf = $timeSettings->{"CF"};
+    my $start = $timeSettings->{"START"}->{"internal"};
+    my $end = $timeSettings->{"END"}->{"internal"};
+    my $resolution = $timeSettings->{"RESOLUTION"};
+    my $datadb = new perfSONAR_PS::DB::ESxSNMP( { server_url => $self->{CONF}->{"snmp"}->{esxsnmp_server} } );
+    $datadb->openDB();
+
+    my $result = $datadb->query( { name => $name, resolution => $resolution, cf => $cf, start => $start, end => $end } );
+    $datadb->closeDB();
+
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.getDataESxSNMP.end" );
+    $self->{NETLOGGER}->debug( $msg );
+
+    if ( !$result ) {
+        $self->{LOGGER}->error( "ESxSNMP error: unable to retrieve data" );
+    }
+    else {
+        my $prefix = "nmwg";
+        my $uri    = "http://ggf.org/ns/nmwg/base/2.0/";
+        if ( $datumns ) {
+            if ( defined $parameters->{et} and $parameters->{et} ne q{} ) {
+                foreach my $e ( sort keys %{ $parameters->{et} } ) {
+                    next if $e eq "http://ggf.org/ns/nmwg/tools/snmp/2.0/";
+                    $uri = $e;
+                }
+            }
+            if ( $uri ne "http://ggf.org/ns/nmwg/base/2.0" ) {
+                foreach my $r ( sort keys %{ $self->{NAMESPACES} } ) {
+                    if ( ( $uri . "/" ) eq $self->{NAMESPACES}->{$r} ) {
+                        $prefix = $r;
+                        last;
+                    }
+                }
+                if ( !$prefix ) {
+                    $prefix = "nmwg";
+                    $uri    = "http://ggf.org/ns/nmwg/base/2.0/";
+                }
+            }
+        }
+
+        my $dataSource = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"dataSource\"]", 1 ), 0 );
+        my $valueUnits = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"valueUnits\"]", 1 ), 0 );
+
+        startData( $parameters->{output}, $id, $parameters->{mid}, undef );
+        $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.retrieveRRD.genXML.start" );
+        $self->{NETLOGGER}->debug( $msg );
+        foreach my $a ( 0 .. $#{$result} ) {
+            if ( $a < $sec ) {
+                my ($ts, $val) = @{$result->[$a]};
+                my %attrs = ();
+                if ( $timeType eq "iso" ) {
+                    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime( $ts );
+                    $attrs{"timeType"} = "ISO";
+                    $attrs{"timeValue"} = sprintf "%04d-%02d-%02dT%02d:%02d:%02dZ\n", ( $year + 1900 ), ( $mon + 1 ), $mday, $hour, $min, $sec;
+                }
+                else {
+                    $attrs{"timeType"}  = "unix";
+                    $attrs{"timeValue"} = $ts;
+                }
+                $attrs{"value"}      = $val;
+                $attrs{"valueUnits"} = $valueUnits;
+
+                $parameters->{output}->createElement(
+                    prefix     => $prefix,
+                    namespace  => $uri,
+                    tag        => "datum",
+                    attributes => \%attrs
+                );
+            }
+        }
+        endData( $parameters->{output} );
+        $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.retrieveRRD.genXML.end" );
+        $self->{NETLOGGER}->debug( $msg );
+    }
+    return;
+}
 =head2 addSelectParameters($self, { parameter_block, filters })
 
 Re-construct the parameters block.
