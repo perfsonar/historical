@@ -240,7 +240,7 @@ function drawMap() {
     for(var ep_id in endpoints) {
         var endpoint = endpoints[ep_id];
         if (endpoint.type == 'radial') {
-	    console.log("Radial endpoint: "+ep_id);
+	    log("Radial endpoint: "+ep_id);
             var outerRadius = 4.5;
 
             if (endpoint.outerRadius) {
@@ -309,24 +309,24 @@ function drawMap() {
         // we draw a "circle" around the pictures, and offset everything from that circle
         var ang = Math.atan2(dst_y-src_y,dst_x-src_x);
 
-        log("Debug: src("+src_x+","+src_y+"), dst("+dst_x+","+dst_y+")");
+  //      log("Debug: src("+src_x+","+src_y+"), dst("+dst_x+","+dst_y+")");
         var src_radius = Math.sqrt(Math.pow(endpoints[link["source"]]["width"], 2) + Math.pow(endpoints[link["source"]]["height"], 2))/2;
-        log("Debug: (width, height): ("+endpoints[link["source"]]["width"]+","+endpoints[link["source"]]["height"]+")");
+ //       log("Debug: (width, height): ("+endpoints[link["source"]]["width"]+","+endpoints[link["source"]]["height"]+")");
         var dst_radius = Math.sqrt(Math.pow(endpoints[link["destination"]]["width"], 2) + Math.pow(endpoints[link["destination"]]["height"], 2))/2;
 
-        log("Debug: (src, dst): ("+src_radius+","+dst_radius+")");
+//        log("Debug: (src, dst): ("+src_radius+","+dst_radius+")");
 
         src_x += src_radius * Math.cos(ang);
         src_y += src_radius * Math.sin(ang);
         dst_x -= dst_radius * Math.cos(ang);
         dst_y -= dst_radius * Math.sin(ang);
 
-        log("Debug: src("+src_x+","+src_y+"), dst("+dst_x+","+dst_y+"): post-y-mod");
+   //     log("Debug: src("+src_x+","+src_y+"), dst("+dst_x+","+dst_y+"): post-y-mod");
 
         // Offset the arrow some if there are multiple links
         if (intra_link_count[num_links_between_id] > 1) {
             var ang = Math.PI - Math.atan2(dst_y-src_y,dst_x-src_x);
-            var distance_offset = 2*8*(Math.floor((intra_link_count[num_links_between_id])/2))*(Math.pow(-1, intra_link_count[num_links_between_id]));
+            var distance_offset = 2*15*(Math.floor((intra_link_count[num_links_between_id])/2))*(Math.pow(-1, intra_link_count[num_links_between_id]));
 
             var x_offset = Math.sin(ang)*distance_offset;
             var y_offset = Math.cos(ang)*distance_offset;
@@ -339,21 +339,6 @@ function drawMap() {
 
         // Offset the arrow according to the src/dst image edges.
         var ang = Math.atan2(dst_y-src_y,dst_x-src_x);
-        log("Debug: fwd src("+src_x+","+src_y+"), dst("+dst_x+","+dst_y+"): "+ang);
-        log("Debug: rev src("+src_x+","+src_y+"), dst("+dst_x+","+dst_y+"): "+Math.atan2(src_y-dst_y,src_x-dst_x));
-
-        var i;
-        for(i = 0; i <= 2; i++) {
-            var j;
-                for(var j = 0; j <= 2; j++) {
-                        if (i == 1 && j == 1) {
-                                continue;
-                        }
-                        var ang = Math.atan2(j-1, i-1);
-
-                        log("Debug: fwd src("+1+","+1+"), dst("+i+","+j+"): "+ang+", "+(180/Math.PI*ang));
-                }
-        }
 
         var src_color;
         var dst_color;
@@ -374,11 +359,84 @@ function drawMap() {
             }
         }
 
-        log("Debug: src_color: "+src_color);
-        log("Debug: dst_color: "+dst_color);
-        log("Debug: arrow_scale: "+arrow_scale);
-        log("Debug: (src_x, src_y): ("+src_x+","+src_y+")");
-        log("Debug: (dst_x, dst_y): ("+dst_x+","+dst_y+")");
+	var srcdst_text = "";
+	var dstsrc_text = "";
+	var srcdst_value;
+	var dstsrc_value;
+
+        // measurement_results:[{"source_destination":{"unit":"bps","value":246528},"destination_source":{"unit":"bps","value":27648},"type":"utilization"}]
+        for(var id in link["measurement_results"]) {
+		var results = link["measurement_results"][id];
+		//if (results["type"] != "utilization" && results["type"] != "last_throughput") {
+		if (results["type"] != "utilization") {
+			continue;
+		}
+
+		if (results["source_destination"]["value"] != null) {
+			var value = results["source_destination"]["value"];
+			srcdst_value = value;
+
+			var units;
+			if (value >= 1000*1000) {
+				value /= 1000*1000;
+				units = "M";
+			} else {
+				value = 0;
+				units = "M";
+			}
+			if (value >= 1000) {
+				value /= 1000;
+				units = "G";
+			}
+
+			if (value > 10) {
+				value = value.toFixed(0);
+			} else {
+				value = value.toFixed(1);
+			}
+
+			srcdst_text = value+units;
+		}
+
+		if (results["destination_source"]["value"] != null) {
+			var value = results["destination_source"]["value"];
+			var units;
+
+			dstsrc_value = value;
+
+			if (value >= 1000*1000) {
+				value /= 1000*1000;
+				units = "M";
+			} else {
+				value = 0;
+				units = "M";
+			}
+
+			if (value >= 1000) {
+				value /= 1000;
+				units = "G";
+			}
+
+			if (value > 10) {
+				value = value.toFixed(0);
+			} else {
+				value = value.toFixed(1);
+			}
+
+			dstsrc_text = value+units;
+		}
+	}
+
+	log("Source Dest Text: "+srcdst_text);
+	log("Dest Source Text: "+dstsrc_text);
+	log("Source Dest Value: "+srcdst_value);
+	log("Dest Source Value: "+dstsrc_value);
+
+        //log("Debug: src_color: "+src_color);
+        //log("Debug: dst_color: "+dst_color);
+        //log("Debug: arrow_scale: "+arrow_scale);
+        //log("Debug: (src_x, src_y): ("+src_x+","+src_y+")");
+        //log("Debug: (dst_x, dst_y): ("+dst_x+","+dst_y+")");
 
         if (link["type"] == "bidirectional") {
             drawArrow(canvas_ctx, src_x, src_y, dst_x, dst_y, src_color, arrow_scale );
@@ -391,8 +449,43 @@ function drawMap() {
             var midpt_x = (src_x + dst_x)/2;
             var midpt_y = (src_y + dst_y)/2;
 
+            var srcdst_midpt_x = (src_x + midpt_x)/2;
+            var dstsrc_midpt_x = (midpt_x + dst_x)/2;
+            var srcdst_midpt_y = (src_y + midpt_y)/2;
+            var dstsrc_midpt_y = (midpt_y + dst_y)/2;
+
             drawArrow(canvas_ctx, src_x, src_y, midpt_x, midpt_y, src_color, arrow_scale, 5 );
             drawArrow(canvas_ctx, dst_x, dst_y, midpt_x, midpt_y, dst_color, arrow_scale, 5 );
+
+            if (srcdst_text) {
+                var xoffset = -srcdst_text.length/2 * 5;
+                var yoffset = -10;
+
+		/*
+		canvas_ctx.beginPath();
+		canvas_ctx.moveTo(midpt_x,midpt_y);
+		canvas_ctx.moveTo(midpt_x+srcdst_text.length * 5 ,midpt_y);
+		canvas_ctx.moveTo(midpt_x+srcdst_text.length * 5 ,midpt_y+10);
+		canvas_ctx.moveTo(midpt_x,midpt_y+10);
+		canvas_ctx.moveTo(midpt_x,midpt_y);
+		canvas_ctx.closePath();
+		canvas_ctx.stroke();
+
+		log("Output: "+midpt_x+":"+midpt_y);
+		log("Output: "+(midpt_x+srcdst_text.length * 5)+":"+(midpt_y));
+		log("Output: "+(midpt_x+srcdst_text.length * 5)+":"+(midpt_y+10));
+		log("Output: "+midpt_x+":"+(midpt_y+10));
+		log("Output: "+midpt_x+":"+midpt_y);
+		*/
+
+                drawString(canvas_ctx, srcdst_text, "rgb(0,0,0)", 10, srcdst_midpt_x + xoffset, srcdst_midpt_y + yoffset);
+            }
+            if (dstsrc_text) {
+                var xoffset = -srcdst_text.length/2 * 5;
+                var yoffset = -10;
+
+                drawString(canvas_ctx, dstsrc_text, "rgb(0,0,0)", 10, dstsrc_midpt_x + xoffset, dstsrc_midpt_y + yoffset);
+            }
         }
         else if (link["type"] == "unidirectional-line") {
             var prevLineWidth   = canvas_ctx.lineWidth;
@@ -454,7 +547,7 @@ function drawMap() {
             canvas_ctx.fill();
             canvas_ctx.fillStyle = prevFillStyle;
 
-            log("EP: "+endpoint["height"]+"/"+endpoint["width"]);
+            //log("EP: "+endpoint["height"]+"/"+endpoint["width"]);
         } else if (endpoint.type == "icon" || (endpoint.type == null && endpoint.image != null)) {
             if (endpoint["height"] && endpoint["width"]) {
                 height = endpoint["height"];
@@ -475,7 +568,7 @@ function drawMap() {
 
             y -= height/2;
             x -= width/2;
-            log("Debug: Drawing "+ep_id+" image at ("+x+","+y+")");
+            //log("Debug: Drawing "+ep_id+" image at ("+x+","+y+")");
 
                 /*
             var new_rad = Math.sqrt(width*width+height*height)/2;
@@ -495,7 +588,7 @@ function drawMap() {
                 log("Error: "+err);
             };
         }
-        log("EP: "+endpoint["height"]+"/"+endpoint["width"]);
+        //log("EP: "+endpoint["height"]+"/"+endpoint["width"]);
     }
 
     for(var icon_id in icons) {
@@ -523,7 +616,7 @@ function drawMap() {
 
         y -= height/2;
         x -= width/2;
-        log("Debug: Drawing "+icon_id+" image at ("+x+","+y+")");
+        //log("Debug: Drawing "+icon_id+" image at ("+x+","+y+")");
 
         var prevFill = canvas_ctx.fillStyle;
         canvas_ctx.fillStyle = "rgb(255, 255, 255)";
@@ -543,7 +636,8 @@ function drawMap() {
 function getMapState() {
     // Call a 'local' CGI script that outputs data in JSON format
     var query = updateUrl;
-    log("Debug: getMapState: Calling cgi script \"" + query + "\"" );
+    query += "?nonce="+(new Date().getTime());
+    //log("Debug: getMapState: Calling cgi script \"" + query + "\"" );
     var doreq = MochiKit.Async.doSimpleXMLHttpRequest( query );
     doreq.addCallback( handleStateUpdate );
     MochiKit.Async.callLater( 120, getMapState );
@@ -556,14 +650,14 @@ function getMapState() {
  **/
 
 function handleStateUpdate( req ) {
-    log("Debug: handleUpdate: Data received \"" + Date() + "\"" );
-    log("Debug: handleUpdate: JSON \"" + req.responseText + "\"" );
+    //log("Debug: handleUpdate: Data received \"" + Date() + "\"" );
+    //log("Debug: handleUpdate: JSON \"" + req.responseText + "\"" );
     var json;
 
     try {
         json = MochiKit.Async.evalJSONRequest( req );
         if( json == null ) { 
-            log("Debug: handleUpdate: got null json");
+            //log("Debug: handleUpdate: got null json");
             return; 
         }
     } catch(err) {
@@ -602,12 +696,27 @@ function drawString(ctx, txt, col, fh, tx, ty) {
 	ctx.lineCap = "round"; 
 	ctx.lineJoin = "round"
 	ctx.lineWidth = lw; 
-	ctx.strokeStyle = col;
+	//ctx.strokeStyle = col;
+	ctx.strokeStyle = "rgb(0,0,0)";
 	for (var i = 0; i < txt.length; i++) {
 		drawSymbol(ctx, txt[i], ls, tx+xp, ty, fw, fh);
 		xp += (txt[i]!="."?fw+cr:(fw/2)+cr);
 	}
 }
+
+/*
+function drawString( ctx, x, y, str ) {
+    var size = 8;
+
+    var i;
+    for(i = 0; i < str.length; i++) {
+	var symbol = str.substr(i, 1);
+	console.log("Drawing("+i+","+x+","+y+"): "+symbol);
+	drawSymbol( ctx, symbol, x, y, size );
+	x += size;
+    }
+}
+*/
 
 /**
  * Title:       drawSymbol
@@ -624,12 +733,14 @@ function drawSymbol( ctx, symbol, fc, cx, cy, cw, ch ) {
 	ctx.beginPath();
 	switch ( symbol ) {
 		case "0":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+fc,cy+(ch*0.333333));
 			ctx.arc(cx+(cw/2),cy+(cw/2),(cw/2)-fc,deg2rad(180),0, false);
 			ctx.arc(cx+(cw/2),(cy+ch)-(cw/2),(cw/2)-fc,0,deg2rad(180), false);
 			ctx.closePath();
 		break;
 		case "1":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+(cw*0.1)+fc,cy+ch-fc);
 			ctx.lineTo(cx+cw-fc,cy+ch-fc);
 			ctx.moveTo(cx+(cw*0.666666),cy+ch-fc);
@@ -637,17 +748,20 @@ function drawSymbol( ctx, symbol, fc, cx, cy, cw, ch ) {
 			ctx.lineTo(cx+(cw*0.25),cy+(ch*0.25));
 		break;
 		case "2":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+cw-fc,cy+(ch*0.8));
 			ctx.lineTo(cx+cw-fc,cy+ch-fc);
 			ctx.lineTo(cx+fc,cy+ch-fc);
 			ctx.arc(cx+(cw/2),cy+(cw*0.425),(cw*0.425)-fc,deg2rad(45),deg2rad(-180), true);
 		break;
 		case "3":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+(cw*0.1)+fc,cy+fc);
 			ctx.lineTo(cx+(cw*0.9)-fc,cy+fc);
 			ctx.arc(cx+(cw/2),cy+ch-(cw*0.5),(cw*0.5)-fc,deg2rad(-90),deg2rad(180), false);
 		break;
 		case "4":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+(cw*0.75),cy+ch-fc);
 			ctx.lineTo(cx+(cw*0.75),cy+fc);
 			ctx.moveTo(cx+cw-fc,cy+(ch*0.666666));
@@ -657,24 +771,28 @@ function drawSymbol( ctx, symbol, fc, cx, cy, cw, ch ) {
 			ctx.lineTo(cx+(cw*0.5),cy+ch-fc);
 		break;
 		case "5":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+(cw*0.9)-fc,cy+fc);
 			ctx.lineTo(cx+(cw*0.1)+fc,cy+fc);
 			ctx.lineTo(cx+(cw*0.1)+fc,cy+(ch*0.333333));
 			ctx.arc(cx+(cw/2),cy+ch-(cw*0.5),(cw*0.5)-fc,deg2rad(-80),deg2rad(180), false);
 		break;
 		case "6":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+fc,cy+ch-(cw*0.5)-fc);
 			ctx.arc(cx+(cw/2),cy+ch-(cw*0.5),(cw*0.5)-fc,deg2rad(-180),deg2rad(180), false);
 			ctx.bezierCurveTo(cx+fc,cy+fc,cx+fc,cy+fc,cx+(cw*0.9)-fc,cy+fc);
 			ctx.moveTo(cx+(cw*0.9)-fc,cy+fc);
 		break;
 		case "7":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+(cw*0.5),cy+ch-fc);
 			ctx.lineTo(cx+cw-fc,cy+fc);
 			ctx.lineTo(cx+(cw*0.1)+fc,cy+fc);
 			ctx.lineTo(cx+(cw*0.1)+fc,cy+(ch*0.25)-fc);
 		break;
 		case "8":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+(cw*0.92)-fc,cy+(cw*0.59));
 			ctx.arc(cx+(cw/2),cy+(cw*0.45),(cw*0.45)-fc,deg2rad(25),deg2rad(-205), true);
 			ctx.arc(cx+(cw/2),cy+ch-(cw*0.5),(cw*0.5)-fc,deg2rad(-135),deg2rad(-45), true);
@@ -683,11 +801,13 @@ function drawSymbol( ctx, symbol, fc, cx, cy, cw, ch ) {
 			ctx.lineTo(cx+(cw*0.21),cy+(ch*0.47));
 		break;
 		case "9":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+cw-fc,cy+(cw*0.5));
 			ctx.arc(cx+(cw/2),cy+(cw*0.5),(cw*0.5)-fc,deg2rad(0),deg2rad(360), false);
 			ctx.bezierCurveTo(cx+cw-fc,cy+ch-fc,cx+cw-fc,cy+ch-fc,cx+(cw*0.1)+fc,cy+ch-fc);
 		break;
 		case "%":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+fc,cy+(ch*0.75));
 			ctx.lineTo(cx+cw-fc,cy+(ch*0.25));
 			ctx.moveTo(cx+(cw*0.505),cy+(cw*0.3));
@@ -696,11 +816,13 @@ function drawSymbol( ctx, symbol, fc, cx, cy, cw, ch ) {
 			ctx.arc(cx+(cw*0.7),cy+ch-(cw*0.3),(cw*0.3)-fc,deg2rad(0),deg2rad(360), false);
 		break;
 		case ".":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+(cw*0.25),cy+ch-fc-fc);
 			ctx.arc(cx+(cw*0.25),cy+ch-fc-fc,fc,deg2rad(0),deg2rad(360), false);
 			ctx.closePath();
 		break;
 		case "M":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+(cw*0.083),cy+ch-fc);
 			ctx.lineTo(cx+(cw*0.083),cy+fc);	
             ctx.moveTo(cx+(cw*0.083),cy+fc);	
@@ -711,6 +833,7 @@ function drawSymbol( ctx, symbol, fc, cx, cy, cw, ch ) {
 			ctx.lineTo(cx+(cw*0.75),cy+fc);		
 		break;
 		case "G":
+			//log("I'm drawing "+symbol);
             ctx.moveTo(cx+fc,cy+(ch*0.333333));
 			ctx.arc(cx+(cw/2),cy+ch-(cw*0.5),(cw*0.5)-fc,deg2rad(180),deg2rad(-15), true);
 			ctx.moveTo(cx+fc,cy+(ch*0.333333));
@@ -719,12 +842,14 @@ function drawSymbol( ctx, symbol, fc, cx, cy, cw, ch ) {
 			ctx.lineTo(cx+(cw*0.60),cy+(ch*0.5));
 		break;
 		case "b":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+fc,cy+ch-(cw*0.5)-fc);
 			ctx.arc(cx+(cw/2),cy+ch-(cw*0.5),(cw*0.5)-fc,deg2rad(-180),deg2rad(180), false);
 			ctx.bezierCurveTo(cx+fc,cy+fc,cx+fc,cy+fc,cx+(cw*0.2)-fc,cy+fc);
 			ctx.moveTo(cx+(cw*0.9)-fc,cy+fc);
 		break;
 		case "B":
+			//log("I'm drawing "+symbol);
 			ctx.moveTo(cx+(cw*0.92)-fc,cy+(cw*0.59));
 			ctx.arc(cx+(cw/2),cy+(cw*0.45),(cw*0.45)-fc,deg2rad(25),deg2rad(-165), true);			
 			ctx.arc(cx+(cw/2),cy+ch-(cw*0.5),(cw*0.5)-fc,deg2rad(-215),deg2rad(-45), true);
@@ -733,8 +858,20 @@ function drawSymbol( ctx, symbol, fc, cx, cy, cw, ch ) {
 			ctx.lineTo(cx+(cw*0.21),cy+(ch*0.47));
 		break;
 		default:
+			log("Doing nothing");
 		break;
 	}	
 	ctx.stroke();
 }
+
+/**
+ * Title:       deg2rad
+ * Arguments:   degrees - on a circle
+ * Purpose:     Convert degree measure to Radiens
+ **/
+ 
+function deg2rad(degrees) {
+	return Math.PI *degrees/180;
+}
+
 
