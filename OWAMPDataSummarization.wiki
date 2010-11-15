@@ -1,4 +1,4 @@
-= OWAMP Summarization Data =
+= OWAMP Data Summarization =
 
 OWAMP is a tool that measures one-way delay. Tools such as the perfSONAR-PS toolkit allow one to configure OWAMP tests that constantly collect multiple one-way delay measurements every second. By default, the perfSONAR-PS toolkit collects these measurements at a rate of 10 per second (i.e. 600 per minute => 36000 per hour => 864,000 per day, etc). The number of measurements can add-up quickly and as a result the perfSONAR tools that collect these measurements provide a facility to summarize the data so it can be more easily consumed. 
 
