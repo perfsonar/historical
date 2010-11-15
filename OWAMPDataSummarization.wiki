@@ -1,0 +1,109 @@
+= OWAMP Summarization Data =
+
+OWAMP is a tool that measures one-way delay. Tools such as the perfSONAR-PS toolkit allow one to configure OWAMP tests that constantly collect multiple one-way delay measurements every second. By default, the perfSONAR-PS toolkit collects these measurements at a rate of 10 per second (i.e. 600 per minute => 36000 per hour => 864,000 per day, etc). The number of measurements can add-up quickly and as a result the perfSONAR tools that collect these measurements provide a facility to summarize the data so it can be more easily consumed. 
+
+Summarization is done by categorizing each individual measurement into groups often referred to as *buckets* and reporting how many measurements fall into each bucket. The decision of which bucket to place an individual measurement is done by rounding the one-way delay result to a certain level of accuracy and putting all measurements with the same rounded value into the same bucket. The level of accuracy is defined by a value referred to as the *bucket_width*. The bucket width is represnted as a decimal number that expresses the level of acuracy relative to one second (e.g. .001=1ms, .000001=1us, etc). Another way to demonstrate this is by saying given a bucket value X and a bucket_width Y, then X*Y = the number of seconds each member of the bucket returned as the delay. 
+
+As an example let's say one sends 10 packets in a minute that return the delay values in the table below and have a bucket_width set to .001. By doing ceil([One-way Delay]/[bucket_width]) one can summarize each packet and its associated bucket value in the table below:
+
+|| Packet # || One-way Delay || Bucket ||
+|| 1 || .0174112 || 18 ||
+|| 2 || .0184112 || 19 ||
+|| 3 || .0175342 || 18 ||
+|| 4 || .0170999 || 18 ||
+|| 5 || .0183210 || 19 ||
+|| 6 || .0188888 || 19 ||
+|| 7 || .0177777 || 18 ||
+|| 8 || .0181234 || 19 ||
+|| 9 || .0192121 || 20 ||
+|| 10 || .0193333 || 20 ||
+
+We could present this distribution in its summary form in a table as follows:
+
+|| Bucket || Count ||
+|| 18 || 4 ||
+|| 19 || 4 ||
+|| 20 || 2 ||
+
+Alternatively we could present this data graphically as a histogram:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/OWAMPDataSummarization/histo_example.png
+
+perfSONAR returns this as XML which would like the following:
+{{{
+<summary:value_buckets>
+    <summary:value_bucket value="18" count="4" />
+    <summary:value_bucket value="19" count="4" />
+    <summary:value_bucket value="20" count="2" />
+</summary:value_buckets>
+}}}
+
+== TTL ==
+In addition to the one-way delay buckets, the perfSONAR tools can also summarize the time-to-live (TTL) values returned by OWAMp. The TTL is an 8-bit field set in the I{ header of a packet that is decremented by every router in a path. By default owamp sets the TTL to its maximum value (255) and records the value when it reaches the destination. By substarction the recourded value form 255 one can determine the number of routers in the path between the source and destination. If two tests record different TTL values, then that indicates that they took different paths (NOTE: just because two paths have the same TTL does not necessarily mean they took the same path, just that they took paths with an equal number of hops).  The method for organization TTL buckets is to simply sort the results based the value returned (i.e. no rounding). 
+
+For example, if we send 10 packets and 5 report a TTL of 250 (5 hops) and 5 report a TTL of 249 (6 hops) we'd have a summary like the following:
+
+|| Bucket || Count ||
+|| 249 || 5 ||
+|| 250 || 5 ||
+
+Alternatively we could present this data graphically as a histogram:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/OWAMPDataSummarization/ttl_histo_example.png
+
+perfSONAR returns this as XML which would like the following:
+{{{
+<summary:TTL_buckets>
+    <summary:TTL_bucket ttl="249" count="5" />
+    <summary:TTL_bucket ttl="250" count="5" />
+</summary:TTL_buckets>
+}}}
+
+= Calculating Common Statistical Measures from Buckets =
+The summary data above can be used to calculate common statictical measures such as min, max, median, and inter-quartile range. The examples in the sections that follow will use the summary from the one-way delay example above, which is copied here for convenience:
+
+|| Bucket || Count ||
+|| 18 || 4 ||
+|| 19 || 4 ||
+|| 20 || 2 ||
+
+
+== Min and Max ==
+Min and max are perhaps the easiest of the measures to calculate. The minimum is calculated by reporting the smallest bucket value which in the example above is *18*. Given the bucket width of .001 this is actually 18 * .001s = *18ms*. Likewise the maximum value is 20 whick can be expressed in milliseconds as 20 * .001s = *20ms*.
+
+== Median ==
+Calculating the median can be done by thinking of the buckets as a list. To do this sort the bucket values and list each bucket the number of times indicated in the count. The example above can be expressed as:
+
+ * 18, 18, 18, 18, 19, 19, 19, 19, 20, 20
+
+To calculate the median we simply need to find the middle value:
+
+ * 18, 18, 18, 18, *19*, *19*, 19, 19, 20, 20
+ 
+In this example the median is *19* or by using the bucket_width to calculate in milliseconds 19*.001 s= *19 ms*.
+
+== Inter-Quartile Range ==
+The inter-quartile range is the diffence between the upper and lower quartiles. We must find these first before caculationg the range. Finding this is very similar to calculating the median, and to start it helps to list the values:
+
+ * 18, 18, 18, 18, 19, 19, 19, 19, 20, 20
+ 
+We now split the list in half so we can calculate the quartiles:
+ 
+ * *Lower Half:* 18, 18, 18, 18, 19
+ * *Upper Half:* 19, 19, 19, 20, 20
+ 
+To calculate the lower quartile, find the middle value of the lower half:
+ 
+ * 18, 18, *18*, 18, 19
+ 
+Likewise, for the upper quartile find the middle of the upper half:
+
+ * 19, 19, *19*, 20, 20
+ 
+ Final, calculate the difference between these to values to get the interquartile-range:
+ 
+  * 19 - 18 = *1*
+    * 1 * .001s = 1ms
+    
+= Full perfSONAR Example =
+ Coming soon...
