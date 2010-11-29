@@ -2,16 +2,27 @@
 
 == Agenda/Minutes ==
 
- # Attendees: 
+ # Attendees: Nils, Kavitha, Aaron, Andy, Sowmya, Brian, Joe
  # Followup on previous actions:
    * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
    * _*ACTION*_: Joe will take SOP to DICE.
+     * Issues have been put in the diagnostic service description document, and we should continue to follow up there.
    * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
-     * Will be resolved by work Somya is doing on testservice.cgi.
+     * Will be resolved by work Sowmya is doing on testservice.cgi.
    * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC.
    * _*ACTION*_: Brian will write a document to advise people which version of the toolkit they should go for (net install vs cd).
+     * done.
    * _*ACTION*_: Aaron will send out the location of the livecd upgrade script so.
+     * Jason has it as FAQ 33.
  # Developers Update
+   * Nils: Looking at visualization tools for visualizing pS-ps data.
+   * Kavitha: nothing currently
+   * Aaron: pS-PTK version 3.2 released. Kernal update happened the next Monday.
+   * Andy: nothing currently
+   * Sowmya: Wrapping up servicetest.cgi. Fixed some issues in cache.pl
+   * Brian: Adding multiple congestion control algorithms to bwctl.
+   * Joe: Need milestones for diagnostic service to DICE principles.
+   * Jeff: nothing currently
  # Release Update (Jason/Aaron)
  # Caching Operations Update (Jason/Aaron/Andy)
 
