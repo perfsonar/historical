@@ -1,0 +1,180 @@
+=== Mock options and sample invocations ===
+
+==== common Mock options ====
+
+Mock can be invoked with a fair number of options; typically when rebuilding packages, only a few specific options are required.  See `/usr/bin/mock --help` for the complete list of options and defaults, and `mock(1)` for additional documentation and examples.
+
+
+|| option flag || provides  || possible values ||
+| `-r CHROOT` | name of the CHROOT, usually `$dist-$release-$arch`, but other configs may exist<br> corresponding configs are in `/etc/mock/*.cfg` | `epel-5-i386`<br> `fedora-13-ppc`<br> `epel-5-jpackage-x86_64` |
+| `--resultdir`| path for resulting files (source / binary rpms, and logs)<br> this can be any arbitrary path on the filesystem, writable by the invoking user | any path writable to the invoking user; it may be convenient to drop results in a directory hierarchy based on release/version/architecture |
+|`--arch`| Sets kernel personality()<br> note that `arch` is typically already set in the chroot cfg, though this option can be useful when building e.g. kernels (where `arch=i686`) to override the default | `i386`<br> `i686`<br> `x86_64`<br> `ppc`<br> limited by arch of build host | 
+|`--uniqueext` | Arbitrary, unique extension to append to buildroot directory name<br> this allows simultaneous builds to occur | `$USERID`, or some other unique identifier |
+
+
+
+A sample invocation:
+
+{{{
+throck@buildhost-01% /usr/bin/mock -r epel-5-i386 \
+   --resultdir=/srv/results/throck/centos-5/i386/collectd-4.9.1-3.el5 \
+   --uniqueext=throck \
+   --arch=i386 \
+   /srv/results/throck/srpms/collectd-4.9.1-3.el5.src.rpm
+}}}
+
+
+=== sample mock session details ===
+
+Here is an example mock invocation, which is being used to rebuild the `web100_userland` package for the `i386` architecture, using the EPEL-enabled CentOS 5 chroot configuration:
+
+{{{
+throck@buildhost-01% /usr/bin/mock -r epel-5-i386 --resultdir=/srv/results/throck/centos-5/i386/web100_userland-1.7-3.el5 --uniqueext=throck --arch=i386 /home/throck/rpm/SRPM/web100_userland-1.7-3.el5.src.rpm
+INFO: mock.py version 1.0.7 starting...
+State Changed: init plugins
+State Changed: start
+INFO: Start(/home/throck/rpm/SRPM/web100_userland-1.7-3.el5.src.rpm)  Config(epel-5-i386)
+State Changed: lock buildroot
+State Changed: clean
+State Changed: init
+State Changed: lock buildroot
+Mock Version: 1.0.7
+INFO: Mock Version: 1.0.7
+INFO: enabled root cache
+State Changed: unpacking root cache
+INFO: enabled yum cache
+State Changed: cleaning yum metadata
+State Changed: running yum
+State Changed: setup
+State Changed: build
+INFO: Done(/home/throck/rpm/SRPM/web100_userland-1.7-3.el5.src.rpm) Config(epel-5-i386) 1 minutes 34 seconds
+INFO: Results and/or logs in: /srv/results/throck/centos-5/i386/web100_userland-1.7-3.el5
+INFO: Cleaning up build root ('clean_on_success=True')
+State Changed: lock buildroot
+State Changed: clean
+throck@buildhost-01% 
+}}}
+
+This example session resulted in a successful build; examining the results directory we find:
+
+{noformat}
+throck@admin-test-01% ls -la /srv/results/throck/centos-5/i386/web100_userland-1.7-3.el5
+total 1028
+drwxrwxr-x  2 throck throck   4096 Aug 10 00:28 .
+drwxr-xr-x 56 throck throck   4096 Sep  7 16:38 ..
+-rw-rw-r--  1 throck throck  65945 Aug 10 00:28 build.log
+-rw-rw-r--  1 throck throck  20412 Aug 10 00:28 root.log
+-rw-rw-r--  1 throck throck    421 Aug 10 00:28 state.log
+-rw-r--r--  1 throck mock   146881 Aug 10 00:28 web100_userland-1.7-3.el5.i386.rpm
+-rw-r--r--  1 throck mock   487671 Aug 10 00:27 web100_userland-1.7-3.el5.src.rpm
+-rw-r--r--  1 throck mock   291894 Aug 10 00:28 web100_userland-debuginfo-1.7-3.el5.i386.rpm
+{noformat}
+
+Of particular interest (aside from the resulting rpm's) are the `root.log`, which contains a record of the creation of the build root, including specific details about any yum transactions that were run to meet build dependencies, and the `build.log`, that contains the details of the mock invocation, the source compilation (if any), and the creation of the resulting package(s).
+
+If the package build fails, it's also possible to examine the buildroot (assuming you've configured Mock to not `cleanup_on_failure`)
+
+----
+
+=== tips and troubleshooting ===
+
+==== setting up a mock shell function for easier command line invocation ====
+
+Typing out the mock invocation for every build can be tedious; using a shell function similar to the following provides a method for shortcutting the command line:
+
+{{{
+mockbuild ()
+{
+    MYCFG=$1;
+    MYDISTRO=$2;
+    MYARCH=$3;
+    MYSRPM=$4;
+    shift;
+    shift;
+    shift;
+    shift;
+    EXTRAS=$*;
+    if [ -z ${MYSRPM} ]; then
+        echo "mockbuild \$CFG \$DISTRO \$ARCH \$SRPM";
+        return;
+    fi;
+    if [ -z "`rpm -qp $MYSRPM 2>/dev/null`" ]; then
+        echo "invalid SRPM";
+        return;
+    fi;
+    RDIR="/srv/results/${USERNAME}/${MYDISTRO}/${MYARCH}/`rpm -qp ${MYSRPM} 2>/dev/null`";
+    echo "/usr/bin/mock -r ${MYCFG} --resultdir=${RDIR} --uniqueext=$USER --arch=${MYARCH} ${MYSRPM}";
+    echo "Extras: $EXTRAS"
+}
+}}}
+
+The expected arguments are:
+
+|| variable || expected value || example ||
+| MYCFG | The mock configuration to use, minus the `.cfg`; see /etc/mock/ for a list of valid configurations | epel-5-i386<br> epel-5-x86_64.cfg |
+| MYDISTRO | name of the target distro; will be used along with `$for the `--resultdir` path | centos-5<br> perfsonar-ps |
+| MYARCH | Target arch | i386<br> x86_64 |
+| MYSRPM | Path to your Source RPM package | /home/throck/rpm/SRPM/web100_userland-1.7-3.el5.src.rpm<br> /tmp/mypackage-1.0-1.src.rpm |
+
+Invoking this function in a shell 
+
+{{{
+throck@psdev% mockbuild epel-5-i386 centos-5 i386 /home/throck/rpm/nptoolkit/SRPM/web100_userland-1.7-3.el5.src.rpm
+}}}
+
+...would then be expanded to:
+
+{{{
+throck@psdev% /usr/bin/mock -r epel-5-i386 --resultdir=/srv/results/throck/centos-5/i386/web100_userland-1.7-3.el5 --uniqueext=throck --arch=i386 /home/throck/rpm/SRPM/web100_userland-1.7-3.el5.src.rpm
+}}}
+
+
+=== troubleshooting mock builds ===
+
+If a build fails, the session will return an ERROR, and a hint at the reason for failure.  In this example, e.g., a build dependency is missing:
+
+{{{
+ERROR: Bad build req: No Package Found for I2util. Exiting.
+}}}
+
+In that case, simply making the necessary package available (see the section on 'creating holding repos') will likely negate the problem.  Sometimes, however, the failure cannot be interpreted by mock, and the reason will be given as:
+
+{{{
+ERROR: Command failed. See logs for output.
+}}}
+
+At this point, looking at the `build.log` for specific errors related to the failure is necessary.  There can be a variety of failures when rebuilding packages; some will be completely apparent, and others elusive.
+  
+Some common failures include:
+
+- the buildroot is being included in installed files
+{{{
+Found '/var/tmp/bwctl-1.3-3-buildroot' in installed files; aborting
+}}}
+
+This can typically be fixed by defining/adjusting the `--prefix` passed to `%configure` in `%build`.
+
+- `make test` (esp. with perl modules) fails at `test_dynamic` (which is a module, _not_ a build issue):
+{{{
+...
+Failed 4/13 test scripts, 69.23% okay. 10/148 subtests failed, 93.24% okay.
+make: *** [test_dynamic] Error 255
+error: Bad exit status from /var/tmp/rpm-tmp.83954 (%check)
+RPM build errors:
+    Bad exit status from /var/tmp/rpm-tmp.83954 (%check)
+Child returncode was: 1
+EXCEPTION: Command failed. See logs for output.
+}}}
+
+- a patch included in the source rpm won't apply cleanly:
+{{{
+Patch #0 (ELRepo-sk98lin-10.85.8.3-el5.patch):
++ echo 'Patch #0 (ELRepo-sk98lin-10.85.8.3-el5.patch):'
++ patch -p1 -s
+1 out of 1 hunk FAILED -- saving rejects to file h/skcsum.h.rej
+1 out of 1 hunk FAILED -- saving rejects to file h/skdrv1st.h.rej
+1 out of 1 hunk FAILED -- saving rejects to file h/skdrv2nd.h.rej
+1 out of 1 hunk FAILED -- saving rejects to file h/skgepnmi.h.rej
+error: Bad exit status from /var/tmp/rpm-tmp.48216 (%prep)
+}}}
+

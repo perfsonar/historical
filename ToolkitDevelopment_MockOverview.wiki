@@ -1,0 +1,102 @@
+== Overview ==
+
+=== About Mock ===
+
+[https://fedorahosted.org/mock/ Mock] is a build system that provides a facility for users to compile RPM packages inside of a chroot'ed build environment.  Mock is used by the Fedora project as the build engine for [http://koji.fedoraproject.org/koji/ koji], which is used for all package builds for the [http://fedoraproject.org Fedora project] and [http://fedoraproject.org/wiki/EPEL EPEL], for the [http://www.redhat.com/rhel/ RHEL] and [http://centos.org CentOS] package build systems, and a number of other third-party repositories.
+
+The benefits of using Mock include:
+
+  * The ability to build RPM packages in a pristine build environment with all dependencies installed, in an automated and highly repeatable fashion.
+  * The ability to enforce very specific controls in the build environment, specifically with regard to repository/package availability.
+  * The ability to readily duplicate the build environment, which allows for distributed builds and/or independent verification/debugging/test of the build.
+  * The ability to build against specific versions of dependent packages, without the need to install these on any client machine.
+  * The ability to provide a full record of the build transaction, as an aid in build debugging, or for later review.
+  * The ability to build RPM packages targeted for Linux operating systems other than what is running on the client machine (e.g. RHEL, CentOS, Fedora, etc).
+  * The ability to build for all machine architectures supported on a given platform, for example, assuming the build host is running in 64-bit mode, it can be used to compile both 32 and 64-bit packages.
+
+
+== Installation ==
+
+=== prerequisites for installing Mock ===
+
+As implied above, the build host need not be running the same OS release/version as the build targets; generally, the build host OS has no bearing on which targets are supported, however, mock itself has dependencies which are OS-dependent, therefore, running on a release that matches the target OS is recommended.
+
+As far as hardware, mock has no specific requirements other than those required for installation; machine requirements are instead dictated by desired target architectures, and the scope and size of packages being built.  Running mock on a VM guest is common, though in general, the more horsepower the better; the compilation overhead in certain large packages (e.g. the kernel) can be quite significant, while for others it will be extremely minimal.  In either case, adequate storage for the build cache, intermediate build and resulting packages should be provided.
+
+=== installing and preparing mock for use ===
+
+Mock is available in the EPEL repository, so the easiest way to get it installed is to add/enable the EPEL repos (see [http://fedoraproject.org/wiki/EPEL/FAQ#howtouse how to use EPEL]) and then install via `yum`.  All of the necessary dependencies will be pulled in and installed.
+
+=== site-specific mock changes ===
+
+The base mock installation provides enough bits to begin build packages immediately, though there are a few things that should be done to enable package building for non-root users (you should never need to invoke `mock` as root), and a few that should be changed to make life a little easier overall.
+
+==== security and specifying build user(s) ====
+
+Mock is intended to be invoked as a non-root user, in order allow builds to be performed with a very specific set of permissions, and without the need to grant full root privileges.  Mock will be performing certain operations as root, and so permission to invoke mock is controlled by group membership.  Permission then, can be granted simply by adding a user to the `mock` group (via `usermod -a -G mock username`).  This permission should be granted only to trusted users, as you can trivially assume root's identity inside a mock shell; alternately, you can create a user dedicated to package building (see [http://fedoraproject.org/wiki/Projects/Mock#Security_Considerations] for additional background).  For these reasons, you should carefully take precautions when deciding which method to use when granting build privileges, and to whom they are granted.  Additionally, you should take precautions to ensure that only authorized users have access to the build host.
+
+==== optional changes to `site-defaults.cfg` ====
+
+Global configuration options for mock are controlled in `/etc/mock/site-defaults.cfg`.   There are a few tunable parameters in here worth reviewing; depending on filesystem layout and size, local software update polices, and how repositories are configured in the chroot configs, these may need to be adjusted.  Defaults are shown commented, and can be overridden by entering an uncommented value in the config, e.g.:
+
+{{{
+config_opts['basedir'] = '/srv/mock/'
+config_opts['cache_topdir'] = '/srv/mock/cache'
+config_opts['cleanup_on_failure'] = 0
+config_opts['plugin_conf']['yum_cache_opts']['max_age_days'] = 0
+config_opts['plugin_conf']['root_cache_opts']['max_age_days'] = 1
+}}}
+
+Those example options relocate the base and cache directories, disable the automatic cleanup of the build root when builds fail (useful for examining a failed build), trims the yum cache to 0 (effectively forcing a re-fetch from repos on every invocation), and the root_cache to 1 day.  In addition to those config options, certain RPM macro values can be set globally, e.g.:
+
+{{{
++config_opts['macros']['%vendor'] = "MCNC - Advanced Services"
++config_opts['macros']['%packager'] = "MCNC buildsystem"
+}}}
+
+Note that these macros will be overridden by whatever is defined in a .spec; conversely, if not defined in the .spec, the values defined here will be used instead.
+
+==== create local holding repos and add to chroot configs. ====
+
+Sometimes a package dependency isn't provided in any repository, or it isn't practical/possible to put it into one (e.g. testing an advanced version, a locally developed package).  Normally, the package can just be included in the build by specifying it via an `--install` argument to mock.  If there are more than a few packages that need to be pulled in, this can get cumbersome (perl packages are notorious for this); an alternative is to define additional on-disk yum repos, which can contain multiple packages.  Defining the repos is done inside the chroot config, as with any other repository, e.g. for a CentOS 5 i386 configuration, adding the following:
+
+{{{
+[holding]
+name=holding
+baseurl=file:///srv/holding/centos-5/i386/
+}}}
+
+After adding any required files to this holding repo, the yum metadata needs to be created:
+
+{{{
+throck@buildhost-01% createrepo -d --update /srv/holding/centos-5/i386
+8/8 * kernel-PAE-devel-2.6.18-194.11.4.el5.web100.i686.rpm                      
+Saving Primary metadata
+Saving file lists metadata
+Saving other metadata
+throck@buildhost-01% 
+}}}
+
+==== using local mirrors to speed up builds and enforce control over updates ====
+
+The default chroot configs contain pointers to their respective upstream repositories, e.g. in `/etc/mock/epel-5-i386.cfg`, the `[update]` section of the conf points to a mirrorlist:
+
+{{{
+[core]
+name=base
+mirrorlist=http://mirrorlist.centos.org/?release=5&arch=i386&repo=os
+}}}
+
+This means that when mock is invoked, the packages for base will be pulled from whatever mirrorlist returns; this is fine for casual package building, however, there is no guarantee that a selected mirror will be completely up-to-date, fast, and most importantly, the same as previous mock invocations.  Adjusting the yum and root cache tunings can reduce the need to fetch remote packages, however, the build will still be subject to whatever changes have (or haven't) occurred upstream.
+
+If you can afford the space, going to the trouble of establishing a local mirror will not only speed up the build tremendously, it also provides a method of ensuring that only known, tested upstream updates are being used.  This can complement your local update policy, and is particularly critical when producing a re-spin.  Changing the configuration to point to a local mirror is trivial:
+
+{{{
+[core]
+name=base
+#mirrorlist=http://mirrorlist.centos.org/?release=5&arch=i386&repo=os
+baseurl=http://rpms.mcnc.org/yum/distro/CentOS/5/os/i386/
+}}}
+
+This should be done for every section for which a local mirror is available.
+
