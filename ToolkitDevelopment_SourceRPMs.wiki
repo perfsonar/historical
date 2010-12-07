@@ -1,0 +1,295 @@
+#summary Guidelines bor Building source RPM packages
+
+== Source Packaging Background ==
+
+The process of creating a package begins with the creation of a source rpm, which will ultimately be used to produce the target binary package(s) for one or more target architectures, by rebuilding them using [Mock].  The source rpm contains all of the package information, build instructions, source code archive (if necessary), and optionally any configuration files not included in the source, as well as patches to be applied at various stages of the build process in order to fix known bugs or change the behavior of the package without modifying the source.
+
+The source package should be crafted in a way such that it can be generated and rebuilt reliably and consistently, by specifying all required directives, the relevant build prerequisites and steps, and so that the target binary packages include enough information to be installed and used consistently, by specifying all necessary runtime requirements.  Following the processes outlined here will help to ensure these goals are met; further validation will be performed throughout the build process, e.g. when building the initial src.rpm using `rpmbuild`, during the initial source package rebuild via `mock`, and during the final rebuild via `mock`.
+
+Many packages are already available in source format; these are provided either directly by the distribution or specific package vendor.  In some cases source and binary packages are also available in third-party repositories; these will not always readily rebuild or install without some modification or sanitization, however, they often provide a good starting point from which to produce a new source package suitable for rebuilding on the target distribution.
+
+(!) Note; the direct use of multiple third-party repositories that weren't intended to be mixed can lead to unexpected and undesirable results; to ensure compatibility, stability, and long-term maintainability, use only repositories provided by or endorsed directly by the distribution vendor (i.e. [http://mirror.centos.org/centos-5 CentOS] and [http://mirrors.fedoraproject.org/mirrorlist?repo=epel-5&arch=i386 EPEL]).  When a specific package isn't included in those repositories, either seek out or generate suitable source rpms, and rebuild them against the target distribution.  See the [http://fedoraproject.org/wiki/EPEL/FAQ#What_about_compatibility_with_other_third_party_repositories.3F EPEL FAQ]
+
+== Source Packaging Specifics ==
+
+
+At a high level, all package details, including version/release, dependency information, build and installation instructions, and changelogs are defined in the `.spec` file.  The general rules and guidelines for creating source rpm packages is covered in the [http://fedoraproject.org/wiki/PackagingGuidelines Fedora Packaging Guidelines] documentation; though those guidelines are specific to the release process for the Fedora Project, it's worth noting that the same general procedures are followed in RHEL and derivatives, since the same tools and general build procedures are shared by both communities.  Using that documentation as a reference when crafting source packages, then, will help avoid a number of common build problems, and will ensure general compatibility with RHEL and derivatives.  There are other documents as well that cover a variety of topics related to packaging; see [https://fedoraproject.org/wiki/Special:PrefixIndex/Packaging] for an overview of related documentation.
+
+=== Package Naming ===
+
+The package should be named using a brief, obvious identifier that matches the name of the source package or project; the exception to this rule is for Perl modules, which are typically prefixed with `perl-`, so for example the _perfSONAR_PS-LSCacheDaemon_ module becomes `perl-perfSONAR_PS-LSCacheDaemon`.  The [http://fedoraproject.org/wiki/Packaging:NamingGuidelines upstream package guidelines] are a good place to start when choosing a package name.
+
+=== Version And Release Numbering ===
+
+Package Version and Release numbering should follow the version and release of the source package.  The `%{release}` tag may include other optional tags, including local distribution tag (usually `%{dist}`, though can be any locally defined value, e.g. `%{disttag}` or a pre-release identifier).  Note that the Release numbers within a given Version will be used to determine how updates are applied; inserting arbitrary tags or adding a pre-release tag in the wrong order may prevent a newer revision from being applied (e.g. the pre-release `package-foo.2.1a2-1` will wrongly supersede the release revision `package-foo.2.1-1`; this should instead be `package-foo.2.1-0.1.a1` when pre-release, and `package-foo-2.1-1` when released).  Following the [http://fedoraproject.org/wiki/Packaging:NamingGuidelines#Package_Version Version/Release numbering guidelines] will ensure avoiding this conflict.
+
+=== Tagging Packages Using `%{disttag}` ===
+
+Packages can be tagged with a local identifier to indicate their origin.  In any perfSONAR-PS developed package, this is typically achieved by defining a custom macro `%{disttag}` in the head of the .spec, and then applying it in the _Release_ tag.  Here is an example from [https://svn.internet2.edu/svn/perfSONAR-PS/branches/pS-Performance_Toolkit-3.2/perfSONAR_PS-Client-API/perl-perfSONAR_PS-Client-API.spec perl-perfSONAR_PS-Client-API.spec]
+
+{{{
+%define relnum 1
+%define disttag pSPS
+
+Name:           perl-perfSONAR_PS-Client-API
+Version:        3.1
+Release:        %{relnum}.%{disttag}
+Summary:        perfSONAR_PS Client API
+...
+}}}
+
+The resulting source package will then be `perl-perfSONAR_PS-Client-API-3.1-1.pSPS.src.rpm`
+
+== Producing A Source Package ==
+
+The high-level steps to producing a source rpm are:
+
+- obtain or produce a spec file
+- obtain or assemble code
+- organize the .spec and code into suitable directories
+- build the source rpm (using `rpmbuild`)
+
+=== Obtaining Or Producing The Spec File ===
+
+==== Using The Existing `spec` Provided In The Source Repository ====
+
+For most perfSONAR-PS packages, the spec and source files are stored in subversion (see the documentation on source package repositories for details).  In this case, the spec should already be complete; it is up to the specific package maintainer to properly increment the version/revision numbers, update the changelog, and make any necessary adjustments to the spec as new versions/revisions are released.
+
+==== Using The perfSONAR-PS Package Skeleton ====
+
+When creating a _new_ perfSONAR-PS package, developers should clone the existing package skeleton following [http://code.google.com/p/perfsonar-ps/wiki/CreatingPackages#Package_Skeleton_and_Preliminaries the instructions in the wiki].  The skeleton includes a spec that already includes much of the customization needed for an individual software package.
+
+==== Producing A `spec` From Scratch ====
+
+For packages which don't fall under either of the first two categories, it may be necessary to create a spec from scratch.  Rather than manually adding all of the necessary commands and formatting, it is recommended to automatically generate a new `spec` using one of the following techniques.  Regardless of which technique is used, further editing of the resulting spec is required before it can be used to generate a source package.
+
+===== Using `rpmdev-newspec` =====
+
+`rpmdev-newspec`, which is included in the `rpmdevtools` package, can be used to generate a minimal specfile prototypes for several package types, including perl, python, lib and others.  It is most useful when producing packages from third-party software where no source rpm exists.  The resulting output will provide a starting point for completing a functional spec, including all required fields; when a package type is specified, standard special variables or build commands will be included.  An example with no type specification:
+
+{{{
+user@host% rpmdev-newspec -m -o mypackage.spec mypackage 
+Skeleton specfile (minimal) has been created to "mypackage.spec".
+
+user@host% cat mypackage.spec 
+Name:           mypackage
+Version:        
+Release:        1%{?dist}
+Summary:        
+
+Group:          
+License:        
+URL:            
+Source0:        
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildRequires:  
+Requires:       
+
+%description
+
+
+%prep
+%setup -q
+
+
+%build
+%configure
+make %{?_smp_mflags}
+
+
+%install
+rm -rf %{buildroot}
+make install DESTDIR=%{buildroot}
+
+
+%clean
+rm -rf %{buildroot}
+
+
+%files
+%defattr(-,root,root,-)
+%doc
+
+
+
+%changelog
+}}}
+
+Another example which specifies a package type, in this case for a Perl package:
+
+{{{
+user@host% rpmdev-newspec -m -o perl-MyModule.spec -t perl MyModule     
+Skeleton specfile (perl) has been created to "perl-MyModule.spec".
+user@host% cat perl-MyModule.spec 
+Name:           MyModule
+Version:        
+Release:        1%{?dist}
+Summary:        
+
+Group:          Development/Libraries
+License:        
+URL:            
+Source0:        
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildArch:      
+# Correct for lots of packages, other common choices include eg. Module::Build
+BuildRequires:  perl(ExtUtils::MakeMaker)
+Requires:  perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+
+%description
+
+
+%prep
+%setup -q
+
+
+%build
+# Remove OPTIMIZE=... from noarch packages (unneeded)
+%{__perl} Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}"
+make %{?_smp_mflags}
+
+
+%install
+rm -rf %{buildroot}
+make pure_install PERL_INSTALL_ROOT=%{buildroot}
+find %{buildroot} -type f -name .packlist -exec rm -f {} ';'
+# Remove the next line from noarch packages (unneeded)
+find %{buildroot} -type f -name '*.bs' -a -size 0 -exec rm -f {} ';'
+find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null ';'
+chmod -R u+w %{buildroot}/*
+
+%check
+make test
+
+
+%clean
+rm -rf %{buildroot}
+
+
+%files
+%defattr(-,root,root,-)
+%doc
+# For noarch packages: vendorlib
+%{perl_vendorlib}/*
+# For arch-specific packages: vendorarch
+%{perl_vendorarch}/*
+%exclude %dir %{perl_vendorarch}/auto/
+%{_mandir}/man3/*.3*
+
+
+%changelog
+}}}
+
+`rpmdev-newspec` can be customized with site-specific prefs as well; see `/etc/rpmdevtools/spectemplate-*`
+
+===== Using [http://cpanspec.sourceforge.net `cpanspec`] =====
+
+An alternative when building Perl packages for which no source rpm is available is to use `cpanspec`.  One advantage `cpanspec` provides is the enumeration of `BuildRequires` and `Requires`, based on the contents of the module; it also provides much more flexible control over other spec options.  The end result may include more specific detail than provided by `rpmdev-newspec`, though the resulting output will still require some manipulation in order to produce a resulting src.rpm that will rebuild cleanly.
+
+=== Organizing The Spec And Code ===
+
+Assuming we have obtained and generated a compressed tar archive of the target code (`.tgz`), and have produced a `.spec` and other necessary files (source, patches, etc.), the next step is to prepare these into an appropriate path structure in preparation for assembly using `rpmbuild`.
+
+==== Using Non-default Paths For Assembling Source RPMs ====
+
+Since the source code repository in most cases already contains all of the files necessary for producing a source rpm, it may be preferable to build source rpms directly from that hierarchy, rather than duplicating them elsewhere before assembly.
+
+(!)  Note: the `rpmbuild` command expects to find the source and spec in several default paths; the current default base can be shown by invoking `rpm --eval %{_pkgnamedir}`.  If not specified, the default base path will be `/usr/src/redhat/`, with all inputs and outputs below that path.  If your source is already organized into a path hierarchy and you'd prefer to build source rpms directly, it's possible to override the defaults by using custom settings in `~/.rpmmacros`.  Say for example our source is organized within some directory hierarchy into `%{name}-%{version}` subdirectories within the working copy of our source repository, each of which contained our input for source and spec, so that from a single path within the source repository we can run `rpmbuild` and have our output source rpm always land in the same directory (within `~/rpm_stage/SRPM`), we could create the necessary input/output directories (BUILD, RPM, SRPM, tmp) in `~/rpm_stage` and specify the following in `~/.rpmmacros`:
+
+{{{
+%_topdir        /home/YOU/rpm_stage
+%_svndir        /PATH/TO/SVN_WORKING_DIR
+
+%_pkgnamedir    %{_topdir}
+%_rpmtopdir     %{_svndir}/%{name}-%{version}
+#%_rpmtopdir    %{_pkgnamedir}
+%_sourcedir     %{_rpmtopdir}
+%_specdir       %{_rpmtopdir}
+%_builddir      %{_topdir}/BUILD
+%_rpmdir        %{_topdir}/RPM
+%_srcrpmdir     %{_topdir}/SRPM
+%_tmppath       %{_topdir}/tmp
+
+}}}
+
+If you'll be working with multiple source repositories, it may even be desirable to set `%_svndir` to  `%(pwd)`; this will allow `rpmbuild` invocations from arbitrary top-level source repository paths.  These settings are just an example and by no means the only way to configure your build environment; there are multiple possibilities for customizing your `.rpmmacros` to make generating and organizing source rpms easier.
+
+=== Building The Source RPM (Using `rpmbuild`) ===
+
+Once you've settled on a working configuration for organizing your spec and sources, and have optionally customized the rpm runtime paths, the next step is to build a source rpm.  Note that for the purposes of this documentation, we're assuming that the source rpm is being built on a system on which the package dependencies required for building the target are not necessarily installed; for that reason, it is safe to instruct rpmbuild to skip dependency checking during this step.  Also, the underlying architecture of the system is irrelevant at this step; when the resulting source package is rebuilt using `Mock`, any build-time package dependencies will be resolved, and architecture-specific selection will be used.
+
+Creating the source rpm is as simple as invoking `rpmbuild -bs` against a target path.  As an example, here is the creation of a src.rpm for `perl-XML-LibXML`, including an invocation showing failed deps; for reference, in this example `%_topdir` is set to `/home/throck/rpm`, and `%_svndir` is set to `%(pwd)`
+
+{{{
+throck@psdev% pwd
+/home/throck/svn/pS-Performance_Toolkit-3.2/Minor_Packages
+
+throck@psdev%% rpmbuild -bs perl-XML-LibXML/perl-XML-LibXML.spec         
+error: Failed build dependencies:
+	perl-XML-SAX is needed by perl-XML-LibXML-1.70-1.pSPS.i386
+
+throck@psdev%% rpmbuild -bs --nodeps perl-XML-LibXML/perl-XML-LibXML.spec
+Wrote: /home/throck/rpm/SRPM/perl-XML-LibXML-1.70-1.pSPS.src.rpm
+}}}
+
+Here is a second example, where the src.rpm is being built from an entirely different source repository, but the source rpm ends up in the same location as the first:
+
+{{{
+throck@psdev% pwd
+/home/throck/svn/nptoolkit/branches/RELEASE_3.2/software
+
+throck@psdev% rpmbuild -bs web100_userland/web100_userland.spec 
+error: Failed build dependencies:
+	gtk2-devel is needed by web100_userland-1.7-3.el5.i386
+
+throck@psdev% rpmbuild -bs --nodeps web100_userland/web100_userland.spec
+Wrote: /home/throck/rpm/SRPM/web100_userland-1.7-3.el5.src.rpm
+}}}
+
+The resulting source rpms are now ready for submission to Mock.  Note that these source rpms are transient and not necessary to keep or share, since at the end of a successful mock build, both source and binary rpms will be produced; the source rpms should be functionally equivalent to the source rpm produced in this step, however, since the versions produced from Mock have been validated and sanitized, those should be the versions that are shared, and if desired, distributed.
+
+=== Importing Third-Party Source RPMs ===
+
+As noted above, it may be necessary at times to use a third-party source package as a reference or for direct rebuilding against the target distribution.  Once the working paths have been customized in `~/rpmmacros` as outlined above, importing the rpm is simply a matter of installing it via rpm.  For example, importing the `sk98lin` driver, directly from [http://elrepo.org/ ELrepo]:
+
+{{{
+throck@psdev% pwd
+/home/throck/svn/nptoolkit/branches/RELEASE_3.2/software
+
+throck@psdev% rpm -ivh http://elrepo.org/linux/elrepo/el5/SRPMS/sk98lin-kmod-10.85.3.3-1.el5.elrepo.src.rpm
+Retrieving http://elrepo.org/linux/elrepo/el5/SRPMS/sk98lin-kmod-10.85.3.3-1.el5.elrepo.src.rpm
+warning: /home/throck/rpm/tmp/rpm-xfer.BotrHf: Header V3 DSA signature: NOKEY, key ID baadae52
+   1:sk98lin-kmod           warning: user ajb does not exist - using root
+warning: group ajb does not exist - using root
+warning: user ajb does not exist - using root  2%)
+warning: group ajb does not exist - using root
+warning: user ajb does not exist - using root  4%)
+warning: group ajb does not exist - using root
+########################################### [100%]
+warning: user ajb does not exist - using root
+warning: group ajb does not exist - using root
+
+throck@psdev% svn add sk98lin-kmod
+A         sk98lin-kmod
+A  (bin)  sk98lin-kmod/sk98lin-10.85.3.3.tar.bz2
+A         sk98lin-kmod/kmodtool-el5-sk98lin.sh
+A         sk98lin-kmod/ELRepo-sk98lin-10.85.3.3-el5.patch
+A         sk98lin-kmod/sk98lin-kmod.spec
+
+throck@psdev% svn ci sk98lin-mod -m "import of sk98lin driver from http://elrepo.org/linux/elrepo/el5/SRPMS/sk98lin-kmod-10.85.3.3-1.el5.elrepo.src.rpm"
+Adding         sk98lin-kmod-10.85.3.3
+Adding         sk98lin-kmod-10.85.3.3/ELRepo-sk98lin-10.85.3.3-el5.patch
+Adding         sk98lin-kmod-10.85.3.3/kmodtool-el5-sk98lin.sh
+Adding  (bin)  sk98lin-kmod-10.85.3.3/sk98lin-10.85.3.3.tar.bz2
+Adding         sk98lin-kmod-10.85.3.3/sk98lin-kmod.spec
+Transmitting file data ....
+Committed revision 12345.
+}}}
+
+When importing third-party source rpms, be sure to commit the original, unmodified source rpm contents, and note the original source location in the commit log.
+
+== Last Updated ==
+
+$Id$
