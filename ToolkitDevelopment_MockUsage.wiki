@@ -5,7 +5,7 @@
 Mock can be invoked with a fair number of options; typically when rebuilding packages, only a few specific options are required.  See `/usr/bin/mock --help` for the complete list of options and defaults, and `mock(1)` for additional documentation and examples.
 
 
-|| option flag || provides  || possible values ||
+| option flag | provides  | possible values |
 | `-r CHROOT` | name of the CHROOT, usually `$dist-$release-$arch`, but other configs may exist. Corresponding configs are in `/etc/mock/*.cfg` | `epel-5-i386`, `fedora-13-ppc`, `epel-5-jpackage-x86_64` |
 | `--resultdir`| path for resulting files (source / binary rpms, and logs). This can be any arbitrary path on the filesystem, writable by the invoking user | any path writable to the invoking user; it may be convenient to drop results in a directory hierarchy based on release/version/architecture |
 |`--arch`| Sets kernel personality(). Note that `arch` is typically already set in the chroot cfg, though this option can be useful when building e.g. kernels (where `arch=i686`) to override the default | `i386`, `i686`, `x86_64`, `ppc`. limited by arch of build host | 
@@ -110,7 +110,7 @@ mockbuild ()
 
 The expected arguments are:
 
-|| variable || expected value || example ||
+| variable | expected value | example |
 | MYCFG | The mock configuration to use, minus the `.cfg`; see /etc/mock/ for a list of valid configurations | epel-5-i386, epel-5-x86_64.cfg |
 | MYDISTRO | name of the target distro; will be used along with `$for the `--resultdir` path | centos-5, perfsonar-ps |
 | MYARCH | Target arch | i386, x86_64 |
