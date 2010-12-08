@@ -6,10 +6,10 @@ Mock can be invoked with a fair number of options; typically when rebuilding pac
 
 
 || option flag || provides  || possible values ||
-| `-r CHROOT` | name of the CHROOT, usually `$dist-$release-$arch`, but other configs may exist<br> corresponding configs are in `/etc/mock/*.cfg` | `epel-5-i386`<br> `fedora-13-ppc`<br> `epel-5-jpackage-x86_64` |
-| `--resultdir`| path for resulting files (source / binary rpms, and logs)<br> this can be any arbitrary path on the filesystem, writable by the invoking user | any path writable to the invoking user; it may be convenient to drop results in a directory hierarchy based on release/version/architecture |
-|`--arch`| Sets kernel personality()<br> note that `arch` is typically already set in the chroot cfg, though this option can be useful when building e.g. kernels (where `arch=i686`) to override the default | `i386`<br> `i686`<br> `x86_64`<br> `ppc`<br> limited by arch of build host | 
-|`--uniqueext` | Arbitrary, unique extension to append to buildroot directory name<br> this allows simultaneous builds to occur | `$USERID`, or some other unique identifier |
+| `-r CHROOT` | name of the CHROOT, usually `$dist-$release-$arch`, but other configs may exist. Corresponding configs are in `/etc/mock/*.cfg` | `epel-5-i386`, `fedora-13-ppc`, `epel-5-jpackage-x86_64` |
+| `--resultdir`| path for resulting files (source / binary rpms, and logs). This can be any arbitrary path on the filesystem, writable by the invoking user | any path writable to the invoking user; it may be convenient to drop results in a directory hierarchy based on release/version/architecture |
+|`--arch`| Sets kernel personality(). Note that `arch` is typically already set in the chroot cfg, though this option can be useful when building e.g. kernels (where `arch=i686`) to override the default | `i386`, `i686`, `x86_64`, `ppc`. limited by arch of build host | 
+|`--uniqueext` | Arbitrary, unique extension to append to buildroot directory name. This allows simultaneous builds to occur | `$USERID`, or some other unique identifier |
 
 
 
@@ -57,7 +57,7 @@ throck@buildhost-01%
 
 This example session resulted in a successful build; examining the results directory we find:
 
-{noformat}
+{{{
 throck@admin-test-01% ls -la /srv/results/throck/centos-5/i386/web100_userland-1.7-3.el5
 total 1028
 drwxrwxr-x  2 throck throck   4096 Aug 10 00:28 .
@@ -68,7 +68,7 @@ drwxr-xr-x 56 throck throck   4096 Sep  7 16:38 ..
 -rw-r--r--  1 throck mock   146881 Aug 10 00:28 web100_userland-1.7-3.el5.i386.rpm
 -rw-r--r--  1 throck mock   487671 Aug 10 00:27 web100_userland-1.7-3.el5.src.rpm
 -rw-r--r--  1 throck mock   291894 Aug 10 00:28 web100_userland-debuginfo-1.7-3.el5.i386.rpm
-{noformat}
+}}}
 
 Of particular interest (aside from the resulting rpm's) are the `root.log`, which contains a record of the creation of the build root, including specific details about any yum transactions that were run to meet build dependencies, and the `build.log`, that contains the details of the mock invocation, the source compilation (if any), and the creation of the resulting package(s).
 
@@ -111,10 +111,10 @@ mockbuild ()
 The expected arguments are:
 
 || variable || expected value || example ||
-| MYCFG | The mock configuration to use, minus the `.cfg`; see /etc/mock/ for a list of valid configurations | epel-5-i386<br> epel-5-x86_64.cfg |
-| MYDISTRO | name of the target distro; will be used along with `$for the `--resultdir` path | centos-5<br> perfsonar-ps |
-| MYARCH | Target arch | i386<br> x86_64 |
-| MYSRPM | Path to your Source RPM package | /home/throck/rpm/SRPM/web100_userland-1.7-3.el5.src.rpm<br> /tmp/mypackage-1.0-1.src.rpm |
+| MYCFG | The mock configuration to use, minus the `.cfg`; see /etc/mock/ for a list of valid configurations | epel-5-i386, epel-5-x86_64.cfg |
+| MYDISTRO | name of the target distro; will be used along with `$for the `--resultdir` path | centos-5, perfsonar-ps |
+| MYARCH | Target arch | i386, x86_64 |
+| MYSRPM | Path to your Source RPM package | /home/throck/rpm/SRPM/web100_userland-1.7-3.el5.src.rpm, /tmp/mypackage-1.0-1.src.rpm |
 
 Invoking this function in a shell 
 
