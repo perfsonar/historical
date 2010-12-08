@@ -28,6 +28,72 @@ To build this kernel, you will need a host with CentOS 5, and the 'rpm-build' pa
   * To build the kernel headers (needed for building modules later), run: rpmbuild -ba --target=i386 --with headers kernel-2.6.spec 2> build-err.log | tee build-out.log
   * The RPMs (and a new SRPM) should now be available in the RPMS and SRPMS directories in your RPM build directory. They can either be installed directly, or added to a yum repository and installed via that method.
 
+== Customizing The Toolkit ==
+
+The pS-Performance Toolkit, as both the LiveCD and NetInstall, are built using a custom CentOS kickstart file. You can read more about kickstart installations [http://docs.redhat.com/docs/en-US/Red_Hat_Enterprise_Linux/5/html/Installation_Guide/ch-kickstart2.html here]. The kickstart file defines the set of software repositories to use, the set of software to install, and a script that performs some system configuration once the software has been installed. Customizing the toolkit will involve changing one or more of those elements in the kickstart files.
+
+=== Pre-Requisites ===
+
+The build procedures here assume that the toolkit ISOs are being built on CentOS 5. The steps may work on other systems, but have only been tested on CentOS 5.
+
+For building custom versions of either the LiveCD or NetInstall, you'll need a copy of Image Magick installed on the host. This should be available via yum. 
+
+For building custom versions of the NetInstall, you will need a copy of mkisofs installed on the host. This should be available via yum.
+
+For building custom versions of the LiveCD, you will need the livecd-tools package installed on CentOS 5. You can find installation information [https://projects.centos.org/trac/livecd/wiki/GetToolset here].
+
+=== Building The Toolkit ===
+
+You can download the kickstarts, images and scripts needed to build the toolkit by doing a subversion checkout of http://anonsvn.internet2.edu/svn/nptoolkit/trunk/
+
+There are 6 directories in this subversion repository. The ones of importance for customization are 'kickstarts', 'images', and 'scripts'. The 'kickstarts' directory contains the files used for generating the kickstarts used by the LiveCD and NetInstall setups. The 'scripts' directory contains 2 scripts used for building the toolkit, one for the NetInstall and one for the LiveCD. The 'images' directory contains the image displayed when the CD is first booted.
+
+If you run the script 'build_livecd.sh' as root, it should download all the necessary RPMs, and build an ISO of the LiveCD and place it in the directory from which you ran the script. Similarly, if you run the script 'build_netinstall.sh' as root, it should build an ISO of the NetInstall.
+
+The general build process of the LiveCD proceeds as follows:
+  * Patches the 'generic' kickstart file (reference-platform.ks) with LiveCD-specific modifications (reference-platform-livecd.patch)
+  * Calls livecd-creator to build the LiveCD from the kickstart file
+  * Modifies the generated LiveCD to use the proper boot image
+
+The general build process of the NetInstall roceeds as follows:
+  * Patches the 'generic' kickstart file (reference-platform.ks) with NetInstall-specific modifications (reference-platform-netinstall.patch)
+  * Modifies the generic CentOS netinstall CD (in the 'resources' directory) to include the kickstart and to boot using it
+  * Modifies the generic CentOS netinstall CD to use the proper boot image
+
+=== Customizing The Toolkit ===
+
+To customize the toolkit, you will need to modify the kickstart file. The reference-platform.ks file in the kickstarts directory is the 'generic' kickstart file. There are 2 patches, reference-platform-livecd.ks and reference-platform-netinstall.ks, that modify this kickstart file.
+
+There are a large number of directives inside the kickstart. The meaning of most of these is outside the scope of this document, but should be available [http://docs.redhat.com/docs/en-US/Red_Hat_Enterprise_Linux/5/html/Installation_Guide/ch-kickstart2.html here].
+
+==== Customizing The Software Yum Repositories ====
+
+The set of repositories that will be used to retrieve RPMs from can be customized. This allows you to use a local mirror to speed up builds as well as to include new or customized RPMs. Note, however, that when changing the repositories, you must make sure that the software to be installed (either directly or to satisfy dependencies) must still be available in the set of repositories.
+
+The 'repo' lines specify the set of repositories to use:
+
+{{{
+repo --name=a-Internet2    --baseurl=http://software.internet2.edu/rpms/i386/main/
+}}}
+
+The above line tells the kickstart to use the Internet2 repository and gives the URL of the yum repository.
+
+Note: the repositories here are only used for installation. They will not be available after installation. If you want to make these software repositories available after installation, you must either have the kickstart install an appropriate repository package (see [https://fedoraproject.org/wiki/EPEL/FAQ#How_can_I_install_the_packages_from_the_EPEL_software_repository.3F here] for an example of the repository package), or have the post installation script add the appropriate .repo and key files. 
+
+==== Customizing The Software To Install ====
+
+In the `%packages` section, there are a list of packages to install or not install. Any packages that start with "@" are package groups (e.g. `@core` is the set of core packages). Any packages that start with "-" are packages that should not be installed (e.g. `-sysreport` says to not install the sysreport package). All other packages are normal packages to install like you might do with yum.
+
+You can add any packages here that you might want installed.
+
+==== Customizing The Toolkit System Environment ====
+
+The toolkit system environment can be configured using the %post script. This script is run after the software packages have been installed, and allow for modifications to be made to the installed system before it is booted for the first time (or, in the case of the LiveCD, before it is turned into an unmodifiable ISO).
+
+There is an existing %post script that performs a number of tasks needed by the toolkit. However, this script can be modified to include any desired configuration for the toolkit system. For example, users could be added, or configuration files could be modified. The existing post installation script includes a wide variety of methods for configuring aspects of the installed system.
+
+The thing to remember when making changes is that the patch files expect to patch the `reference-platform.ks` file. There are a few ways to go about making changes. One way is to make changes to the reference-platform.ks in such a way that they don't conflict with the patches. This is generally the path of least resistance. Another option, if you only plan on making one of the LiveCD or NetInstall, is to patch the reference-platform.ks before making your changes, and then edit the `build_netinstall.sh` or `build_livecd.sh` and set the `KICKSTART_PATCH=...` line to be `KICKSTART_PATCH=`. This will stop the script from trying to patch the `reference-platform.ks` file. Lastly, you can edit the reference-platform.ks, and the regenerate or edit the patch files to account for the changes.
+
 == Last Updated ==
 
 $Id$
