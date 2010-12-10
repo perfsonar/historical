@@ -17,7 +17,16 @@ The NEW measurement tools/services that will come with the toolkit will include:
 New Additions:
  Path MA configuration / activation
 
-=== Important Issue tracker items ===
+=== Most Important Issue tracker items to try to get into this release ===
+
+  * 117:	perfSONAR BUOY bwmaster continues to fail after sync-ed NTPD
+  * 160: ESnet SNMP MA Enhancements
+  * 183: Address/Name Normalization in pSB
+  * 188/189: add ntp servers for various geographic locations
+  * 197: better bwctl plots
+  * 198: pSB node equivalence
+
+
 
 
 == Roadmap ==
