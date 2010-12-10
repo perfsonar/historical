@@ -9,11 +9,15 @@
   
 === Tools/Services ===
 The NEW measurement tools/services that will come with the toolkit will include:
-
+  Path MA, Traceroute MP etc
   
 
 === Web Interface ===
 
+New Additions:
+ Path MA configuration / activation
+
+=== Important Issue tracker items ===
 
 
 == Roadmap ==
