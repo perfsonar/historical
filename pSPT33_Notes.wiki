@@ -6,6 +6,15 @@
 
 == Goals ==
 
+The main goal is to integrate new tools that are running in production in various places into the toolkit.
+
+These include the Nagios checks, Path MA / MP, the new serviceTest.cgi replacement script,
+the directorySearch tool, and the new owamp bucketing code.
+
+Other goals include:
+  * better GUI / usability 
+  * bug fixes
+  
   
 === Tools/Services ===
 The NEW measurement tools/services that will come with the toolkit will include:
@@ -15,9 +24,16 @@ The NEW measurement tools/services that will come with the toolkit will include:
 === Web Interface ===
 
 New Additions:
- Path MA configuration / activation
+  * Path MA configuration / activation
+  * Nagios configuration  (assume integration of existing site nagios installation for this release) 
 
-=== Most Important Issue tracker items to try to get into this release ===
+
+Integration/enhancements of the following tools:
+  * http://sc-monitor2.internet2.edu/esxpsb/
+  * https://stats1.es.net/perfSONAR/directorySearch.html
+
+
+=== Important Issue tracker items to try to get into this release ===
 
   * 117:	perfSONAR BUOY bwmaster continues to fail after sync-ed NTPD
   * 160: ESnet SNMP MA Enhancements
@@ -25,11 +41,14 @@ New Additions:
   * 188/189: add ntp servers for various geographic locations
   * 197: better bwctl plots
   * 198: pSB node equivalence
-
-
+  * 184, 303, 321, 326: web GUI improvements
+  * 350, 351: Nagios
+  * 389: data provenance
 
 
 == Roadmap ==
+
+coming soon
 
 
 == Last Modified ==
