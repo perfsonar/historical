@@ -50,6 +50,13 @@ Integration/enhancements of the following tools:
 
 coming soon
 
+== SVN Code Location for the various tools ==
+
+  * New serviceTest.cgi script - http://svn.internet2.edu/svn/perfSONAR-PS/branches/ESnet_Production/serviceTestCGI/serviceTest-general/
+
+  * OWAMP bucketing code - http://svn.internet2.edu/svn/perfSONAR-PS/branches/alake-owpbuckets-pSBMA/
+
+  
 
 == Last Modified ==
 
