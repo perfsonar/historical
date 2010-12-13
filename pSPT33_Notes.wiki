@@ -57,6 +57,9 @@ coming soon
   * OWAMP bucketing code - http://svn.internet2.edu/svn/perfSONAR-PS/branches/alake-owpbuckets-pSBMA/
 
   * Traceroute MA/MP code - https://svn.internet2.edu/svn/perfSONAR-PS/branches/alake-traceoutema/
+   
+  * Nagios Plug-ins - https://svn.internet2.edu/svn/perfSONAR-PS/branches/sowmya-nagios/
+   * _Note: Organized into RPM in this branch, plug-ins in trunk_
 
 == Last Modified ==
 
