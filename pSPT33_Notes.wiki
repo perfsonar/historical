@@ -47,6 +47,11 @@ Integration/enhancements of the following tools:
 
 
 == Roadmap ==
+  * OWAMP Visualization tools
+  * End-to-End path visualization tools
+  * Circuit Monitoring
+
+
 
 coming soon
 
