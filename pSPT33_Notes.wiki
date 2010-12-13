@@ -47,8 +47,8 @@ Integration/enhancements of the following tools:
 
 
 == Roadmap ==
-  * OWAMP Visualization tools
-  * End-to-End path visualization tools
+  * Cross domain latency variation visualization tools
+  * End-to-End path visualization tools that integrate multiple measurements (ping, traceroute, partial path bwctl, etc)
   * Circuit Monitoring
 
 
