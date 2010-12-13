@@ -2,18 +2,26 @@
 
 == Agenda/Minutes ==
 
- # Attendees: 
+ # Attendees: Aaron, Andy, Sowmya, Joe, Jeff, Nils
  # Followup on previous actions:
    * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC.
+      * Brian has started a page to discuss this.
+      * Jeff will put up a doodle poll to pick a time the week of Jan 24.
    * _*ACTION*_: Jeff will review owamp buckets description written by Andy.
+      * Looked good.
    * _*ACTION*_: Brian will put status of bwctl changes in issue tracker so unfinished tasks can be prioritized.
+      * Done
    * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
  # Review 3.3 wishlist document
    * http://code.google.com/p/perfsonar-ps/wiki/pSPT33_Notes
-
+   * Need a more long term roadmap to start, and then can bring it back to what we include in 3.3.
+   * Need visualization for tracerouteMA.
+   * How often should we be doing releases? What time frame should 3.3 come out?
  # Next call will be Jan 3.
 
 === ACTIONS ===
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC.
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
 
 == Where ==
 
