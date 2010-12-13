@@ -1,0 +1,23 @@
+=  Dec 13 2010 Conference Call 2:30 p.m. EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees: 
+ # Followup on previous actions:
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC.
+   * _*ACTION*_: Jeff will review owamp buckets description written by Andy.
+   * _*ACTION*_: Brian will put status of bwctl changes in issue tracker so unfinished tasks can be prioritized.
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+ # Review 3.3 wishlist document
+   * http://code.google.com/p/perfsonar-ps/wiki/pSPT33_Notes
+
+ # Next call will be Jan 3.
+
+=== ACTIONS ===
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS: 00113498255555
+ * Direct Dial:  mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-883-7860 then 8255555# at the prompt. 
