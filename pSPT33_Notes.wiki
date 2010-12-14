@@ -51,7 +51,7 @@ Integration/enhancements of the following tools:
 The following ideas could be on the longer term roadmap.
 
   * Circuit Monitoring
-  * Lookup service enhancements (higher performance, integration of misc other metrics, etc)
+  * Lookup service enhancements (higher performance, integration of misc other metrics, utilize new summarization algorithm, etc.)
   * Cross domain latency variation visualization tools
   * End-to-End path visualization tools that integrate multiple measurements (ping, traceroute, partial path bwctl, etc)
   * Alarm/notification generation & management.
