@@ -39,6 +39,7 @@ Requires:		perl(Net::IPv6Addr)
 Requires:		perl(Params::Validate)
 Requires:		perl(Time::HiRes)
 Requires:		perl(Time::Local)
+Requires:		perl(XML::Tidy)
 Requires:		perl(XML::LibXML) >= 1.60
 #Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:       perl
