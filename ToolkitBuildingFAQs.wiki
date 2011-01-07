@@ -10,23 +10,60 @@ The Toolkit includes a patched version of the CentOS 5 version of the Linux kern
 To build this kernel, you will need a host with CentOS 5, and the 'rpm-build' package installed.
 
   * Download the most recent kernel Source RPM for CentOS 5.5
-  * Download http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/kernel/srpm_patches/sources.patch
   * Install the kernel source RPM. This should install files into your RPM build directory (typically /usr/src/redhat if root)
+  * Download http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/kernel/srpm_patches/sources.patch
+    * This patch will perform a couple tasks:
+      * Adds the web100 patch to the SOURCES directory
+      * Modifies the default kernel config to include the web100 options.
   * cd to the 'SOURCES' directory in your RPM build directory
-  * run 'patch -i sources.patch -p0'
+  * Run 'patch -i sources.patch -p0'
   * cd to the 'SPECS' directory in your RPM build directory
-  * Edit the file 'kernel-2.6.spec'
-    * Set an appropriate buildid (e.g. .web100)
-    * Add the web100 patch to the list of available patches (e.g. add a line like: Patch30000: web100-2.6.18-2.5.12-200609221010.patch)
-      * Take note of the patch number specified
-    * Add a line to tell the build process to apply the patch you just specified (e.g. add a line like: %patch30000 -p1)
-    * If you want to add more patches, you'll need to follow the approach above
-    * Update the changelog at the bottom to note any changes you've made
-    * For examples of the changes, look at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/kernel/srpm_patches/kernel-2.6_spec.patch
+  * Download http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/kernel/srpm_patches/kernel-2.6_spec.patch
+    * This patch attempts a few tasks:
+      * Set the buildid to .web100 so that the kernel version will be of the form 2.6.18-194.32.1.el5.web100
+      * Adds the web100 patch to the list of available patches
+      * Adds a line to tell the build process to apply the web100 patch
+      * Attempts to update the changelog at the bottom to note the changes
+  * cd to the 'SPECS' directory in your RPM build directory
+  * Run 'patch -i kernel-2.6_spec.patch'
+    * Note: it is likely that one or more of the patch changes may fail (especially the changelog one). If this happens, the changes will need to be applied manually to the kernel-2.6.spec. Look at the generated .rej file to see which changes need to be made to the spec file.
+  * Further changes can be made as needed
+    * To set a new buildid, edit the 'kernel-2.6.spec' in the 'SPECS' directory of your RPM build directory and set an appropriate buildid (e.g. .web100.custom)
+    * To add more patches, edit the 'kernel-2.6.spec', and follow the example for adding the web100 patches in the 'kernel-2.6_spec.patch'
+      * Add a line to tell the spec file about the new patch. E.g. add a line like: Patch30001: custom.patch
+        * Take note of the patch number specified
+      * Add a line to tell the build process to apply the new patch you. E.g. add a line like: %patch30001 -p1
+    * To change the default kernel configuration edit the file 'config-rhel-generic' in the 'SOURCES' directory of your RPM build directory
+    * Update the changelog at the bottom 'kernel-2.6.spec' file to note any changes you've made
   * To build the kernel, run: rpmbuild -ba --target=i686 --without debug --without kabichk kernel-2.6.spec 2> build-err.log | tee build-out.log 
     * Note: the above command will put error messages into the file 'build-err.log'
+    * If new patches have been added, this command may error out due to patches that don't apply cleanly. If so, these patches will need modified as appropriate and the command rerun.
   * To build the kernel headers (needed for building modules later), run: rpmbuild -ba --target=i386 --with headers kernel-2.6.spec 2> build-err.log | tee build-out.log
   * The RPMs (and a new SRPM) should now be available in the RPMS and SRPMS directories in your RPM build directory. They can either be installed directly, or added to a yum repository and installed via that method.
+
+=== Generating Random Bytes ===
+When compiling on a remote host, it is common to see an error like this:
+
+{{{
+Not enough random bytes available.  Please do some other work to give
+the OS a chance to collect more entropy! (Need 266 more bytes)
+}}}
+
+There are a number of ways to generate random bytes on a remote machine, but the easiest way that we've found is to perform parallel 'hdparm' tests. The following script can be run one or more times in the event that the error above is seen.
+
+{{{
+#!/bin/bash
+
+NUM_TESTS=20
+
+if [ -n "$1" ]; then
+    NUM_TESTS=$1
+fi
+
+for i in `seq 1 $NUM_TESTS`; do
+    /sbin/hdparm -t /dev/sda1 &
+done
+}}}
 
 == Customizing The Toolkit ==
 
