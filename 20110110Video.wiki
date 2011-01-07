@@ -1,0 +1,27 @@
+#summary Jan 10, 2011 Conference Call
+
+=  Jan 10 2011 Conference Call 2:30 p.m. EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+   * TBD
+ # Topic 1
+   * TBD
+ # Topic 2
+
+== Actions ==
+
+  * _*ACTION*_: Action 1
+
+== Where ==
+
+ESnet conference bridge:
+
+ * GDS: 00113498255555
+ * Direct Dial:  mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-883-7860 then 8255555# at the prompt. 
+
+== Last Updated ==
+
+$Id$
