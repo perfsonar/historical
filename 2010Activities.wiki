@@ -1,0 +1,1920 @@
+#summary List of perfSONAR-PS Activites from 2010
+
+== 2010 Activities ==
+
+  * [2010Activities#20101213Video Video Conference for Dec 13, 2010]
+  * [2010Activities#20101129Video Video Conference for Nov 29, 2010]
+  * [2010Activities#20101101Video Video Conference for Nov 1, 2010]
+  * [2010Activities#20101018Video Video Conference for Oct 18, 2010]
+  * [2010Activities#20101004Video Video Conference for Oct 04, 2010]
+  * [2010Activities#20100920Video Video Conference for Sept 20, 2010]
+  * [2010Activities#20100830Video Video Conference for Aug 30, 2010]
+  * [2010Activities#20100823Video Video Conference for Aug 23, 2010]
+  * [2010Activities#20100816Video Video Conference for Aug 16, 2010]
+  * [2010Activities#20100802APICall API Conference for Aug 2, 2010]
+  * [2010Activities#20100802Video Video Conference for Aug 2, 2010]
+  * [2010Activities#20100726Video Video Conference for July 26, 2010]
+  * [2010Activities#20100614APICall API Conference Call for June 14, 2010]
+  * [2010Activities#20100614Video Video Conference for June 14, 2010]
+  * [2010Activities#20100607APICall API Conference Call for June 7, 2010]
+  * [2010Activities#20100607Video Video Conference for June 7, 2010 (Special Purpose - pSPT 3.2 Release)]
+  * [2010Activities#20100524Video Video Conference for May 24, 2010]
+  * [2010Activities#20100517APICall API Conference Call for May 17, 2010]
+  * [2010Activities#20100517Video Video Conference for May 17, 2010]
+  * [2010Activities#20100510Video Video Conference for May 10, 2010]
+  * [2010Activities#20100503Video Video Conference for May 3, 2010]
+  * [2010Activities#20100419Video Video Conference for April 19, 2010]
+  * [2010Activities#20100412Video Video Conference for April 12, 2010]
+  * [2010Activities#20100329Video Video Conference for March 29, 2010]
+  * [2010Activities#20100322Video Video Conference for March 22, 2010]
+  * [2010Activities#20100222Video Video Conference for February 22, 2010]
+  * [2010Activities#20100131Meet Developer's Meeting for January 31, 2010]
+  * [2010Activities#20100125Video Video Conference for January 25, 2010]
+  * [2010Activities#20100111Video Video Conference for January 11, 2010]
+
+=== 20101213Video ===
+
+ # Attendees: Aaron, Andy, Sowmya, Joe, Jeff, Nils
+ # Followup on previous actions:
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC.
+      * Brian has started a page to discuss this.
+      * Jeff will put up a doodle poll to pick a time the week of Jan 24.
+   * _*ACTION*_: Jeff will review owamp buckets description written by Andy.
+      * Looked good.
+   * _*ACTION*_: Brian will put status of bwctl changes in issue tracker so unfinished tasks can be prioritized.
+      * Done
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+ # Review 3.3 wishlist document
+   * http://code.google.com/p/perfsonar-ps/wiki/pSPT33_Notes
+   * Need a more long term roadmap to start, and then can bring it back to what we include in 3.3.
+   * Need visualization for tracerouteMA.
+   * How often should we be doing releases? What time frame should 3.3 come out?
+ # Next call will be Jan 3.
+
+==== ACTIONS ====
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC.
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+
+
+=== 20101129Video ===
+
+ # Attendees: Andy, Marcos, Nils, Sowmya, Brian, Jeff, Joe, Aaron, Maxim
+ # Followup on previous actions:
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+   * _*ACTION*_: Joe will take SOP to DICE.
+     * Issues have been put in the diagnostic service description document, and we should continue to follow up there.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+     * Will be resolved by work Sowmya is doing on testservice.cgi.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC.
+ # Developers Update
+   * Andy: Wiki page describing owamp buckets. Looking at traceroute MA configuration file issues. Looking at adding filter-chaining into the traceroute MA to allow for hop selection.
+   * Marocs: No update
+   * Nils: No update
+   * Sowmya: Working on owamp bucket addition to the pS-B MA.
+   * Brian: BWCTL mods to allow different congestion control algs.
+   * Joe: Need to get the diagnostic service document completed by the end of the month.
+   * Aaron: Deployed a lot of pS for measurement at SC. (bwctl/owamp/traceroute) Lots of displays showing pS data: weathermap etc...
+   * Maxim: Trying to debug gLS problem with local service crashing.
+   * Jeff:  No update
+
+ # Next call will be Dec 6.
+
+==== ACTIONS ====
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC.
+   * _*ACTION*_: Jeff will review owamp buckets description written by Andy.
+   * _*ACTION*_: Brian will put status of bwctl changes in issue tracker so unfinished tasks can be prioritized.
+
+=== 20101101Video ===
+
+ # Attendees: Nils, Kavitha, Aaron, Andy, Sowmya, Brian, Joe
+ # Followup on previous actions:
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+   * _*ACTION*_: Joe will take SOP to DICE.
+     * Issues have been put in the diagnostic service description document, and we should continue to follow up there.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+     * Will be resolved by work Sowmya is doing on testservice.cgi.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC.
+   * _*ACTION*_: Brian will write a document to advise people which version of the toolkit they should go for (net install vs cd).
+     * done.
+   * _*ACTION*_: Aaron will send out the location of the livecd upgrade script so.
+     * Jason has it as FAQ 33.
+ # Developers Update
+   * Nils: Looking at visualization tools for visualizing pS-ps data.
+   * Kavitha: nothing currently
+   * Aaron: pS-PTK version 3.2 released. Kernal update happened the next Monday.
+   * Andy: nothing currently
+   * Sowmya: Wrapping up servicetest.cgi. Fixed some issues in cache.pl
+   * Brian: Adding multiple congestion control algorithms to bwctl.
+   * Joe: Need milestones for diagnostic service to DICE principles.
+   * Jeff: nothing currently
+ # Release Update (Jason/Aaron)
+ # Caching Operations Update (Jason/Aaron/Andy)
+
+ # Next call will be Nov 1.
+
+=== 20101018Video ===
+
+ # Attendees: Brian, Somya, Andy, Nils, Kavitha, Aaron, Jason, Marcos, Jeff, Maxim
+ # Followup on previous actions:
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+     * Jason: Alternate DB open that doesn't invoke the transaction subsystem.  Compare vs. trunk on ndb1.  2 Parallel instances of the gLS, both in the hints file:
+     * Comparison on searching for the 'DB_LOCK_DEADLOCK' error in the logs
+{{{
+[root@ndb1 log]# grep DB_LOCK_DEADLOCK gLS_prop.log* | grep "2010/10/15" | wc -l 
+8999
+[root@ndb1 log]# grep DB_LOCK_DEADLOCK gLS_trunk.log* | grep "2010/10/15" | wc -l
+25434
+}}}
+     * Comparison on searching for the 'ERROR' error in the logs
+{{{
+[root@ndb1 log]# grep ERROR gLS_prop.log* | grep "2010/10/15" | wc -l
+15834
+[root@ndb1 log]# grep ERROR gLS_trunk.log* | grep "2010/10/15" | wc -l
+35617
+}}}
+   * _*ACTION*_: Joe will take SOP to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+     * Will be resolved by work Somya is doing on testservice.cgi.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC.
+   * _*ACTION*_: Jeff and Andy will individually talk with Brian/Joe about strategies for dealing with Circuit Monitoring.
+ # Release Update (Jason/Aaron)
+ # Caching Operations (Jason/Aaron)
+   * Need to release the the software that is responsible for this.  Need to document how it works.  Need to convert perfAdmin (other GUIs?) to use it once there is a new package
+   * Proposed Changes:
+     * Create a package to generate the tarball, and expose it via apache
+     * Create a package to download the tarball (LS Cache Daemon does this now?) and store in common location
+        * Create a simplistic API so other packags interact with the data using the API.
+     * Convert perfAdmin to use the downloaded location, and not run it's own cache via cron
+   * People involved?
+     * Aaron, Jason, Andy
+   * Timelines?
+     * Before the end of the year.
+
+ # Next call will be Nov 1.
+
+==== ACTIONS ====
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+   * _*ACTION*_: Joe will take SOP to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+     * Will be resolved by work Somya is doing on testservice.cgi.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC.
+   * _*ACTION*_: Brian will write a document to advise people which version of the toolkit they should go for (net install vs cd).
+   * _*ACTION*_: Aaron will send out the location of the livecd upgrade script so.
+
+
+=== 20101004Video ===
+
+ # Attendees: Andy, Somya, Aaron, Nils, Kavitha, Jeff
+ # Followup on previous actions:
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will take SOP to DICE.
+      * DICE meeting next week.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+      * Will be resolved by work Somya is doing on testservice.cgi.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities.
+   * _*ACTION*_: All - Review release wiki page to determine if any are critical for 3.2. [pSPT32Release]
+ # Team Updates
+   * Somya: worked on servicetest GUI. Would be helpful if others would review.
+   * Aaron: Worked on pS-PTK release.
+   * Nils: nothing
+   * Kavitha: nothing
+   * Andy: Added config option for pS-B bwctl integrity. Increased listener queue for pS-PS services. Need to create tracerouteMA documentation.
+   * Jeff: DICE meeting. Most relevant thing is Circuit Monitoring to be discussed later.
+ # Release Update (Aaron)
+   * RC4 in testing - tcp cc algorithm change is the big difference. New RC (5) will be avail for internal testing. Hoping RC5 will end up being the final release. Dependencies not installed properly by default, annoying hacks needed to make it work correctly.
+ # DICE Circuit Monitoring (Jeff/Aaron)
+ # Next call will be 10/11
+==== ACTIONS ====
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will take SOP to DICE.
+      * DICE meeting next week.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+      * Will be resolved by work Somya is doing on testservice.cgi.
+   * _*ACTION*_: All: review 
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC.
+   * _*ACTION*_: Jeff and Andy will individually talk with Brian/Joe about strategies for dealing with Circuit Monitoring.
+
+=== 20100920Video ===
+
+ # Attendees:
+   * Andy, Somya, Maxim, John, Ken, Marcos, Aaron, Kavitha, Nils, Jeff
+ # Followup on previous actions:
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will take SOP to DICE.
+      * DICE meeting next week.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+      * Will be resolved by work Somya is doing on testservice.cgi.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities.
+   * _*ACTION*_: All - Review release wiki page to determine if any are critical for 3.2. [pSPT32Release]
+   * _*ACTION*_: Jeff and Aaron will discuss how the tcp options will be set for 3.2 with Tom.
+ # Team Updates
+   * Andy: Working on traceroute MA and MP. In testing on ESnet hosts now. Going to add an option to bwctl/pS-B to configure how much of a delay to allow on iperf tests.
+   * Somya: Working on nagios plugins rpm. Will ask Jason to test the nagios plugin to prepare it for Atlas.
+   * Maxim: No update.
+   * John: No update.
+   * Ken: Looking to create a full penn-state mesh of internal pS-PTK deployment of several hosts. Will still have global hosts. Doing PXE boots.
+   * Marcos: No update.
+   * Aaron: Put out a new RC to determine if we have fixed the performance degradation.
+   * Kavitha: No update.
+   * Jeff: DICE meeting next week. Please send any topics and issues you may be concerned about.
+ # Release Update (Aaron/Jason)
+ # Traceroute Queries and what really is metadata? (Andy)
+   * Andy sent email to ask advise on how to query for interior hops in the data. There are two aspects to this: 1) what is the best method to use in querying the MA. 2) How can this interact with the gLS infrastructure to allow global queries such as - who has traceroute data for any path that crosses router X?. Aaron suggested the filter-chaining structure is appropriate for the MA queries. Jeff suggested that data with topological references could be pulled out as metadata for service summarization.
+   * Jeff suggested that Andy write up these issues a bit more and engage Martin in finding reasonable solutions.
+ # Next call will be 10/4
+==== ACTIONS ====
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities.
+   * _*ACTION*_: Jeff and Aaron will discuss how the tcp options will be set for 3.2 with Tom.
+   * _*ACTION*_: Andy and Aaron will work together to determine if traceroute MP/MA can be installed on SCinet test hosts.
+
+=== 20100830Video ===
+
+ # Attendees:
+   * Andy, Eric, Somya, Jeff, Maxim, Jason, Aaron, Kavitha
+ # Followup on previous actions:
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will take SOP to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. Aim for a half day VC the second week of Sept.
+   * _*ACTION*_: All - Review release wiki page to determine if any are critical for 3.2. [pSPT32Release]
+   * _*ACTION*_: Jeff and Aaron will discuss how the tcp options will be set for 3.2 with Tom.
+ # Team Updates
+   * Andy: working on a traceroute mp that reads the owmesh.conf file, and works with pS-B. Illinois university having perf issues.
+   * Eric: Nothing
+   * Somya: Working on creating rpms for nagios plugins. Still working on dependency issues.
+   * Jeff: Nothing
+   * Maxim: Nothing
+   * Jason: Added ganglia MA. Added/Edited messages for pS-B as examples to answer EU questions. Atlas will monitor T2 sites with Nagios at BNL. Atlas still having perf problems with OU.
+   * Aaron: Debugging throughput performance for Atlas/pS-PTK. Will cover later durinng release update.
+   * Kavitha: Nothing
+ # pS-PTK 3.2 release update (Jason/Aaron)
+   * Major issue is that 3.2 throughput performance is not as good.
+     * nic driver change and tcp options changes didn't help
+     * may be interrupt balancing in the kernel.
+     * will attempt to disable kernel interrupt balancing on a bnl 3.1.3 host
+     * will attempt to enable kernel interrupt balancing on 3.2 and test
+ # Next call will be 9/13
+==== ACTIONS ====
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will take SOP to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. Aim for a half day VC the second week of Sept.
+   * _*ACTION*_: All - Review release wiki page to determine if any are critical for 3.2. [pSPT32Release]
+   * _*ACTION*_: Jeff and Aaron will discuss how the tcp options will be set for 3.2 with Tom.
+
+=== 20100823Video ===
+
+ # Attendees:
+   * Ken, Jason, Joe, Brian, Andy, Kavitha, Aaron
+ # Followup on previous actions:
+   * _*ACTION*_: Maxim, Jason and Aaron will incorporate pinger check script into release 3.2. (Sub-action: Aaron will check with Maxim on this.)
+     * Move to 3.2.1.
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will send out the SOP expectations to the list to see if everyone on this list agrees. If we are in agreement in pS-PS, Joe will take it to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
+   * _*ACTION*_: Jason will sort through current bugs to determine what must be fixed for 3.2 to be finalized.
+     * done
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities.
+ # Team Updates
+   * *Only things people think can't wait until next week*
+ # pS-PTK 3.2 release update (Jason/Aaron)
+   * No new major bugs found. Putting out another RC-3 which will hopefully become final.
+   * Discussion on tcp options.
+   * Discussion of performance problems for BNL after upgrade.
+ # pS-PS/owamp latency relation to Hades (Joe)
+   * DICE - common diagnostic service Q1 2011
+   * Need to think about how pS-PTK and pS-PS in general need to be modified in support of a common DICE diagnostic service.
+ # hls Nagios checks (Brian)
+   * Lots of warnings right now. Things look fragile. What can we do?
+   * First step is making sure the measurements are good. Once we are sure of that, we can go on to: modifying configurable options, verify interaction between components is good, and then instrument services to determine problems within services.
+ # pS-PS 3.3 functionality
+   * Aim for a half day VC the second week of Sept.
+ # Next call will be 8/23
+==== ACTIONS ====
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will take SOP to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities.
+   * _*ACTION*_: All - Review release wiki page to determine if any are critical for 3.2. [pSPT32Release]
+   * _*ACTION*_: Jeff and Aaron will discuss how the tcp options will be set for 3.2 with Tom.
+
+=== 20100816Video ===
+
+ # Attendees:
+   *  Andy, Somya, Brian, Jason, Marcos, Aaron, Kavitha, Jeff
+ # Followup on previous actions:
+   * _*ACTION*_: Maxim, Jason and Aaron will incorporate pinger check script into release 3.2. (Sub-action: Aaron will check with Maxim on this.)
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will send out the SOP expectations to the list to see if everyone on this list agrees. If we are in agreement in pS-PS, Joe will take it to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
+   * _*ACTION*_: Andy will evaluate the current traceroute rnc file and the rfc to determine what schema the tracerouteMA should use. Compatibility is the goal.
+      * Andy will move forward with the current rnc file which looks like a subset of the rfc. We can upgrade later if wanted.
+   * _*ACTION*_: Jason will talk with Maxim to determine what can be done to fix the pingER GUI and will discuss the results with Atlas to determine if there will be user concerns.
+      * Tom T. will be trying to fix it. Atlas would rather the release was not delayed.
+   * _*ACTION*_: Andy and/or Somya will deploy nagios checks against ESnet and Ineternet2 gLSs
+      * Andy has deployed some of them. Andy will send out a link.
+ # Team Updates
+   * Marcos: Has finished ip summarization development. He will come up with a test plan.
+   * Brian:  Would like to have a focused session in the near future to talk about 3.3 priorities.
+   * Andy: Started coding traceroute-ma in a branch. Doing a quick proof-of-concept now and will integrate into pS-B later. Looking at packaging nagios plugins.
+   * Aaron: rc-2 release of pS-PTK.
+   * Somya: Working on a GUI to show top/bottom performing links based on owamp/bwctl data.
+   * Jason: rc-2 is out, trying to get testers. Have a reasonable list of bugs. Jason will sort through them and determine critical vs non-critical bugs. Aiming for first week of sept for final release.
+   * Kavitha: nothing
+   * Jeff: nothing
+ # Next call will be 8/23
+==== ACTIONS ====
+   * _*ACTION*_: Maxim, Jason and Aaron will incorporate pinger check script into release 3.2. (Sub-action: Aaron will check with Maxim on this.)
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will send out the SOP expectations to the list to see if everyone on this list agrees. If we are in agreement in pS-PS, Joe will take it to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
+   * _*ACTION*_: Jason will sort through current bugs to determine what must be fixed for 3.2 to be finalized.
+   * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities.
+
+=== 20100802APICall ===
+
+ * Attending:
+   * Aaron, Andy, Ahmed, Marcos, Kavitha, Dan. (regrets: Jeff B., Jason Z., DMS)
+
+==== Agenda ====
+
+ # Agenda bashing
+ # Review updated use-case document
+ # Two questions from Jeff Boote:
+ (1) I'm curious how the list of available datatypes will be kept up to date?
+ And how the API  will be extended to new data types. 
+ For specifically the use cases Jason mentions from the pS Workshop, that will be key. 
+ There are several researchers who will want to expose 'new' metrics.
+
+ (2)I'm not sure the topology related data types are expressive enough... 
+ For example, I'm 
+ not sure I see how to reference a 'node' unless it is a L3 node. In fact, not sure I see 
+ 'node' at all - that really isn't the same thing as an interface - right?
+
+===== Notes =====
+
+ * Walked through use-cases #1 through #5. Notes on each below.
+  # Return throughput/latency results between two endpoints in certain time period
+   * Need to enumerate constants for datatypes like "bwctl"
+   * Also should enumerate params for these. Use abstract/concrete classes as for Subject but allow name=value for extensibility.
+   * Timeout for get_data()? Resolved: have global default, per-Client default, per-call value.
+  # List all endpoints with throughput/latency data available
+    * Multiple DataSet-s need to be retrieved, where each one just has meta.
+    * Agreed not fundamentally different than #1, but client could use a hint that it's not worth pre-fetching any of the data.
+    * If there are multiple services contacted, what to do about partial results? Resolved that this is by default OK, but optionally the client can ask for an exception to be thrown if not all data is available.
+    * To allow for processing in parallel with arriving data, provide a callback interface that will return incremental results until there are no more, it is told to stop, or it times out.
+    * To scope this kind of query, the Subject needs to be something like "esnet.`*`"
+  # Return X minute average utilization for Y time period on interface
+    * What if the server has {{{X*c}}} minute resolution instead of {{{X}}}? Resolved that where possible the client should re-sample, and otherwise it should raise an exception.
+    * Getting available resolution is currently not possible, so clients are probably going to mostly live with the default. Unlike other parameters, a missing "resolution" param means "default" instead of "all".
+  # List all router interfaces with collected SNMP data
+    * Agreed that this was pretty much the same as (2) for the API
+  # Trigger bwctl test via a web GUI
+    * Agreed that triggering tests was out-of-scope for this API
+
+Other issues:
+  * Jeff Boote's points above are both answered by simply providing extensibility hooks, e.g. allow string values and inheritance for the Subject, etc. Need to make sure these can map cleanly to underlying protocols.
+
+  * Exceptions
+    * Everyone agreed that having Exceptions defined would be a Really Fine Thing To Do. Since participants East of the Mississippi wanted to go home at this point, they were willing to agree to any hop-headed scheme, including this initial organization suggested by Dan:
+      # error interpreting the input arguments
+      # errors finding services
+      # errors connecting to services (including AA)
+      # errors fetching data or metadata from a service
+      # errors interpreting the data returned
+
+===== Actions =====
+
+ * _*ACTION*_: Add enumerations for common datatypes to API
+ * _*ACTION*_: Add Parameters abstract type, with subtypes for commonly used ones. Still allow arbitrary name=value pairs to be used, for extensibility. 
+ * _*ACTION*_: Add interface to get/set global, per-Client, and per-call timeouts
+ * _*ACTION*_: Add interface to give get_data() a "hint" that only metadata is needed
+ * _*ACTION*_: Modify get_data() to return a *group* of DataSet objects, one per unique combination of metadata, per-call
+ * _*ACTION*_: Add interface to get_data() to optionally throw an exception on incomplete data.
+ * _*ACTION*_: Add callback signature, and parameter to get_data(), for incremental results.
+ * _*ACTION*_: Add Subject subclass(es) useful for scoping lookups to domain, e.g. a "bag of address patterns" like {{{esnet.*, internet2.edu.*}}}.
+ * _*ACTION*_: Write initial set of Exception classes (see "Exceptions" blurb above)
+ * _*ACTION*_: Add Subject extensibility hooks. At least so raw XML strings can be passed through, but ideally something easier to use than that.
+
+_*Reconvene in 2 weeks (16 August)*_
+
+=== 20100802Video ===
+
+ # Attendees:
+   *  Andy, Somya, Joe, Brian, Jason, Eric, Marcos, Aaron, Kavitha, Jeff
+ # Followup on previous actions:
+   * _*ACTION*_: Maxim, Jason and Aaron will incorporate pinger check script into release 3.2. (Sub-action: Aaron will check with Maxim on this.)
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Brian will followup with BNL to see why lhcmon.bnl.gov is not showing up in the LS infrastructure.
+     * Reboot seems to have fixed the problem.
+   * _*ACTION*_: Joe will send out the SOP expectations to the list to see if everyone on this list agrees. If we are in agreement in pS-PS, Joe will take it to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
+   * _*ACTION*_: Jason will verify there are no more outstanding tasks in the issue tracker for toolkit 3.2.
+      * Everything should be up to date in the tracker.
+   * _*ACTION*_: Brian and Andy will test toolkit 3.2rc1.
+      * Done
+   * _*ACTION*_: Andy will work on packaging the Nagios checks.
+   * _*ACTION*_: Andy will evaluate the current traceroute rnc file and the rfc to determine what schema the tracerouteMA should use. Compatibility is the goal.
+ # Release update (Jason/Aaron/Tom)
+   * 13 betatesters have been targeted. Atlas will be primary for testing upgrade proceedures. Also testing pS-B backup scripts. Trying to determine how many of outstanding issues can be handled with this release.
+ # Install DVD (Brian)
+   * Removing from the 3.2 requirements. Will release with 3.2.1.
+ # Nagios Plugin Update (Andy)
+   * Started deploying on ESnet. Andy has identified a problem with pS-B keep-alive requests to the hLS after the hLS services are restarted.
+ # Next call will be 8/16
+==== ACTIONS ====
+   * _*ACTION*_: Maxim, Jason and Aaron will incorporate pinger check script into release 3.2. (Sub-action: Aaron will check with Maxim on this.)
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will send out the SOP expectations to the list to see if everyone on this list agrees. If we are in agreement in pS-PS, Joe will take it to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
+   * _*ACTION*_: Andy will evaluate the current traceroute rnc file and the rfc to determine what schema the tracerouteMA should use. Compatibility is the goal.
+   * _*ACTION*_: Jason will talk with Maxim to determine what can be done to fix the pingER GUI and will discuss the results with Atlas to determine if there will be user concerns.
+   * _*ACTION*_: Andy and/or Somya will deploy nagios checks against ESnet and Ineternet2 gLSs
+
+=== 20100726Video ===
+
+ # Attendees:
+   * Brian, Jason, John, Marcos, Andy, Eric, Joe, Aaron, Kavitha, Somya, Jeff
+ # Followup on previous actions:
+   * _*ACTION*_: Maxim, Jason and Aaron will incorporate pinger check script into release 3.2.
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will send out the SOP expectations to the list to see if everyone on this list agrees. If we are in agreement in pS-PS, Joe will take it to DICE.
+   * _*ACTION*_: Andy will update on the group on the Nagios development.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jason will update the issue tracker for 3.2 milestones.
+   * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
+ # Release update (Jason/Aaron/Tom)
+    * Added an 'upgrade script' to upgrade a 3.1 version toolkit to a 3.2.
+ # Update on Nagios development (Andy/Brian)
+    * http://code.google.com/p/perfsonar-ps/wiki/NagiosPlanning
+    * Need feedback on functionality.
+ # Update on Traceroute development (Andy)
+    * http://code.google.com/p/perfsonar-ps/wiki/TracerouteMADesign
+ 
+==== ACTIONS ====
+   * _*ACTION*_: Maxim, Jason and Aaron will incorporate pinger check script into release 3.2. (Sub-action: Aaron will check with Maxim on this.)
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Brian will followup with BNL to see why lhcmon.bnl.gov is not showing up in the LS infrastructure.
+   * _*ACTION*_: Joe will send out the SOP expectations to the list to see if everyone on this list agrees. If we are in agreement in pS-PS, Joe will take it to DICE.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
+   * _*ACTION*_: Jason will verify there are no more outstanding tasks in the issue tracker for toolkit 3.2.
+   * _*ACTION*_: Brian and Andy will test toolkit 3.2rc1.
+   * _*ACTION*_: Andy will work on packaging the Nagios checks.
+   * _*ACTION*_: Andy will evaluate the current traceroute rnc file and the rfc to determine what schema the tracerouteMA should use. Compatibility is the goal.
+
+
+=== 20100614APICall ===
+
+ # Actions from last call:
+   * Please see the current version of PsClientApi.
+ # Discuss open issues:
+   # Table-o-data being returned in the result object (Data, in the API). Some think this should be done with simpler objects and inheritance.
+     * how, then, to deal with user-requested summarizations?
+     * in the table-o-data model, how are known structures described -- enumerations of names for rows and columns? (do the "rows" of the table need a name, too?)
+   # Need an API method to get "just" the metadata. Examples:
+     * what SNMP granularities are available, e.g. !DataInfoRequest [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-SNMPMA/etc/requests/DataInfoRequest-1.xml XML example].
+     * which data (measurements) are available. e.g., results of !MetadataKeyRequest with an empty subject.
+   # Need explicit timeout for synchronous calls
+   # A TTL in the result so the client knows how often to ask for new data. Services would need to provid this -- can we specify a default?
+   # Error handling and exceptions. This gets tricky when multiple services get involved:
+     * what to do if we are contacting multiple services underneath and some fail while others succeed. Does partial failure lead to partial results? Is total failure still an exception? How are the exceptions returned to the caller? 
+   # More generic "Topology" class instead of a class hierarchy with !NetworkElements, !EndpointPair? Should this be consistent with whether we make a class hierarchy for Data, or treated separately?
+   # Need to specify supported time formats
+   # At least need to keep the possibility of an asychronous, "callback", API in mind
+ # Next steps
+   # List of specific use-cases
+   # Python examples for each
+   # Timeline for prototype implementation
+
+=== 20100614Video ===
+
+ # Attendees:
+   * Maxim, Andy, Joe, Jeff, Jason, Marcos, Aaron, Kavitha
+ # Followup on previous actions:
+   * _*ACTION*_: Maxim will verify his check script helps and continue watching for the pinger issues.
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will add monitoring expectations to the SOP for production global infrastructure. Criteria for adding/removing gLSs from the hints files. Bringing this topic to DICE.
+   * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
+   * _*ACTION*_: Andy will update on the group on the Nagios development.
+   * _*ACTION*_: Everyone: review issue tracker and email a list of the issues they think is critical for 3.2.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
+ # Update on owamp pS-B development
+    * Andy will continue to use the current event type, and always return buckets.
+ # Release update
+    * Aaron/Eric have updated release status wiki page. Testing net-boot and KS has started, looking for feedback by wednesday. Will attempt to have an ISO available by the end of the week. Will attempt to have 2 rounds of testing by the end of the month.
+ # Team updates
+    * Maxim, no update.
+    * Andy, nothing.
+    * Joe, no.
+    * Jeff, no.
+    * Jason, OGF is next week. Will be pushing to get NMWG/NMC documents done.
+    * Marcos, Working on integrating IPsummarization into gls code.
+    * Aaron, no.
+    * Kavitha, no.
+ 
+==== ACTIONS ====
+
+   * _*ACTION*_: Maxim, Jason and Aaron will incorporate pinger check script into release 3.2.
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will send out the SOP expectations to the list to see if everyone on this list agrees. If we are in agreement in pS-PS, Joe will take it to DICE.
+   * _*ACTION*_: Andy will update on the group on the Nagios development.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jason will update the issue tracker for 3.2 milestones.
+   * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
+
+
+=== 20100607APICall ===
+
+ * Attending:
+   * Jason
+   * Andy
+   * Marcos
+   * Aaron
+   * Ahmed
+   * Maxim
+   * Zafar
+   * Dan
+   * Martin
+
+==== Agenda ====
+
+ # Actions from last call:
+   * _*ACTION*_: V1 Of the API
+   * _*ACTION*_: Use Cases
+ # User Scenarios (Zafar)
+ # Presentation/discussion of V1 of the API
+
+==== Background material ====
+
+* [http://code.google.com/p/perfsonar-ps/wiki/20100517APICall Minutes from 5/17 API Call]
+* Current V1 API specification (work in progress)
+{{{
+typedef Parameters (array or hash of name/value pairs)
+
+==== Initialization ====
+/* Init includes various optional parameters which need to be cleaned up 
+Also might need a client_parameters call to make it generic.  */
+
+create_client(Parameters)
+/* Parameters include: */
+	 /* gls_hints_file=""   use gLS root hints file, if given; default is 'http://www.perfsonar.net/gls.root.hints'  */
+   /*   gls_urls=[],       /* list of gLS servers */
+   /*           hls_urls=[],       /* list of hLS servers */
+   /*           service_urls=[],   /* list of services to query without consulting LS infrastructure */
+
+==== Get Data ====
+
+DataSetHandle /* state used to fetch data (including measurements and summaries) */
+get_data( String             type
+                  NetworkElements    elements,        /* the network elements involved in the measurement */
+                  DataParams  params,          /* parameters of the measurement to search for */
+                 TimeRange          time_range=NULL, /* if non-empty, a TimeRange filter */
+                  int                max_results=0,   /* never return more than this many results; 0=inf. */ 
+                  int                offset=10,       /* return up to this many results at a time */
+)
+
+The max_results/offset allows for pagination, though this would need to be
+handled (at least for the near term) in the client API.
+
+===== Iterate through measurement sets =====
+DataSet next_measurement_set(ResultHandle handle)
+
+===== Retrieve the measurements for the measurement set =====
+ResultHandle get_results(DataSet set)
+
+===== Iterate through the measurement data in that measurement set =====
+Result next_result(ResultHandle handle)
+
+==== Data types ====
+===== TimeRange =====
+TimeRange(double start_time, double end_time)
+* start_time: double (may be -1/NULL)
+* end_time: double (may be -1/NULL)
+
+TimeRange(start_time, -1/NULL): from start_time to the end of time
+TimeRange(-1/NULL, end_time):   from the beginning of time to end_time
+TimeRange(-1/NULL, -1/NULL):    from the beginning of time to the end of time
+
+===== DataSet =====
+* String             service_url          /* the URL from which the measurements are being retrieved */
+* String             type
+* NetworkElements    elements
+* DataParams  params
+* Summarization      summarization
+* TimeRange          time_range
+* int                max_results
+* int                offset
+
+===== Result =====
+This is an abstract supertype of GenericData and GenericSummarizationResult
+
+===== GenericData < Result =====
+* double timestamp
+* double value
+
+====== PingERData < GenericData ======
+* double timestamp
+* double value:          the median RTT value
+* double minRtt:
+* double meanRtt:
+* double medianRtt:
+* double lossPercent:
+* double clp:
+* double minIpd:
+* double maxIpd:
+* double iqrIpd:
+* double meanIpd:
+* double duplicates:
+* double outOfOrder:
+
+===== GenericSummarizationResult =====
+* TimeRange time
+* String    summarization_type
+* double    value
+
+====== MaxSummarizationResult ======
+====== MinSummarizationResult ======
+====== MedianSummarizationResult ======
+
+====== HistogramSummarizationResult ======
+* TimeRange time
+* String    summarization_type
+* double    value:                  NULL or -1
+* String    bucket_units:           The units of each bucket in the histogram
+* double    bucket_width:           The size of each bucket in the histogram
+* double    buckets[]:              The buckets in the histogram
+* double    bucket_values[]:        The values of each bucket
+
+  e.g.
+
+   bucket_units:   "packets"
+   bucket_width:   1   
+   buckets:        [1, 3, 4, 5, 10]
+   bucket_values:  [10, 4, 4, 1, 8]
+
+===== NetworkElements =====
+This is Topology Schema element.
+
+Examples:
+
+====== EndPointPair ======
+* String source
+* String destination
+
+====== Interface ======
+* String host
+* String hostAddress
+* String interfaceName
+* String interfaceAddress
+
+===== DataParams =====
+This is an abstract supertype of the various types of measurement parameters. 
+
+====== AvailableBandwidth ======
+====== Jitter ======
+====== RoundTripTime ======
+====== OneWayLatency ======
+====== IperfTest ======
+====== OwampTest ======
+====== PingERTest ======
+
+===== Summarization =====
+This is an abstract supertype of the various summarization types.
+
+* double aggregation_interval:    seconds of data to summarize in each returned SummarizationResult
+
+====== MinSummarization ======
+====== MaxSummarization ======
+====== MedianSummarization ======
+====== HistogramSummarization ======
+}}}
+
+===== User Scenarios =====
+ 
+The following is a list of user scenarios i.e. type of information required by perfSONAR users.
+
+_Time based queries:_
+ 
+ * Show throughput measurements since date.
+ * Show latency measurements since date.
+ * Show max/min throughput times for each day since date.
+ * Show max/min latency times for each day since date.
+
+_Host based queries:_
+ 
+ * Show hourly/daily/weekly throughput between host1 and host2.
+ * Show hourly/daily/weekly latency between host1 and host2.
+
+_Magnitude (of data) based queries:_
+ 
+ * Show amount of data transferred between host1 and host2 since date.
+
+And various combinations of the above.
+ 
+==== Minutes ====
+ 
+ # Actions from last call:
+   * _*ACTION*_: V1 Of the API
+     * Available at [psClientAPI]
+     * Try to get comments in ASAP.
+   * _*ACTION*_: Use Cases
+     * No additional use cases were added or discussed beyond Zafar's
+ # User Scenarios (Zafar)
+   * Zafar presents his work.  He is working on the GridFTP MA project at SLAC.  General theme: make it easier for users to get data.  Discussion from Maxim/Dan on this.  Not as clear cut as the examples.  Maxim mentions the need to worry about layers.  Dan points out that any API we construct should be useful as a building block to build new layers.  Some mention of a lack of discovery - many in attendance have not read the discovery API for the LS: [http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/gLS/phase_1_color.html#api].  
+ # Presentation/discussion of V1 of the API
+   * Not many read the work since it was posted prior to the call.
+   * More discussion on ease of use vs complexity.  This is a common theme that we are spending a lot of time discussing.  Need to broaden the focus beyond this.  
+   * Ahmed wants to be involved with the current API work
+ # Next call
+   * In a week, will work on current API till then
+   * Next call needs to focus on physical work - requirements have been gathered.  
+
+=== 20100607Video ===
+
+ # pSPT 3.2 Release
+   * See notes here: [pSPT32Release]
+   * Development
+     * Milestone review
+       * Are the milestones still accurate?
+       * Do we need more?  Do we need less?
+       * Are the target dates accurate?  More time, less time?
+     * Subtasks
+       * Are the subtasks still accurate?
+       * Do we need more?  Do we need less?      
+     * Progress
+       * Eric and Aaron - Please update these as you complete things
+   * Testing Groups
+     * Alpha/Beta testing = pSPS Group
+     * RC Testing = select external testers
+   * Testing products
+     * KS Files
+       * Are there netboot etc. CDs to go with the KS images?  If not are there instructions on how to use a standard CentOS netboot CD to do this?
+     * Live CD
+     * Installation CD/DVD
+   * Testing Timeframes
+     * Week of June 7th
+       * KS Images ready for Alpha testing, feedback due by Fri June 11th
+     * Week of June 14th
+       * LiveCD ready for Alpha testing, feedback due by Fri June 18th
+       * Additional KS testing if needed
+     * Week of June 21st
+       * LiveCD ready for Beta/RC testing, feedback due by Fri June 25th
+     * Week of June 28th
+       * LiveCD ready for RC 2 testing (June 30th, latest), feedback due by Fri July 5th   
+     * Week of July 5th
+       * Continued testing, no additional RCs planned during this time
+       * Final RC generation by July 5th
+     * Week of July 12th
+       * Joint Techs, RC of LiveCD available for download
+
+==== Notes ====
+
+ # Attendees:
+   * Jason
+   * Marcos
+   * Aaron
+   * Andy
+   * Sowmya
+   * Joe
+   * Eric
+   * Kavitha
+ # Milestone Status
+   * Base 1 is done
+   * Base 2 is in progress (Aaron to create RPM repo in the next day or so)
+     * Eric having some trouble with RPM packages (e.g. some need very basic deps)
+   * Base 3 is also in progress. Web RPMs added to kick start already
+   * Base 4 is largly testing, and will start after 2 and 3 are done.  
+     * May need to push back due date.  Delays in building and availability of Eric.  
+   * LiveCD 1
+     * Tool itegration in progress.  Backing store/passwords.  Ramdisk procedure will take the longest, and wil dicate when this is done.  Aaron thinks this can be tested in parallel with the KS files.  
+   * Install DVD
+     * Eric in progress. Will be very hard to test due to the cost/availability of DVDs for many testers.  Should consider a process to break the DVD image into several CDs.  
+ # Missing milestones
+   * We need to have a boot CD ready to test the KS.  This is not covered in other milestones.  Jason will create.
+ # Dates
+   * Some dates will need to be ajusted - will re-evaluate at the end of this week.  
+ # Testers
+   * Andy/Sowmya/Brian (plus others?) from ESnet
+   * Who from UD?
+   * Jason/Kavitha/Aaron + some others at Internet2 (our TSG group)
+ 
+==== ACTIONS ====
+
+ * _*ACTION*_: Jason to update release status and information.  
+
+=== 20100524Video ===
+
+ # Attendees: Jason, Eric, Andy, Brian, Aaron, Kavitha, Marcos, Joe, Jeff, Ahmed
+   * TBD
+ # Followup on previous actions:
+   * _*ACTION*_: Maxim will verify his check script helps and continue watching for the pinger issues.
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will add monitoring expectations to the SOP for production global infrastructure. Criteria for adding/removing gLSs from the hints files. Bringing this topic to DICE.
+   * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
+   * _*ACTION*_: Andy will update on the group on the Nagios development.
+   * _*ACTION*_: Everyone: review issue tracker and email a list of the issues they think is critical for 3.2.
+   * _*ACTION*_: ~~Jason will modify the delayGraph.cgi GUI so OWAMP 'max' data is no longer plotted for 3.2.~~
+     * Done on 5/19
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+ # [IndexStrategies Indexing Strategies] (Jason/Aaron/Jeff)
+ 
+==== ACTIONS ====
+
+   * _*ACTION*_: Maxim will verify his check script helps and continue watching for the pinger issues.
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will add monitoring expectations to the SOP for production global infrastructure. Criteria for adding/removing gLSs from the hints files. Bringing this topic to DICE.
+   * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
+   * _*ACTION*_: Andy will update on the group on the Nagios development.
+   * _*ACTION*_: Everyone: review issue tracker and email a list of the issues they think is critical for 3.2.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+   * _*ACTION*_: Jason will update [IndexStrategies Indexing Strategies] based on comments
+
+
+=== 20100517APICall ===
+
+ * Attending:
+   * Maxim
+   * Andy
+   * Jason
+   * Aaron
+   * Ezra
+   * Martin
+   * Dan
+   * Jeff
+   * Marcos
+   * Kavitha
+
+==== Agenda ====
+
+ # Introductions and reason for interest
+ # Discussion of desired scope and result of effort
+ # Discussion of near-term roadmap
+ # Volunteers for material for the next telecon
+
+===== Background Info =====
+
+ * [http://psps.perfsonar.net/client-doc.html Some existing documentation for writing clients with the current PERL code]
+ * Dan G.'s related project, _globus.org_: [http://globus.org/service/ sales pitch] and [https://docs.google.com/Doc?docid=0ATOd-XAIhc_vZGd0bjdzM3dfMTFneDk5bWJjcQ&hl=en more details].
+ 
+==== Minutes ====
+ 
+ # Introductions and reason for interest
+   * Dan starts us off, wants to know why people are here.  He is involved with the CEDPS project (see http://www.cedps.net/).  Specifically the monitoring - wants to pS but discovered there is not an easy way to get information.  Can go the long way, wants to see an API.  
+   * Ezra doesn't want to deal with the low level knowledge since not always using perl (e.g. using Java, etc.).  Wants access to the information without having to know about structure of XML, etc. 
+   * Maxim is doing ecenter.  Talks about PingER APIs and how the current APIs are just crude wrappers around XML generation (used in CGIs etc)
+   * Andy wants to continue the work talked about at JTs to implement APIs for client/application developers
+   * Aaron works more on the server side of things.  We always talk about wanting to provide the information, just not how it will be used or how to use it.  
+   * Marcos wants to make it easier on the end user.  
+ # Discussion of desired scope and result of effort
+   * Dan gets into the scope.  Wants to avoid touching the protocol and service aspects for the API if we can.  
+   * Maxim mentions REST and the work he has done ([http://xenmon.fnal.gov:10010/ecenter/service]).  Dan doesn't want to exclude things like REST, but is more interested in capturing things like the _basic workflow_ of a client, to see what they are doing now and try to tailor the API to the needs.  Need to worry about things like how the IS fits in (answer questions automatically).  
+   * Aaron goes into how we have approached this before, e.g. High Level = _I want to know information x_, Lower Levels = simple questions that can proceed in a series of atomic steps.  Dan states we should narrow our work to that top level, and if we have ideas on how to solve that now.  
+   * Jeff sees a goal of making it easier for people to program clients.  E.g. our first goal should be establishing a minimal set of instructions based on the questions that are going to be asked.      
+   * Dan muses on the axis of questions that can be asked:
+     * _Get Throughput Data_ or _Get Latency Data_
+     * What do we get back (in terms of a return value).  
+     * How are time ranges handled
+     * Does this function cover multiple points?
+     * Do we care about tools or just characteristics?
+   * Jeff and Jason explain how the mapping of characteristics and tools work
+     * Services encode their metadata with different eventTypes to describe the underlying data.  For example bwctl running an iperf test:
+       * http://ggf.org/ns/nmwg/tools/iperf/2.0
+       * http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0
+     * Information registered to the LS.  
+     * Users would be able to search on either, and the data is found
+     * Dan: what happens if they don't do this, is it _invalid_?.  JZ: No, just won't find it.  We don't mandate what people should/should not encode data.  JB: there are also a small number of services now so its not a big problem.  Can also have a companion API for the LS - force you to register data in several ways.    
+     * Dan: Question on how we know things are equal.  JZ: can use the LS to find things that are stored together.  Also have the long standing idea of some sort of central registry.  
+   * Dan: Based on the above, the API needs to make it easier - the API should maintain a mapping for the eventTypes to something simple like _getThroughput_
+     * Start of an argument about the value of characteristics vs tools
+       * Dan sees value in only exposing things that we know will be easy to use and be used.  Doesn't want to give people lots of half measures that we dont feel we can support, because they will use them
+       * Dan thinks _getThroughput_ or _getLatency_ is the way to go - concise description of what you are going to get
+       * Jason doesn't agree - just as valuable to want to use _getIperf_ in a situation like that.  Also doesn't want to see _getThroughput_ and would rather see _getCharacteristic(throughput_ to make it general. 
+       * Some confusion on what is being asked - Jeff thinks that since all eventTypes are URIs, we should be able to just plug in what we want, e.g. doesn't want to see _getThroughput_
+     * Start of an argument about the value of _getThroughput_ vs _getCharacteristic(throughput)_
+       * Trade-offs:
+         * API space
+         * explicit use
+         * Readability
+         * Usability
+         * Functionality
+       * Dan also doesn't want to see people entering URIs into a function - could use enumerated types to make it easier.  Still run into problems (e.g. available vs achievable bandwidth)
+   * Dan comes back to the Information Services steps.  Should this be explicit/implicit when using them?  Aaron claims clients may not care where the data comes from, just want to see it. Could argue there are times when it matters (data provenance).  
+   * Jason explains how the gLS Discovery API works, and how it may be used currently.  
+   * Dan states that simplicity from the client would be not needing extra LS steps - do it automatically.  No one disagrees.  
+ # Discussion of near-term roadmap
+   * Use Cases
+   * V1 of the Proposed API
+ # Volunteers for material for the next telecon
+   * API
+     * Dan
+     * Aaron
+     * Andy
+     * Martin
+   * Use Cases
+     * Everyone else
+   
+===== Actions =====
+
+ * _*ACTION*_: V1 Of the API
+ * _*ACTION*_: Use Cases
+
+=== 20100517Video ===
+
+ # Attendees:
+   * Marcos, Maxim, Brian, Ahmed, Andy, Joe, Jason, Aaron, Kavitha, Jeff, Wei Ping
+ # Followup on previous actions:
+   * _*ACTION*_: Jason will follow up on pingER issues.
+       * Maxim has created a check script that will restart pinger if it fails.
+   * _*ACTION*_: Ahmed to continue testing with replay and will look for areas of the application that are causing database deadlocks.
+       * Ahmed is attempting to try using xmldb with no transactions.
+   * _*ACTION*_: Jason will test the new cache.pl changes and install if there are no problems.
+   * _*ACTION*_: Joe will propose SOP for production global infrastructure.  http://code.google.com/p/perfsonar-ps/wiki/GlobalInfrastructureMaintenanceSOP
+        * Joe has a first draft.
+   * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
+   * _*ACTION*_: Aaron will more fully describe the requirements to support upgrading a toolkit host. (Include config file dependency analysis.)
+        * Aaron has a new document linked to from the dev plan showing this.
+   * _*ACTION*_: Everyone: review proposed nagios plugin list and offer Andy feedback. [ http://code.google.com/p/perfsonar-ps/wiki/NagiosPlanning ] 
+   * _*ACTION*_: Everyone: review issue tracker and email a list of the issues they think is critical for 3.2.
+ # Discussion of how to filter owamp data (Brian)
+   * The current owamp plots shows lots of large spikes that are due to network activity on the host, not due to actual network latency. We need a way to filter this out.
+   * My proposed solution: modify delayGraph.cgi to compute the 95th percentile (http://en.wikipedia.org/wiki/Percentile)  and the median of the data returned, and not show any value above the 95th percentile (or optionally replace all values greater than the 95th percentile with the median value) when generating the graph
+   * Future enhancements to this solution should include:
+       * write a client API where various types of filtering are built into the API
+       * store a daily? histogram and the median in the database, so that they can be queried, and not recomputed every time (or maybe a running histogram of the last 7 days?)
+   * Q: Who should do this?
+ # [IndexingStrategies Indexing Strategies] (Jason/Aaron/Jeff)
+   * Tabled to next week.
+ 
+==== ACTIONS ====
+
+   * _*ACTION*_: Maxim will verify his check script helps and continue watching for the pinger issues.
+   * _*ACTION*_: Ahmed will test both the gLS/hLS with no transactions.
+   * _*ACTION*_: Joe will add monitoring expectations to the SOP for production global infrastructure. Criteria for adding/removing gLSs from the hints files. Bringing this topic to DICE.
+   * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
+   * _*ACTION*_: Andy will update on the group on the Nagios development.
+   * _*ACTION*_: Everyone: review issue tracker and email a list of the issues they think is critical for 3.2.
+   * _*ACTION*_: Jason will modify the delayGraph.cgi GUI so OWAMP 'max' data is no longer plotted for 3.2.
+   * _*ACTION*_: Andy will document the performance issues he is seeing with querying pS-B and Jeff will review.
+
+
+=== 20100510Video ===
+
+ # Attendees:
+   * Joe, Aaron, Jason, Andy, Jeff, Eric, Brian, Ahmed, Marcos
+ # Excused:
+   * Maxim
+     * Issue with pinger MP hanging on ATLAS boxes is resolved _again_
+     * will require extra re-factoring of the MP scheduler code to address issue when tests are scheduled too close (less than 5 minutes)
+ # Followup on previous actions:
+   * _*ACTION*_: Ahmed to continue testing with replay and will look for areas of the application that are causing database deadlocks.
+   * _*ACTION*_: Brian will send out the latest nl_cpu.
+   * _*ACTION*_: Brian will install nl_cpu on ESnet gls host.
+   * _*ACTION*_: ~~Jason will install new nl_cpu on Internet2 gls host.~~
+     * Complete 5/3/2010
+   * _*ACTION*_: Jason will test the new cache.pl changes and install if there are no problems.
+   * _*ACTION*_: Joe will propose SOP for production global infrastructure.
+   * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
+   * _*ACTION*_: Aaron will more fully describe the requirements to support upgrading a toolkit host.
+ # Nagios (Andy)
+   * Andy created a wiki page for evaluating nagios plugins. [ http://code.google.com/p/perfsonar-ps/wiki/NagiosPlanning ] Andy reviewed the proposed plugins.
+ # pSPT 3.2 Status (Aaron/Eric)
+   * Current work has been on build environment and web-config GUI interface. Web-config GUI work has gone better than expected. 
+ 
+==== ACTIONS ====
+
+   * _*ACTION*_: Jason will follow up on pingER issues.
+   * _*ACTION*_: Ahmed to continue testing with replay and will look for areas of the application that are causing database deadlocks.
+   * _*ACTION*_: Jason will test the new cache.pl changes and install if there are no problems.
+   * _*ACTION*_: Joe will propose SOP for production global infrastructure.
+   * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
+   * _*ACTION*_: Aaron will more fully describe the requirements to support upgrading a toolkit host. (Include config file dependency analysis.)
+   * _*ACTION*_: Everyone: review proposed nagios plugin list and offer Andy feedback. [ http://code.google.com/p/perfsonar-ps/wiki/NagiosPlanning ] 
+   * _*ACTION*_: Everyone: review issue tracker and email a list of the issues they think is critical for 3.2.
+
+
+=== 20100503Video ===
+
+ # Attendees:
+   * Aaron, Andy, Jason, Brian, Eric, Maxim, Jeff, Marcos, Joe, Ahmed
+ # Followup on previous actions:
+   * _*ACTION*_: Brian/Eric P/Andy to analyze results when available from hls/gls testing.
+      * Netlogger output analysis. Similar results to the Internet2 testing were seen.
+   * _*ACTION*_: Brian send nl_cpu link out to others so cpu data can be correlated with netlogger tests.
+   * _*ACTION*_: Aaron and Eric will explore jointly and propose a development plan for the next version of the toolkit enabling both R/O media as well as a full-install option.  Conf call to discuss, next step is to flush out a roadmap for development
+ # Additional cache.pl changes (Andy)
+   * Andy made new performance and functionality available in the cache.pl script and updated the ESnet instance. There was discussion on the process for updating the global production infrastructure. The changes look reasonable.
+ # Toolkit milestones (Aaron/Eric)
+   * [pSPT32_Notes]
+   * Basic functionality was agreed to. There was discussion about potentially being able to skip the 'upgrade' functionality for this release.
+ # DICE service development work
+   * Joe asked about the appropriate venue to discuss DICE collaborative work. Consensus seemed to be the dice measurement list with development work being done where appropriate for the lead developers of the task.
+
+==== ACTIONS ====
+
+ * _*ACTION*_: Ahmed to continue testing with replay and will look for areas of the application that are causing database deadlocks.
+ * _*ACTION*_: Brian will send out the latest nl_cpu.
+ * _*ACTION*_: Brian will install nl_cpu on ESnet gls host.
+ * _*ACTION*_: Jason will install new nl_cpu on Internet2 gls host.
+ * _*ACTION*_: Jason will test the new cache.pl changes and install if there are no problems.
+ * _*ACTION*_: Joe will propose SOP for production global infrastructure.
+ * _*ACTION*_: Jeff will look at the toolkit plan to evaluate dependencies and timelines. Joe and/or Brian will also look at this aspect.
+ * _*ACTION*_: Aaron will more fully describe the requirements to support upgrading a toolkit host.
+
+
+=== 20100419Video ===
+
+ # Attendees: Eric, Aaron, Jeff, Maxim, Jason, Joe, Andy, Brian, Ahmed, Marcos.
+ # Followup on previous actions:
+  * _*ACTION*_: Ahmed will analyse the LS code to look for places to optimize and look for locking issues.
+      * in progress
+  * _*ACTION*_: Andy to redeploy netlogging at ESnet 
+      * done
+  * _*ACTION*_: Brian/Eric P to analyze results when available
+      * not started
+  * _*ACTION*_: Aaron and Eric will explore jointly and propose a development plan for the next version of the toolkit enabling both R/O media as well as a full-install option.
+      * conf call to discuss, next step is to flush out a roadmap for development
+ # pSPT 3.1.3 Release Status
+    * [pSPT201004Release Release Status]
+    * More testing needed. Will be putting out another RC today (hopefully last one).
+    * pingER fixes will be on next RC.
+    * ls cache daemon fix.
+ # gLS Testing - Ahmed
+
+==== ACTIONS ====
+  * _*ACTION*_: Brian/Eric P/Andy to analyze results when available
+  * _*ACTION*_: Brian send nl_cpu link out to others so cpu data can be correlated with netlogger tests.
+  * _*ACTION*_: Aaron and Eric will explore jointly and propose a development plan for the next version of the toolkit enabling both R/O media as well as a full-install option.
+      * conf call to discuss, next step is to flush out a roadmap for development
+
+
+=== 20100412Video ===
+
+ # Attendees: Maxim, Jeff, Jason, Eric, Andy, Brian, Joe, Ahmed, Marcos, Aaron, Matt
+ # Followup on previous actions:
+  * _*ACTION*_: Jason/Andy to add more netlogging to LS code
+    * Jason: Deployed on some Internet2 hosts. Doesn't look to have helped much. Ahmed will be looking closer.
+  * _*ACTION*_: Jason to redeploy nettlogging at Internet2
+    * done
+  * _*ACTION*_: Andy to redeploy netlogging at ESnet 
+    * continue
+  * _*ACTION*_: Brian/Eric P to analyze results when available
+    * continue
+  * _*ACTION*_: Eric P/Andy to look at XMLDB _drop in_ replacements
+    * This is longer term and will be tracked on the issue tracker.
+  * _*ACTION*_: Marcos/Eric P/Andy should continue investigation into the vmstat results from planetlab to see what is blocking processes.
+    * Should look at vmstat along with the netlogger output.
+ # pSPT 3.1.3 Release Status
+    * RC1 is available and will be tested this week.
+ # [InstallDVD_Notes InstallDVD proposal]
+    * long rambling discussion with positives/negatives discussed. The short story is that DOE sites would benefit from the ability to patch kernels provided by this functionality and that University sites benefit from the ability to quickly deploy a toolkit on a host non-destructively. Aaron suggested that both could be accomplished by using kick-start functionality instead of the clonezilla solution. Aaron and Eric will explore jointly and propose a development plan to accomplish both.
+ 
+==== ACTIONS ====
+  * _*ACTION*_: Ahmed will analyse the LS code to look for places to optimize and look for locking issues.
+  * _*ACTION*_: Andy to redeploy netlogging at ESnet 
+  * _*ACTION*_: Brian/Eric P to analyze results when available
+  * _*ACTION*_: Aaron and Eric will explore jointly and propose a development plan for the next version of the toolkit enabling both R/O media as well as a full-install option.
+
+
+=== 20100329Video ===
+
+ # Attendees: 
+   * eric p
+   * andy
+   * jason
+   * maxim
+   * brian
+   * aaron
+   * joe
+   * ezra
+   * ahmed
+ # gLS Testing Update
+   * Ahmed update on profiling of common LS queries and registered information
+     * [UDelLSTesting]
+     * Testing on the _real_ infrastructure.  
+     * Results on page, but highlights
+       * 5 out of 9 gLSs are _active_ on average from the hints list.  Some down
+       * _Inbalance_ between the services on a pSPT hLSs and the hLSs of an organization (ESnet, Internet2)
+       * Measured some of the times it takes to register to a gLS, and information propagates around the cloud
+       * Cache.pl makes up about 1280/1300 queries to the moonshine gLS in a given day (20/1300 were _different_, perhaps the GN3 API)
+     * Discussion topics:
+       * Hints file = total number of gLSs, not _*active*_ gLSs.  Meta discussion on monitoring - Internet2 has a nagios instance to monitor our gLS (and Fermi/Udel).  GN3 didn't want to be monitored.  APAN does their own monitoring.  Idea is to monitor all.  This is a larger topic for DICE, e.g. perfSONAR Operations.  Need an OPS list to send alerts, etc.  
+       * _*Service Description*_ is not very descriptive (note that the pSPT uses a template for this).  Consider altering documentation to get something better. 
+       * pSPT services register to local hLS, _*only*_.  should we add hooks to allow registration to other hLSs (e.g. if a VO wanted to run one).  Would eliminate the number of hLSs out there but may force a centralization of functionality (e.g. who from a VO would be the site to run an hLS?). 
+   * Marcos (Andy) update on resource consumption of LS and analysis of results
+     * Marcos not present, Andy to give update
+     * [LSScalabilityInvestigation]
+     * Marcos is testing on PlanetLab, initially looking at scalability (number of services per hLS, number of hLSs per gLS, timings to get data, and distribute data).  
+     * Recently Eric and Andy have been working with Marcos to get more system information (memory, CPU, process/thread count)
+     * Eric P Reports: wanted to look at vmstat.  Got some numbers.  Not showing the LS to be io bound, cpu bound or memory(swap) bound.  Looking at the number of processes blocked - probably related to xmldb locking.  Also looking at context switching.  Still some interpretation to do on the data.  Also does not believe that XQuery/XPath is the problem.  
+     * Discussions:
+       * Should be playing with the dials in DB_CONFIG, specifically the lock hold time, number of locks.  Couple this with measuring (with NETLOGGER) the critical sections to see where we can improve things.
+       * Replacing XMLDB - is it time to do this?  Would be a rash thing to do, but maybe look at other databases and measure performance.  Could contemplate switching to SQL (not sqlite, maybe postgres/mysql).  What about _pay_ oracle with XML support?
+   * Next steps
+     * Testing and Simulation
+       * Andy and Jason to add more netlogging into the LS code.
+       * Jason to redoply (next week) on ndb1, with netlogging turned on.  Andy will do the same at ESnet.  
+       * Brian/Eric P to intrepret the results when we have them
+     * New Techonologies
+       * Andy/Eric P to look at other XMLDBs for a _drop in_ replacement.  SQL may be considered, but not immediately.  
+     * Andy will continue work on cache.pl (see issue 408) for the pSPT 3.1.3 release.
+ # pSPT 3.1.3 Release
+   * Andy committed alterations to the open/close procedure
+     * Goal was to reduce the number of opens/closes
+     * Preserved the _one open/close per process_ rule that dbxml cares about
+   * Seeing a large amount of database 'lock' errors at Internet2 (ndb1 GLS)
+     * Related to dbxml?
+     * Related to recent fixes?
+   * Issue notes:
+     * DB must be locked at certain points in operation, normal when _writing_:
+       * Cleaning (_read_, CPU, _write_)
+       * Registration/Deregistration/Keepalive of hLSs (CPU, _read_, _write_)
+       * Summarization (_read_, CPU, _write_)
+       * Syncing with other gLSs (_read_, CPU) 
+     * DB errors occur when these overlap.
+     * Critical sections (e.g. when we are actually _writing_) are kept as small as possible to mitigate the errors
+     * _Read_ operations (Query) can overlap with _writes_.  
+     * Literature at the time of development (2007) suggested that DB _connection_ (like a _handle_ in SQL terms) must be opened new with each thread/process that attaches to database.  
+     * Transaction management is a combination of the library and perfSONAR-PS try/catches to ensure concurrency
+ # Cache.pl Discussion
+   * Fix in progress (see issue 408)
+   * Plan is to install to pSPT for 3.1.3 release
+   * Would like to have this ready for RC1 (in the next week?)
+   * Andy: how it works
+     * Every pSPT gets a daemon.  Daemon will HTTP Conditional GET a tar file from well known locations.  Well known locations are stored on a _hints_ file.  Get the file if changed, untar into GUI directory on pSPT.  GUIs will work as they have always worked, but the pSPT will not run it's own cache script.
+     * Well known servers (ESnet, Internet2) will run a modified cache.pl script. Will store/save information.  Will tar up/replace the file to be fetched on changes.  
+   * Questions:
+     * How large is the file: 13k or so
+     * Why a tar: easier to fetch one thing, and it contains all the supporting files.  Some discussion on if we want to _change_ this into a structured json/xml file.  Note that this is an ugly hack that we dont want to live on too much longer.  This approach is fine.
+     * Consistency between instances: will be better than what we have now, but not perfect
+     * Will we backup the tars on the server side: right now no, maybe we should consider this (record of past/present instances).  
+ 
+==== ACTIONS ====
+
+  * _*ACTION*_: Jason/Andy to add more netlogging to LS code
+  * _*ACTION*_: Jason to redeploy nettlogging at Internet2
+  * _*ACTION*_: Andy to redeploy netlogging at ESnet 
+  * _*ACTION*_: Brian/Eric P to analyze results when available
+  * _*ACTION*_: Eric P/Andy to look at XMLDB _drop in_ replacements
+  * _*ACTION*_: Marcos/Eric P/Andy should continue investigation into the vmstat results from planetlab to see what is blocking processes.
+
+=== 20100322Video ===
+
+ # Attendees: 
+   * Jeff
+   * Joe
+   * Brian
+   * Andy
+   * Maxim
+   * Jason
+   * Eric
+   * Marcos
+   * Esra
+   * Aaron
+   * Martin
+   * Ahmed
+ # Actions from last call:
+   * gLS testing status?
+     * Andy & Eric met with Marcos & Ahmed and assigned tasks.
+     * Marcos: his part of the tests are done & posted.  Need to analyze results still.
+   * pSPT 3.1.2 deployment status (experiences)?
+     * Most of Atlas has it deployed (SLAC is using a custom solution, may be some stragglers).
+     * Some issues being reported, Jason, Aaron, Andy are looking into it.
+     * A segfault probably happening when perl is trying to exit (old problem, seeing it a lot more due to restarting services once per day)
+     * Stuff is restarting just fine so it doesn't appear to be a critical problem.
+     * Also a problem with psb & bwctl - iperf will hang and prevent the master portion of psb from restarting.
+   * ATLAS SNMP issues - status?
+     * Joe & Brian discussed it with Shawn.  We believe he now understands the complexity of the issues.
+     * Shawn originally wanted to expose some of the path (layer 2 and layer 3) for each site.  Had played around with the idea of only exposing specific interfaces (not the entire device).  
+     * We would like to address this, but it is not a top priority right now.
+ # LHCOPN status update - Joe
+   * E2Emon was discussed at length.
+   * The community wanted the perfSONAR tools to measure & report about the LHCOPN network pledges by the T1's (ie measure delivered bandwidth & availability)
+ # DICE status update - "Product Manager" (Joe)
+   * We worked through 3 of 4 use cases (portal, diagnostic, dynamic circuit monitoring).
+ # OGF status update (Jason)
+   * 1 NML session, working on a doc which should be ready next meeting
+   * 2 NMC sessions  Jeff presented APAN slides.  limited number of tourists. Lots of DFN folks.
+      * DFN is seeing problems with the RRDma & 700 interfaces.  Not sure if it is protocol or implementation issues.
+      * Roman went over a result code proposal. Well on the way to being done.
+      * Layed out what needs to be done on the base doc and tried to identify people who will do it.
+   * 4 NSI Sessions
+     * Nothing related to pS - talk of circuit monitoring use case.  
+ # pSPT 3.1.3 Release (Jason)
+   * Andy and Aaron working hard on this.
+   * Un-resolved issues
+     * Logging core dumps on exit
+     * Cache discussions
+       * Each toolkit crawls the entire hls/gls space & caches data locally hourly. But it is missing services periodically & it doesn't scale.
+       * Currently leaning towards developing an index service that would do the crawling, and then the toolkits would just hit the index service and download the details.
+       * Andy & Aaron will be working this issue. Please provide any suggestions via the issue tracker.
+     * Updating NDT  ( Rich has released a bunch of versions since the one we are using.)
+     * On track to have testers available in 2 weeks, and out by members meeting
+ # Team Updates
+   * Internet2 Team Updates
+   * ESnet
+     * Review Brian's email about the new directory.cgi script David is working on.
+ # *Future topics*:
+   * _*pSPS*_:
+     * Community handling in regular testing screens.  If the user doesn't pick a community, others can'y use this mechanism to find the node
+       * N.B. the node is still _findable_ via other methods including domain/IP and it does show up in the gLS
+       * Does it make sense to set a default?
+       * Should there be other methods to find sans communities?
+     * GUIs
+       * BWCTL
+       * OWAMP
+   * _*Google MLab*_
+     * Register each deployment (and tools on each) into pSPS
+     * GUI to find an NDT server.  Started by *Jason*, still have the _public_ vs _private_ routing to these servers
+     * Make MLab data public - even better expose it via pSPS
+   * _*NSF perfSONAR Workshop*_
+     * How would a researcher use pS to fulfill research goals?
+     * How do you get tool developers to publish via pS?
+     * NSF will be creating a steering committee for this workshop.
+     * Hopefully NSF is interested in funding pS.
+   * _*Service Monitoring*_
+     * Availability (current + historic)
+     * Nagios Plugins
+     * Data monitoring vs service liveness
+   * _*Config management*_
+     * Sharing service configuration through IS
+     * Centralized way to manage configs of similar services.  
+   * _*Status Collection Enhancements*_
+     * Overview: DCN _Status_ page uses the TL1 collector to extract and display many of the Cienna counters.  Currently only cares about interfaces and interface-like things.  
+     * Similar Work: Jon Dugan's [http://code.google.com/p/esxsnmp/|ESxSNMP] which is a high performance SNMP polling system.  
+     * Enhancement Ideas
+       * Combine efforts to use TL1 collectors in ESxSNMP.  Would use same database backend and pS interface by doing this
+       * Collecting/Storing network topology.  Specifically: how interfaces are connected via the switching fabric/external links and any other tie ins to the discussions in working groups. 
+       * Gathering and storing alarm information.  Is this the same as Status?  Could or should this be done in nagios.  
+ 
+==== ACTIONS ====
+
+  * _*ACTION*_: 
+  * _*ACTION*_: Next meeting will be a topic meeting on gLS performance testing.  
+
+=== 20100222Video ===
+
+ # Attendees: 
+   * Eric P, Joe, Jason, Brian, Marcos, Aaron, Andy, Inder, Martin
+   * Apologies: Jeff
+ # Teamp Updates
+   * Eric P - Notes there will be a meeting with Martin/Eric/Marcos/Andy/Brian on gLS testing on 2/23.  
+   * Joe - bwctld.limits file posted to stats1 based on the routing table.  Have a special DOE one as well.  
+   * Jason - APAN slides for Jeff (will be available on psps.perfsonar soon).  Update web site(s).  Working with Google MLab on NDT stuff.  USAtlas debugging and release.  Working with other scientists (NEES/LSST) on performance needs, still very early.  Need to work with Andy on his 'client api' package.  
+   * Brian - see Andy's update  
+   * Marcos - gLS testing (similar to Andy's work), will start to coordiante with him.  
+   * Aaron - working on porting tools to cisco platform
+   * Andy - gLS testing
+   * Inder - no
+   * Martin - no
+   * Jeff - Stuck in propsal land.  Wish him well.    
+ # Actions from last call:
+   * See [20100131Meet]
+ # pSPT Release (Jason/Aaron)
+   * Completed on Feb 17th
+     * USATLAS is deploying, good feedback so far (people like what we did).  
+     * No complaints (yet)
+     * Tier3 doc will be worked on soon.  Shawn thinks this release may be stable enough for the Tier3s.  Will be careful to have USATLAS test the hardware instead of us doing it (Jason will keep the group posted).  
+     * Jason/Brian/Joe talk a little about the SNMP topic that USATLAS brought up.  Joe/Brian talked with Shawn about this, and how its kind of complicated.  
+   * Next release (3.1.3) proposed for April 9th or 16th (plenty of time for slip before SMM)
+   * Content:
+     * Jason will review bugs, wants to limit new development
+     * Targeting critical fixes for the most part
+     * There is a chance we won't need it (in case there are no critical vulner released.  
+ # Results of gLS performance testing (Andy/Brian)
+   * See [ESnetLSTesting]
+   * Notes:
+     * 
+     * Showcase of work that andy and brian did in testing the gLS and hLS performance
+     * Idea is to narrow down what is taking a long time
+     * Where is the time being spend?  mostly in the database (not the web service).  Traffic doesn't seem to affect it much.  
+     * Attempt to break down more
+     * Netloggerized LS - checked into SVN.  
+     * Going over the results + some discussion.  
+   * General thoughts:
+     * need more results
+     * need to do things on _full_ hLSs  and gLSs (idea is that things take a long time because there is a lot of data to search)
+     * Optimizing queries, both in the xmldb and at the user level (does nesting effect, etc).  
+ # Next Face to Face Meeting - (if enough involvement)
+   * April 24th (Sat) and April 25th (Sun) Before Spring Member Meeting in Washington DC
+   * Pros:
+     * Before the MM so we are all a bit more 'fresh' to talk about things
+   * Cons:
+     * May have to stay at hotels in DC and move to MM hotel
+   * Notes:
+     * Not a lot of support for the meeting on a weekend (hard for ESnet to get travel)
+     * Can't go after due to IDC
+     * Brian noted a 3 hour conference call once a month may fit the need of an entire day of face to face.  
+ # Google Summer of Code
+   * Applications from organizations due March 8th.
+   * Internet2 would not be able to accept more than 2 students (and thats a stretch)
+   * Is there interest in applying?  Would ESnet be able to absorb some mentoring duties if so?
+   * Notes:
+     * Joe doesn't see a lot of benefit for the cost.  Too much time spent on getting the projects off the ground, don't use in the end
+     * Agreement all around.  
+ # *Future topics*:
+   * _*pSPS*_:
+     * Community handling in regular testing screens.  If the user doesn't pick a community, others can'y use this mechanism to find the node
+       * N.B. the node is still _findable_ via other methods including domain/IP and it does show up in the gLS
+       * Does it make sense to set a default?
+       * Should there be other methods to find sans communities?
+     * GUIs
+       * BWCTL
+       * OWAMP
+   * _*Google MLab*_
+     * Register each deployment (and tools on each) into pSPS
+     * GUI to find an NDT server.  Started by *Jason*, still have the _public_ vs _private_ routing to these servers
+     * Make MLab data public - even better expose it via pSPS
+   * _*NSF perfSONAR Workshop*_
+     * How would a researcher use pS to fulfill research goals?
+     * How do you get tool developers to publish via pS?
+     * NSF will be creating a steering committee for this workshop.
+     * Hopefully NSF is interested in funding pS.
+   * _*Service Monitoring*_
+     * Availability (current + historic)
+     * Nagios Plugins
+     * Data monitoring vs service liveness
+   * _*Config management*_
+     * Sharing service configuration through IS
+     * Centralized way to manage configs of similar services.  
+   * _*Status Collection Enhancements*_
+     * Overview: DCN _Status_ page uses the TL1 collector to extract and display many of the Cienna counters.  Currently only cares about interfaces and interface-like things.  
+     * Similar Work: Jon Dugan's [http://code.google.com/p/esxsnmp/|ESxSNMP] which is a high performance SNMP polling system.  
+     * Enhancement Ideas
+       * Combine efforts to use TL1 collectors in ESxSNMP.  Would use same database backend and pS interface by doing this
+       * Collecting/Storing network topology.  Specifically: how interfaces are connected via the switching fabric/external links and any other tie ins to the discussions in working groups. 
+       * Gathering and storing alarm information.  Is this the same as Status?  Could or should this be done in nagios.  
+ 
+==== ACTIONS ====
+
+  * _*ACTION*_: Marcos will communicate with Andy/Brian on the work he is doing with the gLS.  All parties shoudl work together on testing.
+  * _*ACTION*_: Next meeting will be a topic meeting on gLS performance testing. 
+
+=== 20100131Meet ===
+
+==== Where ====
+
+Collegiate room (2nd Floor - right next to the main ballroom) in the [http://www.union.utah.edu A. Ray Olpin University Union].  
+
+==== When ====
+
+January 31, 2010.
+1:00pm - 5:00pm MDT
+
+==== Roadmap discussion ====
+
+ * Presenting: *Jeff*, *Brian*, *Joe*
+ * [http://code.google.com/p/perfsonar-ps/wiki/PsPsRoadMap Roadmap]
+
+==== User Documentation Thoughts ====
+
+ * Presenting: *Brian*
+ * I think the user documentation should be organized around a set of use cases / sample queries. http://psps.perfsonar.net/client-doc.html is a good start in this direction. 
+ * High level:
+   * From all MAs:
+     * Get list of all 'metadata', e.g. interfaces, endpoints, etc.
+     * Get a list of all 'metadata' but filter by something, e.g. domain, ip range, specific characteristic (1G interfaces, or dual homed hosts)
+     * Get all 'data' for a given 'metadata' (by key, filtered by type)
+     * Get all 'data' for a given 'metadata' for a given time range or via a statistical function (e.g. averaged).
+   * From an hLS:
+     * List of all registered services
+     * List of services filtered by service elements (e.g. name, location)
+     * List of services filtered by contained metadata items (see MA queries)
+     * List of metadata for a given service
+     * List of metadata for a given service filtered by data type (see MA queries)
+ * Here are some detailed examples that I think are helpful:
+   * SNMP MA:
+     * give me a list of all router interfaces
+     * give me a list of all router interfaces at FNAL
+     * give me the last hour average utilization for interface X
+     * give me that last hour maximum utilization for interface X
+     * give me average and max utilization data for June of last year
+   * pSB MA:
+     * give me the list of src/dest pairs stored in this MA
+     * give me all bwctl results for the past 24 hours from host A to host B
+     * give me all owamp results for the past 24 hours from host A to host B
+     * give me all bwctl and owamp results from June of last year
+   * LS:
+     * give me a list of all bwctl servers listed under project "ESnet" or "DOE-SC-LAB"
+     * give me a list of all ESnet pSB MAs
+     * give me a list of all SNMP MAs
+   * PingER MA:
+     * give me a list of pingER data for host A to host B for the past 24 hours
+   * Topology MA:
+     * give me topology for domain A
+     * give me interface with IP address A
+     * give me interface connected to another interface with IP address A
+     
+==== WMap ====
+ 
+ * Presenting: *Joe*, *Jeff*    
+ * What is needed, what is low hanging fruit?
+
+==== Web Configuration GUI ====
+
+ * Presenting: *Aaron*, *Andy*, *Maxim*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-web_configuration.ppt Slides]
+ * Problems
+   * The web configuration GUI is difficult to add new features to, and may not meet the needs or desires of current and future users.
+   * The glue between the configuration files/database and the configuration options provided to the end user were developed in an ad hoc manner.
+ * Goal
+   * Document the administrative and visual features desired by users
+   * Document the features that the backend can reasonably provide
+   * Produce a model for a web interface that provides the features as well as a model for a glue between the various software capabilities, and the needs of the web interface.
+ * Desired Features
+ * Discuss general web interface needs
+ * Discuss how to bridge the GUI features wanted by users with the configuration options of various services.
+
+==== gLS and hLS performance and scaling ====
+
+ * Presenting: *Brian*, *Martin*, *Eric*, *Jason*
+ * Present the Results of the testing performed by Eric and Brian
+ * Potential solutions
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/LS-Scalability-issues.pptx Slides]
+
+==== Merging LS and TS ====
+        
+ * Presenting: *Martin*, *Eric*      
+ * Merging the TS/LS protocols, and implementation/adoption
+   * XML-DB? Organize TS so it is more distributable.
+
+==== Improving pSPS Service Architecture ====
+
+ * Presenting: *Aaron*, *Andy*, *Eric*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-software_architecture.ppt Slides]
+ * Problems
+   * Difficult to add new metrics
+   * Duplication in efforts which leads to inconsitencies
+ * Goals
+   * Ease development of new services
+   * Improve code re-use
+   * Increase modularity
+   * more
+ * Analyze types of services
+   * Look at functional components of each
+   * What's new functionality needed in future
+     * AA, etc
+ * Anything from OSCARS architecture that can apply to PS?
+ * Other Open Design Questions
+
+==== Clients and services ====
+
+ * Presenting: *Inder*, *Aaron*, *Andy*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-clients-services.ppt Slides]
+ * Goals
+   * Easier for clients to develop pS services
+   * Shorten the learning curve and development time
+   * Provide bridge between standards and sofware
+ * Short-term
+   * Client SDK
+   * More client documention
+   * High level programming libs
+   * Support process as upgrade libs and protocols
+   * Development support
+     * Dummy server for debugging and testing clients
+     
+==== Circuit Monitoring ====
+
+ * Presenting: *Aaron*, *Ezra*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-circuit_monitoring.ppt Slides]
+ * Discussion of the architecture described in:
+   * CircuitMonitoringOverview, CircuitMonitoringArchitecture, CircuitMonitoring and CircuitMonitoringMoreDetails
+ * Goal for session: Foster discussion about the circuit monitoring, and to bring folks into broad agreement over the overarching architecture.
+
+==== Combining Path Data with Measurement Data ====
+
+ * Presenting: *Andy*, *Jeff*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-traceroute_owp_bwctl.ppt Slides]
+ * Motivations
+   * Short-term: Associate traceroute with measurement data
+   * Long-term: Store path data from non-traceroute sources
+ * Linking Path, Measurement and Topology Data
+ * Architecture
+   * Route MA
+   * Triggering traceroute measurements
+ * Schema for storing traceroute results
+   * Current: http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/rnc/traceroute.rnc
+ * Looking beyond traceroute
+
+==== Product Support ====
+
+ * Presenting: *Jason*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-JZ-Support.ppt Slides]
+ * Packages for Platforms and Architectures
+   * Decide which Arch's we will support, suggested:
+     * x86
+     * x86 64 Bit
+     * Others we could consider
+       * ia64
+       * ppc
+   * Decide which platforms we will (explicitly) support, suggested:
+     * RHEL v4 and v5
+     * CentOS v4 and v5       
+     * Scientific v4 and v5
+     * Others to consider:
+       * Debian v4 and v5 (requires deb package support)
+       * Ubuntu (versions vary, maybe current + previous 2 - requires deb package support)
+       * Fedora (versions vary, maybe current + previous 2)
+       * SuSE (versions vary, maybe current + previous)
+       * FreeBSD (versions vary, maybe current + previous - requires maintaining something in 'ports')
+ * pSPT
+   * Need a general statement that covers
+     * A statement of who we are, and the resources (e.g. how limited) that are available
+     * Our commitment to alerting about vulnerabilities
+     * Our commitment patching and fixing vulnerabilities.  Want to avoid timeframes in our definition.  
+     * Support statement for support when the major version jumps
+ * In general we need to get these things in a public area so there is not a lot of confusion.  We will need to talk to VOs about this as well. 
+
+==== LiveCD Topics ====
+
+ * Presenting: *Jason*, *Aaron*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-JZ-LiveCD.ppt Slides]
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-toolkit_transition.ppt Debian Security Updates EOL Slides]
+ * Remaining 3.1.X releases
+   * Targeting 2 - 3 more this year.  May need to worry about some next year depending on support...
+     * 3.1.3 in April (pre MM)
+     * 3.1.4 in July (pre JTs)
+     * 3.1.5 in Nov/Dec (if needed - hard with SC)
+   * Critical bug fixes and software upgrades _*only*_
+     * Limit the introduction of new features/structure
+     * Limit the changes to existing features/structure 
+   * Will release faster if something *very* critical comes up
+   * [http://lists.debian.org/debian-security-announce/2010/msg00010.html Debian security support for v. 4.0 (etch) is being EOL'ed on Feb 15th]
+     * Upgrade could be time consuming and breaks the rules above
+     * Rely on backports prepared by others (security fixes would be quick to backport)
+     * Manually backport as needed (will be time consuming if backports are not quick to enter the market)
+ * Kernel Bingo (listen for you number, but only shout when its not called...)
+   * pSPT has adopted the 2.6.27 lineage, the _long term support_ kernel.  See [http://lkml.org/lkml/2008/10/11/235 here] for more details, this line replaces 2.6.18.
+     * _*Positives*_:
+       * We don't need an experimental kernel, we really don't need to be on the bleeding edge of hardware support of new features
+       * We want a safe kernel - the long term supported lineages _*should*_ receive all of the same fixes as the other mainline branches
+       * Web100 applies cleanly to the vanilla kernels from this line, and web100 development is not funded anymore (MM reported the current maintainer donates time to keep up).  
+     * _*Negatives*_:
+       * Real linux vendors are keeping up with the bleeding edge of development (and apply their own patches etc.)
+       * Knowledgeable (but perhaps easily excitable) people know math, and 2.6.27 < 2.6.32.  This throws up a red flag that we are not keeping up and may be pusing a vulnerable product.  
+   * USATLAS (specifically SLAC) has raised some concerns on our choice of kernels.  This is not news, but there is pressure for us to do one of two things (not clear if either would solve the problem of course):
+     # Clearly state our process
+       * Explain why we use the particular kernel
+       * Explain why we think this protects the end user vs. the alternative (bleeding edge)
+       * Explain our definition of _support_ (see above discussion)         
+     # Migrate to something that will make everyone happy
+       * Follow what the vendors are following - use what RHEL/CentOS/Scientific use
+       * Still state the process and support level
+   * To reiterate what was said from SLAC security personnel on their process:
+     * Typically like everything under their control (mostly RHEL/CentOS/Scientific) to all be at the same kernel, right now its 2.6.32.x
+     * Follow the CVE announcements like a hawk, expect that the vendors will offer patches in 2-4 weeks
+     * Patch everything on the network in that timeframe.
+   * Things we can consider to mitigate/compromise (in order of easiest to hardest):
+     # Follow all of the lists.  When we see a CVE we digest it as fast as possible and relay this information to the performance-node lists as well as USATLAS (or other VOs that want to be kept aware).  Suggest instant steps to comply in the event of a problem, announce when releases will be available to fix.
+     # Automatically update the 2.6.27 kernel when a fix becomes available (even if there is not a CVE that applies to us).  Follow same announcement steps as in _*1*_.
+     # Migrate to a vanilla 2.6.32 (or whatever the vendors are using).  Apply the same tactic as in _*1*_ (or _*2*_) regarding upgrades
+     # Use stock vendor kernels and apply web100.  Would need to monitor what they are using (will be easier when we are in 3.2) and will need to follow same announcement steps as in _*1*_.
+     # Convert all tools that use web100 (ndt/npad) to not use web100.  This eliminates some of the problem, but we would still need to follow what the vendors are doing regarding kernels.  
+ * RHEL (3.2) Transition
+   * Targeting Late Summer 2010 for 3.2 Betas
+     * Have a list of people interested in helping test already
+   * Must support 3.1.x's in parallel
+     * How long
+     * To what level
+     * Project fork if necessary?
+   * VOs may be slow to adopt 3.2 - e.g. USATLAS is very slow to recommend 3.1 to Tier3s for example.  An upgrade to a completly different system is similar to starting over, I would expect at least 2 minor releases (taking us into 2011) to work out all the kinks.        
+   * Features to worry about
+     * Wizard interfaces
+     * Backend magic to manage the disk
+     * Upgrade path?
+     * RPMs for all services and packages
+     * Kernels (see SLAC discussion) - and if we want to support web100 long term
+     * Install to disk option
+
+==== Nagios integration ====
+
+ * Presenting: *Jason*, *Brian*    
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-JZ-Nagios.ppt Slides]
+ * Worth experimenting with basic installation/configuration of NAGIOS on current generation?
+ * Configuration
+   * Static - easy stuff
+     * Certain processes/data sets should always be monitored
+       * httpd
+       * ntpd (both is it up and is time in sync)
+       * service watcher process? 
+       * Disk levels - go below a threshold
+       * Load Levels - go above a threshold
+       * Process Count?
+         * Total goes above some threshold
+         * Too many of one type, e.g. too many owampd's or bwctld's (indicates people testing to you)
+     * Alert intervals (how often to send alerts for the same outstanding event)
+   * Dynamic - the hard stuff
+     * Email addresse(s) to send alerts to (GUI tie in)
+     * Proccesses/data to monitor 
+       * ssh (if enabled)
+       * owampd/bwctld/npad/ndt/pow(master|collector)/bw(master|collector) (if enabled)
+       * pSB MA, SNMP MA, topology services, LS (if enabled)
+         * process running
+         * respond to echo
+         * respond to metdata
+         * respond to data (may duplicate a database check)   
+       * mysqld (if enabled)    
+       * Data Queries - could be done in two different ways:
+         * From databases directly (mysql for owamp/bwctl/pinger, rrd for snmp/smokeping)
+         * from services through WS queries
+         * Queries to care about:
+           * Data above or below a statistical threshold
+             * too many errors on an interface
+             * utilization too high
+             * bwctl epxpectation too low
+             * owamp loss/jitter too high
+           * Data older than a time threshold (bwctl/owamp/pinger can consult test time interval for this)
+           * Data flapping between known good and bad values               
+             * owamp/pinger latency
+             * interface status
+   * Send a 'come online' alert to a pS address?
+ * GUI extensions to watch other instances of the toolkit in the wild [requires nrpe probably] (future enhancement)
+ * Decide which of the many Nagios GUIs to integrate (e.g.: http://www.debianhelp.co.uk/nagiosweb.htm)  
+
+==== Programming Languages ====
+
+ * Presenting: *Aaron*, *Eric*, *Maxim*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-programming_languages.ppt Slides]
+ * Goal
+   * To survey programming languages to see which best meet our needs given existing constraints
+ * Constraints
+   * We already have a substantial codebase written in Perl, along with a developer-base that understands it
+ * Provide some information about Perl, Python, Java and Ruby
+
+==== Build and Testing Platforms ====
+
+ * Presenting: *Eric*, *Jason*, *Brian*
+ * [http://perfsonar-ps.googlecode.com/svn/wiki/20100131Meet/20100131-testing-platform-ep.pptx Slides]
+ * Attempting to solve two problems (potentially with a common solution):
+   # _*Build infrastructure*_
+     * Does not have to be bare iron, VMs are acceptable
+     * _*Must*_ contain diverse set of platforms and architectures (discussion to be held in the support topic)
+     * _*Should*_ be automatable (kick off the same tests on all platforms simultaneously)
+          * download svn branch/tag
+          * build using rpm build tools
+          * verify - attempt to install on target arch/platform
+            * download pre-reqs
+            * install
+            * insert dummy config
+            * start service
+            * run canned unit tests
+     * _*Must*_ be resetable (bring the entire infrastructure back to a clean state for each build/test prorcess)
+     * Infrastructure does not have to be mobile (would prefer it not be - have it live in an accessible place)
+     * All developers have access to the _head_ machine
+       * accts live there
+       * machine configurations (to generate all VMs) live there too
+       * update the _master_ as new releases and software updates come out       
+     * Examples out in the world to consider:
+       * [https://nmi.cs.wisc.edu/ NMI] - OSG build tool, well supported and built for this specific purpose
+       * [http://www.emulab.net/ Emulab] - Network testbed, but fits some of the above needs (variable archs and some platforms, easy to _reset_, easy to automate)
+       * Homeade - Get a beefy system and set up software to start up QEMU/XEN/VMware instances.  Can make this as scriptable and configurable as we need to, but will require development time.  
+   # _*Testing infrastructure*_
+     * Configurable infrastructure with a potentially diverse topology used to validate functional requirements of the software
+     # Define Supported Platforms
+       * hardware archictecture + operating system/distribution + middleware.
+       * try to support most of currently deployed plaftom
+       * keep it to a minimum number
+       * have at least one platform current (hardware/OS)
+     # Create VM templates that matches the supported platforms
+       * use a VM to build and package release. This allows reproductable build process
+       * Duplicate VM from template and instantiate for testing (always starting from a known state
+     # Create VM to run stub services for testing
+       * needed for unit testing (automation)
+       * needed for debuging and development
+       * allows to model various configuration
+     # The entire build and testing environment as a download.
+       * This allows anyone to reproduce it anywhere.
+       * Helps for automation and provisioning
+       * Allows for collaborative debug (one may send a VM to another).
+     # Create enough VMs for scalability testing. Some examples include
+       * ability to test N clients all hitting the same service at the same time
+       * ability to run the LS scalability tests described here:
+         * http://code.google.com/p/perfsonar-ps/wiki/ProposedLStestPlan
+     # Ability to run interoperability tests with perfSONAR MDM release
+     # Ability to automate much of this to run tests before a release (longer term)
+     # Available collaborative resources
+       * OpenDevNet
+       * NMI
+       * Ad-hoc
+
+==== NOTES ====
+
+===== Road Map =====
+  * _*ACTION*_: Jason: Create minor milestones of first major milestone
+
+===== User Documentation =====
+  * Should use as feedback for API development
+  * Step one - document current API and queries
+  * Templating approach for documentation
+  * _*ACTION*_:  Jason: Presentation for APAN - turned into dev-guide (march timeframe)
+  * _*ACTION*_: Jason/Eric: Reorganize Issue tracker to include individual tags vs project milestones
+
+===== WMap =====
+  * Need better GUIs: Goals, need flashy stuff to 'sell' pS utility
+  * current ESnet wmap uses non-pS interaction
+  * what is the low-hanging fruit?
+  * _*ACTION*_: Aaron: come up with proposal for an API/toolkit for this functionality
+
+===== Web Config GUI =====
+  * Current state: Feature creep with no underlying design
+  * Need survey of what users *want*
+  * what are services, what are functionalities?
+  * document what is there
+  * _*ACTION*_: Joe: Ask questions on this topic at ESCC PS BOF Wed Night.
+  * _*ACTION*_: Jason: Get feedback from USAtlas on directions for WebGUI
+
+===== gLS/hLS scalability =====
+  * most common query: find me the service access point for X where X can be lots.
+  * Find me topology server for ESnet (easy)
+  * Find me all pSB MAs for community LHC
+  * Find me all MAs with throughput data for host X
+  * Jeff doesn't like "find me all", hard to optimize
+  * Joe: want "find me MAs along path A->B->C->D". Potentially useful query that has very different implications for scaling. Andy: may exist outside LS Jeff: maybe when you combine LS/TS Martin: difficult to optimize for. Jeff: you have to query with path info to optimize
+  * Believe current system won't scale
+  * What if hLSes are down, what if they're far away. Common queries shouldn't hit large # of hLSes.
+  * Three issues:
+    * performance of the implementation
+    * questions about summarization
+    * what should be cached and where
+  * need to create subgroup to think about these issues more
+    * add another layer to the hierarchy?
+    * recursive queries?
+  * _*ACTION*_: Martin/Jeff/Joe: look at current model and evaluate (both scaling issues and LS/TS merging)
+  * _*ACTION*_: Andy/Brian/Aaron: continue optimization of current implementation
+
+===== Client and Service Architecture =====
+  * _*ACTION*_: Aaron/Andy: Develop use cases and use as means to evaluate an architecture
+
+===== Circuit Monitoring =====
+Notes on slide deck:
+    * Add operational vs administrative status to slide 3
+    * Add "Capacity" & COS policy to slide 3
+    * Slide 6: Monitoring Service should be called Measuremnet Point/Archive, not a new element in the perfSONAR architecture, OR, maybe it is a transformation service that combines data from perfSONAR MA's & MP's.
+    * Concerns: way that mapping between circuit-id to full set of segment ids needs to be fully specified in a way describable to operations
+  * _*ACTION*_: Inder/Joe/Jeff: review and refine model
+  
+===== Product Support =====
+  * _*ACTION*_: We will only be supporting one architecture and operating system combination (CentOS 5.x, x86).  x = version to be determined later, usually at release time.  
+  * _*ACTION*_: Jason will draft policy statements on supported OSs and our commitment to security vulnerabilities.  
+  
+===== LiveCD Topics =====
+  * _*ACTION*_: See _*Product Support*_ for statement of support.  
+  * _*ACTION*_: Templates for  all knoppix configs need to be modified to note that they should not be manually edited (e.g. will get clobbered)
+
+=== 20100125Video ===
+
+ # Attendees: Marcos, Andy, Brian, Aaron, Inder, Jason, Eric, Joe, Maxim, Jeff, Martin, Ezra
+ # Topics for discussion:
+   * Roadmap discussion
+      * http://code.google.com/p/perfsonar-ps/wiki/PsPsRoadMap
+      * Jeff/Brian/Joe
+   * Software Architecture and Protocol directions
+      * Improving the software-service architecture
+         * Increasing code reuse
+         * High-level style guidelines
+         * goal: increase modularity and code reuse
+         * example: shouldn't need to create a new service to make a new metric available
+         * Aaron/Eric/Andy
+      * Ensuring compatibility between clients and services
+         * Inder/Aaron/Andy
+      * Merging the TS/LS protocols, and implementation/adoption
+         * XML-DB? Organize TS so it is more distributable.
+         * Martin/Eric
+      * Programming language direction going forward
+         * Lots of new programmers, some of different language interests
+         * Advantages/Disadvantages of current possibilities
+         * Aaron/Maxim/Eric
+      * Easing outside development of clients and GUIs as well as development of new services
+         * What is needed to support client developers?
+         * Use cases
+         * Inder/Jason/Andy
+   * gLS/hLS performance and scaling
+      * Testing shows scalability issues
+      * Potential solutions
+      * Brian/Martin/Eric/Jason
+   * Traceroute integration with owamp/bwctl
+      * Andy/Jeff
+   * LiveCD transition
+     * Goal: What should we do: upgrade to LiveCD, or upgrade to 5.0?
+     * [http://lists.debian.org/debian-security-announce/2010/msg00010.html|Debian security support for v. 4.0 (etch) is being EOL'ed on Feb 15th]
+       * Options:
+         * Upgrade to 5.0, not a trivial task for a bugfix release.
+         * Use [http://www.backports.org/dokuwiki/doku.php|backports] where we can, manually port major security releases
+       * Need to determine an EOL time range ourselves based on 3.2 development and community acceptance
+     * Aaron/Joe
+   * Configuration GUI architecture
+     * Goal: User perspective - what do they want to do? Architect config tool around that instead of from the OS perspective.
+     * Aaron/Andy/Maxim
+   * Testing plateform
+      * How many versions, OSs, etc...
+      * Eric/Brian/Jason
+   * Nagios integration into the pS-Perf-Tk
+     * Goal: What alarms/alerts should be configured in for the next release. And how that is implemented and configured.
+     * Alarms for services
+     * Alarms based on data analysis
+     * Brian/Jason
+   * Circuit Monitoring
+     * Aaron/Ezra
+   * Wmap - Flashy GUIs
+     * What is needed, what is low hanging fruit?
+     * Joe/Jeff
+   * Client APIs and Documentation
+     * What use cases do we want the documentation to support?
+     * Brian
+
+=== 20100111Video ===
+
+ # Attendees: 
+   * Joe, Brian, Jason, Maxim, Aaron, Andy, Jeff, Martin, Eric
+ # Etherpad:
+   * http://etherpad.com/9MDYtLe4OO
+ # Developer Updates
+   * Joe: Looking at traceroute
+   * Brian: Netloggerizing LS - dbopen/dbclose optimization may help. Andy will evalute to determine if it should be pushed into trunk. Netlogger extensions shold be pushed into trunk too.
+   * Jason: Off since SC.
+   * Maxim: Concerned with rpm build issues (supported OSs). Looking at use cases for analysis and e-center: http://code.google.com/p/ecenter/wiki/ECenterPortalUseCases
+   * Aaron: Looking at pS infrastructure, and TL1 issues.
+   * Andy: Will be working on documentation for example pS client.
+   * Jeff: On Vacation
+   * Martin: No report
+   * Eric: Open devnet work. More reliable.
+ # Actions from last call:
+   * _*ACTION*_:
+      * *ACTION*: Joe will be modifying cfengine config.
+      * *ACTION*: Maxim will verify pingER-MP fix.
+      * *ACTION*: Jeff, Brian, Joe will work on roadmap.
+ # Next pSPT Release
+   * Target: 1/29 (Friday before JTs)
+   * Pending Bugs:
+     * NTP Security Patch (Aaron)
+     * OWAMP data cleanup (Aaron/Jeff pending...)
+     * pSB Performance (Andy)
+     * pSB Double entry for nodes (Andy)
+     * Other bugs to be announced in email 
+ # OWAMP/pS-B status update
+   * Timestamp/performance issues. (Andy)
+     * timestamp conversions found to be expensive (profiling with netlogger) Looks ready to merge into trunk after testing.
+ # Iperf (bwctl integration) status update (Aaron)
+   * Iperf3 is working in a limited sense with bwctl. Iperf3 enhancements are needed to really get benefit. Aaron will prioritize what is needed.
+ # Future meetings
+   * Set time for VC
+      * Set agenda for f2f (homework)
+   * F2F
+      * Sunday afternoon of Jt Techs.
+ # RPM Building
+   * Current:
+     * Supported Platforms
+       * i386 and x86_64
+       * RHEL/CentOS/Scientific + older (pre 8/9?) Fedora (Newer FCs too bleeding edge?)
+       * Nothing for Debian based
+     * Build Environment
+       * Varies by developer, e.g. Jason builds on VMs on laptop: Centos 4 i386 and x86_64.  
+     * Test Environment
+       * Also varies by developer, Jason uses VMs on laptop: e.g. Centos 3/4/5, Fedora 9/10, Scientific 4/5 - both i386 and x86_64.  
+   * Proposed:
+     * Need to make a stand on what we are supporting and what we will not support (post this publically).
+     * If we are supporting more, RPM Repo organization should change (e.g. others build test on each arch/platform and have a seperate repo for each instead of a _catch all_, see here: http://rpmfusion.org/)
+     * Need a build/test farm so this doesn't fall on individual developers anymore.  This can be done on the cheap with a single machine and dedicated VMs.  
+ # *Future topics*:
+   * _*pSPS*_:
+     * Community handling in regular testing screens.  If the user doesn't pick a community, others can'y use this mechanism to find the node
+       * N.B. the node is still _findable_ via other methods including domain/IP and it does show up in the gLS
+       * Does it make sense to set a default?
+       * Should there be other methods to find sans communities?
+     * GUIs
+       * BWCTL
+       * OWAMP
+   * _*Google MLab*_
+     * Register each deployment (and tools on each) into pSPS
+     * GUI to find an NDT server.  Started by *Jason*, still have the _public_ vs _private_ routing to these servers
+     * Make MLab data public - even better expose it via pSPS
+   * _*NSF perfSONAR Workshop*_
+     * How would a researcher use pS to fulfill research goals?
+     * How do you get tool developers to publish via pS?
+     * NSF will be creating a steering committee for this workshop.
+     * Hopefully NSF is interested in funding pS.
+   * _*Service Monitoring*_
+     * Availability (current + historic)
+     * Nagios Plugins
+     * Data monitoring vs service liveness
+   * _*Config management*_
+     * Sharing service configuration through IS
+     * Centralized way to manage configs of similar services.  
+   * _*Status Collection Enhancements*_
+     * Overview: DCN _Status_ page uses the TL1 collector to extract and display many of the Cienna counters.  Currently only cares about interfaces and interface-like things.  
+     * Similar Work: Jon Dugan's [http://code.google.com/p/esxsnmp/|ESxSNMP] which is a high performance SNMP polling system.  
+     * Enhancement Ideas
+       * Combine efforts to use TL1 collectors in ESxSNMP.  Would use same database backend and pS interface by doing this
+       * Collecting/Storing network topology.  Specifically: how interfaces are connected via the switching fabric/external links and any other tie ins to the discussions in working groups. 
+       * Gathering and storing alarm information.  Is this the same as Status?  Could or should this be done in nagios.  
+
+== Last Updated ==
+
+$Id$

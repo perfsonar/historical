@@ -5,38 +5,41 @@ face to face meetings are available here.  Please use the !MeetingTemplate when
 applicable.
 
 == Future Events ==
-   * [20101213Video] - Video Conference for Dec 13, 2010
+   * [20110110Video] - Video Conference for Jan 10, 2011
 
 == Past Events ==
 
+ * 2011
  * 2010
-   * [20101129Video] - Video Conference for Nov 29, 2010
-   * [20101101Video] - Video Conference for Nov 1, 2010
-   * [20101018Video] - Video Conference for Oct 18, 2010
-   * [20101004Video] - Video Conference for Oct 04, 2010
-   * [20100920Video] - Video Conference for Sept 20, 2010
-   * [20100830Video] - Video Conference for Aug 30, 2010
-   * [20100823Video] - Video Conference for Aug 23, 2010
-   * [20100816Video] - Video Conference for Aug 16, 2010
-   * [20100802Video] - Video Conference for Aug 2, 2010
-   * [20100726Video] - Video Conference for July 26, 2010
-   * [20100614APICall] - API Conference Call for June 14, 2010
-   * [20100614Video] - Video Conference for June 14, 2010
-   * [20100607APICall] - API Conference Call for June 7, 2010
-   * [20100607Video] - Video Conference for June 7, 2010 (Special Purpose - pSPT 3.2 Release)
-   * [20100524Video] - Video Conference for May 24, 2010
-   * [20100517APICall] - API Conference Call for May 17, 2010
-   * [20100517Video] - Video Conference for May 17, 2010
-   * [20100510Video] - Video Conference for May 10, 2010
-   * [20100503Video] - Video Conference for May 3, 2010
-   * [20100419Video] - Video Conference for April 19, 2010
-   * [20100412Video] - Video Conference for April 12, 2010
-   * [20100329Video] - Video Conference for March 29, 2010
-   * [20100322Video] - Video Conference for March 22, 2010
-   * [20100222Video] - Video Conference for February 22, 2010
-   * [20100131Meet] - Developer's Meeting for January 31, 2010
-   * [20100125Video] - Video Conference for January 25, 2010
-   * [20100111Video] - Video Conference for January 11, 2010
+   * [2010Activities#20101213Video Video Conference for Dec 13, 2010]
+   * [2010Activities#20101129Video Video Conference for Nov 29, 2010]
+   * [2010Activities#20101101Video Video Conference for Nov 1, 2010]
+   * [2010Activities#20101018Video Video Conference for Oct 18, 2010]
+   * [2010Activities#20101004Video Video Conference for Oct 04, 2010]
+   * [2010Activities#20100920Video Video Conference for Sept 20, 2010]
+   * [2010Activities#20100830Video Video Conference for Aug 30, 2010]
+   * [2010Activities#20100823Video Video Conference for Aug 23, 2010]
+   * [2010Activities#20100816Video Video Conference for Aug 16, 2010]
+   * [2010Activities#20100802APICall API Conference for Aug 2, 2010]
+   * [2010Activities#20100802Video Video Conference for Aug 2, 2010]
+   * [2010Activities#20100726Video Video Conference for July 26, 2010]
+   * [2010Activities#20100614APICall API Conference Call for June 14, 2010]
+   * [2010Activities#20100614Video Video Conference for June 14, 2010]
+   * [2010Activities#20100607APICall API Conference Call for June 7, 2010]
+   * [2010Activities#20100607Video Video Conference for June 7, 2010 (Special Purpose - pSPT 3.2 Release)]
+   * [2010Activities#20100524Video Video Conference for May 24, 2010]
+   * [2010Activities#20100517APICall API Conference Call for May 17, 2010]
+   * [2010Activities#20100517Video Video Conference for May 17, 2010]
+   * [2010Activities#20100510Video Video Conference for May 10, 2010]
+   * [2010Activities#20100503Video Video Conference for May 3, 2010]
+   * [2010Activities#20100419Video Video Conference for April 19, 2010]
+   * [2010Activities#20100412Video Video Conference for April 12, 2010]
+   * [2010Activities#20100329Video Video Conference for March 29, 2010]
+   * [2010Activities#20100322Video Video Conference for March 22, 2010]
+   * [2010Activities#20100222Video Video Conference for February 22, 2010]
+   * [2010Activities#20100131Meet Developer's Meeting for January 31, 2010]
+   * [2010Activities#20100125Video Video Conference for January 25, 2010]
+   * [2010Activities#20100111Video Video Conference for January 11, 2010]
  * 2009
    * [2009Activities#20091214Video Video Conference for December 14, 2009]
    * [2009Activities#20091130Video Video Conference for November 30, 2009]
