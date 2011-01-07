@@ -131,6 +131,142 @@ There is an existing %post script that performs a number of tasks needed by the 
 
 The thing to remember when making changes is that the patch files expect to patch the `reference-platform.ks` file. There are a few ways to go about making changes. One way is to make changes to the reference-platform.ks in such a way that they don't conflict with the patches. This is generally the path of least resistance. Another option, if you only plan on making one of the LiveCD or NetInstall, is to patch the reference-platform.ks before making your changes, and then edit the `build_netinstall.sh` or `build_livecd.sh` and set the `KICKSTART_PATCH=...` line to be `KICKSTART_PATCH=`. This will stop the script from trying to patch the `reference-platform.ks` file. Lastly, you can edit the reference-platform.ks, and the regenerate or edit the patch files to account for the changes.
 
+== Building Toolkit Packages With `mock` ==
+
+[ToolkitDevelopment_MockOverview This page] contains background information on mock. The latter sections assume basic knowledge of mock and 'holding' repositories, and that the holding repository has been configured as described.
+
+[ToolkitDevelopment_SourceRPMs This page] contains information on creating and building source RPMs. The latter sections assume basic knowledge of building source RPMs.
+=== i2_mock utility ===
+
+To ease the use of mock, we built a simple wrapper script over the mock command which simply sets some default values:
+  * The uniqueext value will be set to the callers username 
+  * The architecture is set to "i386"
+  * The default build environment is set to "epel-5" (RedHat5 + the EPEL repositories)
+  * The output directory is set to /srv/results/[username]/[build environment]/[architecture]/[rpm name]
+
+{{{
+    #!/usr/bin/perl
+
+    use strict;
+    use warnings;
+
+    use Getopt::Long;
+
+    Getopt::Long::Configure("pass_through");
+    Getopt::Long::Configure("no_ignore_case");
+
+    my $uniqueext;
+    my $resultdir;
+    my $arch;
+    my $distro;
+
+    my $result = GetOptions("uniqueext=s", \$uniqueext,
+                        "resultdir=s", \$resultdir,
+                        "arch=s", \$arch,
+                        "distro=s", \$distro);
+
+    my @remaining_args = @ARGV;
+
+    my $srpm = $ARGV[$#ARGV];
+    unless ($srpm) {
+            print "No source RPM specified\n";
+            exit(-1);
+    }
+
+    unless (`rpm -qp $srpm 2>/dev/null`) {
+        print "invalid SRPM: $srpm";
+        exit(-1);
+    }
+
+    my  ($name, $pass, $uid, $gid, $quota, $comment, $gcos, $dir, $shell, $expire) = getpwuid($>);
+
+    $arch="i386" unless ($arch);
+    $distro="epel-5" unless ($distro);
+    $uniqueext=$name unless ($uniqueext);
+    $resultdir="/srv/results/$name/$distro/$arch/".`rpm -qp $srpm 2>/dev/null` unless ($resultdir);
+    chomp($resultdir);
+
+    my $mycfg = "$distro-$arch";
+    $mycfg="$distro-i386" if ( ! -e "/etc/mock/$mycfg" and $arch eq "i686" and -e "/etc/mock/$distro-i386.cfg");
+
+    my @args = ();
+    push @args, ("/usr/bin/mock");
+    push @args, ("-r", $mycfg);
+    push @args, ("--resultdir", $resultdir);
+    push @args, ("--uniqueext", $uniqueext);
+    push @args, ("--arch", $arch);
+    push @args, @remaining_args;
+
+    print join(" ", @args)."\n";
+    system(@args);
+}}}
+
+=== I2utils ===
+  * Build a source RPM of I2utils (e.g. I2utils-1.1-1.src.rpm)
+    * A copy of the source/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/I2utils
+  * Run: `i2_mock [I2utils rpm]` (e.g. `i2_mock I2utils-1.1-1.src.rpm`)
+
+=== bwctl ===
+  * Place a built RPM of I2utils into the 'holding' repository
+  * Build a source RPM of bwctl (e.g. bwctl-1.3-5.src.rpm)
+    * A copy of the source/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/bwctl/
+  * Run: `i2_mock [bwctl rpm]` (e.g. `i2_mock bwctl-1.3-5.src.rpm`)
+
+=== owamp ===
+  * Place a built RPM of I2utils into the 'holding' repository
+  * Build a source RPM of owamp (e.g. owamp-3.2rc4-1.src.rpm)
+    * A copy of the source/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/owamp/
+  * Run: `i2_mock [owamp rpm]` (e.g. `i2_mock owamp-3.2rc4-1.src.rpm`)
+
+=== web100_userland ===
+  * Build a source RPM of web100_userland (e.g. web100_userland-1.7-1.src.rpm)
+    * A copy of the source/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/web100_userland/
+  * Run: `i2_mock [web100_userland rpm]` (e.g. `i2_mock oweb100_userland-1.7-1.src.rpm)
+
+=== ndt ===
+  * Place a built RPM of I2utils into the 'holding' repository
+  * Place a built RPM of web100_userland into the 'holding' repository
+  * Build a source RPM of ndt (e.g. ndt-3.6.4-4.src.rpm)
+    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/ndt/
+  * Run: `i2_mock [ndt rpm]` (e.g. `i2_mock ndt-3.6.4-4.src.rpm)
+
+=== npad ===
+  * Place a built RPM of web100_userland into the 'holding' repository
+  * Build a source RPM of npad (e.g. npad-1.5.6-1.src.rpm)
+    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/npad/
+  * Run: `i2_mock [npad rpm]` (e.g. `i2_mock npad-1.5.6-1.src.rpm)
+
+=== nuttcp ===
+  * Build a source RPM of nuttcp (e.g. nuttcp-6.1.2-1.src.rpm)
+    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/nuttcp/
+  * Run: `i2_mock [nuttcp rpm]` (e.g. `i2_mock nuttcp-6.1.2-1.src.rpm)
+
+=== kernel ===
+  * Build a source RPM of the kernel. This will involve steps described [#Kernel above]. (e.g. kernel-2.6.18-194.32.1.el5.web100.src.rpm)
+  * Run `i2_mock --arch i686 --without debug --without kabichk [kernel rpm]` (e.g. `i2_mock --arch i686 --without debug --without kabichk ~/rpm/SRPMS/kernel-2.6.18-194.32.1.el5.web100.src.rpm`)
+
+=== aufs kernel module ===
+  * Copy all the kernel development RPMs (*-devel-*rpm) into the 'holding' repository (i.e. i686, PAE and xen version)
+    * Make note of the kernel version number (e.g. 2.6.18-194.32.1.el5.web100)
+  * Build a source RPM of the aufs module (e.g. aufs-0.20090202.cvs-6.src.rpm)
+    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/aufs/
+  * Run `i2_mock --arch i686 -D "kernel [kernel version number]" [aufs rpm]` (e.g. `i2_mock --arch i686 -D "kernel 2.6.18-194.32.1.el5.web100" aufs-0.20090202.cvs-6.src.rpm)
+
+=== ixgbe kernel module ===
+  * Copy all the kernel development RPMs (*-devel-*rpm) into the 'holding' repository (i.e. i686, PAE and xen version)
+    * Make note of the kernel version number (e.g. 2.6.18-194.32.1.el5.web100)
+  * Build a source RPM of the ixgbe module (e.g. ixgbe-3.1.17-1.src.rpm)
+    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/ixgbe/
+  * Run `i2_mock --arch i686 -D "kversion [kernel version number]" [ixgbe rpm]` (e.g. `i2_mock --arch i686 -D "kversion 2.6.18-194.32.1.el5.web100" ixgbe-3.1.17-1.src.rpm)
+
+=== myri10ge kernel module ===
+  * Copy all the kernel development RPMs (*-devel-*rpm) into the 'holding' repository (i.e. i686, PAE and xen version)
+    * Make note of the kernel version number (e.g. 2.6.18-194.32.1.el5.web100)
+  * Build a source RPM of the myri10ge module (e.g. myri10ge-1.5.2-0.src.rpm)
+    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/myri10ge/
+  * Run `i2_mock --arch i686 -D "kversion [kernel version number]" [myri10ge rpm]` (e.g. `i2_mock --arch i686 -D "kversion 2.6.18-194.32.1.el5.web100" myri10ge-1.5.2-0.src.rpm
+
+
 == Last Updated ==
 
 $Id$
