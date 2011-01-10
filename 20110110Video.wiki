@@ -9,9 +9,9 @@
  # Topic 1
    * TBD
  # Topic 2
-  * TBD
+   * TBD
 # Topic 3
-  * Brief discussion of Bps vs bps in SNMP MA Schema.
+   * Brief discussion of Bps vs bps in SNMP MA Schema.
 
 
 == Actions ==
