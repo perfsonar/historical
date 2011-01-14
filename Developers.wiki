@@ -48,9 +48,9 @@ The perfSONAR-PS PingER service is an evolution of the [http://www-iepm.slac.sta
 
 perfSONAR-PS PingER is designed to be scalable enough in order to accommodate hundreds of monitored pairs of hosts and uses a relational database backend (MySQL, Postgres, SQLite) to efficiently store and retrieve such performance information.
 
-perfSONAR-PS PingER also supports the registration of data through perfSONAR LS's to faciliate the dynamic discovery and querying of unknown deployments.
+perfSONAR-PS PingER also supports the registration of data through perfSONAR LS's to facilitate the dynamic discovery and querying of unknown deployments.
 
-The MA provides a web service interface based on [http://nmwg.internet2.edu/ NMWG XML] that allows queries on the PingER data and to be consumpted by perfSONAR client applications and services alike.
+The MA provides a web service interface based on [http://nmwg.internet2.edu/ NMWG XML] that allows queries on the PingER data and to be consumed by perfSONAR client applications and services alike.
 
 ==== perfSONAR-BUOY Measurement Archive ====
 
@@ -61,6 +61,46 @@ Data collected through the BWCTL interaction is stored in a MySQL database. Acti
 ==== LS Registration Daemon ====
 
 The perfSONAR-PS LS Registration Daemon allows networks to register their [http://e2epi.internet2.edu/bwctl BWCTL], [http://e2epi.internet2.edu/owamp OWAMP], [http://e2epi.internet2.edu/ndt NDT], [http://www.psc.edu/networking/projects/pathdiag/ NPAD] and [http://damsl.cis.udel.edu/projects/phoebus/ Phoebus] services with a perfSONAR-PS Lookup Service. This allows interested clients to search for and find the network's services. 
+
+==== Traceroute MA and MP ====
+
+The Traceroute service consists of a configurable MP to perform scripted traceroutes on a time based schedule.  The resulting traceroutes are collected and made available through a web services interface.  
+
+=== Client Examples ===
+
+In addition to the services of the perfSONAR framework there are several client applications that locate and consume data.  Presentation can be in the form of graphical interfaces, or even systems to alarm based on performance thresholds.  
+
+==== Client APIs ====
+
+A series of APIs for dealing with general service concepts (e.g. MA API) as well as specific service incarnations (e.g. PingER, gLS and hLS) are available and used on some of the subsequent client examples.  These APIs are written in perl but could be extended to other languages.  
+
+==== NAGIOS Plugins ====
+
+NAGIOS is a network monitoring tool that continuously monitors the health of network components. This can be as simple as a TCP connect to check liveness, or as complex as a series of tests to analyze data.  The perfSONAR-PS project has developed a set of plugins:
+
+ # _*check_ls.pl*_ - Checks the responsiveness of all forms of LS service
+ # _*check_gls.pl*_ - Checks the contents of the gLS service for correctness  
+ # _*check_hls.pl*_ - Checks the contents of the hLS service for correctness
+ # _*check_pinger.pl*_ - Checks the data of the PingER service for certain conditions (e.g. excessive loss or jitter)
+ # _*check_topology.pl*_ - Checks the contents of the topology service for correctness.
+ # _*check_snmp.pl*_ - Checks the data of the SNMP MA service for certain conditions (e.g. if an interface has high utilization)
+ # _*check_throughput.pl*_ - Checks the data of the perfSONAR-BUOY service for certain conditions (e.g. if throughput has dropped below an expected value)
+ # _*check_owdelay.pl*_ - Checks the data of the perfSONAR-BUOY service for certain conditions (e.g. if jitter has risen to an unexpected value)
+ # _*check_perfSONAR.pl*_ - General service check for liveness
+
+==== perfAdmin Visualization ====
+
+perfAdmin is a series of CGI scripts to visualize perfSONAR data.  Graphs are provided by the [http://code.google.com/apis/visualization/documentation/gallery.html Google Visualization API].  Currently perfAdmin can visualize:
+
+ * Lookup Service Visualization
+ * perfSONAR-BUOY Data (Throughput and One Way Delay)
+ * PingER Data
+ * SNMP MA Data
+ * Topology Service Visualization
+ 
+==== PingER GUI ====
+
+Visualization of PingER data is possible through this catalyst based GUI. 
 
 === Use Cases ===
 
@@ -76,7 +116,7 @@ The development of perfSONAR-PS involves several tools that are meant to make th
 
 === Subversion ===
 
-The main perfSONAR-PS subversion repository is located in Ann Arbor Michigan:
+The main perfSONAR-PS subversion repository is located at the Internet2 offices Ann Arbor Michigan:
 
  * [http://anonsvn.internet2.edu/svn/perfSONAR-PS/] - Read only access to the source code
  * [https://svn.internet2.edu/svn/perfSONAR-PS/] - Read/Write access for approved developers
@@ -92,7 +132,7 @@ bash$ svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk perfSONAR
 bash$ svn update
 At revision 7.
 }}}
- * Checking status (do to check the status of items in your local copy)
+ * Checking status (do to check the status of items in your local copy).  The two files listed below are new to the repo and modified in the local copy (respectively):
 {{{
 bash$ svn status
 ?      newFile
@@ -108,13 +148,27 @@ A      newFile
 bash$ svn rm RPM-GPG-KEY-Internet2 
 D     RPM-GPG-KEY-Internet2
 }}}
- * Committing
+ * Committing (_*always*_ include a svn log message!)
 {{{
 bash$ svn commit
 A    trunk/newFile
 M    trunk/mirrors-Internet2
 D    trunk/RPM-GPG-KEY-Internet2
 }}}
+ * Create a branch:
+{{{
+bash$ svn copy https://svn.internet2.edu/svn/perfSONAR-PS/trunk https://svn.internet2.edu/svn/perfSONAR-PS/branches/YOURBRANCHNAME -m "Creating a branch of trunk"
+}}}
+ * Merging changes from the trunk to a branch.
+   * First get the revision number that your branch starts with:
+{{{
+bash$ svn log -v --stop-on-copy
+}}}
+   * Use the revision number this returns in the next command, be sure to be in your working copy:
+{{{
+bash$ svn merge -r #FROMABOVE:HEAD
+bash$ https://svn.internet2.edu/svn/perfSONAR-PS/trunk
+}}}  
  
 ==== Repo Organization ====
 
@@ -123,8 +177,6 @@ Specifically the organization of the subversion repository should resemble this 
 http://perfsonar-ps.googlecode.com/svn/wiki/ReleaseManagement/svn.png
 
 The repository has gone through several changes through our development lifecycle.  Please see a [SubversionStructure primer] on how individual directories (e.g. Trunk, Branches) should look to better understand our methodology.  
-
-it is organized .
 
 ==== Code Organization ====
  
@@ -196,14 +248,17 @@ Each Bug report main contain certain items:
      * _New_ - Issue has not had initial review yet
      * _Accepted_ - Problem reproduced / Need acknowledged
      * _Started_ - Work on this issue has begun   
+     * _Complete_ - Work on this issue is complete / Need Review
+     * _Stalled_ - Work on this issue has stopped
+     * _Held_ - This issue requires further review
    * _*Closed*_ Issues 
      * _Fixed_ - Developer made requested changes, QA should verify
      * _Verified_ - QA has verified that the fix worked
      * _Invalid_ - This was not a valid issue report
      * _Duplicate_ - This report duplicates an existing issue
-     * _WontFix_ - We decided to not take action on this issue
- # _*Owner*_ - 
- # _*CC*_ - 
+     * _!WontFix_ - We decided to not take action on this issue
+ # _*Owner*_ - Designated developer for this bug.  Change this as needed (e.g. a multi-step bug may be moved from the developer to a member of the release team for integration).  
+ # _*CC*_ - Add in other project members who have a vested interest in the issue.  
  # _*Labels*_ - 
    * _*Type*_ 
      * _Defect_ - Report of a software defect
@@ -216,27 +271,34 @@ Each Bug report main contain certain items:
      * _High_ - Strongly want to resolve in milestone
      * _Medium_ - Normal priority
      * _Low_ - Might slip to later milestone
-   * _*OpSys*_ 
+   * _*!OpSys*_ 
      * _All_ - Affects all operating systems
      * _Windows_ - Affects Windows users
      * _Linux_ - Affects Linux users
      * _OSX_ - Affects Mac OS X users
    * _*Milestone*_ 
-     * _Release0.9Beta_ - perfSONAR-PS September 2007 Release (<font color="red">depreciated</font>) 
-     * _Release0.9_ - perfSONAR-PS January 2008 Release (<font color="red">depreciated</font>) 
-     * _Release1.0_ - perfSONAR-PS July 2008 Release (<font color="red">depreciated</font>) 
-     * _Release3.1Beta_ - perfSONAR-PS March 2009 Release - Special tag for beta testing
-     * _Release3.1_ - perfSONAR-PS March 2009 Release
-     * _Release3.2Beta_ - perfSONAR-PS Summer 2009 Release - Special tag for beta testing
-     * _Release3.2_ - perfSONAR-PS Summer 2009 Release
-     * _Future_ - perfSONAR-PS Future Plans
+     * _Action_ - Actions Items
+     * _Release0.9_ - perfSONAR-PS January 2008 Release (<font color="red">depreciated</font>)
+     * _Release1.0_ - perfSONAR-PS July 2008 Release (<font color="red">depreciated</font>)
+     * _Release3.1_ - perfSONAR-PS Summer/Fall 2009 Release (<font color="red">depreciated</font>)
+     * _Release3.1.1_ - pSPT November 2009 Bugfix Release (<font color="red">depreciated</font>)
+     * _Release3.1.2_ - pSPT January 2010 Bugfix Release (<font color="red">depreciated</font>)
+     * _Release3.1.3_ - pSPT April 2010 Bugfix Release (<font color="red">depreciated</font>)
+     * _Release3.1.4_ - pSPT Summer 2010 Bugfix Release (<font color="red">depreciated</font>)
+     * _Release3.2_ - perfSONAR-PS/pSPT 2010 Release (<font color="red">depreciated</font>)
+     * _Release3.2.1_ - perfSONAR-PS/pSPT Early 2011 Bugfix Release
+     * _Release3.2.2_ - perfSONAR-PS/pSPT Late 2011 Bugfix Release
+     * _Release3.3_ - perfSONAR-PS/pSPT Release
+     * _Future_ - perfSONAR-PS Future
    * _*Component*_ 
      * _Issues_ - Issues Information Request
      * _Wiki_ - Wiki Information Request
      * _Docs_ - PerfSONAR-PS documentation
+     * _pS-NPToolkit_ - pS-NPToolkit (web-admin/system config)
      * _perfSONAR-PS_ - General Framework - use when unsure of specific parts are unknown
      * _PingER_ - PingER Measurement Archive and Point
      * _SNMP_ - SNMP Measurement Archive
+     * _Traceroute_ - Traceroute Tool
      * _LookupService_ - Class Lookup Service (<font color="red">depreciated</font>) 
      * _HomeLookupService_ - Home Lookup Service
      * _GlobalLookupService_ - Global Lookup Service
@@ -244,16 +306,12 @@ Each Bug report main contain certain items:
      * _CircuitStatus_ - Circuit Status Measurement Archive (<font color="red">depreciated</font>) 
      * _StatusService_ - Status Measurement Archive
      * _PerfSONARBUOY_ - PerfSONAR-BOUY Measurement Archive (<font color="red">depreciated</font>) 
-     * _PerfSONARBUOYClient_ - PerfSONAR-BOUY Client Package
-     * _PerfSONARBUOYServer_ - PerfSONAR-BOUY Server Package
      * _LSRegistrationDaemon_ - LS Registration Daemon
      * _TL1_ - TL1 Tools
      * _GUI_ - PerfSONAR-PS GUI Tools
+     * _perfAdmin_ - CGI Scripts
+     * _NAGIOS_ - NAGIOS Plugins
      * _API_ - Programmer Interfaces
-     * _NPToolkit_ - Network Performance Toolkit (<font color="red">depreciated</font>) 
-     * _PerformanceNode_ - Performance Node
-     * _PerformanceNodeKnoppix_ - Performance Node - Knoppix Releases
-     * _PerformanceNodeFedora_ - Performance Node - Fedora Releases
    * _*Misc*_ 
      * _Security_ - Security risk to users
      * _Performance_ - Performance issue
@@ -274,43 +332,45 @@ There are several categories of mailing lists, each targeting specific groups of
 
 
 || *List* || *Audience* ||
-|| https://mail.internet2.edu/wws/info/i2-perfsonar || perfSONAR-PS Developers Only ||
-|| https://mail.internet2.edu/wws/info/ps-ps-dev || perfSONAR-PS Developers Only ||
-|| https://mail.internet2.edu/wws/info/perfsonar-dev || perfSONAR Developers (International) || 
-|| https://mail.internet2.edu/wws/info/bwctl-dev || BWCTL Development || 
-|| https://mail.internet2.edu/wws/info/ndt-dev || NDT Development || 
-|| https://mail.internet2.edu/wws/info/owamp-dev || OWAMP Development || 
+|| https://lists.internet2.edu/sympa/info/i2-perfsonar || perfSONAR-PS Developers Only (Preferred) ||
+|| https://lists.internet2.edu/sympa/info/ps-ps-dev || perfSONAR-PS Developers Only (Preferred) ||
+|| https://lists.internet2.edu/sympa/info/perfsonar-dev || perfSONAR Developers (International effort, not required) || 
+|| https://lists.internet2.edu/sympa/info/bwctl-dev || BWCTL Development || 
+|| https://lists.internet2.edu/sympa/info/ndt-dev || NDT Development || 
+|| https://lists.internet2.edu/sympa/info/owamp-dev || OWAMP Development || 
 
 
 ==== User Centric ====
 
 
 || *List* || *Audience* ||
-|| https://mail.internet2.edu/wws/info/perfsonar-user || perfSONAR Users Group ||
-|| https://mail.internet2.edu/wws/info/performance-node-users || Performance Node Users ||  
-|| https://mail.internet2.edu/wws/info/bwctl-users || BWCTL Users || 
-|| https://mail.internet2.edu/wws/info/ndt-users || NDT Users || 
-|| https://mail.internet2.edu/wws/info/owamp-users || OWAMP Users || 
+
+|| https://lists.internet2.edu/sympa/info/perfsonar-ps-users || perfSONAR Users Group (Preferred) ||
+|| https://lists.internet2.edu/sympa/info/performance-node-users || Performance Node Users (Preferred) || 
+|| https://lists.internet2.edu/sympa/info/perfsonar-user || perfSONAR Users Group (International effort, not required) || 
+|| https://lists.internet2.edu/sympa/info/bwctl-users || BWCTL Users || 
+|| https://lists.internet2.edu/sympa/info/ndt-users || NDT Users || 
+|| https://lists.internet2.edu/sympa/info/owamp-users || OWAMP Users || 
 
 
 ==== Low Volume Announcement ====
 
 
 || *List* || *Audience* ||
-|| https://mail.internet2.edu/wws/info/perfsonar-announce || perfSONAR Announcements ||
-|| https://mail.internet2.edu/wws/info/performance-node-announce || Performance Node Announcements  || 
-|| https://mail.internet2.edu/wws/info/bwctl-announce || BWCTL Announcements || 
-|| https://mail.internet2.edu/wws/info/ndt-announce || NDT Announcements || 
-|| https://mail.internet2.edu/wws/info/owamp-announce || OWAMP Announcements ||
+|| https://lists.internet2.edu/sympa/info/perfsonar-announce || perfSONAR Announcements ||
+|| https://lists.internet2.edu/sympa/info/performance-node-announce || Performance Node Announcements  || 
+|| https://lists.internet2.edu/sympa/info/bwctl-announce || BWCTL Announcements || 
+|| https://lists.internet2.edu/sympa/info/ndt-announce || NDT Announcements || 
+|| https://lists.internet2.edu/sympa/info/owamp-announce || OWAMP Announcements ||
 
 
 ==== Community Discussion ====
 
 
 || *List* || *Audience* ||
-|| https://mail.internet2.edu/wws/info/is-wg || NTAC Information Services Working Group ||
-|| https://mail.internet2.edu/wws/info/performance-wg || NTAC Performance Working Group ||
-|| https://mail.internet2.edu/wws/info/dcn-wg || DCN Working Group ||
+|| https://lists.internet2.edu/sympa/info/is-wg || NTAC Information Services Working Group ||
+|| https://lists.internet2.edu/sympa/info/performance-wg || NTAC Performance Working Group ||
+|| https://lists.internet2.edu/sympa/info/dcn-wg || DCN Working Group ||
 || http://www.ogf.org/mailman/listinfo/nm-wg || Network Measurement Working Group ||
 || http://www.ogf.org/mailman/listinfo/nml-wg || Network Markup Language Working Group ||
 || http://www.ogf.org/mailman/listinfo/nmc-wg || Network Measurement Control Working Group ||
