@@ -8,11 +8,107 @@
 
  # Attendees:
    * 
- # Topics:
-   # Topic 1
+ # Topics
+   # Release Topics
+   # Visualization tools for the inter-noc diagnostic service ===
+   # OWAMP Visualization
+   # E-Center Update
+   # 5 Minute Break
+   # IRIS Update
+   # PathMA Visualization
+   # Circuit Monitoring
+   # BWCTL Visualization
 
-=== Topic 1 ===
+=== Release Topics === 
 
+ * Presenter: Jason/Aaron
+ * Time Alloted: 45 Mins
+ * Topics to Cover:
+   * Support, QA, Release Management Topics
+   * Growing the Community through self service
+   * 3.2.x
+     * Issues Update
+     * Release Schedule
+     * Functionality Additions
+   * 3.3
+     * Issues Update
+     * Development Priorities
+     * Roadmap/Relsease Schedule
+ * Materials: TBD
+ * Notes:
+ 
+TBD
+
+=== Visualization tools for the inter-noc diagnostic service ===
+
+ * Presenter: Joe
+ * Time Alloted: 30 Mins
+ * Topics to Cover:
+ * Materials: TBD
+ * Notes:
+ 
+TBD
+     
+=== OWAMP Visualization ===
+
+ * Presenter: Andy
+ * Time Alloted: 25 Mins
+ * Topics to Cover:
+ * Materials: TBD
+ * Notes:
+ 
+TBD
+
+=== E-Center Update ===
+
+ * Presenter: Andy/Brian
+ * Time Alloted: 20 Mins
+ * Topics to Cover:
+ * Materials: TBD
+ * Notes:
+ 
+TBD
+
+=== 5 Minute Break ===
+
+=== IRIS Update ===
+
+ * Presenter: Jeff
+ * Time Alloted: 20 Mins
+ * Topics to Cover:
+ * Materials: TBD
+ * Notes:
+ 
+TBD
+
+=== PathMA Visualization ===
+
+ * Presenter: Andy
+ * Time Alloted: 25 Mins
+ * Topics to Cover:
+ * Materials: TBD
+ * Notes:
+ 
+TBD
+
+=== Circuit Monitoring ===
+
+ * Presenter: Aaron
+ * Time Alloted: 45 Mins
+ * Topics to Cover:
+ * Materials: TBD
+ * Notes:
+ 
+TBD
+
+=== BWCTL Visualization ===
+
+ * Presenter: Brian
+ * Time Alloted: 25 Mins
+ * Topics to Cover:
+ * Materials: TBD
+ * Notes:
+ 
 TBD
 
 == Actions ==
