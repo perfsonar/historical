@@ -37,7 +37,7 @@ Mock is intended to be invoked as a non-root user, in order allow builds to be p
 
 ==== optional changes to `site-defaults.cfg` ====
 
-Global configuration options for mock are controlled in `/etc/mock/site-defaults.cfg`.   There are a few tunable parameters in here worth reviewing; depending on filesystem layout and size, local software update polices, and how repositories are configured in the chroot configs, these may need to be adjusted.  Defaults are shown commented, and can be overridden by entering an uncommented value in the config, e.g.:
+Global configuration options for mock are controlled in `/etc/mock/site-defaults.cfg`.   There are a few tunable parameters in here worth reviewing; depending on filesystem layout and size, local software update polices, and how repositories are configured in the build environment configs, these may need to be adjusted.  Defaults are shown commented, and can be overridden by entering an uncommented value in the config, e.g.:
 
 {{{
 config_opts['basedir'] = '/srv/mock/'
@@ -50,15 +50,15 @@ config_opts['plugin_conf']['root_cache_opts']['max_age_days'] = 1
 Those example options relocate the base and cache directories, disable the automatic cleanup of the build root when builds fail (useful for examining a failed build), trims the yum cache to 0 (effectively forcing a re-fetch from repos on every invocation), and the root_cache to 1 day.  In addition to those config options, certain RPM macro values can be set globally, e.g.:
 
 {{{
-+config_opts['macros']['%vendor'] = "MCNC - Advanced Services"
-+config_opts['macros']['%packager'] = "MCNC buildsystem"
+config_opts['macros']['%vendor'] = "MCNC - Advanced Services"
+config_opts['macros']['%packager'] = "MCNC buildsystem"
 }}}
 
 Note that these macros will be overridden by whatever is defined in a .spec; conversely, if not defined in the .spec, the values defined here will be used instead.
 
-==== create local holding repos and add to chroot configs. ====
+==== create local holding repos and add to build environment configs. ====
 
-Sometimes a package dependency isn't provided in any repository, or it isn't practical/possible to put it into one (e.g. testing an advanced version, a locally developed package).  Normally, the package can just be included in the build by specifying it via an `--install` argument to mock.  If there are more than a few packages that need to be pulled in, this can get cumbersome (perl packages are notorious for this); an alternative is to define additional on-disk yum repos, which can contain multiple packages.  Defining the repos is done inside the chroot config, as with any other repository, e.g. for a CentOS 5 i386 configuration, adding the following:
+Sometimes a package dependency isn't provided in any repository, or it isn't practical/possible to put it into one (e.g. testing an advanced version, a locally developed package).  Normally, the package can just be included in the build by specifying it via an `--install` argument to mock.  If there are more than a few packages that need to be pulled in, this can get cumbersome (perl packages are notorious for this); an alternative is to define additional on-disk yum repos, which can contain multiple packages.  Defining the repos is done inside the build environment config, as with any other repository, e.g. for a CentOS 5 i386 configuration (/etc/mock/epel-5-i386.cfg), adding the following:
 
 {{{
 [holding]
@@ -79,7 +79,7 @@ throck@buildhost-01%
 
 ==== using local mirrors to speed up builds and enforce control over updates ====
 
-The default chroot configs contain pointers to their respective upstream repositories, e.g. in `/etc/mock/epel-5-i386.cfg`, the `[update]` section of the conf points to a mirrorlist:
+The default build environment configs contain pointers to their respective upstream repositories, e.g. in `/etc/mock/epel-5-i386.cfg`, the `[update]` section of the conf points to a mirrorlist:
 
 {{{
 [core]

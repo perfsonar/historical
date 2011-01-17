@@ -244,6 +244,7 @@ To ease the use of mock, we built a simple wrapper script over the mock command 
 === kernel ===
   * Build a source RPM of the kernel. This will involve steps described [#Kernel above]. (e.g. kernel-2.6.18-194.32.1.el5.web100.src.rpm)
   * Run `i2_mock --arch i686 --without debug --without kabichk [kernel rpm]` (e.g. `i2_mock --arch i686 --without debug --without kabichk ~/rpm/SRPMS/kernel-2.6.18-194.32.1.el5.web100.src.rpm`)
+   * NOTE: make sure you have >5G of available disk space for building the set of kernels
 
 === aufs kernel module ===
   * Copy all the kernel development RPMs (*-devel-*rpm) into the 'holding' repository (i.e. i686, PAE and xen version)

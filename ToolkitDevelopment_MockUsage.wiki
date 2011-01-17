@@ -8,7 +8,7 @@ Mock can be invoked with a fair number of options; typically when rebuilding pac
 || option flag || provides  || possible values ||
 || `-r CHROOT` || name of the CHROOT, usually `$dist-$release-$arch`, but other configs may exist. Corresponding configs are in `/etc/mock/*.cfg` || `epel-5-i386`, `fedora-13-ppc`, `epel-5-jpackage-x86_64` ||
 || `--resultdir`|| path for resulting files (source / binary rpms, and logs). This can be any arbitrary path on the filesystem, writable by the invoking user || any path writable to the invoking user; it may be convenient to drop results in a directory hierarchy based on release/version/architecture ||
-||`--arch`|| Sets kernel personality(). Note that `arch` is typically already set in the chroot cfg, though this option can be useful when building e.g. kernels (where `arch=i686`) to override the default || `i386`, `i686`, `x86_64`, `ppc`. limited by arch of build host || 
+||`--arch`|| Sets kernel personality(). Note that `arch` is typically already set in the build environment .cfg, though this option can be useful when building e.g. kernels (where `arch=i686`) to override the default || `i386`, `i686`, `x86_64`, `ppc`. limited by arch of build host || 
 ||`--uniqueext` || Arbitrary, unique extension to append to buildroot directory name. This allows simultaneous builds to occur || `$USERID`, or some other unique identifier ||
 
 
@@ -26,7 +26,7 @@ throck@buildhost-01% /usr/bin/mock -r epel-5-i386 \
 
 === sample mock session details ===
 
-Here is an example mock invocation, which is being used to rebuild the `web100_userland` package for the `i386` architecture, using the EPEL-enabled CentOS 5 chroot configuration:
+Here is an example mock invocation, which is being used to rebuild the `web100_userland` package for the `i386` architecture, using the EPEL-enabled CentOS 5 build environment configuration:
 
 {{{
 throck@buildhost-01% /usr/bin/mock -r epel-5-i386 --resultdir=/srv/results/throck/centos-5/i386/web100_userland-1.7-3.el5 --uniqueext=throck --arch=i386 /home/throck/rpm/SRPM/web100_userland-1.7-3.el5.src.rpm
