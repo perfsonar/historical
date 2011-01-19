@@ -46,26 +46,26 @@ Please review before the call and let Jason know of any comments or concerns.
 ===== 3.2.x =====
 
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=92 92] - Work on Use Cases to further develop 'deployments' reporting web pages
-   * Currrently assigned to Brian.  Is work done?  Can this be closed? * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - disable buttons on the stats grpahs page for empty graphs
-   * Assign to Kavitha * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - Add vmxnet module   * Assign to Nils
+   * Moving up from 3.3.  Currrently assigned to Brian.  Is work done?  Can this be closed? * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - disable buttons on the stats grpahs page for empty graphs
+   * Moving up from 3.3.  Assign to Kavitha * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - Add vmxnet module   * Moving up from 3.3.  Assign to Nils
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=224 224] - gLS API validation
+   * Moving up from 3.3.  Assign to Jason.
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=245 245] - negative latency from graph is counterintuitive. Should at least explain why it happens
-   * Assign to Sowmya or Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - Firewall guidance
-   * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - LinuxPPS Support
+   * Moving up 3.3.  Assign to Sowmya.   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - Firewall guidance
+   * Assign to Nils, this is mostly a documentation (non software dev) task.   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - LinuxPPS Support
    * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=298 298] - Advanced Cacti data collection for localhost
-   * Assign to Sowmya
-   * Also role in Cacti support for NTP Monitoring (developed by UMich/AGLT2 and used at SC) * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit
-   * Assign to Sowmya, or close.   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=337 337] - Add multiple hosts to scheduled test
-   * Assign to Kavitha * [http://code.google.com/p/perfsonar-ps/issues/detail?id=352 352] - upgrade script for pSB databases
-   * Aaron and Kavitha to investigate * [http://code.google.com/p/perfsonar-ps/issues/detail?id=369 369] - Testspec description recorded wrong in pSB database   * Aaron and Kavitha to investigate
+   * Moving up from 3.3.  Assign to Sowmya.  Also roll in Cacti support for NTP Monitoring (developed by UMich/AGLT2 and used at SC).  Can create a new bug for this if necessary.   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit
+   * Moving up from 3.3.  Assign to Sowmya.  Could just close if we can't find any problems w/ CSS display for major browsers/OSs.     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=337 337] - Add multiple hosts to scheduled test
+   * Move up from 3.3.  Assign to Kavitha * [http://code.google.com/p/perfsonar-ps/issues/detail?id=352 352] - upgrade script for pSB databases
+   * Aaron/Kavitha to investigate or close.   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=369 369] - Testspec description recorded wrong in pSB database   * Move up from 3.3.  Aaron/Kavitha to investigate.  
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - Package for the client modules * [http://code.google.com/p/perfsonar-ps/issues/detail?id=424 424] - duplicate entries in pSB/bwctl mesh * [http://code.google.com/p/perfsonar-ps/issues/detail?id=429 429] - perfAdmin Time Select/Display Descrepency
-   * Assign to Sowmya * [http://code.google.com/p/perfsonar-ps/issues/detail?id=430 430] - perfAdmin Pop-up/Tab Graph Behavior
-   * Assign to Kavitha to reproduce for major browsers, if we can't please close. * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - myricom driver isn't up to date * [http://code.google.com/p/perfsonar-ps/issues/detail?id=437 437] - display MTU on web-gui
-   * Assign to Kavitha * [http://code.google.com/p/perfsonar-ps/issues/detail?id=444 444] - Nagios Plug-In Packaging * [http://code.google.com/p/perfsonar-ps/issues/detail?id=446 446] - Add option to set timeout in Client::LS
-   * Assign to Andy * [http://code.google.com/p/perfsonar-ps/issues/detail?id=447 447] - new version of nuttcp supported by the NPtoolkit
-   * Assign to Nils/Aaron * [http://code.google.com/p/perfsonar-ps/issues/detail?id=451 451] - Upgrade NDT to 3.6.x lineage on the pSPT * [http://code.google.com/p/perfsonar-ps/issues/detail?id=453 453] - Document/Add addiional options to interface configuration
-   * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=460 460] - Toggle Time display in perfAdmin graphs
-   * Assign to Sowmya * [http://code.google.com/p/perfsonar-ps/issues/detail?id=464 464] - Enhancemts to the Throughput/Latency Testing CGI Pages
+   * Move up from 3.3.  Assign to Sowmya * [http://code.google.com/p/perfsonar-ps/issues/detail?id=430 430] - perfAdmin Pop-up/Tab Graph Behavior
+   * Move up from 3.3.  Assign to Kavitha to reproduce for major browsers, if we can't please close. * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - myricom driver isn't up to date * [http://code.google.com/p/perfsonar-ps/issues/detail?id=437 437] - display MTU on web-gui
+   * Move up from 3.3.  Assign to Kavitha * [http://code.google.com/p/perfsonar-ps/issues/detail?id=444 444] - Nagios Plug-In Packaging * [http://code.google.com/p/perfsonar-ps/issues/detail?id=446 446] - Add option to set timeout in Client::LS
+   * Move up from 3.3.  Assign to Andy * [http://code.google.com/p/perfsonar-ps/issues/detail?id=447 447] - new version of nuttcp supported by the NPtoolkit
+   * Move up from 3.3.  Assign to Nils/Aaron * [http://code.google.com/p/perfsonar-ps/issues/detail?id=451 451] - Upgrade NDT to 3.6.x lineage on the pSPT * [http://code.google.com/p/perfsonar-ps/issues/detail?id=453 453] - Document/Add addiional options to interface configuration
+   * Assign to Nils, also mostly documentation. * [http://code.google.com/p/perfsonar-ps/issues/detail?id=460 460] - Toggle Time display in perfAdmin graphs
+   * Move up from 3.3.  Assign to Sowmya * [http://code.google.com/p/perfsonar-ps/issues/detail?id=464 464] - Enhancemts to the Throughput/Latency Testing CGI Pages
    * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema * [http://code.google.com/p/perfsonar-ps/issues/detail?id=467 467] - ixgbe driver isn't up to date * [http://code.google.com/p/perfsonar-ps/issues/detail?id=468 468] - Additional Metadata Checks in NAGIOS Plugin * [http://code.google.com/p/perfsonar-ps/issues/detail?id=470 470] - bwctl/owamp limits gui doesn't support IPv6 addresses	 * [http://code.google.com/p/perfsonar-ps/issues/detail?id=471 471] - owamp limits file on pSPT
 
 ===== 3.3 =====
