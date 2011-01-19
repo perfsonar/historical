@@ -83,6 +83,7 @@ These are not organized into 3.2.1 vs 3.2.2 and beyond yet.
    * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema * [http://code.google.com/p/perfsonar-ps/issues/detail?id=467 467] - ixgbe driver isn't up to date * [http://code.google.com/p/perfsonar-ps/issues/detail?id=468 468] - Additional Metadata Checks in NAGIOS Plugin * [http://code.google.com/p/perfsonar-ps/issues/detail?id=470 470] - bwctl/owamp limits gui doesn't support IPv6 addresses	 * [http://code.google.com/p/perfsonar-ps/issues/detail?id=471 471] - owamp limits file on pSPT
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=473 473] - Display NTP Status on the Local Services page
    * Assign to Nils.   
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=475 475] - nagios scripts do not support web proxies
 
 ===== 3.3 =====
 
@@ -125,6 +126,7 @@ These are not organized into 3.2.1 vs 3.2.2 and beyond yet.
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=454 454] - Add GridFTP Servers to LSRegistrationDaemon
    * Assigned to Andy
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=474 474]	- Archive Failed Test Results
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=476 476] - Automated database backup
 
 ===== Future =====
 
