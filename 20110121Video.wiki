@@ -50,8 +50,10 @@ These are not organized into 3.2.1 vs 3.2.2 and beyond yet.
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=92 92] - Work on Use Cases to further develop 'deployments' reporting web pages
    * Moving up from 3.3.  Currrently assigned to Brian.  Is work done?  Can this be closed? * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - disable buttons on the stats grpahs page for empty graphs
    * Moving up from 3.3.  Assign to Kavitha * [http://code.google.com/p/perfsonar-ps/issues/detail?id=160 160] - ESnet SNMP MA Enhancements
-   * Awaiting if this is done or not.  
+   * Not done (need to add more functionality).  
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - Add vmxnet module   * Moving up from 3.3.  Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=197 197] - bwctl plots: Verify X axis is scaled by time, and not array index
+   * Assign to Sowmya
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=224 224] - gLS API validation
    * Moving up from 3.3.  Assign to Jason.
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=245 245] - negative latency from graph is counterintuitive. Should at least explain why it happens
@@ -62,6 +64,8 @@ These are not organized into 3.2.1 vs 3.2.2 and beyond yet.
    * Moving up from 3.3.  Assign to Sowmya.  Could just close if we can't find any problems w/ CSS display for major browsers/OSs.     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=337 337] - Add multiple hosts to scheduled test
    * Move up from 3.3.  Assign to Kavitha * [http://code.google.com/p/perfsonar-ps/issues/detail?id=338 338] - owmesh parsing code in perfsonarbuoy_owp_collector needs better error checking
    * Move up from 3.3.  Assign to Kavitha
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=348 348] - PSB Results Top & Bottom 10 lists
+   * Assign to Sowyma
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=352 352] - upgrade script for pSB databases
    * Aaron/Kavitha to investigate or close.   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=369 369] - Testspec description recorded wrong in pSB database   * Move up from 3.3.  Aaron/Kavitha to investigate.  
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - Package for the client modules * [http://code.google.com/p/perfsonar-ps/issues/detail?id=424 424] - duplicate entries in pSB/bwctl mesh * [http://code.google.com/p/perfsonar-ps/issues/detail?id=425 425] - SNMP MA/Cacti Reports wrong capacity
@@ -70,8 +74,6 @@ These are not organized into 3.2.1 vs 3.2.2 and beyond yet.
    * Move up from 3.3.  Assign to Sowmya * [http://code.google.com/p/perfsonar-ps/issues/detail?id=430 430] - perfAdmin Pop-up/Tab Graph Behavior
    * Move up from 3.3.  Assign to Kavitha to reproduce for major browsers, if we can't please close. * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - myricom driver isn't up to date * [http://code.google.com/p/perfsonar-ps/issues/detail?id=434 434] - pSB MA gets stuck on startup
    * Recommend we close.  
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=435 435] - run-away syslog-ng process on PS-Toolkit
-   * Recommend we close.
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=437 437] - display MTU on web-gui
    * Move up from 3.3.  Assign to Kavitha * [http://code.google.com/p/perfsonar-ps/issues/detail?id=444 444] - Nagios Plug-In Packaging * [http://code.google.com/p/perfsonar-ps/issues/detail?id=446 446] - Add option to set timeout in Client::LS
    * Move up from 3.3.  Assign to Andy * [http://code.google.com/p/perfsonar-ps/issues/detail?id=447 447] - new version of nuttcp supported by the NPtoolkit
@@ -88,24 +90,25 @@ These are not organized into 3.2.1 vs 3.2.2 and beyond yet.
    * Related to 186 * [http://code.google.com/p/perfsonar-ps/issues/detail?id=106 106] - bwmaster/bwcontroller: better logging support
    * Assign to Brian to help define what is still needed, or close * [http://code.google.com/p/perfsonar-ps/issues/detail?id=125 125] - testconf.pl: Print out description of exactly what tests are configured to run by an owmesh.conf file
    * Assign to Kavitha * [http://code.google.com/p/perfsonar-ps/issues/detail?id=149 149] - the TL1 status collector doesn't handle timeouts well * [http://code.google.com/p/perfsonar-ps/issues/detail?id=154 154] - hLS Topology Support * [http://code.google.com/p/perfsonar-ps/issues/detail?id=156 156] - need the ability to limit the size of the data returned
-   * Assign to Andy/Sowmya * [http://code.google.com/p/perfsonar-ps/issues/detail?id=173 173] - Archive -i results from bwctl * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - Address/Name Normalization in pSB * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - ability to set peer_port and iperf_port using web config GUI * [http://code.google.com/p/perfsonar-ps/issues/detail?id=186 186] - ls registration daemon needs to support multiple LSes
+   * Assign to Andy/Sowmya * [http://code.google.com/p/perfsonar-ps/issues/detail?id=173 173] - Archive -i results from bwctl * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - Address/Name Normalization in pSB
+   * Possibly close?  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - ability to set peer_port and iperf_port using web config GUI
+   * Possible raise in priority.   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=186 186] - ls registration daemon needs to support multiple LSes
    * Related to 73 * [http://code.google.com/p/perfsonar-ps/issues/detail?id=190 190] - Add owp archiving into pS-B (current version will simply ignore owp files sent to the collector)
    * Being partially addressed by GA Tech project.   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=193 193] - Normalize 'units' used in owmesh specification
    * Assign to Nils
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=195 195] - Defaults for bwctl/owamp test options in the pSB database
-   * Assign to Nils
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=197 197] - bwctl plots: Verify X axis is scaled by time, and not array index
    * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=199 199] - Lookup Service Statistics
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=211 211] - Suspend service start if administrative/connectivity info is not present * [http://code.google.com/p/perfsonar-ps/issues/detail?id=220 220] - CGI scripts are susceptible to client tinkering
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=211 211] - Suspend service start if administrative/connectivity info is not present
+   * Possible upgrade in priority.   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=220 220] - CGI scripts are susceptible to client tinkering
    * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=242 242] - ps-buoy graph user interface improvements
    * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=246 246] - report node names as configured in owmesh file, rather than dns reverse lookups	 * [http://code.google.com/p/perfsonar-ps/issues/detail?id=274 274] - Remove store.xml dependence for pSB * [http://code.google.com/p/perfsonar-ps/issues/detail?id=276 276] - Smarter Disk Configuration
    * Should evaluate if this is still even required.   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=296 296] - keep all scheduled OWAMP tests in the graphs table, add capability to manage
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=304 304] - Backup utility
    * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=321 321] - Link to error logs on services page/perfAdmin GUIs
-   * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=328 328] - Add feature to admin screen to disable http access
+   * Assign to Nils
+   * Possible upgrade in priority * [http://code.google.com/p/perfsonar-ps/issues/detail?id=328 328] - Add feature to admin screen to disable http access
    * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=332 332] - Normalize Table Display in perfAdmin
-   * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=345 345] - support for 'internal' performance toolkit instances * [http://code.google.com/p/perfsonar-ps/issues/detail?id=348 348] - PSB Results Top & Bottom 10 lists
-   * Assign to Andy * [http://code.google.com/p/perfsonar-ps/issues/detail?id=349 349] - Identify and Archive the path measured by bwctl & owamp
+   * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=345 345] - support for 'internal' performance toolkit instances * [http://code.google.com/p/perfsonar-ps/issues/detail?id=349 349] - Identify and Archive the path measured by bwctl & owamp
    * Assign to Andy * [http://code.google.com/p/perfsonar-ps/issues/detail?id=354 354] - Linux Memory Support
    * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=359 359] - var log export   * Assign to Nils
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=380 380] - unify service status checking between the various GUIs, nagios plugins and LS Registration Daemon
@@ -116,6 +119,7 @@ These are not organized into 3.2.1 vs 3.2.2 and beyond yet.
    * Assign to Sowmya * [http://code.google.com/p/perfsonar-ps/issues/detail?id=417 417] - improve toolkit logging * [http://code.google.com/p/perfsonar-ps/issues/detail?id=418 418] - Run NDT/NPAD from apache
    * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=419 419] - additional information needed in the hLS to support service directory * [http://code.google.com/p/perfsonar-ps/issues/detail?id=438 438] - perfsonarbuoy/bwctl startup loop if ntp is unsynchronized
    * Assign to Aaron/Kavitha
+   * Possible upgrade in priority.  
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=439 439] - Red-Green Plots of OWAMP data showing path Availability * [http://code.google.com/p/perfsonar-ps/issues/detail?id=441 441] - Impart knowledge of the 'local node' into perfAdmin Graphs
    * Assign to Nils * [http://code.google.com/p/perfsonar-ps/issues/detail?id=442 442] - multistream support for pSB * [http://code.google.com/p/perfsonar-ps/issues/detail?id=452 452] - Review architecture vulnerabilities (LS and TS)
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=454 454] - Add GridFTP Servers to LSRegistrationDaemon
@@ -154,6 +158,15 @@ The following bugs should be discussed if they make sense for the project to kee
    * Does not appear to be necessary or constructive.   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=443 443] - Client::LS::Remote not re-registering when keep-alives fail to hLS
    * May not be a bug.   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=448 448] - bwcollector discards iperf tests that take > 1 second longer than duration
    * Work Complete? * [http://code.google.com/p/perfsonar-ps/issues/detail?id=449 449] - daemon.pl throws HTTP 500 errors when numerous parallel requests   * Work Complete?
+
+==== Priority Assignment ===
+
+Based on an email discussion, brian has asked we consider the following in the 3.2 release series.  
+
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184]
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=211 211]
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=321 321]
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=438 438]
 
 === Visualization tools for the inter-noc diagnostic service ===
 
