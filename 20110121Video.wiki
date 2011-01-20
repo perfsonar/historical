@@ -287,8 +287,11 @@ TBD
  * Presenter: Andy
  * Time Alloted: 20 Mins
  * Topics to Cover:
- * Materials: TBD
- * Notes: See: https://stats1.es.net/perfsonar/serviceTest/cgi-bin/front-end.cgi
+ * Materials: 
+  * https://stats1.es.net/perfsonar/serviceTest/cgi-bin/front-end.cgi
+  * http://odev-vm-15.es.net/red-green/
+ * Notes:
+
  
 TBD
 
@@ -330,7 +333,7 @@ TBD
  * Presenter: Andy
  * Time Alloted: 25 Mins
  * Topics to Cover:
- * Materials: TBD
+ * Materials: http://odev-vm-15.es.net/traceroute-viz.ppt
  * Notes:
  
 TBD
