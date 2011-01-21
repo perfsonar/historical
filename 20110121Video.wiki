@@ -263,10 +263,6 @@ The following bugs should be discussed if they make sense for the project to kee
    * It is recommended that 'wizards' can change log locations on their own, everyone else should use the default.  Close?
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=399 399] - MySQL table type comparison
    * Does not appear to be necessary or constructive.   
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=448 448] - bwcollector discards iperf tests that take > 1 second longer than duration
-   * Work Complete?
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=449 449] - daemon.pl throws HTTP 500 errors when numerous parallel requests
-   * Work Complete?
 
 ==== Priority Assignment ===
 
