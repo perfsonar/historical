@@ -308,7 +308,7 @@ TBD
   * https://stats1.es.net/perfsonar/serviceTest/cgi-bin/front-end.cgi
   * http://ps-bw.es.net/toolkit/gui/perfAdmin/serviceTestScript/cgi-bin/front-end.cgi
   * http://odev-vm-15.es.net/red-green/
-
+  * Go to: http://lbnl.readytalk.com/  id: 4867381 
  
 TBD
 
@@ -339,7 +339,9 @@ TBD
  * Presenter: Andy
  * Time Allotted: 25 Mins
  * Topics to Cover:
- * Materials: http://odev-vm-15.es.net/traceroute-viz.ppt
+ * Materials: 
+  * http://odev-vm-15.es.net/traceroute-viz.ppt
+  * Go to: http://lbnl.readytalk.com/  id: 4867381 
  * Notes:
  
 TBD
