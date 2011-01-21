@@ -288,7 +288,7 @@ TBD
  * Presenter: Brian/Andy
  * Time Allotted: 20 Mins
  * Topics to Cover:
- * Materials: TBD
+ * Materials: http://acs.lbl.gov/~tierney/tmp/E-center-Update.pptx
  * Notes:
  
 TBD
@@ -313,8 +313,10 @@ TBD
  * Presenter: Brian
  * Time Allotted: 20 Mins
  * Topics to Cover:
- * Materials: TBD
- * Notes: https://stats1.es.net/perfsonar/serviceTest/cgi-bin/front-end.cgi
+ * Materials:
+   * http://ps-bw.es.net/toolkit/gui/perfAdmin/serviceTestScript/cgi-bin/front-end.cgi
+   * https://stats1.es.net/perfsonar/serviceTest/cgi-bin/front-end.cgi
+   * https://stats1.es.net/cgi-bin/top-10-N-bwctl.cgi
 
  * Go to: http://lbnl.readytalk.com/  id: 7377764
  
