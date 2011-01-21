@@ -310,7 +310,6 @@ TBD
   * https://stats1.es.net/perfsonar/serviceTest/cgi-bin/front-end.cgi
   * http://ps-bw.es.net/toolkit/gui/perfAdmin/serviceTestScript/cgi-bin/front-end.cgi
   * http://odev-vm-15.es.net/red-green/
- * Notes:
 
  
 TBD
@@ -322,6 +321,8 @@ TBD
  * Topics to Cover:
  * Materials: TBD
  * Notes: https://stats1.es.net/perfsonar/serviceTest/cgi-bin/front-end.cgi
+
+ * Go to: http://lbnl.readytalk.com/  id: 7377764
  
 TBD
 
