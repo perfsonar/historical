@@ -95,8 +95,6 @@ These are not organized into 3.2.1 vs 3.2.2 and beyond yet.
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=430 430] - perfAdmin Pop-up/Tab Graph Behavior
    * Move up from 3.3.  Assign to Kavitha to reproduce for major browsers, if we can't please close.
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - myricom driver isn't up to date
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=434 434] - pSB MA gets stuck on startup
-   * Recommend we close.  
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=437 437] - display MTU on web-gui
    * Move up from 3.3.  Assign to Kavitha
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=444 444] - Nagios Plug-In Packaging
