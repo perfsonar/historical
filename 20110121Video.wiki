@@ -314,6 +314,7 @@ TBD
  * Time Allotted: 20 Mins
  * Topics to Cover:
  * Materials:
+   * http://acs.lbl.gov/~tierney/tmp/configoptionsPPT.ppt
    * http://ps-bw.es.net/toolkit/gui/perfAdmin/serviceTestScript/cgi-bin/front-end.cgi
    * https://stats1.es.net/perfsonar/serviceTest/cgi-bin/front-end.cgi
    * https://stats1.es.net/cgi-bin/top-10-N-bwctl.cgi
