@@ -97,6 +97,8 @@ These are not organized into 3.2.1 vs 3.2.2 and beyond yet.
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - myricom driver isn't up to date
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=437 437] - display MTU on web-gui
    * Move up from 3.3.  Assign to Kavitha
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=443 443] - Client::LS::Remote not re-registering when keep-alives fail to hLS
+   * Targeting for next release
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=444 444] - Nagios Plug-In Packaging
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=446 446] - Add option to set timeout in Client::LS
    * Move up from 3.3.  Assign to Andy
@@ -260,9 +262,7 @@ The following bugs should be discussed if they make sense for the project to kee
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=396 396] - default log location of /var/log/syslog should be changed
    * It is recommended that 'wizards' can change log locations on their own, everyone else should use the default.  Close?
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=399 399] - MySQL table type comparison
-   * Does not appear to be necessary or constructive.  
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=443 443] - Client::LS::Remote not re-registering when keep-alives fail to hLS
-   * May not be a bug.  
+   * Does not appear to be necessary or constructive.   
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=448 448] - bwcollector discards iperf tests that take > 1 second longer than duration
    * Work Complete?
  * [http://code.google.com/p/perfsonar-ps/issues/detail?id=449 449] - daemon.pl throws HTTP 500 errors when numerous parallel requests
