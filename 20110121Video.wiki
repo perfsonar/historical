@@ -11,13 +11,13 @@
  # Topics
    # Release Topics
    # Visualization tools for the inter-noc diagnostic service ===
+   # BWCTL Visualization
    # OWAMP Visualization
    # E-Center Update
    # 5 Minute Break
    # IRIS Update
    # PathMA Visualization
    # Circuit Monitoring
-   # BWCTL Visualization
 
 === Release Topics === 
 
