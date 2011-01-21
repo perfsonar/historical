@@ -11,10 +11,10 @@
  # Topics
    # Release Topics
    # Visualization tools for the inter-noc diagnostic service ===
-   # BWCTL Visualization
-   # OWAMP Visualization
    # E-Center Update
    # 5 Minute Break
+   # BWCTL Visualization
+   # OWAMP Visualization
    # IRIS Update
    # PathMA Visualization
    # Circuit Monitoring
@@ -282,6 +282,18 @@ Based on an email discussion, brian has asked we consider the following in the 3
  
 TBD
      
+=== E-Center Update ===
+
+ * Presenter: Brian/Andy
+ * Time Alloted: 20 Mins
+ * Topics to Cover:
+ * Materials: TBD
+ * Notes:
+ 
+TBD
+
+=== 5 Minute Break ===     
+     
 === OWAMP Visualization ===
 
  * Presenter: Andy
@@ -305,19 +317,6 @@ TBD
  * Notes: https://stats1.es.net/perfsonar/serviceTest/cgi-bin/front-end.cgi
  
 TBD
-
-
-=== E-Center Update ===
-
- * Presenter: Brian/Andy
- * Time Alloted: 20 Mins
- * Topics to Cover:
- * Materials: TBD
- * Notes:
- 
-TBD
-
-=== 5 Minute Break ===
 
 === IRIS Update ===
 
