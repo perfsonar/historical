@@ -343,7 +343,10 @@ TBD
  * Presenter: Aaron
  * Time Alloted: 45 Mins
  * Topics to Cover:
- * Materials: TBD
+   * Current state of circuit monitoring discusions
+   * Short term roadmap for Internet2 circuit monitoring development
+   * Some open questions in the circuit monitoring front
+ * Materials: [MonitoringPlans]
  * Notes:
  
 TBD
