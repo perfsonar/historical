@@ -268,10 +268,10 @@ The following bugs should be discussed if they make sense for the project to kee
 
 Based on an email discussion, brian has asked we consider the following in the 3.2 release series.  
 
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184]
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=211 211]
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=321 321]
- * [http://code.google.com/p/perfsonar-ps/issues/detail?id=438 438]
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - Keep bug at current target.
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=211 211] - Migrate to 3.2.1
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=321 321] - Harder problem, keep at current target
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=438 438] - Mirate to 3.2.1.  Display issue is already a target for next, BWCTL/bwmaster will need to be checked.  
 
 === Visualization tools for the inter-noc diagnostic service ===
 
