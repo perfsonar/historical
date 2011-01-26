@@ -3,6 +3,7 @@ Makefile
 bin/bwcollector.pl
 bin/bwdb.pl
 bin/bwmaster.pl
+bin/check_pSB_db.pl
 bin/clean_pSB_db.pl
 bin/client.pl
 bin/configureDaemon.pl
