@@ -7,7 +7,7 @@
 == Agenda/Minutes ==
 
  # Attendees:
-   * 
+   * Joe, Brian, Jason, Andy, Sowmya, Nils, Aaron, Jeff, Maxim
  # Topics
    # Release Topics
    # Visualization tools for the inter-noc diagnostic service ===
@@ -27,12 +27,15 @@
    * Support, QA, Release Management Topics
      * Defining 1st, 2nd (3rd?) Line Support roles
        * Mailing list etiquette - who should answer, and when (e.g. 12/24hr wait time for the 'community' to answer)
+       * <b>ACTION:</b> Andy and Jason will be first tier and will work out who will answer what. They will encourage more community self-help.
        * Process for punting bugs: 1st line debugs and tries to solve, if not open a bug for 2nd line to handle.  Since we are small, do we need 3rd line?
+       * <b>DECISION:</b>
      * Primary/Backup roles on products
      * The Return of Code reviews (and not just during release cycles)
    * Growing the Community through self service
      * Tutorials and Instructions
      * 'Build your own toolkit' - Just documentation?  VMware image (updated every now and then) with the tools?  OpenDevNet?
+       * <b>ACTION:</b> Jason will develop a straw-man vmware image with Aaron and Andy will help test.
    * 3.2.x
      * Issues Update
      * Release Schedule
@@ -281,8 +284,11 @@ Based on an email discussion, brian has asked we consider the following in the 3
  * Materials: TBD
  * Notes:
  
-TBD
-     
+Basically track DICE project requirements and use that to determine any software development that needs to take place.
+
+<b>ACTION:</b> Joe will enter the metadata requirements for bwctl registrations into the issue tracker.
+<b>ACTION:</b> This project will require software development for OWAMP and BWCTL data analysis.
+
 === E-Center Update ===
 
  * Presenter: Brian/Andy
@@ -323,6 +329,9 @@ TBD
  
 TBD
 
+=== Visualizations ===
+  * <b>ACTION:</b> Aaron and Sowmya will come up with a plan for how to integrate the new owamp/bwctl/top 10 visualizations into the toolkit and/or perfAdmin.
+
 === IRIS Update ===
 
  * Presenter: Jeff
@@ -331,7 +340,7 @@ TBD
  * Materials: TBD
  * Notes:
  
-TBD
+Will start out with SNMP-MA and active tools. Will integrate in circuit monitoring as that is available.
 
 === PathMA Visualization ===
 
