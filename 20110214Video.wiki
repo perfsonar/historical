@@ -1,0 +1,40 @@
+#summary Feb 14, 2011 Conference Call
+
+=  Feb 14 2011 Conference Call 2:30 p.m. EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+   *
+ # Followup on previous actions:
+  * _*ACTION*_: Nils and Sowmya will attempt to build a release of the pS-PTK using Aaron's documentation.
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+ # PathMA Visualization
+   * Presenter: Andy
+   * Topics to Cover:
+   * Materials: 
+    * http://odev-vm-15.es.net/traceroute-viz.ppt
+    * Go to: http://lbnl.readytalk.com/  id: 4867381 
+   * Notes:
+ # Brain-storm the 'what now' question
+   * Now that there are deployments out there, how do we encourage actual use and show utility?
+     * Documentation on next steps
+     * Email list to encourage usage - advertise successes
+     * other???
+ # Release issue overview
+   * Prioritize 3.2.1 issues and determine resources needs based on timeline.
+
+== Actions ==
+
+
+== Where ==
+
+ESnet conference bridge:
+
+ * GDS: 00113498255555
+ * Direct Dial:  mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-883-7860 then 8255555# at the prompt. 
+
+== Last Updated ==
+
+$Id$
