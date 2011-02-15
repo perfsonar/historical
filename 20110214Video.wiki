@@ -5,7 +5,7 @@
 == Agenda/Minutes ==
 
  # Attendees:
-   *
+   * Brian, Andy, Sowmya, Nils, Aaron, Jeff, Joe, Jason, Maxim
  # Followup on previous actions:
   * _*ACTION*_: Nils and Sowmya will attempt to build a release of the pS-PTK using Aaron's documentation.
   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
@@ -22,6 +22,11 @@
      * Documentation on next steps
      * Email list to encourage usage - advertise successes
      * other???
+   * Ideas:
+     * Encourage nagios tests to looking for low-throughput tests.
+     * Create documentation on how to use the tools to diagnose problems.
+     * Create documentation on what to do first for network operator: setup regular mesh of tests, perhaps nagios config. - Perhaps provide a tab to display a potential nagios config.
+     * Create GUI for doing on-demand tests.
  # Release issue overview
    * Prioritize 3.2.1 issues and determine resources needs based on timeline.
  # Potential solutions to throughput tests with NIC speed mis-matches
@@ -29,9 +34,15 @@
    # Register host info
    # Add flag into bwctl/iperf to fetch the NIC info and put it in the data stream, and include it in the database. (For bwctl, could even trade that info in the control-connection and automatically rate-limit using the window size... but that seems like a bit of a hack. Of course, I have been known to like hacks now and then.)
    # Other ideas anyone?
+ # Cache daemon issues
+   * Andy will progress with the ideas in the comments of the issue tracker.
 
 == Actions ==
 
+  * _*ACTION*_: Nils and Sowmya will attempt to build a release of the pS-PTK using Aaron's documentation.
+  * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+  * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.
+  * _*ACTION*_: Andy will check out SLAC traceroute analysis.
 
 == Where ==
 
