@@ -17,6 +17,8 @@
    * Prioritize 3.2.1 issues and determine resources needs based on timeline.
  # Cache daemon issues - status (Andy)
  # 'What now?' documentation (Brian)
+   * http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/perfsonar-configuration-guide/
+   * http://fasterdata.es.net/fasterdata/troubleshooting/overview/
  # ls_registration_service - bug #443 (Brian)
 == Actions ==
 
