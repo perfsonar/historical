@@ -20,6 +20,8 @@
    * http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/perfsonar-configuration-guide/
    * http://fasterdata.es.net/fasterdata/troubleshooting/overview/
  # ls_registration_service - bug #443 (Brian)
+ # latest version of Somya's owamp plotting tool: 
+http://odev-vm-8.es.net/serviceTest/cgi-bin/delayGraph.cgi?url=http://ps-lat.es.net:8085/perfSONAR_PS/services/pSB&key=0c9f303f231defb145c27b966c4ca4aa&length=14400&&dstIP=198.129.254.187&srcIP=128.114.0.205&src=bwctl.ucsc.edu&dst=ps-lat.es.net
 
  # Other
 
