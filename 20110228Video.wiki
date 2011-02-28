@@ -20,6 +20,11 @@
    * http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/perfsonar-configuration-guide/
    * http://fasterdata.es.net/fasterdata/troubleshooting/overview/
  # ls_registration_service - bug #443 (Brian)
+
+ # Other
+
+  * IPv6 monitoring - mixing with IPv4 vs separate service deployment (Maxim)
+
 == Actions ==
 
 == Where ==
