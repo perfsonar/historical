@@ -19,6 +19,7 @@
     * Sowmya sent email to Jeff on this matter, tried to start.  Trying to use Mock to build things - couldn't generate NDT rpm.  Nothing in documetation to solve her issue - will send email to list.  
     * Nils did this on a VMWare image on his laptop, no problems.  
     * Next steps - make this available for someone to use?  Sowmya and Nils to work together on this now, also improve doc (if something is missing)
+    * Goal is to get a vmware image that others can use to build modules.
   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
     * Not yet ... did do a minor code review, needs to make a branch to start this.  
   * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.
