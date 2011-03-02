@@ -28,7 +28,6 @@
     * Haven't look at what SLAC started.  
   * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
     * Will write up some text issue - Brian started some too - also reference the bug (and the text from the original report) - issue #389.  
-
  # Release issue overview
    * Prioritize 3.2.1 issues and determine resources needs based on timeline.   
      * Jason will finish review.  
