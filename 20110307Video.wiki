@@ -1,0 +1,52 @@
+#summary Mar 7, 2011 Conference Call
+
+=  Mar 7 2011 Conference Call 2:30 p.m. EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+   * TBD
+ # Followup on previous actions:
+   * _*ACTION*_: Nils and Sowmya will work on combining efforst to build a release of the pS-PTK using Aaron's documentation.
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+   * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.  
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+   * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
+   * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net.  
+ # Future Driver Support 
+   * Several "Request for Drivers" types of bugs:
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - Add vmxnet module	
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - LinuxPPS Support	
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - myricom driver isn't up to date
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=462 462] - Kernel module for IDE SSD drive 	 
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=463 463] - the SFC driver isn't completely up to date 
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=467 463] - ixgbe driver isn't up to date	 
+   * What do we do in this space?
+     * Accept bugs, build what people need - requires long term support for exotic drivers
+     * Give people the VMWare image/instructions on how to build drivers for netinstall/live cd
+     * Encourage submissions, we would need to check these of course
+   * Email gravitated toward #2, other thoughts?
+ # Topic 2
+ # Topic 3
+ 
+== Actions ==
+
+ * _*ACTION*_: Discuss methods to enable users to build their own drivers
+ * _*ACTION*_: Nils and Sowmya will work on combining efforst to build a release of the pS-PTK using Aaron's documentation.
+ * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+ * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.  
+ * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+ * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
+ * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net.  
+ 
+== Where ==
+
+ESnet conference bridge:
+
+ * GDS: 00113498255555
+ * Direct Dial:  mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-883-7860 then 8255555# at the prompt. 
+
+== Last Updated ==
+
+$Id:$
