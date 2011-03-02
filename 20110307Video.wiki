@@ -31,13 +31,7 @@
  
 == Actions ==
 
- * _*ACTION*_: Discuss methods to enable users to build their own drivers
- * _*ACTION*_: Nils and Sowmya will work on combining efforst to build a release of the pS-PTK using Aaron's documentation.
- * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
- * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.  
- * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
- * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
- * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net.  
+ * _*ACTION*_: TBD
  
 == Where ==
 
