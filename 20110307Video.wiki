@@ -10,7 +10,7 @@
    * Jason 
  # Followup on previous actions:
    * _*ACTION*_: Nils and Sowmya will work on combining efforst to build a release of the pS-PTK using Aaron's documentation.
-   * _*ACTION*_: Nils and Sowmya will work on combining efforst to build a release of the pS-PTK using Aaron's documentation.
+     * done
    * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
    * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.  
      * done
@@ -31,6 +31,7 @@
      * Give people the VMWare image/instructions on how to build drivers for netinstall/live cd
      * Encourage submissions, we would need to check these of course
    * Email gravitated toward #2, other thoughts?
+    * *Decision is to provide a contrib space. Popular items can be incorporated into the main toolkit as resources allow.*
  # OWAMP Bucket parameter or event type
    * There seems to be a performance hit when the buckets are returned. It's not just the DB queries but also the time it takes to generate the XML. 
     * [http://odev-vm-15.es.net/buckets/no-buckets-plot.png Lifeline - No Buckets ]
