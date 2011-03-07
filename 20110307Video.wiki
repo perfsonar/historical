@@ -12,7 +12,9 @@
    * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.  
    * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
    * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
-   * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net.  
+   * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net. 
+   * _*ACTION*_: All: read / comment on  http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/perfsonar-configuration-guide/ and http://fasterdata.es.net/fasterdata/troubleshooting/overview/
+ 
  # Future Driver Support 
    * Several "Request for Drivers" types of bugs:
      * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - Add vmxnet module	
