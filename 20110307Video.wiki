@@ -5,15 +5,15 @@
 == Agenda/Minutes ==
 
  # Attendees:
-   * TBD
+   * Kavitha, Brian, Aaron, Sowmya, Andy, Jeff, Joe
  # Excused:
    * Jason 
  # Followup on previous actions:
    * _*ACTION*_: Nils and Sowmya will work on combining efforst to build a release of the pS-PTK using Aaron's documentation.
+   * _*ACTION*_: Nils and Sowmya will work on combining efforst to build a release of the pS-PTK using Aaron's documentation.
    * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
-     * No update from last time.  
    * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.  
-     * Done - awaiting changes by Jeff.  
+     * done
    * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
    * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
    * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net. 
@@ -38,10 +38,21 @@
    * We've discussed the folowing options if this became an issue:
     * Add optional boolean parameters such as "include_value_buckets" and "include_ttl_buckets" to indicate if client desires them. We should have a default which is probably to exclude both since that's the old behavior.
     * Define a new event type.
+    * *Decision is to create a new event type and in parallel attempt to improve the XML generation.*
  
 == Actions ==
 
- * _*ACTION*_: TBD
+   * _*ACTION*_: Nils and Sowmya will update the pS-PTK build environment documentation.
+   * _*ACTION*_: Nils and Sowmya will create a vmware image for building contributions for the toolkit.
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+   * _*ACTION*_: Jeff and Brian wil look through issue tracker to determine effort level and resources for 3.2.1 tagged items.
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+   * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
+   * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net. 
+   * _*ACTION*_: All: read / comment on  http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/perfsonar-configuration-guide/ and http://fasterdata.es.net/fasterdata/troubleshooting/overview/
+   * _*ACTION*_: Brian will add an issue to deal with 'contributed' drivers and such.
+   * _*ACTION*_: Andy will create a new owamp summary schema and event type with buckets required.
+   * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
  
 == Where ==
 
