@@ -6,15 +6,18 @@
 
  # Attendees:
    * TBD
+ # Excused:
+   * Jason 
  # Followup on previous actions:
    * _*ACTION*_: Nils and Sowmya will work on combining efforst to build a release of the pS-PTK using Aaron's documentation.
    * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+     * No update from last time.  
    * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.  
+     * Done - awaiting changes by Jeff.  
    * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
    * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
    * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net. 
    * _*ACTION*_: All: read / comment on  http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/perfsonar-configuration-guide/ and http://fasterdata.es.net/fasterdata/troubleshooting/overview/
- 
  # Future Driver Support 
    * Several "Request for Drivers" types of bugs:
      * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - Add vmxnet module	
@@ -33,8 +36,6 @@
    * We've discussed the folowing options if this became an issue:
     * Add optional boolean parameters such as "include_value_buckets" and "include_ttl_buckets" to indicate if client desires them. We should have a default which is probably to exclude both since that's the old behavior.
     * Define a new event type.
- # Topic 2
- # Topic 3
  
 == Actions ==
 
