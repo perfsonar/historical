@@ -1,0 +1,20 @@
+= About =
+
+Home perfSONAR-PS] is a set of independent software services that implement the [http://www.perfsonar.net perfSONAR] protocols for network performance monitoring.  As with other implementations of the perfSONAR standard, all services offer protocol compatibility.  The key feature of this software is the ability to federate between deployments, particularly those that span multiple domains, making the job of solving end-to-end performance problems on paths crossing several networks much easier to address.
+
+The perfSONAR-PS services provide Web Services (WS) based interfaces into already deployed network monitoring infrastructures and act as an intermediate layer, between the performance measurement tools and the diagnostic or visualization applications. The targeted audience for these services is network Network Operation Centers (NOCs) at Universities and Regional networks, however these services are broadly useful to the general public at large.
+
+
+= News =
+pointer to latest release
+
+= Contribute =
+page on how to contribute
+
+
+= Documentation =
+pointers to key documentation
+
+= Details =
+
+The perfSONAR-PS software suite is developed entirely in the [http://www.perl.org Perl] programming language, taking full advantage of numerous language features and benefits including the Comprehensive Perl Archive Network ([http://search.cpan.org CPAN]) distribution system. This software manager makes perfSONAR-PS the ideal choice for integration into typical NOC environments.
