@@ -49,8 +49,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=211 211] - Suspend service start if administrative/connectivity info is not present
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=224 224] - gLS API validation   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=245 245] - negative latency from graph is counterintuitive. Should at least explain why it happens.   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - Firewall guidance   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - LinuxPPS Support   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - Firewall guidance     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=298 298] - Advanced Cacti data collection for localhost   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=337 337] - Add multiple hosts to scheduled test   
@@ -74,8 +73,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=460 460] - Toggle Time display in perfAdmin graphs   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=464 464] - Enhancemts to the Throughput/Latency Testing CGI Pages   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=467 467] - ixgbe driver isn't up to date   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=468 468] - Additional Metadata Checks in NAGIOS Plugin   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=470 470] - bwctl/owamp limits gui doesn't support IPv6 addresses   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=471 471] - owamp limits file on pSPT   
@@ -97,7 +95,14 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=500 500] - IPv6 Redirect for pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=501 501] - IPv6 Support in Web100_Userland 
  * Closed Bugs
-   * TBD
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - ~~LinuxPPS Support~~ 
+     * <font color="red">_*Won't Fix*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=462 462] - ~~Kernel module for IDE SSD drive~~
+     * <font color="red">_*Won't Fix*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=463 463] - ~~the SFC driver isn't completely up to date~~
+     * <font color="red">_*Won't Fix*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=467 467] - ~~ixgbe driver isn't up to date~~
+     * <font color="red">_*Won't Fix*_</font>
    
 == Unclassified Bugs ==
 
