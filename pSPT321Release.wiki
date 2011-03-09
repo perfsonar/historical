@@ -94,6 +94,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=499 499] - Review times and frequencies of LS registration   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=500 500] - IPv6 Redirect for pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=501 501] - IPv6 Support in Web100_Userland 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=502 502] - need to rework google code site to make a easy to find 'contrib' area
  * Closed Bugs
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - ~~LinuxPPS Support~~ 
      * <font color="red">_*Won't Fix*_</font>
