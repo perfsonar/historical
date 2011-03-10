@@ -125,11 +125,11 @@ The system is mostly configured - the listing of available packages will be retr
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit32/netinstall-19.png
 
-The next screen will allow the user to choose which _package groups_ can be installed.  By default all functionality that a pS Performance Toolkit node will need is already selected or enabled.  The choice of additional packages can be used to add other tools to the target host.  The user does not have to select anything additional, but for the interested more information on what is inside of each group is available in the [http://www.centos.org/docs/5/html/Installation_Guide-en-US/s1-pkgselection-s390.html CentOS Documentation].  In general the following groups are available:
+The next screen will allow the user to choose which _package groups_ can be installed.  By default all functionality that a pS Performance Toolkit node will need is already selected or enabled.  It is strongly suggested that users do not de-select the initial packages - this may lead to complications in configuring/operating the pS Performance Toolkit.  The choice of additional packages can be used to add other tools to the target host.  The user does not have to select anything additional, but for the interested more information on what is inside of each group is available in the [http://www.centos.org/docs/5/html/Installation_Guide-en-US/s1-pkgselection-s390.html CentOS Documentation].  In general the following groups are available:
 
  * Administration Tools
  * Authoring and Publishing
- * <font color="red">_*Base*_</font> - Enabled by default
+ * <font color="red">_*Base*_</font> - Enabled by default and _*REQUIRED*_
  * Beagle
  * Clustering
  * Cluster Storages
