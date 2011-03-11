@@ -6,11 +6,10 @@ The perfSONAR-PS services provide Web Services (WS) based interfaces into alread
 
 
 = News =
-pointer to latest release
+New version of the pS-Performance Toolkit 3.2 released Oct 21, 2010. [http://psps.perfsonar.net/toolkit/ (Download here)]
 
 = Contribute =
-page on how to contribute
-
+We are always looking for more people to join this open source project. See our [http://code.google.com/p/perfsonar-ps/wiki/ContributorGuide contributor guide] for more information.
 
 = Documentation =
   * [http://psps.perfsonar.net/toolkit/ Download current release]
