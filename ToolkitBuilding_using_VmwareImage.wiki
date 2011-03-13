@@ -48,4 +48,4 @@ In order to include your software packages or tools, you will have to generate R
 ===Customizing the Toolkit environment===
       Guidelines on other customizations can be found [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs#Customizing_The_Toolkit_System_Environment here].
 
-# After making the required changes, build the toolkit using the build scripts using the [ above] mentioned procedure.
+After making the required changes, build the toolkit using the build scripts using the [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuilding_using_VmwareImage#Building_the_Toolkit above] mentioned procedure.
