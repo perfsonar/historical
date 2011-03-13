@@ -1,0 +1,51 @@
+#summary Instructions to build Toolkit iso using VMWare image
+
+= Introduction =
+We have put together a vmware image which can be used to build iso images of LiveCD and NetInstall version of the perfSONAR-PS Toolkit. The environment contains all the required software tools and scripts for building the latest release of the Toolkit. It will also enable you install other tools that you might want to have on the Toolkit or if you are a developer, you can integrate your code into the Toolkit without having to wait for a release. You may submit the iso images to us along with a note on the customizations that you made and we will include it in the repository for others to use it.
+
+
+=Build environment details =
+    * *Architecture* - i386
+    * *Platform* - CentOS 5
+    * *Installed software packages* - epel, kernel-devel, mock, ImageMagick, mkisofs, squashfs-tools, livecd-tools, syslinux, anaconda-runtime, unifdef, rpm-build, make, m4, gcc-c++, autoconf, automake, redhat-rpm-config, binutils
+
+
+=Instructions to use the VM=
+    # Download the VM here.
+    # After starting the VM, login as root.
+    # If you do not want to build packages as root or you want a separate build user, create a user and add the user to mock. Logout and login again as build user. You may also have to add this user to sudoers list.
+    # A copy of the software packages and the scripts is available in the home directory. You can also choose to download them from the svn directly by doing:_svn_ _co_ _http://anonsvn.internet2.edu/svn/nptoolkit/trunk/_ _nptoolkit_. This will install all the required software scripts and packages under nptoolkit directory.
+
+
+==Building the Toolkit==
+    # To build the toolkit, just CD to nptoolkit/scripts and run 'build_livecd.sh as root to build the LiveCD and 'build_netinstall.sh to build the netinstall iso. More details on what the scripts can be found [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs#Building_The_Toolkit here].
+
+
+==Customizing the Toolkit==
+This section gives you guidelines on how to customize the toolkit. We have covered two main customizations.
+    # Adding your software
+    # Customizing the toolkit environment 
+
+===Adding your software===
+In order to include your software packages or tools, you will have to generate RPMs and have them available in a software repository. You can then include this software repository in the kickstart file which is used by the build scripts to create the iso.
+    # Building packages
+      This [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs#Building_Toolkit_Packages_With_mock page] has details on how to build RPMs for the various tools used by the Toolkit. In sum, you have to do the following:
+        # A copy of i2_mock wrapper script should be available in the vmware image. Download the  script if it is not available in the vmware from [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs#i2_mock_utility here].
+        # The default holding repository can be found in /srv/holding/centos-5/i386. Each time you add an rpm to it, run _createrepo_ _-d_ _--update_ _/srv/holding/centos-5/i386_ to update the repository. 
+          * You can change the holding repository. Instructions to customize it can be found [http://code.google.com/p/perfsonar-ps/wiki/ToolkitDevelopment_MockOverview#create_local_holding_repos_and_add_to_build_environment_configs. here].
+        # Create source rpm of the software package you want to include. Details on building source RPMs for the Toolkit can be found [http://code.google.com/p/perfsonar-ps/wiki/ToolkitDevelopment_SourceRPMs here]
+        # Use i2_mock to create the rpm
+        # You will also have to build other packages that your tool may require. Use the same procedure mentioned above to build the RPMs.
+
+    # Adding yum repo
+        # Create a yum repository locally and place all the RPMs that you built in it. Instructions to create local yum repository can be found [http://wiki.centos.org/HowTos/CreateLocalRepos here].
+        # Add the yum repo to the kickstart file. Guidelines on how to modify the kickstart file can be found [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs#Customizing_The_Software_Yum_Repositories here].
+    
+    # Specify software package to install    
+    # Include the software in %packages section of the kickstart file. Some guidelines on how to do it can be found [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs#Customizing_The_Software_To_Install here].
+
+
+    # Other customizations
+      Guidelines on other customizations can be found [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs#Customizing_The_Toolkit_System_Environment here].
+
+   # After making the required changes, build the toolkit using the build scripts using the [http://code.google.com/p/perfsonar-ps/w/edit.do#Building_the_Toolkit above] mentioned procedure.
