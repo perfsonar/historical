@@ -1,0 +1,27 @@
+#summary Instructions to build Toolkit iso using VMWare image
+
+= Introduction =
+We have put together a vmware image which can be used to build iso images of LiveCD and NetInstall version of the perfSONAR-PS Toolkit. The environment contains all the required software tools and scripts for building the latest release of the Toolkit. It will also enable you install other tools that you might want to have on the Toolkit or if you are a developer, you can integrate your code into the Toolkit without having to wait for a release. The iso images that you build can be submitted to us along with the details of the customization if you want it to be available for others.
+
+
+=Build environment details =
+    * *Architecture* - i386
+    * *Platform* - CentOS 5
+    * *Installed software packages* - epel, kernel-devel, mock, ImageMagick, mkisofs, squashfs-tools, livecd-tools, syslinux, anaconda-runtime, unifdef, rpm-build, make, m4, gcc-c++, autoconf, automake, redhat-rpm-config, binutils
+
+
+=Instructions to use the VM=
+    # Download the VM here.
+    # After starting the VM, login as root.
+    # If you do not want to build packages as root or you want a separate build user, create a user and add the user to mock. Logout and login again as build user. You may also have to add this user to sudoers list.
+    #A copy of the software packages and the scripts is available in the home directory. You can also choose to download them from the svn directly by doing:_svn_ _co_ _http://anonsvn.internet2.edu/svn/nptoolkit/trunk/_ _nptoolkit_. This will install all the required software scripts and packages under nptoolkit directory.
+
+
+==Building the Toolkit==
+    # To build the toolkit, just CD to nptoolkit/scripts and run 'build_livecd.sh as root to build the LiveCD and 'build_netinstall.sh to build the netinstall iso. More details about what the scripts do are available [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs here].
+
+==Customizing the Toolkit==
+===Adding your software===
+    * Building packages
+    * Adding yum repo
+    * Other customizations
