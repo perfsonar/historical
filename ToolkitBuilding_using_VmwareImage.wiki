@@ -42,10 +42,10 @@ In order to include your software packages or tools, you will have to generate R
         # Add the yum repo to the kickstart file. Guidelines on how to modify the kickstart file can be found [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs#Customizing_The_Software_Yum_Repositories here].
     
     # Specify software package to install    
-    # Include the software in %packages section of the kickstart file. Some guidelines on how to do it can be found [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs#Customizing_The_Software_To_Install here].
+       # Include the software in %packages section of the kickstart file. Some guidelines on how to do it can be found [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs#Customizing_The_Software_To_Install here].
 
 
-    # Other customizations
+===Customizing the Toolkit environment===
       Guidelines on other customizations can be found [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs#Customizing_The_Toolkit_System_Environment here].
 
    # After making the required changes, build the toolkit using the build scripts using the [http://code.google.com/p/perfsonar-ps/w/edit.do#Building_the_Toolkit above] mentioned procedure.
