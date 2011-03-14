@@ -1,3 +1,5 @@
+#summary : proposed new google code home page
+
 = About =
 
 Home perfSONAR-PS] is a set of independent software services that implement the [http://www.perfsonar.net perfSONAR] protocols for network performance monitoring.  As with other implementations of the perfSONAR standard, all services offer protocol compatibility.  The key feature of this software is the ability to federate between deployments, particularly those that span multiple domains, making the job of solving end-to-end performance problems on paths crossing several networks much easier to address.
