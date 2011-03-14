@@ -1,4 +1,4 @@
-#summary : proposed new google code home page
+#summary proposed new google code home page
 
 = About =
 
