@@ -11,13 +11,10 @@ We have put together a vmware image which can be used to build iso images of Liv
 
 
 =Instructions to use the VM=
-    # Download the VM here.
-    # After starting the VM, login as root.
-    # If you do not want to build packages as root or you want a separate build user, create a user and add the user to mock.
-      * _Creating_ _a_ _new_ _user:_ useradd [options] {username}.
-      * _Adding_ _existing_ _user_ _to_ _mock:_ usermod -a -G mock {username}
-      * Logout and login again as build user. You may also have to add this user to sudoers list.
+    # Download the VM [http://packrat.internet2.edu/~njacobson/perfsonar/psBuild.vmwarevm.tar.gz here].
+    # After starting the VM, login as username: psBuild (password: psBuild). This user has been added to wheel and mock group. So, you should have sudo rights. We highly recommend changing all the passwords once you login. (Use _passwd_ command)
     # A copy of the software packages and the scripts is available in the home directory. You can also choose to download them from the svn directly by checking out from svn:_svn_ _co_ _http://anonsvn.internet2.edu/svn/nptoolkit/trunk/_ _nptoolkit_. This will install all the required software scripts and packages under nptoolkit directory.
+   # Do an svn update to download the latest version of the software tools and scripts.
 
 
 ==Building the Toolkit==
