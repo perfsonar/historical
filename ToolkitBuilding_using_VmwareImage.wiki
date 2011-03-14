@@ -7,11 +7,12 @@ We have put together a vmware image which can be used to build iso images of Liv
 =Build environment details =
     * *Architecture* - i386
     * *Platform* - CentOS 5
+    * *Disk space* - 30GB
     * *Installed software packages* - epel, kernel-devel, mock, ImageMagick, mkisofs, squashfs-tools, livecd-tools, syslinux, anaconda-runtime, unifdef, rpm-build, make, m4, gcc-c++, autoconf, automake, redhat-rpm-config, binutils, svn
 
 
 =Instructions to use the VM=
-    # Download the VM [http://packrat.internet2.edu/~njacobson/perfsonar/psBuild.vmwarevm.tar.gz here].
+    # Download the VM [http://packrat.internet2.edu/~njacobson/perfsonar/psBuild.vmwarevm.tar.gz here]. The compressed VM is about 1.2GB and expands to about 4GB. Since, the VM uses expandable storage, make sure you have at least 30GB of disk space in your physical host.
     # After starting the VM, login as username: psBuild (password: psBuild). This user has been added to wheel and mock group. So, you should have sudo rights. We highly recommend changing all the passwords once you login. (Use _passwd_ command)
     # A copy of the software packages and the scripts is available in the home directory. You can also choose to download them from the svn directly by checking out from svn:_svn_ _co_ _http://anonsvn.internet2.edu/svn/nptoolkit/trunk/_ _nptoolkit_. This will install all the required software scripts and packages under nptoolkit directory.
    # Do an svn update to download the latest version of the software tools and scripts.
