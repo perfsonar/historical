@@ -1,13 +1,27 @@
-#summary One-sentence summary of this page.
+#summary How to Contribute to the perfSONAR PS project
 
 = Introduction =
 
-coming soon.
+Everyone is encouraged to contribute to the perfSONAR-PS project. The perfSONAR-PS project is meant to be an inclusive community project. That said, we want to make sure that the components included in the perfSONAR-PS library are high quality and follow good coding practices.
+
+Email i2-perfsonar@internet2.edu to request being added as a contributor to this project. 
+
+= Contribute as a user =
+Please submit bug reports to the Issue tracker: http://code.google.com/p/perfsonar-ps/issues/list
+
+= Contribute Documentation =
+In particular, we need help supporting additional network device drivers or other flavors of Unix.
+
+= Contribute Data Analysis Tools =
+We need help in this area.
+
+= Contribute Other Code =
+Bug fixes, enhancements, etc.
 
 
-= Details =
+= License =
+All code submitted to perfSONAR-PS must be released under the BSD license:
+ * http://www.opensource.org/licenses/bsd-license.php
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+
+ 
