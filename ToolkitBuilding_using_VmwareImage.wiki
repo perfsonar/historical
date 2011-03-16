@@ -41,8 +41,8 @@ We have put together a vmware image which can be used to build iso images of Liv
  
 
 =Instructions to use the VM=
-    # Download the VM [http://packrat.internet2.edu/~njacobson/perfsonar/psBuild.vmwarevm.tar.gz here]. The compressed VM is about 1.2GB and expands to about 4GB. Since, the VM uses expandable storage, make sure you have at least 30GB of disk space in your physical host.
-    # After starting the VM, login as username: psBuild (password: psBuild). This user has been added to wheel and mock group. So, you should have sudo rights. We highly recommend changing all the passwords once you login. (Use _passwd_ command)
+    # Download the VM [http://packrat.internet2.edu/~njacobson/perfsonar/psBuild.vmwarevm.bz2 here]. Make sure you have at least 30GB of disk space in your physical host.
+    # After starting the VM, you can login to the console as user psbuild with no password.  This is the only way to access the Virtual Machine.  To enable SSH access, assign the psbuild user a password with the _passwd_ command. The psbuild user can execute superuser commands with the _sudo_ or _su_ commands. The root user is disabled by default. We highly recommend changing all the passwords once you login. (Use _passwd_ command)
     # A copy of the software packages and the scripts is available in the home directory. You can also choose to download them from the svn directly by checking out from svn:_svn_ _co_ _http://anonsvn.internet2.edu/svn/nptoolkit/trunk/_ _nptoolkit_. This will install all the required software scripts and packages under nptoolkit directory.
     # Do an svn update to download the latest version of the software tools and scripts.
 
