@@ -39,6 +39,7 @@ We have put together a vmware image which can be used to build iso images of Liv
     * pcsd - Smart card support.
     * rhnsd - This service polls the Red Hat Network for scheduled updates, some users may want to enable this with chkconfig.
     * SELinux - Provides stronger system security. This has also been disabled to ensure build processes have full access to the resources they may need. You can re-enable this by changing the line SELINUX=DISABLED to ENFORCING in /etc/selinux/config.
+    * yum-updatesd - This service will notify you when updates are available, but will not automatically install them. To enable this feature edit /etc/yum/yum-updatesd.conf and restart the service.
  
 
 =Instructions to use the VM=
