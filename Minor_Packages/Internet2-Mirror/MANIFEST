@@ -1,0 +1,9 @@
+bin/software_repository_update.sh
+bin/web100_kernel_repository_update.sh
+Internet2-Mirror.spec
+MANIFEST
+scripts/Internet2-Mirror.cron
+doc/LICENSE
+doc/README
+doc/INSTALL
+Makefile

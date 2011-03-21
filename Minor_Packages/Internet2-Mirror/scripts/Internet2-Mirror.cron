@@ -1,0 +1,8 @@
+### Internet2 Mirror Setup ###
+#
+# Run the following around every 4 hours to update the mirrors.
+#
+
+* */4 * * *  root /opt/perfsonar_ps/Internet2-Mirror/bin/software_repository_update.sh >& /dev/null
+* */4 * * *  root /opt/perfsonar_ps/Internet2-Mirror/bin/web100_kernel_repository_update.sh >& /dev/null
+

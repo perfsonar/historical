@@ -1,0 +1,31 @@
+INSTALL
+--------------------------------------------------------------------------------
+
+The package contains two scripts:
+
+  - web100_kernel_repository_update.sh: populates the kernel repository
+  - software_repository_update.sh: populates the software repository
+
+These script will do the following:
+
+ a) Downloads the software packages from the Internet2 Subversion Repositories
+ b) Generates repository metadata files locally
+ c) Uses rsync these files into the final web-readable location
+ 
+Note that the initial setup will take the longest in terms of download time due
+to the size of the repository.  Additional updates will occur quickly. 
+
+The scripts require changes before being operational:
+
+ 1) Update TEMP_SVN_DIR and TEMP_REPO_DIR to specify locations to use for
+    checking out/generating the repository info 
+
+ 2) Update DEST_REPO_DIR to specify the destination directory.
+
+The scripts can be run from cron on a regular interval.  Additional questions
+regarding use can be sent to "i2-perfsonar@interent2.edu".  
+
+--------------------------------------------------------------------------------
+Thu Mar 17 14:22:05 AST 2011
+J. Zurawski - zurawski@internet2.edu
+

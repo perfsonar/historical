@@ -1,0 +1,17 @@
+README
+--------------------------------------------------------------------------------
+
+The perfSONAR-PS project has two software repositories to support the pS
+Performance Toolkit:
+
+  - Kernel Packages
+  - Supporting software
+ 
+The included shell scripts can be used to mirror these repositories in alternate
+locations.  After a mirror has been set up, inform the perfSONAR-PS development
+effort of the location by sending an email to "i2-perfsonar@interent2.edu".
+
+--------------------------------------------------------------------------------
+Thu Mar 17 14:22:05 AST 2011
+J. Zurawski - zurawski@internet2.edu
+
