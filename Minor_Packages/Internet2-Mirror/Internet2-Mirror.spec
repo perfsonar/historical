@@ -10,15 +10,16 @@
 Summary:    Internet2 Mirror Tools
 Name:       Internet2-Mirror
 Version:    0.1
-Release:    1
+Release:    %{relnum}.%{disttag}
 License:    distributable, see http://www.internet2.edu/membership/ip.html
 Group:      System Environment/Base
 URL:        http://software.internet2.edu
-Source0:    Internet2-Mirror.tar.gz
+Source0:    Internet2-Mirror-%{version}.%{relnum}.tar.gz
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:  noarch
 Requires:   yum
 Requires:   rpm
+Requires:   subversion
 
 %description
 Internt2 mirror package. This package contains instructions to mirror the Internet2 software repositories.  
