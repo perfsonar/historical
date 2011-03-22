@@ -11,6 +11,9 @@ available such data for consumption by interested parties. Network
 characteristics supported include availability, latency and jitter, which
 provide a broad spectrum of determining end-to-end network performance.
 
+The PingER supports both IPv4 and IPv6 ping facilities and allows to run ping tests
+to the both address types at the same time.
+
 perfSONAR-PS PingER is designed to be scalable enough in order to accommodate
 hundreds of monitored pairs of hosts and uses a relational database backend
 (MySQL, Postgres, SQLite) to efficiently store and retrieve such performance
@@ -77,7 +80,7 @@ Installation (YUM):
 Like Apt, YUM installation also manages the task of finding dependencies.  The
 following command is all that is needed:
 
-  yum install perfSONAR_PS-PingER-server-v3.1-13.pSPS.noarch.rpm
+  yum install perfSONAR_PS-PingER-server-v3.1-14.pSPS.noarch.rpm
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -92,7 +95,7 @@ Installation through APT-RPM is easy, simply let the package manager do the work
 of managing the dependencies:
 
   apt-get update
-  apt-get install perfSONAR_PS-PingER-server-v3.1-13.pSPS.noarch.rpm
+  apt-get install perfSONAR_PS-PingER-server-v3.1-14.pSPS.noarch.rpm
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
@@ -106,17 +109,17 @@ Installation (Bare RPM):
 If you do not wish to install the Internet2 Repository package, you may simply
 install a noarch RPM:
 
-  wget -c http://lhcopnmon1-mgm.fnal.gov:9090/downloads/perfSONAR_PS-PingER-server-v3.1-13.pSPS.noarch.rpm 
+  wget -c http://lhcopnmon1-mgm.fnal.gov:9090/downloads/perfSONAR_PS-PingER-server-v3.1-14.pSPS.noarch.rpm 
   
 To install without package manager help:
 
-  rpm -ivh perfSONAR_PS-PingER-server-v3.1-13.pSPS.noarch.rpm
+  rpm -ivh perfSONAR_PS-PingER-server-v3.1-14.pSPS.noarch.rpm
   
 Note that this RPM may need packages to install correctly: if they are not found
 on your system manual download and install will be required.  An alternate
 method is to still use a package manager in a "local" way (YUM only):
 
-  yum localinstall perfSONAR_PS-PingER-server-v3.1-13.pSPS.noarch.rpm
+  yum localinstall perfSONAR_PS-PingER-server-v3.1-14.pSPS.noarch.rpm
   
 This will still search the available repositories for any necessary packages.
 
@@ -181,6 +184,18 @@ and
   svn update
 
 
+Post-Installation configuration:
+-------------------------------
+
+It is required to run: 
+
+sudo  /etc/init.d/PingER config
+
+after the installation or upgrade process. If you updated from the version before the 3.1-14
+then you MUST run this in order to re-format your old PingER DB.
+Choose option 
+
+
 Keeping PingER running
 -----------------------
 
@@ -196,5 +211,5 @@ The email notification will be send to the specified email account.
 
 --------------------------------------------------------------------------------
 
-Mon Apr 13 08:40:45 EDT 2009
+Updated on 03/15/2011 by MPG.
 

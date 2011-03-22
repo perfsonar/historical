@@ -28,7 +28,7 @@ use Log::Log4perl qw(get_logger);
 our $logger = Log::Log4perl::get_logger( 'perfSONAR_PS::Services::MP::Agent::Ping' );
 
 # default command line
-our $default_command = '/bin/ping -c %count% -i %interval% -s %packetSize% -t %ttl% %destination%';
+our $default_command = '%executable% -c %count% -i %interval% -s %packetSize% -t %ttl% -I %interface% %destination%';
 
 =head2 new( $command, $options, $namespace)
 
@@ -49,15 +49,31 @@ sub new {
         $hash{"CMD"} = $default_command;
     }
     $hash{"OPTIONS"} = {
-        'transport'  => 'ICMP',
+        'executable' => '/bin/ping',
+        'transport'  => 'icmp',
         'count'      => 10,
         'interval'   => 1,
         'packetSize' => 1000,
-        'ttl'        => 255
+        'ttl'        => 255,
+	'interface'  => 'eth0',
     };
     %{ $hash{"RESULTS"} } = ();
 
     bless \%hash => $package;
+}
+
+=head2  executable ( $string )
+
+accessor/mutator method to set the executable command
+
+=cut
+
+sub  executable {
+    my $self = shift;
+    if ( @_ ) {
+        $self->{OPTIONS}{executable} = shift;
+    }
+    return $self->{OPTIONS}{executable};
 }
 
 =head2 count( $string )
@@ -142,6 +158,21 @@ sub ttl {
     return $self->{'OPTIONS'}->{ttl};
 }
 
+=head2  interface( $string )
+
+accessor/mutator method to set  interface 
+
+=cut
+
+sub interface {
+    my $self = shift;
+    if ( @_ ) {
+        $self->{'OPTIONS'}->{interface} = shift;
+    }
+
+    return $self->{'OPTIONS'}->{interface};
+}
+
 =head2 ttl( $string )
 
 accessor/mutator method to set the ttl of the pings
@@ -177,18 +208,18 @@ sub parse {
 
     for ( my $x = 1; $x < scalar @$cmdOutput - 4; $x++ ) {
         $logger->debug( "Analysing line: " . $cmdOutput->[$x] );
-        my @string = split /:/, $cmdOutput->[$x];
+	chomp $cmdOutput->[$x];
+        my @string = split /icmp/, $cmdOutput->[$x];
         my $v = {};
-
         ( $v->{'bytes'} = $string[0] ) =~ s/\s*bytes.*$//;
-        if ( $string[0] =~ m/ from(.*)\((.*)\)/ ) {
-            my $dest = $1;
-            $dest =~ s/\s//g;
-            $self->destination( $dest ) if $dest ne '';
-            $self->destinationIp( $2 );
-            $logger->debug( "reformatting destination to '" . $self->destination() . "' and destination ip '" . $self->destinationIp() . "'" );
-        }
-        if ( $string[1] ) {
+       # if ( $cmdOutput->[$x]  =~ m/ from(.*)\((.*)\)/ ) {
+       #      my $dest = $1;
+       #      $dest =~ s/\s//g;
+       #      $self->destination( $dest ) if $dest ne '';
+       #      $self->destinationIp( $2 );
+       #      $logger->debug( "reformatting destination to '" . $self->destination() . "' and destination ip '" . $self->destinationIp() . "'" );
+       #  }
+       if ( $string[1] && $string[1] =~ /^_seq/) {
             foreach my $t ( split /\s+/, $string[1] ) {
                 $logger->debug( "looking at $t" );
                 if ( $t =~ m/(.*)=(\s*\d+\.?\d*)/ ) {
@@ -199,23 +230,23 @@ sub parse {
                     $v->{'units'} = $t;
                 }
             }
+         
+            my $ms_time = $v->{'time'} ? $v->{'time'} : 0;
+            push( @rtts, $ms_time );
+
+            # next time stamp
+            $time = $time + ( $ms_time / 1000 );
+
+            push @pings, {
+        	'timeValue' => $time,                   #timestamp,
+        	'value'     => $ms_time,                # rtt
+        	'seqNum'    => $v->{'_seq'},        #seq
+        	'ttl'       => $v->{'ttl'},             #ttl
+        	'numBytes'  => $v->{'bytes'},           #bytes
+        	'units'     => $v->{'units'} || 'ms',
+            };
+            push( @seqs, $v->{'_seq'} ) if $v->{'_seq'} && $v->{'_seq'} =~ /^\d+$/;
         }
-        my $ms_time = $v->{'time'} ? $v->{'time'} : 0;
-        push( @rtts, $ms_time );
-
-        # next time stamp
-        $time = $time + ( $ms_time / 1000 );
-
-        push @pings, {
-            'timeValue' => $time,                   #timestamp,
-            'value'     => $ms_time,                # rtt
-            'seqNum'    => $v->{'icmp_seq'},        #seq
-            'ttl'       => $v->{'ttl'},             #ttl
-            'numBytes'  => $v->{'bytes'},           #bytes
-            'units'     => $v->{'units'} || 'ms',
-        };
-        push( @seqs, $v->{'icmp_seq'} ) if $v->{'icmp_seq'} && $v->{'icmp_seq'} =~ /^\d+$/;
-
     }
 
     # get rest of results

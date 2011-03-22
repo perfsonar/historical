@@ -1,0 +1,68 @@
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+           messageIdRef="message.5923925" 
+           id="message.1681575" 
+             type="MetadataKeyResponse">
+ <nmwg:metadata xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" 
+                 xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/" 
+                 xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+   <pinger:subject id="subj1">
+      <nmwgt:endPointPair>
+         <nmwgt:src value="131.225.110.2" type="ipv4"/>
+         <nmwgt:dst value="131.225.80.108" type="ipv4"/>
+      </nmwgt:endPointPair>
+   </pinger:subject>
+   <pinger:parameters id="params1">
+      <nmwg:parameter value="10" name="count"/>
+      <nmwg:parameter value="64" name="packetSize"/>
+      <nmwg:parameter value="255" name="ttl"/>
+      <nmwg:parameter value="icmp" name="transport"/>
+      <nmwg:parameter value="1" name="packetInterval"/>
+   </pinger:parameters>
+   <nmwg:key id="1"/>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:metadata xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" 
+          xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/" 
+          xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta2">
+    <pinger:subject id="subj3">
+       <nmwgt:endPointPair>
+         <nmwgt:src value="131.225.110.2" type="ipv4"/>
+         <nmwgt:dst value="130.199.3.7" type="ipv4"/>
+       </nmwgt:endPointPair>
+    </pinger:subject>
+    <pinger:parameters id="params3">
+       <nmwg:parameter value="10" name="count"/>
+       <nmwg:parameter value="1000" name="packetSize"/>
+       <nmwg:parameter value="255" name="ttl"/>
+       <nmwg:parameter value="icmp" name="transport"/>
+       <nmwg:parameter value="1" name="packetInterval"/>
+    </pinger:parameters><nmwg:key id="3"/>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:metadata xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" 
+           xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/"
+           xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta3">
+    <pinger:subject id="subj2">
+       <nmwgt:endPointPair>
+          <nmwgt:src value="fe80::230:48ff:fec5:48c" type="ipv6"/>
+          <nmwgt:dst value="fe80::212:3fff:fe56:76b8" type="ipv6"/>
+       </nmwgt:endPointPair>
+    </pinger:subject>
+    <pinger:parameters id="params2">
+        <nmwg:parameter value="10" name="count"/>
+        <nmwg:parameter value="64" name="packetSize"/>
+	<nmwg:parameter value="255" name="ttl"/>
+	<nmwg:parameter value="icmp" name="transport"/>
+	<nmwg:parameter value="1" name="packetInterval"/>
+    </pinger:parameters><nmwg:key id="2"/>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" metadataIdRef="meta1" id="data1">
+       <nmwg:key id="1"/></nmwg:data>
+   <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" metadataIdRef="meta2" id="data2">
+      <nmwg:key id="3"/>
+   </nmwg:data>
+   <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" metadataIdRef="meta3" id="data3">
+       <nmwg:key id="2"/>
+   </nmwg:data>
+</nmwg:message>

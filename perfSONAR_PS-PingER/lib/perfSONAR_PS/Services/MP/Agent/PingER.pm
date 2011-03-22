@@ -58,6 +58,7 @@ our $logger = get_logger( 'perfSONAR_PS::Services::MP::Agent::Pinger' );
 # command line
 our $default_command = $perfSONAR_PS::Services::MP::Agent::Ping::default_command;
 
+my @PARAMS = qw/minRtt meanRtt maxRtt minIpd meanIpd maxIpd iqrIpd lossPercent clp outOfOrder duplicates/;
 =head2 pingPriming
 
 accessor/mutator class to determine whether we are conducting ping priming or not
@@ -203,21 +204,12 @@ sub parse {
     # if loss is 100%, nothing is certain
     # normalise data
     if ( !exists $self->results()->{'lossPercent'}
-        || $self->results()->{'lossPercent'} == 100 )
-    {
-        $self->results()->{'minRtt'}     = undef;
-        $self->results()->{'maxRtt'}     = undef;
-        $self->results()->{'meanRtt'}    = undef;
-        $self->results()->{'minIpd'}     = undef;
-        $self->results()->{'maxIpd'}     = undef;
-        $self->results()->{'meanIpd'}    = undef;
-        $self->results()->{'iqrIpd'}     = undef;
-        $self->results()->{'medianRtt'}  = undef;
-        $self->results()->{'duplicates'} = undef;
-        $self->results()->{'outOfOrder'} = undef;
-        $self->results()->{'rtts'}       = undef;
-        $self->results()->{'seqs'}       = undef;
+        || $self->results()->{'lossPercent'} == 100 )   {
+        foreach  my $datum (@PARAMS, 'rtts', 'seqs') {
+            $self->results()->{$datum}     = undef;
+        }
     }
+    $self->results()->{'lossPercent'} = 100 if $self->results()->{'sent'} && !$self->results()->{'recv'};
     $logger->debug( "  Results: ", sub { Dumper $self->results() } );
     $self->results()->{'startTime'} = $time;
     $self->results()->{'endTime'}   = $endtime;
@@ -241,8 +233,9 @@ sub toAPI {
     # create the metadata element
     # create the subject
     # nmtl3 interface
-    my $src = $self->_createInterface( 'src', $self->source(),      $self->sourceIp() );
-    my $dst = $self->_createInterface( 'dst', $self->destination(), $self->destinationIp() );
+    
+    my $src = $self->_createInterface( 'src', $self->source(),   $self->sourceIp());
+    my $dst = $self->_createInterface( 'dst', $self->destination(),  $self->destinationIp() );
 
     my $endpoints = EndPointPair->new( { endPoint => [ $src, $dst ] } );
     my $subject = PingerSubj->new( { endPointPair => $endpoints } );
@@ -295,17 +288,9 @@ sub toAPI {
 
     # add the datums to the commonTime
     $commonTime->set_datum( \@singletons );
-    $commonTime->addDatum( $self->_datumAPI( 'minRtt' ) );
-    $commonTime->addDatum( $self->_datumAPI( 'meanRtt' ) );
-    $commonTime->addDatum( $self->_datumAPI( 'maxRtt' ) );
-    $commonTime->addDatum( $self->_datumAPI( 'minIpd' ) );
-    $commonTime->addDatum( $self->_datumAPI( 'meanIpd' ) );
-    $commonTime->addDatum( $self->_datumAPI( 'maxIpd' ) );
-    $commonTime->addDatum( $self->_datumAPI( 'iqrIpd' ) );
-    $commonTime->addDatum( $self->_datumAPI( 'lossPercent' ) );
-    $commonTime->addDatum( $self->_datumAPI( 'clp' ) );
-    $commonTime->addDatum( $self->_datumAPI( 'outOfOrder' ) );
-    $commonTime->addDatum( $self->_datumAPI( 'duplicates' ) );
+    foreach my $datum (@PARAMS) {
+        $commonTime->addDatum( $self->_datumAPI( $datum ) );
+    }
 
     #$logger->fatal("TIME: " . $commonTime->asString() );
 
@@ -351,11 +336,11 @@ sub _createInterface {
     my $role = shift;
     my $dns  = shift;
     my $ip   = shift;
-
+   
     my $ipInt = IpAddress->new(
         {
             'value' => $ip,
-            'type'  => 'IPv4',
+            'type'  => $self->destination_type(),
         }
     );
 
@@ -363,9 +348,9 @@ sub _createInterface {
 
     my $src = EndPoint->new(
         {
-            'protocol' => 'ICMP',
+            'protocol' => 'icmp',
             'role'     => $role,
-            interface  => $interface,
+             interface  => $interface,
         }
     );
     return $src;

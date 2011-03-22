@@ -91,16 +91,18 @@ sub load {
 
         #$logger->debug( "$node:\n"  . $node->toString() );
 
-        my $ipAddress = undef;
-
+        my %ipAddress = ();
+        my %ip_type= ();
         # determine the ip address also if exists
         foreach my $port ( $node->getChildrenByLocalName( 'port' ) ) {
             my $id = $port->getAttribute( 'id' );
             foreach my $ip ( $port->getChildrenByLocalName( 'ipAddress' ) ) {
-                $ipAddress = $ip->textContent;
-                chomp( $ipAddress );
-		last if $ipAddress;
+                $ipAddress{$id} =  $ip->textContent; 
+		$ip_type{$id} =  $ip->getAttribute( 'type' )?lc($ip->getAttribute( 'type' )):'ipv4';
+                chomp(   $ipAddress{$id} );
+		last if $ipAddress{$id};
             }
+	    
         }
 
         # get the destination name (hostName)
@@ -111,14 +113,14 @@ sub load {
 	    last if $destination;
         }
     
-        # get the tests and populat datastructure
+        # get the tests and populate datastructure
         foreach my $test ( $node->getChildrenByLocalName( 'parameters' ) ) {
 
             #$logger->debug( "Found: " . $test->toString() );
             $logger->debug( "Found new test" );
 
             # find the params
-            my $hash = {};
+            my %hash = ();
             foreach my $param ( $test->childNodes ) {
                 my $tag = $param->localname();
                 next
@@ -142,25 +144,27 @@ sub load {
                     # remap the packetinterval into interval so the agent can use it
                     $attr = 'interval' if $attr eq 'packetInterval';
                     $logger->debug( "Found: '$attr' with value '$value'" );
-                    $hash->{$attr} = $value;
+                    $hash{$attr} = $value;
                 }
 
             }
 
             # don't bother if we don't have a period to use
             next
-                if !exists $hash->{measurementPeriod};
+                if !exists $hash{measurementPeriod};
 
             # create a special id to identify the test
-            my $id = 'packetSize=' . $hash->{'packetSize'} . ':count=' . $hash->{count} . ':interval=' . $hash->{'interval'} . ':ttl=' . $hash->{ttl};
+            my $id = 'packetSize=' . $hash{'packetSize'} . ':count=' . $hash{count} . ':interval=' . $hash{'interval'} . ':ttl=' . $hash{ttl};
 
             # add the destination details
-            $hash->{destinationIp} = $ipAddress   if $ipAddress;
-            $hash->{destination}   = $destination?$destination:$ipAddress;
-
-            $config->{ $nodeid . ':' . $id } = $hash;
-            $found++;
-
+	    foreach my $port_id (keys %ipAddress) {
+	        my %tmp_test = %hash;
+		$tmp_test{destinationIp}    = $ipAddress{$port_id};
+		$tmp_test{destination_type} = $ip_type{$port_id};
+                $tmp_test{destination}      = $destination?$destination:{$port_id};
+                $config->{"$port_id:$id"}   = \%tmp_test;
+		$found++;
+	    }
         }
 
     }

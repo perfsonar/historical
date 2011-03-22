@@ -1,0 +1,9 @@
+#  to get list of all metadata
+#
+<nmwg:message xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" type="MetadataKeyRequest" id="message.5923925">
+  <nmwg:metadata id="metaid16459279">
+    <pinger:subject id="subj16459279"/>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metaid16459279" id="data16459279"/>
+</nmwg:message>

@@ -23,10 +23,7 @@ CREATE TABLE  metaData  (
  count smallint   NOT NULL,
  packetInterval smallint,
  deadline smallint,
- ttl smallint,
- -- INDEX (ip_name_src, ip_name_dst, packetSize, count),
- FOREIGN KEY (ip_name_src) references host (ip_name),
- FOREIGN KEY (ip_name_dst) references host (ip_name));
+ ttl smallint);
 
 CREATE INDEX metaData_idx1 
   ON metaData (ip_name_src, ip_name_dst, packetSize, count);
@@ -42,7 +39,7 @@ CREATE TRIGGER metaData_fki
         IS NULL;
   END;
 
-CREATE TRIGGER metaData_fku 
+CREATE TRIGGER metaData_fku
   BEFORE UPDATE ON metaData FOR EACH ROW 
   BEGIN
     SELECT RAISE(ROLLBACK, 'Update on metaData violates foreign key on ip_name_src')

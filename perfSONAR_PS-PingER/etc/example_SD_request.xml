@@ -1,0 +1,37 @@
+<nmwg:message xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+	      type="SetupDataRequest" id="message.5424672">
+  <nmwg:metadata id="metaid13686124">
+    <pinger:parameters id="params13686124">
+      <nmwg:parameter name="startTime">1300740344</nmwg:parameter>
+      <nmwg:parameter name="endTime">1300742144</nmwg:parameter>
+      <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>
+      <nmwg:parameter name="resolution">5</nmwg:parameter>
+    </pinger:parameters>
+    <nmwg:key id="1"/>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:metadata id="metaid5387234">
+    <pinger:parameters id="params5387234">
+      <nmwg:parameter name="startTime">1300740344</nmwg:parameter>
+      <nmwg:parameter name="endTime">1300742144</nmwg:parameter>
+      <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>
+      <nmwg:parameter name="resolution">5</nmwg:parameter>
+    </pinger:parameters>
+    <nmwg:key id="3"/>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:metadata id="metaid7587828">
+    <pinger:parameters id="params7587828">
+      <nmwg:parameter name="startTime">1300740344</nmwg:parameter>
+      <nmwg:parameter name="endTime">1300742144</nmwg:parameter>
+      <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>
+      <nmwg:parameter name="resolution">5</nmwg:parameter>
+    </pinger:parameters>
+    <nmwg:key id="2"/>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metaid13686124" id="data13686124"/>
+  <nmwg:data metadataIdRef="metaid5387234" id="data5387234"/>
+  <nmwg:data metadataIdRef="metaid7587828" id="data7587828"/>
+</nmwg:message>

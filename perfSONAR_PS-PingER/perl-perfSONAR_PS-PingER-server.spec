@@ -4,7 +4,7 @@
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 PingER
 %define disttag pSPS
-%define relnum 13
+%define relnum 14
 
 Name:           perl-perfSONAR_PS-PingER-server
 Version:        3.1
@@ -61,6 +61,7 @@ Requires:       perl(Module::Load)
 Requires:       perl(Net::Ping)
 Requires:       perl(Net::DNS)
 Requires:       perl(Net::Domain)
+Requires:       perl(Net::Interface)
 Requires:       perl(NetAddr::IP)
 Requires:       perl(POSIX)
 Requires:       perl(Pod::Usage)
@@ -142,6 +143,9 @@ echo "    /opt/perfsonar_ps/PingER/doc/INSTALL file                    "
 echo "-----------------------------------------------------------------"
 
 %changelog
+
+* Mon Mar 14 2011 maxim@fnal.gov v3.1.14
+- added support for the IPv6
 
 * Mon May 17 2010 maxim@fnal.gov v3.1.13
 - added pinger service check script with docs and crontab, fixed names

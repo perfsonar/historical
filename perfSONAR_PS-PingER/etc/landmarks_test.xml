@@ -1,0 +1,43 @@
+<pingertopo:topology xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070707" xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070707/" xmlns:pingertopo="http://ogf.org/ns/nmwg/tools/pinger/landmarks/1.0/">
+    <pingertopo:domain id="urn:ogf:network:domain=FNAL-Test">
+    <pingertopo:node id="urn:ogf:network:domain=FNAL-Test:node=FNAL-Test-2">
+      <nmtb:name type="string">FNAL-Test-2</nmtb:name>
+      <nmtb:hostName>optimax.fnal.gov</nmtb:hostName>
+      <nmtb:description>test node</nmtb:description>
+      <nmwg:parameters id="paramid2">
+        <nmwg:parameter name="packetSize">64</nmwg:parameter>
+        <nmwg:parameter name="count">10</nmwg:parameter>
+        <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+        <nmwg:parameter name="ttl">255</nmwg:parameter>
+        <nmwg:parameter name="measurementPeriod">30</nmwg:parameter>
+        <nmwg:parameter name="measurementOffset"/>
+        <nmwg:parameter name="project">LHCOPN</nmwg:parameter>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=FNAL-Test:node=FNAL-Test-2:port=fe80::212:3fff:fe56:76b8">
+        <nmtl3:ipAddress type="ipv6">fe80::212:3fff:fe56:76b8</nmtl3:ipAddress>
+      </nmtl3:port>
+      <nmtl3:port id="urn:ogf:network:domain=FNAL-Test:node=FNAL-Test-2:port=131.225.110.108">
+        <nmtl3:ipAddress type="ipv4">131.225.80.108</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+  </pingertopo:domain>
+ <pingertopo:domain id="urn:ogf:network:domain=bnl.gov">
+    <pingertopo:node id="urn:ogf:network:domain=bnl.gov:node=BNL-T1">
+      <nmtb:name type="string">BNL-T1</nmtb:name>
+      <nmtb:hostName>newmon.bnl.gov</nmtb:hostName>
+      <nmtb:description></nmtb:description>
+      <nmwg:parameters id="1000B">
+        <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+        <nmwg:parameter name="count">10</nmwg:parameter> 
+        <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+        <nmwg:parameter name="ttl">255</nmwg:parameter>
+        <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>
+        <nmwg:parameter name="measurementOffset">0</nmwg:parameter>
+      </nmwg:parameters>
+      <nmtl3:port id="urn:ogf:network:domain=bnl.gov:node=BNL-T1:port=130.199.3.7">
+        <nmtl3:ipAddress type="IPv4">130.199.3.7</nmtl3:ipAddress>
+      </nmtl3:port>
+    </pingertopo:node>
+  </pingertopo:domain>
+
+</pingertopo:topology>

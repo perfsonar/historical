@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w -I../lib
 
 use strict;
-###use warnings;
+use warnings;
 
 =head1  NAME  
 
@@ -55,7 +55,6 @@ parameters will be overwritten from the CSV file or reset to defaults if missing
 =cut
 
 use English qw(-no_match_vars);
-
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 use Data::Dumper;
@@ -104,16 +103,15 @@ my %lookup_row = (
 GetOptions(
     \%options,
     map( "$_=i", keys %int_option_keys ), map( "$_=s", keys %string_option_keys ),
-    qw/verbose help/,
+    qw/verbose v help h/,
 
 );
-if ( $options{verbose} ) {
-    Log::Log4perl->easy_init( $DEBUG );
-}
-else {
-    Log::Log4perl->easy_init( $INFO );
-}
-
+my $output_level = $options{v}?$DEBUG:$INFO;
+my %logger_opts = (
+    level  => $output_level,
+    layout => '%d (%P) %p> %F{1}:%L %M - %m%n'
+);
+Log::Log4perl->easy_init(\%logger_opts);
 my $logger = get_logger( "create_landmarks" );
 
 $logger->logdie( pod2usage( -verbose => 2 ) ) if $options{help} || !( $options{file} && -e $options{file} );
@@ -151,6 +149,7 @@ my $num               = 0;
 my $io_file           = IO::File->new( $options{file} );
 my $csv_obj           = Text::CSV_XS->new();
 while ( my $row = $csv_obj->getline( $io_file ) ) {
+    next if !$row || !@{$row} || $row->[0] =~ /^#/; 
     unless ( $row->[0] && $row->[1] && ( $row->[2] || $row->[3] ) ) {
         $logger->error( " Skipping Malformed row: domain=$row->[0]  node=$row->[1] hostname=$row->[2] ip=$row->[3]" );
         next;
@@ -162,9 +161,17 @@ while ( my $row = $csv_obj->getline( $io_file ) ) {
         $domain_obj = Domain->new( { id => $domain_id } );
         $landmark_obj->addDomain( $domain_obj );
     }
+    $logger->debug( "  row: domain=$row->[0]  node=$row->[1] hostname=$row->[2] ip=$row->[3]" );
+     
     my $node_id  = "$domain_id:node=$row->[1]";
     my $node_obj = $domain_obj->getNodeById( $node_id );
     $domain_obj->removeNodeById( $node_id ) if ( $node_obj );
+    my $ip_type = ($row->[3] =~ /^\d+\.\d+\.\d+\.\d+/xims)?'ipv4':
+                      ($row->[3] =~ /^[a-f\d\:\.]+$/xims)?'ipv6':undef;
+    if($row->[3] && !$ip_type) {
+        $logger->error( "Malformed IP address, skipping ::" . $row->[3]);
+        next;
+    } 
     eval {
         $node_obj = Node->new(
             {
@@ -176,7 +183,7 @@ while ( my $row = $csv_obj->getline( $io_file ) ) {
                     {
                         xml => qq{
 <nmtl3:port xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070707/" id="$node_id:port=$row->[3]">
-    <nmtl3:ipAddress type="IPv4">$row->[3]</nmtl3:ipAddress>
+    <nmtl3:ipAddress type="$ip_type">$row->[3]</nmtl3:ipAddress>
 </nmtl3:port>
 }
                     }

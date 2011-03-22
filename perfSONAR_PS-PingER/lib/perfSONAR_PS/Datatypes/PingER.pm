@@ -411,7 +411,7 @@ sub ressurectMd {
     if ( $params->{metaID} ) {
         eval { ( $params->{metaID}, $params->{md_row} ) = each %{ $self->DBO->getMeta( [ 'metaID', { 'eq' => $params->{metaID} } ], 1 ) }; };
         if ( $EVAL_ERROR ) {
-            $self->get_LOGGER->logdie( " Fatal error while calling Rose::DB object query" . $EVAL_ERROR );
+            $self->get_LOGGER->logdie( " Fatal error while calling DB object query" . $EVAL_ERROR );
         }
     }
     else {
@@ -420,14 +420,15 @@ sub ressurectMd {
     my $metaid = $params->{metaID};
     $md = Metadata->new();
     my $key = MetaKey->new( { id => $metaid } );
-
+    $self->get_LOGGER->debug(" RESSURECTING MD from the ROW:", sub {Dumper($params->{md_row})});
+    my $src = 
     my $subject = PingerSubj->new(
         {
             id           => "subj$metaid",
             endPointPair => EndPointPair->new(
                 {
-                    src => Src->new( { value => $params->{md_row}->{ip_name_src}, type => 'hostname' } ),
-                    dst => Dst->new( { value => $params->{md_row}->{ip_name_dst}, type => 'hostname' } )
+                    src => Src->new( { value => $params->{md_row}{src_number}, type => $params->{md_row}{src_type}} ),
+                    dst => Dst->new( { value => $params->{md_row}{dst_number}, type => $params->{md_row}{dst_type}} )
                 }
             )
         }
@@ -574,7 +575,7 @@ along with this software.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008-2009, Fermi Research Alliance (FRA)
+Copyright (c) 2008-2011, Fermi Research Alliance (FRA)
 
 All rights reserved.
 

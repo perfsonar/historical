@@ -28,6 +28,9 @@ Config class which parses the STORE file.
 =cut
 
 use English qw( -no_match_vars);
+use Socket;
+use IO::Interface;
+use Net::Interface qw(:constants);
 
 # db storage
 use perfSONAR_PS::DB::SQL::PingER;
@@ -57,7 +60,7 @@ our $logger = get_logger( "perfSONAR_PS::Services::MP::PingER" );
 our $basename = 'pingermp';
 
 our $processName     = 'perfSONAR-PS PingER MP';
-our $ping_parameters = ' -c %count% -i %interval% -s %packetSize% -t %ttl% %destination%';
+our $ping_parameters = '%executable% -c %count% -i %interval% -s %packetSize% -I %interface% -t %ttl% %destination%';
 
 =head2 new( $conf )
 
@@ -117,8 +120,11 @@ sub init {
         if ( $self->getConf( "enable_registration" ) and not $self->getConf( "service_accesspoint" ) ) {
             $logger->logdie( "Must have either a service_accesspoint or an external address specified if you enable registration" );
         }
-        $self->configureConf( 'ping_exec', '/bin/ping', $self->getConf( 'ping_exec' ) );
-
+        $self->configureConf( 'ping4_exec', '/bin/ping', $self->getConf( 'ping4_exec' ) );
+        $self->configureConf( 'ping4_if', 'eth0', $self->getConf( 'ping4_if' ) );
+        $self->configureConf( 'ping6_exec', '/bin/ping6', $self->getConf( 'ping6_exec' ) );
+	$self->configureConf( 'ping6_if', 'eth0', $self->getConf( 'ping6_if' ) );
+       
         $self->configureConf( 'db_host', undef, $self->getConf( 'db_host' ) );
 
         $self->configureConf( 'db_port', undef,              $self->getConf( 'db_port' ) );
@@ -454,21 +460,23 @@ sub storeData {
     # store results
     my ( $src, $dst, $md, $data );
     unless ( $agent->sourceIp() && $agent->destinationIp() ) {
-        $logger->warn( " !!! Undefined source or destination IP ( unreachable host or parsing problem ?): ", sub { Dumper( $agent ) } );
+        $logger->error( " !!! Undefined source or destination IP ( unreachable host or parsing problem ?): ", sub { Dumper( $agent ) } );
         return -1;
     }
     my $ip_name = $agent->source() ? $agent->source() : $agent->sourceIp();
 
-    eval { $src = $self->database()->soi_host( { ip_name => $ip_name, ip_number => $agent->sourceIp() } ); };
-    if ( $EVAL_ERROR || !$src || $src !~ /^[\-\w\.]+$/ ) {
+    eval { $src = $self->database()->soi_host( { ip_name => $ip_name, ip_number => $agent->sourceIp(),  ip_type => $agent->destination_type } ); };
+    
+    if ( $EVAL_ERROR || !$src) {
         $logger->error( "Failed: " . ( $EVAL_ERROR ? $EVAL_ERROR : '' ) . " - to find or insert soi_host:   $ip_name   " . $agent->sourceIp() . " Reason: " . $self->database()->ERRORMSG );
         return -1;
     }
+    $logger->debug("Found SRC HOST id=$src");
     $ip_name = $agent->destination() ? $agent->destination() : $agent->destinationIp();
     eval { 
-        $dst = $self->database()->soi_host( { ip_name => $ip_name, ip_number => $agent->destinationIp() } ); 
+        $dst = $self->database()->soi_host( { ip_name => $ip_name, ip_number => $agent->destinationIp(),  ip_type => $agent->destination_type } ); 
     };
-    if ( $EVAL_ERROR || !$dst || $dst !~ /^[\-\w\.]+$/ ) {
+    if ( $EVAL_ERROR || !$dst) {
         $logger->error(  "Failed: " . ($EVAL_ERROR?$EVAL_ERROR : '') . 
 	                 "- to find or insert soi_host:  " . ($ip_name?"$ip_name " : ' no HOSTNAME ')  . 
 			 ($agent->destinationIp()?$agent->destinationIp() : ' no destination IP ') .
@@ -477,12 +485,13 @@ sub storeData {
 		      );
         return -1;
     }
+    $logger->debug("Found DST HOST id=$src");
     eval {
         $md = $self->database()->soi_metadata(
             {
-                ip_name_src      => $src,
-                ip_name_dst      => $dst,
-                'transport'      => 'ICMP',
+                src_host      => $src,
+                dst_host      => $dst,
+                'transport'      => 'icmp',
                 'packetSize'     => $agent->packetSize(),
                 'count'          => $agent->count(),
                 'packetInterval' => $agent->interval(),
@@ -492,7 +501,9 @@ sub storeData {
 
     };
     if ( $EVAL_ERROR || !$md || $md < 0 ) {
-        $logger->error( "Failed: " . ( $EVAL_ERROR ? $EVAL_ERROR : '' ) . "  -  to find or insert  soi_metadata: " . $agent->packetSize() . "  " . $agent->count() . "  " . $agent->interval() . "  " . $agent->ttl() . " Reason: " . $self->database()->ERRORMSG );
+        $logger->error( "Failed: " . ( $EVAL_ERROR ? $EVAL_ERROR : '' ) . "  -  to find or insert  soi_metadata: " . 
+	                 $agent->packetSize() . "  " . $agent->count() . "  " . $agent->interval() . 
+			 "  " . $agent->ttl() . " Reason: " . $self->database()->ERRORMSG );
         return -1;
     }
     eval {
@@ -533,7 +544,10 @@ sub storeData {
         );
     };
     if ( $EVAL_ERROR || $data == -1 ) {
-        $logger->error( "Failed:  " . ( $EVAL_ERROR ? $EVAL_ERROR : '' ) . " -   to find or insert  insertdata: " . $md . ", " . $agent->results()->{'startTime'} . ",  " . $agent->results()->{'meanRtt'} . " Reason: " . $self->database()->ERRORMSG );
+        $logger->error( "Failed:  " . ( $EVAL_ERROR ? $EVAL_ERROR : '' ) . 
+	                " -   to find or insert  insertdata: " . $md . ", " . 
+			$agent->results()->{'startTime'} . ",  " . $agent->results()->{'meanRtt'} . 
+			" Reason: " . $self->database()->ERRORMSG );
         return -1;
 
     }
@@ -559,22 +573,40 @@ sub getAgent {
         unless defined $test;
 
     # get the appropiate agent and init it.
-    my $command = '';
-    if ( $self->getConf( 'ping_exec' ) && -e $self->getConf( 'ping_exec' ) ) {
-        $command = $self->getConf( 'ping_exec' ) . $ping_parameters;
-    }
+    my $command =  $ping_parameters;
+   
     my $agent = perfSONAR_PS::Services::MP::Agent::PingER->new( $command );
     $agent->init();
-
-    # determine if we want to use the destination IP or the DNS
+    my $s              = IO::Socket::INET->new( Proto => 'tcp' );
+    # TODO: check to make sure we pick up correct ip
+     # determine if we want to use the destination IP or the DNS
     $agent->destination( $test->{destination} );
     $agent->destinationIp( $test->{destinationIp} );
-
+    $agent->destination_type( $test->{destination_type} );
+    if( $agent->destination_type eq 'ipv4') {
+       $agent->executable(  $self->getConf('ping4_exec' )  )   if $self->getConf('ping4_exec' ) ;
+       $agent->interface(  $self->getConf('ping4_if' )  )     if $self->getConf('ping4_if' ) ;
+    } else {
+        $agent->interface(  $self->getConf('ping6_if' )  )     if $self->getConf('ping6_if' ) ;
+        $agent->executable(  $self->getConf('ping6_exec' )  )   if $self->getConf('ping6_exec' ) ;
+    }
+    my ($iaddr_str) =  $s->if_addr(  $agent->interface  );
+    my $iaddr = Socket::inet_aton(  $iaddr_str );
+    my $nodename = gethostbyaddr(  $iaddr, Socket::AF_INET );
+    $logger->debug("IPV4 Addr= $iaddr_str   $nodename");
+    my $if    = Net::Interface->new( $agent->interface );
+    my $ipv6 = lc(Net::Interface::inet_ntop($if->address(AF_INET6)));
+    $logger->debug("IPV6 Addr= $ipv6 ");
+    
+    $agent->source( $nodename );
+    $agent->destination_type eq 'ipv4'?$agent->sourceIp($iaddr_str):$agent->sourceIp($ipv6);
+    
     $agent->count( $test->{count} )           if $test->{count};
     $agent->packetSize( $test->{packetSize} ) if $test->{packetSize};
     $agent->ttl( $test->{ttl} )               if $test->{ttl};
     $agent->interval( $test->{interval} )     if $test->{interval};
-
+    
+  
     # timeouts
     $agent->timeout( $self->getConf( 'service_timeout' ) );
 

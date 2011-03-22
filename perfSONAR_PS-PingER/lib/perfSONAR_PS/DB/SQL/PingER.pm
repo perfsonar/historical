@@ -33,8 +33,8 @@ use base qw(perfSONAR_PS::DB::SQL::Base);
 use constant CLASSPATH => 'perfSONAR_PS::DB::SQL::PingER';
 use constant METADATA  => {
     'metaID'         => 1,
-    'ip_name_src'    => 2,
-    'ip_name_dst'    => 3,
+    'src_host'       => 2,
+    'dst_host'       => 3,
     'transport'      => 4,
     'packetSize'     => 5,
     'count'          => 6,
@@ -42,10 +42,10 @@ use constant METADATA  => {
     'ttl'            => 8,
 };
 use constant HOST => {
-    'ip_name'   => 1,
-    'ip_number' => 2,
-    'comments'  => 3,
-
+    'host'      => 1,
+    'ip_name'   => 2,
+    'ip_number' => 3,
+    'ip_type'   => 4
 };
 use constant DATA => {
     'metaID'      => 1,
@@ -71,14 +71,14 @@ use constant DATA => {
 'select or insert host': wrapper method to look for the table host for the row
 with $param = { ip_name => '',    ip_number  => ''} returns 
 
-   -1 = somethign went wrong 
-   everything else is good ( could be 0 or ip_name )
+   -1 = somethingwent wrong 
+ host id if everything is good (inserted or found)
 
 =cut
 
 sub soi_host {
     my ( $self, $param ) = @_;
-    unless ( $param && ref( $param ) eq 'HASH' && $self->validateQuery( $param, HOST, { ip_name => 1, ip_number => 2 } ) == 0 ) {
+    unless ( $param && ref( $param ) eq 'HASH' && $self->validateQuery( $param, HOST, { ip_name => 2, ip_number => 3  } ) == 0 ) {
         $self->ERRORMSG( "soi_host  requires single HASH ref parameter with ip_name and ip_number set" );
 	$self->LOGGER->error( "soi_host  requires single HASH ref parameter with ip_name and ip_number set" );
         return -1;
@@ -91,7 +91,7 @@ sub soi_host {
             ],
             table    => 'host',
             validate => HOST,
-            index    => 'ip_name',
+            index    => 'host',
             limit    => 1
         }
     );
@@ -100,13 +100,15 @@ sub soi_host {
 	$self->LOGGER->error("soi_host  failed for ip_name=$param->{ip_name}  ip_number=$param->{ip_number} ");
         return $query;
     }
-
+   
     # insert if not there
     my $n = scalar( keys %{$query} );
     if ( $n == 0 ) {
         my $id = $self->insertTable(
             {
-                insert => { 'ip_name' => $param->{ip_name}, 'ip_number' => $param->{ip_number} },
+                insert => { ip_name   => $param->{ip_name}, 
+		            ip_number => $param->{ip_number},
+			    ip_type   => ($param->{ip_type}?$param->{ip_type}:'ipv4') },
                 table  => 'host'
             }
         );
@@ -122,20 +124,20 @@ sub soi_host {
         	    ],
         	    table    => 'host',
         	    validate => HOST,
-        	    index    => 'ip_name',
+        	    index    => 'host',
         	    limit    => 1
 		}
 	    );
 	    if ( !ref( $query_repeat) && $query_repeat < 0 ) {
 		$self->ERRORMSG( "soi_host  failed for ip_name=$param->{ip_name}  ip_number=$param->{ip_number} " );
 		$self->LOGGER->error("soi_host  failed for ip_name=$param->{ip_name}  ip_number=$param->{ip_number} ");
-		return $query;
+		return $query_repeat;
 	    }
-	    return $param->{ip_name}; 
+	    return  ( keys %{$query_repeat} )[0]; 
 	} 
+    } else {
+        return ( keys %{$query} )[0];
     }
-    $self->LOGGER->debug( "found host " . $param->{ip_name} . "/ " . $param->{ip_number} );
-    return ( keys %{$query} )[0];
 }
 
 =head2  soi_metadata
@@ -144,10 +146,10 @@ wrapper method to retrieve the relevant   metadata entry given  the parameters h
  
      'ip_name_src' => 
      'ip_name_dst' =>
-	 'ip_number_src' =>    ##  this one will be converted into name by quering host table
-	 'ip_number_dst' =>    ## this one will be converted into name by quering host table
+	 'src_host' =>    ##  this one will be converted into host id 
+	 'dst_host' =>    ## this one will be converted into host id
 	  
-     'transport'      = # ICMP, TCP, UDP
+     'transport'      = # icmp, udp, tcp
      'packetSize'     = # packet size of pings in bytes
      'count' 	      = # number of packets sent
      'packetInterval' = # inter packet time in seconds
@@ -165,35 +167,11 @@ sub soi_metadata {
         $self->ERRORMSG( "soi_metadata requires single HASH ref parameter" );
         return -1;
     }
-    foreach my $name ( qw/ip_name_src ip_name_dst/ ) {
-        ( my $what_num = $name ) =~ s/name/number/;
-        unless ( defined $param->{$name} ) {
-            if ( $param->{$what_num} ) {
-                my $host = $self->getFromTable(
-                    {
-                        query    => [ $what_num => { 'eq' => $param->{$what_num} } ],
-                        table    => 'host',
-                        validate => HOST,
-                        index    => 'ip_name',
-                        limit    => 1
-                    }
-                );
-                if ( $host && ref( $host ) eq 'HASH' ) {
-                    my ( $ip_name, $ip_num ) = each( %$host );
-                    $param->{$name} = $ip_name;
-                }
-            }
-        }
-        unless ( defined $param->{$name} ) {
-            $self->ERRORMSG( "soi_metadata requires $name or $what_num set and  " );
-            return -1;
-        }
-    }
     my $query = $self->getFromTable(
         {
             query => [
-                'ip_name_src'    => { 'eq' => $param->{ip_name_src} },
-                'ip_name_dst'    => { 'eq' => $param->{ip_name_dst} },
+                'src_host'    => { 'eq' => $param->{src_host} },
+                'dst_host'    => { 'eq' => $param->{dst_host} },
                 'transport'      => { 'eq' => $param->{'transport'} },
                 'packetSize'     => { 'eq' => $param->{'packetSize'} },
                 'count'          => { 'eq' => $param->{'count'} },
@@ -214,7 +192,7 @@ sub soi_metadata {
         return $self->insertTable( { insert => $param, table => 'metaData' } );
 
     }
-    $self->LOGGER->debug( "found host " . $param->{ip_name_src} . "/ " . $param->{ip_name_dst} . " metaID=" . ( keys %{$query} )[0] );
+    $self->LOGGER->debug( "found  metaid  " . $param->{src_host} . "/ " . $param->{dst_host} . " metaID=" . ( keys %{$query} )[0] );
     return ( keys %{$query} )[0];
 
 }
@@ -258,8 +236,31 @@ sub getMeta {
             index    => 'metaID',
             limit    => $limit,
         }
-    );
-
+    ); 
+    $self->LOGGER->debug(" getMeta MD:: ", sub{Dumper($results)});
+    return $results  unless $results && ref $results eq ref {} && %$results;
+    foreach my $metaid ( keys %{$results} ) {
+        foreach my $host (qw/src dst/) {
+            my $tmp = $self->getFromTable(
+        	{
+        	    query    => [ host => { eq => $results->{$metaid}{"$host\_host"} }],
+        	    table    => 'host',
+        	    validate =>  HOST,
+        	    index    => 'host',
+        	    limit    => 1
+            });
+	    unless($tmp && ref $tmp eq ref {} && %$tmp) {
+		$self->LOGGER->error(" Missing host info for the METAID=$metaid");
+		delete $results->{$metaid};
+		next;
+	    }
+	    my ($tmp_host, $tmp_row) = each %{$tmp};
+	    $results->{$metaid}{"$host\_name"}   = $tmp_row->{ip_name};
+	    $results->{$metaid}{"$host\_number"} = $tmp_row->{ip_number}; 
+	    $results->{$metaid}{"$host\_type"}   = $tmp_row->{ip_type};
+	}
+    }  
+    $self->LOGGER->debug(" getMeta HOST:: ", sub{Dumper($results)});
     return $results;
 }
 

@@ -1,0 +1,45 @@
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+          messageIdRef="message.5424672" id="message.13865132" 
+           type="SetupDataResponse">
+   <nmwg:metadata xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" 
+               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+     <select:subject id="subj1"/>
+     <select:parameters id="params1">
+        <nmwg:parameter value="1300740344" name="startTime"/>
+         <nmwg:parameter value="1300742144" name="endTime"/>
+     </select:parameters>
+     <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0/</nmwg:eventType>
+   </nmwg:metadata>
+   <nmwg:metadata xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+                  xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/"
+		  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"  
+		  metadataIdRef="1" id="meta2">
+     <pinger:subject id="subj1">
+       <nmwgt:endPointPair>
+            <nmwgt:src value="131.225.110.2" type="ipv4"/>
+            <nmwgt:dst value="131.225.80.108" type="ipv4"/>
+       </nmwgt:endPointPair>
+     </pinger:subject>
+     <pinger:parameters id="params1">
+	<nmwg:parameter value="10" name="count"/>
+	<nmwg:parameter value="64" name="packetSize"/>
+	<nmwg:parameter value="255" name="ttl"/>
+	<nmwg:parameter value="icmp" name="transport"/>
+	<nmwg:parameter value="1" name="packetInterval"/>
+     </pinger:parameters><nmwg:key id="1"/>
+     <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+   </nmwg:metadata>
+   <nmwg:data xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/" 
+             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              metadataIdRef="meta2" id="data1">
+      <nmwg:commonTime value="1300741846" type="unix">
+	 <pinger:datum value="0.178" name="minRtt"/>
+	 <pinger:datum value="0.234" name="maxRtt"/>
+	 <pinger:datum value="0.188" name="medianRtt"/>
+	 <pinger:datum value="31.069" name="meanRtt"/>
+	 <pinger:datum value="0.1" name="iqrIpd"/>
+	 <pinger:datum value="2.1" name="maxIpd"/>
+	 <pinger:datum value="0.256" name="meanIpd"/>
+      </nmwg:commonTime>
+   </nmwg:data>
+</nmwg:message> 

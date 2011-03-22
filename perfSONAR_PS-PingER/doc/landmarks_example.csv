@@ -12,5 +12,6 @@
 #
 # below you will see an example for the Fermilab's US CMS Tier-1 monitoring site
 #
-FNAL-T1,FNAL-T1-1,tukki.fnal.gov,,my description 1,64,10,,,,,
+FNAL-T1,FNAL-T1-1,tukki.fnal.gov,131.225.110.70,my description 1,64,10,,,,,
 FNAL-T1,FNAL-T1-2,lhcopnmon1-mgm.fnal.gov,,my description 2,64,10,,,,,
+FNAL-Test,FNAL-Test-2,xenmon.fnal.gov,fe80::230:48ff:fec5:48c,test node,64,10,,,,,

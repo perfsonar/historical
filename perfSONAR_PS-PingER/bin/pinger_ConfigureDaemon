@@ -46,7 +46,6 @@ my $file = shift;
 unless ( $file ) {
     $file = &ask( "What file should I write the configuration to? ", $DEFAULT_FILE, undef, '.+' );
 }
-
 my $tmp;
 our $default_hostname = hostname();
 our $hostname         = 'localhost';
@@ -54,11 +53,22 @@ our $db_name          = q{pingerMA};
 our $db_port          = q{};
 our $db_username      = 'pinger';
 our $db_password      = 'pinger_pass';
-
 my %config = ();
-if ( -f $file ) {
+
+if(-e  $file) {
+    unless(-w $file) {
+        print "!!! Config file is not writeable, check permissions !!!\n";
+        exit 1;
+    }
     %config = ParseConfig( $file );
+} else {
+   my $res = system("touch $file");
+   if($res) {
+       print "!!! Unable to create config file, check permissions !!!\n";
+       exit 1;
+   }
 }
+
 
 # make sure all the endpoints start with a "/".
 if ( defined $config{"port"} ) {
@@ -83,22 +93,55 @@ my $pre_input = '';
 while ( 1 ) {
     my $input;
     print "1) Set global values for the PingER MA/MP\n";
-    print "2) Add/Edit PingER endpoint\n";   
+    print "2) Add/Edit PingER endpoint\n";
     print "3) Enable/Disable PingER  port/endpoint\n";
     print "4) PingER MP/MA storage cleanup\n";
-    print "5) Save and Exit ( configuration is saved automatically when you select 1 - 4 )\n";
-    print "6) Exit without Save\n";
+    print "5) Re-factor(add IPV6 support) old PingER DB\n";
+    print "6) Save and Exit ( configuration is saved automatically when you select 1 - 5 )\n";
+    print "7) Exit without Save\n";
     $input = &ask( "? ", q{}, undef, '[123456]' );
 
-    if ( $input == 6 ) {
+    if ( $input ==7 ) {
         exit( 0 );
     }
-    elsif ( $input == 5 ) { 
+    elsif ( $input == 6 ) { 
         SaveConfig_mine( $file, \%config );
         print "\n";
         print "Saved config to $file\n";
         print "\n";
 	exit( 0 );
+    } 
+    elsif ( $input == 5 ) {
+        SaveConfig_mine( $file, \%config );
+        my @endpoints = ();
+        foreach my $port ( sort keys %{ $config{"port"} } ) {
+            next unless ( exists $config{"port"}->{$port}->{"endpoint"} );
+            foreach my $endpoint ( sort keys %{ $config{"port"}->{$port}->{"endpoint"} } ) {
+                push @endpoints, "$port$endpoint";
+            }
+        }
+	  if ( $#endpoints > -1 ) {
+            print "\n";
+            print "Existing Endpoints: \n";
+            my $len = $#endpoints;
+            for my $i ( 0 .. $len ) {
+                print " $i) $endpoints[$i]\n" if  $endpoints[$i] =~ /\/ma$/ms;
+            }
+            print "\n";
+        }  
+        do {
+            $input = &ask( "Enter PingER endpoint to add support (for example as: 8075/perfSONAR_PS/services/pingerma) or select from a number from the above ", q{8075/perfSONAR_PS/services/pingerma}, undef, '^(\d+[\/].*|\d+)$' );
+            if ( $input =~ /^\d+$/mx ) {
+                $input = $endpoints[$input];
+            }
+        } while ( not( $input =~ /\d+[\/].*/mx ) ); 
+        my ( $port, $endpoint );
+        if ( $input =~ /(\d+)([\/].*)/mx ) {
+            $port     = $1;
+            $endpoint = $2;
+        } 
+        refactor_pinger( $config{"port"}->{$port}->{"endpoint"}->{$endpoint},  "pingerma" );
+        print "Support for the IPv6 was added to the PingER DB\n";
     }
     elsif( $input == 4) { 
       SaveConfig_mine( $file, \%config ) if  $pre_input && $pre_input != 5;
@@ -325,7 +368,7 @@ sub config_pinger {
 
     $config->{$modulename}->{"db_type"} = &ask( "Enter the database type to read from (sqlite,mysql) ", "mysql", $config->{$modulename}->{"db_type"}, '^(sqlite|mysql)$' );
 
-    my $dirname =  '/opt/perfsonar_ps/PingER/scripts';
+    my $dirname =  '/../scripts';
 
     if ( $config->{$modulename}->{"db_type"} eq "sqlite" ) {
         $config->{$modulename}->{"db_file"} = &ask( "Enter the filename of the SQLite database ", "pinger.db", $config->{$modulename}->{"db_file"}, '.+' );
@@ -406,10 +449,16 @@ sub config_pinger {
 
     if ( $modulename eq "pingermp" ) {
         $config->{$modulename}->{"configuration_file"} = &ask( "Name of XML configuration file for landmarks and schedules ", "pinger-landmarks.xml", $config->{$modulename}->{"configuration_file"}, '.+' );
+        $config->{$modulename}->{"ping6_exec"} = &ask( "Enter the full path to the ping command  for IPv6",  '/bin/ping6', $config->{$modulename}->{"ping6_exec"}, 'ping6$' );
+        $config->{$modulename}->{"ping6_if"} = &ask( "Enter the name of the network interface used fot the IPv6 ping",  'eth0', $config->{$modulename}->{"ping6_if"}, '^eth[0-9]$' );
+        $config->{$modulename}->{"ping4_exec"} = &ask( "Enter the full path to the IPv4 ping command",  '/bin/ping', $config->{$modulename}->{"ping4_exec"}, 'ping?$' );
+        $config->{$modulename}->{"ping4_if"} = &ask( "Enter the name of the network interface used fot the IPv4 ping",  'eth0', $config->{$modulename}->{"ping4_if"}, '^eth[0-9]$' );
+       
     }
 
     if ( $modulename eq "pingerma" ) {
         $config->{$modulename}->{"query_size_limit"} = &ask( "Enter the limit on query size ", "100000", $config->{$modulename}->{"query_size_limit"}, '^\d*$' );
+	
     }
 
     $config->{$modulename}->{"enable_registration"} = &ask( "Will this service register with an LS (0,1) ", "0", $config->{$modulename}->{"enable_registration"}, '^[01]$' );
@@ -426,12 +475,72 @@ sub config_pinger {
     $config->{$modulename}->{"service_description"} = &ask( "Enter a service description ", "PingER $moduletype on $default_hostname", $config->{$modulename}->{"service_description"}, '.+' );
 
     $config->{$modulename}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{$modulename}->{"service_accesspoint"}, '^http:\/\/' );
+   
+    
+}
 
+=head2 refactor_pinger
+
+add support for the IPv6 for the PingER DB
+
+=cut
+
+sub refactor_pinger {
+    my ( $config,    $modulename ) = @_;
+ my $moduletype =   "MA";
+    $config->{$modulename} = () unless exists $config->{$modulename};
+
+    $config->{$modulename}->{"db_type"} = &ask( "Enter the database type to read from (sqlite,mysql) ", "mysql", $config->{$modulename}->{"db_type"}, '^(sqlite|mysql)$' );
+    my $dbh = '';
+    if ( $config->{$modulename}->{"db_type"} eq "sqlite" ) {      
+        eval {
+            require DBD::SQLite;
+            require DBI;
+
+            $dbh = DBI->connect(
+                "dbi:SQLite:dbname=$config->{$modulename}->{db_file}",
+                "", "",
+                {
+                    AutoCommit => 1,
+                    RaiseError => 1
+                }
+            );
+            $dbh->disconnect();
+            system( "sqlite3  $config->{$modulename}->{db_file} < $dirname/../scripts/update_sqlite_db.sql" );
+        };
+        if ( $EVAL_ERROR || $dbh->err) {
+            die " $EVAL_ERROR :: You have to install perl DBD::SQLite driver, run: sudo cpan -i 'DBD::SQLite' ";
+        }
+    }
+    elsif ( $config->{$modulename}->{"db_type"} eq "mysql" ) {       
+            eval {
+        	require DBD::mysql;
+        	require DBI;
+		my $root_pass = &ask( "Enter the 'root' password for the MySQL database  ", '', undef, '');
+		print " Connecting to ... $config->{$modulename}{db_host} database=$config->{$modulename}{db_name}\n";
+		$dbh = DBI->connect(
+        	    "dbi:mysql:host=$config->{$modulename}{db_host};database=$config->{$modulename}{db_name}",
+        	    'root', $root_pass,
+        	    {
+        		AutoCommit => 1,
+        		RaiseError => 1
+        	    }
+        	);
+     	 	$dbh->disconnect(); 
+        	system( "mysql -u root -p'$root_pass' -h $config->{$modulename}{db_host} -D $config->{$modulename}{db_name} < $dirname/../scripts/update_mysql_db.sql" );
+            };
+            if ( $EVAL_ERROR || $dbh->err) {
+        	die " $EVAL_ERROR :: You have to install perl DBD::mysql driver, run: sudo cpan -i 'DBD::mysql' or check DB";
+            } 
+    } 
+    else {
+        print "\n Found unsupported DB type: $config->{$modulename}->{db_type} in the config file, ONLY mysql and SQLite are supported ..\n"; 
+    }
 }
 
 =head2 cleanup_pinger
 
-TBD
+clean old data from the pinger db
 
 =cut
 

@@ -10,27 +10,29 @@ drop  table if exists host;
 #   ip_number has length of 64 - to accomodate possible IPv6 
 #
 CREATE TABLE   host (
+ host BIGINT NOT NULL AUTO_INCREMENT,
  ip_name varchar(52) NOT NULL, 
  ip_number varchar(64) NOT NULL,
- comments varchar(1024), 
- PRIMARY KEY  (ip_name, ip_number) );
+ ip_type enum('ipv4','ipv6')  NOT NULL default 'ipv4',
+ PRIMARY KEY  (host),
+ UNIQUE INDEX (ip_name, ip_number) 
+);
 
 #
 #     meta data table ( [eriod is an interval, since interval is reserved word )
 #
 CREATE TABLE   metaData  (
  metaID BIGINT NOT NULL AUTO_INCREMENT,
- ip_name_src varchar(52) NOT NULL,
- ip_name_dst varchar(52) NOT NULL,
- transport varchar(10)  NOT NULL,
+ src_host BIGINT NOT NULL,
+ dst_host BIGINT NOT NULL, 
+ transport enum('icmp','tcp','udp')   NOT NULL DEFAULT 'icmp',
  packetSize smallint   NOT NULL,
  count smallint   NOT NULL,
  packetInterval smallint,
- deadline smallint,
  ttl smallint,
- INDEX (ip_name_src, ip_name_dst, packetSize, count),
- FOREIGN KEY (ip_name_src) references host (ip_name),
- FOREIGN KEY (ip_name_dst) references host (ip_name),
+ INDEX (src_host, dst_host, packetSize, count),
+ FOREIGN KEY (src_host) references host (host),
+ FOREIGN KEY (dst_host) references host (host),
  PRIMARY KEY  (metaID));
 
 

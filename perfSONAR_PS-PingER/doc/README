@@ -64,6 +64,9 @@ install on the clients. The server (i.e. the echo responder) runs at a high
 priority (e.g. in the kernel on UNIX) and so is more likely to provide a good
 measure of network performance than a user application.
 
+The PingER supports both IPv4 and IPv6 ping facilities and allows to run ping tests
+to the both address types at the same time.
+
 PingER is very modest in its network bandwidth requirements (~100 bps per
 monitoring-remote- host-pair for the way we use it).
 
@@ -102,6 +105,13 @@ configuration script:
 Answer all questions or accept defaults about desired location of the
 service/port/description etc...  This script will attempt to create the MA
 database.
+
+NOTICE:
+-------
+
+  If you upgradin PingER from the version earlier than 3.1-14 then you MUST 
+  run pinger_ConfigureDaemon and select "Re-format OLD PingER DB".
+
 
 Check logging config file: 
      
@@ -164,6 +174,14 @@ Metadata: src=lhcopnmon1-mgm.fnal.gov dst=www.cmsaf.mit.edu  packetSize=1000
 Metadata Key(s): 9 :
 Metadata: src=lhcopnmon1.fnal.gov dst=t2.unl.edu  packetSize=1000
 
+You can also run:
+
+ /opt/perfsonar_ps/PingER/client/bin/pinger_service_check.pl. This is more comprehensive
+ testing script and it will test for the prensence of the metadata and availability of the
+ actual measurements in the past 30 minutes for the each metadata entry. If you just deployed
+ PingER on your host then please wait for the first data to appear. It will depend on your
+ local tests configuration outlined in the pinger_landmarks.xml file.
+
 Maintenance:
 ------------
 
@@ -193,5 +211,5 @@ Finally, check the following websites for news of software releases:
 
 --------------------------------------------------------------------------------
 
-Fri Apr  3 10:43:20 EDT 2009
+Updated on 03/15/2011 by MPG.
 
