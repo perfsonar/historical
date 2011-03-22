@@ -1,0 +1,39 @@
+#summary Mar28, 2011 Conference Call
+
+=  Mar 28 2011 Conference Call 2:30 p.m. EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+   * TBD
+ # Excused:
+   * TBD
+ # Followup on previous actions:
+   * _*ACTION*_: Nils and Sowmya will update the pS-PT build environment documentation and vmware image.
+   * _*ACTION*_: Jeff and Brian will look through issue tracker to determine effort level and resources for 3.2.1 tagged items. 
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+   * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
+   * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net. 
+   * _*ACTION*_: All: read / comment on  http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/perfsonar-configuration-guide/ and http://fasterdata.es.net/fasterdata/troubleshooting/overview/
+   * _*ACTION*_: Brian will add an issue to deal with 'contributed' drivers and such.
+   * _*ACTION*_: Andy will create a new owamp summary schema and event type with buckets required.
+   * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+ # Developer updates?
+ # Release Topics
+ # Code Review for Maxim's Changes
+ 
+== Actions ==
+
+   * _*ACTION*_: TBD
+
+== Where ==
+
+ESnet conference bridge:
+
+ * GDS: 00113498255555
+ * Direct Dial:  mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-883-7860 then 8255555# at the prompt. 
+
+== Last Updated ==
+
+$Id:$
