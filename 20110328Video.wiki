@@ -21,7 +21,56 @@
  # Developer updates?
  # Release Topics
  # Code Review for Maxim's Changes
- 
+ # Documentation Topics
+   * See Jason's email thread for the entire proposal
+   * Maintain the 2 content areas as such:
+     # Web = publishable/polished material that is reviewed on a semi-regular basis.  Content neutral for the perfSONAR-PS community.  
+     # Wiki = 'in-progress' work area and collaboration space.  Content migrates off when 'finished'
+   * Also need to speak to the user types more directly.  E.g. materials for an operator are different than materials for a developer.  Organizing this in some way will cut down on information overload.  
+   * Proposed breakdown by content area:
+     * Informal/Collaboration (Wiki)
+       * Anything that is in-progress will start here, then be moved
+       * Service Design Documents, understood to be in progress
+       * Protocol Design Documents
+       * Release Management
+       * Bug Tracking
+       * Meeting(s) space
+     * Formal (Web)
+       * Installation and Configuration
+         * Step by Step Install (migrate from Wiki)
+         * One Page README - just the facts to get up and running
+       * Using the pSPT
+         * Regular vs Diagnostic Use Case
+         * Why/How to configure tests (What Brian has started)
+         * Care and Feeding of your pSPT (Maintenance procedures, etc.)
+         * Debugging Network Problems
+       * Contributing (some of what Brian has started, but more, and formalized)
+         * Become a Mirror
+         * Building Drivers
+         * Packaging Software
+         * Participation In The Project
+       * Specific spaces for (note, these can use links to other resources - act as a reference for the things these groups would want to do):
+         * Researchers
+           * Kinds of data available
+           * How to access it
+           * How to get in contact with R&E network support staff
+         * Users
+           * Learning to use the pS tools
+           * Learn about network performance (in general)
+           * Getting more help
+         * Operators
+           * Installing
+           * Configuring
+           * Maintaining
+           * Interpreting results
+           * Learn about network performance (in general)
+           * Getting more help
+         * Developers
+           * Developing clients
+           * developing servers
+           * packaging
+           * contributions to the project
+
 == Actions ==
 
    * _*ACTION*_: TBD
