@@ -9,8 +9,12 @@
  # Excused:
    * Jason  
  # Followup on previous actions:
+   * _*ACTION*_: ~~Jason to migrate hLS code to a branch~~
+     * Done: https://svn.internet2.edu/svn/perfSONAR-PS/branches/jz-lstransactions/
+     * Next step - merge to trunk?
    * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.  
-   * _*ACTION*_: Jason to add labels to issue tracker for time estimates.  
+   * _*ACTION*_: ~~Jason to add labels to issue tracker for time estimates~~
+     * Complete  
    * _*ACTION*_: Brian to share some of the information about managing CMS at ESnet with Shibboleth.  
    * _*ACTION*_: Jeff to still ask about further use of SVN as a content management system for psps.perfsonar.net
    * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
