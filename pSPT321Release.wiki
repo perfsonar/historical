@@ -48,13 +48,14 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=197 197] - bwctl plots: Verify X axis is scaled by time, and not array index   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=211 211] - Suspend service start if administrative/connectivity info is not present
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=224 224] - gLS API validation   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=242 242] - ps-buoy graph user interface improvements
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=245 245] - negative latency from graph is counterintuitive. Should at least explain why it happens.   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - Firewall guidance     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=298 298] - Advanced Cacti data collection for localhost   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=337 337] - Add multiple hosts to scheduled test   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=338 338] - owmesh parsing code in perfsonarbuoy_owp_collector needs better error checking   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=348 348] - PSB Results Top & Bottom 10 lists   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=349 349] - Identify and Archive the path measured by bwctl & owamp
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=352 352] - upgrade script for pSB databases   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=369 369] - testspec description recorded wrong in pSB database   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - Package for the client modules
@@ -64,12 +65,14 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=430 430] - perfAdmin Pop-up/Tab Graph Behavior   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - myricom driver isn't up to date   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=437 437] - isplay MTU on web-gui   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=438 438] - perfsonarbuoy/bwctl startup loop if ntp is unsynchronized   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=443 443] - Client::LS::Remote not re-registering when keep-alives fail to hLS   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=444 444] - Nagios Plug-In Packaging   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=446 446] - Add option to set timeout in Client::LS   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=447 447] - new version of nuttcp supported by the NPtoolkit   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=451 451] - Upgrade NDT to 3.6.x lineage on the pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=453 453] - Document/Add addiional options to interface configuration   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=454 454] - Add GridFTP Servers to LSRegistrationDaemon   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=460 460] - Toggle Time display in perfAdmin graphs   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=464 464] - Enhancemts to the Throughput/Latency Testing CGI Pages   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases   
@@ -84,11 +87,13 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=483 483] - prompt to subscribe to perfsonar-user@internet2.edu list when installing toolkit   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=484 484] - service_watcher runs two instances at the same time at 1AM   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=485 485] - ls_registration_daemon.conf is missing site_name even though host information entered
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=488 488] - IPv6 Compatibility for all perfSONAR services and products
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=490 490] - Reverse Traceroute/Ping does not hold 'function' argument between CGI submission
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=491 491] - IPV6 Survey
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=492 492] - additional documentation needed on what to do after installing the NP Toolkit   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=493 493] - LS Cache Daemon Download Problem   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=494 494] - Disable HTTP Trace on pSPT   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=495 494] - PHP (Cacti) Vulnerability on pSPT   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=495 495] - PHP (Cacti) Vulnerability on pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=496 496] - Mirrors for pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=497 497] - Traceroute MA does not query over long ranges of time
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=499 499] - Review times and frequencies of LS registration   
@@ -98,6 +103,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=506 506] - status page "not running" clarification
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=507 507] - Services must include examples of requests and responses
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=508 508] - SSL Certificates on pSPT
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=510 510] - validate recent Transport.pm and Client/MA.pm changes 
  * Closed Bugs
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - ~~LinuxPPS Support~~ 
      * <font color="red">_*Won't Fix*_</font>
