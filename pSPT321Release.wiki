@@ -104,6 +104,8 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=507 507] - Services must include examples of requests and responses
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=508 508] - SSL Certificates on pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=510 510] - validate recent Transport.pm and Client/MA.pm changes 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=512 512] - For toolkit building VM, change default output directory in i2_mock utility to psbuild user home 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=513 513] - For toolkit building VM, add holding directory to psbuild user home directory 
  * Closed Bugs
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - ~~LinuxPPS Support~~ 
      * <font color="red">_*Won't Fix*_</font>
