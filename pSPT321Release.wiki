@@ -48,13 +48,11 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=224 224] - gLS API validation   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=242 242] - ps-buoy graph user interface improvements
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=245 245] - negative latency from graph is counterintuitive. Should at least explain why it happens.   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - Firewall guidance     
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=298 298] - Advanced Cacti data collection for localhost   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - Firewall guidance       
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=337 337] - Add multiple hosts to scheduled test   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=348 348] - PSB Results Top & Bottom 10 lists   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=349 349] - Identify and Archive the path measured by bwctl & owamp
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=352 352] - upgrade script for pSB databases    
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=349 349] - Identify and Archive the path measured by bwctl & owamp   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - Package for the client modules
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=424 424] - duplicate entries in pSB/bwctl mesh   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=425 425] - SNMP MA/Cacti Reports wrong capacity   
@@ -104,10 +102,14 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=510 510] - validate recent Transport.pm and Client/MA.pm changes 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=512 512] - For toolkit building VM, change default output directory in i2_mock utility to psbuild user home 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=513 513] - For toolkit building VM, add holding directory to psbuild user home directory 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=514 514] - changes to owamp, bwctl, or PingER config should automatically update traceroute config too	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=516 516] - regular testing gui doesn't preserve udp bandwidth setting
  * Closed Bugs
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=197 197] - ~~bwctl plots: Verify X axis is scaled by time, and not array index~~
      * <font color="green">_*remaining tasks for this issue are part of issue 242  *_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - ~~LinuxPPS Support~~ 
+     * <font color="red">_*Won't Fix*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=352 352] - ~~upgrade script for pSB databases~~
      * <font color="red">_*Won't Fix*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=462 462] - ~~Kernel module for IDE SSD drive~~
      * <font color="red">_*Won't Fix*_</font>
