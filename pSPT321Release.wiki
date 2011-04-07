@@ -104,6 +104,11 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=513 513] - For toolkit building VM, add holding directory to psbuild user home directory 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=514 514] - changes to owamp, bwctl, or PingER config should automatically update traceroute config too	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=516 516] - regular testing gui doesn't preserve udp bandwidth setting
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=517 517] - NPAD testing port wrong on pSPT
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=518 518] - Reverse Traceroute/Ping is not IPv6 Capable
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=519 519] - Add support for DNS 'rotate' option
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=520 520] - NAGIOS BWCTL Probe Support for TCP/UDP tests
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=521 521] - NAGIOS Plugins Documentation Clarification
  * Closed Bugs
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=197 197] - ~~bwctl plots: Verify X axis is scaled by time, and not array index~~
      * <font color="green">_*remaining tasks for this issue are part of issue 242  *_</font>

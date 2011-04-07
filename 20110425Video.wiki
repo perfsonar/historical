@@ -1,0 +1,41 @@
+#summary April 25th, 2011 Conference Call
+
+=  April 25 2011 Conference Call 2:30 p.m. EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+   * TBD
+ # Excused:
+   * TBD
+ # Followup on previous actions:
+   * _*ACTION*_: Jason to migrate hLS code to a branch
+     * Done: https://svn.internet2.edu/svn/perfSONAR-PS/branches/jz-lstransactions/
+     * Next step - merge to trunk?
+   * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.  
+   * _*ACTION*_: ~~ Jeff and Brian to assign time estimates and owners for 3.2.1 issues.
+   * _*ACTION*_: Jeff to still ask about further use of SVN as a content management system for psps.perfsonar.net
+   * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
+   * _*ACTION*_: Brian to migrate fasterdata content to Wiki
+   * _*ACTION*_: Jason to integrate his comments into Brian's wiki pages + fasterdata content.  Work on additional doc in accordance with the proposal.  
+   * _*ACTION*_: Nils will put the next steps for the vmware build environment in the issue tracker.
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+   * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+ # LS and LS Registration Daemon, easy to disable via the GUI?
+ # OWAMP NAGIOS Probe - use percentage instead?
+
+== Actions ==
+
+  * _*ACTION*_: TBD
+
+== Where ==
+
+ESnet conference bridge:
+
+ * GDS: 00113498255555
+ * Direct Dial:  mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-883-7860 then 8255555# at the prompt. 
+
+== Last Updated ==
+
+$Id:$
