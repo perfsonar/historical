@@ -5,23 +5,20 @@ OK, so you've installed and configured your NP Toolkit host so that others can r
 
 <strong>Step 1</strong>: Select "Scheduled Tests" under "Toolkit Administration" in the web GUI on your NP Toolkit host, and configure some regular bwctl tests to places in the network of interest to you. You need to locate some relevant bwctl servers. For example:
 
-<table border="0"><tbody><tr><td><strong>Catagory</strong></td>
-<td><strong>Examples</strong></td>
-</tr><tr><td style="width: 280px;">10G backbone servers in ESnet, Internet2, etc.</td>
-<td>
-<p>ESnet: chic-pt1.es.net,wash-pt1.es.net,sunn-pt1.es.net<br/>Internet2: bwctl.losa.net.internet2.edu, bwctl.newy.net.internet2.edu</p>
-</td>
-</tr><tr><td>Large, well connected sites that your users transfer data to or from</td>
-<td>
-<p>NERSC: perfsonar.nersc.gov<br/>OLCF/ORNL: perfsonar.ornl.gov<br/>LHC Tier 1 sites: lhcmon.bnl.gov<br/>SLAC: bwctl.slac.stanford.edu</p>
-</td>
-</tr><tr><td>Other sites your users interact with (look at netflow data for your site to find largest flow destinations, or talk to your users)</td>
-<td> </td>
-</tr></tbody></table>
+|| Catgory || Examples ||
+|| 10G backbone servers in ESnet, Internet2, etc.|| ESnet: chic-pt1.es.net,wash-pt1.es.net,sunn-pt1.es.net<br/>Internet2: bwctl.losa.net.internet2.edu, bwctl.newy.net.internet2.edu||
+||Large, well connected sites that your users transfer data to or from|| NERSC: perfsonar.nersc.gov<br/>OLCF/ORNL: perfsonar.ornl.gov<br/>LHC Tier 1 sites: lhcmon.bnl.gov<br/>SLAC: bwctl.slac.stanford.edu ||
+||Other sites your users interact with (look at netflow data for your site to find largest flow destinations, or talk to your users)||
 
-Look in the <a href="https://stats1.es.net/perfSONAR/directorySearch.html" target="_blank">perfSONAR Directory</a> for bwctl servers in each of the above catagories. Note that a lot of problems only show up at RTT &gt; 20ms, to be sure to include some tests to servers at least that far away, as well as some nearby servers. If there are no bwctl servers where you need them, encourage your friends to deploy at least a bwctl server. (see the <a href="http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/level-1/">'level 1' HOWTO</a> instructions)
+Look in the <a href="https://stats1.es.net/perfSONAR/directorySearch.html" target="_blank">perfSONAR Directory</a> for bwctl servers in each of the above catagories. Note that a lot of problems only show up at RTT &gt; 20ms, to be sure to include some tests to servers at least that far away, as well as some nearby servers. If there are no bwctl servers where you need them, encourage your friends to deploy at least a bwctl server. (For example, see the <a href="http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/level-1/">'level 1' HOWTO</a> instructions for DOE sites)
 
-<p>The default NP Toolkit configuration (20 second test every 4 hours, using TCP autotuning) is fine for most situations. It is best for tests to be a short as possible but long enough to give good results. You may want to create different test classes for network paths based on RTT.</p>
+<p>The default NP Toolkit configuration (20 second test every 4 hours, using TCP autotuning) is fine for most situations. It is best for tests to be a short as possible but long enough to give good results. You may want to create different test classes for network paths based on RTT. For example:</p>
+
+||RTT time||	Test duration||
+|| 0 - 10 ms ||	10 seconds||
+||10ms - 50 ms ||	15 seconds||
+||50ms - 100 ms	|| 20 seconds||
+||> 100 ms ||	30 seconds ||
 
 <p>TCP window size: use autotuning unless you have a 10G tester running tests to lots of 1G hosts. In that case create a test class with a window size based on the BDP to that host.</p>
 
