@@ -89,7 +89,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=494 494] - Disable HTTP Trace on pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=495 495] - PHP (Cacti) Vulnerability on pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=496 496] - Mirrors for pSPT   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=497 497] - Traceroute MA does not query over long ranges of time
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=499 499] - Review times and frequencies of LS registration   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=500 500] - IPv6 Redirect for pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=501 501] - IPv6 Support in Web100_Userland 
@@ -125,9 +124,11 @@ TBD
      * <font color="red">_*Won't Fix*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=467 467] - ~~ixgbe driver isn't up to date~~
      * <font color="red">_*Won't Fix*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=468 468] - Additional Metadata Checks in NAGIOS Plugin      
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=468 468] - ~~Additional Metadata Checks in NAGIOS Plugin~~      
      * <font color="green">_*FIXED 4/11/2011*_</font>
-        
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=497 497] - ~~Traceroute MA does not query over long ranges of time~~
+     * <font color="green">_*FIXED 4/11/2011*_</font>
+             
 == Unclassified Bugs ==
 
 The following new bugs were identified, and are not classified yet:
