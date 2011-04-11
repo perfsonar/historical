@@ -71,7 +71,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=460 460] - Toggle Time display in perfAdmin graphs    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema     
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=468 468] - Additional Metadata Checks in NAGIOS Plugin   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=470 470] - bwctl/owamp limits gui doesn't support IPv6 addresses   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=471 471] - owamp limits file on pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=473 473] - Display NTP Status on the Local Services page
@@ -126,7 +125,9 @@ TBD
      * <font color="red">_*Won't Fix*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=467 467] - ~~ixgbe driver isn't up to date~~
      * <font color="red">_*Won't Fix*_</font>
-   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=468 468] - Additional Metadata Checks in NAGIOS Plugin      
+     * <font color="green">_*FIXED 4/11/2011*_</font>
+        
 == Unclassified Bugs ==
 
 The following new bugs were identified, and are not classified yet:
