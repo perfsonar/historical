@@ -63,13 +63,12 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=438 438] - perfsonarbuoy/bwctl startup loop if ntp is unsynchronized   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=443 443] - Client::LS::Remote not re-registering when keep-alives fail to hLS   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=444 444] - Nagios Plug-In Packaging   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=446 446] - Add option to set timeout in Client::LS   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=447 447] - new version of nuttcp supported by the NPtoolkit   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=446 446] - Add option to set timeout in Client::LS    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=451 451] - Upgrade NDT to 3.6.x lineage on the pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=453 453] - Document/Add addiional options to interface configuration   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=454 454] - Add GridFTP Servers to LSRegistrationDaemon   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=460 460] - Toggle Time display in perfAdmin graphs   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=464 464] - Enhancemts to the Throughput/Latency Testing CGI Pages   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=459 459] -	Nagios plug-in to check toolkit version
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=460 460] - Toggle Time display in perfAdmin graphs    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=468 468] - Additional Metadata Checks in NAGIOS Plugin   
@@ -109,6 +108,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=519 519] - Add support for DNS 'rotate' option
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=520 520] - NAGIOS BWCTL Probe Support for TCP/UDP tests
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=521 521] - NAGIOS Plugins Documentation Clarification
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=523 523] - Upgrade to CentoOS 5.6
  * Closed Bugs
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=197 197] - ~~bwctl plots: Verify X axis is scaled by time, and not array index~~
      * <font color="green">_*remaining tasks for this issue are part of issue 242  *_</font>
@@ -116,9 +116,13 @@ TBD
      * <font color="red">_*Won't Fix*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=352 352] - ~~upgrade script for pSB databases~~
      * <font color="red">_*Won't Fix*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=447 447] - new version of nuttcp supported by the NPtoolkit  
+     * <font color="red">_*Won't Fix*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=462 462] - ~~Kernel module for IDE SSD drive~~
      * <font color="red">_*Won't Fix*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=463 463] - ~~the SFC driver isn't completely up to date~~
+     * <font color="red">_*Won't Fix*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=464 464] - Enhancemts to the Throughput/Latency Testing CGI Pages  
      * <font color="red">_*Won't Fix*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=467 467] - ~~ixgbe driver isn't up to date~~
      * <font color="red">_*Won't Fix*_</font>
