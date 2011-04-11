@@ -1,4 +1,4 @@
-# summary  PS Toolkit Configuration Guide
+#summary PS Toolkit Configuration Guide
 
 (this page is under construction, and will be moved to psps.perfsonar.net when complete)
 
