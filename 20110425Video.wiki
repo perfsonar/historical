@@ -23,6 +23,7 @@
    * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
  # LS and LS Registration Daemon, easy to disable via the GUI?
  # OWAMP NAGIOS Probe - use percentage instead?
+ # v6 Support Update
 
 == Actions ==
 
