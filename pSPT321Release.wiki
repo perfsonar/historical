@@ -107,6 +107,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=520 520] - NAGIOS BWCTL Probe Support for TCP/UDP tests
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=521 521] - NAGIOS Plugins Documentation Clarification
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=523 523] - Upgrade to CentoOS 5.6
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=524 524] - SNMP MA SQLite Backend testing
  * Closed Bugs
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=197 197] - ~~bwctl plots: Verify X axis is scaled by time, and not array index~~
      * <font color="green">_*remaining tasks for this issue are part of issue 242  *_</font>
