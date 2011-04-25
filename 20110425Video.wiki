@@ -16,7 +16,7 @@
    * _*ACTION*_: ~~ Jeff and Brian to assign time estimates and owners for 3.2.1 issues.
    * _*ACTION*_: Jeff to still ask about further use of SVN as a content management system for psps.perfsonar.net
    * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
-   * _*ACTION*_: Brian to migrate fasterdata content to Wiki
+   * _*ACTION*_: ~~Brian to migrate fasterdata content to Wiki (done)
    * _*ACTION*_: Jason to integrate his comments into Brian's wiki pages + fasterdata content.  Work on additional doc in accordance with the proposal.  
    * _*ACTION*_: Nils will put the next steps for the vmware build environment in the issue tracker.
    * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
