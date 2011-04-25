@@ -24,6 +24,10 @@
  # LS and LS Registration Daemon, easy to disable via the GUI?
  # OWAMP NAGIOS Probe - use percentage instead?
  # v6 Support Update
+ # MP Design Proposal 
+  * Wiki: [MPDesignProposal]
+ # Data Provenance/Additional Metadata 
+  * Issue 389
 
 == Actions ==
 
