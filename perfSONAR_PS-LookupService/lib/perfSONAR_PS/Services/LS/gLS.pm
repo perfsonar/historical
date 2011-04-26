@@ -321,7 +321,7 @@ sub init {
     $handler->registerFullMessageHandler( "LSSynchronizationRequest", $self );
 
     my $error = q{};
-    my $metadatadb = $self->prepareDatabase( { recover => 0, container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
+    my $metadatadb = $self->prepareDatabase( { recover => 0, container => $self->{CONF}->{"gls"}->{"metadata_db_file"}, disableTxn => 0 } );
     unless ( $metadatadb ) {
         $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error );
         return -1;
@@ -329,7 +329,7 @@ sub init {
     $metadatadb->checkpoint( { error => \$error } );
     $metadatadb->closeDB( { error => \$error } );
 
-    my $summarydb = $self->prepareDatabase( { recover => 0, container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
+    my $summarydb = $self->prepareDatabase( { recover => 0, container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"}, disableTxn => 0 } );
     unless ( $summarydb ) {
         $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
         return -1;
@@ -350,14 +350,17 @@ Opens the XMLDB and returns the handle if there was not an error.
 
 sub prepareDatabase {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { recover => 0, container => 1, doc => 0 } );
+    my $parameters = validateParams( @args, { recover => 0, container => 1, doc => 0, disableTxn => 0 } );
 
     my $error = q{};
+    my $disableTxn = 0;
+    $disableTxn = 1 if exists $parameters->{disableTxn} and $parameters->{disableTxn};
     my $db    = new perfSONAR_PS::DB::XMLDB(
         {
             env  => $self->{CONF}->{"gls"}->{"metadata_db_name"},
             cont => $parameters->{container},
             ns   => \%ls_namespaces,
+            disableTxn => $parameters->{disableTxn}
         }
     );
 
@@ -395,7 +398,7 @@ sub prepareDatabase {
     return $db;
 }
 
-=head2 closeDatabase($self, { db, dbTr, error })
+=head2 closeDatabase($self, { db, dbTr, error, disableTxn })
 
 Close a database handle, depending on the error flag take the appropriate steps.
 
@@ -403,13 +406,17 @@ Close a database handle, depending on the error flag take the appropriate steps.
 
 sub closeDatabase {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { db => 1, dbTr => 0, error => 0 } );
+    my $parameters = validateParams( @args, { db => 1, dbTr => 0, error => 0, disableTxn => 0 } );
     my $error = q{};
 
+    my $disableTxn = 0;
+    $disableTxn = 1 if exists $parameters->{disableTxn} and $parameters->{disableTxn};
     if ( exists $parameters->{error} and $parameters->{error} ) {
-        $parameters->{db}->abortTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if exists $parameters->{dbTr} and $parameters->{dbTr};
-        undef $parameters->{dbTr};
-        $parameters->{db}->checkpoint( { error => \$error } );
+        if ( $disableTxn == 0 ) {
+            $parameters->{db}->abortTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if exists $parameters->{dbTr} and $parameters->{dbTr};
+            undef $parameters->{dbTr};
+            $parameters->{db}->checkpoint( { error => \$error } );
+        }
         $parameters->{db}->closeDB( { error => \$error } );
         $self->{LOGGER}->error( "Database errors prevented the transaction from completing." );
         $self->{LOGGER}->error( "Error: \"" . $error . "\"" ) if $error;
@@ -417,15 +424,19 @@ sub closeDatabase {
     }
     else {
         my $status = 0;
-        $status = $parameters->{db}->commitTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if exists $parameters->{dbTr} and $parameters->{dbTr};
-        undef $parameters->{dbTr};
-        $parameters->{db}->checkpoint( { error => \$error } );
+        if ( $disableTxn == 0 ) {
+            $status = $parameters->{db}->commitTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if exists $parameters->{dbTr} and $parameters->{dbTr};
+            undef $parameters->{dbTr};
+            $parameters->{db}->checkpoint( { error => \$error } );
+        }
         $parameters->{db}->closeDB( { error => \$error } );
         $self->{LOGGER}->error( "Error: \"" . $error . "\"" ) if $error;
         unless ( $status == 0 ) {
-            $parameters->{db}->abortTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if exists $parameters->{dbTr} and $parameters->{dbTr};
-            undef $parameters->{dbTr};
-            $parameters->{db}->checkpoint( { error => \$error } );
+            if ( $disableTxn == 0 ) {
+                $parameters->{db}->abortTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if exists $parameters->{dbTr} and $parameters->{dbTr};
+                undef $parameters->{dbTr};
+                $parameters->{db}->checkpoint( { error => \$error } );
+            }
             $parameters->{db}->closeDB( { error => \$error } );
             $self->{LOGGER}->error( "Database errors prevented the transaction from completing." );
             $self->{LOGGER}->error( "Error: \"" . $error . "\"" ) if $error;
@@ -890,6 +901,10 @@ sub summarizeLS {
         # If our service is a '*:node' element.
         foreach my $node ( $temp_nodes->get_nodelist ) {
             my @elements = ( "address", "ipAddress", "name" );
+            
+            #
+            # JZ 3/29/2011 - Will most likely need to do some other things here for IPv6
+            #
             my @types = ( "ipv4", "IPv4" );
             my $extractedAddress = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types } );
             $serviceSummaryMap{$set}{"addresses"} = merge( \%{ $serviceSummaryMap{$set}{"addresses"} }, $extractedAddress );
@@ -902,7 +917,7 @@ sub summarizeLS {
             $summaryMap{"domains"} = merge( \%{ $summaryMap{"domains"} }, $extractedDomains );
 
             my @urns = ();
-            @types = ( "urn", "URN" );
+            @types = ( "urn", "URN", "uri", "URI" );
             my $id = $node->getAttribute( "id" );
             push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
             $extractedDomains = $self->summarizeURN( { search => $node, elements => \@elements, types => \@types, urnarray => \@urns } );
@@ -944,6 +959,9 @@ sub summarizeLS {
             foreach my $a ( $temp_addresses->get_nodelist ) {
                 my $value = extract( $a, 0 );
                 next unless $value;
+                
+                $value =~ s/^tcp:/http:/;
+                $value =~ s/^udp:/http:/;                
                 my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $value );
                 next unless $host;
                 if ( is_ipv4( $host ) ) {
@@ -982,6 +1000,8 @@ sub summarizeLS {
                 push @elements, "idRef";
                 push @types,    "urn";
                 push @types,    "URN";
+                push @types,    "uri";
+                push @types,    "URI";
                 $extractedDomains = $self->summarizeURN( { search => $d, elements => \@elements, types => \@types, urnarray => \@urns } );
                 $serviceSummaryMap{$set}{"domains"} = merge( \%{ $serviceSummaryMap{$set}{"domains"} }, $extractedDomains );
                 $summaryMap{"domains"} = merge( \%{ $summaryMap{"domains"} }, $extractedDomains );
@@ -1054,6 +1074,10 @@ sub summarizeLS {
                 my $temp_interfaces = find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='interface']", 0 );
                 foreach my $interface ( $temp_interfaces->get_nodelist ) {
                     my @elements = ( "address", "ipAddress", "ifAddress", "name" );
+
+                    #
+                    # JZ 3/29/2011 - Will most likely need to do some other things here for IPv6
+                    #
                     my @types = ( "ipv4", "IPv4" );
                     my $extractedAddress = $self->summarizeAddress( { search => $interface, elements => \@elements, types => \@types } );
                     $serviceSummaryMap{$set}{"addresses"} = merge( \%{ $serviceSummaryMap{$set}{"addresses"} }, $extractedAddress );
@@ -1067,7 +1091,7 @@ sub summarizeLS {
                     $summaryMap{"domains"} = merge( \%{ $summaryMap{"domains"} }, $extractedDomains );
 
                     my @urns = ();
-                    @types = ( "urn", "URN" );
+                    @types = ( "urn", "URN", "uri", "URI" );
                     my $id = $interface->getAttribute( "id" );
                     push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
                     $extractedDomains = $self->summarizeURN( { search => $interface, elements => \@elements, types => \@types, urnarray => \@urns } );
@@ -1087,6 +1111,10 @@ sub summarizeLS {
                     }
 
                     my @elements = ( "address", "ipAddress", "name" );
+
+                    #
+                    # JZ 3/29/2011 - Will most likely need to do some other things here for IPv6
+                    #
                     my @types = ( "ipv4", "IPv4" );
                     my $extractedAddress = $self->summarizeAddress( { search => $port, elements => \@elements, types => \@types } );
                     $serviceSummaryMap{$set}{"addresses"} = merge( \%{ $serviceSummaryMap{$set}{"addresses"} }, $extractedAddress );
@@ -1099,7 +1127,7 @@ sub summarizeLS {
                     $summaryMap{"domains"} = merge( \%{ $summaryMap{"domains"} }, $extractedDomains );
 
                     my @urns = ();
-                    @types = ( "urn", "URN" );
+                    @types = ( "urn", "URN", "uri", "URI" );
                     my $id = $port->getAttribute( "id" );
                     push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
                     $extractedDomains = $self->summarizeURN( { search => $port, elements => \@elements, types => \@types, urnarray => \@urns } );
@@ -1111,6 +1139,10 @@ sub summarizeLS {
                 my $temp_nodes = find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='node']", 0 );
                 foreach my $node ( $temp_nodes->get_nodelist ) {
                     my @elements = ( "address", "ipAddress", "name" );
+
+                    #
+                    # JZ 3/29/2011 - Will most likely need to do some other things here for IPv6
+                    #
                     my @types = ( "ipv4", "IPv4" );
                     my $extractedAddress = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types } );
                     $serviceSummaryMap{$set}{"addresses"} = merge( \%{ $serviceSummaryMap{$set}{"addresses"} }, $extractedAddress );
@@ -1123,7 +1155,7 @@ sub summarizeLS {
                     $summaryMap{"domains"} = merge( \%{ $summaryMap{"domains"} }, $extractedDomains );
 
                     my @urns = ();
-                    @types = ( "urn", "URN" );
+                    @types = ( "urn", "URN", "uri", "URI" );
                     my $id = $node->getAttribute( "id" );
                     push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
                     push @urns, extract( find( $node, "./*[local-name()='relation' and \@type=\"connectionLink\"]/nmtb:linkIdRef", 1 ), 0 );
@@ -1145,6 +1177,10 @@ sub summarizeLS {
                     }
 
                     my @elements         = ( "name" );
+
+                    #
+                    # JZ 3/29/2011 - Will most likely need to do some other things here for IPv6
+                    #
                     my @types            = ( "ipv4", "IPv4" );
                     my $extractedAddress = $self->summarizeAddress( { search => $network, elements => \@elements, types => \@types } );
                     $serviceSummaryMap{$set}{"addresses"} = merge( \%{ $serviceSummaryMap{$set}{"addresses"} }, $extractedAddress );
@@ -1157,7 +1193,7 @@ sub summarizeLS {
                     $summaryMap{"domains"} = merge( \%{ $summaryMap{"domains"} }, $extractedDomains );
 
                     my @urns = ();
-                    @types = ( "urn", "URN" );
+                    @types = ( "urn", "URN", "uri", "URI" );
                     my $id = $network->getAttribute( "id" );
                     push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
                     $extractedDomains = $self->summarizeURN( { search => $network, elements => \@elements, types => \@types, urnarray => \@urns } );
@@ -1176,7 +1212,7 @@ sub summarizeLS {
                     $summaryMap{"domains"} = merge( \%{ $summaryMap{"domains"} }, $extractedDomains );
 
                     my @urns = ();
-                    @types = ( "urn", "URN" );
+                    @types = ( "urn", "URN", "uri", "URI" );
                     my $id = $domain->getAttribute( "id" );
                     push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
                     $extractedDomains = $self->summarizeURN( { search => $domain, elements => \@elements, types => \@types, urnarray => \@urns } );
@@ -1189,6 +1225,10 @@ sub summarizeLS {
                 my $temp_test = find( $doc->getDocumentElement, "./*[local-name()='subject']", 0 );
                 foreach my $service ( $temp_services->get_nodelist ) {
                     my @elements = ( "address", "ipAddress", "name" );
+
+                    #
+                    # JZ 3/29/2011 - Will most likely need to do some other things here for IPv6
+                    #
                     my @types = ( "ipv4", "IPv4" );
                     my $extractedAddress = $self->summarizeAddress( { search => $service, elements => \@elements, types => \@types } );
                     $serviceSummaryMap{$set}{"addresses"} = merge( \%{ $serviceSummaryMap{$set}{"addresses"} }, $extractedAddress );
@@ -1201,7 +1241,7 @@ sub summarizeLS {
                     $summaryMap{"domains"} = merge( \%{ $summaryMap{"domains"} }, $extractedDomains );
 
                     my @urns = ();
-                    @types = ( "urn", "URN" );
+                    @types = ( "urn", "URN", "uri", "URI" );
                     my $id = $service->getAttribute( "id" );
                     push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
                     $extractedDomains = $self->summarizeURN( { search => $service, elements => \@elements, types => \@types, urnarray => \@urns } );
@@ -1213,6 +1253,10 @@ sub summarizeLS {
                 my $temp_endpointpairs = find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='endPointPair']", 0 );
                 foreach my $endpointpair ( $temp_endpointpairs->get_nodelist ) {
                     my @elements = ( ".", "address", "ipAddress", "name", "src", "dst" );
+
+                    #
+                    # JZ 3/29/2011 - Will most likely need to do some other things here for IPv6
+                    #
                     my @types = ( "ipv4", "IPv4" );
                     my $extractedAddress = $self->summarizeAddress( { search => $endpointpair, elements => \@elements, types => \@types } );
                     $serviceSummaryMap{$set}{"addresses"} = merge( \%{ $serviceSummaryMap{$set}{"addresses"} }, $extractedAddress );
@@ -1225,7 +1269,7 @@ sub summarizeLS {
                     $summaryMap{"domains"} = merge( \%{ $summaryMap{"domains"} }, $extractedDomains );
 
                     my @urns = ();
-                    @types = ( "urn", "URN" );
+                    @types = ( "urn", "URN", "uri", "URI" );
                     my $id = $endpointpair->getAttribute( "id" );
                     push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
                     $extractedDomains = $self->summarizeURN( { search => $endpointpair, elements => \@elements, types => \@types, urnarray => \@urns } );
@@ -1237,6 +1281,10 @@ sub summarizeLS {
                 $temp_endpointpairs = find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='endPointPair']/*[local-name()='endPoint']", 0 );
                 foreach my $endpointpair ( $temp_endpointpairs->get_nodelist ) {
                     my @elements = ( ".", "address", "ipAddress", "name", "src", "dst" );
+
+                    #
+                    # JZ 3/29/2011 - Will most likely need to do some other things here for IPv6
+                    #
                     my @types = ( "ipv4", "IPv4" );
                     my $extractedAddress = $self->summarizeAddress( { search => $endpointpair, elements => \@elements, types => \@types } );
                     $serviceSummaryMap{$set}{"addresses"} = merge( \%{ $serviceSummaryMap{$set}{"addresses"} }, $extractedAddress );
@@ -1249,7 +1297,7 @@ sub summarizeLS {
                     $summaryMap{"domains"} = merge( \%{ $summaryMap{"domains"} }, $extractedDomains );
 
                     my @urns = ();
-                    @types = ( "urn", "URN" );
+                    @types = ( "urn", "URN", "uri", "URI" );
                     my $id = $endpointpair->getAttribute( "id" );
                     push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
                     $extractedDomains = $self->summarizeURN( { search => $endpointpair, elements => \@elements, types => \@types, urnarray => \@urns } );
@@ -1261,6 +1309,10 @@ sub summarizeLS {
                 my $temp_endpoints = find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='endPoint']", 0 );
                 foreach my $endpoint ( $temp_endpoints->get_nodelist ) {
                     my @elements = ( ".", "address", "ipAddress", "name", "src", "dst" );
+
+                    #
+                    # JZ 3/29/2011 - Will most likely need to do some other things here for IPv6
+                    #
                     my @types = ( "ipv4", "IPv4" );
                     my $extractedAddress = $self->summarizeAddress( { search => $endpoint, elements => \@elements, types => \@types } );
                     $serviceSummaryMap{$set}{"addresses"} = merge( \%{ $serviceSummaryMap{$set}{"addresses"} }, $extractedAddress );
@@ -1273,7 +1325,7 @@ sub summarizeLS {
                     $summaryMap{"domains"} = merge( \%{ $summaryMap{"domains"} }, $extractedDomains );
 
                     my @urns = ();
-                    @types = ( "urn", "URN" );
+                    @types = ( "urn", "URN", "uri", "URI" );
                     my $id = $endpoint->getAttribute( "id" );
                     push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
                     $extractedDomains = $self->summarizeURN( { search => $endpoint, elements => \@elements, types => \@types, urnarray => \@urns } );
@@ -2195,16 +2247,9 @@ sub handleMessage {
 
     my %totalNS = reverse %{ $parameters->{"rawRequest"}->{"NAMESPACES"} };
     startMessage( $parameters->{output}, $messageIdReturn, $parameters->{messageId}, $messageTypeReturn, q{}, \%totalNS );
-    
-    # create database handle
-    my $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
-    unless ( $database ) {
-        my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error;
-        $self->{LOGGER}->fatal( $msg );
-        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
-        return -1;
-    }
-    
+
+    my $database = q{};
+    my $disableTxn = 0;
     foreach my $d ( $parameters->{rawRequest}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS( $ls_namespaces{"nmwg"}, "data" ) ) {
         $counter++;
 
@@ -2215,21 +2260,78 @@ sub handleMessage {
             throw perfSONAR_PS::Error_compat( "error.ls.data_trigger", "Matching metadata not found for data trigger \"" . $d->getAttribute( "id" ) . "\"" ) unless $m;
 
             if ( exists $parameters->{messageType} and $parameters->{messageType} and $parameters->{messageType} eq "LSRegisterRequest" ) {
+
+                # create database handle
+                $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"}, disableTxn => $disableTxn } );
+                unless ( $database ) {
+                    my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error;
+                    $self->{LOGGER}->fatal( $msg );
+                    throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+                    return -1;
+                }
+
                 $self->{LOGGER}->debug( "Parsing LSRegister request." );
                 $self->lsRegisterRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, d => $d, database => $database } );
             }
             elsif ( exists $parameters->{messageType} and $parameters->{messageType} and $parameters->{messageType} eq "LSDeregisterRequest" ) {
+
+                # create database handle
+                $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"}, disableTxn => $disableTxn } );
+                unless ( $database ) {
+                    my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error;
+                    $self->{LOGGER}->fatal( $msg );
+                    throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+                    return -1;
+                }
+
                 $self->{LOGGER}->debug( "Parsing LSDeregister request." );
                 $self->lsDeregisterRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, d => $d, database => $database } );
             }
             elsif ( exists $parameters->{messageType} and $parameters->{messageType} and $parameters->{messageType} eq "LSKeepaliveRequest" ) {
+            
+                # create database handle
+                $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"}, disableTxn => $disableTxn } );
+                unless ( $database ) {
+                    my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error;
+                    $self->{LOGGER}->fatal( $msg );
+                    throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+                    return -1;
+                }
+            
                 $self->{LOGGER}->debug( "Parsing LSKeepalive request." );
                 $self->lsKeepaliveRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, database => $database } );
             }
             elsif ( exists $parameters->{messageType} and $parameters->{messageType} and ( $parameters->{messageType} eq "LSQueryRequest" or $parameters->{messageType} eq "LSLookupRequest" ) ) {
+
+                # we don't need transactions for this operation
+                $disableTxn = 1;
+
+                # create database handle
+                $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"}, disableTxn => $disableTxn } );
+                unless ( $database ) {
+                    my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error;
+                    $self->{LOGGER}->fatal( $msg );
+                    throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+                    return -1;
+                }
+                $self->{LOGGER}->debug( "Parsing LSQuery request." );
                 $self->lsQueryRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, database => $database } );
             }
             elsif ( exists $parameters->{messageType} and $parameters->{messageType} and $parameters->{messageType} eq "LSKeyRequest" ) {
+
+                # we don't need transactions for this operation
+                $disableTxn = 1;
+
+                # create database handle
+                $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"}, disableTxn => $disableTxn } );
+                unless ( $database ) {
+                    my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error;
+                    $self->{LOGGER}->fatal( $msg );
+                    throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+                    return -1;
+                }
+
+                $self->{LOGGER}->debug( "Parsing LSKey request." );
                 $self->lsKeyRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, database => $database } );
             }
             else {
@@ -2266,12 +2368,14 @@ sub handleMessage {
             getResultCodeMetadata( $parameters->{output}, $mdId, $mdIdRef, $errorEventType );
             getResultCodeData( $parameters->{output}, "data." . genuid(), $mdId, $errorMessage, 1 );
         }
+
+        # close database
+        if ( $database ) {
+            $self->closeDatabase( { db => $database, disableTxn => $disableTxn } );
+            throw perfSONAR_PS::Error_compat( "error.ls.register.data_trigger_missing", "No data triggers found in request." ) unless $counter;
+        }
     }
     
-    # close database
-    $self->closeDatabase(db => $database);
-    throw perfSONAR_PS::Error_compat( "error.ls.register.data_trigger_missing", "No data triggers found in request." ) unless $counter;
-
     endMessage( $parameters->{output} );
     $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.LS.handleMessage.end" );
     $self->{NETLOGGER}->debug( $msg );
@@ -3314,33 +3418,17 @@ sub lsQueryRequest {
             $sent->{"address"}->{$ad} = 1;
         }
 
-        my $dbTr = $database->getTransaction( { error => \$error } );
-        unless ( $dbTr ) {
-            $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-            undef $dbTr;
-            my $msg = "Could not start database transaction, database responded with \"" . $error . "\".";
-            $self->{LOGGER}->error( $msg );
-            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
-            return -1;
-        }
-
         my %map = ();
-        my @resultsString = $database->query( { query => $queryString, txn => $dbTr, error => \$error } );
+        my @resultsString = $database->query( { query => $queryString, error => \$error } );
         $errorFlag++ if $error;
 
         if ( $errorFlag ) {
-            $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-            undef $dbTr;
-            $database->checkpoint( { error => \$error } );
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database errors prevented the transaction from completing:" . $error );
         }
         else {
 
             my $len = $#resultsString;
             if ( $len == -1 ) {
-                $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-                undef $dbTr;
-                $database->checkpoint( { error => \$error } );
                 throw perfSONAR_PS::Error_compat( "error.ls.query.summary_error", "Service has empty summary set, results to query not found." );
             }
             else {
@@ -3348,116 +3436,104 @@ sub lsQueryRequest {
                     my $parser = XML::LibXML->new();
                     my $doc    = $parser->parse_string( $resultsString[$x] );
 
-                    my @resultsString2 = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"" . $doc->getDocumentElement->getAttribute( "metadataIdRef" ) . "\"]", txn => $dbTr, error => \$error } );
+                    my @resultsString2 = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"" . $doc->getDocumentElement->getAttribute( "metadataIdRef" ) . "\"]", error => \$error } );
                     $errorFlag++ if $error;
                     $map{ $doc->getDocumentElement->getAttribute( "metadataIdRef" ) }{"metadata"} = $doc->getDocumentElement;
                     $map{ $doc->getDocumentElement->getAttribute( "metadataIdRef" ) }{"data"}     = \@resultsString2;
                 }
 
-                my $status = $database->commitTransaction( { txn => $dbTr, error => \$error } );
-                if ( $status == 0 ) {
-                    undef $dbTr;
-                    $database->checkpoint( { error => \$error } );
+                foreach my $id ( keys %map ) {
+                    my %store = ();
+                    $store{"eventType"} = 0 if exists $sent->{"eventType"};
+                    $store{"address"}   = 0 if exists $sent->{"address"};
+                    $store{"domain"}    = 0 if exists $sent->{"domain"};
+                    $store{"keyword"}   = 0 if exists $sent->{"keyword"};
 
-                    foreach my $id ( keys %map ) {
-                        my %store = ();
-                        $store{"eventType"} = 0 if exists $sent->{"eventType"};
-                        $store{"address"}   = 0 if exists $sent->{"address"};
-                        $store{"domain"}    = 0 if exists $sent->{"domain"};
-                        $store{"keyword"}   = 0 if exists $sent->{"keyword"};
-
-                        # gather eventTypes
-                        if ( exists $store{"eventType"} ) {
-                            my $l_eventTypes = find( $map{$id}{"metadata"}, "./nmwg:metadata/nmwg:eventType", 0 );
-                            my $l_supportedEventTypes = find( $map{$id}{"metadata"}, "./nmwg:metadata/*[local-name()='parameters']/nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
-                            foreach my $e ( $l_eventTypes->get_nodelist ) {
-                                my $value = extract( $e, 0 );
-                                next unless $value;
-                                $store{"eventType"}++ if $sent->{"eventType"}->{$value};
-                            }
-                            foreach my $se ( $l_supportedEventTypes->get_nodelist ) {
-                                my $value = extract( $se, 0 );
-                                next unless $value;
-                                $store{"eventType"}++ if $sent->{"eventType"}->{$value};
-                            }
+                    # gather eventTypes
+                    if ( exists $store{"eventType"} ) {
+                        my $l_eventTypes = find( $map{$id}{"metadata"}, "./nmwg:metadata/nmwg:eventType", 0 );
+                        my $l_supportedEventTypes = find( $map{$id}{"metadata"}, "./nmwg:metadata/*[local-name()='parameters']/nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
+                        foreach my $e ( $l_eventTypes->get_nodelist ) {
+                            my $value = extract( $e, 0 );
+                            next unless $value;
+                            $store{"eventType"}++ if $sent->{"eventType"}->{$value};
                         }
-
-                        # gather the domains
-                        if ( exists $store{"domain"} ) {
-                            my $l_domains = find( $map{$id}{"metadata"}, "./nmwg:metadata/summary:subject/nmtb:domain", 0 );
-                            foreach my $d ( $l_domains->get_nodelist ) {
-                                my $name = extract( find( $d, "./nmtb:name", 1 ), 0 );
-                                next unless $name;
-                                $store{"domain"}++ if $sent->{"domain"}->{$name};
-                            }
+                        foreach my $se ( $l_supportedEventTypes->get_nodelist ) {
+                            my $value = extract( $se, 0 );
+                            next unless $value;
+                            $store{"eventType"}++ if $sent->{"eventType"}->{$value};
                         }
+                    }
 
-                        #gather the networks
-                        if ( exists $store{"address"} ) {
+                    # gather the domains
+                    if ( exists $store{"domain"} ) {
+                        my $l_domains = find( $map{$id}{"metadata"}, "./nmwg:metadata/summary:subject/nmtb:domain", 0 );
+                        foreach my $d ( $l_domains->get_nodelist ) {
+                            my $name = extract( find( $d, "./nmtb:name", 1 ), 0 );
+                            next unless $name;
+                            $store{"domain"}++ if $sent->{"domain"}->{$name};
+                        }
+                    }
 
-                            my $l_networks = find( $map{$id}{"metadata"}, "./nmwg:metadata/summary:subject/nmtl3:network", 0 );
-                            my @cidr_list = ();
-                            foreach my $n ( $l_networks->get_nodelist ) {
-                                my $address = extract( find( $n, "./nmtl3:subnet/nmtl3:address", 1 ), 0 );
-                                my $mask    = extract( find( $n, "./nmtl3:subnet/nmtl3:netmask", 1 ), 0 );
-                                if ( $address ) {
-                                    if ( $mask ) {
-                                        $address .= "/" . $mask;
-                                    }
-                                    else {
-                                        $address .= "/32";
-                                    }
-                                    @cidr_list = Net::CIDR::cidradd( $address, @cidr_list );
+                    #gather the networks
+                    if ( exists $store{"address"} ) {
+
+                        my $l_networks = find( $map{$id}{"metadata"}, "./nmwg:metadata/summary:subject/nmtl3:network", 0 );
+                        my @cidr_list = ();
+                        foreach my $n ( $l_networks->get_nodelist ) {
+                            my $address = extract( find( $n, "./nmtl3:subnet/nmtl3:address", 1 ), 0 );
+                            my $mask    = extract( find( $n, "./nmtl3:subnet/nmtl3:netmask", 1 ), 0 );
+                            if ( $address ) {
+                                if ( $mask ) {
+                                    $address .= "/" . $mask;
                                 }
-                            }
-
-                            # we need to do some CIDR finding
-                            foreach my $add ( keys %{ $sent->{"address"} } ) {
-                                $store{"address"}++ if Net::CIDR::cidrlookup( $add, @cidr_list ) and $add;
-                            }
-                        }
-
-                        # gather keywords
-                        if ( exists $store{"keyword"} ) {
-                            my $l_keywords = find( $map{$id}{"metadata"}, "./nmwg:metadata//nmwg:parameter[\@name=\"keyword\"]", 0 );
-                            foreach my $k ( $l_keywords->get_nodelist ) {
-                                my $value = extract( $k, 0 );
-                                next unless $value;
-                                $store{"keyword"}++ if $sent->{"keyword"}->{$value};
+                                else {
+                                    $address .= "/32";
+                                }
+                                @cidr_list = Net::CIDR::cidradd( $address, @cidr_list );
                             }
                         }
 
-                        # we have a match, get the contact service.
-                        my $flag = 1;
-                        foreach my $key ( keys %store ) {
-                            $flag = $store{$key};
-                            last if $flag <= 0;
-                        }
-
-                        if ( $flag ) {
-                            my $len2 = $#{ $map{$id}{"data"} };
-                            for my $d ( @{ $map{$id}{"data"} } ) {
-                                push @resultServices, $d;
-                            }
+                        # we need to do some CIDR finding
+                        foreach my $add ( keys %{ $sent->{"address"} } ) {
+                            $store{"address"}++ if Net::CIDR::cidrlookup( $add, @cidr_list ) and $add;
                         }
                     }
 
-                    if ( $#resultServices == -1 ) {
-                        createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), $subject->toString . "\n<nmwg:eventType>error.ls.query.empty_results</nmwg:eventType>\n", undef );
-                        createData( $parameters->{doc}, $dId, $mdId, "<nmwgr:datum xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\">Nothing returned for search.</nmwgr:datum>\n", undef );
+                    # gather keywords
+                    if ( exists $store{"keyword"} ) {
+                        my $l_keywords = find( $map{$id}{"metadata"}, "./nmwg:metadata//nmwg:parameter[\@name=\"keyword\"]", 0 );
+                        foreach my $k ( $l_keywords->get_nodelist ) {
+                            my $value = extract( $k, 0 );
+                            next unless $value;
+                            $store{"keyword"}++ if $sent->{"keyword"}->{$value};
+                        }
                     }
-                    else {
-                        createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), $subject->toString . "\n<nmwg:eventType>" . $eventType . "</nmwg:eventType>\n", undef );
-                        foreach my $metadata ( @resultServices ) {
-                            createData( $parameters->{doc}, $dId, $mdId, $metadata, undef );
+
+                    # we have a match, get the contact service.
+                    my $flag = 1;
+                    foreach my $key ( keys %store ) {
+                        $flag = $store{$key};
+                        last if $flag <= 0;
+                    }
+
+                    if ( $flag ) {
+                        my $len2 = $#{ $map{$id}{"data"} };
+                        for my $d ( @{ $map{$id}{"data"} } ) {
+                            push @resultServices, $d;
                         }
                     }
                 }
+
+                if ( $#resultServices == -1 ) {
+                    createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), $subject->toString . "\n<nmwg:eventType>error.ls.query.empty_results</nmwg:eventType>\n", undef );
+                    createData( $parameters->{doc}, $dId, $mdId, "<nmwgr:datum xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\">Nothing returned for search.</nmwgr:datum>\n", undef );
+                }
                 else {
-                    $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-                    undef $dbTr;
-                    $database->checkpoint( { error => \$error } );
-                    throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
+                    createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), $subject->toString . "\n<nmwg:eventType>" . $eventType . "</nmwg:eventType>\n", undef );
+                    foreach my $metadata ( @resultServices ) {
+                        createData( $parameters->{doc}, $dId, $mdId, $metadata, undef );
+                    }
                 }
             }
         }
@@ -3473,7 +3549,7 @@ sub lsQueryRequest {
         throw perfSONAR_PS::Error_compat( "error.ls.query.query_not_found", "Query not found in sent metadata." ) unless $query;
         $query =~ s/\s+\// collection('CHANGEME')\//gmx;
 
-        my $database = $self->prepareDatabase( { container => $dbContainer } );
+        my $database = $self->prepareDatabase( { container => $dbContainer, disableTxn => 1 } );
         unless ( $database ) {
             my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $dbContainer . "\": " . $error;
             $self->{LOGGER}->fatal( $msg );
@@ -3481,61 +3557,35 @@ sub lsQueryRequest {
             return -1;
         }
 
-        my $dbTr = $database->getTransaction( { error => \$error } );
-        unless ( $dbTr ) {
-            $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-            undef $dbTr;
-            $database->checkpoint( { error => \$error } );
-            my $msg = "Could not start database transaction, database responded with \"" . $error . "\".";
-            $self->{LOGGER}->error( $msg );
-            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
-            return -1;
-        }
-
-        my @resultsString = $database->query( { query => $query, txn => $dbTr, error => \$error } );
+        my @resultsString = $database->query( { query => $query, error => \$error } );
         $errorFlag++ if $error;
 
         if ( $errorFlag ) {
-            $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-            undef $dbTr;
-            $database->checkpoint( { error => \$error } );
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database errors prevented the transaction from completing:" . $error );
         }
         else {
-            my $status = $database->commitTransaction( { txn => $dbTr, error => \$error } );
-            if ( $status == 0 ) {
-                undef $dbTr;
-                $database->checkpoint( { error => \$error } );
+            my $dataString = q{};
+            my $len        = $#resultsString;
+            for my $x ( 0 .. $len ) {
+                $dataString = $dataString . $resultsString[$x];
+            }
 
-                my $dataString = q{};
-                my $len        = $#resultsString;
-                for my $x ( 0 .. $len ) {
-                    $dataString = $dataString . $resultsString[$x];
-                }
+            # XXX: JZ 11/6 - Is this really worthy of throwing an error?  It is
+            #   just empty results after all.
+            throw perfSONAR_PS::Error_compat( "error.ls.query.empty_results", "Nothing returned for search." ) unless $dataString;
 
-                # XXX: JZ 11/6 - Is this really worthy of throwing an error?  It is
-                #   just empty results after all.
-                throw perfSONAR_PS::Error_compat( "error.ls.query.empty_results", "Nothing returned for search." ) unless $dataString;
+            createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), "<nmwg:eventType>success.ls.query</nmwg:eventType>", undef );
+            my $mdPparameters = q{};
+            $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./xquery:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
+            unless ( $mdPparameters ) {
+                $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./nmwg:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
+            }
 
-                createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), "<nmwg:eventType>success.ls.query</nmwg:eventType>", undef );
-                my $mdPparameters = q{};
-                $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./xquery:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
-                unless ( $mdPparameters ) {
-                    $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./nmwg:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
-                }
-
-                if ( $mdPparameters and $mdPparameters eq "native" ) {
-                    createData( $parameters->{doc}, $dId, $mdId, "<psservice:datum xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">" . $dataString . "</psservice:datum>\n", undef );
-                }
-                else {
-                    createData( $parameters->{doc}, $dId, $mdId, "<psservice:datum xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">" . escapeString( $dataString ) . "</psservice:datum>\n", undef );
-                }
+            if ( $mdPparameters and $mdPparameters eq "native" ) {
+                createData( $parameters->{doc}, $dId, $mdId, "<psservice:datum xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">" . $dataString . "</psservice:datum>\n", undef );
             }
             else {
-                $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-                undef $dbTr;
-                $database->checkpoint( { error => \$error } );
-                throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
+                createData( $parameters->{doc}, $dId, $mdId, "<psservice:datum xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">" . escapeString( $dataString ) . "</psservice:datum>\n", undef );
             }
         }
     }
@@ -3595,48 +3645,28 @@ sub lsKeyRequest {
             $dbContainer = $self->{CONF}->{"gls"}->{"metadata_db_file"};
         }
 
-        my $dbTr = $database->getTransaction( { error => \$error } );
-        unless ( $dbTr ) {
-            $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-            undef $dbTr;
-            $database->checkpoint( { error => \$error } );
-            my $msg = "Could not start database transaction, database responded with \"" . $error . "\".";
-            $self->{LOGGER}->error( $msg );
-            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
-            return -1;
-        }
-
-        my @resultsString = $database->query( { query => $queryString, txn => $dbTr, error => \$error } );
+        my @resultsString = $database->query( { query => $queryString, error => \$error } );
         $errorFlag++ if $error;
 
         if ( $errorFlag ) {
-            $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-            undef $dbTr;
-            $database->checkpoint( { error => \$error } );
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database errors prevented the transaction from completing:" . $error );
         }
         else {
-            my $status = $database->commitTransaction( { txn => $dbTr, error => \$error } );
-            if ( $status == 0 ) {
-                undef $dbTr;
-                $database->checkpoint( { error => \$error } );
-                my $parser   = XML::LibXML->new();
-                my $metadata = $parser->parse_string( $resultsString[0] );
-                if ( $metadata and $metadata->getDocumentElement->getAttribute( "id" ) ) {
-                    my $mdId = "metadata." . genuid();
-                    my $dId  = "data." . genuid();
-                    createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), $service->toString, undef );
-                    createData( $parameters->{doc}, $dId, $mdId, createLSKey( { key => $metadata->getDocumentElement->getAttribute( "id" ) } ), undef );
-                }
-                else {
-                    throw perfSONAR_PS::Error_compat( "error.ls.key.not_registered", "Service was not registered in this LS." );
-                }
+            my $parser   = XML::LibXML->new();
+
+# XXX - JZ 10/5/2010
+# New check to see if we got something back ...
+#  May need to push this into other places
+            if ( $resultsString[0] ) {
+            my $metadata = $parser->parse_string( $resultsString[0] );
+#            if ( $metadata and $metadata->getDocumentElement->getAttribute( "id" ) ) {
+                my $mdId = "metadata." . genuid();
+                my $dId  = "data." . genuid();
+                createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), $service->toString, undef );
+                createData( $parameters->{doc}, $dId, $mdId, createLSKey( { key => $metadata->getDocumentElement->getAttribute( "id" ) } ), undef );
             }
             else {
-                $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-                undef $dbTr;
-                $database->checkpoint( { error => \$error } );
-                throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
+                throw perfSONAR_PS::Error_compat( "error.ls.key.not_registered", "Service was not registered in this LS." );
             }
         }
     }
