@@ -10,10 +10,15 @@
    * TBD
  # Followup on previous actions:
    * Short Term
-     * _*ACTION*_: Jason to enter a bug for v6 toolkit support (3.3)
-     * _*ACTION*_: Jason to enter a bug for OWAMP NAGIOS plugin improvement.  
-     * _*ACTION*_: Jason to enter a bug for the LS registration issue (3.2.1 and 3.3 versions).     
-     * _*ACTION*_: Jason to migrate hLS code to a branch
+     * _*ACTION*_: ~~Jason to enter a bug for v6 toolkit support (3.3)~~
+       * Done, [http://code.google.com/p/perfsonar-ps/issues/detail?id=527 Issue 527] 
+     * _*ACTION*_: ~~Jason to enter a bug for OWAMP NAGIOS plugin improvement.~~  
+       * Done, [http://code.google.com/p/perfsonar-ps/issues/detail?id=528 Issue 528] 
+     * _*ACTION*_: ~~Jason to enter a bug for the LS registration issue (3.2.1 and 3.3 versions).~~
+       * Done, [http://code.google.com/p/perfsonar-ps/issues/detail?id=529 Issue 529]           
+       * Done, [http://code.google.com/p/perfsonar-ps/issues/detail?id=530 Issue 530]   
+     * _*ACTION*_: ~~Jason to migrate hLS code to a branch~~
+       * Done
      * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
      * _*ACTION*_: Jason to integrate his comments into Brian's wiki pages + fasterdata content.  Work on additional doc in accordance with the proposal.  
      * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
