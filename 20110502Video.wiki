@@ -1,0 +1,45 @@
+#summary May 2nd, 2011 Conference Call
+
+=  May 2 2011 Conference Call 2:30 p.m. EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+   * TBD
+ # Excused:
+   * TBD
+ # Followup on previous actions:
+   * Short Term
+     * _*ACTION*_: Jason to enter a bug for v6 toolkit support (3.3)
+     * _*ACTION*_: Jason to enter a bug for OWAMP NAGIOS plugin improvement.  
+     * _*ACTION*_: Jason to enter a bug for the LS registration issue (3.2.1 and 3.3 versions).     
+     * _*ACTION*_: Jason to migrate hLS code to a branch
+     * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
+     * _*ACTION*_: Jason to integrate his comments into Brian's wiki pages + fasterdata content.  Work on additional doc in accordance with the proposal.  
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Developers to comment/change time estimates 3.2.1 issues.
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Jeff to still ask about further use of SVN as a content management system for psps.perfsonar.net   
+ # TBD
+ 
+== Actions ==
+
+ * Short Term
+   * _*ACTION*_: TBD
+ * Long Term
+   * _*ACTION*_: TBD
+   
+== Where ==
+
+ESnet conference bridge:
+
+ * GDS: 00113498255555
+ * Direct Dial:  mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-883-7860 then 8255555# at the prompt. 
+
+== Last Updated ==
+
+$Id:$
