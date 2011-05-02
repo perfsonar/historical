@@ -1,6 +1,6 @@
 #summary May 2nd, 2011 Conference Call
 
-=  May 2 2011 Conference Call 2:30 p.m. EDT =
+=  May 2 2011 Conference Call 3 p.m. EDT =
 
 == Agenda/Minutes ==
 
@@ -28,7 +28,8 @@
      * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
      * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
      * _*ACTION*_: Jeff to still ask about further use of SVN as a content management system for psps.perfsonar.net   
- # TBD
+ # Supported Architectures
+     * Should we add 64bit?
  
 == Actions ==
 
