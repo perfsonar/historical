@@ -5,9 +5,9 @@
 == Agenda/Minutes ==
 
  # Attendees:
-   * TBD
+   * Brian, Jason, Jeff, Martin, Aaron, Kavitha, Nils, Andy
  # Excused:
-   * TBD
+   * Joe
  # Followup on previous actions:
    * Short Term
      * _*ACTION*_: ~~Jason to enter a bug for v6 toolkit support (3.3)~~
@@ -28,10 +28,28 @@
      * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
      * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
      * _*ACTION*_: Jeff to still ask about further use of SVN as a content management system for psps.perfsonar.net   
+       * Done
+ # Release Discussion
+     * What should/should not be part of the next pS-PS release.
+       * OSCARS .6 dependencies
  # Supported Architectures
      * Should we add 64bit?
+       * Mach should make that easier. Sowmya will attempt it.
+ # Host Metadata Issues
+     * Discussion of how host configuration should be referenced with respect to test data.
  
 == Actions ==
+
+     * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
+     * _*ACTION*_: Kavitha/Sowmya/Aaron to comment/change time estimates 3.2.1 issues.
+     * _*ACTION*_: Jason to integrate his comments into Brian's wiki pages + fasterdata content.  Work on additional doc in accordance with the proposal.  
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Jeff to get schedule for implementation of CMS for web space.
+     * _*ACTION*_: Brian/Jeff to work on pS-PS scheduling
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
 
  * Short Term
    * _*ACTION*_: TBD
