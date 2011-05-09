@@ -1,4 +1,4 @@
-#summary May 2nd, 2011 Conference Call
+#summary May 9nd, 2011 Conference Call
 
 =  May 9 2011 Conference Call 3 p.m. EDT =
 
@@ -19,10 +19,12 @@
      * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
      * _*ACTION*_: Brian/Jeff to work on pS-PS scheduling
      * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
-       * Done
- # Developer Updates
+  # Developer Updates
  # Host metadata
   * http://code.google.com/p/perfsonar-ps/wiki/HostMetadataProposal
+ # Updated plots for Toolkit
+  * http://ps-lat.es.net/toolkit/gui/perfAdmin/serviceTestScript/cgi-bin/front-end.cgi?eventType=owamp
+  * http://ps-lat.es.net/toolkit/gui/perfAdmin/serviceTestScript/cgi-bin/front-end.cgi?eventType=bwctl
 
 == Actions ==
 
