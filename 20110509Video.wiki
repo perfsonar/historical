@@ -21,7 +21,9 @@
      * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
        * Done
  # Developer Updates
- 
+ # Host metadata
+  * http://code.google.com/p/perfsonar-ps/wiki/HostMetadataProposal
+
 == Actions ==
 
  * Short Term
