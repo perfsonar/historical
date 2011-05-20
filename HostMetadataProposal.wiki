@@ -96,3 +96,34 @@ The service registration should look the same as the current service registratio
 
 ===Differences===
 There would also be a node object registered for each service. Through the use of existing elements like _capacity_ in the _port_ object, we can capture features like interface capacity. The remaining properties are not defined anywhere...at least consistently. The example above uses a "host" namespace describes information specific to an end system node. Since the node is generic and can represent things that are not end systems, puting it in the base is probably not appropriate. Based on the DICE document, we need operatingSystemType, operatingSystemVersion, and tcpCongestionCtrlAlg. We could presumably add more if they are needed.  There are plenty of open issues with this approach. 
+
+=Example hLS Queries=
+==Querying a known host's parameters==
+{{{
+#what congestion control algorithm does host X run
+/nmwg:store/nmwg:metadata/nmtb:node[nmtb:hostName='X']/nmhost:tcpCongestionCtrlAlg
+
+#what operating system does host X run
+/nmwg:store/nmwg:metadata/nmtb:node[nmtb:hostName='X']/nmhost:operatingSystem
+
+#Return all host parameters
+/nmwg:store/nmwg:metadata/nmtb:node[nmtb:hostName='X']
+}}}
+
+==Searching for hosts with a specific parameter==
+{{{
+#Return all hosts using reno
+/nmwg:store/nmwg:metadata/nmtb:node[nmhost:tcpCongestionCtrlAlg='reno']
+
+#Return all hosts running CentOS
+/nmwg:store/nmwg:metadata/nmtb:node[nmhost:operatingSystem='CentOS']
+
+#Return all hosts running CentOS 5.6
+/nmwg:store/nmwg:metadata/nmtb:node[nmhost:operatingSystem='CentOS' and nmhost:operatingSystemVersion='5.6']
+
+}}}
+
+===Searching for a host that runs a particular service AND has a specific host parameter===
+This type of query requires a join between the service and node elements. Since XPath does not support JOINS, it will require at least two XPaths and/or some additional processing by the application to filter out the desired results. Examples in this category:
+ # Return all BWCTL servers that run a particular congestion control algorithm.
+ # Return all OWAMP servers that run a particular operating system
