@@ -5,7 +5,7 @@
 == Agenda/Minutes ==
 
  # Attendees:
-   * TBD
+   * Maxim, Brian, Aaron, Nils, Kavitha, Joe, Andy, Sowmya, Gunter
  # Excused:
    * Jason
  # Followup on previous actions:
@@ -13,6 +13,7 @@
      * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
      * _*ACTION*_: Sowmya/Aaron to comment/change time estimates 3.2.1 issues.
      * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+          * Joe/Jeff will bring up on Friday ESnet/Internet2 call.
      * _*ACTION*_: Sowmya will package owamp/bwctl plots for others to test.
      * _*ACTION*_: Andy will add some additional host parameters (cpu speed, number of cores) as well as put some specific query examples together.
    * Long Term
@@ -23,12 +24,24 @@
      * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
  # Discussion on the 3.2.0.1 Netinstall
    * Status
+     * Brian will have someone at ESnet look at rolling it.
    * Estimated Completetion (Dev)
    * Testing
- # TBD
+ # Owamp checking
+   * back off to once/hour
 
 == Actions ==
 
+     * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+     * _*ACTION*_: Sowmya to comment/change time estimates 3.2.1 issues.
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Sowmya will package owamp/bwctl plots for others to test.
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Brian/Jeff to work on pS-PS scheduling
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
 TBD
 
 == Where ==
