@@ -45,6 +45,8 @@ lib/perfSONAR_PS/Client/MA.pm
 lib/perfSONAR_PS/Common.pm
 lib/perfSONAR_PS/DB/Cacti.pm
 lib/perfSONAR_PS/DB/Cricket.pm
+lib/perfSONAR_PS/DB/ESxSNMP.pm
+lib/perfSONAR_PS/DB/ESxSNMP_API.pm
 lib/perfSONAR_PS/DB/File.pm
 lib/perfSONAR_PS/DB/Ganglia.pm
 lib/perfSONAR_PS/DB/RRD.pm
