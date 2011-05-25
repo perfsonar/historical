@@ -39,8 +39,7 @@ TBD
 
 == Bugs Related to This Release ==
 
- * Open Bugs
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - disable buttons on the stats grpahs page for empty graphs   
+ * Open Bugs 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=160 160] - ESnet SNMP MA Enhancements   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - Add vmxnet module   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - ability to set peer_port and iperf_port using web config GUI  
@@ -50,14 +49,11 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=245 245] - negative latency from graph is counterintuitive. Should at least explain why it happens.   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - Firewall guidance       
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=337 337] - Add multiple hosts to scheduled test   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=348 348] - PSB Results Top & Bottom 10 lists   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=337 337] - Add multiple hosts to scheduled test     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=349 349] - Identify and Archive the path measured by bwctl & owamp   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - Package for the client modules
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=424 424] - duplicate entries in pSB/bwctl mesh   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=425 425] - SNMP MA/Cacti Reports wrong capacity   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=429 429] - perfAdmin Time Select/Display Descrepency   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=430 430] - perfAdmin Pop-up/Tab Graph Behavior   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=425 425] - SNMP MA/Cacti Reports wrong capacity      
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - myricom driver isn't up to date   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=437 437] - isplay MTU on web-gui   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=438 438] - perfsonarbuoy/bwctl startup loop if ntp is unsynchronized   
@@ -67,8 +63,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=451 451] - Upgrade NDT to 3.6.x lineage on the pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=453 453] - Document/Add addiional options to interface configuration   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=454 454] - Add GridFTP Servers to LSRegistrationDaemon   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=459 459] -	Nagios plug-in to check toolkit version
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=460 460] - Toggle Time display in perfAdmin graphs    
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=459 459] -	Nagios plug-in to check toolkit version   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=470 470] - bwctl/owamp limits gui doesn't support IPv6 addresses   
@@ -113,19 +108,29 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=533 533] - Change NDT init script to use $PATH variable when counting numer of running processes
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=534 534] - Document host/address behavior with regardst to v6 on the pSPT
  * Closed Bugs
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - ~~disable buttons on the stats grpahs page for empty graphs~~  
+     * <font color="purple">_*MIGRATED 5/25/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=197 197] - ~~bwctl plots: Verify X axis is scaled by time, and not array index~~
      * <font color="green">_*remaining tasks for this issue are part of issue 242  *_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - ~~LinuxPPS Support~~ 
      * <font color="red">_*Won't Fix*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=348 348] - ~~PSB Results Top & Bottom 10 lists~~ 
+     * <font color="purple">_*MIGRATED 5/25/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=352 352] - ~~upgrade script for pSB databases~~
      * <font color="red">_*Won't Fix*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=447 447] - new version of nuttcp supported by the NPtoolkit  
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=429 429] - ~~perfAdmin Time Select/Display Descrepency~~
+     * <font color="green">_*FIXED 5/25/2011*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=430 430] - ~~perfAdmin Pop-up/Tab Graph Behavior~~
+     * <font color="green">_*FIXED 5/25/2011*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=447 447] - ~~new version of nuttcp supported by the NPtoolkit~~
      * <font color="red">_*Won't Fix*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=460 460] - ~~Toggle Time display in perfAdmin graphs~~
+     * <font color="green">_*FIXED 5/25/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=462 462] - ~~Kernel module for IDE SSD drive~~
      * <font color="red">_*Won't Fix*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=463 463] - ~~the SFC driver isn't completely up to date~~
      * <font color="red">_*Won't Fix*_</font>
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=464 464] - Enhancemts to the Throughput/Latency Testing CGI Pages  
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=464 464] - ~~Enhancemts to the Throughput/Latency Testing CGI Pages~~
      * <font color="red">_*Won't Fix*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=467 467] - ~~ixgbe driver isn't up to date~~
      * <font color="red">_*Won't Fix*_</font>
