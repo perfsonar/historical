@@ -86,7 +86,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=496 496] - Mirrors for pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=499 499] - Review times and frequencies of LS registration   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=500 500] - IPv6 Redirect for pSPT
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=501 501] - IPv6 Support in Web100_Userland 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=502 502] - need to rework google code site to make a easy to find 'contrib' area
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=504 504] - Add event type to pSB for OWAMP data with buckets required
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=506 506] - status page "not running" clarification
@@ -105,7 +104,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=524 524] - SNMP MA SQLite Backend testing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=529 529] - Disable LS and LS Registration Daemon when Administrative Info is missing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=531 531] - Remove non-functional options in the regular testing setup
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=533 533] - Change NDT init script to use $PATH variable when counting numer of running processes
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=534 534] - Document host/address behavior with regardst to v6 on the pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=535 535] - NTP Stats on pSPT
  * Closed Bugs
@@ -139,9 +137,13 @@ TBD
      * <font color="green">_*FIXED 4/11/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=497 497] - ~~Traceroute MA does not query over long ranges of time~~
      * <font color="green">_*FIXED 4/11/2011*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=501 501] - ~~IPv6 Support in Web100_Userland~~
+     * <font color="green">_*FIXED 6/17/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=517 517] - ~~NPAD testing port wrong on pSPT~~
      * <font color="green">_*FIXED 4/14/2011*_</font>
-             
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=533 533] - ~~Change NDT init script to use $PATH variable when counting numer of running processes~~
+     * <font color="green">_*FIXED 6/17/2011*_</font>
+            
 == Unclassified Bugs ==
 
 The following new bugs were identified, and are not classified yet:
