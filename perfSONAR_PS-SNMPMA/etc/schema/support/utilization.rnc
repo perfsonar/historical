@@ -1,0 +1,315 @@
+# ##############################################################
+# 
+# File:         utilization.rnc - Specialized schema for the 
+#                                 measure of interface utilization
+# Version:      $Id: utilization.rnc 341 2008-04-24 21:52:11Z boote $
+# Purpose:      Describes specific elements to be used in the
+#               representation and handling of interface 
+#               utilization
+# Reference:    http://books.xmlschemata.org/relaxng/page2.html
+#                         
+# ##############################################################
+        
+
+# ##############################################################
+# Namespace definitions
+# ##############################################################
+namespace nmwg = "http://ggf.org/ns/nmwg/base/2.0/"
+namespace utilization = "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
+namespace nmwgr = "http://ggf.org/ns/nmwg/result/2.0/"
+
+
+# ##############################################################
+# Include additional functionality from other files
+# ##############################################################
+include "nmtopo.rnc"
+include "nmtopo_ver3.rnc"
+include "result.rnc"
+include "nmbase.rnc" {
+        Metadata |= UtilizationMetadata
+        Data |= UtilizationData        
+} 
+
+
+# ##############################################################
+# Metadata is the 'data' that describes physical measurements. 
+# Metadata can be something such as a physical address, or 
+# a geographical location; any form of static, re-usable 
+# designation.  It is important to note that the subject
+# namespace and parameters namespace MUST match (or the parameters
+# can be a generic NMWG) or bad things will occur.
+#
+# Example: 
+# 
+# <nmwg:metadata id="REQUIRED_ID" 
+#                metadataIdRef="OPTIONAL_REFERENCE_ID"
+#                xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#   <!-- TBD OPTIONAL SUBJECT -->
+# 
+#   <!-- TBD OPTIONAL PARAMETERS -->
+#
+#   <!-- TBD OPTIONAL EVENTTYPE -->
+# 
+#   <!-- TBD OPTIONAL KEY -->
+#  
+#   <!-- ANY OPTIONAL (MULTIPLE) ELEMENT IN ANY NAMESPACE --> 
+#
+# </nmwg:metadata>
+# 
+# ##############################################################
+        
+UtilizationMetadata = 
+        element nmwg:metadata {
+                Identifier &
+                MetadataIdentifierRef? &
+                UtilizationMetadataContent
+        }
+          
+UtilizationMetadataBlock = 
+        UtilizationSubject? &
+        (
+                UtilizationParameters |
+                Parameters
+        )?
+        
+UtilizationMetadataContent = 
+        (
+                UtilizationMetadataBlock |
+                FilterMetadataBlock                
+        ) &        
+        EventType? &
+        Key?        
+
+
+# ##############################################################
+# Redefined utilization subject allows only an interface, and
+# the two id attributes.    
+#
+# Example: 
+# 
+# <utilization:subject id="REQUIRED_ID" 
+#               metadataIdRef="OPTIONAL_REFERENCE_ID"
+#               xmlns:nmwg="http://ggf.org/ns/nmwg/tools/utilization/2.0/">
+# 
+#   <nmwgtopo:interface xmlns:nmwgtopo="http://ggf.org/ns/nmwg/topology/2.0/">
+# 
+#     <nmwgtopo:ipAddress type='REQUIRED_TYPE'> TEXT </nmwgtopo:ipAddress>
+# 
+#     <nmwgtopo:hostName> TEXT </nmwgtopo:hostName>
+# 
+#     <nmwgtopo:ifName> TEXT </nmwgtopo:ifName>
+# 
+#     <nmwgtopo:ifDescription> TEXT </nmwgtopo:ifDescription>
+# 
+#     <nmwgtopo:ifAddress type='REQUIRED_TYPE'> TEXT </nmwgtopo:ifAddress>
+# 
+#     <nmwgtopo:ifHostName> TEXT </nmwgtopo:ifHostName>
+# 
+#     <nmwgtopo:ifIndex> TEXT </nmwgtopo:ifIndex>
+# 
+#     <nmwgtopo:type> TEXT </nmwgtopo:type>
+# 
+#     <nmwgtopo:direction> TEXT </nmwgtopo:direction>
+# 
+#     <nmwgtopo:authRealm> TEXT </nmwgtopo:authRealm>
+# 
+#     <nmwgtopo:classOfService> TEXT </nmwgtopo:classOfService>
+# 
+#     <nmwgtopo:capacity> TEXT </nmwgtopo:capacity>
+#  
+#   </nmwgtopo:interface>
+#  
+# </utilization:subject>
+#
+# ##############################################################
+
+UtilizationSubject =
+        element utilization:subject {
+                Identifier &
+                MetadataIdentifierRef? &                
+                (
+                        Interface |
+                        BaseInterface |
+                        L2Interface |
+                        L3Interface
+                )
+        }
+
+
+# ##############################################################
+# This is simply the regular method of doing parameters with an
+# enumeration to limit what 'names' are accepted and an outer
+# utilization: namespace for the parameters.
+#
+# Example: 
+# 
+# <utilization:parameters id="REQUIRED_ID" 
+#                   xmlns:nmwg="http://ggf.org/ns/nmwg/tools/utilization/2.0/">
+# 
+#   <nmwg:parameter name="REQUIRED_ENUM_NAME" value="OPTIONAL_VALUE"
+#                   xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#     <!-- ANY TEXT, (IF YOU DID NOT USE THE VALUE ATTRIBUTE) -->
+# 
+#   </nmwg:parameter>
+#  
+#   <!-- MORE PARAMETERS -->
+#   
+# </utilization:parameters>
+# 
+# ##############################################################
+
+UtilizationParameters =
+        element utilization:parameters {
+                Identifier &        
+                UtilizationParameter+
+        }
+        
+UtilizationParameter = 
+        element nmwg:parameter { 
+                attribute name { "interval" | "valueUnits" } &
+                (
+                        attribute value { text } |
+                        text
+                )
+        }
+
+
+# ##############################################################
+# The data block is complex, and has the potential to contain
+# many things.  The data block can be used to return a metadata
+# block from a request, commonTime or datum elements, keys, 
+# or something that we have perhaps not defined as of yet.  
+#
+# Example: 
+# 
+# <nmwg:data id="REQUIRED_ID" 
+#            metadataIdRef="OPTIONAL_REFERENCE_ID" 
+#            xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#   <!-- OPTIONAL (MULTIPLE) METADATA -->
+# 
+#           <!-- OR -->
+#
+#   <!-- TBD OPTIONAL (MULTIPLE) COMMON TIME ELEMENTS AND 
+#        OPTIONAL (MULTIPLE) DATUM ELEMENTS-->
+# 
+#           <!-- OR -->
+#  
+#   <!-- TBD OPTIONAL (MULTIPLE) DATUM ELEMENTS -->
+# 
+#           <!-- OR -->
+#  
+#   <!-- OPTIONAL (MULTIPLE) KEY ELEMENTS -->
+# 
+#           <!-- OR -->
+# 
+#   <!-- ANY OPTIONAL (MULTIPLE) ELEMENT IN ANY NAMESPACE -->
+#   
+# </nmwg:data>
+# 
+# ##############################################################
+   
+UtilizationData =
+        element nmwg:data {
+                Identifier &
+                MetadataIdentifierRef? &
+                (
+                        (
+                                Metadata* |
+                                UtilizationMetadata*
+                        ) |
+                        (
+                                UtilizationCommonTime+ & 
+                                (
+                                        UtilizationDatum* |
+                                        ResultDatum*
+                                )
+                        ) |
+                        (
+                                UtilizationDatum* |
+                                ResultDatum*
+                        ) |
+                        Key*
+                )
+        }
+
+
+# ##############################################################
+# CommonTime is used a a shortcut able to 'factor out' a frequently
+# occurring time range that a bunch of datum (or other) elements
+# might share, thus reducing complexity of XML representation.  
+# CommonTime is similar to the other NMWG time stamps (from 
+# nmtime.rnc) in its potential time representations.
+#
+# Example: 
+# 
+# <nmwg:commonTime type="REQUIRED_TYPE" value="OPTIONAL_VALUE"
+#                  duration="OPTIONAL_DURATION" 
+#                  inclusive="OPTIONAL_INCLUSIVE_FLAG"
+#                  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#   <!-- TBD OPTIONAL START TIME ELEMENT (USE END TIME OR DURATION) -->
+#  
+#   <!-- TBD OPTIONAL END TIME ELEMENT (ONLY WITH START TIME) -->
+#  
+#   <!-- TBD OPTIONAL TIME VALUE ELEMENT (USE IF NO VALUE ATTRIBUTE) -->
+#  
+#   <!-- TBD OPTIONAL (MULTIPLE) DATUM ELEMENTS -->
+# 
+#   <!-- ANY OPTIONAL (MULTIPLE) ELEMENT IN ANY NAMESPACE -->
+# </nmwg:commonTime>
+# 
+# ##############################################################
+
+UtilizationCommonTime = 
+        element nmwg:commonTime {
+                Type &
+                (
+                        TimeStamp |
+                        (
+                                StartTime & 
+                                (
+                                        EndTime | 
+                                        Duration 
+                                )
+                        )
+                ) &
+                (
+                        UtilizationDatum* |
+                        ResultDatum*
+                )
+        } 
+
+
+# ##############################################################
+# These are the basic elements we would expect to see in the 
+# specific iperf datum.
+#
+# Example: 
+# 
+# <utilization:datum value="REQUIRED_VALUE"
+#                    valueUnits="OPTIONAL_VALUE_UNITS"
+#                    timeType="OPTIONAL_TIME_TYPE"
+#                    timeValue="OPTIONAL_TIME_VALUE"
+#                    xmlns:nmwg="http://ggf.org/ns/nmwg/tools/utilization/2.0/">
+# 
+#   <!-- TIME ELEMENT (IF ATTRIBUTES NOT USED) -->
+#  
+# </utilization:datum>
+# 
+# ##############################################################
+
+UtilizationDatum =
+        element utilization:datum {
+                attribute value { xsd:float } &
+                attribute valueUnits { xsd:string }? &        
+                (
+                        (
+                                attribute timeType { xsd:string } & 
+                                attribute timeValue { xsd:string }
+                        ) |
+                        Time
+                )?                         
+        }

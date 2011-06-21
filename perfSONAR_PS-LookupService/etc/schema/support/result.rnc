@@ -1,0 +1,41 @@
+# ##############################################################
+# 
+# File:         result.rnc - Extension for a 'results' namespace
+# Version:      $Id: result.rnc 341 2008-04-24 21:52:11Z boote $
+# Purpose:      The 'results' namespace, for our purposes, is used
+#               for errors or other system messages.  At current
+#               time only a 'datum' element is defined.
+# Reference:    http://books.xmlschemata.org/relaxng/page2.html
+#                         
+# ##############################################################
+
+
+# ##############################################################
+# Namespace definitions
+# ##############################################################
+namespace nmwgr = "http://ggf.org/ns/nmwg/result/2.0/"
+
+
+# ##############################################################
+# This datum can be used to relay errors or system information
+# usually in response to a request.
+#
+# Example: 
+# 
+# <nmwgr:datum type="OPTIONAL_TYPE"
+#             xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">
+# 
+#   <!-- ANY TEXT -->
+#  
+# </nmwgr:datum>
+# 
+# ##############################################################
+
+ResultDatum =
+        element nmwgr:datum {
+                attribute type { xsd:string }? &
+                (
+                        text |
+                        anyElement+
+                )
+        }

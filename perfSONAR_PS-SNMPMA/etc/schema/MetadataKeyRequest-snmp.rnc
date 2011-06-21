@@ -1,0 +1,56 @@
+# ##############################################################################
+# 
+# File:      MetadataKeyRequest.rnc - Schema for MetadataKeyRequest messages
+# Version:   $Id$
+# Purpose:   Using the NMBase definitions, craft a specific shema for Metadata
+#            Key Request messages
+# 
+# ##############################################################################
+
+# NMWG Base namesapce and tool namespaces
+namespace nmwg = "http://ggf.org/ns/nmwg/base/2.0/"
+namespace snmp = "http://ggf.org/ns/nmwg/tools/snmp/2.0/"
+namespace netutil = "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" 
+namespace neterr = "http://ggf.org/ns/nmwg/characteristic/errors/2.0/" 
+namespace netdisc = "http://ggf.org/ns/nmwg/characteristic/discards/2.0/" 
+
+# Use the tool schema file, but change some of the open ended defaults
+include "support/snmp.rnc" {
+    Type = 
+        attribute type { 
+            "MetadataKeyRequest" 
+        } 
+
+    SNMPSubject =
+        element snmp:subject {
+            Identifier &
+            MetadataIdentifierRef? &        
+            (
+                    Interface |
+                    BaseInterface |
+                    L2Interface |
+                    L3Interface
+            )
+        } |
+        element nmwg:subject {
+            Identifier &
+            MetadataIdentifierRef? &        
+            (
+                    Interface |
+                    BaseInterface |
+                    L2Interface |
+                    L3Interface
+            )
+        }
+
+    SNMPParameters =
+        element snmp:parameters {
+            Identifier &        
+            SNMPParameter+
+        } |
+        element nmwg:parameters {
+            Identifier &        
+            SNMPParameter+
+        }
+}
+

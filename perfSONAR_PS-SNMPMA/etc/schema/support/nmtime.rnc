@@ -1,0 +1,154 @@
+# ##############################################################
+# 
+# File:      nmtime.rnc - NMWG Time definitions
+# Version:   $Id: nmtime.rnc 358 2008-06-05 15:14:11Z swany $
+# Purpose:   This describes a set of time formats for 
+#             representing measurements.  
+#                         
+# ##############################################################
+
+
+# ##############################################################
+# Namespace definitions
+# ##############################################################
+namespace nmtm = "http://ggf.org/ns/nmwg/time/20070914/"
+
+
+# ##############################################################
+# Regular time is attached to a specific datum instance; it is
+# essentially the same as before, but cannot have anything
+# 'inside' of it. The type can be simple, like UNIX, or it
+# could be something like timeRange or timeInterval. If this is
+# the case, we would then see the two extra time designators for
+# the start and end (or duration)
+# 
+# Example:
+# 
+# <nmtm:time type="REQUIRED_TYPE" value="OPTIONAL_VALUE"
+#            duration="OPTIONAL_DURATION" 
+#            inclusive="OPTIONAL_INCLUSIVE_FLAG"
+#            xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
+# 
+#   <!-- TBD OPTIONAL START TIME ELEMENT (USE END TIME OR 
+#        DURATION) -->
+#  
+#   <!-- TBD OPTIONAL END TIME ELEMENT (ONLY WITH START TIME) -->
+#  
+#   <!-- TBD OPTIONAL TIME VALUE ELEMENT (USE IF NO VALUE 
+#        ATTRIBUTE) -->
+#  
+# </nmtm:time>
+# 
+#
+# Time types are enumerated as follows:
+#
+# * unix: integral seconds since Jan 1, 1970 (UTC)
+#
+# * iso9601/rfc3339:
+#
+#       full date/time representation. Examples from RFC-339:
+#
+#        Here are some examples of Internet date/time format.
+#     
+#           1985-04-12T23:20:50.52Z
+#     
+#        This represents 20 minutes and 50.52 seconds after the 23rd hour of
+#        April 12th, 1985 in UTC.
+#     
+#           1996-12-19T16:39:57-08:00
+#     
+#        This represents 39 minutes and 57 seconds after the 16th hour of
+#        December 19th, 1996 with an offset of -08:00 from UTC (Pacific
+#        Standard Time).  Note that this is equivalent to 1996-12-20T00:39:57Z
+#        in UTC.
+#     
+#           1990-12-31T23:59:60Z
+#     
+#        This represents the leap second inserted at the end of 1990.
+#     
+#           1990-12-31T15:59:60-08:00
+#     
+#        This represents the same leap second in Pacific Standard Time, 8
+#        hours behind UTC.
+#     
+#           1937-01-01T12:00:27.87+00:20
+#     
+#        This represents the same instant of time as noon, January 1, 1937,
+#        Netherlands time.  Standard time in the Netherlands was exactly 19
+#        minutes and 32.13 seconds ahead of UTC by law from 1909-05-01 through
+#        1937-06-30.  This time zone cannot be represented exactly using the
+#        HH:MM format, and this timestamp uses the closest representable UTC
+#        offset.
+#
+# ##############################################################
+
+Time = 
+        element nmtm:time {
+                attribute type { xsd:string } &
+                (
+                         TimeStamp |
+                         (
+                                StartTime & 
+                                ( 
+                                        EndTime | 
+                                        Duration
+                                )
+                         )
+                )
+        } 
+
+# precisionUnits must be one of the recognized SI units
+# The most complete list I could currently find is at:
+# http://en.wikipedia.org/wiki/Orders_of_magnitude_%28time%29
+#
+# synchronized SHOULD be set true if the party generating the timestamp
+# has a clock that is synchronized to UTC using an external source
+# (e.g., the attribute should be set true if GPS hardware is used and it
+# indicates that it has acquired current position and time or if NTP is
+# used and it indicates that it has synchronized to an external source,
+# which includes stratum 0 source, etc.).  If there is no notion of
+# external synchronization for the time source, the attribute SHOULD be set
+# to false. If the attribute is not set at all, the synchronization
+# status of the timestamp can not be determined except through external
+# knowledge.
+Precision =
+        (
+            (
+                attribute precision { xsd:unsignedInt } &
+                attribute precisionUnits { xsd:string } &
+                attribute synchronized { xsd:boolean }?
+            ) |
+            element nmtm:precision {
+                attribute precisionUnits { xsd:string } &
+                attribute synchronized { xsd:boolean }? &
+                xsd:unsignedInt
+            }
+        )
+        
+
+TimeStamp =   
+        (
+                ( 
+                        attribute value { xsd:string } |
+                        element nmtm:value { xsd:string }
+                ) &
+                Precision?
+        )
+
+Duration =
+        attribute duration { xsd:string }
+
+TimeContent = 
+        attribute type { text } &
+        attribute inclusive { text }? &
+        TimeStamp        
+
+StartTime = 
+        element nmtm:start {
+                TimeContent
+        }
+   
+EndTime = 
+        element nmtm:end {
+                TimeContent
+        }

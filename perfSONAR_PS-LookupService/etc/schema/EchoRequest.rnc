@@ -1,0 +1,54 @@
+# ##############################################################################
+# 
+# File:      EchoRequest.rnc - Schema for EchoRequest messages
+# Version:   $Id$
+# Purpose:   Using the NMBase definitions, craft a specific shema for echo
+#            request messages.
+# 
+# ##############################################################################
+
+# NMWG Base namesapce
+namespace nmwg = "http://ggf.org/ns/nmwg/base/2.0/"
+
+# Use the NMBase schema file, but change some of the open ended defaults
+include "support/nmbase.rnc" {
+    MessageContent = EchoMessageContent
+    
+    Type = 
+        attribute type { 
+            "EchoRequest" 
+        } 
+
+    EventType =
+        element nmwg:eventType { 
+            "http://schemas.perfsonar.net/tools/admin/echo/2.0" |
+            "http://schemas.perfsonar.net/tools/admin/echo/ma/2.0" |
+            "echo.ma"
+        } 
+}
+
+# Message Conentent
+EchoMessageContent =
+    Identifier & 
+    MessageIdentifierRef? &
+    Type &                     
+    (
+        EchoMetadata |  
+        EchoData
+    )+
+
+# Metadata Conent (eventType and IDs)
+EchoMetadata = 
+    element nmwg:metadata {
+        Identifier &
+        MetadataIdentifierRef? &
+        EventType
+    }
+
+# Data Conent (trigger w/ IDs only)
+EchoData =
+    element nmwg:data {
+        Identifier &
+        MetadataIdentifierRef
+    }    
+

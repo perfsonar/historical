@@ -37,8 +37,8 @@ Outcome:
   -->
 
   <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
-    <perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
-      <psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
+    <perfsonar:subject id="sub" xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+      <psservice:service id="serv" xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
         <psservice:serviceName>Lookup Service1</psservice:serviceName>
         <psservice:accessPoint>http://localhost:8080/perfSONAR_PS/services/gLS</psservice:accessPoint>
         <psservice:serviceType>LS</psservice:serviceType>
@@ -91,8 +91,8 @@ Outcome:
   -->
 
   <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta2">
-    <perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
-      <psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
+    <perfsonar:subject id="sub" xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+      <psservice:service id="serv" xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
         <psservice:serviceName>Lookup Service2</psservice:serviceName>
         <psservice:accessPoint>http://localhost:8082/perfSONAR_PS/services/gLS</psservice:accessPoint>
         <psservice:serviceType>LS</psservice:serviceType>
@@ -142,8 +142,8 @@ Outcome:
   -->
 
   <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta3">
-    <perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
-      <psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
+    <perfsonar:subject id="sub" xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+      <psservice:service id="serv" xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
         <psservice:serviceName>Lookup Service3</psservice:serviceName>
         <psservice:accessPoint>http://localhost:8083/perfSONAR_PS/services/gLS</psservice:accessPoint>
         <psservice:serviceType>LS</psservice:serviceType>
@@ -194,8 +194,8 @@ Outcome:
   -->
 
   <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta4">
-    <perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
-      <psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
+    <perfsonar:subject id="sub" xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+      <psservice:service id="serv" xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
         <psservice:serviceName>Lookup Service4</psservice:serviceName>
         <psservice:accessPoint>http://localhost:8084/perfSONAR_PS/services/gLS</psservice:accessPoint>
         <psservice:serviceType>LS</psservice:serviceType>

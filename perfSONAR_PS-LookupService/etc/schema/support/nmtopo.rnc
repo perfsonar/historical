@@ -1,0 +1,140 @@
+# ##############################################################
+# 
+# File:      nmtopo.rnc - Schema to describe topological
+#                            elements.
+# Version:   $Id: nmtopo.rnc 341 2008-04-24 21:52:11Z boote $
+#                         
+# ##############################################################
+
+
+# ##############################################################
+# Namespace definitions
+# ##############################################################
+namespace nmwgtopo = "http://ggf.org/ns/nmwg/topology/2.0/"
+
+
+# ##############################################################
+# Covers the basic point to point measurement situation.  The two 
+# points are a source and destination; may contain information 
+# such as hostname or ip address, and port number when applicable.
+# 
+# Example:
+# 
+# <nmwgtopo:endPointPair 
+#  xmlns:nmwgtopo="http://ggf.org/ns/nmwg/topology/2.0/">
+# 
+#   <nmwgtopo:src type="REQUIRED_TYPE" value="REQUIRED_VALUE" 
+#                 port="OPTIONAL_PORT"/>
+# 
+#   <nmwgtopo:dst type="REQUIRED_TYPE" value="REQUIRED_VALUE" 
+#                 port="OPTIONAL_PORT"/>
+#  
+# </nmwgtopo:endPointPair>
+# 
+# ##############################################################
+
+EndpointPair = 
+        element nmwgtopo:endPointPair {
+                EndpointPairContent
+        }
+
+EndpointPairContent =
+        element nmwgtopo:src {
+                EndpointContent
+        } &
+        element nmwgtopo:dst {
+                EndpointContent
+        }  
+
+
+# ##############################################################
+# Similar to above, from one point only.
+# 
+# Example:
+# 
+# <nmwgtopo:endPoint type="REQUIRED_TYPE" value="REQUIRED_VALUE" 
+#               port="OPTIONAL_PORT"/>
+# 
+# ##############################################################
+
+Endpoint = 
+        element nmwgtopo:endPoint {
+                EndpointContent
+        }
+
+EndpointContent = 
+        (
+                attribute value { xsd:string } |
+                text
+        ) &
+        attribute type { xsd:string } &
+        attribute port { xsd:string }?
+
+
+# ##############################################################
+# When looking at network utilization numbers (from a router or 
+# related software) there is a different set of applicable 
+# information
+# 
+# Example:
+# 
+# <nmwgtopo:interface xmlns:nmwgtopo="http://ggf.org/ns/nmwg/topology/2.0/">
+# 
+#   <nmwgtopo:ipAddress type='REQUIRED_TYPE'> TEXT </nmwgtopo:ipAddress>
+# 
+#   <nmwgtopo:hostName> TEXT </nmwgtopo:hostName>
+# 
+#   <nmwgtopo:ifName> TEXT </nmwgtopo:ifName>
+# 
+#   <nmwgtopo:ifDescription> TEXT </nmwgtopo:ifDescription>
+# 
+#   <nmwgtopo:ifAddress type='REQUIRED_TYPE'> TEXT </nmwgtopo:ifAddress>
+# 
+#   <nmwgtopo:ifHostName> TEXT </nmwgtopo:ifHostName>
+# 
+#   <nmwgtopo:ifIndex> TEXT </nmwgtopo:ifIndex>
+# 
+#   <nmwgtopo:type> TEXT </nmwgtopo:type>
+# 
+#   <nmwgtopo:direction> TEXT </nmwgtopo:direction>
+# 
+#   <nmwgtopo:authRealm> TEXT </nmwgtopo:authRealm>
+# 
+#   <nmwgtopo:classOfService> TEXT </nmwgtopo:classOfService>
+# 
+#   <nmwgtopo:capacity> TEXT </nmwgtopo:capacity>
+#  
+# </nmwgtopo:interface>
+# 
+# ##############################################################
+
+Interface = 
+        element nmwgtopo:interface {
+                InterfaceContent
+        }
+
+InterfaceContent = 
+        element nmwgtopo:ipAddress {
+                Address
+        }? &
+        element nmwgtopo:hostName { xsd:string }? &  
+        element nmwgtopo:ifName { xsd:string }? &
+        element nmwgtopo:ifDescription { xsd:string }? &
+        element nmwgtopo:ifAddress {
+                Address
+        }? &
+        element nmwgtopo:ifHostName { xsd:string }? &
+        element nmwgtopo:ifIndex { xsd:string }? &
+        element nmwgtopo:type { xsd:string }? &
+        element nmwgtopo:direction { xsd:string }? &
+        element nmwgtopo:authRealm { xsd:string }? &
+        element nmwgtopo:classOfService { xsd:string }? &
+        element nmwgtopo:capacity { xsd:string }?
+
+Address = 
+        (
+                attribute value { xsd:string } |
+                text
+        ) &
+        attribute type { xsd:string }
+

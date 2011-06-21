@@ -1,0 +1,59 @@
+# ##############################################################################
+# 
+# File:      DataInfoRequest.rnc - Schema for DataInfoRequest messages
+# Version:   $Id$
+# Purpose:   Using the NMBase definitions, craft a specific shema for Data Info
+#            Request messages
+# 
+# ##############################################################################
+
+# NMWG Base namesapce and tool namespaces
+namespace nmwg = "http://ggf.org/ns/nmwg/base/2.0/"
+namespace ganglia = "http://ggf.org/ns/nmwg/tools/ganglia/2.0/"
+
+# Use the tool schema file, but change some of the open ended defaults
+include "support/ganglia.rnc" {
+    Type = 
+        attribute type { 
+            "DataInfoRequest" 
+        } 
+
+    GangliaSubject =
+        element ganglia:subject {
+            Identifier &
+            MetadataIdentifierRef? &        
+            (
+                    Node |
+                    (
+                        Interface |
+                        BaseInterface |
+                        L2Interface |
+                        L3Interface
+                    )
+            )
+        } |
+        element nmwg:subject {
+            Identifier &
+            MetadataIdentifierRef? &        
+            (
+                    Node |
+                    (
+                        Interface |
+                        BaseInterface |
+                        L2Interface |
+                        L3Interface
+                    )
+            )
+        }
+
+    GangliaParameters =
+        element ganglia:parameters {
+            Identifier &        
+            GangliaParameter+
+        } |
+        element nmwg:parameters {
+            Identifier &        
+            GangliaParameter+
+        }
+}
+

@@ -1,0 +1,54 @@
+# ##############################################################################
+# 
+# File:      DataInfoRequest.rnc - Schema for DataInfoRequest messages
+# Version:   $Id$
+# Purpose:   Using the NMBase definitions, craft a specific shema for Data Info
+#            Request messages
+# 
+# ##############################################################################
+
+# NMWG Base namesapce and tool namespaces
+namespace nmwg = "http://ggf.org/ns/nmwg/base/2.0/"
+namespace snmp = "http://ggf.org/ns/nmwg/tools/snmp/2.0/"
+namespace neterr = "http://ggf.org/ns/nmwg/characteristic/errors/2.0/" 
+
+# Use the tool schema file, but change some of the open ended defaults
+include "support/errors.rnc" {
+    Type = 
+        attribute type { 
+            "DataInfoRequest" 
+        } 
+
+    ErrorsSubject =
+        element neterr:subject {
+            Identifier &
+            MetadataIdentifierRef? &        
+            (
+                    Interface |
+                    BaseInterface |
+                    L2Interface |
+                    L3Interface
+            )
+        } |
+        element nmwg:subject {
+            Identifier &
+            MetadataIdentifierRef? &        
+            (
+                    Interface |
+                    BaseInterface |
+                    L2Interface |
+                    L3Interface
+            )
+        }
+
+    ErrorsParameters =
+        element neterr:parameters {
+            Identifier &        
+            ErrorsParameter+
+        } |
+        element nmwg:parameters {
+            Identifier &        
+            ErrorsParameter+
+        }
+}
+

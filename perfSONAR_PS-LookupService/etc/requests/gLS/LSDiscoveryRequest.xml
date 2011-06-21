@@ -22,7 +22,7 @@ Outcome: N/A
 
 <!-- can have multiples of each, note that this creates an 'or' relationship -->
         <nmtb:address xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" type="ipv4">128.4.133.167</nmtb:address>
-        <nmtb:address xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/"type="ipv4">128.4.100.45</nmtb:address>
+        <nmtb:address xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" type="ipv4">128.4.100.45</nmtb:address>
 
         <nmtb:domain xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/">
           <nmtb:name type="dns">edu</nmtb:name>          

@@ -1,0 +1,441 @@
+# ##############################################################
+# 
+# File:      nmbase.rnc - Main schema definition
+# Version:   $Id: nmbase.rnc 341 2008-04-24 21:52:11Z boote $
+# Purpose:   This is the main schema file, it defines the
+#             general structure of an NMWG message or store
+# 
+# ##############################################################
+
+
+# ##############################################################
+# Namespace definitions
+# ##############################################################
+namespace nmwg = "http://ggf.org/ns/nmwg/base/2.0/"
+
+
+# ##############################################################
+# Include additional functionality from other files
+# ##############################################################
+include "nmtime.rnc"
+include "filter.rnc"
+
+# ##############################################################
+# Every NMWG document should begin with either a 'store' or 
+# 'message' element
+# Patterns are defined for the content of each element.
+# 
+# Example (using message):
+# 
+# <nmwg:message id="OPTIONAL_ID" 
+#               messageIdRef="OPTIONAL_REFERENCE_ID"
+#               type="REQUIRED_TYPE"
+#               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#   <!-- OPTIONAL PARAMETERS -->
+#
+#   <!-- OPTIONAL (MULTIPLE) METADATA -->
+# 
+#   <!-- OPTIONAL (MULTIPLE) DATA -->
+#  
+# </nmwg:message>
+# 
+# ##############################################################
+
+start =
+        (
+                element nmwg:message {
+                        MessageContent
+                } |
+                element nmwg:store {
+                        StoreContent
+                }
+        )
+
+MessageContent =
+        Identifier? & 
+        MessageIdentifierRef? &
+        Type &
+        Parameters? &                        
+        (
+                Metadata |  
+                Data
+        )+
+        
+        
+StoreContent = 
+        Identifier? & 
+        MessageIdentifierRef? &
+        Type &
+        Parameters? &                        
+        (
+                Metadata |  
+                Data
+        )+        
+
+
+# ##############################################################
+# Metadata is the information that describes data.  This
+# information doesn't change over time
+#
+#
+# Example: 
+# 
+# <nmwg:metadata id="REQUIRED_ID" 
+#                metadataIdRef="OPTIONAL_REFERENCE_ID"
+#                xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#   <!-- TBD OPTIONAL SUBJECT -->
+# 
+#   <!-- TBD OPTIONAL PARAMETERS -->
+#
+#   <!-- TBD OPTIONAL EVENTTYPE -->
+# 
+#   <!-- TBD OPTIONAL KEY -->
+#  
+#   <!-- ANY OPTIONAL (MULTIPLE) ELEMENT IN ANY NAMESPACE --> 
+#
+# </nmwg:metadata>
+# 
+# ##############################################################
+        
+Metadata = 
+        element nmwg:metadata {
+                (
+                        Identifier &
+                        MetadataIdentifierRef? &
+                        MetadataContent
+                ),
+                anyElement*
+        }
+
+MetadataBlock =
+        Subject? &
+        Parameters?
+        
+MetadataContent = 
+        (
+                MetadataBlock |
+                FilterMetadataBlock                
+        ) &        
+        EventType? &
+        Key?        
+
+
+# ##############################################################
+# Subject identifies an endPoint (or points), perhaps the name of
+# a service or some other form of physical location. For the
+# purpose of the general case, we make no assumptions on potential
+# elements and allow all elements, in any namespace. Verification
+# can be handled in subsequent schema files.  
+#
+# Example: 
+# 
+# <nmwg:subject id="REQUIRED_ID" 
+#               metadataIdRef="OPTIONAL_REFERENCE_ID"
+#               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#   <!-- ANY ELEMENT IN ANY NAMESPACE -->
+#  
+# </nmwg:subject>
+# 
+# ##############################################################
+
+Subject = 
+        element nmwg:subject {
+                SubjectContent
+        }
+
+SubjectContent = 
+        (
+                Identifier &
+                MetadataIdentifierRef?        
+        ),
+        anyElement*
+        
+
+# ##############################################################
+# Parameters and Parameter elements can be used in a number of
+# ways in: 1) the message to signify items such as time stamp
+# or authorization or 2) metadata or data to specify filters or
+# special cases for the information. A 'parameters' block
+# has an id and encloses one to many 'parameter' elements.
+# These elements have a required 'name', and may contain
+# an attribute, element, or text value (only one please;
+# software using this should consider complex elements, then
+# text, and finally the value attribute; exceptions should
+# be thrown on duplicates).
+#
+# Example: 
+# 
+# <nmwg:parameters id="REQUIRED_ID" 
+#                  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#   <nmwg:parameter name="REQUIRED_NAME" value="OPTIONAL_VALUE"
+#                   xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#     <!-- ANY TEXT, OR ANY ELEMENT ANY NAMESPACE (IF YOU DID NOT 
+#          USE THE VALUE ATTRIBUTE) -->
+# 
+#   </nmwg:parameter>
+#  
+#   <!-- MORE PARAMETERS -->
+#   
+# </nmwg:parameters>
+# 
+# The namespaces can of course be different.
+# 
+# ##############################################################
+
+Parameters = 
+        element nmwg:parameters {
+                ParametersContent
+        }
+   
+ParametersContent =    
+        Identifier &
+        Parameter+
+   
+Parameter = 
+        element nmwg:parameter { 
+                attribute name { xsd:string } &
+                (
+                        attribute value { xsd:string } |
+                        (
+                                anyElement |
+                                text
+                        )
+                )
+        }   
+
+
+# ##############################################################
+# Event type is a simple text element used to describe the
+# characteristic or event of the data.
+#
+# Example: 
+# 
+# <nmwg:eventType xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#   <!-- TEXT -->
+#  
+# </nmwg:eventType>
+# 
+# ##############################################################        
+
+EventType =
+        element nmwg:eventType { xsd:string }      
+
+   
+# ##############################################################
+# The key is used to return a 'pointer' or otherwise special piece
+# of identifying information in response to a request. For now, 
+# this information is enclosed only within a parameters block.
+# The optional ID can be used to track past searches.
+#
+# Example: 
+# 
+# <nmwg:key id="OPTIONAL_ID" 
+#           xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#   <!-- OPTIONAL PARAMETERS -->
+#  
+# </nmwg:key>
+# 
+# ##############################################################
+   
+Key = 
+        element nmwg:key {
+                Identifier? &
+                (
+                        Parameters |
+                        FilterParameters                                
+                )
+        }        
+        
+           
+# ##############################################################
+# The data block is complex and has the potential to contain
+# many things. The data block can be used to return a metadata
+# block from a request, commonTime or datum elements, keys,
+# or something that we have perhaps not defined as of yet. 
+#
+# Example: 
+# 
+# <nmwg:data id="REQUIRED_ID" 
+#            metadataIdRef="OPTIONAL_REFERENCE_ID" 
+#            xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#   <!-- OPTIONAL (MULTIPLE) METADATA -->
+# 
+#           <!-- OR -->
+#
+#   <!-- TBD OPTIONAL (MULTIPLE) COMMON TIME ELEMENTS AND 
+#        OPTIONAL (MULTIPLE) DATUM ELEMENTS-->
+# 
+#           <!-- OR -->
+#  
+#   <!-- TBD OPTIONAL (MULTIPLE) DATUM ELEMENTS -->
+# 
+#           <!-- OR -->
+#  
+#   <!-- OPTIONAL (MULTIPLE) KEY ELEMENTS -->
+# 
+#           <!-- OR -->
+# 
+#   <!-- ANY OPTIONAL (MULTIPLE) ELEMENT IN ANY NAMESPACE -->
+#   
+# </nmwg:data>
+# 
+# ##############################################################
+   
+Data =
+        element nmwg:data {
+                (
+                        Identifier &
+                        MetadataIdentifierRef? &
+                        (
+                                Metadata* |
+                                (
+                                        commonTime+ & 
+                                        Datum*
+                                ) |
+                                Datum* |
+                                Key*
+                        )
+                ),
+                anyElement*
+        }
+
+# ##############################################################
+# CommonTime is used as a shortcut that is able to 'factor out' 
+# a frequently occurring time range that a group of datum (or 
+# other) elements might share, thus reducing the verbosity of the 
+# XML representation. CommonTime is similar to the other NMWG time 
+# stamps (from nmtime.rnc) in its potential time representations.
+#
+# It is unfortunate that it needs to be in this file and not
+# nmtime.rnc, but as it occurs outside the datum, it is here.
+#
+# Example: 
+# 
+# <nmwg:commonTime type="REQUIRED_TYPE" value="OPTIONAL_VALUE"
+#                  duration="OPTIONAL_DURATION" 
+#                  inclusive="OPTIONAL_INCLUSIVE_FLAG"
+#                  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#   <!-- TBD OPTIONAL START TIME ELEMENT (USE END TIME OR
+#         DURATION) -->
+#  
+#   <!-- TBD OPTIONAL END TIME ELEMENT (ONLY WITH START TIME) -->
+#  
+#   <!-- TBD OPTIONAL TIME VALUE ELEMENT (USE IF NO VALUE
+#         ATTRIBUTE) -->
+#  
+#   <!-- TBD OPTIONAL (MULTIPLE) DATUM ELEMENTS -->
+# 
+#   <!-- ANY OPTIONAL (MULTIPLE) ELEMENT IN ANY NAMESPACE -->
+# </nmwg:commonTime>
+# 
+# ##############################################################
+
+commonTime = 
+        element nmwg:commonTime {
+                (
+                        Type &
+                        (
+                                TimeStamp |
+                                (
+                                        StartTime & 
+                                        (
+                                                EndTime | 
+                                                Duration 
+                                        )
+                                )
+                        ) &
+                        Datum*
+                ),
+                anyElement*
+        }
+
+
+# ##############################################################
+# The datum is meant to be generic in this case because specific
+# namespace declarations should be used to better define what
+# format that datum should have.
+#
+# Example: 
+# 
+# <nmwg:datum ANY_ATTRIBUTE
+#             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+# 
+#   <!-- ANY ELEMENT IN ANY NAMESPACE OR ANY TEXT -->
+#  
+# </nmwg:datum>
+# 
+# ##############################################################
+
+Datum =
+        element nmwg:datum {
+                anyThing  
+        }
+        
+         
+# ##############################################################
+# Common elements are defined as named patterns as they are re- 
+# used several times.
+# ##############################################################
+                
+Identifier =
+        attribute id { xsd:string }
+
+MetadataIdentifierRef =
+        attribute metadataIdRef { xsd:string }
+
+MessageIdentifierRef =
+        attribute messageIdRef { xsd:string }
+    
+Type = 
+        attribute type { xsd:string }    
+
+
+# ##############################################################
+# This sequence allows any element, attribute, or text (regardless 
+# of name or namespace) into the document when invoked.
+# ##############################################################
+
+anyElement = 
+        element * { 
+                anyThing 
+        }
+
+anyAttribute = 
+        attribute * { text }
+
+anyThing = 
+        ( 
+                anyElement | 
+                anyAttribute | 
+                text 
+        )*
+        
+        
+# ##############################################################
+# This sequence allows any element, attribute, or text (only in the 
+# NMWG namespace) into the document when invoked.
+# ##############################################################
+        
+anyNMWGElement = 
+        element nmwg:* { 
+                anyNMWGThing 
+        }
+
+anyNMWGAttribute = 
+        attribute * { text }
+
+anyNMWGThing = 
+        ( 
+                anyNMWGElement | 
+                anyNMWGAttribute | 
+                text 
+        )*        

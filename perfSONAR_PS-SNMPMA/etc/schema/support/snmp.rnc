@@ -1,0 +1,203 @@
+# ##############################################################
+#
+# File:         snmp.rnc - Specialized schema for snmp
+#
+# Version:      $Id: snmp.rnc 341 2008-04-24 21:52:11Z boote $
+# Purpose:      Describes specific elements to be used in the
+#               representation and handling of snmp
+# Reference:    http://books.xmlschemata.org/relaxng/page2.html
+#
+# ##############################################################
+
+
+# ##############################################################
+# Namespace definitions
+# ##############################################################
+namespace nmwg = "http://ggf.org/ns/nmwg/base/2.0/"
+namespace snmp = "http://ggf.org/ns/nmwg/tools/snmp/2.0/"
+namespace nmwgr = "http://ggf.org/ns/nmwg/result/2.0/"
+namespace netutil = "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" 
+namespace neterr = "http://ggf.org/ns/nmwg/characteristic/errors/2.0/" 
+namespace netdisc = "http://ggf.org/ns/nmwg/characteristic/discards/2.0/" 
+
+# ##############################################################
+# Include additional functionality from other files
+# ##############################################################
+include "nmtopo.rnc"
+include "nmtopo_ver3.rnc"
+include "result.rnc"
+include "nmbase.rnc" {
+        Metadata |= SNMPMetadata
+        Data |= SNMPData
+}
+
+
+# ##############################################################
+# 
+# The metadata in this case is an NMWG metadata block, with options
+# of having an SNMP subject, some form of parameters block (SNMP,
+# Filtering [select, etc.], or NMWG), an eventType block with
+# enumerated values, and a key with specified enumerated values.
+#
+# ##############################################################
+
+SNMPMetadata =
+        element nmwg:metadata {
+                Identifier &
+                MetadataIdentifierRef? &
+                SNMPMetadataContent
+        }
+
+SNMPMetadataBlock =
+        (
+                SNMPSubject |
+                UtilSubject |
+                ErrSubject |
+                DiscSubject
+        )? &
+        (
+                SNMPParameters |
+                Parameters
+        )?
+
+SNMPMetadataContent =
+        (
+                SNMPMetadataBlock |
+                FilterMetadataBlock
+        ) &
+        EventType? &
+        Key?
+
+
+# ##############################################################
+# 
+# Subject is a topology 'interface' as well as ids and reference
+# attributes.
+#
+# ##############################################################
+
+SNMPSubject =
+        element snmp:subject {
+                SNMPSubjectContent
+        }
+
+UtilSubject =
+        element netutil:subject {
+                SNMPSubjectContent
+        }
+
+ErrSubject =
+        element neterr:subject {
+                SNMPSubjectContent
+        }
+
+DiscSubject =
+        element netdisc:subject {
+                SNMPSubjectContent
+        }
+
+SNMPSubjectContent = 
+        Identifier &
+        MetadataIdentifierRef? &
+        (
+                Interface |
+                BaseInterface |
+                L2Interface |
+                L3Interface
+        )?
+        
+# ##############################################################
+# 
+# Parameters are mostly used in the context of an MP providing
+# contact information to gather data.
+#
+# ##############################################################
+
+SNMPParameters =
+        element snmp:parameters {
+                Identifier &
+                SNMPParameter+
+        }
+
+SNMPParameter =
+        element nmwg:parameter {
+                attribute name { "supportedEventType" | "SNMPVersion" | 
+                                 "SNMPCommunity" | "OID" | "Alias" } &
+                (
+                        attribute value { text } |
+                        text
+                )
+        }
+
+# ##############################################################
+# 
+# Key is used to describe the backend storage, we use primarily
+# RRD files, and SQL databases (MySQL, SQLite, etc.)
+#
+# ##############################################################
+
+SNMPKey = 
+        element nmwg:key {
+                Identifier? &
+                (
+                        Parameters |
+                        SNMPKeyParameters                                
+                )
+        } 
+
+SNMPKeyParameters =
+        element nmwg:parameters {
+                Identifier &
+                SNMPKeyParameter+
+        }
+
+SNMPKeyParameter =
+        element nmwg:parameter {
+                attribute name { "type" | "valueUnits" | "file" | 
+                                 "dataSource" | "table" } &
+                (
+                        attribute value { text } |
+                        text
+                )
+        }
+
+# ##############################################################
+# 
+# Data can be a key, a result datum, or general/specific incarnations
+# of the datum element.
+#
+# ##############################################################
+
+SNMPData =
+        element nmwg:data {
+                Identifier &
+                MetadataIdentifierRef? &
+                (                 
+                        Datum* |
+                        SNMPDatum* |
+                        ResultDatum* |
+                        Key*
+                )
+        }
+
+        
+# ##############################################################
+# 
+# Datum is left unspecified at the moment, simply returning
+# the time/value pair.  
+#
+# ##############################################################
+
+SNMPDatum =
+        element snmp:datum {
+                attribute value { xsd:string } &
+                attribute valueUnits { xsd:string }? &                
+                (
+                        (
+                                attribute timeType { xsd:string } &
+                                attribute timeValue { xsd:string }
+                        ) |
+                        Time
+                )?
+        }
+
