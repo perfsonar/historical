@@ -106,6 +106,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=531 531] - Remove non-functional options in the regular testing setup
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=534 534] - Document host/address behavior with regardst to v6 on the pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=535 535] - NTP Stats on pSPT
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=536 536] - Add 'pSPS' tag to all RPMs
  * Closed Bugs
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - ~~disable buttons on the stats grpahs page for empty graphs~~  
      * <font color="purple">_*MIGRATED 5/25/2011*_</font>
