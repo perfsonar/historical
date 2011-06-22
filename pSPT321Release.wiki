@@ -48,8 +48,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=242 242] - ps-buoy graph user interface improvements
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=245 245] - negative latency from graph is counterintuitive. Should at least explain why it happens.   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - Firewall guidance       
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=337 337] - Add multiple hosts to scheduled test     
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit      
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=349 349] - Identify and Archive the path measured by bwctl & owamp   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - Package for the client modules
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=424 424] - duplicate entries in pSB/bwctl mesh   
@@ -114,6 +113,8 @@ TBD
      * <font color="green">_*remaining tasks for this issue are part of issue 242  *_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - ~~LinuxPPS Support~~ 
      * <font color="red">_*Won't Fix*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=337 337] - ~~Add multiple hosts to scheduled test~~
+     * <font color="green">_*FIXED 6/22/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=348 348] - ~~PSB Results Top & Bottom 10 lists~~ 
      * <font color="purple">_*MIGRATED 5/25/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=352 352] - ~~upgrade script for pSB databases~~
