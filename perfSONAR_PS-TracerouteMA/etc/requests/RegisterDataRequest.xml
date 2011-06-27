@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message type="RegisterDataRequest" id="registerDataRequest1"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
+
+<nmwg:metadata id="meta.AAAFFF" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/">
+  <traceroute:subject id="subj.AAAFFF">
+    <nmwgt:endPointPair>
+      <nmwgt:src type="ipv4" value="198.129.254.30"/>
+      <nmwgt:dst type="ipv4" value="198.124.252.141"/>
+    </nmwgt:endPointPair>
+  </traceroute:subject>
+  <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0/</nmwg:eventType>
+  <nmwg:parameters id="params.AAAFFF">
+    <nmwg:parameter name="firstTtl">1</nmwg:parameter>
+    <nmwg:parameter name="maxTtl">64</nmwg:parameter>
+    <nmwg:parameter name="waitTime">5</nmwg:parameter>
+    <nmwg:parameter name="pause">0</nmwg:parameter>
+    <nmwg:parameter name="packetSize">40</nmwg:parameter>
+  </nmwg:parameters>
+</nmwg:metadata>
+
+<nmwg:data id="data.AAAFFF.0" metadataIdRef="meta.AAAFFF" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+  <traceroute:datum hop="198.129.254.29" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079154" ttl="1" value="0.135" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="198.129.254.29" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079154" ttl="1" value="0.101" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="198.129.254.29" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079154" ttl="1" value="0.09" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.219.10" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079154" ttl="2" value="1.14" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.219.10" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079154" ttl="2" value="1.149" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.219.10" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079154" ttl="2" value="1.126" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.217.2" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079154" ttl="3" value="37.212" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.217.2" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079154" ttl="3" value="1.551" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.217.2" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079154" ttl="3" value="1.533" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.209.98" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079154" ttl="4" value="1.616" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.209.98" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079154" ttl="4" value="1.613" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.209.98" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079154" ttl="4" value="1.614" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.220.49" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079154" ttl="5" value="28.643" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.220.49" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079154" ttl="5" value="28.638" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.220.49" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079154" ttl="5" value="28.634" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.209.46" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079154" ttl="6" value="41.773" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.209.46" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079154" ttl="6" value="41.771" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.209.46" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079154" ttl="6" value="41.736" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.221.58" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079154" ttl="7" value="52.36" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.221.58" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079154" ttl="7" value="52.357" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.221.58" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079154" ttl="7" value="52.35" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.218.101" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079154" ttl="8" value="52.373" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.218.101" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079154" ttl="8" value="52.345" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.218.101" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079154" ttl="8" value="52.342" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="198.124.252.141" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079154" ttl="9" value="52.311" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="198.124.252.141" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079154" ttl="9" value="52.312" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="198.124.252.141" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079154" ttl="9" value="52.308" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+</nmwg:data>
+
+<nmwg:data id="data.AAAFFF.1" metadataIdRef="meta.AAAFFF" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+  <traceroute:datum hop="198.129.254.29" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079485" ttl="1" value="0.135" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="198.129.254.29" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079485" ttl="1" value="0.101" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="198.129.254.29" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079485" ttl="1" value="0.09" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.219.10" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079485" ttl="2" value="1.14" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.219.10" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079485" ttl="2" value="1.149" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.219.10" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079485" ttl="2" value="1.126" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.217.2" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079485" ttl="3" value="37.212" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.217.2" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079485" ttl="3" value="1.551" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.217.2" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079485" ttl="3" value="1.533" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.209.98" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079485" ttl="4" value="1.616" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.209.98" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079485" ttl="4" value="1.613" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.209.98" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079485" ttl="4" value="1.614" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.220.49" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079485" ttl="5" value="28.643" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.220.49" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079485" ttl="5" value="28.638" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.220.49" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079485" ttl="5" value="28.634" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.209.46" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079485" ttl="6" value="41.773" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.209.46" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079485" ttl="6" value="41.771" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.209.46" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079485" ttl="6" value="41.736" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.221.58" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079485" ttl="7" value="52.36" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.221.58" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079485" ttl="7" value="52.357" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.221.58" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079485" ttl="7" value="52.35" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.218.101" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079485" ttl="8" value="52.373" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.218.101" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079485" ttl="8" value="52.345" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="134.55.218.101" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079485" ttl="8" value="52.342" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="198.124.252.141" numBytes="64" queryNum="1" timeType="unix" timeValue="1282079485" ttl="9" value="52.311" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="198.124.252.141" numBytes="64" queryNum="2" timeType="unix" timeValue="1282079485" ttl="9" value="52.312" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+  <traceroute:datum hop="198.124.252.141" numBytes="64" queryNum="3" timeType="unix" timeValue="1282079485" ttl="9" value="52.308" valueUnits="ms" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0"/>
+</nmwg:data>
+
+</nmwg:message>

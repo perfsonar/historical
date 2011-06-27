@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message type="MetadataKeyRequest" id="metadataKeyRequest1"
+              xmlns:iperf= "http://ggf.org/ns/nmwg/tools/iperf/2.0/"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
+  
+  <!-- Get the key for data between two given endpoints -->
+  <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <traceroute:subject xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" id="s-in-iperf-1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="ipv4" value="198.129.254.30" />
+        <nmwgt:dst type="ipv4" value="198.124.238.38" />
+      </nmwgt:endPointPair>
+    </traceroute:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0</nmwg:eventType>
+    <nmwg:parameters id="params1"></nmwg:parameters>
+  </nmwg:metadata> 
+  <nmwg:data id="data1" metadataIdRef="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"/>
+  
+  <!-- get all keys between a given start and end time -->
+  <nmwg:metadata id="meta2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <traceroute:subject xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" id="s-in-iperf-1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" />
+    </traceroute:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0</nmwg:eventType>
+    <nmwg:parameters id="params2"></nmwg:parameters>
+  </nmwg:metadata> 
+  <nmwg:metadata id="meta.2.chain" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <select:subject id="subject.16110882" metadataIdRef="meta2" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"/>
+    <select:parameters id="parameters.14643134" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+        <nmwg:parameter name="startTime">1286490428</nmwg:parameter>
+        <nmwg:parameter name="endTime">1286494028</nmwg:parameter>
+    </select:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data id="data2" metadataIdRef="meta2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"/>
+  
+</nmwg:message>

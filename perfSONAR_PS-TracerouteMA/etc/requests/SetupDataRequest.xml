@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message type="SetupDataRequest" id="setupDataRequest1"
+              xmlns:iperf= "http://ggf.org/ns/nmwg/tools/iperf/2.0/"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
+
+  <!--
+  Use this parameter to let the server know you are capable of 
+  understanding datum elements that match the eventType namespace 
+  (instead of just nmwg:)
+  -->
+
+  <!--
+  <nmwg:parameters>
+    <nmwg:parameter name="eventNameSpaceSynchronization">true</nmwg:parameter>
+  </nmwg:parameters> 
+  -->
+
+  <!-- get one metric, not using a key, no specified data range -->
+  <!-- NOTE: we are supporting two 'eventType' structures for the time being -->   
+    <nmwg:metadata id="metadata.12773104" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+      <trace:subject id="subject" xmlns:trace="http://ggf.org/ns/nmwg/tools/traceroute/2.0">
+        <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"/>
+      </trace:subject>
+      <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0</nmwg:eventType>
+    </nmwg:metadata>
+    <nmwg:metadata id="metadata.12773104.chain" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+      <select:subject id="subject.16110882" metadataIdRef="metadata.12773104" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"/>
+      <select:parameters id="parameters.14643134" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+        <nmwg:parameter name="startTime">1283869613</nmwg:parameter>
+        <nmwg:parameter name="endTime">1283797613</nmwg:parameter>
+      </select:parameters>
+      <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0</nmwg:eventType>
+    </nmwg:metadata>
+    <nmwg:data id="data1" metadataIdRef="metadata.12773104" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"/>
+    
+    <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <trace:subject xmlns:trace= "http://ggf.org/ns/nmwg/tools/traceroute/2.0" id="trace1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="ipv4" value="198.129.226.155" />
+        <nmwgt:dst type="ipv4" value="198.124.252.141" />
+      </nmwgt:endPointPair>
+    </trace:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0</nmwg:eventType>
+    <nmwg:parameters id="traceParams1">
+        <nmwg:parameter name="startTime">1283797613</nmwg:parameter>
+        <nmwg:parameter name="endTime">1283869613</nmwg:parameter>
+    </nmwg:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data1" metadataIdRef="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"/>
+</nmwg:message>

@@ -18,7 +18,7 @@ the database info or it may be provided directly via the command-line.
 
 clean_pSB_db.pl [I<options>]
 clean_pSB_db.pl [B<--dbuser> username][B<--dbpassword> password][B<--dbhost> hostname][B<--dbname> database] [I<options>]
-clean_pSB_db.pl [B<--owmesh-dir> owmeshdir][B<--dbtype> owamp|bwctl] [I<options>]
+clean_pSB_db.pl [B<--owmesh-dir> owmeshdir][B<--dbtype> owamp|bwctl|traceroute] [I<options>]
 
 =over
 
@@ -28,15 +28,15 @@ clean_pSB_db.pl [B<--owmesh-dir> owmeshdir][B<--dbtype> owamp|bwctl] [I<options>
 
 =item B<--maxdays> days
 
-maximum age (in days) of data to keep in database. Only valid for owamp databases. Defaults to 90.
+maximum age (in days) of data to keep in database. Not valid for bwctl databases. Defaults to 90.
 
 =item B<--maxmonths> days
 
 maximum number of months to keep in database. Must be used for bwctl databases. Defaults to 3.
 
-=item B<--dbtype> owamp|bwctl
+=item B<--dbtype> owamp|bwctl|traceroute
 
-indicates type of data in database. Valid value are 'owamp' or 'bwctl'. Defaults to 'owamp'.
+indicates type of data in database. Valid value are 'owamp', 'bwctl', or 'traceroute'. Defaults to 'owamp'.
 
 =item B<--dbname> name
 
@@ -122,9 +122,9 @@ use perfSONAR_PS::Config::OWP::Conf;
 use POSIX;
 
 #var definitions
-my @DEFAULT_TABLES = ( 'DATA', 'DELAY', 'NODES', 'TESTSPEC', 'TTL' );
+my @DEFAULT_TABLES = ( 'DATA', 'DELAY', 'NODES', 'TESTSPEC', 'TTL', 'MEASUREMENT', 'HOPS' );
 my $DEFAULT_DB_HOST = 'localhost';
-my %OW_TYPES = ( 'owamp' => 'OWP', 'bwctl' => 'BW');
+my %OW_TYPES = ( 'owamp' => 'OWP', 'bwctl' => 'BW', 'traceroute' => "TRACE");
 my %valid_tables = ();
 
 #Set option default
@@ -180,8 +180,8 @@ if($maxmonths > 0){
     $maxdays = $maxmonths * 31;
 }
 
-if( $dbtype ne "owamp" && $dbtype ne "bwctl" ){
-    print STDERR "Option 'dbtype' must be 'owamp' or 'bwctl'\n";
+if( $dbtype ne "owamp" && $dbtype ne "bwctl" && $dbtype ne "traceroute" ){
+    print STDERR "Option 'dbtype' must be 'owamp', 'bwctl', or 'traceroute'\n";
     &usage();
     exit 1;
 }elsif( $maxdays < 1  ){
@@ -234,7 +234,7 @@ while(my $show_row = $show_sth->fetchrow_arrayref){
     my @table_name_parts = split /_/, $show_row->[0];
     next if(!&validate_table_name(\@table_name_parts, \%valid_tables, $dbtype));
     my @dateParts = ();
-    if( $dbtype eq 'owamp' ){
+    if( $dbtype eq 'owamp' || $dbtype eq 'traceroute' ){
         push @dateParts, substr($table_name_parts[0], 6, 2);
     }else{
         push @dateParts, 1;
@@ -294,7 +294,7 @@ sub drop_table() {
     my $drop_sth = $dbh->prepare("DROP TABLE $table") or die $dbh->errstr;
     $drop_sth->execute() or die $drop_sth->errstr;
     my $date_sql = "DELETE FROM DATES WHERE ";
-    $date_sql .= "day='" . $dateParts->[0] . "' AND " if($dbtype eq 'owamp');
+    $date_sql .= "day='" . $dateParts->[0] . "' AND " if($dbtype eq 'owamp' || $dbtype eq 'traceroute');
     $date_sql .= "month='" . $dateParts->[1] . "' AND year='" . $dateParts->[2] . "'";
     my $deldate_sth = $dbh->prepare($date_sql) or die $dbh->errstr;
     $deldate_sth->execute() or die $deldate_sth->errstr;
@@ -317,7 +317,7 @@ sub validate_table_name(){
     
     if($dbtype eq 'bwctl' && length($table_name_parts->[0]) != 6){
         return 0;
-    }elsif($dbtype eq 'owamp' && length($table_name_parts->[0]) != 8){
+    }elsif(($dbtype eq 'owamp' || $dbtype eq 'traceroute') && length($table_name_parts->[0]) != 8){
         return 0;
     }
     
@@ -334,9 +334,9 @@ sub validate_table_name(){
 sub usage() {
     print "clean_pSB_db.pl <options>\n";
     print "    -h,--help                            displays this message.\n";
-    print "    --maxdays days                       maximum age (in days) of data to keep in database. Only valid for owamp databases. Defaults to 90.\n";
+    print "    --maxdays days                       maximum age (in days) of data to keep in database. Not valid for bwctl databases. Defaults to 90.\n";
     print "    --maxmonths months                   maximum number of months to keep in database. Must be used for bwctl databases. Defaults to 3.\n";
-    print "    --dbtype type                        Indicates type of data in database. Valid value are 'owamp' or 'bwctl'. Defaults to 'owamp'.\n";
+    print "    --dbtype type                        Indicates type of data in database. Valid value are 'owamp', 'bwctl', and 'traceroute'. Defaults to 'owamp'.\n";
     print "    --dbname name                        name of database to access. Defaults to 'owamp'.\n";
     print "    --dbuser user                        name of database user. Defaults to root.\n";
     print "    --dbpassword password                password to access database. Defaults to empty string.\n";

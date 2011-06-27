@@ -1,0 +1,89 @@
+#!/bin/bash
+#
+# Init script for tracerouet_scheduler program
+#
+# chkconfig: 2345 60 20
+# description: Traceroute Scheduler
+#
+
+PREFIX=/opt/perfsonar_ps/traceroute_ma
+BINDIR=${PREFIX}/bin
+CONFDIR=${PREFIX}/etc
+RUNDIR=/var/run
+
+LOGGERFILE=${CONFDIR}/traceroute-scheduler_logger.conf
+PIDFILE=${RUNDIR}/traceroute-scheduler.pid
+
+USER=perfsonar
+GROUP=perfsonar
+
+PERFSONAR="${BINDIR}/traceroute_scheduler.pl --owmesh=${CONFDIR} --pidfile=${PIDFILE} --logger=${LOGGERFILE} --user=${USER} --group=${GROUP}"
+
+ERROR=0
+ARGV="$@"
+if [ "x$ARGV" = "x" ] ; then 
+    ARGS="help"
+fi
+
+for ARG in $@ $ARGS
+do
+    # check for pidfile
+    if [ -f $PIDFILE ] ; then
+        PID=`cat $PIDFILE`
+        if [ "x$PID" != "x" ] && kill -0 $PID 2>/dev/null ; then
+            STATUS="Traceroute Scheduler (pid $PID) running"
+            RUNNING=1
+        else
+            STATUS="Traceroute Scheduler (pid $PID?) not running"
+            RUNNING=0
+        fi
+    else
+        STATUS="Traceroute Scheduler (no pid file) not running"
+        RUNNING=0
+    fi 
+
+    case $ARG in
+    start)
+	echo $PERFSONAR
+
+	if $PERFSONAR ; then
+	    echo "$0 $ARG: Traceroute Scheduler started"
+	else
+	    echo "$0 $ARG: Traceroute Scheduler could not be started"
+	    ERROR=3
+	fi
+	;;
+    stop)
+	if [ $RUNNING -eq 0 ]; then
+	    echo "$0 $ARG: $STATUS"
+	    continue
+	fi
+	if kill $PID ; then
+	    echo "$0 $ARG: Traceroute Scheduler stopped"
+	else
+	    echo "$0 $ARG: Traceroute Scheduler could not be stopped"
+	    ERROR=4
+	fi
+	;;
+    restart)
+    	$0 stop; echo "waiting..."; sleep 10; $0 start;
+	;;
+    *)
+	echo "usage: $0 (start|stop|restart|help)"
+	cat <<EOF
+
+start      - start Traceroute Scheduler
+stop       - stop Traceroute Scheduler
+restart    - restart Traceroute Scheduler if running by sending a SIGHUP or start if 
+             not running
+help       - this screen
+
+EOF
+	ERROR=2
+    ;;
+
+    esac
+
+done
+
+exit $ERROR

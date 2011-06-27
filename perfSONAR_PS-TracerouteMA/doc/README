@@ -1,0 +1,147 @@
+			        perfSONAR Traceroute MA and MP Services
+
+--------------------------------------------------------------------------------
+
+About:
+------
+
+The perfSONAR-PS Traceroute Measurement Archive (MA) provides a storage service
+for information collected from the traceroute tool. This package also contains 
+Traceroute Measurement Points (MP) that actively run traceroute. One is the Traceroute
+Scheduler that runs the traceroute on scheduled intervals. The other is the On-Demand
+Traceroute MP that runs traceroute upon receiveing a request from a client. 
+
+
+Installation:
+-------------
+
+Please read the INSTALL file for instructions
+
+Database Preparation:
+---------------------
+
+The MySQL database for the traceroute data must be prepared before
+collection may begin.  Note that some options regarding the database can be
+adjusted in the 'owmesh.conf' file (see next section).  There are two scripts, 
+one for each data type:
+
+  (sudo) bin/tracedb.pl -c ../etc -i ADMIN_USER_NAME
+  
+Note that if you wish to delete an existing database replace '-i' with '-x'.
+Replace ADMIN_USER_NAME with the name of the MySQL admin (this is normally
+'root').  Before starting the script a prompt will appear for this user's
+password, if there is no password press enter.  
+     
+Configuration:
+--------------
+
+The perfSONAR Traceroute MA comes with a base configuration via the installation procedure.
+This is meant to  serve as a guide for customizing the service.  
+
+There are several files that may be adjusted manually to configure this service
+for a specific use case:
+
+  - etc/daemon.conf, etc/collector-daemon.conf, etc/ondemand_mp-daemon.conf: 
+  
+    Contains information that identifies the service uniquely and allows it to
+    run in a given environment.  There are several options that should be
+    changed:  
+   
+      service_accesspoint      - Change the "hostname" from localhost
+      service_description      - Identifying information about the service
+      service_name             - Service Name (short)  
+
+    There are also several options that may be changed for a configuration:
+
+      port                     - Port the service listens on
+      endpoint                 - Endpoint to contact the service
+      ls_registration_interval - Length of time (minutes) between contacting LS 
+      enable_registration      - Turn on or off LS registration
+      ls_instance              - Specific hLS to register data with
+      maintenance_interval     - Interval of time to re-generate the store.xml
+                                 file (N.B. doing this frequently can be CPU
+                                 expensive but does make test data available
+                                 more quickly)
+      owmesh                   - This is the *DIRECTORY* that contains the
+                                 owmesh.conf file.  *DO NOT* place the full path
+                                 to the file or the service will not start.
+    
+  - etc/daemon_logger.conf:
+
+    Contains information related to logging, there are three modes:
+    
+      Log::Dispatch::Screen     - Log messages to screen (useful for debugging)
+      Log::Dispatch::Syslog     - Log messages to syslog facility
+      Log::Dispatch::FileRotate - Log messages to specified file
+
+    Each logging mode is achieved by commenting/un-commenting specific lines in
+    the file.  Refer to the file for instructions.
+    
+  - traceroute-master.conf
+  
+    Contains information about where to register the results returned by the traceroute scheduler and ondemand MP.
+    
+      collector_urls        - One or more URLs of traceroute collectors where to register the data     
+      collector_timeout     - The amount of time to wait before timing-out a registration request
+      data_dir              - The directory where traceroute data is kept before being registered
+      register_interval     - The frequency (in seconds) to send registration messages
+      batch_size            - The maximum number of services to register in a single registration message
+      batch_count           - The maximum number of registration messages to send per registration interval
+
+    
+  - etc/owmesh.conf: 
+
+    This file is where you define your traceroute tests. The file annotated with instructions on what to change.
+ 
+
+Starting/Stopping:
+------------------
+
+The service comes with init scripts that may be used to start and stop
+operation:
+
+  (sudo) /etc/init.d/traceroute_ma start
+  (sudo) /etc/init.d/traceroute_ma stop
+  (sudo) /etc/init.d/traceroute_ma restart
+  
+There are other scripts that manage the measurement and collection of data:
+
+ - traceroute_collector      Daemon that accepts request to register new data
+ - traceroute_master         Script that periodically sends traceroute data to traceroute collector
+ - traceroute_scheduler      Script that runs traceroute tests defined in owmesh.conf
+ - traceroute_ondemand_mp    Daemon that 
+
+In general, "master" script and the scheduler/ondemand_mp will run on data collector nodes,
+and "collector" scripts run on central node or nodes that normally contain a
+database. 
+
+Maintenance:
+------------
+
+Subscribe to the user mailing lists if you are seeking help on some problem
+related to this software.  Announcements regarding availability of new releases
+will also be sent to these locations
+
+  perfSONAR-PS Users Group - https://mail.internet2.edu/wws/info/psps-users
+  perfSONAR-PS Announcements - https://mail.internet2.edu/wws/info/psps-announce
+
+  Performance Node Users - https://mail.internet2.edu/wws/info/performance-node-users
+  Performance Node Announcements - https://mail.internet2.edu/wws/info/performance-node-announce
+
+Also if you are using package management software and have installed the
+Internet2 software repository, a typical upgrade should download new releases:
+
+  (sudo) yum update
+
+or
+
+  (sudo) apt-get upgrade
+  
+Finally, check the following websites for news of software releases:
+
+  http://software.internet2.edu
+  http://www.internet2.edu/performance
+
+--------------------------------------------------------------------------------
+
+Tue Oct 5 11:01:46 EDT 2010
