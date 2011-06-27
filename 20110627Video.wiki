@@ -20,7 +20,9 @@
      * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
      * _*ACTION*_: Brian/Jeff to work on pS-PS scheduling
      * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
- # TBD
+ # Team Updates
+
+ # Release planning
 
 == Actions ==
 
