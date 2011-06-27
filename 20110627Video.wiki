@@ -1,4 +1,4 @@
-#summary June 27th, 2011 Conference Call
+﻿#summary June 27th, 2011 Conference Call
 
 =  June 27 2011 Conference Call 3:00 p.m. EDT =
 
@@ -26,7 +26,6 @@
 
 == Actions ==
 
-TBD
 
 == Where ==
 
