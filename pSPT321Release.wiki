@@ -46,8 +46,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=242 242] - ps-buoy graph user interface improvements
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=245 245] - negative latency from graph is counterintuitive. Should at least explain why it happens.   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - Firewall guidance       
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit      
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=349 349] - Identify and Archive the path measured by bwctl & owamp   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit       
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - Package for the client modules
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=425 425] - SNMP MA/Cacti Reports wrong capacity         
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=438 438] - perfsonarbuoy/bwctl startup loop if ntp is unsynchronized   
@@ -55,12 +54,10 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=444 444] - Nagios Plug-In Packaging   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=446 446] - Add option to set timeout in Client::LS    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=453 453] - Document/Add addiional options to interface configuration   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=454 454] - Add GridFTP Servers to LSRegistrationDaemon   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=459 459] -	Nagios plug-in to check toolkit version   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=473 473] - Display NTP Status on the Local Services page
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=475 475] - nagios scripts do not support web proxies   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=480 480] - Update Project Web Sites
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=481 481] - in perfsonar-ps: cache.pl does not collect topology service information
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=482 482] - TCP tuning settings for Toolkit need updating   
@@ -94,11 +91,14 @@ TBD
  * Awaiting Testing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - ability to set peer_port and iperf_port using web config GUI  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=321 321] - Link to error logs on services page/perfAdmin GUIs
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=349 349] - Identify and Archive the path measured by bwctl & owamp  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=424 424] - duplicate entries in pSB/bwctl mesh   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - myricom driver isn't up to date   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=451 451] - Upgrade NDT to 3.6.x lineage on the pSPT   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=454 454] - Add GridFTP Servers to LSRegistrationDaemon      
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=470 470] - bwctl/owamp limits gui doesn't support IPv6 addresses   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=471 471] - owamp limits file on pSPT   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=475 475] - nagios scripts do not support web proxies   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=496 496] - Mirrors for pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=516 516] - regular testing gui doesn't preserve udp bandwidth setting
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=529 529] - Disable LS and LS Registration Daemon when Administrative Info is missing
