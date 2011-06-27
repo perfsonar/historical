@@ -59,7 +59,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=459 459] -	Nagios plug-in to check toolkit version   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema     
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=470 470] - bwctl/owamp limits gui doesn't support IPv6 addresses   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=473 473] - Display NTP Status on the Local Services page
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=475 475] - nagios scripts do not support web proxies   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=480 480] - Update Project Web Sites
@@ -98,6 +97,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=424 424] - duplicate entries in pSB/bwctl mesh   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - myricom driver isn't up to date   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=451 451] - Upgrade NDT to 3.6.x lineage on the pSPT   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=470 470] - bwctl/owamp limits gui doesn't support IPv6 addresses   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=471 471] - owamp limits file on pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=496 496] - Mirrors for pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=516 516] - regular testing gui doesn't preserve udp bandwidth setting
