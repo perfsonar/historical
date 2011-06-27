@@ -107,6 +107,7 @@ lib/perfSONAR_PS/Config/OWP/Conf.pm
 lib/perfSONAR_PS/Config/OWP/Helper.pm
 lib/perfSONAR_PS/Config/OWP/Utils.pm
 lib/perfSONAR_PS/DB/File.pm
+lib/perfSONAR_PS/DB/OWPDB.pm
 lib/perfSONAR_PS/DB/SQL.pm
 lib/perfSONAR_PS/DB/XMLDB.pm
 lib/perfSONAR_PS/Error.pm

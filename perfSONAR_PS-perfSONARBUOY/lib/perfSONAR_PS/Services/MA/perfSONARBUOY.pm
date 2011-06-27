@@ -59,6 +59,8 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::DB::File;
+use perfSONAR_PS::DB::OWPDB;
+use perfSONAR_PS::DB::owhdb;
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::Utils::NetLogger;
 use perfSONAR_PS::Utils::ParameterValidation;
@@ -71,6 +73,7 @@ my %ma_namespaces = (
     bwctl      => "http://ggf.org/ns/nmwg/tools/bwctl/2.0/",
     owd        => "http://ggf.org/ns/nmwg/characteristic/delay/one-way/20070914/",
     summary    => "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921/",
+    summbuckets => "http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/",
     achievable => "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0",
     owamp      => "http://ggf.org/ns/nmwg/tools/owamp/2.0/",
     select     => "http://ggf.org/ns/nmwg/ops/select/2.0/",
@@ -112,8 +115,10 @@ ways:
 sub init {
     my ( $self, $handler ) = @_;
     $self->{LOGGER} = get_logger( "perfSONAR_PS::Services::MA::perfSONARBUOY" );
+
     $self->{NETLOGGER} = get_logger( "NetLogger" );
-    
+
+
     unless ( exists $self->{CONF}->{"root_hints_url"} ) {
         $self->{CONF}->{"root_hints_url"} = q{};
         $self->{LOGGER}->info( "gLS Hints file was not set, automatic discovery of hLS instance disabled." );
@@ -398,8 +403,13 @@ Stub function to run a function at the daemon level - results of these functions
 sub inline_maintenance {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, {} );
-
+    #my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.inline_maintenance.start");
+    #$self->{NETLOGGER}->debug( $nlmsg );
+    
     $self->refresh_store_file();
+    
+    #$nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.inline_maintenance.end");
+    #$self->{NETLOGGER}->debug( $nlmsg );
     return;
 }
 
@@ -413,7 +423,9 @@ sub refresh_store_file {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { error => 0 } );
     return 0 unless $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file";
-
+    
+    #my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.refresh_store_file.start");
+    #$self->{NETLOGGER}->debug( $nlmsg );
     my $store_file = $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
     if ( -f $store_file ) {
         my ( $mtime ) = ( stat( $store_file ) )[9];
@@ -456,6 +468,9 @@ sub refresh_store_file {
     }
 
     ${ $parameters->{error} } = "" if ( $parameters->{error} );
+    
+    #$nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.refresh_store_file.end");
+    #$self->{NETLOGGER}->debug( $nlmsg );
     return 0;
 }
 
@@ -597,6 +612,7 @@ sub createStorage {
             print $fh "            xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\"\n";
             print $fh "            xmlns:owd=\"http://ggf.org/ns/nmwg/characteristic/delay/one-way/20070914/\"\n";
             print $fh "            xmlns:summary=\"http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921/\"\n";
+            print $fh "            xmlns:summbuckets=\"" . $ma_namespaces{summbuckets} . "\"\n";
             print $fh "            xmlns:bwctl=\"http://ggf.org/ns/nmwg/tools/bwctl/2.0/\"\n";
             print $fh "            xmlns:iperf= \"http://ggf.org/ns/nmwg/tools/iperf/2.0/\">\n\n";
             $fh->close;
@@ -630,20 +646,24 @@ sub createStorage {
         my $dbsourceBW = $dbtypeBW . ":" . $dbnameBW . ":" . $dbhostBW;
         my $dbuserBW   = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBUSER" } );
         my $dbpassBW   = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBPASS" } );
-
+        
+        my $dbh = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
         my @dateSchema = ( "year", "month" );
-        my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dateSchema, user => $dbuserBW, pass => $dbpassBW } );
-        my $dbReturn = $datedb->openDB;
-        if ( $dbReturn == -1 ) {
+        #my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dateSchema, user => $dbuserBW, pass => $dbpassBW } );
+       
+        #my $dbReturn = $datedb->openDB;
+        
+        my $dbReturn = $dbh->openDB;if ( $dbReturn == -1 ) {
             $self->{LOGGER}->fatal( "Database error, aborting." );
             $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
             $self->{NETLOGGER}->debug( $nlmsg );
             return -1;
         }
-
-        my $result = $datedb->query( { query => "select * from DATES order by year, month;" } );
-        $datedb->closeDB;
-
+        $dbh->setSchema({schema => \@dateSchema});
+        #my $result = $datedb->query( { query => "select * from DATES order by year, month;" } );
+        #$datedb->closeDB;
+        
+        my $result = $dbh->query( { query => "select * from DATES order by year, month;" } );
         my $len = $#{$result};
         unless ( $len == -1 ) {
             for my $a ( 0 .. $len ) {
@@ -658,16 +678,20 @@ sub createStorage {
             $query .= ";";
 
             my @tspecSchema = ( "tspec_id", "description", "duration", "len_buffer", "window_size", "tos", "parallel_streams", "udp", "udp_bandwidth" );
-            my $tspecdb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@tspecSchema, user => $dbuserBW, pass => $dbpassBW } );
-            $dbReturn = $tspecdb->openDB;
-            if ( $dbReturn == -1 ) {
-                $self->{LOGGER}->fatal( "Database error, aborting." );
-                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
-                $self->{NETLOGGER}->debug( $nlmsg );
-                return -1;
-            }
-            $result = $tspecdb->query( { query => $query } );
-            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+            #my $tspecdb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@tspecSchema, user => $dbuserBW, pass => $dbpassBW } );
+            #$dbReturn = $tspecdb->openDB;
+            #if ( $dbReturn == -1 ) {
+             #   $self->{LOGGER}->fatal( "Database error, aborting." );
+              #  $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+               # $self->{NETLOGGER}->debug( $nlmsg );
+                #return -1;
+            #}
+            
+            #$result = $tspecdb->query( { query => $query } );
+            
+             $dbh->setSchema({schema => \@tspecSchema});
+             $result = $dbh->query( { query => $query } );
+             $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
             undef $len;
             $len = $#{$result};
@@ -740,8 +764,13 @@ sub createStorage {
                 $query .= ";";
 
                 my $parameter = $self->generateParameters( { content => \%content } );
-                my $result2 = $tspecdb->query( { query => $query } );
-                $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result2 ) == -1;
+                
+
+		#my $result2 = $tspecdb->query( { query => $query } );
+                
+                $dbh->setSchema({schema => \@tspecSchema});
+                my $result2 = $dbh->query( { query => $query } );
+		$self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result2 ) == -1;
 
                 my $len2 = $#{$result2};
                 $tspec{$a}{"xml"} = $parameter;
@@ -749,7 +778,7 @@ sub createStorage {
                     $tspec{$a}{"id"}{ $result2->[$b][0] } = 1;
                 }
             }
-            $tspecdb->closeDB;
+            #$tspecdb->closeDB;
 
             # ------------------------------------------------------------------
             # XXX
@@ -765,15 +794,18 @@ sub createStorage {
             $query .= ";";
 
             my @nodeSchema = ( "node_id", "node_name", "longname", "addr", "first", "last" );
-            my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@nodeSchema, user => $dbuserBW, pass => $dbpassBW } );
-            $dbReturn = $nodedb->openDB;
-            if ( $dbReturn == -1 ) {
-                $self->{LOGGER}->fatal( "Database error, aborting." );
-                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
-                $self->{NETLOGGER}->debug( $nlmsg );
-                return -1;
-            }
-            $result = $nodedb->query( { query => $query } );
+            #my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@nodeSchema, user => $dbuserBW, pass => $dbpassBW } );
+            #$dbReturn = $nodedb->openDB;
+            #if ( $dbReturn == -1 ) {
+             #   $self->{LOGGER}->fatal( "Database error, aborting." );
+              #  $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+               # $self->{NETLOGGER}->debug( $nlmsg );
+                #return -1;
+            #}
+            #$result = $nodedb->query( { query => $query } );
+       
+            $dbh->setSchema({schema => \@nodeSchema});      
+            $result = $dbh->query( { query => $query } );
             $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
             my %tnode = ();
@@ -799,8 +831,9 @@ sub createStorage {
                 }
                 $query .= ";";
 
-                my $result2 = $nodedb->query( { query => $query } );
-                $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result2 ) == -1;
+                #my $result2 = $nodedb->query( { query => $query } );
+                my $result2 = $dbh->query( { query => $query } );
+		$self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result2 ) == -1;
 
                 my $len2 = $#{$result2};
                 for my $b ( 0 .. $len2 ) {
@@ -815,7 +848,7 @@ sub createStorage {
                     }
                 }
             }
-            $nodedb->closeDB;
+            #$nodedb->closeDB;
 
             # ------------------------------------------------------------------
 
@@ -834,16 +867,19 @@ sub createStorage {
             $query .= ";";
 
             @nodeSchema = ( "node_id", "node_name", "longname", "addr", "first", "last" );
-            $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@nodeSchema, user => $dbuserBW, pass => $dbpassBW } );
-            $dbReturn = $nodedb->openDB;
-            if ( $dbReturn == -1 ) {
-                $self->{LOGGER}->fatal( "Database error, aborting." );
-                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
-                $self->{NETLOGGER}->debug( $nlmsg );
-                return -1;
-            }
-            $result = $nodedb->query( { query => $query } );
-            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+            #$nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@nodeSchema, user => $dbuserBW, pass => $dbpassBW } );
+            #$dbReturn = $nodedb->openDB;
+            #if ( $dbReturn == -1 ) {
+             #   $self->{LOGGER}->fatal( "Database error, aborting." );
+              #  $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+               # $self->{NETLOGGER}->debug( $nlmsg );
+                #return -1;
+            #}
+            #$result = $nodedb->query( { query => $query } );
+            
+            $dbh->setSchema({schema => \@nodeSchema});
+            $result = $dbh->query( { query => $query } );
+	    $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
             $len = $#{$result};
             for my $a ( 0 .. $len ) {
@@ -882,16 +918,19 @@ sub createStorage {
 
             if ( $case ) {
                 my @dataSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
-                my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dataSchema, user => $dbuserBW, pass => $dbpassBW } );
-                $dbReturn = $datadb->openDB;
-                if ( $dbReturn == -1 ) {
-                    $self->{LOGGER}->fatal( "Database error, aborting." );
-                    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
-                    $self->{NETLOGGER}->debug( $nlmsg );
-                    return -1;
-                }
-                $result = $datadb->query( { query => $query } );
-                $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+             #   my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dataSchema, user => $dbuserBW, pass => $dbpassBW } );
+              #  $dbReturn = $datadb->openDB;
+               # if ( $dbReturn == -1 ) {
+                #    $self->{LOGGER}->fatal( "Database error, aborting." );
+                 #   $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                  #  $self->{NETLOGGER}->debug( $nlmsg );
+                   # return -1;
+                #}
+                #$result = $datadb->query( { query => $query } );
+                
+                $dbh->setSchema({schema => \@dataSchema});
+                $result = $dbh->query( { query => $query } );
+		$self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
                 my %resSet = ();
                 $len = $#{$result};
@@ -1017,8 +1056,8 @@ sub createStorage {
                 $self->{LOGGER}->info( "BWCTL Data not found in database - not adding to metadata storage." );
             }
         }
-    }
-
+$dbh->closeDB();    
+}
     # bwctl
     # --------------------------------------------------------------------------
     # owamp
@@ -1032,17 +1071,35 @@ sub createStorage {
         my $dbuserOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBUSER" } );
         my $dbpassOWP   = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBPASS" } );
 
-        my @dateSchema = ( "year", "month", "day" );
-        my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dateSchema, user => $dbuserOWP, pass => $dbpassOWP } );
-        my $dbReturn = $datedb->openDB;
-        if ( $dbReturn == -1 ) {
+        
+        my $owdbh = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
+        #my $dbReturn = $datedb->openDB;
+       my $dbReturn = $owdbh->openDB;
+	if ( $dbReturn == -1 ) {
             $self->{LOGGER}->fatal( "Database error, aborting." );
             $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
             $self->{NETLOGGER}->debug( $nlmsg );
             return -1;
         }
-        my $result = $datedb->query( { query => "select * from DATES order by year, month, day;" } );
-        $datedb->closeDB;
+
+	my @dateSchema = ( "year", "month", "day" );
+        
+
+
+	#my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dateSchema, user => $dbuserOWP, pass => $dbpassOWP } );
+#        my $dbReturn = $datedb->openDB;
+ #       if ( $dbReturn == -1 ) {
+  #          $self->{LOGGER}->fatal( "Database error, aborting." );
+   #         $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+    #        $self->{NETLOGGER}->debug( $nlmsg );
+     #       return -1;
+      #  }
+       # my $result = $datedb->query( { query => "select * from DATES order by year, month, day;" } );
+        #$datedb->closeDB;
+
+       $owdbh->setSchema({schema => \@dateSchema});
+       my $result = $owdbh->query( { query => "select * from DATES order by year, month, day;" } );
+
 
         my $len = $#{$result};
         unless ( $len == -1 ) {
@@ -1059,16 +1116,20 @@ sub createStorage {
             $query .= ";";
 
             my @tspecSchema = ( "tspec_id", "description", "num_session_packets", "num_sample_packets", "wait_interval", "dscp", "loss_timeout", "packet_padding", "bucket_width" );
-            my $tspecdb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@tspecSchema, user => $dbuserOWP, pass => $dbpassOWP } );
-            $dbReturn = $tspecdb->openDB;
-            if ( $dbReturn == -1 ) {
-                $self->{LOGGER}->fatal( "Database error, aborting." );
-                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
-                $self->{NETLOGGER}->debug( $nlmsg );
-                return -1;
-            }
-            $result = $tspecdb->query( { query => $query } );
-            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+            #my $tspecdb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@tspecSchema, user => $dbuserOWP, pass => $dbpassOWP } );
+            #$dbReturn = $tspecdb->openDB;
+            #if ( $dbReturn == -1 ) {
+             #   $self->{LOGGER}->fatal( "Database error, aborting." );
+              #  $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+               # $self->{NETLOGGER}->debug( $nlmsg );
+                #return -1;
+            #}
+            #$result = $tspecdb->query( { query => $query } );
+            
+
+            $owdbh->setSchema({schema => \@tspecSchema});
+            $result = $owdbh->query( { query => $query } );
+	    $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
             %tspec = ();
             undef $len;
@@ -1132,7 +1193,9 @@ sub createStorage {
                 $query .= ";";
 
                 my $parameter = $self->generateParameters( { content => \%content } );
-                my $result2 = $tspecdb->query( { query => $query } );
+                #my $result2 = $tspecdb->query( { query => $query } );
+                
+                my $result2 = $owdbh->query( { query => $query } );
                 $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result2 ) == -1;
 
                 my $len2 = $#{$result2};
@@ -1141,7 +1204,7 @@ sub createStorage {
                     $tspec{$a}{"id"}{ $result2->[$b][0] } = 1;
                 }
             }
-            $tspecdb->closeDB;
+            #$tspecdb->closeDB;
 
             # ------------------------------------------------------------------
             # XXX
@@ -1157,16 +1220,20 @@ sub createStorage {
             $query .= ";";
 
             my @nodeSchema = ( "node_id", "node_name", "longname", "host", "addr", "first", "last" );
-            my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@nodeSchema, user => $dbuserOWP, pass => $dbpassOWP } );
-            $dbReturn = $nodedb->openDB;
-            if ( $dbReturn == -1 ) {
-                $self->{LOGGER}->fatal( "Database error, aborting." );
-                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
-                $self->{NETLOGGER}->debug( $nlmsg );
-                return -1;
-            }
-            $result = $nodedb->query( { query => $query } );
-            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+            #my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@nodeSchema, user => $dbuserOWP, pass => $dbpassOWP } );
+            #$dbReturn = $nodedb->openDB;
+            #if ( $dbReturn == -1 ) {
+            #    $self->{LOGGER}->fatal( "Database error, aborting." );
+             #   $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+              #  $self->{NETLOGGER}->debug( $nlmsg );
+               # return -1;
+            #}
+            #$result = $nodedb->query( { query => $query } );
+            
+
+            $owdbh->setSchema({schema => \@nodeSchema});
+            $result = $owdbh->query( { query => $query } );
+	    $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
             my %tnode = ();
             undef $len;
@@ -1191,8 +1258,11 @@ sub createStorage {
                 }
                 $query .= ";";
 
-                my $result2 = $nodedb->query( { query => $query } );
-                $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result2 ) == -1;
+                #my $result2 = $nodedb->query( { query => $query } );
+                
+
+                my $result2 = $owdbh->query( { query => $query } );
+		$self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result2 ) == -1;
 
                 my $len2 = $#{$result2};
                 for my $b ( 0 .. $len2 ) {
@@ -1207,7 +1277,7 @@ sub createStorage {
                     }
                 }
             }
-            $nodedb->closeDB;
+            #$nodedb->closeDB;
 
             # ------------------------------------------------------------------
 
@@ -1225,16 +1295,20 @@ sub createStorage {
             $query .= ";";
 
             @nodeSchema = ( "node_id", "node_name", "longname", "host", "addr", "first", "last" );
-            $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@nodeSchema, user => $dbuserOWP, pass => $dbpassOWP } );
-            $dbReturn = $nodedb->openDB;
-            if ( $dbReturn == -1 ) {
-                $self->{LOGGER}->fatal( "Database error, aborting." );
-                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
-                $self->{NETLOGGER}->debug( $nlmsg );
-                return -1;
-            }
-            $result = $nodedb->query( { query => $query } );
-            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+            #$nodedb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@nodeSchema, user => $dbuserOWP, pass => $dbpassOWP } );
+            #$dbReturn = $nodedb->openDB;
+            #if ( $dbReturn == -1 ) {
+             #   $self->{LOGGER}->fatal( "Database error, aborting." );
+              #  $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+               # $self->{NETLOGGER}->debug( $nlmsg );
+                #return -1;
+            #}
+            #$result = $nodedb->query( { query => $query } );
+           
+           $owdbh->setSchema({schema => \@nodeSchema}); 
+           $result = $owdbh->query( { query => $query } );
+	   
+	   $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
             $len = $#{$result};
             for my $a ( 0 .. $len ) {
@@ -1273,16 +1347,20 @@ sub createStorage {
 
             if ( $case ) {
                 my @dataSchema = ( "send_id", "recv_id", "tspec_id", "si", "ei", "stimestamp", "etimestamp", "start_time", "end_time", "min", "max", "minttl", "maxttl", "sent", "lost", "dups", "maxerr", "finished" );
-                my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dataSchema, user => $dbuserOWP, pass => $dbpassOWP } );
-                $dbReturn = $datadb->openDB;
-                if ( $dbReturn == -1 ) {
-                    $self->{LOGGER}->fatal( "Database error, aborting." );
-                    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
-                    $self->{NETLOGGER}->debug( $nlmsg );
-                    return -1;
-                }
-                $result = $datadb->query( { query => $query } );
-                $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
+                #my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dataSchema, user => $dbuserOWP, pass => $dbpassOWP } );
+                #$dbReturn = $datadb->openDB;
+                #if ( $dbReturn == -1 ) {
+                 #   $self->{LOGGER}->fatal( "Database error, aborting." );
+                  #  $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                   # $self->{NETLOGGER}->debug( $nlmsg );
+                    #return -1;
+                #}
+
+            #    $result = $datadb->query( { query => $query } );
+             
+            $owdbh->setSchema({schema => \@dataSchema});
+            $result = $owdbh->query( { query => $query } );
+            $self->{LOGGER}->fatal( "Query error, aborting." ) and return -1 if scalar( $result ) == -1;
 
                 my %resSet = ();
                 $len = $#{$result};
@@ -1310,16 +1388,18 @@ sub createStorage {
                 }
 
                 my %mark = ();
+                
+                #organize event types to associate with bucket and non-bucket code
+                my @noBucketsEt = ( 
+                                    'http://ggf.org/ns/nmwg/tools/owamp/2.0', 
+                                    'http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921' 
+                                  );
+                my @bucketsEt = ( 'http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317' );
+                my @owampEventTypes = ( \@noBucketsEt, \@bucketsEt); 
+                                        
                 foreach my $src ( keys %resSet ) {
                     foreach my $dst ( keys %{ $resSet{$src} } ) {
                         foreach my $fakeid ( keys %{ $resSet{$src}{$dst} } ) {
-
-                            # ------------------------------------------------------
-                            # XXX
-                            # JZ 7/19/09
-                            # Changes based on node resolution bug
-                            # ------------------------------------------------------
-
                             next if $mark{$src}{$dst}{$fakeid};
                             $mark{$src}{$dst}{$fakeid} = 1;
                             foreach my $otherS ( keys %{ $tnode{$src} } ) {
@@ -1327,81 +1407,84 @@ sub createStorage {
                                     $mark{$otherS}{$otherD}{$fakeid} = 1;
                                 }
                             }
-
-                            # ------------------------------------------------------
-
-			    my ($src_name, $src_port, $src_type) = split(",", $src);
-			    my ($dst_name, $dst_port, $dst_type) = split(",", $dst);
-
-                            my $metadata = q{};
-                            my $data     = q{};
-
-                            $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
-                            $metadata .= "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
-                            $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-                            $metadata .= "        <nmwgt:src";
-                            $metadata .= " value=\"" . $src_name . "\"" if $src_name;
-                            $metadata .= " port=\"" . $src_port . "\"" if $src_port;
-                            $metadata .= " type=\"" . $src_type . "\"" if $src_type;
-                            $metadata .= " />\n";
-                            $metadata .= "        <nmwgt:dst";
-                            $metadata .= " value=\"" . $dst_name . "\"" if $dst_name;
-                            $metadata .= " port=\"" . $dst_port . "\"" if $dst_port;
-                            $metadata .= " type=\"" . $dst_type . "\"" if $dst_type;
-                            $metadata .= " />\n";
-                            $metadata .= "      </nmwgt:endPointPair>\n";
-                            $metadata .= "    </owamp:subject>\n";
-                            $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>\n";
-                            $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:eventType>\n";
-                            $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
-                            $metadata .= $tspec{$fakeid}{"xml"};
-                            $metadata .= "  </nmwg:metadata>\n";
-
-                            # ------------------------------------------------------
-                            # XXX
-                            # JZ 7/19/09
-                            # Changes based on node resolution bug
-                            # ------------------------------------------------------
-                            my %tList = ();
-                            foreach my $ts ( @{ $resSet{$src}{$dst}{$fakeid} } ) {
-                                $tList{$ts} = 1;
-                            }
-                            foreach my $otherS ( keys %{ $tnode{$src} } ) {
-                                foreach my $otherD ( keys %{ $tnode{$dst} } ) {
-                                    foreach my $ts ( @{ $resSet{$otherS}{$otherD}{$fakeid} } ) {
-                                        $tList{$ts} = 1;
+                            my ($src_name, $src_port, $src_type) = split(",", $src);
+                            my ($dst_name, $dst_port, $dst_type) = split(",", $dst);
+                            foreach my $owpEt( @owampEventTypes ) {
+                                # ------------------------------------------------------
+                                # XXX
+                                # JZ 7/19/09
+                                # Changes based on node resolution bug
+                                # ------------------------------------------------------
+                                my $metadata = q{};
+                                my $data     = q{};
+    
+                                $metadata .= "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
+                                $metadata .= "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
+                                $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+                                $metadata .= "        <nmwgt:src";
+                                $metadata .= " value=\"" . $src_name . "\"" if $src_name;
+                                $metadata .= " port=\"" . $src_port . "\"" if $src_port;
+                                $metadata .= " type=\"" . $src_type . "\"" if $src_type;
+                                $metadata .= " />\n";
+                                $metadata .= "        <nmwgt:dst";
+                                $metadata .= " value=\"" . $dst_name . "\"" if $dst_name;
+                                $metadata .= " port=\"" . $dst_port . "\"" if $dst_port;
+                                $metadata .= " type=\"" . $dst_type . "\"" if $dst_type;
+                                $metadata .= " />\n";
+                                $metadata .= "      </nmwgt:endPointPair>\n";
+                                $metadata .= "    </owamp:subject>\n";
+                                foreach my $mdEt(@{$owpEt}){
+                                    $metadata .= "    <nmwg:eventType>$mdEt</nmwg:eventType>\n";
+                                }
+                                $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
+                                $metadata .= $tspec{$fakeid}{"xml"};
+                                $metadata .= "  </nmwg:metadata>\n";
+    
+                                # ------------------------------------------------------
+                                # XXX
+                                # JZ 7/19/09
+                                # Changes based on node resolution bug
+                                # ------------------------------------------------------
+                                my %tList = ();
+                                foreach my $ts ( @{ $resSet{$src}{$dst}{$fakeid} } ) {
+                                    $tList{$ts} = 1;
+                                }
+                                foreach my $otherS ( keys %{ $tnode{$src} } ) {
+                                    foreach my $otherD ( keys %{ $tnode{$dst} } ) {
+                                        foreach my $ts ( @{ $resSet{$otherS}{$otherD}{$fakeid} } ) {
+                                            $tList{$ts} = 1;
+                                        }
                                     }
                                 }
-                            }
-                            my @temp = keys %tList;
-
-                            # ------------------------------------------------------
-
-                            my @eT = ( "http://ggf.org/ns/nmwg/tools/owamp/2.0", "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" );
-                            $data .= $self->generateData( { id => $id, testspec => \@temp, eT => \@eT, db => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
-
-                            if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-                                my $dHash  = md5_hex( $data );
-                                my $mdHash = md5_hex( $metadata );
-                                $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                                $errorFlag++ if $parameters->{"error"};
-                                $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                                $errorFlag++ if $parameters->{"error"};
-                            }
-                            elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
-                                my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
-                                if ( defined $fh ) {
-                                    print $fh $metadata . "\n" . $data . "\n";
-                                    $fh->close;
+                                my @temp = keys %tList;
+    
+                                # ------------------------------------------------------
+    
+                                $data .= $self->generateData( { id => $id, testspec => \@temp, eT => $owpEt, db => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
+    
+                                if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
+                                    my $dHash  = md5_hex( $data );
+                                    my $mdHash = md5_hex( $metadata );
+                                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                                    $errorFlag++ if $parameters->{"error"};
+                                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
+                                    $errorFlag++ if $parameters->{"error"};
                                 }
-                                else {
-                                    $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
-                                    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
-                                    $self->{NETLOGGER}->debug( $nlmsg );
-                                    return -1;
+                                elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+                                    my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
+                                    if ( defined $fh ) {
+                                        print $fh $metadata . "\n" . $data . "\n";
+                                        $fh->close;
+                                    }
+                                    else {
+                                        $self->{LOGGER}->fatal( "File handle cannot be written, aborting." );
+                                        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
+                                        $self->{NETLOGGER}->debug( $nlmsg );
+                                        return -1;
+                                    }
                                 }
+                                $id++;
                             }
-                            $id++;
                         }
                     }
                 }
@@ -1410,7 +1493,8 @@ sub createStorage {
                 $self->{LOGGER}->info( "OWAMP Data not found in database - not adding to metadata storage." );
             }
         }
-    }
+       $owdbh->closeDB(); 
+   }
 
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         if ( $errorFlag ) {
@@ -1455,8 +1539,10 @@ sub createStorage {
         $self->{NETLOGGER}->debug( $nlmsg );
         return -1;
     }
+
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
     $self->{NETLOGGER}->debug( $nlmsg );
+
     return 0;
 }
 
@@ -1564,7 +1650,7 @@ Return the propel member from the conf Hierarchy.
 sub confHierarchy {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { conf => 1, type => 1, variable => 1 } );
-
+    
     if ( exists $parameters->{conf}->{ $parameters->{variable} } and $parameters->{conf}->{ $parameters->{variable} } ) {
         return $parameters->{conf}->{ $parameters->{variable} };
     }
@@ -1577,6 +1663,7 @@ sub confHierarchy {
     elsif ( exists $parameters->{conf}->{ $parameters->{type} . "CENTRAL" . $parameters->{variable} } and $parameters->{conf}->{ $parameters->{type} . "CENTRAL" . $parameters->{variable} } ) {
         return $parameters->{conf}->{ $parameters->{type} . "CENTRAL" . $parameters->{variable} };
     }
+    
     return;
 }
 
@@ -1603,9 +1690,11 @@ sub prepareDatabases {
         return;
     }
     $self->{LOGGER}->info( "Returning \"" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} . "\"" );
+
     
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.prepareDatabases.end");
     $self->{NETLOGGER}->debug( $nlmsg );
+
     return $metadatadb;
 }
 
@@ -1619,9 +1708,11 @@ We then sleep for some amount of time and do it again.
 
 sub registerLS {
     my ( $self, $sleep_time ) = validateParamsPos( @_, 1, { type => SCALARREF }, );
+
     my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.start");
     $self->{NETLOGGER}->debug( $nlmsg );
     
+
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         unless ( -d $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} ) {
             $self->{LOGGER}->fatal( "XMLDB is not defined, disallowing registration." );
@@ -1678,7 +1769,7 @@ sub registerLS {
     }
 
     $ls = $self->{LS_CLIENT};
-
+    
     my $error         = q{};
     my @resultsString = ();
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
@@ -1909,6 +2000,8 @@ sub handleEvent {
     $self->{LOGGER}->debug( "Request filter parameters: cf: $cf resolution: $resolution start: $start end: $end" );
 
     if ( $parameters->{messageType} eq "MetadataKeyRequest" ) {
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleEvent.end", { type => $parameters->{messageType} });
+        $self->{NETLOGGER}->debug( $nlmsg );
         $self->{LOGGER}->info( "MetadataKeyRequest initiated." );
         $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleEvent.end", { type => $parameters->{messageType} });
         $self->{NETLOGGER}->debug( $nlmsg );
@@ -1924,6 +2017,8 @@ sub handleEvent {
         );
     }
     elsif ( $parameters->{messageType} eq "SetupDataRequest" ) {
+        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleEvent.end", { type => $parameters->{messageType} });
+        $self->{NETLOGGER}->debug( $nlmsg );
         $self->{LOGGER}->info( "SetupDataRequest initiated." );
         $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleEvent.end", { type => $parameters->{messageType} });
         $self->{NETLOGGER}->debug( $nlmsg );
@@ -1939,14 +2034,18 @@ sub handleEvent {
         );
     }
     else {
+
         $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleEvent.end", { type => $parameters->{messageType}, status => -1 });
         $self->{NETLOGGER}->debug( $nlmsg );
+
         throw perfSONAR_PS::Error_compat( "error.ma.message_type", "Invalid Message Type" );
         return;
     }
+
     
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleEvent.end", { type => $parameters->{messageType}});
     $self->{NETLOGGER}->debug( $nlmsg );
+
     return;
 }
 
@@ -1979,9 +2078,10 @@ sub maMetadataKeyRequest {
             message_parameters => 1
         }
     );
+
     my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maMetadataKeyRequest.start");
     $self->{NETLOGGER}->debug( $nlmsg );
-    
+
     my $mdId  = q{};
     my $dId   = q{};
     my $error = q{};
@@ -2035,9 +2135,11 @@ sub maMetadataKeyRequest {
         $self->{LOGGER}->debug( "Closing database." );
         $self->{METADATADB}->closeDB( { error => \$error } );
     }
+
     
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maMetadataKeyRequest.end");
     $self->{NETLOGGER}->debug( $nlmsg );
+
     return;
 }
 
@@ -2064,9 +2166,11 @@ sub metadataKeyRetrieveKey {
             output             => 1
         }
     );
+
     my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.metadataKeyRetrieveKey.start");
     $self->{NETLOGGER}->debug( $nlmsg );
     
+
     my $mdId    = "metadata." . genuid();
     my $dId     = "data." . genuid();
     my $hashKey = extract( find( $parameters->{key}, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
@@ -2122,8 +2226,10 @@ sub metadataKeyRetrieveKey {
     my $params = find( $key2, ".//nmwg:parameters", 1 );
     $self->addSelectParameters( { parameter_block => $params, filters => $parameters->{filters} } );
     createData( $parameters->{output}, $dId, $mdId, $key2->toString, undef );
+
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.metadataKeyRetrieveKey.end", {status => -1});
     $self->{NETLOGGER}->debug( $nlmsg );
+
     return;
 }
 
@@ -2151,9 +2257,11 @@ sub metadataKeyRetrieveMetadataData {
             output             => 1
         }
     );
+
     my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.metadataKeyRetrieveMetadataData.start");
     $self->{NETLOGGER}->debug( $nlmsg );
     
+
     my $mdId        = q{};
     my $dId         = q{};
     my $queryString = q{};
@@ -2255,8 +2363,10 @@ sub metadataKeyRetrieveMetadataData {
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
     }
+
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.metadataKeyRetrieveMetadataData.end");
     $self->{NETLOGGER}->debug( $nlmsg );
+
     return;
 }
 
@@ -2292,8 +2402,10 @@ sub maSetupDataRequest {
             message_parameters => 1
         }
     );
+
     my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maSetupDataRequest.start");
     $self->{NETLOGGER}->debug( $nlmsg );
+
 
     my $mdId  = q{};
     my $dId   = q{};
@@ -2380,9 +2492,11 @@ sub setupDataRetrieveKey {
             output             => 1
         }
     );
+
     my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.setupDataRetrieveKey.start");
     $self->{NETLOGGER}->debug( $nlmsg );
     
+
     my $mdId    = q{};
     my $dId     = q{};
     my $results = q{};
@@ -2531,8 +2645,10 @@ sub setupDataRetrieveMetadataData {
             output             => 1
         }
     );
+
     my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.setupDataRetrieveMetadataData.start");
     $self->{NETLOGGER}->debug( $nlmsg );
+
 
     my $mdId = q{};
     my $dId  = q{};
@@ -2692,9 +2808,11 @@ sub handleData {
             dst                => 1
         }
     );
+
     my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.handleData.start");
     $self->{NETLOGGER}->debug( $nlmsg );
     
+
     my $type = extract( find( $parameters->{data}, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]", 1 ), 0 );
     if ( lc( $type ) eq "mysql" or lc( $type ) eq "sql" ) {
         $self->retrieveSQL(
@@ -2747,8 +2865,10 @@ sub retrieveSQL {
             dst                => 1
         }
     );
+
     my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.start");
     $self->{NETLOGGER}->debug( $nlmsg );
+
 
     my $timeType = "iso";
     if ( defined $parameters->{message_parameters}->{"timeType"} ) {
@@ -2792,7 +2912,8 @@ sub retrieveSQL {
 
     my $dataType = "";
     foreach my $eventType ( keys %{ $parameters->{et} } ) {
-        if ( $eventType eq "http://ggf.org/ns/nmwg/tools/owamp/2.0" ) {
+        if ( $eventType eq "http://ggf.org/ns/nmwg/tools/owamp/2.0" 
+             or $eventType eq "http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317" ) {
             $dataType = "OWAMP";
             last;
         }
@@ -2808,16 +2929,11 @@ sub retrieveSQL {
     my @dbSchema = ();
     my $res;
     my $query    = q{};
+    my $querydelay = q{};
     my $dbReturn = q{};
-
-    # XXX JZ - 7/15/2009
-    #
-    # If we were to limt the data, here is the place to do so (see the owamp section for more notes)
-
-    if ( $dataType eq "BWCTL" ) {
-        my @dateSchema = ( "year", "month" );
-        my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@dateSchema, user => $dbuser, pass => $dbpass } );
-        $dbReturn = $datedb->openDB;
+    my $dbh = new perfSONAR_PS::DB::SQL( { name => $dbconnect, user => $dbuser, pass => $dbpass } );
+   
+    $dbReturn = $dbh->openDB;
         if ( $dbReturn == -1 ) {
             my $msg = "Database error, could not complete request.";
             $self->{LOGGER}->error( $msg );
@@ -2826,10 +2942,34 @@ sub retrieveSQL {
             $self->{NETLOGGER}->debug( $nlmsg );
             return;
         }
+    my $send_id = q{};
+    my $recv_id=q{};
+    my $test_spec = q{};
 
-        my $result = $datedb->query( { query => "select * from DATES;" } );
-        $datedb->closeDB;
-        my $len = $#{$result};
+    # XXX JZ - 7/15/2009
+    #
+    # If we were to limt the data, here is the place to do so (see the owamp section for more notes)
+
+    if ( $dataType eq "BWCTL" ) {
+        my @dateSchema = ( "year", "month" );
+	#my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@dateSchema, user => $dbuser, pass => $dbpass } );
+        #$dbReturn = $datedb->openDB;
+        #$dbReturn = $dbh->openDB;
+	#if ( $dbReturn == -1 ) {
+         #   my $msg = "Database error, could not complete request.";
+          #  $self->{LOGGER}->error( $msg );
+           # getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+           # $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+           # $self->{NETLOGGER}->debug( $nlmsg );
+            #return;
+        #}
+
+        #my $result = $datedb->query( { query => "select * from DATES;" } );
+        #$datedb->closeDB;
+        
+	$dbh->setSchema({schema => \@dateSchema}); 
+        my $result = $dbh->query( { query => "select * from DATES;" } );
+	my $len = $#{$result};
         unless ( $len > -1 ) {
             my $msg = "No data in database";
             $self->{LOGGER}->error( $msg );
@@ -2844,7 +2984,7 @@ sub retrieveSQL {
         }
 
         my @nodeSchema = ( "node_id", "node_name", "longname", "addr", "first", "last" );
-        my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@nodeSchema, user => $dbuser, pass => $dbpass } );
+        #my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@nodeSchema, user => $dbuser, pass => $dbpass } );
 
         my $query1 = q{};
         my $query2 = q{};
@@ -2857,19 +2997,25 @@ sub retrieveSQL {
         $query1 .= ";";
         $query2 .= ";";
 
-        $dbReturn = $nodedb->openDB;
-        if ( $dbReturn == -1 ) {
-            my $msg = "Database error, could not complete request.";
-            $self->{LOGGER}->error( $msg );
-            getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
-            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
-            $self->{NETLOGGER}->debug( $nlmsg );
-            return;
-        }
+        #$dbReturn = $nodedb->openDB;
+        #if ( $dbReturn == -1 ) {
+         #   my $msg = "Database error, could not complete request.";
+          #  $self->{LOGGER}->error( $msg );
+           # getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            #$nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
+            #$self->{NETLOGGER}->debug( $nlmsg );
+            #return;
+        #}
 
-        my $result1 = $nodedb->query( { query => $query1 } );
-        my $result2 = $nodedb->query( { query => $query2 } );
-        $nodedb->closeDB;
+        #my $result1 = $nodedb->query( { query => $query1 } );
+        #my $result2 = $nodedb->query( { query => $query2 } );
+        #$nodedb->closeDB;
+
+        $dbh->setSchema({schema => \@nodeSchema});
+        my $result1 = $dbh->query( { query => $query1 } );
+        my $result2 = $dbh->query( { query => $query2 } );
+
+
 
         if ( $#{$result1} < 0 and $#{$result2} < 0 ) {
             my $msg = "Id error, found \"" . join( " - ", @{$result1} ) . "\" for SRC and \"" . join( " - ", @{$result2} ) . "\" for DST addresses.";
@@ -2956,146 +3102,88 @@ sub retrieveSQL {
         $query = $query . ";" if $query;
     }
     elsif ( $dataType eq "OWAMP" ) {
-
-        my @dateSchema = ( "year", "month" . "day" );
-        my $datedb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@dateSchema, user => $dbuser, pass => $dbpass } );
-        $dbReturn = $datedb->openDB;
-        if ( $dbReturn == -1 ) {
-            my $msg = "Database error, could not complete request.";
-            $self->{LOGGER}->error( $msg );
-            getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
-            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
-            $self->{NETLOGGER}->debug( $nlmsg );
-            return;
+    	#determine if we need to show the buckets
+    	my $showBuckets = 0;
+    	my $tmpBuckEt = $ma_namespaces{'summbuckets'};
+    	$tmpBuckEt =~ s/\/$//; #make version without trailing slash
+    	if( $parameters->{et}->{$tmpBuckEt} ){
+        		$showBuckets = 1;
         }
 
-        my $result = $datedb->query( { query => "select * from DATES;" } );
-        $datedb->closeDB;
-        my $len = $#{$result};
-        unless ( $len > -1 ) {
-            my $msg = "No data in database";
-            $self->{LOGGER}->error( $msg );
-            getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
-            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
-            $self->{NETLOGGER}->debug( $nlmsg );
-            return;
-        }
-        my @dateList = ();
-        for my $a ( 0 .. $len ) {
-            push @dateList, sprintf "%04d%02d%02d", $result->[$a][0], $result->[$a][1], $result->[$a][2];
+	my $prefix = "summary";
+        my $uri    = "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921/";
+        if($showBuckets){
+             $uri = $ma_namespaces{'summbuckets'};
         }
 
-        my @nodeSchema = ( "node_id", "node_name", "longname", "host", "addr", "first", "last" );
-        my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@nodeSchema, user => $dbuser, pass => $dbpass } );
+	startData( $parameters->{output}, $id, $parameters->{mid}, undef );
 
-        my $query1 = q{};
-        my $query2 = q{};
-        foreach my $date ( @dateList ) {
-            $query1 .= " union " if $query1;
-            $query1 .= "select distinct node_id from " . $date . "_NODES where addr like \"" . $parameters->{src} . "%\"";
-            $query2 .= " union " if $query2;
-            $query2 .= "select distinct node_id from " . $date . "_NODES where addr like \"" . $parameters->{dst} . "%\"";
-        }
-        $query1 .= ";";
-        $query2 .= ";";
+    	#create object for owhdb
+    	my $owhdbI = new perfSONAR_PS::DB::owhdb(
+                    DBH         => $dbh->{HANDLE},
+		    NSPREFIX    => $prefix,
+                    NAMESPACE   => $uri,
+                    XMLOUT      => $parameters->{output}
+        );
+    	
+    	#get the date table names based on start and end
+    	my $startTime = $parameters->{time_settings}->{"START"}->{"internal"};
+    	my $endTime = $parameters->{time_settings}->{"END"}->{"internal"};
+	$self->{LOGGER}->info("DATES table query range:$startTime-$endTime");    
+	my $dateTable = $owhdbI->getDateTableList({
+    							startTime   => $startTime,
+    							endTime     => $endTime
+    					});
+    	
+    	#get test-spec
+    	my $tspecList = \@tspec;
+    	
+    	#for each date table
+	$self->{LOGGER}->info("NODES and DATA queries");
+	my $si = owptstampi($startTime);
+	my $ei = owptstampi($endTime);
+    	foreach my $dateEntry (@{$dateTable}){
+    		# get src and dst nodeid list
+    		my $srcList = $owhdbI->getNodeIdsFromIp({
+    			tableName   => $dateEntry,
+    			node_ip     => $parameters->{src}
+    		});
+    		my $dstList = $owhdbI->getNodeIdsFromIp({
+    			tableName   => $dateEntry,
+    			node_ip     => $parameters->{dst}
+    		});
+    		# check if buckets is required
+    		if($showBuckets){
+    			#If yes, call fetchValueBuckets -  should take care of XML creation
+    			$owhdbI->fetchSummaryAndValueBuckets({
+    				tableName   => $dateEntry,
+                    send_id     => $srcList,
+                    recv_id     => $dstList,
+                    si  => $si,
+                    ei  => $ei,
+                    tspec_id    => $tspecList,
+                    timeType	=> $timeType 
+    			});
+    		}else{
+    			# If no, call fetchSummaryData -  should take care of XML creation
+    			$owhdbI->fetchSummaryData({
+    				tableName   => $dateEntry,
+                    send_id     => $srcList,
+                    recv_id     => $dstList,
+                    si  => $si,
+                    ei  => $ei,
+                    tspec_id    => $tspecList,
+                    timeType	=> $timeType 
+    			});
+    			
+    		}
+    			
+    			
+    	}
+    		
+      endData( $parameters->{output} );
 
-        $dbReturn = $nodedb->openDB;
-        if ( $dbReturn == -1 ) {
-            my $msg = "Database error, could not complete request.";
-            $self->{LOGGER}->error( $msg );
-            getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
-            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
-            $self->{NETLOGGER}->debug( $nlmsg );
-            return;
-        }
-
-        my $result1 = $nodedb->query( { query => $query1 } );
-        my $result2 = $nodedb->query( { query => $query2 } );
-        $nodedb->closeDB;
-
-        if ( $#{$result1} < 0 and $#{$result2} < 0 ) {
-            my $msg = "Id error, found \"" . join( " - ", @{$result1} ) . "\" for SRC and \"" . join( " - ", @{$result2} ) . "\" for DST addresses.";
-            $self->{LOGGER}->error( $msg );
-            getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
-            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
-            $self->{NETLOGGER}->debug( $nlmsg );
-            return;
-        }
-
-        my $sendSQL = q{};
-        if ( $#{$result1} >= 0 ) {
-            foreach my $s ( @{$result1} ) {
-                $sendSQL .= " or " if $sendSQL;
-                $sendSQL .= " ( " unless $sendSQL;
-                $sendSQL .= " send_id=\"" . $s->[0] . "\"";
-            }
-            $sendSQL .= " ) ";
-        }
-                
-        my $recvSQL = q{};
-        if ( $#{$result2} >= 0 ) {
-            foreach my $r ( @{$result2} ) {
-                $recvSQL .= " or " if $recvSQL;
-                $recvSQL .= " ( " unless $recvSQL;
-                $recvSQL .= " recv_id=\"" . $r->[0] . "\"";
-            }
-            $recvSQL .= " ) ";
-        }
-
-        # XXX JZ - 7/15/2009
-        #
-        # If we were to limt the data, here is the place to do so.  We can set
-        #   a 'lower bound' to be some amount of time < now().
-
-        my $lowerBound = q{};
-        my $upperBound = q{};
-        if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
-            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = owpgmtime( $parameters->{time_settings}->{"START"}->{"internal"} );
-            $lowerBound = sprintf "%4d%02d%02d", ( $year + 1900 ), ( $mon + 1 ), ( $mday );
-        }
-        if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
-            my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = owpgmtime( $parameters->{time_settings}->{"END"}->{"internal"} );
-            $upperBound = sprintf "%4d%02d%02d", ( $year + 1900 ), ( $mon + 1 ), ( $mday );
-        }
-
-        @dbSchema = ( "send_id", "recv_id", "tspec_id", "si", "ei", "stimestamp", "etimestamp", "start_time", "end_time", "min", "max", "minttl", "maxttl", "sent", "lost", "dups", "maxerr", "finished" );
-        foreach my $date ( @dateList ) {
-            if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
-                next if $lowerBound and $date < $lowerBound;
-                next if $upperBound and $date > $upperBound;
-                if ( $query ) {
-                    $query = $query . " union select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec . " and";
-                }
-                else {
-                    $query = "select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec . " and";
-                }
-
-                my $queryCount = 0;
-                if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
-                    $query = $query . " etimestamp > " . $parameters->{time_settings}->{"START"}->{"internal"};
-                    $queryCount++;
-                }
-                if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
-                    if ( $queryCount ) {
-                        $query = $query . " and stimestamp < " . $parameters->{time_settings}->{"END"}->{"internal"};
-                    }
-                    else {
-                        $query = $query . " stimestamp < " . $parameters->{time_settings}->{"END"}->{"internal"};
-                    }
-                }
-            }
-            else {
-                if ( $query ) {
-                    $query = $query . " union select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec;
-                }
-                else {
-                    $query = "select * from " . $date . "_DATA where " . $sendSQL . " and " . $recvSQL . " and " . $testspec;
-                }
-            }
-        }
-        $query = $query . ";" if $query;
-    }
-    else {
+    }else {
         my $msg = "Improper eventType found.";
         $self->{LOGGER}->error( $msg );
         getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
@@ -3106,6 +3194,8 @@ sub retrieveSQL {
 
     $self->{LOGGER}->info( "Query \"" . $query . "\" formed." );
 
+ if($dataType eq 'BWCTL'){
+       $self->{LOGGER}->info( "Query \"" . $query . "\" formed." );
     unless ( $query ) {
         my $msg = "Query returned 0 results";
         $self->{LOGGER}->error( $msg );
@@ -3115,21 +3205,13 @@ sub retrieveSQL {
         return;
     }    
             
-    my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@dbSchema, user => $dbuser, pass => $dbpass } );
-
-    $dbReturn = $datadb->openDB;
-    if ( $dbReturn == -1 ) {
-        my $msg = "Database error, could not complete request.";
-        $self->{LOGGER}->error( $msg );
-        getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
-        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
-        $self->{NETLOGGER}->debug( $nlmsg );
-        return;
-    }
-
-    my $result = $datadb->query( { query => $query } );
-    $datadb->closeDB;
-
+    $dbh->setSchema({schema => \@dbSchema});
+    my $result = $dbh->query({ query => $query });
+    
+    #query for delay data if eventtype is owamp
+    my $result_delay;
+    my %resultHash=();
+    
     if ( $#{$result} == -1 ) {
         my $msg = "Query returned 0 results";
         $self->{LOGGER}->error( $msg );
@@ -3139,10 +3221,9 @@ sub retrieveSQL {
         return;
     }
     else {
-        if ( $dataType eq "BWCTL" ) {
             my $prefix = "iperf";
             my $uri    = "http://ggf.org/ns/nmwg/tools/iperf/2.0/";
-
+            
             startData( $parameters->{output}, $id, $parameters->{mid}, undef );
             my $len = $#{$result};
             for my $a ( 0 .. $len ) {
@@ -3175,62 +3256,15 @@ sub retrieveSQL {
 
             }
             endData( $parameters->{output} );
-        }
-        elsif ( $dataType eq "OWAMP" ) {
-            my $prefix = "summary";
-            my $uri    = "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921/";
-
-            startData( $parameters->{output}, $id, $parameters->{mid}, undef );
-            my $len = $#{$result};
-            for my $a ( 0 .. $len ) {
-                my %attrs = ();
-                if ( $timeType eq "unix" ) {
-                    $attrs{"timeType"}  = "unix";
-                    $attrs{"startTime"} = owptime2exacttime( $result->[$a][5] );
-                    $attrs{"endTime"}   = owptime2exacttime( $result->[$a][6] );
-                }
-                else {
-                    $attrs{"timeType"}  = "iso";
-                    $attrs{"startTime"} = owpexactgmstring( $result->[$a][5] );
-                    $attrs{"endTime"}   = owpexactgmstring( $result->[$a][6] );
-                }
-
-                #min
-                $attrs{"min_delay"} = $result->[$a][9] if defined $result->[$a][9];
-
-                # max
-                $attrs{"max_delay"} = $result->[$a][10] if defined $result->[$a][10];
-
-                # minTTL
-                $attrs{"minTTL"} = $result->[$a][11] if defined $result->[$a][11];
-
-                # maxTTL
-                $attrs{"maxTTL"} = $result->[$a][12] if defined $result->[$a][12];
-
-                #sent
-                $attrs{"sent"} = $result->[$a][13] if defined $result->[$a][13];
-
-                #lost
-                $attrs{"loss"} = $result->[$a][14] if defined $result->[$a][14];
-
-                #dups
-                $attrs{"duplicates"} = $result->[$a][15] if defined $result->[$a][15];
-
-                #err
-                $attrs{"maxError"} = $result->[$a][16] if defined $result->[$a][16];
-
-                $parameters->{output}->createElement(
-                    prefix     => $prefix,
-                    namespace  => $uri,
-                    tag        => "datum",
-                    attributes => \%attrs
-                );
-            }
-            endData( $parameters->{output} );
-        }
     }
+  }  
+    #close db
+    $dbh->closeDB;
+    
+
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.retrieveSQL.end", {status => -1});
     $self->{NETLOGGER}->debug( $nlmsg );
+
     return;
 }
 
@@ -3249,8 +3283,10 @@ sub addSelectParameters {
             filters         => 1,
         }
     );
+
     my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.addSelectParameters.start");
     $self->{NETLOGGER}->debug( $nlmsg );
+
 
     my $params       = $parameters->{parameter_block};
     my @filters      = @{ $parameters->{filters} };
@@ -3284,8 +3320,10 @@ sub addSelectParameters {
             }
         }
     }
+
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.addSelectParameters.end");
     $self->{NETLOGGER}->debug( $nlmsg );
+
     return;
 }
 
