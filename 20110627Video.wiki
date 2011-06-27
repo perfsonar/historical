@@ -28,7 +28,7 @@
     * Aaron: Working on issues. Would like feedback on cacti.
     * Kavitha: None
     * Andy: Working on circuit monitoring - backporting to 0.5.3. Going to focus on open pS issues. Also working on v6 testing.
-    * Sowmya: Working on owamp/bwctl plots. Build CentOS kernel for x86-64. Now will work on open issues.
+    * Sowmya: Working on owamp/bwctl plots. Built CentOS kernel for i386 and i686. Now will work on open issues.
     * Jason: Working to get pS service into Dynes deployments. Working with LHCONE on getting pS-PS nodes deployed for their use.
     * Brian: None
     * John: Working on a plan for ACE. Going to use sflow for accounting. Working with Neil McKee from Inmon.
