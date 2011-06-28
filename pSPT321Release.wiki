@@ -73,7 +73,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=500 500] - IPv6 Redirect for pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=502 502] - need to rework google code site to make a easy to find 'contrib' area
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=506 506] - status page "not running" clarification
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=507 507] - Services must include examples of requests and responses
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=508 508] - SSL Certificates on pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=512 512] - For toolkit building VM, change default output directory in i2_mock utility to psbuild user home 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=513 513] - For toolkit building VM, add holding directory to psbuild user home directory 
@@ -100,6 +99,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=475 475] - nagios scripts do not support web proxies   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=496 496] - Mirrors for pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=504 504] - Add event type to pSB for OWAMP data with buckets required
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=507 507] - Services must include examples of requests and responses
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=516 516] - regular testing gui doesn't preserve udp bandwidth setting
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=529 529] - Disable LS and LS Registration Daemon when Administrative Info is missing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=531 531] - Remove non-functional options in the regular testing setup   
