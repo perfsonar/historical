@@ -60,7 +60,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=481 481] - in perfsonar-ps: cache.pl does not collect topology service information
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=482 482] - TCP tuning settings for Toolkit need updating   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=483 483] - prompt to subscribe to perfsonar-user@internet2.edu list when installing toolkit    
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=485 485] - ls_registration_daemon.conf is missing site_name even though host information entered
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=488 488] - IPv6 Compatibility for all perfSONAR services and products
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=490 490] - Reverse Traceroute/Ping does not hold 'function' argument between CGI submission
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=491 491] - IPV6 Survey
@@ -96,6 +95,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=470 470] - bwctl/owamp limits gui doesn't support IPv6 addresses   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=471 471] - owamp limits file on pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=475 475] - nagios scripts do not support web proxies   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=485 485] - ls_registration_daemon.conf is missing site_name even though host information entered
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=496 496] - Mirrors for pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=504 504] - Add event type to pSB for OWAMP data with buckets required
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=507 507] - Services must include examples of requests and responses
