@@ -49,7 +49,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit       
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - Package for the client modules
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=425 425] - SNMP MA/Cacti Reports wrong capacity         
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=438 438] - perfsonarbuoy/bwctl startup loop if ntp is unsynchronized   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=443 443] - Client::LS::Remote not re-registering when keep-alives fail to hLS      
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=446 446] - Add option to set timeout in Client::LS    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=453 453] - Document/Add addiional options to interface configuration   
@@ -124,6 +123,8 @@ TBD
      * <font color="green">_*FIXED 5/25/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=437 437] - ~~Display MTU on web-gui~~     
      * <font color="green">_*FIXED 6/24/2011*_</font>          
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=438 438] - ~~perfsonarbuoy/bwctl startup loop if ntp is unsynchronized~~
+     * <font color="purple">_*MIGRATED 6/28/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=447 447] - ~~new version of nuttcp supported by the NPtoolkit~~
      * <font color="red">_*Won't Fix*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=460 460] - ~~Toggle Time display in perfAdmin graphs~~
