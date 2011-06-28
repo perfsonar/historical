@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  perfSONAR-PS pSB SetupDataRequest Message (for OWAMP bucket data)
+  
+  Use: 
+    perl client.pl URL SetupDataRequest-owamp-6.xml
+    
+  Expected Response (Note data content will depend on selected data range):
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="setupDataRequest1" id="message.11018093" type="SetupDataResponse">
+      <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.15112743" metadataIdRef="meta2c">
+        <owamp:subject xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/" id="subject-125">
+          <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+            <nmwgt:src value="198.124.252.130" type="ipv4"/>
+            <nmwgt:dst value="198.129.254.102" type="ipv4"/>
+          </nmwgt:endPointPair>
+        </owamp:subject>
+        <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317</nmwg:eventType>
+        <nmwg:parameters id="parameters-125">
+          <nmwg:parameter name="count">108000</nmwg:parameter>
+          <nmwg:parameter name="bucket_width">0.0001</nmwg:parameter>
+          <nmwg:parameter name="schedule">
+            <interval type="exp">0.1</interval>
+          </nmwg:parameter>
+        </nmwg:parameters>
+      </nmwg:metadata>
+      <nmwg:data metadataIdRef="metadata.15112743" id="data.17317764">
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.0214024" maxError="2.01166e-06" max_delay="0.022296" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:45:11.2916769897 UTC 2011" loss="0" startTime="Tue Jun 28 16:44:13.2435415090 UTC 2011" sent="600" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="281" value="215"/>
+                <summary:value_bucket count="315" value="216"/>
+                <summary:value_bucket count="1" value="217"/>
+                <summary:value_bucket count="1" value="220"/>
+                <summary:value_bucket count="1" value="222"/>
+                <summary:value_bucket count="1" value="223"/>
+            </summary:value_buckets>
+        </summary:datum>
+        <!-- Lots more of these -->
+     </nmwg:data>
+</nmwg:message>
+
+  Expected Alternate Response (no data found):
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="setupDataRequest1" id="message.6001492" type="SetupDataResponse">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.15169999" metadataIdRef="meta2c">
+    <owamp:subject xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/" id="subject-608">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src value="64.57.16.226" type="ipv4"/>
+        <nmwgt:dst value="64.57.16.98" type="ipv4"/>
+      </nmwgt:endPointPair>
+    </owamp:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317</nmwg:eventType>
+    <nmwg:parameters id="parameters-608">
+      <nmwg:parameter name="count">10800</nmwg:parameter>
+      <nmwg:parameter name="bucket_width">0.0001</nmwg:parameter>
+      <nmwg:parameter name="schedule">
+        <interval type="exp">0.1</interval>
+      </nmwg:parameter>
+    </nmwg:parameters>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.15169999" id="data.13627484">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">Query returned 0 results</nmwgr:datum>
+  </nmwg:data>
+
+</nmwg:message>
+
+  Error Response (Metadata not found):
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="setupDataRequest1" id="message.6160196" type="SetupDataResponse">
+
+  <nmwg:metadata metadataIdRef="meta1" id="metadata.11752448">
+    <nmwg:eventType>error.ma.storage</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="metadata.11752448" id="data.4216789">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">Database "/var/lib/perfsonar/perfsonarbuoy_ma/store.xml" returned 0 results for search</nmwgr:datum>
+  </nmwg:data>
+
+</nmwg:message>
+
+-->
+
+<nmwg:message type="SetupDataRequest" id="setupDataRequest1"
+              xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
+
+  <!-- Note the eventType. This will return the delay buckets. 
+       Use http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921 if you do not need the 
+       buckets and want a more compact response
+  -->
+  <nmwg:metadata id="meta2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:subject id="id">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src value="198.124.252.130" type="ipv4" />
+        <nmwgt:dst value="198.129.254.102" type="ipv4" />
+      </nmwgt:endPointPair>
+    </nmwg:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317</nmwg:eventType>
+  </nmwg:metadata> 
+  <nmwg:metadata id="meta2c" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <select:subject id="sub2c" metadataIdRef="meta2" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"/> 
+    <select:parameters id="param2c" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">      
+      <nmwg:parameter name="startTime">1309279447</nmwg:parameter>
+      <nmwg:parameter name="endTime">1309280347</nmwg:parameter>
+    </select:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0</nmwg:eventType> 
+  </nmwg:metadata>
+  <nmwg:data id="data2" metadataIdRef="meta2c" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"/>
+
+</nmwg:message>

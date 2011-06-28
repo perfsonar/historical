@@ -1,0 +1,219 @@
+<?xml version="1.0"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Header/>
+  <SOAP-ENV:Body>
+    <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="setupDataRequest1" id="message.11018093" type="SetupDataResponse">
+      <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.15112743" metadataIdRef="meta2c">
+        <owamp:subject xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/" id="subject-125">
+          <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+            <nmwgt:src value="198.124.252.130" type="ipv4"/>
+            <nmwgt:dst value="198.129.254.102" type="ipv4"/>
+          </nmwgt:endPointPair>
+        </owamp:subject>
+        <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317</nmwg:eventType>
+        <nmwg:parameters id="parameters-125">
+          <nmwg:parameter name="count">108000</nmwg:parameter>
+          <nmwg:parameter name="bucket_width">0.0001</nmwg:parameter>
+          <nmwg:parameter name="schedule">
+            <interval type="exp">0.1</interval>
+          </nmwg:parameter>
+        </nmwg:parameters>
+      </nmwg:metadata>
+      <nmwg:data metadataIdRef="metadata.15112743" id="data.17317764">
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.0214024" maxError="2.01166e-06" max_delay="0.022296" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:45:11.2916769897 UTC 2011" loss="0" startTime="Tue Jun 28 16:44:13.2435415090 UTC 2011" sent="600" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="281" value="215"/>
+                <summary:value_bucket count="315" value="216"/>
+                <summary:value_bucket count="1" value="217"/>
+                <summary:value_bucket count="1" value="220"/>
+                <summary:value_bucket count="1" value="222"/>
+                <summary:value_bucket count="1" value="223"/>
+            </summary:value_buckets>
+        </summary:datum>
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.02141" maxError="2.01166e-06" max_delay="0.0242963" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:46:09.2317372317 UTC 2011" loss="0" sent="600" startTime="Tue Jun 28 16:45:11.3505780939 UTC 2011" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="271" value="215"/>
+                <summary:value_bucket count="313" value="216"/>
+                <summary:value_bucket count="5" value="217"/>
+                <summary:value_bucket count="1" value="218"/>
+                <summary:value_bucket count="1" value="220"/>
+                <summary:value_bucket count="2" value="223"/>
+                <summary:value_bucket count="3" value="224"/>
+                <summary:value_bucket count="1" value="226"/>
+                <summary:value_bucket count="1" value="229"/>
+                <summary:value_bucket count="1" value="231"/>
+                <summary:value_bucket count="1" value="243"/>
+            </summary:value_buckets>
+        </summary:datum>
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.021421" maxError="2.01166e-06" max_delay="0.105593" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:47:11.455009077 UTC 2011" loss="0" sent="600" startTime="Tue Jun 28 16:46:09.2550730666 UTC 2011" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="244" value="215"/>
+                <summary:value_bucket count="329" value="216"/>
+                <summary:value_bucket count="4" value="217"/>
+                <summary:value_bucket count="6" value="218"/>
+                <summary:value_bucket count="2" value="219"/>
+                <summary:value_bucket count="1" value="220"/>
+                <summary:value_bucket count="1" value="222"/>
+                <summary:value_bucket count="1" value="223"/>
+                <summary:value_bucket count="2" value="225"/>
+                <summary:value_bucket count="1" value="230"/>
+                <summary:value_bucket count="1" value="235"/>
+                <summary:value_bucket count="1" value="237"/>
+                <summary:value_bucket count="1" value="248"/>
+                <summary:value_bucket count="1" value="257"/>
+                <summary:value_bucket count="1" value="265"/>
+                <summary:value_bucket count="1" value="267"/>
+                <summary:value_bucket count="1" value="271"/>
+                <summary:value_bucket count="1" value="299"/>
+                <summary:value_bucket count="1" value="1056"/>
+            </summary:value_buckets>
+        </summary:datum>
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.0214119" maxError="2.01166e-06" max_delay="0.0252466" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:48:13.2936612580 UTC 2011" loss="0" sent="600" startTime="Tue Jun 28 16:47:11.633709180 UTC 2011" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="242" value="215"/>
+                <summary:value_bucket count="349" value="216"/>
+                <summary:value_bucket count="3" value="217"/>
+                <summary:value_bucket count="1" value="219"/>
+                <summary:value_bucket count="1" value="221"/>
+                <summary:value_bucket count="1" value="224"/>
+                <summary:value_bucket count="1" value="228"/>
+                <summary:value_bucket count="1" value="252"/>
+                <summary:value_bucket count="1" value="253"/>
+            </summary:value_buckets>
+        </summary:datum>
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.0214086" maxError="3.01749e-06" max_delay="0.155219" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:49:12.198705048 UTC 2011" loss="0" sent="600" startTime="Tue Jun 28 16:48:13.3329853691 UTC 2011" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="275" value="215"/>
+                <summary:value_bucket count="317" value="216"/>
+                <summary:value_bucket count="3" value="217"/>
+                <summary:value_bucket count="1" value="220"/>
+                <summary:value_bucket count="1" value="224"/>
+                <summary:value_bucket count="1" value="237"/>
+                <summary:value_bucket count="1" value="813"/>
+                <summary:value_bucket count="1" value="1553"/>
+            </summary:value_buckets>
+        </summary:datum>
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.0214047" maxError="3.01749e-06" max_delay="0.0231085" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:50:13.711960582 UTC 2011" loss="0" sent="600" startTime="Tue Jun 28 16:49:12.403076288 UTC 2011" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="279" value="215"/>
+                <summary:value_bucket count="318" value="216"/>
+                <summary:value_bucket count="1" value="225"/>
+                <summary:value_bucket count="1" value="227"/>
+                <summary:value_bucket count="1" value="232"/>
+            </summary:value_buckets>
+        </summary:datum>
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.0214128" maxError="2.01166e-06" max_delay="0.0246563" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:51:12.4059083239 UTC 2011" loss="0" sent="600" startTime="Tue Jun 28 16:50:13.1192803236 UTC 2011" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="266" value="215"/>
+                <summary:value_bucket count="326" value="216"/>
+                <summary:value_bucket count="3" value="217"/>
+                <summary:value_bucket count="1" value="218"/>
+                <summary:value_bucket count="1" value="227"/>
+                <summary:value_bucket count="1" value="246"/>
+                <summary:value_bucket count="2" value="247"/>
+            </summary:value_buckets>
+        </summary:datum>
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.0214071" maxError="2.01166e-06" max_delay="0.0257945" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:52:14.1970643661 UTC 2011" loss="0" sent="600" startTime="Tue Jun 28 16:51:13.129834762 UTC 2011" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="226" value="215"/>
+                <summary:value_bucket count="362" value="216"/>
+                <summary:value_bucket count="8" value="217"/>
+                <summary:value_bucket count="1" value="221"/>
+                <summary:value_bucket count="1" value="224"/>
+                <summary:value_bucket count="1" value="239"/>
+                <summary:value_bucket count="1" value="258"/>
+            </summary:value_buckets>
+        </summary:datum>
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.0214028" maxError="2.01166e-06" max_delay="0.0273614" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:53:14.3865684838 UTC 2011" loss="0" sent="600" startTime="Tue Jun 28 16:52:14.2176318057 UTC 2011" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="259" value="215"/>
+                <summary:value_bucket count="315" value="216"/>
+                <summary:value_bucket count="5" value="217"/>
+                <summary:value_bucket count="3" value="218"/>
+                <summary:value_bucket count="1" value="220"/>
+                <summary:value_bucket count="1" value="222"/>
+                <summary:value_bucket count="1" value="223"/>
+                <summary:value_bucket count="3" value="224"/>
+                <summary:value_bucket count="2" value="225"/>
+                <summary:value_bucket count="1" value="230"/>
+                <summary:value_bucket count="1" value="233"/>
+                <summary:value_bucket count="1" value="244"/>
+                <summary:value_bucket count="1" value="246"/>
+                <summary:value_bucket count="2" value="252"/>
+                <summary:value_bucket count="1" value="254"/>
+                <summary:value_bucket count="1" value="261"/>
+                <summary:value_bucket count="1" value="269"/>
+            </summary:value_buckets>
+        </summary:datum>
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.0214162" maxError="2.01166e-06" max_delay="0.0243125" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:54:12.3949826123 UTC 2011" loss="0" sent="600" startTime="Tue Jun 28 16:53:15.9127381 UTC 2011" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="240" value="215"/>
+                <summary:value_bucket count="354" value="216"/>
+                <summary:value_bucket count="3" value="217"/>
+                <summary:value_bucket count="1" value="229"/>
+                <summary:value_bucket count="1" value="237"/>
+                <summary:value_bucket count="1" value="244"/>
+            </summary:value_buckets>
+        </summary:datum>
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.0214195" maxError="3.01749e-06" max_delay="0.0260601" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:55:16.2074271628 UTC 2011" loss="0" sent="600" startTime="Tue Jun 28 16:54:12.4189108163 UTC 2011" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="248" value="215"/>
+                <summary:value_bucket count="346" value="216"/>
+                <summary:value_bucket count="3" value="217"/>
+                <summary:value_bucket count="1" value="219"/>
+                <summary:value_bucket count="1" value="238"/>
+                <summary:value_bucket count="1" value="261"/>
+            </summary:value_buckets>
+        </summary:datum>
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.0214119" maxError="2.01166e-06" max_delay="0.0269799" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:56:16.1179932077 UTC 2011" loss="0" sent="600" startTime="Tue Jun 28 16:55:16.2101963127 UTC 2011" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="267" value="215"/>
+                <summary:value_bucket count="325" value="216"/>
+                <summary:value_bucket count="1" value="217"/>
+                <summary:value_bucket count="1" value="219"/>
+                <summary:value_bucket count="1" value="223"/>
+                <summary:value_bucket count="2" value="227"/>
+                <summary:value_bucket count="1" value="232"/>
+                <summary:value_bucket count="1" value="241"/>
+                <summary:value_bucket count="1" value="270"/>
+            </summary:value_buckets>
+        </summary:datum>
+        <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.0214028" maxError="2.01166e-06" max_delay="0.0258613" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:57:13.1210835635 UTC 2011" loss="0" sent="600" startTime="Tue Jun 28 16:56:16.2311188444 UTC 2011" maxTTL="251">
+            <summary:value_buckets>
+                <summary:value_bucket count="223" value="215"/>
+                    <summary:value_bucket count="362" value="216"/>
+                    <summary:value_bucket count="5" value="217"/>
+                    <summary:value_bucket count="1" value="219"/>
+                    <summary:value_bucket count="2" value="221"/>
+                    <summary:value_bucket count="1" value="222"/>
+                    <summary:value_bucket count="2" value="223"/>
+                    <summary:value_bucket count="1" value="242"/>
+                    <summary:value_bucket count="1" value="243"/>
+                    <summary:value_bucket count="1" value="246"/>
+                    <summary:value_bucket count="1" value="259"/>
+                </summary:value_buckets>
+            </summary:datum>
+            <summary:datum xmlns:summary="http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317/" minTTL="251" min_delay="0.0214176" maxError="2.01166e-06" max_delay="0.140428" timeType="iso" duplicates="0" endTime="Tue Jun 28 16:58:19.1840583463 UTC 2011" loss="0" sent="600" startTime="Tue Jun 28 16:57:13.1812923712 UTC 2011" maxTTL="251">
+                <summary:value_buckets>
+                    <summary:value_bucket count="263" value="215"/>
+                    <summary:value_bucket count="316" value="216"/>
+                    <summary:value_bucket count="6" value="217"/>
+                    <summary:value_bucket count="2" value="218"/>
+                    <summary:value_bucket count="1" value="222"/>
+                    <summary:value_bucket count="1" value="226"/>
+                    <summary:value_bucket count="2" value="228"/>
+                    <summary:value_bucket count="1" value="229"/>
+                    <summary:value_bucket count="1" value="231"/>
+                    <summary:value_bucket count="1" value="237"/>
+                    <summary:value_bucket count="1" value="238"/>
+                    <summary:value_bucket count="1" value="243"/>
+                    <summary:value_bucket count="1" value="245"/>
+                    <summary:value_bucket count="1" value="645"/>
+                    <summary:value_bucket count="1" value="725"/>
+                    <summary:value_bucket count="1" value="1405"/>
+                 </summary:value_buckets>
+            </summary:datum>
+        </nmwg:data>
+    </nmwg:message>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
