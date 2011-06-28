@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Header/>
+  <SOAP-ENV:Body>
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="EchoMessage1" id="message.3162508" type="EchoResponse"><nmwg:metadata metadataIdRef="metadata1" id="metadata.6879933"><nmwg:eventType>success.echo</nmwg:eventType></nmwg:metadata><nmwg:data metadataIdRef="metadata.6879933" id="data.6893256"><nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">The echo request has passed.</nmwgr:datum></nmwg:data><nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata1">
+    <nmwg:eventType>http://schemas.perfsonar.net/tools/admin/echo/2.0</nmwg:eventType>
+  </nmwg:metadata></nmwg:message>  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

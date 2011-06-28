@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Header/>
+  <SOAP-ENV:Body>
+    <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="metadataKeyRequest1" id="message.10038462" type="MetadataKeyResponse">
+        <nmwg:metadata xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/" xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" id="meta.ae46d6e7be4c5dde60ca33e5f2d403cc">
+            <traceroute:subject id="subj.ae46d6e7be4c5dde60ca33e5f2d403cc">
+                <nmwgt:endPointPair>
+                    <nmwgt:src value="198.129.254.94" type="ipv4"/>
+                    <nmwgt:dst value="198.124.252.141" type="ipv4"/>
+                </nmwgt:endPointPair>
+            </traceroute:subject>
+            <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0</nmwg:eventType>
+            <nmwg:parameters id="params.ae46d6e7be4c5dde60ca33e5f2d403cc">
+                <nmwg:parameter name="maxTtl">64</nmwg:parameter>
+                <nmwg:parameter name="waitTime">5</nmwg:parameter>
+                <nmwg:parameter name="packetSize">40</nmwg:parameter>
+            </nmwg:parameters>
+        </nmwg:metadata>
+        <nmwg:metadata xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/" xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" id="meta.8f1cb270e00a14c43eac0d6859bc63da">
+            <traceroute:subject id="subj.8f1cb270e00a14c43eac0d6859bc63da">
+                <nmwgt:endPointPair>
+                    <nmwgt:src value="198.129.254.94" type="ipv4"/>
+                    <nmwgt:dst value="198.129.254.50" type="ipv4"/>
+                </nmwgt:endPointPair>
+            </traceroute:subject>
+            <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0</nmwg:eventType>
+            <nmwg:parameters id="params.8f1cb270e00a14c43eac0d6859bc63da">
+                <nmwg:parameter name="maxTtl">64</nmwg:parameter>
+                <nmwg:parameter name="waitTime">5</nmwg:parameter>
+                <nmwg:parameter name="packetSize">40</nmwg:parameter>
+            </nmwg:parameters>
+        </nmwg:metadata>
+        <nmwg:metadata xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/" xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" id="meta.998ef2095b10b5587a5b8cc4f9da4791">
+            <traceroute:subject id="subj.998ef2095b10b5587a5b8cc4f9da4791">
+                <nmwgt:endPointPair>
+                    <nmwgt:src value="198.129.254.94" type="ipv4"/>
+                    <nmwgt:dst value="198.124.238.34" type="ipv4"/>
+                </nmwgt:endPointPair>
+            </traceroute:subject>
+            <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0</nmwg:eventType>
+            <nmwg:parameters id="params.998ef2095b10b5587a5b8cc4f9da4791">
+                <nmwg:parameter name="maxTtl">64</nmwg:parameter>
+                <nmwg:parameter name="waitTime">5</nmwg:parameter>
+                <nmwg:parameter name="packetSize">40</nmwg:parameter>
+            </nmwg:parameters>
+        </nmwg:metadata>
+        <nmwg:metadata xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/" xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" id="meta.d1f00469c0ec24dec0aad15ddad2e70b">
+            <traceroute:subject id="subj.d1f00469c0ec24dec0aad15ddad2e70b">
+                <nmwgt:endPointPair>
+                    <nmwgt:src value="198.129.254.94" type="ipv4"/>
+                    <nmwgt:dst value="198.129.254.58" type="ipv4"/>
+                </nmwgt:endPointPair>
+            </traceroute:subject>
+            <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0</nmwg:eventType>
+            <nmwg:parameters id="params.d1f00469c0ec24dec0aad15ddad2e70b">
+                <nmwg:parameter name="maxTtl">64</nmwg:parameter>
+                <nmwg:parameter name="waitTime">5</nmwg:parameter>
+                <nmwg:parameter name="packetSize">40</nmwg:parameter>
+            </nmwg:parameters>
+        </nmwg:metadata>        
+        <nmwg:data metadataIdRef="meta.8f1cb270e00a14c43eac0d6859bc63da" id="data.8f1cb270e00a14c43eac0d6859bc63da">
+            <nmwg:key>
+                <nmwg:parameters id="params.8f1cb270e00a14c43eac0d6859bc63da">
+                    <nmwg:parameter name="maKey">8f1cb270e00a14c43eac0d6859bc63da</nmwg:parameter>
+                </nmwg:parameters>
+            </nmwg:key>
+        </nmwg:data>
+        <nmwg:data metadataIdRef="meta.d1f00469c0ec24dec0aad15ddad2e70b" id="data.d1f00469c0ec24dec0aad15ddad2e70b">
+            <nmwg:key>
+                <nmwg:parameters id="params.d1f00469c0ec24dec0aad15ddad2e70b">
+                    <nmwg:parameter name="maKey">d1f00469c0ec24dec0aad15ddad2e70b</nmwg:parameter>
+                </nmwg:parameters>
+            </nmwg:key>
+        </nmwg:data>
+        <nmwg:data metadataIdRef="meta.998ef2095b10b5587a5b8cc4f9da4791" id="data.998ef2095b10b5587a5b8cc4f9da4791">
+            <nmwg:key>
+                <nmwg:parameters id="params.998ef2095b10b5587a5b8cc4f9da4791">
+                    <nmwg:parameter name="maKey">998ef2095b10b5587a5b8cc4f9da4791</nmwg:parameter>
+                </nmwg:parameters>
+            </nmwg:key>
+        </nmwg:data>
+        <nmwg:data metadataIdRef="meta.ae46d6e7be4c5dde60ca33e5f2d403cc" id="data.ae46d6e7be4c5dde60ca33e5f2d403cc">
+            <nmwg:key>
+                <nmwg:parameters id="params.ae46d6e7be4c5dde60ca33e5f2d403cc">
+                    <nmwg:parameter name="maKey">ae46d6e7be4c5dde60ca33e5f2d403cc</nmwg:parameter>
+                </nmwg:parameters>
+            </nmwg:key>
+        </nmwg:data>
+    </nmwg:message>  
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

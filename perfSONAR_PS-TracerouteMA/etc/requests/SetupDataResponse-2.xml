@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Header/>
+  <SOAP-ENV:Body>
+    <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="setupDataRequest1" id="message.1075378" type="SetupDataResponse">
+        <nmwg:metadata xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/" xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" id="meta.998ef2095b10b5587a5b8cc4f9da4791">
+            <traceroute:subject id="subj.998ef2095b10b5587a5b8cc4f9da4791">
+                <nmwgt:endPointPair>
+                    <nmwgt:src value="198.129.254.94" type="ipv4"/>
+                    <nmwgt:dst value="198.124.238.34" type="ipv4"/>
+                </nmwgt:endPointPair>
+            </traceroute:subject>
+            <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0</nmwg:eventType>
+            <nmwg:parameters id="params.998ef2095b10b5587a5b8cc4f9da4791">
+                <nmwg:parameter name="maxTtl">64</nmwg:parameter>
+                <nmwg:parameter name="waitTime">5</nmwg:parameter>
+                <nmwg:parameter name="packetSize">40</nmwg:parameter>
+            </nmwg:parameters>
+        </nmwg:metadata>
+        <nmwg:data metadataIdRef="meta.998ef2095b10b5587a5b8cc4f9da4791" id="data.998ef2095b10b5587a5b8cc4f9da4791.0">
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="3" hop="198.124.238.34" value="56.332" numBytes="" ttl="8" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="1" hop="198.129.254.93" value="0.168" numBytes="" ttl="1" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="2" hop="198.129.254.93" value="0.105" numBytes="" ttl="1" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="3" hop="198.129.254.93" value="0.093" numBytes="" ttl="1" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="1" hop="134.55.40.174" value="0.204" numBytes="" ttl="2" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="2" hop="134.55.40.174" value="0.179" numBytes="" ttl="2" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="3" hop="134.55.40.174" value="0.178" numBytes="" ttl="2" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="1" hop="134.55.222.53" value="4.584" numBytes="" ttl="3" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="2" hop="134.55.222.53" value="4.521" numBytes="" ttl="3" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="3" hop="134.55.222.53" value="4.514" numBytes="" ttl="3" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="1" hop="134.55.220.150" value="23.641" numBytes="" ttl="4" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="2" hop="134.55.220.150" value="19.397" numBytes="" ttl="4" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="3" hop="134.55.220.150" value="19.414" numBytes="" ttl="4" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="1" hop="134.55.39.106" value="42.903" numBytes="" ttl="5" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="2" hop="134.55.39.106" value="42.884" numBytes="" ttl="5" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="3" hop="134.55.39.106" value="42.887" numBytes="" ttl="5" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="1" hop="134.55.221.6" value="56.405" numBytes="" ttl="6" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="2" hop="134.55.221.6" value="56.388" numBytes="" ttl="6" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="3" hop="134.55.221.6" value="56.391" numBytes="" ttl="6" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="1" hop="134.55.220.54" value="56.365" numBytes="" ttl="7" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="2" hop="134.55.220.54" value="56.36" numBytes="" ttl="7" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="3" hop="134.55.220.54" value="56.379" numBytes="" ttl="7" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="1" hop="198.124.238.34" value="56.344" numBytes="" ttl="8" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+            <traceroute:datum xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" queryNum="2" hop="198.124.238.34" value="56.334" numBytes="" ttl="8" valueUnits="ms" timeValue="1309273409" timeType="unix"/>
+        </nmwg:data>
+    </nmwg:message>  
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

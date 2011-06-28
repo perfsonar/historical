@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message type="SetupDataRequest" id="setupDataRequest1"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
+
+
+    <!-- get results between all stored endpoints in a given time range -->  
+    <nmwg:metadata id="metadata.12773104" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+      <nmwg:key xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="key-1">
+        <nmwg:parameters id="parameters-key-1">
+            <nmwg:parameter name="maKey">998ef2095b10b5587a5b8cc4f9da4791</nmwg:parameter>
+        </nmwg:parameters>
+      </nmwg:key>
+      <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0</nmwg:eventType>
+      <nmwg:parameters id="traceParams1">
+        <nmwg:parameter name="startTime">1309272993</nmwg:parameter>
+        <nmwg:parameter name="endTime">1309273893</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:metadata>
+    
+    <nmwg:data id="data1" metadataIdRef="metadata.12773104" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"/>
+    
+</nmwg:message>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message type="MetadataKeyRequest" id="metadataKeyRequest1"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
+  
+  <!-- Get the key for data between two given endpoints -->
+  <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <traceroute:subject xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0" id="s-in-iperf-1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="ipv4" value="198.129.254.94" />
+        <nmwgt:dst type="ipv4" value="198.124.238.34" />
+      </nmwgt:endPointPair>
+    </traceroute:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0</nmwg:eventType>
+    <nmwg:parameters id="params1"></nmwg:parameters>
+  </nmwg:metadata> 
+  <nmwg:data id="data1" metadataIdRef="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"/>
+
+</nmwg:message>

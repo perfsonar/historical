@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Header/>
+  <SOAP-ENV:Body>
+    <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" messageIdRef="registerDataResponse1" id="message.16365678" type="RegisterDataResponse">
+        <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" xmlns:traceroute="http://ggf.org/ns/nmwg/tools/traceroute/2.0/" id="meta.AAAFFF">
+          <traceroute:subject id="subj.AAAFFF">
+            <nmwgt:endPointPair>
+              <nmwgt:src type="ipv4" value="198.129.254.30"/>
+              <nmwgt:dst type="ipv4" value="198.124.252.141"/>
+            </nmwgt:endPointPair>
+          </traceroute:subject>
+          <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0/</nmwg:eventType>
+          <nmwg:parameters id="params.AAAFFF">
+            <nmwg:parameter name="firstTtl">1</nmwg:parameter>
+            <nmwg:parameter name="maxTtl">64</nmwg:parameter>
+            <nmwg:parameter name="waitTime">5</nmwg:parameter>
+            <nmwg:parameter name="pause">0</nmwg:parameter>
+            <nmwg:parameter name="packetSize">40</nmwg:parameter>
+          </nmwg:parameters>
+        </nmwg:metadata>
+    </nmwg:message>
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

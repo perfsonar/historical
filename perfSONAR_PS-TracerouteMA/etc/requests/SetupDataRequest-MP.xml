@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message type="SetupDataRequest" id="setupDataRequest1"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
+
+  <!-- get results between two endpoints in given time range -->
+  <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <trace:subject xmlns:trace= "http://ggf.org/ns/nmwg/tools/traceroute/2.0" id="trace1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="ipv4" value="198.129.254.94" />
+        <nmwgt:dst type="ipv4" value="198.124.238.34" />
+      </nmwgt:endPointPair>
+    </trace:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/traceroute/2.0</nmwg:eventType>
+    <nmwg:parameters id="traceParams1">
+        <nmwg:parameter name="maxTtl">64</nmwg:parameter>
+        <nmwg:parameter name="waitTime">5</nmwg:parameter>
+        <nmwg:parameter name="packetSize">40</nmwg:parameter>
+    </nmwg:parameters>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" metadataIdRef="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"/>
+  
+</nmwg:message>
