@@ -63,7 +63,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=490 490] - Reverse Traceroute/Ping does not hold 'function' argument between CGI submission
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=491 491] - IPV6 Survey
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=492 492] - additional documentation needed on what to do after installing the NP Toolkit   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=493 493] - LS Cache Daemon Download Problem   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=494 494] - Disable HTTP Trace on pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=495 495] - PHP (Cacti) Vulnerability on pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=499 499] - Review times and frequencies of LS registration   
@@ -143,6 +142,8 @@ TBD
      * <font color="green">_*FIXED 6/28/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=484 484] - ~~service_watcher runs two instances at the same time at 1AM~~
      * <font color="green">_*FIXED 6/24/2011*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=493 493] - ~~LS Cache Daemon Download Problem~~
+     * <font color="green">_*FIXED 6/28/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=497 497] - ~~Traceroute MA does not query over long ranges of time~~
      * <font color="green">_*FIXED 4/11/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=501 501] - ~~IPv6 Support in Web100_Userland~~
