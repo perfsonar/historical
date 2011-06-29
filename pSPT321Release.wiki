@@ -48,15 +48,13 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - Firewall guidance       
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit       
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - Package for the client modules
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=425 425] - SNMP MA/Cacti Reports wrong capacity         
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=443 443] - Client::LS::Remote not re-registering when keep-alives fail to hLS      
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=425 425] - SNMP MA/Cacti Reports wrong capacity            
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=446 446] - Add option to set timeout in Client::LS    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=453 453] - Document/Add addiional options to interface configuration   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=459 459] -	Nagios plug-in to check toolkit version   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=480 480] - Update Project Web Sites
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=481 481] - in perfsonar-ps: cache.pl does not collect topology service information
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=482 482] - TCP tuning settings for Toolkit need updating   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=483 483] - prompt to subscribe to perfsonar-user@internet2.edu list when installing toolkit    
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=488 488] - IPv6 Compatibility for all perfSONAR services and products
@@ -75,7 +73,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=514 514] - changes to owamp, bwctl, or PingER config should automatically update traceroute config too	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=518 518] - Reverse Traceroute/Ping is not IPv6 Capable
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=519 519] - Add support for DNS 'rotate' option
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=520 520] - NAGIOS BWCTL Probe Support for TCP/UDP tests
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=521 521] - NAGIOS Plugins Documentation Clarification
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=523 523] - Upgrade to CentoOS 5.6
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=524 524] - SNMP MA SQLite Backend testing
@@ -87,6 +84,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=349 349] - Identify and Archive the path measured by bwctl & owamp  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=424 424] - duplicate entries in pSB/bwctl mesh   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - myricom driver isn't up to date   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=443 443] - Client::LS::Remote not re-registering when keep-alives fail to hLS   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=444 444] - Nagios Plug-In Packaging
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=451 451] - Upgrade NDT to 3.6.x lineage on the pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=454 454] - Add GridFTP Servers to LSRegistrationDaemon      
@@ -98,6 +96,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=504 504] - Add event type to pSB for OWAMP data with buckets required
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=507 507] - Services must include examples of requests and responses
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=516 516] - regular testing gui doesn't preserve udp bandwidth setting
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=520 520] - NAGIOS BWCTL Probe Support for TCP/UDP tests
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=529 529] - Disable LS and LS Registration Daemon when Administrative Info is missing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=531 531] - Remove non-functional options in the regular testing setup   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=535 535] - NTP Stats on pSPT   
@@ -140,6 +139,8 @@ TBD
      * <font color="green">_*FIXED 4/11/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=473 473] - ~~Display NTP Status on the Local Services page~~
      * <font color="green">_*FIXED 6/28/2011*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=481 481] - ~~in perfsonar-ps: cache.pl does not collect topology service information~~
+     * <font color="green">_*FIXED 6/29/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=484 484] - ~~service_watcher runs two instances at the same time at 1AM~~
      * <font color="green">_*FIXED 6/24/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=493 493] - ~~LS Cache Daemon Download Problem~~
