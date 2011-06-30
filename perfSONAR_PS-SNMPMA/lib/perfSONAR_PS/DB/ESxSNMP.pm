@@ -178,7 +178,7 @@ sub closeDB {
 =head2 info($self, { })
 
 Get info about the given ESxSNMP variable.
-
+ 
 =cut
 
 sub info {
@@ -203,10 +203,10 @@ sub query {
     my %result   = ();
     my @headings = ();
     unless ( $parameters->{cf} ) {
-        $self->{LOGGER}->error("Consolidation function invalid.");
+        $self->{LOGGER}->debug("No consolidation function provided.");
     }
 
-    $self->{LOGGER}->error("Booyah! " . $parameters->{name});
+    $self->{LOGGER}->info("Booyah! " . $parameters->{name});
 
     my $q = $parameters->{name} . 
         "?begin=" .  $parameters->{start} .
@@ -216,15 +216,19 @@ sub query {
         #$parameters->{cf},
         #$parameters->{resolution});
 
-    $self->{LOGGER}->error("Booyah2.0! " . $q);
+    $self->{LOGGER}->info("Booyah! " . $q);
     my $answer = $self->{CLIENT}->get_uri($q);
-    $self->{LOGGER}->error(Dumper($answer));
+    #$self->{LOGGER}->error(Dumper($answer));
 
     # XXX improve error handling
 
-    if($answer == -1) {
+    unless($answer && $answer != -1) {
         $self->{LOGGER}->error("unable to fetch data");
         return;
+    }
+
+    foreach my $d ( @{$answer->{'data'}} ) {
+        $d->[1] *= 8;
     }
 
     return $answer->{'data'};

@@ -178,6 +178,14 @@ sub init {
             return -1;
         }
     }
+    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
+        unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_file"}
+            and $self->{CONF}->{"snmp"}->{"metadata_db_file"} )
+        {
+            $self->{LOGGER}->warn( "Value for 'metadata_db_file' is not set, setting to 'snmpstore.db'." );
+            $self->{CONF}->{"snmp"}->{"metadata_db_file"} = "snmpstore.db";
+        }
+    }
     else {
         $self->{LOGGER}->fatal( "Wrong value for 'metadata_db_type' set." );
         return -1;
@@ -407,6 +415,16 @@ sub init {
         $metadatadb->closeDB( { error => \$error } );
         $self->{METADATADB} = q{};
     }
+    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
+        #make sure database is created
+        my $metadatadb = $self->prepareSQLiteDatabases;
+        unless ( $metadatadb ) {
+            $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"snmp"}->{"metadata_db_file"});
+            return -1;
+        }
+        $metadatadb->closeDB();
+        $self->{METADATADB} = q{};
+    }
     else {
         $self->{LOGGER}->fatal( "Wrong value for 'metadata_db_type' set." );
         return -1;
@@ -539,7 +557,12 @@ Regenerate the store file if it has gotten old.
 sub refresh_store_file {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { error => 0 } );
-
+    
+    #sqlite has no store file to refresh
+    if($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite"){
+        return 0;
+    }
+    
     my $store_file = $self->{CONF}->{"snmp"}->{"metadata_db_file"};
 
     if ( -f $store_file ) {
@@ -604,6 +627,24 @@ sub prepareDatabases {
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "There was an error opening \"" . $self->{CONF}->{"snmp"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"snmp"}->{"metadata_db_file"} . "\": " . $error );
         return;
     }
+    return $metadatadb;
+}
+
+=head2 prepareSQLiteDatabases($self)
+
+Opens the SQLite metadata database
+
+=cut
+sub prepareSQLiteDatabases {
+    my $self = shift @_;
+
+    #create database
+    my $metadatadb = new perfSONAR_PS::DB::SQL( { name => "dbi:SQLite:dbname=" . $self->{CONF}->{"snmp"}->{"metadata_db_file"}, user => '', pass => '' } );
+    unless ( $metadatadb->openDB() == 0 ) {
+        throw perfSONAR_PS::Error_compat( "error.snmp.sqlite", "There was an error opening " . $self->{CONF}->{"snmp"}->{"metadata_db_file"} );
+        return;
+    }
+    
     return $metadatadb;
 }
 
@@ -736,6 +777,26 @@ sub buildHashedKeys {
             $self->{LOGGER}->debug( "Key id $hash maps to data element " . $data->getDocumentElement->getAttribute( "id" ) );
         }
     }
+    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
+         my $metadatadb = $self->prepareSQLiteDatabases();
+         unless ( $metadatadb ) {
+            $self->{LOGGER}->fatal( "Database could not be opened." );
+            return -1;
+        }
+        
+         my $results = $metadatadb->query({ query => "SELECT * FROM dataKeys" });
+         if( $results == -1 ){
+            $metadatadb->closeDB();
+            return -1;
+         }
+         
+         foreach my $result( @{$results} ){
+             my $hash = md5_hex( join '', @{$result} );
+             $id_to_hash{$hash} = 'data' . $result->[0];
+             $hash_to_id{'data' . $result->[0] } = $hash;
+         }
+         $metadatadb->closeDB();
+    }
     else {
         my $msg = "Wrong value for 'metadata_db_type' set.";
         $self->{LOGGER}->fatal( $msg );
@@ -784,6 +845,12 @@ sub registerLS {
         }
     }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
+        unless ( -f $self->{CONF}->{"snmp"}->{"metadata_db_file"} ) {
+            $self->{LOGGER}->fatal( "Store file not defined, disallowing registration." );
+            return -1;
+        }
+    }
+    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
         unless ( -f $self->{CONF}->{"snmp"}->{"metadata_db_file"} ) {
             $self->{LOGGER}->fatal( "Store file not defined, disallowing registration." );
             return -1;
@@ -841,6 +908,18 @@ sub registerLS {
         }
         @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata", txn => q{}, error => \$error } );
         $metadatadb->closeDB( { error => \$error } );
+    }
+    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
+        my $metadatadb = $self->prepareSQLiteDatabases;
+        unless ( $metadatadb ) {
+            $self->{LOGGER}->fatal( "Database could not be opened." );
+            return -1;
+        }
+        my $resultsXMLObj = $self->sqLiteCreateMetadata( { metadatadb => $metadatadb } );
+        foreach my $md ( $resultsXMLObj->get_nodelist ){
+            push @resultsString, $md->toString;
+        }
+        $metadatadb->closeDB();
     }
     else {
         $self->{LOGGER}->fatal( "Wrong value for 'metadata_db_type' set." );
@@ -1135,10 +1214,13 @@ sub maMetadataKeyRequest {
             throw perfSONAR_PS::Error_compat( "Database could not be opened." );
             return;
         }
-    }
-    unless ( ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" )
-        or ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) )
-    {
+    }elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
+        $self->{METADATADB} = $self->prepareSQLiteDatabases();
+        unless ( $self->{METADATADB} ) {
+            throw perfSONAR_PS::Error_compat( "SQLite database could not be opened." );
+            return;
+        }
+    }elsif( $self->{CONF}->{"snmp"}->{"metadata_db_type"} ne "file" ){
         throw perfSONAR_PS::Error_compat( "Wrong value for 'metadata_db_type' set." );
         return;
     }
@@ -1282,50 +1364,64 @@ sub metadataKeyRetrieveMetadataData {
     my $mdId        = q{};
     my $dId         = q{};
     my $queryString = q{};
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
-    }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
-    }
+    my $results     = q{};
+    my $dataResults = q{};
 
-    $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
-
-    my $results             = $parameters->{metadatadb}->querySet( { query => $queryString } );
-    my %et                  = ();
-    my $eventTypes          = find( $parameters->{metadata}, "./nmwg:eventType", 0 );
-    my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
-    foreach my $e ( $eventTypes->get_nodelist ) {
-        my $value = extract( $e, 0 );
-        if ( $value ) {
-            $et{$value} = 1;
+    if( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ){
+        $results = $self->sqLiteCreateMetadata({ metadatadb => $parameters->{metadatadb}, node => $parameters->{metadata} });
+        my @mdIds = ();
+        foreach my $md ( $results->get_nodelist ) {
+            my $tmpMdId = $md->getAttribute( "id" );
+            $tmpMdId =~ s/meta//;
+            push @mdIds,  $tmpMdId;
         }
-    }
-    foreach my $se ( $supportedEventTypes->get_nodelist ) {
-        my $value = extract( $se, 0 );
-        if ( $value ) {
-            $et{$value} = 1;
+        $dataResults = $self->sqLiteCreateKeyData({ metadatadb => $parameters->{metadatadb}, metaDataIds => \@mdIds });
+    }else{
+        if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
+            $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
         }
-    }
-
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        $queryString = "/nmwg:store/nmwg:data";
-    }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
-    }
-
-    if ( $eventTypes->size() or $supportedEventTypes->size() ) {
-        $queryString = $queryString . "[./nmwg:key/nmwg:parameters/nmwg:parameter[(\@name=\"supportedEventType\" or \@name=\"eventType\")";
-        foreach my $e ( sort keys %et ) {
-            $queryString = $queryString . " or (\@value=\"" . $e . "\" or text()=\"" . $e . "\")";
+        elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+            $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
         }
-        $queryString = $queryString . "]]";
+    
+        $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
+        $results             = $parameters->{metadatadb}->querySet( { query => $queryString } );
+        my %et                  = ();
+        my $eventTypes          = find( $parameters->{metadata}, "./nmwg:eventType", 0 );
+        my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
+        foreach my $e ( $eventTypes->get_nodelist ) {
+            my $value = extract( $e, 0 );
+            if ( $value ) {
+                $et{$value} = 1;
+            }
+        }
+        foreach my $se ( $supportedEventTypes->get_nodelist ) {
+            my $value = extract( $se, 0 );
+            if ( $value ) {
+                $et{$value} = 1;
+            }
+        }
+    
+        if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
+            $queryString = "/nmwg:store/nmwg:data";
+        }
+        elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+            $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
+        }
+    
+        if ( $eventTypes->size() or $supportedEventTypes->size() ) {
+            $queryString = $queryString . "[./nmwg:key/nmwg:parameters/nmwg:parameter[(\@name=\"supportedEventType\" or \@name=\"eventType\")";
+            foreach my $e ( sort keys %et ) {
+                $queryString = $queryString . " and (\@value=\"" . $e . "\" or text()=\"" . $e . "\")";
+            }
+            $queryString = $queryString . "]]";
+        }
+        
+        $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
+        
+        $dataResults = $parameters->{metadatadb}->querySet( { query => $queryString } );
     }
-
-    $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
-
-    my $dataResults = $parameters->{metadatadb}->querySet( { query => $queryString } );
+    
     if ( $results->size() > 0 and $dataResults->size() > 0 ) {
         my %mds = ();
         foreach my $md ( $results->get_nodelist ) {
@@ -1413,10 +1509,13 @@ sub maDataInfoRequest {
             throw perfSONAR_PS::Error_compat( "Database could not be opened." );
             return;
         }
-    }
-    unless ( ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" )
-        or ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) )
-    {
+    }elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
+        $self->{METADATADB} = $self->prepareSQLiteDatabases();
+        unless ( $self->{METADATADB} ) {
+            throw perfSONAR_PS::Error_compat( "SQLite database could not be opened." );
+            return;
+        }
+    }elsif( $self->{CONF}->{"snmp"}->{"metadata_db_type"} ne "file" ){
         throw perfSONAR_PS::Error_compat( "Wrong value for 'metadata_db_type' set." );
         return;
     }
@@ -1478,6 +1577,7 @@ sub dataInfoRetrieveKey {
 
     my $mdId    = "metadata." . genuid();
     my $dId     = "data." . genuid();
+    my $results = q{};
     my $hashKey = extract( find( $parameters->{key}, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
     unless ( $hashKey ) {
         my $msg = "Key error in metadata storage - key format is incorrect.";
@@ -1497,14 +1597,17 @@ sub dataInfoRetrieveKey {
     my $query = q{};
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
         $query = "/nmwg:store/nmwg:data[\@id=\"" . $hashId . "\"]";
+        $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
+        $results = $parameters->{metadatadb}->querySet( { query => $query } );
     }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
         $query = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data[\@id=\"" . $hashId . "\"]";
+        $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
+        $results = $parameters->{metadatadb}->querySet( { query => $query } );
+    }elsif( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ){
+        $results = $self->sqLiteCreateKeyData( { metadatadb => $parameters->{metadatadb}, keyId => "$hashId" } );
     }
 
-    $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
-
-    my $results = $parameters->{metadatadb}->querySet( { query => $query } );
     if ( $results->size() != 1 ) {
         my $msg = "Key error in metadata storage - key not found in database.";
         $self->{LOGGER}->error( $msg );
@@ -1597,50 +1700,65 @@ sub dataInfoRetrieveMetadataData {
     my $mdId        = q{};
     my $dId         = q{};
     my $queryString = q{};
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
-    }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
-    }
-
-    $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
-
-    my $results             = $parameters->{metadatadb}->querySet( { query => $queryString } );
-    my %et                  = ();
-    my $eventTypes          = find( $parameters->{metadata}, "./nmwg:eventType", 0 );
-    my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
-    foreach my $e ( $eventTypes->get_nodelist ) {
-        my $value = extract( $e, 0 );
-        if ( $value ) {
-            $et{$value} = 1;
+    my $results     = q{};
+    my $dataResults = q{};
+    
+    if( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ){
+        $results = $self->sqLiteCreateMetadata({ metadatadb => $parameters->{metadatadb}, node => $parameters->{metadata} });
+        my @mdIds = ();
+        foreach my $md ( $results->get_nodelist ) {
+            my $tmpMdId = $md->getAttribute( "id" );
+            $tmpMdId =~ s/meta//;
+            push @mdIds,  $tmpMdId;
         }
-    }
-    foreach my $se ( $supportedEventTypes->get_nodelist ) {
-        my $value = extract( $se, 0 );
-        if ( $value ) {
-            $et{$value} = 1;
+        $dataResults = $self->sqLiteCreateKeyData({ metadatadb => $parameters->{metadatadb}, metaDataIds => \@mdIds });
+    }else{
+        if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
+            $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
         }
-    }
-
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        $queryString = "/nmwg:store/nmwg:data";
-    }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
-    }
-
-    if ( $eventTypes->size() or $supportedEventTypes->size() ) {
-        $queryString = $queryString . "[./nmwg:key/nmwg:parameters/nmwg:parameter[(\@name=\"supportedEventType\" or \@name=\"eventType\")";
-        foreach my $e ( sort keys %et ) {
-            $queryString = $queryString . " or (\@value=\"" . $e . "\" or text()=\"" . $e . "\")";
+        elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+            $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
         }
-        $queryString = $queryString . "]]";
+    
+        $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
+    
+        my $results             = $parameters->{metadatadb}->querySet( { query => $queryString } );
+        my %et                  = ();
+        my $eventTypes          = find( $parameters->{metadata}, "./nmwg:eventType", 0 );
+        my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
+        foreach my $e ( $eventTypes->get_nodelist ) {
+            my $value = extract( $e, 0 );
+            if ( $value ) {
+                $et{$value} = 1;
+            }
+        }
+        foreach my $se ( $supportedEventTypes->get_nodelist ) {
+            my $value = extract( $se, 0 );
+            if ( $value ) {
+                $et{$value} = 1;
+            }
+        }
+    
+        if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
+            $queryString = "/nmwg:store/nmwg:data";
+        }
+        elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+            $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
+        }
+    
+        if ( $eventTypes->size() or $supportedEventTypes->size() ) {
+            $queryString = $queryString . "[./nmwg:key/nmwg:parameters/nmwg:parameter[(\@name=\"supportedEventType\" or \@name=\"eventType\")";
+            foreach my $e ( sort keys %et ) {
+                $queryString = $queryString . " and (\@value=\"" . $e . "\" or text()=\"" . $e . "\")";
+            }
+            $queryString = $queryString . "]]";
+        }
+        
+        $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
+        
+        my $dataResults = $parameters->{metadatadb}->querySet( { query => $queryString } );
     }
-
-    $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
-
-    my $dataResults = $parameters->{metadatadb}->querySet( { query => $queryString } );
+    
     if ( $results->size() > 0 and $dataResults->size() > 0 ) {
         my %mds = ();
         foreach my $md ( $results->get_nodelist ) {
@@ -1769,10 +1887,13 @@ sub maSetupDataRequest {
             throw perfSONAR_PS::Error_compat( "Database could not be opened." );
             return;
         }
-    }
-    unless ( ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" )
-        or ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) )
-    {
+    }elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
+        $self->{METADATADB} = $self->prepareSQLiteDatabases();
+        unless ( $self->{METADATADB} ) {
+            throw perfSONAR_PS::Error_compat( "SQLite database could not be opened." );
+            return;
+        }
+    }elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} ne "file" ) {
         throw perfSONAR_PS::Error_compat( "Wrong value for 'metadata_db_type' set." );
         return;
     }
@@ -1867,14 +1988,17 @@ sub setupDataRetrieveKey {
     my $query = q{};
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
         $query = "/nmwg:store/nmwg:data[\@id=\"" . $hashId . "\"]";
+        $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
+        $results = $parameters->{metadatadb}->querySet( { query => $query } );
     }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
         $query = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data[\@id=\"" . $hashId . "\"]";
+        $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
+        $results = $parameters->{metadatadb}->querySet( { query => $query } );
+    }elsif( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ){
+        $results = $self->sqLiteCreateKeyData( { metadatadb => $parameters->{metadatadb}, keyId => "$hashId" } );
     }
 
-    $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
-
-    $results = $parameters->{metadatadb}->querySet( { query => $query } );
     if ( $results->size() != 1 ) {
         my $msg = "Key error in metadata storage - key not found in database.";
         $self->{LOGGER}->error( $msg );
@@ -1950,6 +2074,8 @@ sub setupDataRetrieveMetadataData {
 
     my $mdId = q{};
     my $dId  = q{};
+    my $results     = q{};
+    my $dataResults = q{};
     my $msg  = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.setupDataRetrieveMetadataData.start" );
     $self->{NETLOGGER}->debug( $msg );
 
@@ -1961,44 +2087,55 @@ sub setupDataRetrieveMetadataData {
         $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
     }
 
-    $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
-
-    my $results = $parameters->{metadatadb}->querySet( { query => $queryString } );
-
-    my %et                  = ();
-    my $eventTypes          = find( $parameters->{metadata}, "./nmwg:eventType", 0 );
-    my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
-    foreach my $e ( $eventTypes->get_nodelist ) {
-        my $value = extract( $e, 0 );
-        if ( $value ) {
-            $et{$value} = 1;
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ){
+        $results = $self->sqLiteCreateMetadata({ metadatadb => $parameters->{metadatadb}, node => $parameters->{metadata} });
+        my @mdIds = ();
+        foreach my $md ( $results->get_nodelist ) {
+            my $tmpMdId = $md->getAttribute( "id" );
+            $tmpMdId =~ s/meta//;
+            push @mdIds,  $tmpMdId;
         }
-    }
-    foreach my $se ( $supportedEventTypes->get_nodelist ) {
-        my $value = extract( $se, 0 );
-        if ( $value ) {
-            $et{$value} = 1;
+        $dataResults = $self->sqLiteCreateKeyData({ metadatadb => $parameters->{metadatadb}, metaDataIds => \@mdIds });
+    } 
+    else {
+        $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
+        $results = $parameters->{metadatadb}->querySet( { query => $queryString } );
+        
+        my %et                  = ();
+        my $eventTypes          = find( $parameters->{metadata}, "./nmwg:eventType", 0 );
+        my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
+        foreach my $e ( $eventTypes->get_nodelist ) {
+            my $value = extract( $e, 0 );
+            if ( $value ) {
+                $et{$value} = 1;
+            }
         }
-    }
-
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        $queryString = "/nmwg:store/nmwg:data";
-    }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
-    }
-
-    if ( $eventTypes->size() or $supportedEventTypes->size() ) {
-        $queryString = $queryString . "[./nmwg:key/nmwg:parameters/nmwg:parameter[(\@name=\"supportedEventType\" or \@name=\"eventType\")";
-        foreach my $e ( sort keys %et ) {
-            $queryString = $queryString . " or (\@value=\"" . $e . "\" or text()=\"" . $e . "\")";
+        foreach my $se ( $supportedEventTypes->get_nodelist ) {
+            my $value = extract( $se, 0 );
+            if ( $value ) {
+                $et{$value} = 1;
+            }
         }
-        $queryString = $queryString . "]]";
+    
+        if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
+            $queryString = "/nmwg:store/nmwg:data";
+        }
+        elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+            $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
+        }
+    
+        if ( $eventTypes->size() or $supportedEventTypes->size() ) {
+            $queryString = $queryString . "[./nmwg:key/nmwg:parameters/nmwg:parameter[(\@name=\"supportedEventType\" or \@name=\"eventType\")";
+            foreach my $e ( sort keys %et ) {
+                $queryString = $queryString . " and (\@value=\"" . $e . "\" or text()=\"" . $e . "\")";
+            }
+            $queryString = $queryString . "]]";
+        }
+        
+        $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
+        $dataResults = $parameters->{metadatadb}->querySet( { query => $queryString } );
     }
-
-    $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
-
-    my $dataResults = $parameters->{metadatadb}->querySet( { query => $queryString } );
+    
     my %used = ();
     for my $x ( 0 .. $dataResults->size() ) {
         $used{$x} = 0;
@@ -2519,6 +2656,7 @@ sub retrieveESxSNMP {
 
     if ( !$result ) {
         $self->{LOGGER}->error( "ESxSNMP error: unable to retrieve data" );
+        throw perfSONAR_PS::Error_compat( "error.ma.storage", "Unable to retrieve SNMP data from ESxSNMP" );
     }
     else {
         my $prefix = "nmwg";
@@ -2693,6 +2831,289 @@ sub getDataRRD {
     }
 }
 
+=head2 sqLiteCreateMetadata( $self, { metadatadb, node } )
+
+Generates metadata from sqlite database. Accepts a perfSONAR_PS::DB::SQL database handle as a 
+required parameter. Also optionally accepts a "node" which is a metadata LibXml node from the 
+request that it uses to filter the metadata returned. 
+
+=cut
+sub sqLiteCreateMetadata {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(@args, { metadatadb => 1, node => 0 });
+    my @resultsString = ();
+    
+    my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.sqLiteCreateMetadata.start" );
+    $self->{NETLOGGER}->debug( $msg );
+    
+    #build a map to grab the prexies of the namespaces
+    my %nsPrefixMap = ();
+    foreach my $prefix( keys %ma_namespaces ){
+        $nsPrefixMap{$ma_namespaces{$prefix}} = $prefix;
+    }
+    
+    #map of database fields in interface table
+    my %xfaceDbFields = ( 'urn' => 'urn',
+                     'hostName' => 'hostName',
+                     'ifName' => 'ifName',
+                     'ifDescription' => 'ifDescription',
+                     'ifAddress' => 'ifAddress',
+                     'capacity' => 'capacity',
+                     'direction' => 'direction',
+                     'authRealm' => 'authRealm',
+                   );
+                
+    #Build where
+    my $where = q{};
+    if ( $parameters->{node} && $parameters->{node}->getType != 8 && $parameters->{node}->hasChildNodes()) {
+        foreach my $c ( $parameters->{node}->childNodes ) {
+            if($c->nodeName =~ /(\w+:)?subject/ && $c->hasChildNodes()){
+                foreach my $sc ( $c->childNodes ) {
+                    if($sc->nodeName =~ /(\w+:)?interface/ && $sc->hasChildNodes()){
+                        foreach my $ic ( $sc->childNodes ) {
+                            my $elem_name = $ic->nodeName;
+                            $elem_name =~ s/^\w+://;
+                            if($ic->textContent && exists $xfaceDbFields{$elem_name}){
+                                $where .= ' AND ' if( $where );
+                                $where .= 'i.' . $xfaceDbFields{$elem_name} . "='" . $ic->textContent . "'";
+                            }
+                        }
+                    }
+                }
+            }elsif($c->nodeName =~ /(\w+:)?eventType/ && $c->textContent){
+                my $namespace = $c->textContent;
+                $namespace .= '/' if(exists $nsPrefixMap{$namespace.'/'});
+                $where .= ' AND ' if( $where );
+                $where .= ' (m.eventType = "' . $namespace . '" OR "' . $namespace . '" IN (SELECT value FROM metadataParams WHERE key="supportedEventType" AND metadataId=m.id))';
+            }
+        }
+    }
+    $where = ' WHERE ' . $where if($where);
+    
+    #get metadata
+    my $result = $parameters->{'metadatadb'}->query({
+            query => "SELECT m.id, i.urn, i.hostName, i.ifName, i.ifAddress, i.ifDescription, i.capacity, i.direction, i.authRealm, m.eventType FROM metadata AS m INNER JOIN interfaces AS i ON m.interfaceId = i.id" . $where
+        });
+    if($result == -1){
+        $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.sqLiteCreateMetadata.end", { status => -1 } );
+        $self->{NETLOGGER}->error( $msg );
+        return -1;
+    }
+     
+    #get parameters
+    my $param_where = q{};
+    if($where){ #only constrain params if metadata constrained
+        my $first = 1;
+        $param_where = ' WHERE metadataId IN (';
+        foreach my $md( @{$result} ){ 
+            $param_where .= ',' if($first != 1);
+            $param_where .= $md->[0];
+            $first = 0;
+        }
+        $param_where .= ')';
+    }
+    
+    my $paramResults = $parameters->{'metadatadb'}->query({
+        query => "SELECT metadataId, key, value FROM metadataParams" . $param_where
+    });
+    if($paramResults == -1){
+        $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.sqLiteCreateMetadata.end", { status => -1 } );
+        $self->{NETLOGGER}->error( $msg );
+        return -1;
+    }
+    
+    my %param_map = ();
+    foreach my $pr(@{$paramResults}){
+        if(! exists $param_map{$pr->[0]} ){
+            my @tmpArr =();
+            $param_map{$pr->[0]} = \@tmpArr;
+        }
+        my @tmpParam = ($pr->[1], $pr->[2]);
+        push @{ $param_map{$pr->[0]} }, \@tmpParam;
+    }
+    
+    #loop through metatdata and grab parameters
+    my $xml_doc = XML::LibXML->createDocument;
+    my $node_list = new XML::LibXML::NodeList;
+    foreach my $md( @{$result} ){   
+        my $namespace = $md->[9];
+        $namespace .= '/' if(exists $nsPrefixMap{$namespace.'/'});
+        
+        my $md_elem = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/base/2.0/', 'nmwg:metadata');
+        $md_elem->setAttributeNode($xml_doc->createAttribute('id', 'meta' . $md->[0]));
+        
+        my $subj_elem =  $xml_doc->createElementNS($namespace, $nsPrefixMap{$namespace} . ':subject');
+        $subj_elem->setAttributeNode($xml_doc->createAttribute('id', 'subj' . $md->[0]));
+        $md_elem->addChild($subj_elem);
+        
+        my $xface_elem = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/topology/2.0/', 'nmwgt:interface');
+        $subj_elem->addChild($xface_elem);
+        
+        if($md->[1]){
+            my $urn = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/topology/base/3.0/', 'nmwgt3:urn');
+            $urn->appendTextNode( $md->[1] );
+            $xface_elem->addChild($urn);
+        }
+        
+        if($md->[2]){
+            my $hostname = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/topology/2.0/', 'nmwgt:hostName');
+            $hostname->appendTextNode( $md->[2] );
+            $xface_elem->addChild($hostname);
+        }
+        
+        if($md->[3]){
+            my $ifname = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/topology/2.0/', 'nmwgt:ifName');
+            $ifname->appendTextNode( $md->[3] );
+            $xface_elem->addChild($ifname);
+        }
+        
+        if($md->[4]){
+            my $ifname = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/topology/2.0/', 'nmwgt:ifAddress');
+            $ifname->appendTextNode( $md->[4] );
+            $xface_elem->addChild($ifname);
+        }
+        
+        if($md->[5]){
+            my $ifdescr = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/topology/2.0/', 'nmwgt:ifDescription');
+            $ifdescr->appendTextNode( $md->[5] );
+            $xface_elem->addChild($ifdescr);
+        }
+        
+        if($md->[6]){
+            my $capacity = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/topology/2.0/', 'nmwgt:capacity');
+            $capacity->appendTextNode( $md->[6] );
+            $xface_elem->addChild($capacity);
+        }
+        
+        if($md->[7]){
+            my $direction = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/topology/2.0/', 'nmwgt:direction');
+            $direction->appendTextNode( $md->[7] );
+            $xface_elem->addChild($direction);
+        }
+        
+        if($md->[8]){
+            my $authRealm = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/topology/2.0/', 'nmwgt:authRealm');
+            $authRealm->appendTextNode( $md->[8] );
+            $xface_elem->addChild($authRealm);
+        }
+        
+        my $eventType = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/base/2.0/', 'nmwg:eventType');
+        $eventType->appendTextNode( $namespace );
+        $md_elem->addChild($eventType);
+		
+		my $params_elem = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/base/2.0/', 'nmwg:parameters');
+		$params_elem->setAttributeNode($xml_doc->createAttribute('id', 'metaparam' . $md->[0]));
+		$md_elem->addChild($params_elem);
+        
+        if(exists $param_map{$md->[0]}){
+            foreach my $param(@{$param_map{$md->[0]}}){
+                my $param_elem = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/base/2.0/', 'nmwg:parameter');
+                $param_elem->setAttributeNode($xml_doc->createAttribute('name', $param->[0]));
+                $param_elem->appendTextNode( $param->[1] );
+                $params_elem->addChild($param_elem);
+            }
+        }
+        
+        $node_list->push( $md_elem );
+    }
+    
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.sqLiteCreateMetadata.end" );
+    $self->{NETLOGGER}->debug( $msg );
+    
+    return $node_list;
+}
+
+=head2 sqLiteCreateKeyData( $self, { metadatadb, keyId, metaDataIds } )
+
+Generates the elements used to calculate the maKey and are also used by data backend to find data.
+Accepts a perfSONAR_PS::DB::SQL database handle as a required parameter. Also optionally accepts a 
+keyId which identifies the specific key to get. Alternatively it accepts a metaDataIds as an array
+of metaDataIds that much match for the key to be returned.
+
+=cut
+sub sqLiteCreateKeyData {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(@args, { metadatadb => 1, keyId => 0, metaDataIds => 0 });
+    my @resultsString = ();
+    
+    my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.sqLiteCreateKeyData.start" );
+    $self->{NETLOGGER}->debug( $msg );
+    
+    my $where = q{};
+    if($parameters->{'keyId'} && $parameters->{'metaDataIds'}){
+        #can't provide both
+        $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.sqLiteCreateKeyData.end", { status => -1 } );
+        $self->{NETLOGGER}->error( $msg );
+        return -1;
+    }elsif($parameters->{'keyId'}){
+        my $tmpId = $parameters->{'keyId'};
+        $tmpId =~ s/data//;
+        $where = " WHERE id=$tmpId";
+    }elsif($parameters->{'metaDataIds'} && ref($parameters->{'metaDataIds'}) eq 'ARRAY'){
+        $where = " WHERE metaDataId IN (" .  (join ',', @{$parameters->{'metaDataIds'}}) . ")";
+    }
+    
+    
+    #get the metadata
+    my $result = $parameters->{'metadatadb'}->query({
+            query => "SELECT id, metadataId, type, name, valueUnits, eventType FROM dataKeys" . $where
+        });
+    if($result == -1){
+        $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.sqLiteCreateKeyData.end", { status => -1 } );
+        $self->{NETLOGGER}->error( $msg );
+        return -1;
+    }
+    
+    #build a map to grab the prexies of the namespaces
+    my %nsPrefixMap = ();
+    foreach my $prefix( keys %ma_namespaces ){
+        $nsPrefixMap{$ma_namespaces{$prefix}} = $prefix;
+    }
+    
+    #loop through metatdata and grab parameters
+    my $xml_doc = XML::LibXML->createDocument;
+    my $node_list = new XML::LibXML::NodeList;
+    foreach my $d( @{$result} ){
+        my $data_elem = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/base/2.0/', 'nmwg:data');
+        $data_elem->setAttributeNode($xml_doc->createAttribute('id', 'data' . $d->[0]));
+        $data_elem->setAttributeNode($xml_doc->createAttribute('metadataIdRef', 'meta' . $d->[1]));
+        
+        my $key_elem = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/base/2.0/', 'nmwg:key');
+        $key_elem->setAttributeNode($xml_doc->createAttribute('id', 'keyid' . $d->[0]));
+        $data_elem->addChild($key_elem);
+        
+        my $params_elem = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/base/2.0/', 'nmwg:parameters');
+        $params_elem->setAttributeNode($xml_doc->createAttribute('id', 'dataparam' . $d->[0]));
+        $key_elem->addChild($params_elem);
+        
+        my $paramType = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/base/2.0/', 'nmwg:parameter');
+        $paramType->setAttributeNode($xml_doc->createAttribute('name', 'type'));
+        $paramType->appendTextNode( $d->[2] );
+        $params_elem->addChild($paramType);
+        
+        my $paramName = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/base/2.0/', 'nmwg:parameter');
+        $paramName->setAttributeNode($xml_doc->createAttribute('name', 'name'));
+        $paramName->appendTextNode( $d->[3] );
+        $params_elem->addChild($paramName);
+        
+        my $paramUnits = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/base/2.0/', 'nmwg:parameter');
+        $paramUnits->setAttributeNode($xml_doc->createAttribute('name', 'valueUnits'));
+        $paramUnits->appendTextNode( $d->[4] );
+        $params_elem->addChild($paramUnits);
+        
+        my $paramEventType = $xml_doc->createElementNS('http://ggf.org/ns/nmwg/base/2.0/', 'nmwg:parameter');
+        $paramEventType->setAttributeNode($xml_doc->createAttribute('name', 'eventType'));
+        $paramEventType->appendTextNode( $d->[5] );
+        $params_elem->addChild($paramEventType);
+        
+        $node_list->push( $data_elem );
+    }
+    
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.sqLiteCreateKeyData.end" );
+    $self->{NETLOGGER}->debug( $msg );
+    
+    return $node_list;
+}
 1;
 
 __END__

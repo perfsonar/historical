@@ -54,6 +54,7 @@ the following Perl libraries, libraries, and external tools to function:
     - Cwd
     - DBI
     - DBD::mysql
+    - DBD::sqlite
     - Data::UUID
     - Date::Manip
     - Digest::MD5

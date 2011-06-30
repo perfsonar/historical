@@ -2,6 +2,7 @@ Config::General
 Cwd
 DBI
 DBD::mysql
+DBD::SQLite
 Data::UUID
 Date::Manip
 Digest::MD5
