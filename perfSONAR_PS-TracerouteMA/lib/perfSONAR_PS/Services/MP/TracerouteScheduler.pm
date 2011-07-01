@@ -13,7 +13,11 @@ use perfSONAR_PS::Services::MP::TracerouteTest;
 
 use Log::Log4perl qw(get_logger);
 
-use constant PARAM_MAP => { 'FIRSTTTL' => 'first_hop' , 'MAXTTL' => 'max_ttl', 'WAITTIME' => 'query_timeout', 'PAUSE' => 'pause', 'PACKETSIZE' => 'packetlen', 'TIMEOUT' => 'timeout', 'ICMP' => 'use_icmp' };
+use constant PARAM_MAP => { 'FIRSTTTL' => 'first_hop' , 'MAXTTL' => 'max_ttl', 
+                            'WAITTIME' => 'query_timeout', 'PAUSE' => 'pause', 
+                            'PACKETSIZE' => 'packetlen', 'TIMEOUT' => 'timeout', 
+                            'ICMP' => 'use_icmp', 'TRACE4PROG' => 'trace4_program',
+                            'TRACE6PROG' => 'trace4_program', 'PREFIPV4' => 'prefer_ip_v4'};
 
 use fields 'LOGGER','NETLOGGER','TRACEROUTE_TESTS';
 
@@ -23,7 +27,13 @@ sub new {
     $self->{LOGGER} = get_logger( "perfSONAR_PS::Services::MP::TracerouteScheduler" );
     $self->{NETLOGGER} = get_logger( "NetLogger" );
     $self->{TRACEROUTE_TESTS} = ();
-    $self->init( $owmesh );
+    eval{
+        $self->init( $owmesh );
+    };
+    if($@){
+        $self->{LOGGER}->error("Error loading test config: " . $@);
+        die "Error loading test config: " . $@;
+    }
     
     return $self;
 }

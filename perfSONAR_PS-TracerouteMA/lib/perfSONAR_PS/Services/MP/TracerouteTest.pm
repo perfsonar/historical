@@ -7,6 +7,7 @@ our $VERSION = 3.1;
 use Data::Validate::IP qw(is_ipv4 is_ipv6);
 use File::Copy qw(move);
 use File::Temp qw(tempfile);
+use Net::DNS;
 use XML::LibXML;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
@@ -38,6 +39,7 @@ sub new {
     if(defined $trace_params && $trace_params){
         $self->{'TRACE_PARAMS'} = $trace_params;
         ($self->{'METADATA_ID'}, $self->{'METADATA'}) = $self->_createMetadata();
+        $self->determine_v4_or_v6();
     }
     
     if(defined $datadir && $datadir){
@@ -45,6 +47,108 @@ sub new {
     }
     
     return $self;
+}
+
+sub determine_v4_or_v6 {
+    my $self = shift @_;   
+    if(!$self->{'TRACE_PARAMS'}->{'host'}){
+        $self->{LOGGER}->warn("No destination host provided for traceroute test");
+        return;
+    }
+    
+    #Set the v4 and v6 versions of traceroute
+    my $trace6prog = $self->{'TRACE_PARAMS'}->{'TRACE6PROG'} ? $self->{'TRACE_PARAMS'}->{'TRACE6PROG'} : "traceroute6" ;
+    my $trace4prog = $self->{'TRACE_PARAMS'}->{'TRACE4PROG'} ? $self->{'TRACE_PARAMS'}->{'TRACE4PROG'} : "" ; #just use default if not specified
+    
+    #Determine the endpoint type
+    my $endpoint_type = $self->getEndpointType($self->{'TRACE_PARAMS'}->{'host'});
+    #If its a hostname then we have more work to do
+    if($endpoint_type eq 'hostname'){
+        my ($ipv4addr, $ipv6addr) = $self->getv4v6( $self->{'TRACE_PARAMS'}->{'host'} );
+        #Prefer Ipv6 by default otherwise use v4
+        if(!$self->{'TRACE_PARAMS'}->{'prefer_ip_v4'} && $ipv6addr){
+            $endpoint_type = 'ipv6';
+        }elsif($ipv4addr){
+            $endpoint_type = 'ipv4';
+        }elsif($ipv6addr){
+            # preference but no ipv4
+            $endpoint_type = 'ipv6'
+        }else{
+            $self->{LOGGER}->warn("Unable to find A or AAA record for " . $self->{'TRACE_PARAMS'}->{'host'});
+        }
+    }
+      
+    #set the traceroute program
+    if($endpoint_type eq "ipv6" ){
+        $self->{'TRACE_PARAMS'}->{'trace_program'} = $trace6prog;
+    }elsif($trace4prog){
+        $self->{'TRACE_PARAMS'}->{'trace_program'} = $trace4prog;
+    }
+    $self->verifySourceAddr( $endpoint_type ) if($endpoint_type ne 'hostname');
+    
+    $self->{LOGGER}->info("Test type is " . $endpoint_type . " for " . $self->{'TRACE_PARAMS'}->{'host'} );
+    $self->{LOGGER}->info("Source address is " . $self->{'TRACE_PARAMS'}->{'source_address'} );
+    $self->{LOGGER}->info("Traceroute program is " . ($self->{'TRACE_PARAMS'}->{'trace_program'} ? $self->{'TRACE_PARAMS'}->{'trace_program'} : 'traceroute'));
+    
+    #otherwise just let it do default ipv4 traceroute
+    return 0;
+}
+
+sub verifySourceAddr {
+    my($self, $destAddrType) = @_;
+    
+    if(!$self->{'TRACE_PARAMS'}->{'source_address'}){
+        return;
+    }
+    
+    #get source endpoint type
+    my $endpoint_type = $self->getEndpointType($self->{'TRACE_PARAMS'}->{'source_address'});
+    if($endpoint_type eq $destAddrType){
+        return;
+    }elsif($endpoint_type ne 'hostname'){
+        $self->{LOGGER}->warn("Specified an $endpoint_type address " . $self->{'TRACE_PARAMS'}->{'source_address'} . " to a $destAddrType destination " . $self->{'TRACE_PARAMS'}->{'host'});
+        return;
+    }elsif($destAddrType eq 'ipv4'){
+        #can use hostnames for ipv4 traceroute
+        return;
+    }
+    #traceroute6 does not like it when you give the source as a hostname
+    #we need a v6 address if we get here...
+    my ($srcipv4addr, $srcipv6addr) = $self->getv4v6( $self->{'TRACE_PARAMS'}->{'source_address'} );
+    if($srcipv6addr && is_ipv6($srcipv6addr) && $srcipv6addr =~ /(.+)/){
+        $self->{'TRACE_PARAMS'}->{'source_address'} = $1; #gets around tainting error
+    }else{
+        $self->{LOGGER}->warn("Unable to find $destAddrType record for source address");
+    }
+}
+sub getv4v6 {
+    my ($self, $hostname) = @_;
+    my $ipv6addr = "";
+    my $ipv4addr = "";
+    my $res = Net::DNS::Resolver->new;
+    
+    #lookup IPv4 address
+    my $query = $res->search($hostname, "A");
+    if($query){
+        foreach my $rr ($query->answer) {
+            if($rr->type eq "A"){
+                $ipv4addr = $rr->address;
+                last;
+            }
+        }
+    }
+    #lookup IPv6 address
+    $query = $res->search($hostname, "AAAA");
+    if($query){
+        foreach my $rr ($query->answer) {
+            if($rr->type eq "AAAA"){
+                $ipv6addr = $rr->address;
+                last;
+            }
+        }
+    }
+    
+    return ($ipv4addr, $ipv6addr );
 }
 
 sub run {

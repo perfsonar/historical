@@ -425,7 +425,7 @@ sub initTables {
         measurement_id INT NOT NULL,
         ttl INT NOT NULL,
         addrType VARCHAR(10) NOT NULL,
-        addr VARCHAR(20) NOT NULL,
+        addr VARCHAR(150) NOT NULL,
         queryNum INT NOT NULL,
         numBytes INT,
         delay FLOAT NOT NULL,
