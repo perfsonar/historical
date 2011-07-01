@@ -42,14 +42,12 @@ TBD
  * Open Bugs 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - Add vmxnet module   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=224 224] - gLS API validation   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=242 242] - ps-buoy graph user interface improvements
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=245 245] - negative latency from graph is counterintuitive. Should at least explain why it happens.   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - Firewall guidance       
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit       
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - Package for the client modules
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=425 425] - SNMP MA/Cacti Reports wrong capacity               
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=453 453] - Document/Add addiional options to interface configuration   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=459 459] -	Nagios plug-in to check toolkit version   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=480 480] - Update Project Web Sites
@@ -63,7 +61,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=499 499] - Review times and frequencies of LS registration   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=500 500] - IPv6 Redirect for pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=502 502] - need to rework google code site to make a easy to find 'contrib' area
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=506 506] - status page "not running" clarification
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=508 508] - SSL Certificates on pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=512 512] - For toolkit building VM, change default output directory in i2_mock utility to psbuild user home 	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=513 513] - For toolkit building VM, add holding directory to psbuild user home directory 
@@ -78,6 +75,7 @@ TBD
  * Awaiting Testing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - ability to set peer_port and iperf_port using web config GUI  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=160 160] - ESnet SNMP MA Enhancements   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=242 242] - ps-buoy graph user interface improvements
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=321 321] - Link to error logs on services page/perfAdmin GUIs
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=349 349] - Identify and Archive the path measured by bwctl & owamp  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=424 424] - duplicate entries in pSB/bwctl mesh   
@@ -87,6 +85,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=446 446] - Add option to set timeout in Client::LS 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=451 451] - Upgrade NDT to 3.6.x lineage on the pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=454 454] - Add GridFTP Servers to LSRegistrationDaemon      
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=459 459] -	Nagios plug-in to check toolkit version   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=470 470] - bwctl/owamp limits gui doesn't support IPv6 addresses   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=471 471] - owamp limits file on pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=475 475] - nagios scripts do not support web proxies   
@@ -149,6 +148,8 @@ TBD
      * <font color="green">_*FIXED 4/11/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=501 501] - ~~IPv6 Support in Web100_Userland~~
      * <font color="green">_*FIXED 6/17/2011*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=506 506] - ~~status page "not running" clarification~~
+     * <font color="green">_*FIXED 6/30/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=510 510] - ~~validate recent Transport.pm and Client/MA.pm changes~~
      * <font color="green">_*FIXED 6/24/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=517 517] - ~~NPAD testing port wrong on pSPT~~
