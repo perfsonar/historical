@@ -57,8 +57,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=491 491] - IPV6 Survey
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=492 492] - additional documentation needed on what to do after installing the NP Toolkit   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=494 494] - Disable HTTP Trace on pSPT   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=495 495] - PHP (Cacti) Vulnerability on pSPT   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=500 500] - IPv6 Redirect for pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=502 502] - need to rework google code site to make a easy to find 'contrib' area
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=508 508] - SSL Certificates on pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=512 512] - For toolkit building VM, change default output directory in i2_mock utility to psbuild user home 	 
@@ -89,8 +87,10 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=475 475] - nagios scripts do not support web proxies   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=485 485] - ls_registration_daemon.conf is missing site_name even though host information entered
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=490 490] - Reverse Traceroute/Ping does not hold 'function' argument between CGI submission
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=495 495] - PHP (Cacti) Vulnerability on pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=496 496] - Mirrors for pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=499 499] - Review times and frequencies of LS registration
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=500 500] - IPv6 Redirect for pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=504 504] - Add event type to pSB for OWAMP data with buckets required
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=507 507] - Services must include examples of requests and responses
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=516 516] - regular testing gui doesn't preserve udp bandwidth setting
