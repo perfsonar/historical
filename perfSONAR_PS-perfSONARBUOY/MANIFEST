@@ -110,6 +110,7 @@ lib/perfSONAR_PS/DB/File.pm
 lib/perfSONAR_PS/DB/OWPDB.pm
 lib/perfSONAR_PS/DB/SQL.pm
 lib/perfSONAR_PS/DB/XMLDB.pm
+lib/perfSONAR_PS/DB/owhdb.pm
 lib/perfSONAR_PS/Error.pm
 lib/perfSONAR_PS/Error_compat.pm
 lib/perfSONAR_PS/EventTypeEquivalenceHandler.pm
