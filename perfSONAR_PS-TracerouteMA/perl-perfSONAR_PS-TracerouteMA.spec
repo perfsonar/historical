@@ -3,7 +3,6 @@
 
 # init scripts must be located in the 'scripts' directory
 %define init_script_traceroute_ma traceroute_ma
-%define init_script_traceroute_collector traceroute_collector
 %define init_script_traceroute_master traceroute_master
 %define init_script_traceroute_scheduler traceroute_scheduler
 %define init_script_traceroute_mp traceroute_ondemand_mp
@@ -147,9 +146,6 @@ mkdir -p $RPM_BUILD_ROOT/etc/init.d
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_traceroute_ma} > scripts/%{init_script_traceroute_ma}.new
 install -m 755 scripts/%{init_script_traceroute_ma}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_traceroute_ma}
 
-awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_traceroute_collector} > scripts/%{init_script_traceroute_collector}.new
-install -m 755 scripts/%{init_script_traceroute_collector}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_traceroute_collector}
-
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_traceroute_master} > scripts/%{init_script_traceroute_master}.new
 install -m 755 scripts/%{init_script_traceroute_master}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_traceroute_master}
 
@@ -164,7 +160,6 @@ mkdir -p /var/log/perfsonar
 chown perfsonar:perfsonar /var/log/perfsonar
 
 /sbin/chkconfig --add traceroute_ma
-/sbin/chkconfig --add traceroute_collector
 
 %post client
 mkdir -p /var/log/perfsonar
@@ -186,17 +181,13 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,perfsonar,perfsonar,-)
 %config(noreplace) %{install_base}/etc/daemon.conf
 %config(noreplace) %{install_base}/etc/daemon_logger.conf
-%config(noreplace) %{install_base}/etc/collector-daemon.conf
-%config(noreplace) %{install_base}/etc/collector-daemon_logger.conf
 %{install_base}/bin/tracedb.pl
 %{install_base}/bin/daemon.pl
 %{install_base}/scripts/install_dependencies.sh
 %{install_base}/scripts/prepare_environment_server.sh
 %{install_base}/scripts/traceroute_ma
-%{install_base}/scripts/traceroute_collector
 %{install_base}/lib/*
 /etc/init.d/traceroute_ma
-/etc/init.d/traceroute_collector
 
 %files client
 %defattr(-,perfsonar,perfsonar,-)
@@ -229,8 +220,6 @@ rm -rf $RPM_BUILD_ROOT
 if [ $1 -eq 0 ]; then
     /sbin/chkconfig --del traceroute_ma
     /sbin/service traceroute_ma stop
-    /sbin/chkconfig --del traceroute_collector
-    /sbin/service traceroute_collector stop
 fi
 
 %preun client
