@@ -74,6 +74,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=523 523] - Upgrade to CentoOS 5.6
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=524 524] - SNMP MA SQLite Backend testing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=534 534] - Document host/address behavior with regardst to v6 on the pSPT
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=539 539] - PingER will not run tests on hosts without IPv6 address
  * Awaiting Testing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - ability to set peer_port and iperf_port using web config GUI  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=160 160] - ESnet SNMP MA Enhancements   
