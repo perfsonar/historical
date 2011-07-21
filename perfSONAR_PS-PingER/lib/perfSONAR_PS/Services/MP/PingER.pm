@@ -595,18 +595,22 @@ sub getAgent {
     my $nodename = gethostbyaddr(  $iaddr, Socket::AF_INET );
     $logger->debug("IPV4 Addr= $iaddr_str   $nodename");
     my $if    = Net::Interface->new( $agent->interface );
-    my $ipv6 = lc(Net::Interface::inet_ntop($if->address(AF_INET6)));
-    $logger->debug("IPV6 Addr= $ipv6 ");
-    
+    my $ipv6;
+    eval {
+        $ipv6 = lc(Net::Interface::inet_ntop($if->address(AF_INET6)));
+        $logger->debug("IPV6 Addr= $ipv6 ");
+    };
+    if($EVAL_ERROR || !$ipv6) {
+        $logger->error("NO IPV6 Address available"); 
+    }
     $agent->source( $nodename );
-    $agent->destination_type eq 'ipv4'?$agent->sourceIp($iaddr_str):$agent->sourceIp($ipv6);
-    
+    $agent->destination_type eq 'ipv4'?$agent->sourceIp($iaddr_str):
+        $ipv6?$agent->sourceIp($ipv6):
+	           $logger->logdie("NO IPV6 Address available but IPV6 test is scheduled, please fix config");
     $agent->count( $test->{count} )           if $test->{count};
     $agent->packetSize( $test->{packetSize} ) if $test->{packetSize};
     $agent->ttl( $test->{ttl} )               if $test->{ttl};
     $agent->interval( $test->{interval} )     if $test->{interval};
-    
-  
     # timeouts
     $agent->timeout( $self->getConf( 'service_timeout' ) );
 
