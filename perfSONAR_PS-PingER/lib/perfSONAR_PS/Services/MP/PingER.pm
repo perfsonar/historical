@@ -1,8 +1,7 @@
 package perfSONAR_PS::Services::MP::PingER;
 
 use strict;
-
-#use warnings;
+use warnings;
 
 use version;
 our $VERSION = 3.1;
@@ -42,6 +41,7 @@ use perfSONAR_PS::Services::MP::Agent::PingER;
 use perfSONAR_PS::Services::MP::Config::PingER;
 
 use perfSONAR_PS::Client::LS::Remote;
+use perfSONAR_PS::Utils::DNS qw(reverse_dns);
 
 use Scalar::Util qw(blessed);
 use Data::Dumper;
@@ -60,7 +60,8 @@ our $logger = get_logger( "perfSONAR_PS::Services::MP::PingER" );
 our $basename = 'pingermp';
 
 our $processName     = 'perfSONAR-PS PingER MP';
-our $ping_parameters = '%executable% -c %count% -i %interval% -s %packetSize% -I %interface% -t %ttl% %destination%';
+our $iface_ping_parameters = '%executable% -c %count% -i %interval% -s %packetSize% -I %interface% -t %ttl% %destination%';
+our $ping_parameters = '%executable% -c %count% -i %interval% -s %packetSize% -B -t %ttl% %destination%';
 
 =head2 new( $conf )
 
@@ -121,9 +122,9 @@ sub init {
             $logger->logdie( "Must have either a service_accesspoint or an external address specified if you enable registration" );
         }
         $self->configureConf( 'ping4_exec', '/bin/ping', $self->getConf( 'ping4_exec' ) );
-        $self->configureConf( 'ping4_if', 'eth0', $self->getConf( 'ping4_if' ) );
+        $self->configureConf( 'ping4_if', undef, $self->getConf( 'ping4_if' ) );
         $self->configureConf( 'ping6_exec', '/bin/ping6', $self->getConf( 'ping6_exec' ) );
-	$self->configureConf( 'ping6_if', 'eth0', $self->getConf( 'ping6_if' ) );
+	$self->configureConf( 'ping6_if', undef, $self->getConf( 'ping6_if' ) );
        
         $self->configureConf( 'db_host', undef, $self->getConf( 'db_host' ) );
 
@@ -573,8 +574,26 @@ sub getAgent {
         unless defined $test;
 
     # get the appropiate agent and init it.
-    my $command =  $ping_parameters;
-   
+    my $command;
+    if ($test->{destination_type} eq "ipv4") {
+        if ($self->getConf('ping4_if')) {
+            $command = $iface_ping_parameters;
+        }
+        else {
+            $command = $ping_parameters;
+        }
+    }
+    else {
+        if ($self->getConf('ping6_if')) {
+            $command = $iface_ping_parameters;
+        }
+        else {
+            $command = $ping_parameters;
+        }
+    }
+
+    $logger->debug("Set command to: ".$command);
+
     my $agent = perfSONAR_PS::Services::MP::Agent::PingER->new( $command );
     $agent->init();
     my $s              = IO::Socket::INET->new( Proto => 'tcp' );
@@ -590,27 +609,12 @@ sub getAgent {
         $agent->interface(  $self->getConf('ping6_if' )  )     if $self->getConf('ping6_if' ) ;
         $agent->executable(  $self->getConf('ping6_exec' )  )   if $self->getConf('ping6_exec' ) ;
     }
-    my ($iaddr_str) =  $s->if_addr(  $agent->interface  );
-    my $iaddr = Socket::inet_aton(  $iaddr_str );
-    my $nodename = gethostbyaddr(  $iaddr, Socket::AF_INET );
-    $logger->debug("IPV4 Addr= $iaddr_str   $nodename");
-    my $if    = Net::Interface->new( $agent->interface );
-    my $ipv6;
-    eval {
-        $ipv6 = lc(Net::Interface::inet_ntop($if->address(AF_INET6)));
-        $logger->debug("IPV6 Addr= $ipv6 ");
-    };
-    if($EVAL_ERROR || !$ipv6) {
-        $logger->error("NO IPV6 Address available"); 
-    }
-    $agent->source( $nodename );
-    $agent->destination_type eq 'ipv4'?$agent->sourceIp($iaddr_str):
-        $ipv6?$agent->sourceIp($ipv6):
-	           $logger->logdie("NO IPV6 Address available but IPV6 test is scheduled, please fix config");
+
     $agent->count( $test->{count} )           if $test->{count};
     $agent->packetSize( $test->{packetSize} ) if $test->{packetSize};
     $agent->ttl( $test->{ttl} )               if $test->{ttl};
     $agent->interval( $test->{interval} )     if $test->{interval};
+ 
     # timeouts
     $agent->timeout( $self->getConf( 'service_timeout' ) );
 

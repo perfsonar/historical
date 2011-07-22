@@ -24,11 +24,13 @@ command to be executed. This class overwrites the parse and
 use perfSONAR_PS::Services::MP::Agent::CommandLine;
 use base qw(perfSONAR_PS::Services::MP::Agent::CommandLine);
 
+use perfSONAR_PS::Utils::DNS qw(reverse_dns);
+
 use Log::Log4perl qw(get_logger);
 our $logger = Log::Log4perl::get_logger( 'perfSONAR_PS::Services::MP::Agent::Ping' );
 
 # default command line
-our $default_command = '%executable% -c %count% -i %interval% -s %packetSize% -t %ttl% -I %interface% %destination%';
+our $default_command = '%executable% -c %count% -i %interval% -s %packetSize% -t %ttl% -B %destination%';
 
 =head2 new( $command, $options, $namespace)
 
@@ -55,7 +57,6 @@ sub new {
         'interval'   => 1,
         'packetSize' => 1000,
         'ttl'        => 255,
-	'interface'  => 'eth0',
     };
     %{ $hash{"RESULTS"} } = ();
 
@@ -206,9 +207,18 @@ sub parse {
     my @rtts  = ();
     my @seqs  = ();
 
-    for ( my $x = 1; $x < scalar @$cmdOutput - 4; $x++ ) {
+    for ( my $x = 0; $x < scalar @$cmdOutput - 4; $x++ ) {
         $logger->debug( "Analysing line: " . $cmdOutput->[$x] );
 	chomp $cmdOutput->[$x];
+
+        if ($cmdOutput->[$x] =~ /PING.* from ([^ ]*)/) {
+            my $ip = $1;
+            $logger->debug("Setting source IP to $ip");
+            $self->sourceIp($ip);
+            $self->source(reverse_dns($ip));
+            $logger->debug("Setting source hostname to ".$self->source()) if ($self->source());
+        }
+
         my @string = split /icmp/, $cmdOutput->[$x];
         my $v = {};
         ( $v->{'bytes'} = $string[0] ) =~ s/\s*bytes.*$//;
