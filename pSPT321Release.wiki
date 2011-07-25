@@ -58,8 +58,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=480 480] - Update Project Web Sites
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=482 482] - TCP tuning settings for Toolkit need updating   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=483 483] - prompt to subscribe to perfsonar-user@internet2.edu list when installing toolkit    
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=482 482] - TCP tuning settings for Toolkit need updating      
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=488 488] - IPv6 Compatibility for all perfSONAR services and products
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=492 492] - additional documentation needed on what to do after installing the NP Toolkit   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=494 494] - Disable HTTP Trace on pSPT 
@@ -74,6 +73,11 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=523 523] - Upgrade to CentoOS 5.6
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=524 524] - SNMP MA SQLite Backend testing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=534 534] - Document host/address behavior with regardst to v6 on the pSPT
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=541 541] - upgrade procedure for existing installs (both LiveCD and NetInstall)
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=542 542] - Unable to enable IPv6 if not enabled during install 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=543 543] - Static IPv6 address is not assigned to interface after installl 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=544 544] -  move kickstart system modifications into a Toolkit RPM 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=545 545] - jowping CGI doesn't work with an IPv6 address 
  * Awaiting Testing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - ability to set peer_port and iperf_port using web config GUI  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=160 160] - ESnet SNMP MA Enhancements   
@@ -91,6 +95,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=470 470] - bwctl/owamp limits gui doesn't support IPv6 addresses   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=471 471] - owamp limits file on pSPT   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=475 475] - nagios scripts do not support web proxies   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=483 483] - prompt to subscribe to perfsonar-user@internet2.edu list when installing toolkit 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=485 485] - ls_registration_daemon.conf is missing site_name even though host information entered
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=490 490] - Reverse Traceroute/Ping does not hold 'function' argument between CGI submission
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=491 491] - IPV6 Survey
