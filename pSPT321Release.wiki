@@ -112,6 +112,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=539 539] - PingER will not run tests on hosts without IPv6 address
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=540 540] - PingER fails if eth0 is not the only/default interface
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=545 545] - jowping CGI doesn't work with an IPv6 address 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=546 546] - IPv6 display issues on scheduled test GUI
  * Closed Bugs
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - ~~disable buttons on the stats grpahs page for empty graphs~~  
      * <font color="purple">_*MIGRATED 5/25/2011*_</font>
