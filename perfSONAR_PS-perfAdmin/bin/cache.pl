@@ -296,11 +296,17 @@ foreach my $h ( keys %hls_results ) {
     my %keywords = ();
     foreach my $m1 ( $md->get_nodelist ) {
         my $id = $m1->getAttribute( "id" );
-
+        
+        my @contactPoints = ();
         my $contactPoint = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='accessPoint']", 1 ), 0 );
-        unless ( $contactPoint ) {
-            $contactPoint = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='address']", 1 ), 0 );
-            next unless $contactPoint;
+        if ( $contactPoint ) {
+             push @contactPoints, $contactPoint;
+        } else {
+            my $contactPointElems = find( $m1, "./*[local-name()='subject']//*[local-name()='address']", 0 );
+            next unless ($contactPointElems && $contactPointElems->size() > 0);
+            for(my $i = 1; $i <= $contactPointElems->size(); $i++){
+                push @contactPoints, extract( $contactPointElems->get_node($i) , 0);
+            }
         }
         my $serviceName = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='serviceName']", 1 ), 0 );
         unless ( $serviceName ) {
@@ -359,18 +365,20 @@ foreach my $h ( keys %hls_results ) {
                     # more eventTypes as needed...
 
                     # we should be tracking things here, eliminate duplicates
-                    unless ( exists $dups{$value}{$contactPoint} and $dups{$value}{$contactPoint} ) {
-                        $dups{$value}{$contactPoint} = 1;
-                        $matrix2{$h}{$contactPoint}  = 1;
-
-                        if ( exists $list{$value} ) {
-                            push @{ $list{$value} }, { CONTACT => $contactPoint, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription };
+                    foreach my $cp ( @contactPoints ){
+                        unless ( exists $dups{$value}{$cp} and $dups{$value}{$cp} ) {
+                            $dups{$value}{$cp} = 1;
+                            $matrix2{$h}{$cp}  = 1;
+    
+                            if ( exists $list{$value} ) {
+                                push @{ $list{$value} }, { CONTACT => $cp, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription };
+                            }
+                            else {
+                                my @temp = ( { CONTACT => $cp, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription } );
+                                $list{$value} = \@temp;
+                            }
+    
                         }
-                        else {
-                            my @temp = ( { CONTACT => $contactPoint, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription } );
-                            $list{$value} = \@temp;
-                        }
-
                     }
                 }
             }
