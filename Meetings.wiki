@@ -5,11 +5,12 @@ face to face meetings are available here.  Please use the !MeetingTemplate when
 applicable.
 
 == Future Events ==
-   * [20110725Video] - Video Conference for July 25, 2011
+   * [20110801Video] - Video Conference for Aug 1, 2011
 
 == Past Events ==
 
  * 2011
+   * [20110725Video] - Video Conference for July 25, 2011
    * [20110706Video] - Video Conference for July 6, 2011
    * [20110627Video] - Video Conference for June 27, 2011
    * [20110523Video] - Video Conference for May 23, 2011
