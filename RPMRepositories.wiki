@@ -62,7 +62,11 @@ after:
  ) 1> /root/post_install.log 2>&1
 }}}
 
-Creating the Final Release:
+== Building The New ISOs ==
+
+ * Run the "build_livecd.sh" and "build_netinstall.sh" with the updated kickstart created above
+
+== Creating The Final Release ==
 
 If none of your users are going to try to update from the test release to the final release, do the following:
 
@@ -81,6 +85,14 @@ If your users want to update from the test release to the final release, do the 
  * Contact someone at Internet2 to update the repository, or wait for a few hours, and it will get populated
  * Wait until all your users have upgraded. They'll need to upgrade twice: Once to get the new Internet2-repo RPM pointing back at trunk, and once again to get any new RPMs from trunk.
  * Delete the branch
+
+== Creating An -rc1 Release ==
+ * Create a branch named like "release-3.2.1-rc1" using the instructions above
+
+== Creating An -rcX Release ==
+ * Copy the branch for the previous -rc (e.g. "release-3.2.1-rc1") to the new one (e.g. "release-3.2.1-rc2").
+ * Update the RPMs as needed, including the Internet2-repo file.
+ * To enable your users to upgrade from the previous -rc release, you'll need to copy the new Internet2-repo file to the previous -rc branch. When the user does a "yum update", their machine will download the update repository RPM which should point at the new -rc branch. When they do a "yum update" again, their machine will download the RPMs from the new -rc. Once everyone has updated, you can delete the branch.
 
 == Last Updated ==
 
