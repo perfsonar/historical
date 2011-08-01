@@ -21,7 +21,7 @@ baseurl    = http://software.internet2.edu/branches/aaron-testing/rpms/i386/main
 
  * Build the RPM (make the tarball and build it with the spec), and commit it to the branch
   * The RPM *must* be signed, otherwise yum won't install it
- *  Kick someone at Internet2 to update the repository, or wait for a few hours, and it will get populated
+ *  Contact someone at Internet2 to update the repository, or wait for a few hours, and it will get populated
 
 
 == Adding RPMs To The Branch ==
@@ -30,7 +30,7 @@ baseurl    = http://software.internet2.edu/branches/aaron-testing/rpms/i386/main
  * Add your RPMs to the branch
   * The RPMs *must* be signed, otherwise yum won't install it
  * Commit your RPMs
- * Kick someone at Internet2 to update the repository, or wait for a few hours, and it will get populated
+ * Contact someone at Internet2 to update the repository, or wait for a few hours, and it will get populated
 
 
 == Updating The Kickstart ==
@@ -46,15 +46,16 @@ after:
 repo --name=a-Internet2    --baseurl=http://software.internet2.edu/branches/aaron-testing/rpms/i386/main
 }}}
 
- * It can also be helpful to make a couple other changes. In the %post section, there are two lines that can be uncommented so save the results of the %post to a file accessible after the installation.  
+ * It can also be helpful to make a couple other changes. In the %post section, there are two lines that can be uncommented so save the results of the %post to a file accessible after the installation. 
+
+before:
 {{{
 #(
         ...
 #) 1> /root/post_install.log 2>&1
 }}}
 
-should be changed to 
-
+after:
 {{{
 (
  ...
@@ -68,7 +69,7 @@ If none of your users are going to try to update from the test release to the fi
  * Merge the changed RPMs from the branch into trunk EXCEPT Internet2-repo
  * Commit the RPMs
  * Delete the branch
- * Kick someone at Internet2 to update the repository, or wait for a few hours, and it will get populated
+ * Contact someone at Internet2 to update the repository, or wait for a few hours, and it will get populated
 
 If your users want to update from the test release to the final release, do the following:
 
@@ -77,7 +78,7 @@ If your users want to update from the test release to the final release, do the 
  * Upload that RPM to the trunk, and commit it.
  * Merge all the changed RPMs from your branch into the trunk
  * Commit the RPMs
- * Kick someone at Internet2 to update the repository, or wait for a few hours, and it will get populated
+ * Contact someone at Internet2 to update the repository, or wait for a few hours, and it will get populated
  * Wait until all your users have upgraded. They'll need to upgrade twice: Once to get the new Internet2-repo RPM pointing back at trunk, and once again to get any new RPMs from trunk.
  * Delete the branch
 
