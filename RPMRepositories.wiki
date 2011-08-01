@@ -1,0 +1,87 @@
+#summary A discussion of the ways to work with branches in the yum repository
+
+== Creating A New Branch ==
+
+ * Checkout https://cvs3.internet2.edu/svn/software/
+ * Create a branch of trunk
+ * Commit the branch
+ * Create a new Internet2-repo RPM
+  * Checkout https://svn.internet2.edu/svn/perfSONAR-PS/trunk/Internet2-repo/
+  * Edit the spec file, and bump the release number
+  * Edit the etc/Internet2.repo file and change the mirrorlist entry to point to your new branch:
+
+before:
+{{{
+mirrorlist = http://software.internet2.edu/rpms/mirrors-Internet2
+}}}
+after:
+{{{
+baseurl    = http://software.internet2.edu/branches/aaron-testing/rpms/i386/main/
+}}}
+
+ * Build the RPM (make the tarball and build it with the spec), and commit it to the branch
+  * The RPM *must* be signed, otherwise yum won't install it
+ *  Kick someone at Internet2 to update the repository, or wait for a few hours, and it will get populated
+
+
+== Adding RPMs To The Branch ==
+
+ * Checkout your branch (e.g. https://cvs3.internet2.edu/svn/software/branches/aaron-testing)
+ * Add your RPMs to the branch
+  * The RPMs *must* be signed, otherwise yum won't install it
+ * Commit your RPMs
+ * Kick someone at Internet2 to update the repository, or wait for a few hours, and it will get populated
+
+
+== Updating The Kickstart ==
+
+ * Edit the kickstart, and replace the "mirrorlist" for the Internet2 repo with the baseurl for your branch
+
+before:
+{{{
+repo --name=a-Internet2    --mirrorlist=http://software.internet2.edu/rpms/mirrors-Toolkit-Internet2
+}}}
+after:
+{{{
+repo --name=a-Internet2    --baseurl=http://software.internet2.edu/branches/aaron-testing/rpms/i386/main
+}}}
+
+ * It can also be helpful to make a couple other changes. In the %post section, there are two lines that can be uncommented so save the results of the %post to a file accessible after the installation.  
+{{{
+#(
+        ...
+#) 1> /root/post_install.log 2>&1
+}}}
+
+should be changed to 
+
+{{{
+(
+ ...
+ ) 1> /root/post_install.log 2>&1
+}}}
+
+Creating the Final Release:
+
+If none of your users are going to try to update from the test release to the final release, do the following:
+
+ * Merge the changed RPMs from the branch into trunk EXCEPT Internet2-repo
+ * Commit the RPMs
+ * Delete the branch
+ * Kick someone at Internet2 to update the repository, or wait for a few hours, and it will get populated
+
+If your users want to update from the test release to the final release, do the following:
+
+ * Create a new Internet2-repo RPM with an updated version number (greater than the one in your repository). This RPM should point at the original location (i.e. *not* at your branch).
+ * Upload that RPM to your branch, and commit it.
+ * Upload that RPM to the trunk, and commit it.
+ * Merge all the changed RPMs from your branch into the trunk
+ * Commit the RPMs
+ * Kick someone at Internet2 to update the repository, or wait for a few hours, and it will get populated
+ * Wait until all your users have upgraded. They'll need to upgrade twice: Once to get the new Internet2-repo RPM pointing back at trunk, and once again to get any new RPMs from trunk.
+ * Delete the branch
+
+== Last Updated ==
+
+$Id$
+
