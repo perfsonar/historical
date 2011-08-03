@@ -77,7 +77,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=542 542] - Unable to enable IPv6 if not enabled during install 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=543 543] - Static IPv6 address is not assigned to interface after installl 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=544 544] -  move kickstart system modifications into a Toolkit RPM 
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=547 547] - IPv6 scheduled tests issues on toolkit
  * Awaiting Testing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - ability to set peer_port and iperf_port using web config GUI  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=160 160] - ESnet SNMP MA Enhancements   
@@ -114,6 +113,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=540 540] - PingER fails if eth0 is not the only/default interface
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=545 545] - jowping CGI doesn't work with an IPv6 address 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=546 546] - IPv6 display issues on scheduled test GUI
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=547 547] - IPv6 scheduled tests issues on toolkit
  * Closed Bugs
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - ~~disable buttons on the stats grpahs page for empty graphs~~  
      * <font color="purple">_*MIGRATED 5/25/2011*_</font>
