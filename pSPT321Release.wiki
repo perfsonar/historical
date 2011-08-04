@@ -54,7 +54,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit       
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - Package for the client modules
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=425 425] - SNMP MA/Cacti Reports wrong capacity               
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=453 453] - Document/Add addiional options to interface configuration   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema     
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=480 480] - Update Project Web Sites
@@ -139,6 +138,8 @@ TBD
      * <font color="purple">_*MIGRATED 6/28/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=447 447] - ~~new version of nuttcp supported by the NPtoolkit~~
      * <font color="red">_*Won't Fix*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=453 453] - ~~Document/Add addiional options to interface configuration~~
+     * <font color="green">_*FIXED 8/3/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=460 460] - ~~Toggle Time display in perfAdmin graphs~~
      * <font color="green">_*FIXED 5/25/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=462 462] - ~~Kernel module for IDE SSD drive~~
