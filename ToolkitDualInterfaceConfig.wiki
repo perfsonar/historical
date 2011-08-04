@@ -1,3 +1,5 @@
+#summary How to use a dual homed node to avoid overruns between different speed NICs
+
 = Description of the problem =
 
 When perfSONAR is used between two hosts with mismatched network speeds, such 10Ge vs 1Gb, a false result will be reported for throughput via bwctl. When the test is pushes data from a 10Ge NIC into a 1Gb NIC, and overrun condition occurs resulting in dropped packets. If the 1Gb host is many hops away from the 10Ge host, the results of the test will report a false throughput value much less than 1Gb.
