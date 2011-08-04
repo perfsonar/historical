@@ -1,4 +1,4 @@
-===How to setup a dual homed perfSONAR node to avoid overruns between 10Ge and 1GB hosts===
+===Using a dual homed perfSONAR node to avoid overruns between 10Ge and 1GB hosts===
 
 = Description of the problem =
 
