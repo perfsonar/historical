@@ -60,7 +60,6 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=482 482] - TCP tuning settings for Toolkit need updating      
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=488 488] - IPv6 Compatibility for all perfSONAR services and products
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=492 492] - additional documentation needed on what to do after installing the NP Toolkit   
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=494 494] - Disable HTTP Trace on pSPT 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=502 502] - need to rework google code site to make a easy to find 'contrib' area
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=508 508] - SSL Certificates on pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=512 512] - For toolkit building VM, change default output directory in i2_mock utility to psbuild user home 	 
@@ -160,6 +159,8 @@ TBD
      * <font color="green">_*FIXED 6/24/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=493 493] - ~~LS Cache Daemon Download Problem~~
      * <font color="green">_*FIXED 6/28/2011*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=494 494] - ~~Disable HTTP Trace on pSPT~~
+     * <font color="green">_*FIXED 8/4/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=496 496] - ~~Mirrors for pSPT~~
      * <font color="green">_*FIXED 7/7/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=497 497] - ~~Traceroute MA does not query over long ranges of time~~
