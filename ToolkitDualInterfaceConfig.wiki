@@ -4,27 +4,27 @@
 
 When perfSONAR is used between two hosts with mismatched network speeds, such 10Ge vs 1Gb, a false result will be reported for throughput via bwctl/iperf. When the test pushes data from a 10Ge NIC into a 1Gb NIC, an overrun condition occurs resulting in dropped packets. If the 1Gb host is many hops away from the 10Ge host, the test results will report a false throughput value much less than 1Gb.
 
-= Details =
+= Install details =
 
-* Create a dual homed perfsonar node with a 10Ge and 1Gb connections to the same subnet (but different IPs!!)
+  * Create a dual homed perfsonar node with a 10Ge and 1Gb connections to the same subnet (but different IPs!!)
 
-* Edit /opt/perfsonar_ps/toolkit/etc/discover_external_address.conf to specify default NIC
+  * Edit /opt/perfsonar_ps/toolkit/etc/discover_external_address.conf to specify default NIC
 
    Specify the correct NIC for the 10Ge interface
 
       external_interface    eth<n>
 
 
-* Edit /etc/hosts to make certain the FQDN and IPs are correct
+  * Edit /etc/hosts to make certain the FQDN and IPs are correct
 
-* Create /usr/local/perfsonar and place the 3 attached files in this area and fix their permissions
+  * Create /usr/local/perfsonar and place the 3 attached files in this area and fix their permissions
 
       chmod 755 /usr/local/perfsonar/bwctl.sh
       chmod 755 /usr/local/perfsonar/iperf.sh
       chmod 644 /usr/local/perfsonar/ten-g-hosts.txt
 
 
-* Edit bwctl.sh and iperf.sh for local changes for the 10Ge and 1Gb NICs and the gateway address
+  * Edit bwctl.sh and iperf.sh for local changes for the 10Ge and 1Gb NICs and the gateway address
 
        DEFAULT_GW
        TEN_G_FQDN
@@ -37,26 +37,26 @@ When perfSONAR is used between two hosts with mismatched network speeds, such 10
        LOGGING
 
 
-* Edit ten-g-hosts.txt to add/delete/change the FQDN of 10Ge hosts to test against.
+  * Edit ten-g-hosts.txt to add/delete/change the FQDN of 10Ge hosts to test against.
 
       The FQDN must exactly match the name used in the "Scheduled Tests" and which show
       up in the "Throughput Tests" as either the "First Host" or "Second Host".
 
 
-* Change/add the following to /etc/sudoers
+  * Change/add the following to /etc/sudoers
 
       #Defaults    requiretty
       perfsonar    ALL=(ALL) NOPASSWD: /sbin/route
       bwctl        ALL=(ALL) NOPASSWD: /sbin/route
 
 
-* Optionally edit /etc/syslog.conf
+  * Optionally edit /etc/syslog.conf
 
       local5.*        /var/log/perfsonar/bwctl.log
       local6.*        /var/log/perfsonar/iperf.log
 
 
-* Activate the new scripts
+  * Activate the new scripts
 
    mv /usr/bin/bwctl /usr/bin/bwctl.bin
    ln -s /usr/local/perfsonar/bwctl.sh /usr/bin/bwctl
@@ -65,7 +65,7 @@ When perfSONAR is used between two hosts with mismatched network speeds, such 10
    ln -s /usr/local/perfsonar/iperf.sh /usr/bin/iperf
 
 
-* Reboot....or restart syslog and perfsonar_ma
+  * Reboot....or restart syslog and perfsonar_ma
 
 
 You are done!
