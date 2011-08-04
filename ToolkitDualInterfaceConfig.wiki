@@ -1,4 +1,4 @@
-===Using dual homed perfSONAR node to avoid network overruns===
+===Using dual homed perfSONAR node to avoid overruns between 10Ge and 1GB hosts===
 
 = Introduction =
 
