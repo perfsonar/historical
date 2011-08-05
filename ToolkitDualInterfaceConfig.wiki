@@ -25,9 +25,10 @@ A work around to this problem is to create a direct "route" on a dual homed perf
 
   * Create /usr/local/perfsonar and place the 3 attached files in this area and fix their permissions
 
-http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/iperf.sh
-http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/bwctl.sh
-http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/ten-g-hosts.txt
+
+      [http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/bwctl.sh bwctl.sh]
+      [http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/iperf.sh iperf.sh]
+      [http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/ten-g-hosts.txt ten-g-hosts.txt]
 
 {{{
       chmod 755 /usr/local/perfsonar/bwctl.sh
