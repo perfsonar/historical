@@ -4,7 +4,7 @@
 
 When perfSONAR is used to test the throughput between two hosts with mismatched network speeds such 10Ge vs 1Gb, a false result will be reported for throughput via bwctl/iperf. The thoughput graphs will show an asymmetric network path between the two nodes, such as 950Mb in once direction, but only 200Mb in the reverse direction
 
-= Cause Of The Problem =-
+= Cause Of The Problem =
 
 When bwctl uses iperf to push data from a 10Ge NIC into a 1Gb NIC, an overrun condition occurs. This results in dropped packets. The more hops between the two nodes, the lower the lower "apparent" throughput will be reported. Depending on the type of switches and routers between the two nodes, the problem might be masked or appear worse due to buffering and other software configurations.  
 
