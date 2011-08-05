@@ -53,7 +53,7 @@ A work around to this problem is to create a direct "route" on a dual homed perf
 
   * Edit ten-g-hosts.txt to add/delete/change the FQDN of 10Ge hosts to test against.
 
-   The FQDN must exactly match the name used in the "Scheduled Tests" and which show up in the "Throughput Tests" as either the "First Host" or "Second Host".
+   The FQDN must exactly match the name used in the "Scheduled Tests". These names also show up in the "Throughput Tests" as either the "First Host" or "Second Host".
 
 
   * Change/add the following to /etc/sudoers
