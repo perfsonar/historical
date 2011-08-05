@@ -6,11 +6,11 @@ When perfSONAR node is used to test the throughput to a host with slower network
 
 = Cause Of The Problem =
 
-When bwctl uses iperf to push data from a 10Ge NIC into a 1Gb NIC, an overrun condition occurs. This results in dropped packets. The more hops between the two nodes, the lower the lower "apparent" throughput will be reported. Depending on the type of switches and routers between the two nodes, the problem might be masked or appear worse due to buffering and other software configurations.
+When bwctl uses iperf to push data from a 10Ge NIC into a 1Gb NIC, an overrun condition occurs. This results in dropped packets on the 1Gb node. The more hops between the two nodes, the lower the "apparent" throughput will be reported. Depending on the type of switches and routers between the two nodes, the problem might be masked or appear worse due to buffering and other hardware/software configurations.
 
 = Workaround For This Problem =
 
-A work around to this problem is to create a direct "route" on a dual home perfSONAR 
+A work around to this problem is to create a direct "route" on a dual homed perfSONAR to either the 1Gb or 10Ge NIC depending on the network speed of the remote node. By using a 1Gb to 1Gb path, overruns will be avoided by the naturally occurring throttle enforced by the hardware.
 
 = Installation Details =
 
