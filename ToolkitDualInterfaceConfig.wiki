@@ -2,7 +2,7 @@
 
 = Description Of The Problem =
 
-When perfSONAR node is used to test the throughput to a host with slower network connection, such 10Ge vs 1Gb, a false result will be reported for throughput between the two nodes. The throughput graphs will show an asymmetric network path between these two nodes, such as 950Mb in one direction, but only 200Mb in the reverse direction
+When perfSONAR node is used to test the throughput to a host with a slower network connection, such 10Ge vs 1Gb, a false result will be reported for throughput between the two nodes. The throughput graphs will show an asymmetric network path between these two nodes, such as 950Mb in one direction, but only 200Mb in the reverse direction.
 
 = Cause Of The Problem =
 
@@ -16,9 +16,7 @@ A work around to this problem is to create a direct "route" on a dual homed perf
 
   * Create a dual homed perfSONAR node with both 10Ge and 1Gb connections on the same subnet (but with different IPs)
 
-  * Edit /opt/perfsonar_ps/toolkit/etc/discover_external_address.conf to specify default NIC
-
-   Specify the correct NIC for the 10Ge interface
+  * Edit /opt/perfsonar_ps/toolkit/etc/discover_external_address.conf to specify the 10Ge NIC as the default
 {{{
       external_interface    eth<n>
 }}}
@@ -32,7 +30,7 @@ A work around to this problem is to create a direct "route" on a dual homed perf
       chmod 644 /usr/local/perfsonar/ten-g-hosts.txt
 }}}
 
-  * Edit bwctl.sh and iperf.sh for local changes for the 10Ge and 1Gb NICs and the gateway address
+  * Edit bwctl.sh and iperf.sh for the 10Ge and 1Gb NICs and the gateway address appropriate for your site
 {{{
       DEFAULT_GW
       TEN_G_FQDN
