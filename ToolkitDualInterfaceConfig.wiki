@@ -9,9 +9,9 @@ When perfSONAR is used between two hosts with mismatched network speeds, such 10
   * Create a dual homed perfsonar node with a 10Ge and 1Gb connections to the same subnet (but different IPs)
 
   * Edit /opt/perfsonar_ps/toolkit/etc/discover_external_address.conf to specify default NIC
-{{{
-   Specify the correct NIC for the 10Ge interface
 
+   Specify the correct NIC for the 10Ge interface
+{{{
       external_interface    eth<n>
 }}}
 
@@ -26,22 +26,22 @@ When perfSONAR is used between two hosts with mismatched network speeds, such 10
 
   * Edit bwctl.sh and iperf.sh for local changes for the 10Ge and 1Gb NICs and the gateway address
 {{{
-       DEFAULT_GW
-       TEN_G_FQDN
-       ONE_G_FQDN
-       TEN_G_DEV
-       ONE_G_DEV
-       TEN_G_IP
-       ONE_G_IP
+      DEFAULT_GW
+      TEN_G_FQDN
+      ONE_G_FQDN
+      TEN_G_DEV
+      ONE_G_DEV
+      TEN_G_IP
+      ONE_G_IP
 
-       LOGGING
+      LOGGING
 }}}
 
   * Edit ten-g-hosts.txt to add/delete/change the FQDN of 10Ge hosts to test against.
-{{{
+
       The FQDN must exactly match the name used in the "Scheduled Tests" and which show
       up in the "Throughput Tests" as either the "First Host" or "Second Host".
-}}}
+
 
   * Change/add the following to /etc/sudoers
 {{{
