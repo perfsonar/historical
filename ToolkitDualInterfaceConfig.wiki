@@ -25,11 +25,11 @@ A work around to this problem is to create a direct "route" on a dual homed perf
 
   * Create /usr/local/perfsonar and download the following files in this area
 
-      [http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/bwctl.sh bwctl.sh]
+[http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/bwctl.sh bwctl.sh]
 
-      [http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/iperf.sh iperf.sh]
+[http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/iperf.sh iperf.sh]
 
-      [http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/ten-g-hosts.txt ten-g-hosts.txt]
+[http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/ten-g-hosts.txt ten-g-hosts.txt]
 
    *  Fix the permissions on these files to allow their execution
 {{{
@@ -78,7 +78,7 @@ A work around to this problem is to create a direct "route" on a dual homed perf
    ln -s /usr/local/perfsonar/iperf.sh /usr/bin/iperf
 }}}
 
-  * Reboot....or restart syslog and perfsonar_ma
+  * Reboot the node
 
 
 = How It Works =
@@ -86,7 +86,7 @@ A work around to this problem is to create a direct "route" on a dual homed perf
 The following is a brief description of what these two scripts are doing.
 
 
-Whenever perfsonar_ma is start/restart, bwctld invokes /usr/bin/bwctl (as user perfsonar) in one of two forms
+Whenever perfsonar_ma is started, bwctld invokes /usr/bin/bwctl (as user perfsonar) in one of two forms
 
 {{{
    bwctl -T iperf -e local5 -p -B <device FQDN> -rvv -I 14400 -t <time> -d <log> -s <src FQDN> -c [<dst FQDN>]:4823
@@ -116,11 +116,11 @@ The rewritten command is then executed as an `"exec"`. It is mandatory that the 
    exec /usr/bin/bwctl.bin $NEW_LINE
 }}}
 
-Note: perfsonar_ma executes bwctld and thus bwctl.sh twice per remote test host. One is for the outgoing test, the other for the loopback test. So if you have logging turned on, you will see two entries per remote test host.
+Note: perfsonar_ma executes bwctld and thus bwctl.sh twice per remote test host. One is for the outgoing test, the other for the loopback test. If you have logging turned on, you will see two entries per remote test host.
 
 
 
-The iperf.sh script is invoked every time a test is performed using iperf as user bwctl. There are three forms of the command used
+The iperf.sh script is invoked every time a test is performed using iperf (as user bwctl). There are three forms of the command used
 {{{
    iperf -c <client IP> -B <device IP> -f b -m -p <port> -t <time>
    iperf -B <device IP> -s -f b -m -p <port> -t <time>
@@ -132,9 +132,9 @@ The iperf.sh script is invoked every time a test is performed using iperf as use
 "iperf -s" is for incomming tests from the remote test host, ie iperf server
 }}}
 
-Since iperf is a softlink to the script iperf.sh, it is now possible to extract the various command line parameters
+Since iperf is a softlink to the script iperf.sh, it is now possible to extract the various command line parameters.
 
-The script first looks to see if this is an outgoing test by looking for " -c"
+The script first looks to see if this is an outgoing test by looking for "-c"
 If it is not a client test (iperf -s, iperf -v), then the command is executed as is with an "exec" Again the PID must not change.
 {{{
    exec /usr/bin/iperf.bin $CMD_LINE
