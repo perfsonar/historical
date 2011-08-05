@@ -2,7 +2,7 @@
 
 = Description Of The Problem =
 
-When perfSONAR is used between two hosts with mismatched network speeds, such 10Ge vs 1Gb, a false result will be reported for throughput via bwctl/iperf. When the test pushes data from a 10Ge NIC into a 1Gb NIC, an overrun condition occurs resulting in dropped packets. If the 1Gb host is many hops away from the 10Ge host, the test results will report a false throughput value much less than 1Gb.
+When perfSONAR is used to test the throughput between two hosts with mismatched network speeds such 10Ge vs 1Gb, a false result will be reported for throughput via bwctl/iperf. When the test pushes data from a 10Ge NIC into a 1Gb NIC, an overrun condition occurs resulting in dropped packets. The more hops between the two nodes, the lower the lower "apparent" throughput will be reported.
 
 = Installation Details =
 
