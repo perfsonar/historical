@@ -61,8 +61,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=488 488] - IPv6 Compatibility for all perfSONAR services and products
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=492 492] - additional documentation needed on what to do after installing the NP Toolkit   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=502 502] - need to rework google code site to make a easy to find 'contrib' area
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=508 508] - SSL Certificates on pSPT
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=512 512] - For toolkit building VM, change default output directory in i2_mock utility to psbuild user home 	 
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=508 508] - SSL Certificates on pSPT	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=514 514] - changes to owamp, bwctl, or PingER config should automatically update traceroute config too	 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=518 518] - Reverse Traceroute/Ping is not IPv6 Capable
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=519 519] - Add support for DNS 'rotate' option
@@ -170,6 +169,8 @@ TBD
      * <font color="green">_*FIXED 6/30/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=510 510] - ~~validate recent Transport.pm and Client/MA.pm changes~~
      * <font color="green">_*FIXED 6/24/2011*_</font>
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=512 512] - ~~For toolkit building VM, change default output directory in i2_mock utility to psbuild user home~~
+     * <font color="green">_*FIXED 8/05/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=513 513] - ~~For toolkit building VM, add holding directory to psbuild user home directory~~
      * <font color="green">_*FIXED 8/05/2011*_</font>
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=517 517] - ~~NPAD testing port wrong on pSPT~~
