@@ -31,7 +31,7 @@ A work around to this problem is to create a direct "route" on a dual homed perf
 
 [http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/ten-g-hosts.txt ten-g-hosts.txt]
 
-   *  Fix the permissions on these files to allow their execution
+   *  Fix the permissions on these files to allow their access or execution
 {{{
    chmod 755 /usr/local/perfsonar/bwctl.sh
    chmod 755 /usr/local/perfsonar/iperf.sh
