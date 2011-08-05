@@ -4,28 +4,28 @@
 
 When perfSONAR is used between two hosts with mismatched network speeds, such 10Ge vs 1Gb, a false result will be reported for throughput via bwctl/iperf. When the test pushes data from a 10Ge NIC into a 1Gb NIC, an overrun condition occurs resulting in dropped packets. If the 1Gb host is many hops away from the 10Ge host, the test results will report a false throughput value much less than 1Gb.
 
-= Install details =
+= Installation details =
 
-  * Create a dual homed perfsonar node with a 10Ge and 1Gb connections to the same subnet (but different IPs!!)
+  * Create a dual homed perfsonar node with a 10Ge and 1Gb connections to the same subnet (but different IPs)
 
   * Edit /opt/perfsonar_ps/toolkit/etc/discover_external_address.conf to specify default NIC
-
+{{{
    Specify the correct NIC for the 10Ge interface
 
       external_interface    eth<n>
-
+}}}
 
   * Edit /etc/hosts to make certain the FQDN and IPs are correct
 
   * Create /usr/local/perfsonar and place the 3 attached files in this area and fix their permissions
-
+{{{
       chmod 755 /usr/local/perfsonar/bwctl.sh
       chmod 755 /usr/local/perfsonar/iperf.sh
       chmod 644 /usr/local/perfsonar/ten-g-hosts.txt
-
+}}}
 
   * Edit bwctl.sh and iperf.sh for local changes for the 10Ge and 1Gb NICs and the gateway address
-
+{{{
        DEFAULT_GW
        TEN_G_FQDN
        ONE_G_FQDN
@@ -35,35 +35,35 @@ When perfSONAR is used between two hosts with mismatched network speeds, such 10
        ONE_G_IP
 
        LOGGING
-
+}}}
 
   * Edit ten-g-hosts.txt to add/delete/change the FQDN of 10Ge hosts to test against.
-
+{{{
       The FQDN must exactly match the name used in the "Scheduled Tests" and which show
       up in the "Throughput Tests" as either the "First Host" or "Second Host".
-
+}}}
 
   * Change/add the following to /etc/sudoers
-
+{{{
       #Defaults    requiretty
       perfsonar    ALL=(ALL) NOPASSWD: /sbin/route
       bwctl        ALL=(ALL) NOPASSWD: /sbin/route
-
+}}}
 
   * Optionally edit /etc/syslog.conf
-
+{{{
       local5.*        /var/log/perfsonar/bwctl.log
       local6.*        /var/log/perfsonar/iperf.log
-
+}}}
 
   * Activate the new scripts
+{{{
+      mv /usr/bin/bwctl /usr/bin/bwctl.bin
+      ln -s /usr/local/perfsonar/bwctl.sh /usr/bin/bwctl
 
-   mv /usr/bin/bwctl /usr/bin/bwctl.bin
-   ln -s /usr/local/perfsonar/bwctl.sh /usr/bin/bwctl
-
-   mv /usr/bin/iperf /usr/bin/iperf.bin
-   ln -s /usr/local/perfsonar/iperf.sh /usr/bin/iperf
-
+      mv /usr/bin/iperf /usr/bin/iperf.bin
+      ln -s /usr/local/perfsonar/iperf.sh /usr/bin/iperf
+}}}
 
   * Reboot....or restart syslog and perfsonar_ma
 
@@ -77,10 +77,10 @@ The following is a brief description of what these two scripts are doing.
 
 
 Whenever perfsonar_ma is start/restart, bwctld invokes /usr/bin/bwctl (as user perfsonar) in one of two forms
-
+{{{
    bwctl -T iperf -e local5 -p -B <device FQDN> -rvv -I 14400 -t <time> -d <log> -s <src FQDN> -c [<dst FQDN>]:4823
    bwctl -T iperf -e local5 -p -B <device FQDN> -rvv -I 14400 -t <time> -d <log> -s [ src FQDN ]:4823 -c <dst FQDN>
-
+}}}
 Since bwctl is now a softlink to a script, it is possible to extract the various test parameters. For bwctl, only the FQDN of the remote test host is needed.
 The remote test host is always located between  [ FQDN ]:4823, so it is easy to find and extract.
 
@@ -92,18 +92,18 @@ If no match is found, then the command is rewritten to bind to the 1Gb NIC.
 
 
 If a route to this host already exists, it is first removed
-
+{{{
       sudo route del -host $HOST_TARGET 2> /dev/null
-
+}}}
 Then a route is created to force all traffic to the remote test host to go via that appropriate NIC (1 or 10)
-
+{{{
       sudo route add -host $HOST_TARGET gw $DEFAULT_GW dev <NIC>
-
+}}}
 
 The rewritten command is then executed as an "exec". It is mandatory that the PID not change.
-
+{{{
       exec /usr/bin/bwctl.bin $NEW_LINE
-
+}}}
 
 Note: perfsonar_ma executes bwctld and thus bwctl.sh twice per remote test host.
 One is for the outgoing test, the other for the loopback test.
@@ -112,11 +112,11 @@ So if you have logging turned on, you will see two entries per remote test host.
 
 
 The iperf.sh script is invoked every time a test is performed using iperf as user bwctl. There are three forms of the command used
-
+{{{
       iperf -c <client IP> -B <device IP> -f b -m -p <port> -t <time>
       iperf -B <device IP> -s -f b -m -p <port> -t <time>
       iperf -v
-
+}}}
 
 "iperf -v" is used only once when perfsonar_ma starts up.
 "iperf -c" is for outgoing tests to the remote test host, ie iperf client
@@ -127,9 +127,9 @@ Since iperf is a softlink to the script iperf.sh, it is now possible to extract 
 
 The script first looks to see if this is an outgoing test by looking for " -c"
 If it is not a client test (iperf -s, iperf -v), then the command is executed as is with an "exec" Again the PID must not change.
-
+{{{
       exec /usr/bin/iperf.bin $CMD_LINE
-
+}}}
 If the command is for a client test, the client IP, device IP and run time are extracted
 
 If a route for the client IP already exists (created by bwctl.sh), the command is executed as is via "exec"
