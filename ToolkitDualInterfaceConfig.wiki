@@ -96,22 +96,22 @@ Whenever perfsonar_ma is started, bwctld invokes /usr/bin/bwctl (as user perfson
 Since bwctl is now a softlink to a script, it is possible to extract the various test parameters. For bwctl, only the FQDN of the remote test host is needed.
 The remote test host is always located between  `[ FQDN ]:4823`, so it is easy to find and extract.
 
-This FQDN is then looked for in the ten-g-hosts.txt file
+This FQDN is looked for in the ten-g-hosts.txt file
 
+If a simple match is found (just a simple grep), the command is rewritten so that the test is bound to the 10Ge NIC. 
 
-If a simple match is found (just a simple grep), the command is rewritten so that the test is bound to the 10Ge NIC. If no match is found, then the command is rewritten to bind to the 1Gb NIC.
-
+If no match is found, the command is rewritten to bind to the 1Gb NIC.
 
 If a route to this host already exists, it is first removed
 {{{
    sudo route del -host $HOST_TARGET 2> /dev/null
 }}}
-Then a route is created to force all traffic to the remote test host to go via that appropriate NIC (1 or 10)
+A route is created to force all traffic to the remote test host to go via that appropriate NIC (1Gb or 10Ge)
 {{{
    sudo route add -host $HOST_TARGET gw $DEFAULT_GW dev <NIC>
 }}}
 
-The rewritten command is then executed as an `"exec"`. It is mandatory that the PID not change.
+The rewritten command is executed as an `"exec"`. It is mandatory that the PID not change.
 {{{
    exec /usr/bin/bwctl.bin $NEW_LINE
 }}}
@@ -126,7 +126,6 @@ The iperf.sh script is invoked every time a test is performed using iperf (as us
    iperf -B <device IP> -s -f b -m -p <port> -t <time>
    iperf -v
 
-
 "iperf -v" is used only once when perfsonar_ma starts up.
 "iperf -c" is for outgoing tests to the remote test host, ie iperf client
 "iperf -s" is for incomming tests from the remote test host, ie iperf server
@@ -135,7 +134,8 @@ The iperf.sh script is invoked every time a test is performed using iperf (as us
 Since iperf is a softlink to the script iperf.sh, it is now possible to extract the various command line parameters.
 
 The script first looks to see if this is an outgoing test by looking for "-c"
-If it is not a client test (iperf -s, iperf -v), then the command is executed as is with an "exec" Again the PID must not change.
+
+If it is not a client test (iperf -s, iperf -v), the command is executed as is with an "exec" Again the PID must not change.
 {{{
    exec /usr/bin/iperf.bin $CMD_LINE
 }}}
@@ -143,9 +143,9 @@ If the command is for a client test, the client IP, device IP and run time are e
 
 If a route for the client IP already exists (created by bwctl.sh), the command is executed as is via "exec"
 
-If no route exists, then a route is created to this node using the NIC specified by -B.
+If no route exists, a route is created to this node using the NIC specified by -B.
 A script is created to remove the route after the test is complete and forked into the background.
-The original iperf command is then executed as is via an "exec"
+The original iperf command is executed as is via an "exec"
 
 A route to a remote host will only exist if the local perfsonar is configured to test against this remote host.
 This route would be setup by the bwctl.sh script. Thus there is no need to setup a route as it is assumed the
