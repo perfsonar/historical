@@ -18,68 +18,67 @@ A work around to this problem is to create a direct "route" on a dual homed perf
 
   * Edit /opt/perfsonar_ps/toolkit/etc/discover_external_address.conf to specify the 10Ge NIC as the default
 {{{
-      external_interface    eth<n>
+   external_interface    eth<n>
 }}}
 
   * Edit /etc/hosts to make certain the FQDN and IPs are correct
 
-  * Create /usr/local/perfsonar and place the 3 attached files in this area and fix their permissions
+  * Create /usr/local/perfsonar and download the following files in this area
 
+   [http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/bwctl.sh bwctl.sh]
 
-      [http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/bwctl.sh bwctl.sh]
-      [http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/iperf.sh iperf.sh]
-      [http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/ten-g-hosts.txt ten-g-hosts.txt]
+   [http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/iperf.sh iperf.sh]
 
+   [http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/ten-g-hosts.txt ten-g-hosts.txt]
+
+   *  Fix the permissions on these files to allow their execution
 {{{
-      chmod 755 /usr/local/perfsonar/bwctl.sh
-      chmod 755 /usr/local/perfsonar/iperf.sh
-      chmod 644 /usr/local/perfsonar/ten-g-hosts.txt
+   chmod 755 /usr/local/perfsonar/bwctl.sh
+   chmod 755 /usr/local/perfsonar/iperf.sh
+   chmod 644 /usr/local/perfsonar/ten-g-hosts.txt
 }}}
 
   * Edit bwctl.sh and iperf.sh for the 10Ge and 1Gb NICs and the gateway address appropriate for your site
 {{{
-      DEFAULT_GW
-      TEN_G_FQDN
-      ONE_G_FQDN
-      TEN_G_DEV
-      ONE_G_DEV
-      TEN_G_IP
-      ONE_G_IP
+   DEFAULT_GW
+   TEN_G_FQDN
+   ONE_G_FQDN
+   TEN_G_DEV
+   ONE_G_DEV
+   TEN_G_IP
+   ONE_G_IP
 
-      LOGGING
+   LOGGING
 }}}
 
   * Edit ten-g-hosts.txt to add/delete/change the FQDN of 10Ge hosts to test against.
 
-      The FQDN must exactly match the name used in the "Scheduled Tests" and which show up in the "Throughput Tests" as either the "First Host" or "Second Host".
+   The FQDN must exactly match the name used in the "Scheduled Tests" and which show up in the "Throughput Tests" as either the "First Host" or "Second Host".
 
 
   * Change/add the following to /etc/sudoers
 {{{
-      #Defaults    requiretty
-      perfsonar    ALL=(ALL) NOPASSWD: /sbin/route
-      bwctl        ALL=(ALL) NOPASSWD: /sbin/route
+   #Defaults    requiretty
+   perfsonar    ALL=(ALL) NOPASSWD: /sbin/route
+   bwctl        ALL=(ALL) NOPASSWD: /sbin/route
 }}}
 
   * Optionally edit /etc/syslog.conf
 {{{
-      local5.*        /var/log/perfsonar/bwctl.log
-      local6.*        /var/log/perfsonar/iperf.log
+   local5.*        /var/log/perfsonar/bwctl.log
+   local6.*        /var/log/perfsonar/iperf.log
 }}}
 
   * Activate the new scripts
 {{{
-      mv /usr/bin/bwctl /usr/bin/bwctl.bin
-      ln -s /usr/local/perfsonar/bwctl.sh /usr/bin/bwctl
+   mv /usr/bin/bwctl /usr/bin/bwctl.bin
+   ln -s /usr/local/perfsonar/bwctl.sh /usr/bin/bwctl
 
-      mv /usr/bin/iperf /usr/bin/iperf.bin
-      ln -s /usr/local/perfsonar/iperf.sh /usr/bin/iperf
+   mv /usr/bin/iperf /usr/bin/iperf.bin
+   ln -s /usr/local/perfsonar/iperf.sh /usr/bin/iperf
 }}}
 
   * Reboot....or restart syslog and perfsonar_ma
-
-
-You are done!
 
 
 = How It Works =
@@ -88,10 +87,12 @@ The following is a brief description of what these two scripts are doing.
 
 
 Whenever perfsonar_ma is start/restart, bwctld invokes /usr/bin/bwctl (as user perfsonar) in one of two forms
+
 {{{
-      bwctl -T iperf -e local5 -p -B <device FQDN> -rvv -I 14400 -t <time> -d <log> -s <src FQDN> -c [<dst FQDN>]:4823
-      bwctl -T iperf -e local5 -p -B <device FQDN> -rvv -I 14400 -t <time> -d <log> -s [ src FQDN ]:4823 -c <dst FQDN>
+   bwctl -T iperf -e local5 -p -B <device FQDN> -rvv -I 14400 -t <time> -d <log> -s <src FQDN> -c [<dst FQDN>]:4823
+   bwctl -T iperf -e local5 -p -B <device FQDN> -rvv -I 14400 -t <time> -d <log> -s [ src FQDN ]:4823 -c <dst FQDN>
 }}}
+
 Since bwctl is now a softlink to a script, it is possible to extract the various test parameters. For bwctl, only the FQDN of the remote test host is needed.
 The remote test host is always located between  `[ FQDN ]:4823`, so it is easy to find and extract.
 
@@ -103,16 +104,16 @@ If a simple match is found (just a simple grep), the command is rewritten so tha
 
 If a route to this host already exists, it is first removed
 {{{
-      sudo route del -host $HOST_TARGET 2> /dev/null
+   sudo route del -host $HOST_TARGET 2> /dev/null
 }}}
 Then a route is created to force all traffic to the remote test host to go via that appropriate NIC (1 or 10)
 {{{
-      sudo route add -host $HOST_TARGET gw $DEFAULT_GW dev <NIC>
+   sudo route add -host $HOST_TARGET gw $DEFAULT_GW dev <NIC>
 }}}
 
 The rewritten command is then executed as an `"exec"`. It is mandatory that the PID not change.
 {{{
-      exec /usr/bin/bwctl.bin $NEW_LINE
+   exec /usr/bin/bwctl.bin $NEW_LINE
 }}}
 
 Note: perfsonar_ma executes bwctld and thus bwctl.sh twice per remote test host. One is for the outgoing test, the other for the loopback test. So if you have logging turned on, you will see two entries per remote test host.
@@ -121,9 +122,9 @@ Note: perfsonar_ma executes bwctld and thus bwctl.sh twice per remote test host.
 
 The iperf.sh script is invoked every time a test is performed using iperf as user bwctl. There are three forms of the command used
 {{{
-      iperf -c <client IP> -B <device IP> -f b -m -p <port> -t <time>
-      iperf -B <device IP> -s -f b -m -p <port> -t <time>
-      iperf -v
+   iperf -c <client IP> -B <device IP> -f b -m -p <port> -t <time>
+   iperf -B <device IP> -s -f b -m -p <port> -t <time>
+   iperf -v
 
 
 "iperf -v" is used only once when perfsonar_ma starts up.
@@ -136,7 +137,7 @@ Since iperf is a softlink to the script iperf.sh, it is now possible to extract 
 The script first looks to see if this is an outgoing test by looking for " -c"
 If it is not a client test (iperf -s, iperf -v), then the command is executed as is with an "exec" Again the PID must not change.
 {{{
-      exec /usr/bin/iperf.bin $CMD_LINE
+   exec /usr/bin/iperf.bin $CMD_LINE
 }}}
 If the command is for a client test, the client IP, device IP and run time are extracted
 
