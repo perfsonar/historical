@@ -1,0 +1,15 @@
+anl-pt1.es.net
+bnl-pt1.es.net
+bost-pt1.es.net
+chic-pt1.es.net
+clev-pt1.es.net
+fnal-pt1.es.net
+kans-pt1.es.net
+lbl-diskpt1.es.net
+star-pt1.es.net
+ps-bw.es.net
+nms-rthr2.losa.net.internet2.edu
+nms-rthr2.newy32aoa.net.internet2.edu
+eth-3.nms-rthr2.chic.net.internet2.edu
+perfsonar.ix.ui-iccn.org
+
