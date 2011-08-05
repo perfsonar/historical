@@ -24,6 +24,11 @@ A work around to this problem is to create a direct "route" on a dual homed perf
   * Edit /etc/hosts to make certain the FQDN and IPs are correct
 
   * Create /usr/local/perfsonar and place the 3 attached files in this area and fix their permissions
+
+http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/iperf.sh
+http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/bwctl.sh
+http://perfsonar-ps.googlecode.com/svn/wiki/ToolkitDualInterfaceConfig/ten-g-hosts.txt
+
 {{{
       chmod 755 /usr/local/perfsonar/bwctl.sh
       chmod 755 /usr/local/perfsonar/iperf.sh
@@ -83,8 +88,8 @@ The following is a brief description of what these two scripts are doing.
 
 Whenever perfsonar_ma is start/restart, bwctld invokes /usr/bin/bwctl (as user perfsonar) in one of two forms
 {{{
-   bwctl -T iperf -e local5 -p -B <device FQDN> -rvv -I 14400 -t <time> -d <log> -s <src FQDN> -c [<dst FQDN>]:4823
-   bwctl -T iperf -e local5 -p -B <device FQDN> -rvv -I 14400 -t <time> -d <log> -s [ src FQDN ]:4823 -c <dst FQDN>
+      bwctl -T iperf -e local5 -p -B <device FQDN> -rvv -I 14400 -t <time> -d <log> -s <src FQDN> -c [<dst FQDN>]:4823
+      bwctl -T iperf -e local5 -p -B <device FQDN> -rvv -I 14400 -t <time> -d <log> -s [ src FQDN ]:4823 -c <dst FQDN>
 }}}
 Since bwctl is now a softlink to a script, it is possible to extract the various test parameters. For bwctl, only the FQDN of the remote test host is needed.
 The remote test host is always located between  `[ FQDN ]:4823`, so it is easy to find and extract.
