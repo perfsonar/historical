@@ -4,28 +4,28 @@
 
 == Agenda/Minutes ==
 
- # Attendees: Brian, Andy, Aaron, Nils
+  * Attendees: Brian, Andy, Aaron, Nils
 
-# Excused: Jeff, Joe, Sowmya, Jason
+     * Excused: Jeff, Joe, Sowmya, Jason
 
- # Followup on previous actions:
-   * Short Term
-     * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
-     * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
-     * _*ACTION*_: Sowmya will build an ISO for 3.2.1rc2.
-         * Done
-     * _*ACTION*_: Jeff will pull out issues/svn log messages and split out work for finding what is *new* in this release.
-   * Long Term
-     * _*ACTION*_: Nils will continue work on vmware build environment
-     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
-     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
-     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+   * Followup on previous actions:
+     * Short Term
+       * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+       * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
+       * _*ACTION*_: Sowmya will build an ISO for 3.2.1rc2.
+          * Done
+       * _*ACTION*_: Jeff will pull out issues/svn log messages and split out work for finding what is *new* in this release.
+     * Long Term
+       * _*ACTION*_: Nils will continue work on vmware build environment
+       * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+       * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+       * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
 
- # Developer updates
-    * None
+   * Developer updates
+      * None
  
- # 3.2.1rc2 Release Status
-    * a couple problems found and fixed (e.g.: IPV6 addresses where not saved properly)
+  * 3.2.1rc2 Release Status
+     * a couple problems found and fixed (e.g.: IPV6 addresses where not saved properly)
 
   
 == Actions  ==
