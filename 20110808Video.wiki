@@ -27,6 +27,27 @@
   * 3.2.1rc2 Release Status
      * a couple problems found and fixed (e.g.: IPV6 addresses where not saved properly)
 
+  * Other:
+     * Aaron suggests it is time to clean up the wiki. All agree. Process will be to move pages to an "archive" area. Anyone can (and should) suggest pages for archive, and if no one objects within a few days they can move then to the archive area. Here is Aaron's first list.
+
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkit_Repository_Proposal
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkitPlans
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkit_dev
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkitPingER
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkitPerfSONARBUOY
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkitQuickStart
+      * http://code.google.com/p/perfsonar-ps/wiki/SubversionStructure
+      * http://code.google.com/p/perfsonar-ps/wiki/TopologyRelations
+      * http://code.google.com/p/perfsonar-ps/wiki/PerformanceNodeAdminInterface
+      * http://code.google.com/p/perfsonar-ps/wiki/SubPortQueryOptions
+      * http://code.google.com/p/perfsonar-ps/wiki/InstallDVD_Notes
+      * http://code.google.com/p/perfsonar-ps/wiki/SubversionStructure
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkit
+      * http://code.google.com/p/perfsonar-ps/wiki/CatalystEvaluation
+      * http://code.google.com/p/perfsonar-ps/wiki/CurrentE2EMonLimitations
+      * http://code.google.com/p/perfsonar-ps/wiki/FAQ
+      * http://code.google.com/p/perfsonar-ps/wiki/ISOAtlasCentralConfig
+
   
 == Actions  ==
     * need to add message and documentation telling user to reboot after an upgrade (Aaron)
