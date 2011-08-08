@@ -4,15 +4,16 @@
 
 == Agenda/Minutes ==
 
- # Attendees:
+ # Attendees: Brian, Andy, Aaron, Nils
+
+# Excused: Jeff, Joe, Sowmya, Jason
 
  # Followup on previous actions:
    * Short Term
      * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
-     * _*ACTION*_: Aaron will come up with reasonable way to tag repos for testing and rc releases.
-     * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian will discuss with Eric. Jeff will bring up with Chin. Final decision will be made in Fairbanks.
+     * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
      * _*ACTION*_: Sowmya will build an ISO for 3.2.1rc2.
-     * _*ACTION*_: Sowmya, Andy, Aaron will test 3.2.1rc2 ISO, including upgrade process.
+         * Done
      * _*ACTION*_: Jeff will pull out issues/svn log messages and split out work for finding what is *new* in this release.
    * Long Term
      * _*ACTION*_: Nils will continue work on vmware build environment
@@ -21,10 +22,16 @@
      * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
 
  # Developer updates
+    * None
  
  # 3.2.1rc2 Release Status
+    * a couple problems found and fixed (e.g.: IPV6 addresses where not saved properly)
+
   
-== Actions from last week ==
+== Actions  ==
+    * need to add message and documentation telling user to reboot after an upgrade (Aaron)
+    * need more testing of 3.2.0 to 3.2.1rc2 upgrade, for both netinstall and LiveCD before sending rc2 out. This will be done by Aaron, Andy, and Sowmya.
+
 
 == Where ==
 
