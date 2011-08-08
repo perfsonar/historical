@@ -2,7 +2,7 @@
 
 = Description Of The Problem =
 
-When perfSONAR node is used to test the throughput to a host with a slower network connection, such as 10Ge vs 1Gb, a false result will be reported for throughput between the two nodes. The throughput graphs will show an asymmetric network path between these two nodes, such as 950Mb in one direction, but only 200Mb in the reverse direction.
+When perfSONAR node is used to test the throughput to a host with a slower network connection, such as 10Ge vs 1Gb, a misleading result will be reported for throughput between the two nodes. The throughput graphs will show an asymmetric network path between these two nodes, such as 950Mb in one direction, but only 200Mb in the reverse direction.
 
 = Cause Of The Problem =
 
