@@ -31,7 +31,7 @@ The following sections describe the installation procedure for each of the produ
 
 === !NetInstall CD ===
 
-The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.2.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.2.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
+The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.2.0.1.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.2.0.1.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
 user@host:~$ md5sum pS-Performance_Toolkit-NetInstall-3.2.iso;cat pS-Performance_Toolkit-NetInstall-3.2.iso.md5
