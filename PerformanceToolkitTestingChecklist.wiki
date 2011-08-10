@@ -92,28 +92,28 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Click "Select Closest Servers". After it has finished, no more than 5 of the servers should be selected. If any servers cannot be contacted, they should be marked in red, and have a tooltip when you move your mouse over them. Click save, and verify that the /etc/ntp.conf contains the selected hosts.
 
 === External BWCTL Limits ===
-  * `_____` Edit the "Unpriviledged Clients" and make changes to the limits, hit save and see that /usr/local/etc/bwctld.limits has been updated, and that the "regular" group has the limits you specified.
-  * `_____` Click "Add User", enter a user name, select a group, and set a password. Hit save and see that /usr/local/etc/bwctld.limits and /usr/local/etc/bwctld.keys have both been updated
+  * `_____` Edit the "Unpriviledged Clients" and make changes to the limits, hit save and see that /etc/bwctld/bwctld.limits has been updated, and that the "regular" group has the limits you specified.
+  * `_____` Click "Add User", enter a user name, select a group, and set a password. Hit save and see that /etc/bwctld/bwctld.limits and /etc/bwctld/bwctld.keys have both been updated
   * `_____` Click "Add User" and try to re-enter the name above. You should receive an error message about the user already existing.
-  * `_____` Click "Change Password", and try to change the user's password. Hit save, and check that /usr/local/etc/bwctld.keys has been updated
-  * `_____` Click "Change Group", and try to change the user's group. Hit save, and check that /usr/local/etc/bwctld.limits has been updated
-  * `_____` Click "Delete" to delete the user you added. Hit save, and check that /usr/local/etc/bwctld.limits and /usr/local/etc/bwctld.keys have been updated.
-  * `_____` Click "Add Network", enter an IP address and netmask and then select a group. Hit save and see that /usr/local/etc/bwctld.limits has been updated
+  * `_____` Click "Change Password", and try to change the user's password. Hit save, and check that /etc/bwctld/bwctld.keys has been updated
+  * `_____` Click "Change Group", and try to change the user's group. Hit save, and check that /etc/bwctld/bwctld.limits has been updated
+  * `_____` Click "Delete" to delete the user you added. Hit save, and check that /etc/bwctld/bwctld.limits and /etc/bwctld/bwctld.keys have been updated.
+  * `_____` Click "Add Network", enter an IP address and netmask and then select a group. Hit save and see that /etc/bwctld/bwctld.limits has been updated
   * `_____` Click "Add Network" and try to re-enter the address and netmask above. You should receive an error message about the network already existing.
-  * `_____` Click "Change Group", and try to change the networks's group. Hit save, and check that /usr/local/etc/bwctld.limits has been updated
-  * `_____` Click "Delete" to delete the network you added. Hit save, and check that /usr/local/etc/bwctld.limits has been updated.
+  * `_____` Click "Change Group", and try to change the networks's group. Hit save, and check that /etc/bwctld/bwctld.limits has been updated
+  * `_____` Click "Delete" to delete the network you added. Hit save, and check that /etc/bwctld/bwctld.limits has been updated.
 
 === External OWAMP Limits ===
-  * `_____` Edit the "Unpriviledged Clients" and make changes to the limits, hit save and see that /usr/local/etc/owampd.limits has been updated, and that the "regular" group has the limits you specified.
-  * `_____` Click "Add User", enter a user name, select a group, and set a password. Hit save and see that /usr/local/etc/owampd.limits and /usr/local/etc/owampd.pfs have both been updated
+  * `_____` Edit the "Unpriviledged Clients" and make changes to the limits, hit save and see that /etc/owampd/owampd.limits has been updated, and that the "regular" group has the limits you specified.
+  * `_____` Click "Add User", enter a user name, select a group, and set a password. Hit save and see that /etc/owampd/owampd.limits and /etc/owampd/owampd.pfs have both been updated
   * `_____` Click "Add User" and try to re-enter the name above. You should receive an error message about the user already existing.
-  * `_____` Click "Change Password", and try to change the user's password. Hit save, and check that /usr/local/etc/owampd.pfs has been updated
-  * `_____` Click "Change Group", and try to change the user's group. Hit save, and check that /usr/local/etc/owampd.limits has been updated
-  * `_____` Click "Delete" to delete the user you added. Hit save, and check that /usr/local/etc/owampd.limits and /usr/local/etc/owampd.pfs have been updated.
-  * `_____` Click "Add Network", enter an IP address and netmask and then select a group. Hit save and see that /usr/local/etc/owampd.limits has been updated
+  * `_____` Click "Change Password", and try to change the user's password. Hit save, and check that /etc/owampd/owampd.pfs has been updated
+  * `_____` Click "Change Group", and try to change the user's group. Hit save, and check that /etc/owampd/owampd.limits has been updated
+  * `_____` Click "Delete" to delete the user you added. Hit save, and check that /etc/owampd/owampd.limits and /etc/owampd/owampd.pfs have been updated.
+  * `_____` Click "Add Network", enter an IP address and netmask and then select a group. Hit save and see that /etc/owampd/owampd.limits has been updated
   * `_____` Click "Add Network" and try to re-enter the address and netmask above. You should receive an error message about the network already existing.
-  * `_____` Click "Change Group", and try to change the networks's group. Hit save, and check that /usr/local/etc/owampd.limits has been updated
-  * `_____` Click "Delete" to delete the network you added. Hit save, and check that /usr/local/etc/owampd.limits has been updated.
+  * `_____` Click "Change Group", and try to change the networks's group. Hit save, and check that /etc/owampd/owampd.limits has been updated
+  * `_____` Click "Delete" to delete the network you added. Hit save, and check that /etc/owampd/owampd.limits has been updated.
 
 == Last Updated ==
 
