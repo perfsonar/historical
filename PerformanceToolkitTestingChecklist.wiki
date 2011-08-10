@@ -10,6 +10,9 @@ This page contains a checklist of things to test before releasing a Performance 
 
 === Databases ===
   * `_____` Is there an 'owamp' database?
+  * `_____` Is there a 'bwctl' database?
+  * `_____` Is there a 'pingerMA' database?
+  * `_____` Is there a 'tracerouteMA' database?
 
 === Administrative Information ===
   * `_____` Are the labels, prompts, and pop-ups clear and informative?
@@ -57,22 +60,6 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Are all Cacti graphs from the previous version still visible via the the "Cacti Graphs" link on the sidebar?
 
 == Testing Checklist ==
-
-=== Networking Configuration ===
-  * `_____` Did the network come up with DHCP (if DHCP is being used)?
-  * `_____` Can you connect to hosts on the outside world, and resolve DNS names?
-  * `_____` Using the "nptoolkit-configure.py", select "Configure Networking". Did the networking script come up?
-  * `_____` Select "Configure DNS" and add a DNS server.
-  * `_____` Try re-adding that DNS server. It should not appear multiple times.
-  * `_____` Try adding another DNS server.
-  * `_____` Try deleting one of the DNS servers.
-  * `_____` Go back, and then exit, making sure to save changes. Does the /usr/local/etc/static.ip file contain lines like "DNS: `[`server address`]`" for every server you added?
-  * `_____` Open "nptoolkit-configure.py" and then select "Configure DNS". Are all the DNS servers you previously added still there?
-  * `_____` Go back to the main menu. Are there menu entries for all the interfaces on the machine?
-  * `_____` Select configure on one of the interfaces. Configure it for DHCP, and set the MTU to 9000. Exit, and hit save. Does the /usr/local/etc/static.ip contain "BOOTPROTO: dhcp" and "MTU: 9000" lines in it?
-  * `_____` Go back to the main menu. Are there menu entries for all the interfaces on the machine?
-  * `_____` Select configure on that same interface. Configure it for static IP, set the IP, netmask and gateway. Don't change the MTU. Exit, and hit save. Does the /usr/local/etc/static.ip contain a "BOOTPROTO: static", "IP_ADDR: `[`ip chosen`]`", "NETMASK: `[`netmask chosen`]`", "GATEWAY: `[`gateway chosen`]`", and "MTU: 9000" lines in it?
-  * `_____` Restart networking, run /sbin/ifconfig, and see if the interface you specified is configured with the above static IP address information
 
 === Administrative Information ===
   * `_____` Change the Organization Name, Host Location, Administrator Name and Administrator Email
