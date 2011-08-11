@@ -1,0 +1,91 @@
+#summary Instructions to build the Toolkit Building VM
+
+= Building the Toolkit Building Virtual Machine =
+
+== Create the CentOS Virtual Machine ==
+  * Download the centos boot.iso from one of these [http://www.centos.org/modules/tinycontent/index.php?id=30 mirrors].
+  * I used VMware Fusion 3.1.3 to create a new virtual machine. 
+  * Under Settings set the CD ROM drive to load the boot.iso image. 
+  * Increase the disk size to 30 GB.
+
+== OS Installation ==
+  * Start the VM and at the boot prompt type _linux text_ 
+  * Choose installation method _HTTP_ 
+  * When prompted, enter the Web Site Name: _ndb1.internet2.edu_ 
+  * Centos directory: _centos/5.6/os/i386_ 
+  * Press _OK_ until you come to the Time Zone screen.
+  * Set your time zone.
+  * Continue and set your root password.
+  * Continue and uncheck default package selections.
+  * Wait for installation to finish.
+  * Reboot.
+
+== Configure Services ==
+  * When the VM reboots you'll be prompted for configuration. Configure the firewall to disable _SELinux_ , and under Customize ensure _ssh_ is selected.
+  * Under System Services disable _anacron, apmd, bluetooth, firstboot, gpm, mdmonitor, pcsd_ and _yum-updatesd_ 
+
+== Eject Installation Media ==
+  * Log in as root.
+  * Type _shutdown -h now_ 
+  * After shutdown use Virtual Machine Settings to unmount boot.iso.
+  * Start the VM.
+  * Log back in as root.
+
+== Install Packages ==
+  * Install _epel_
+
+{{{ 
+rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm 
+}}}
+
+  * Use _yum_ to install _kernel-devel, mock, ImageMagic, mkisofs, squashfs-tools, livecd-tools, rpm-build, redhat-rpm-config, unifdef, autoconf, automake, gcc-c++, subversion_
+
+  * You may also need to install _syslinux, anaconda-runtime, make, m4 and binutils_ if they're not aleady installed.
+
+== Create psbuild user ==
+  * Type _useradd -G wheel,mock psbuild_ (Note: no space after comma in group list).
+  * Change default group to mock with _usermod -g mock psbuild_
+  * Give the psbuild user a default password _psbuild0_ using the command _passwd psbuild_ 
+  * Use _/usr/sbin/visudo_ to uncomment the line 
+
+{{{ 
+%wheel ALL=(ALL) NOPASSWD: ALL
+}}}
+
+== Configure the psbuild home directory ==
+  * Add the following 3 lines to _/etc/mock/epel-5-i386.cfg_ 
+
+{{{
+[holding]
+name=holding
+baseurl=file:///home/psbuild/holding
+}}}
+
+  * Type the following commands to create toolkit building directories
+
+{{{
+mkdir -p /home/psbuild/holding
+createrepo -d --update /home/psbuild/holding
+mkdir -p /home/psbuild/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+echo '% topdir %(echo $HOME)/rpmbuild' > /home/psbuild/.rpmmacros
+mkdir /home/psbuild/bin
+}}}
+
+  * Copy the i2 mock script from _http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs_ to _/home/psbuild/bin_ 
+  * Change the default output directory in the _i2_mock_ script from 
+
+{{{ 
+$resultdir="/srv/results/$name/$distro/$arch/".`rpm -qp $srpm 2>/dev/null` unless ($resultdir); 
+}}}
+
+  * to 
+
+{{{ 
+$resultdir="/home/$name/$distro/$arch/".`rpm -qp $srpm 2>/dev/null` unless ($resultdir); 
+}}}
+
+== Finish Up ==
+  * Correct the psbuild user permissions with _chown -R psbuild:mock /home/psbuild_
+  * Force the user to change password on first login with _chage -d 0 psbuild_ 
+  * Disable root account with _passwd -l root_ 
+  * _exit_ 
