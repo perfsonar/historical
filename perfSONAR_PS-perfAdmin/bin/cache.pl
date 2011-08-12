@@ -36,6 +36,7 @@ use perfSONAR_PS::Client::Parallel::LS;
 
 my $DEBUGFLAG = q{};
 my $HELP      = q{};
+my $EXP_TIME = time - 3600*24;#expire after 24 hours
 
 my $status = GetOptions(
     'verbose' => \$DEBUGFLAG,
@@ -55,7 +56,7 @@ my $hints  = "http://www.perfsonar.net/gls.root.hints";
 
 my @private_list = ( "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16" );
 
-my $base = "/var/lib/perfsonar/perfAdmin/cache";
+my $base =  "/var/lib/perfsonar/perfAdmin/cache";
 
 my %hls     = ();
 my %matrix1 = ();
@@ -86,6 +87,7 @@ $gls->init();
 
 croak "roots not found" unless ( scalar( @roots ) > 0 );
 
+print "Number of GLS queried:", scalar @roots;
 foreach my $root ( @roots ) {
     print "Trying root '" . $root . "'\n" if $DEBUGFLAG;
 
@@ -110,7 +112,7 @@ foreach my $root ( @roots ) {
 
 my $results = $gls->wait_all( { timeout => 60, parallelism => 8 } );
 my @gls_stats = ();
-
+print "Total GLS reponse received:", scalar keys %{$results};
 foreach my $key ( keys %{$results} ) {
     my $response_info = $results->{$key};
 
@@ -220,7 +222,7 @@ $ls->init();
 
 my %hls_results = ();
 my @hlses       = keys %hls;
-
+print "\n Number of HLS queried:", scalar @hlses;
 $results = query_hlses( { hlses => \@hlses, event_type => "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0", format => 1 } );
 
 my @java_hlses = ();
@@ -330,14 +332,16 @@ foreach my $h ( keys %hls_results ) {
             $logger->debug( "Querying for keywords in :" . $d1->toString . "\n" );
 
             # get the keywords
-            my $keywords = find( $d1, "./nmwg:metadata/summary:parameters/nmwg:parameter", 0 );
-            foreach my $k ( $keywords->get_nodelist ) {
+            my @keyword_list = ();
+            my $keyword_elems = find( $d1, "./nmwg:metadata/summary:parameters/nmwg:parameter", 0 );
+            foreach my $k ( $keyword_elems->get_nodelist ) {
                 $logger->debug( "Found attribute: " . $k->getAttribute( "name" ) );
                 my $name = $k->getAttribute( "name" );
                 next unless $name eq "keyword";
                 my $value = extract( $k, 0 );
                 if ( $value ) {
                     $keywords{$value} = 1;
+                    push @keyword_list, $value;
                 }
                 $logger->debug( "Found keyword: " . $value );
             }
@@ -371,10 +375,10 @@ foreach my $h ( keys %hls_results ) {
                             $matrix2{$h}{$cp}  = 1;
     
                             if ( exists $list{$value} ) {
-                                push @{ $list{$value} }, { CONTACT => $cp, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription };
+                                push @{ $list{$value} }, { CONTACT => $cp, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription, KEYWORDS => \@keyword_list, TIMESTAMP => time  };
                             }
                             else {
-                                my @temp = ( { CONTACT => $cp, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription } );
+                                my @temp = ( { CONTACT => $cp, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription, KEYWORDS => \@keyword_list, TIMESTAMP => time  } );
                                 $list{$value} = \@temp;
                             }
     
@@ -426,40 +430,93 @@ foreach my $h ( keys %hls_results ) {
 }
 
 $logger->debug( "Writing files\n" );
-
-open( FILE, ">" . $base . "/list.glsmap" ) or croak "can't open glsmap list";
+my %cacheData = ();
+if(-e $base . "/" . "/list.glsmap"){
+	open( FILER, "<" . $base . "/list.glsmap" ) or croak "can't open glsmap list";
+	#my %cacheData = ();
+	while ( <FILER> ){
+		chomp;
+		my @fields = split /\|/;
+		if (@fields < 3){
+        		print "Invalid line in $base/list.glsmap\n";
+			next;
+		}
+	
+		if($fields[2] && $fields[2] =~ /\d+/ && $fields[2] > $EXP_TIME){
+			$cacheData{ $fields[0] } = {GLSURL => $fields[0], DATA => $fields[1], TIMESTAMP => $fields[2] };
+		}
+	}	
+	close (FILER);
+}
+open(FILEW, ">". $base . "/list.glsmap") or croak "can't open glsmap list"; 
 foreach my $g ( keys %matrix1 ) {
-    print FILE $g;
+    print FILEW $g;
     my $counter = 0;
     foreach my $h ( keys %{ $matrix1{$g} } ) {
         if ( $counter ) {
-            print FILE ",", $h;
+            print FILEW ",", $h;
         }
         else {
-            print FILE "|", $h;
+            print FILEW "|", $h;
         }
         $counter++;
     }
-    print FILE "\n";
+    print FILEW "|", time;
+    print FILEW "\n";
+    if (defined $cacheData{$g} && $cacheData{$g}){
+    	delete $cacheData{$g};
+    }
 }
-close( FILE );
 
-open( FILE2, ">" . $base . "/list.hlsmap" ) or croak "can't open hls list";
+#write missing entries from cache
+foreach my $cachekey (keys %cacheData){
+	print FILEW $cachekey, "|", $cacheData{$cachekey}{"DATA"}, "|",$cacheData{$cachekey}{"TIMESTAMP"},"\n";
+}
+close( FILEW );
+
+my %cacheData2 = ();
+if(-e $base . "/" . "/list.hlsmap"){
+	open( FILER2, "<" . $base . "/list.hlsmap" ) or croak "can't open hls list";
+	#my %cacheData2 = ();
+	while ( <FILER2> ){
+        	chomp;
+        	my @fields = split /\|/;
+        	if (@fields < 3){
+                	print "Invalid line in $base/list.glsmap\n";
+                	next;
+        	}
+
+        	if($fields[2] && $fields[2] =~ /\d+/ && $fields[2] > $EXP_TIME){
+                	$cacheData2{ $fields[0] } = {GLSURL => $fields[0], DATA => $fields[1], TIMESTAMP => $fields[2] };
+        	}
+	}	
+	close (FILER2);
+}
+#write hls data to file
+open( FILEW2, ">" . $base . "/list.hlsmap" ) or croak "can't open hls list";
 foreach my $h ( keys %matrix2 ) {
-    print FILE2 $h;
+    print FILEW2 $h;
     my $counter = 0;
     foreach my $s ( keys %{ $matrix2{$h} } ) {
         if ( $counter ) {
-            print FILE2 ",", $s;
+            print FILEW2 ",", $s;
         }
         else {
-            print FILE2 "|", $s;
+            print FILEW2 "|", $s;
         }
         $counter++;
     }
-    print FILE2 "\n";
+    print FILEW2 "|", time;
+    print FILEW2 "\n";
+    if (defined $cacheData2{$h} && $cacheData2{$h}){
+        delete $cacheData2{$h};
+    }
 }
-close( FILE2 );
+#write missing entries from cache
+foreach my $cachekey (keys %cacheData2){
+    print FILEW2 $cachekey, "|", $cacheData2{$cachekey}{"DATA"}, "|",$cacheData2{$cachekey}{"TIMESTAMP"},"\n";
+}
+close( FILEW2 );
 
 open( FILE3, ">" . $base . "/list.glsstats" ) or croak "can't open glsstats list";
 foreach my $stat ( @gls_stats ) {
@@ -473,26 +530,75 @@ foreach my $stat ( @hls_stats ) {
 }
 close( FILE4 );
 
+#cache hls
+if( -e $base . "/list.hls"){
+    open( HLS, "<" . $base . "/list.hls" ) or croak "can't open hls list";
+    while( <HLS> ){
+        chomp;
+        my @fields = split /\|/;
+        if( @fields < 4 ){
+            next;
+        }
+        if($#fields != 5 || $fields[5] < $EXP_TIME){
+            next;
+        }
+        if(!defined $hls{$fields[0]}){
+            print $fields[0] . "(cached)\n";
+            my %tmpInfo = (
+                "INFO" => ($fields[0] . "|" . $fields[1] . "|" . $fields[2] . "|" . $fields[3]),
+            );
+            
+            $hls{ $fields[0] } = \%tmpInfo;
+        }
+    }
+    close HLS;
+}
+
+#cache keywords in case some are missing
+if( -e $base . "/list.keywords"){
+    open( KEYWORDS, "<" . $base . "/list.keywords" ) or croak "can't open keyword list";
+    while( <KEYWORDS> ){
+        chomp;
+        my @fields = split /\|/;
+        if( @fields != 3 ){
+            next;
+        }
+        if($fields[2] < $EXP_TIME || !$fields[1]){
+            next;
+        }
+        $hls{$fields[0]}{"KEYWORDS"}{$fields[1]} = 1;
+        print "Cached Keyword: " . $fields[0] . " -> " . $fields[1] . "\n";
+    }
+    close KEYWORDS;
+}
+
 # should we do some verification/validation here?
+open( KEYWORDS, ">" . $base . "/list.keywords" ) or croak "can't open keyword list";
 open( HLS, ">" . $base . "/list.hls" ) or croak "can't open hls list";
 foreach my $h ( keys %hls ) {
     print HLS $hls{$h}{"INFO"};
+    
+    print HLS "|";
     if ( exists $hls{$h}{"KEYWORDS"} and $hls{$h}{"KEYWORDS"} ) {
         my $counter = 0;
         foreach my $k ( keys %{ $hls{$h}{"KEYWORDS"} } ) {
+            print KEYWORDS "$h|$k|" . time . "\n";
             if ( $counter ) {
                 print HLS ",", $k;
             }
             else {
-                print HLS "|", $k;
+                print HLS $k;
             }
             $counter++;
         }
     }
+    print HLS "|", time;
     print HLS "\n";
 }
+close( KEYWORDS );
 close( HLS );
 
+my %file_service_tracker = ();
 my %counter = ();
 foreach my $et ( keys %list ) {
     my $file = q{};
@@ -532,6 +638,11 @@ foreach my $et ( keys %list ) {
     elsif ( $et eq "http://ggf.org/ns/nmwg/tools/phoebus/1.0" ) {
         $file = "list.phoebus";
     }
+    elsif ( $et eq "http://ggf.org/ns/nmwg/tools/traceroute/2.0" ) {
+        $file = "list.traceroute_ma";
+    }elsif ( $et eq "http://ggf.org/ns/nmwg/tools/gridftp/1.0" ) {
+        $file = "list.gridftp";
+    }
     elsif ( $et eq "http://docs.oasis-open.org/wsn/br-2" ) {
         $file = "list.idcnb";
     }
@@ -539,22 +650,85 @@ foreach my $et ( keys %list ) {
         $file = "list.idc";
     }
     next unless $file;
-
+    
+    #OPEN FILE AND KEEP UNEXPIRED
+    my %cached_hosts = ();
+    if(-e $base . "/" . $file){
+        open( IN, "< ". $base . "/" . $file) or croak "can't open $base/$file for reading.";
+        
+        while( <IN>){
+            chomp;
+            my @fields = split /\|/;
+            if( @fields < 6 ){
+                print "Invalid line in $base/$file\n";
+                next;
+            }
+            my @tmpKws = split( /\,/, $fields[4] );
+            if($fields[5] && $fields[5] =~ /\d+/ && $fields[5] > $EXP_TIME){
+                $cached_hosts{ $fields[0] } = { CONTACT => $fields[0], NAME => $fields[1], TYPE => $fields[2], DESC => $fields[3], KEYWORDS => \@tmpKws, TIMESTAMP => $fields[5] };
+            }
+        }
+        close ( IN );
+    }
+    
     my $writetype = ">";
     $writetype = ">>" if exists $counter{$file};
     $counter{$file} = 1;
 
-    open( OUT, $writetype . $base . "/" . $file ) or croak "can't open $base/$file.";
+    open( OUT, $writetype . $base . "/" . $file ) or croak "can't open $base/$file for writing.";
     foreach my $host ( @{ $list{$et} } ) {
+        if(defined $cached_hosts{ $host->{"CONTACT"} } && $cached_hosts{ $host->{"CONTACT"} }){
+            delete $cached_hosts{ $host->{"CONTACT"} };
+        }
+        if(exists $file_service_tracker{$host->{"CONTACT"} . $file}){
+            next;
+        }
+        $file_service_tracker{$host->{"CONTACT"} . $file} = 1;
         print OUT $host->{"CONTACT"}, "|";
         print OUT $host->{"NAME"} if $host->{"NAME"};
         print OUT "|";
         print OUT $host->{"TYPE"} if $host->{"TYPE"};
         print OUT "|";
         print OUT $host->{"DESC"} if $host->{"DESC"};
+        print OUT "|";
+        my $first_kw = 1;
+        foreach my $kw(@{ $host->{"KEYWORDS"} }){
+            if($first_kw){
+                $first_kw = 0;
+            }else{
+                print OUT ",";
+            }
+            print OUT $kw;
+        }
+        print OUT "|";
+        print OUT $host->{"TIMESTAMP"} if $host->{"TIMESTAMP"};
         print OUT "\n";
         print $file , " - ", $host->{"CONTACT"}, "\n";
     }
+    #write any remaining hash elements
+    foreach my $cache_key ( keys %cached_hosts ) {
+        print OUT $cached_hosts{$cache_key}->{"CONTACT"}, "|";
+        print OUT $cached_hosts{$cache_key}->{"NAME"} if $cached_hosts{$cache_key}->{"NAME"};
+        print OUT "|";
+        print OUT $cached_hosts{$cache_key}->{"TYPE"} if $cached_hosts{$cache_key}->{"TYPE"};
+        print OUT "|";
+        print OUT $cached_hosts{$cache_key}->{"DESC"} if $cached_hosts{$cache_key}->{"DESC"};
+        print OUT "|";
+        my $first_kw = 1;
+        foreach my $kw(@{ $cached_hosts{$cache_key}->{"KEYWORDS"} }){
+            if($first_kw){
+                $first_kw = 0;
+            }else{
+                print OUT ",";
+            }
+            print OUT $kw;
+        }
+        print OUT "|";
+        print OUT $cached_hosts{$cache_key}->{"TIMESTAMP"} if $cached_hosts{$cache_key}->{"TIMESTAMP"};
+        print OUT "\n";
+        print $file , " - ", $cached_hosts{$cache_key}->{"CONTACT"}, " (cached)\n";
+    }
+    
     close( OUT );
 
 }
@@ -585,8 +759,8 @@ sub query_hlses {
         $mappings{$cookie} = $h;
     }
 
-    my $results = $ls->wait_all( { timeout => 60, parallelism => 8 } );
-
+    my $results = $ls->wait_all( { timeout => 220, parallelism => 16 } );
+    print "\nReturned HLS results:", scalar keys %{$results};
     my %ret_results = ();
     foreach my $key ( keys %{$results} ) {
         my $response_info = $results->{$key};
