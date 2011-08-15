@@ -5,9 +5,7 @@
 == Agenda/Minutes ==
 
   * Attendees: Brian, Jason, Andy, Sowmya, Kavitha, Jeff
-
      * Excused: Aaron, Nils
-
    * Followup on previous actions:
      * Short Term
        * _*ACTION*_: Aaron will add message and documentation telling user to reboot after an upgrade
@@ -23,11 +21,8 @@
        * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
        * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
        * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
-
    * Developer updates
-
      * Jason: TexasTech is looking at doing a campus wide deployment. Ability to use a GUI to setup a set of MPs and MAs.
- 
   * Other:
   
 == Actions  ==
