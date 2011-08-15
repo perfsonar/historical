@@ -10,7 +10,7 @@
      * Short Term
        * _*ACTION*_: Aaron will add message and documentation telling user to reboot after an upgrade
        * _*ACTION*_: Aaron, Andy, Sowmya will do more testing of 3.2.0 to 3.2.1rc2 upgrade, for both netinstall and LiveCD before sending rc2 out.
-         *DONE
+         * DONE
        * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
        * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
        * _*ACTION*_: Jeff will pull out issues/svn log messages and split out work for finding what is *new* in this release.
