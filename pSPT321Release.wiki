@@ -66,16 +66,15 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=518 518] - Reverse Traceroute/Ping is not IPv6 Capable
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=519 519] - Add support for DNS 'rotate' option
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=521 521] - NAGIOS Plugins Documentation Clarification
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=523 523] - Upgrade to CentoOS 5.6
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=524 524] - SNMP MA SQLite Backend testing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=534 534] - Document host/address behavior with regardst to v6 on the pSPT
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=541 541] - upgrade procedure for existing installs (both LiveCD and NetInstall)
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=542 542] - Unable to enable IPv6 if not enabled during install 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=543 543] - Static IPv6 address is not assigned to interface after installl 
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=544 544] -  move kickstart system modifications into a Toolkit RPM 
- * Awaiting Testing
-   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - ability to set peer_port and iperf_port using web config GUI  
+ * Awaiting Testing  
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=160 160] - ESnet SNMP MA Enhancements   
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - ability to set peer_port and iperf_port using web config GUI
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=242 242] - ps-buoy graph user interface improvements
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=321 321] - Link to error logs on services page/perfAdmin GUIs
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=349 349] - Identify and Archive the path measured by bwctl & owamp  
@@ -101,6 +100,7 @@ TBD
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=507 507] - Services must include examples of requests and responses
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=516 516] - regular testing gui doesn't preserve udp bandwidth setting
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=520 520] - NAGIOS BWCTL Probe Support for TCP/UDP tests
+   * [http://code.google.com/p/perfsonar-ps/issues/detail?id=523 523] - Upgrade to CentoOS 5.6
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=529 529] - Disable LS and LS Registration Daemon when Administrative Info is missing
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=531 531] - Remove non-functional options in the regular testing setup   
    * [http://code.google.com/p/perfsonar-ps/issues/detail?id=535 535] - NTP Stats on pSPT   
