@@ -61,7 +61,7 @@ baseurl=file:///home/psbuild/holding
 mkdir -p /home/psbuild/holding
 createrepo -d --update /home/psbuild/holding
 mkdir -p /home/psbuild/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-echo '% topdir %(echo $HOME)/rpmbuild' > /home/psbuild/.rpmmacros
+echo '%_topdir %(echo $HOME)/rpmbuild' > /home/psbuild/.rpmmacros
 mkdir /home/psbuild/bin
 }}}
   * Copy the i2 mock script from `http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs` to `/home/psbuild/bin` 
