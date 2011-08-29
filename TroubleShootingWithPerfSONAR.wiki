@@ -37,7 +37,7 @@ If the WAN tests show a problem, contact your primary WAN provider.
 
 5) Otherwise, run tests from both end hosts to a test host on the WAN.
 
-Start with a close test system, and then get further and further away.
+Start with the closest test system, and then get further and further away.
 For example, If you are troubleshooting the path from NERSC in Oakland to the TACC  in Austin, find some public bwctl servers along the path:
 
   * nersc-pt1.es.net, sunn-pt1.es.net, chic-pt1.es.net, bwctl.hous.net.internet2.edu
