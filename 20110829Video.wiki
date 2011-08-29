@@ -23,7 +23,7 @@
   * RC2 Status
      * Next steps, production release?
         * Umich tested - no issues
-        * U Hawaii - Alan Whiner, problems - aaron is following up.
+        * U Hawaii - Alan Whinery, problems - aaron is following up.
   * Other:
   
 == Actions  ==
