@@ -24,7 +24,12 @@ Beta, and RC:
    * Alan @ UHawaii
    * Philippe @ MSU
    * Aliza/Mike @ CEN
- * RC 2 (TBD)   
+ * RC 2 [Netinstall and LiveCD] (August 16, 2011) 
+   * Shawn @ UMich
+   * Alan @ UHawaii
+   * Philippe @ MSU
+   * Sandor @ CERN
+   * Ezra @ UDel
  * RC 3 (TBD)
  
 == Release Schedule ==
