@@ -422,6 +422,16 @@ sub init {
             $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"snmp"}->{"metadata_db_file"});
             return -1;
         }
+        
+        my ( $status, $res ) = $self->buildHashedKeys( { metadatadb => $metadatadb, metadatadb_type => "sqlite" } );
+        unless ( $status == 0 ) {
+            $self->{LOGGER}->fatal( "Error building key database: $res" );
+            return -1;
+        }
+
+        $self->{HASH_TO_ID} = $res->{hash_to_id};
+        $self->{ID_TO_HASH} = $res->{id_to_hash};
+        
         $metadatadb->closeDB();
         $self->{METADATADB} = q{};
     }
@@ -777,7 +787,7 @@ sub buildHashedKeys {
             $self->{LOGGER}->debug( "Key id $hash maps to data element " . $data->getDocumentElement->getAttribute( "id" ) );
         }
     }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
+    elsif ( $metadatadb_type eq "sqlite" ) {
          my $metadatadb = $self->prepareSQLiteDatabases();
          unless ( $metadatadb ) {
             $self->{LOGGER}->fatal( "Database could not be opened." );
@@ -792,8 +802,8 @@ sub buildHashedKeys {
          
          foreach my $result( @{$results} ){
              my $hash = md5_hex( join '', @{$result} );
-             $id_to_hash{$hash} = 'data' . $result->[0];
-             $hash_to_id{'data' . $result->[0] } = $hash;
+             $hash_to_id{$hash} = 'data' . $result->[0];
+             $id_to_hash{'data' . $result->[0] } = $hash;
          }
          $metadatadb->closeDB();
     }
