@@ -1422,6 +1422,14 @@ sub metadataKeyRetrieveMetadataData {
         $dataResults = $parameters->{metadatadb}->querySet( { query => $queryString } );
     }
     
+    #get request metadataId
+    my $base_id = $parameters->{metadata}->getAttribute( "id" );
+    my @filters = @{ $parameters->{filters} };
+    if ( $#filters > -1 ) {
+        my @filter_arr = @{ $filters[-1] };
+        $base_id = $filter_arr[0]->getAttribute( "id" );
+    }
+        
     if ( $results->size() > 0 and $dataResults->size() > 0 ) {
         my %mds = ();
         foreach my $md ( $results->get_nodelist ) {
@@ -1439,7 +1447,7 @@ sub metadataKeyRetrieveMetadataData {
             my $mdId = "metadata." . genuid();
 
             my $md_temp = $curr_md->cloneNode( 1 );
-            $md_temp->setAttribute( "metadataIdRef", $curr_d_mdIdRef );
+            $md_temp->setAttribute( "metadataIdRef", $base_id  );
             $md_temp->setAttribute( "id",            $mdId );
 
             $parameters->{output}->addExistingXMLElement( $md_temp );
