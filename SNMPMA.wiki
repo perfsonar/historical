@@ -352,7 +352,7 @@ an explanation of each follows:
 || enable_registration || Yes || Boolean, 0 or 1 || Allow the service to register with an LS instance ||
 || metadata_db_name || No || String (file path) || Name of the directory that houses the database ||
 || metadata_db_file || Yes || String (file name) || File name of a database file ||
-|| metadata_db_type || Yes || String || Either _file_ or _xmldb_ ||
+|| metadata_db_type || Yes || String || Either _file_, _xmldb_, or sqlite ||
 || metadata_db_external || Yes || String || Either _none_, _cacti_, or _cricket_ ||
 || metadata_db_external_source || No || String || Location of external configration file, Used only for Cacti currently ||
 || metadata_db_external_cricket_config || No || String (directory path) || Path to cricket config, Used only for cricket ||
