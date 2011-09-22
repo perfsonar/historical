@@ -1,7 +1,7 @@
 PACKAGE=perfSONAR_PS-LookupService
 ROOTPATH=/opt/perfsonar_ps/lookup_service
-VERSION=3.2
-RELEASE=1
+VERSION=3.2.1
+RELEASE=3
 
 default:
 	@echo No need to build the package. Just run \"make install\"

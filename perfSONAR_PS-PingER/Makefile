@@ -1,7 +1,7 @@
 PACKAGE=perfSONAR_PS-PingER-server
 ROOTPATH=/opt/perfsonar_ps/PingER
-VERSION=3.1
-RELEASE=14
+VERSION=3.2.1
+RELEASE=3
 
 default:
 	@echo No need to build the package. Just run \"make install\"

@@ -1,4 +1,3 @@
-pinger_gui_conf.yml
 MANIFEST
 Makefile
 bin/pinger_cache.pl
@@ -6,8 +5,6 @@ doc/Changes
 doc/INSTALL
 doc/LICENSE
 doc/README
-lib/Data/Visitor.pm
-lib/Data/Visitor/Callback.pm
 lib/Catalyst/Plugin/Static/Simple.pm
 lib/ChartDirector/LICENSE.TXT
 lib/ChartDirector/lib/chartdir.lic
@@ -41,6 +38,7 @@ lib/ChartDirector/lib/fonts/timR10.pcf
 lib/ChartDirector/lib/fonts/timR12.pcf
 lib/ChartDirector/lib/fonts/timR14.pcf
 lib/ChartDirector/lib/libchartdiri386.so
+lib/ChartDirector/lib/libchartdiri64.so
 lib/ChartDirector/lib/libchartdirx86_64.so
 lib/ChartDirector/lib/perlchartdir.pm
 lib/ChartDirector/lib/perlchartdir5004.so
@@ -55,6 +53,8 @@ lib/ChartDirector/lib/perlchartdir58.so
 lib/ChartDirector/lib/perlchartdir58i64.so
 lib/ChartDirector/lib/perlchartdir58i64mt.so
 lib/ChartDirector/lib/perlchartdir58mt.so
+lib/Data/Visitor.pm
+lib/Data/Visitor/Callback.pm
 lib/PingerGUI.pm
 lib/PingerGUI/Controller/Gui.pm
 lib/PingerGUI/Controller/Root.pm
@@ -141,8 +141,10 @@ lib/perfSONAR_PS/PINGER_DATATYPES/v2_0/select/Message/Metadata/Parameters.pm
 lib/perfSONAR_PS/PINGER_DATATYPES/v2_0/select/Message/Metadata/Subject.pm
 lib/perfSONAR_PS/Transport.pm
 lib/perfSONAR_PS/Utils/DNS.pm
+lib/perfSONAR_PS/Utils/NetLogger.pm
 lib/perfSONAR_PS/Utils/ParameterValidation.pm
 lib/perfSONAR_PS/XML/Document.pm
+pinger_gui_conf.yml
 root/css/gui.css
 root/css/mystyle.css
 root/favicon.ico
@@ -247,8 +249,11 @@ root/static/images/application_cascade.png
 root/static/images/application_go.png
 root/static/images/cross.png
 root/static/images/spinner.gif
+scripts/install_dependencies.sh
+scripts/logger.conf
 scripts/pinger_cache.cron
 scripts/pinger_gui.conf
 scripts/pingerui_server.pl
 scripts/pingerui_test.pl
 scripts/prep_links.sh
+scripts/prepare_environment.sh

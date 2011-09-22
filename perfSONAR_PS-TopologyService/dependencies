@@ -21,6 +21,7 @@ Net::Ping
 POSIX
 Params::Validate
 Sleepycat::DbXml
+Socket
 Time::HiRes
 XML::LibXML
 base

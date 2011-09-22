@@ -4,9 +4,8 @@ Config::General
 Cwd
 DBI
 DB_File
-DBD::mysql
 Data::UUID
-Data::Validate::IP,0.08
+Data::Validate::IP
 Date::Manip
 Digest::MD5
 English
@@ -26,11 +25,6 @@ IPC::Open3
 LWP::Simple
 LWP::UserAgent
 Log::Log4perl
-Log::Dispatch
-Log::Dispatch::FileRotate
-Log::Dispatch::File
-Log::Dispatch::Syslog
-Log::Dispatch::Screen
 Math::BigFloat
 Math::Int64
 Module::Load
@@ -38,12 +32,13 @@ Net::IPv6Addr
 Net::Ping
 POSIX
 Params::Validate
+Sleepycat::DbXml
 Socket
 Sys::Hostname
 Sys::Syslog
 Term::ReadKey
 Time::HiRes
 Time::Local
-XML::LibXML,1.66
+XML::LibXML
 base
 vars

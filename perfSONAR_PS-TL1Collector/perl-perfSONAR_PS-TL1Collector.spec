@@ -4,11 +4,11 @@
 %define init_script_1 perfsonar-tl1-service
 %define init_script_2 perfsonar-tl1-collector
 
-%define relnum 1
+%define relnum 3
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-TL1Collector
-Version:        3.1
+Version:        3.2.1
 Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR-PS TL1 Collector/Service
 License:        distributable, see LICENSE

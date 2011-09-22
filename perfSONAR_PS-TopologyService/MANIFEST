@@ -3,9 +3,9 @@ Makefile
 bin/client.pl
 bin/daemon.pl
 doc/Changes
+doc/INSTALL
 doc/LICENSE
 doc/README
-doc/INSTALL
 doc/example_topology.xml
 doc/requests/TSAddRequest.xml
 doc/requests/TSQueryRequest-all.xml

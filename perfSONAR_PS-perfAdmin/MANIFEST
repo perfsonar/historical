@@ -1,6 +1,7 @@
 MANIFEST
 Makefile
 bin/cache.pl
+bin/cache_package.pl
 cgi-bin/PingERGraph.cgi
 cgi-bin/bandwidthGraph.cgi
 cgi-bin/bandwidthGraphFlash.cgi
@@ -8,8 +9,8 @@ cgi-bin/bandwidthGraphScatter.cgi
 cgi-bin/delayGraph.cgi
 cgi-bin/directory.cgi
 cgi-bin/serviceTest.cgi
-cgi-bin/tree.cgi
 cgi-bin/topoGraph.cgi
+cgi-bin/tree.cgi
 cgi-bin/utilizationGraph.cgi
 cgi-bin/utilizationGraphFlash.cgi
 cgi-bin/view.cgi

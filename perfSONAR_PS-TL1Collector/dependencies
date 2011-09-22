@@ -28,6 +28,7 @@ POSIX
 Params::Validate
 RRDp
 Regexp::Common
+Socket
 Storable
 Time::HiRes
 XML::LibXML

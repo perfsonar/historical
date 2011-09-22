@@ -1,16 +1,13 @@
-
 MANIFEST
 Makefile
 bin/client.pl
 bin/daemon.pl
 bin/tracedb.pl
+bin/traceroute.pl
 bin/traceroute_master.pl
 bin/traceroute_scheduler.pl
-bin/traceroute.pl
 doc/INSTALL
 doc/README
-etc/collector-daemon.conf
-etc/collector-daemon_logger.conf
 etc/daemon.conf
 etc/daemon_logger.conf
 etc/ondemand_mp-daemon.conf

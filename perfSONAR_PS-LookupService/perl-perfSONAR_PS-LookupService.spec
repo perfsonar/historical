@@ -8,11 +8,11 @@
 # with "sysconfig-" (e.g. sysconfig-lookup_service)
 %define sysconfig_1   lookup_service
 
-%define relnum 1
+%define relnum 3
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-LookupService
-Version:        3.2
+Version:        3.2.1
 Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS Lookup Service
 License:        distributable, see LICENSE

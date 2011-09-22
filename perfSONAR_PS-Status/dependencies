@@ -23,6 +23,7 @@ Net::SNMP
 Net::Telnet
 POSIX
 Params::Validate
+Socket
 Time::HiRes
 XML::LibXML
 base

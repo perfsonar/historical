@@ -1,7 +1,7 @@
 PACKAGE=perfSONAR_PS-PingER-GUI
 ROOTPATH=/opt/perfsonar_ps/PingER-GUI
-VERSION=3.1
-RELEASE=13
+VERSION=3.2.1
+RELEASE=3
 ARCH=i386
 
 default:
