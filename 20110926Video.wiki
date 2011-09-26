@@ -4,22 +4,17 @@
 
 == Agenda/Minutes ==
 
-  * Attendees: 
-     * Excused: 
-  * Followup on previous actions:
-     * Short Term
-       * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
-       * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
-       * _*ACTION*_: Andy will coordinate with Sowmya and Aaron to create RC3. Andy will announce to perfSONAR-users to solicite the last round of testing. We expect this version to go production.
-     * Long Term
-       * _*ACTION*_: Nils will continue work on vmware build environment
-       * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
-       * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
-       * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+  * Attendees: Andy, Sowmya, Brian, Aaron, Kavitha
+   
   * RC3 Status
-  * Other:
+
+Netinstall is fully tested. Need to test LiveCD, and then will send an announcement for rc3 to all the lists.
+LiveCD needs a new kernel and a new AUFS module (instructions for this are at: http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs). Email that goes out will explain how to point yum at the rc3 repo.
   
 == Actions  ==
+
+  * Somya to build LiveCD for testing
+  * Andy to put together email announcement
 
 == Where ==
 ESnet conference bridge:
