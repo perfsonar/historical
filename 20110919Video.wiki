@@ -4,7 +4,7 @@
 
 == Agenda/Minutes ==
 
-  * Attendees: 
+  * Attendees: Andy, Sowmya, Kavitha, Nils, Aaron, Brian, Jeff
      * Excused: 
   * Followup on previous actions:
      * Short Term
@@ -17,10 +17,23 @@
        * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
        * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
   * RC3 Status
+       * GUI updates are complete. Security issues are still being tracked down.
+       * Andy will verify yum updates which should address security issues.
+       * Aiming for Wednesday creation of RC3. If no issues found internally, aiming for public release by friday.
   * Other:
   
 == Actions  ==
-
+     * Short Term
+       * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+       * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
+       * _*ACTION*_: Andy will coordinate with Sowmya and Aaron to create RC3. Andy will announce to perfSONAR-users to solicite the last round of testing. We expect this version to go production.
+       * _*ACTION*_: Nils will verify GUI fixes.
+       * _*ACTION*_: Andy will verify yum updates which should address security issues.
+     * Long Term
+       * _*ACTION*_: Nils will continue work on vmware build environment
+       * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+       * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+       * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
 == Where ==
 ESnet conference bridge:
 
