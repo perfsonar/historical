@@ -48,6 +48,8 @@ chown perfsonar:perfsonar /var/log/perfsonar
 mkdir -p /var/log/perfsonar/alarms
 chown perfsonar:perfsonar /var/log/perfsonar/alarms
 
+chown apache:perfsonar /opt/perfsonar_ps/alarms/etc/alarms_cgi.conf
+
 /etc/init.d/crond restart
 /etc/init.d/httpd restart
 
@@ -55,9 +57,10 @@ chown perfsonar:perfsonar /var/log/perfsonar/alarms
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(-,perfsonar,perfsonar,-)
+%defattr(0644,perfsonar,perfsonar,0755)
 %config %{install_base}/etc/*
-%{install_base}/bin/*
+%attr(0755,perfsonar,perfsonar) %{install_base}/bin/*
+%attr(0755,perfsonar,perfsonar) %{install_base}/web/*cgi
 %{install_base}/web/*
 %{install_base}/scripts/*
 %{install_base}/lib/*
