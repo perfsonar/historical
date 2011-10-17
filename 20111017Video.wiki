@@ -18,12 +18,11 @@
      * Andy suggested using same issue states from OSCARS project in pS-PS. It was agreed to and Andy will normalize as he has time.
   * Other:
      * Next call will be in two weeks.
-  
 == Actions  ==
   * Followup on previous actions:
      * Short Term
         * *_ACTION_*: Jeff/Brian will arrange for a discussion with past contributors to try and determine how to get their contributions added back into the base of the project.
-     * *_ACTION_*: Jeff/Brian will plan for a what's next meeting/call for the project post-SC to determine what critical functionality is next on the horizon.
+        * *_ACTION_*: Jeff/Brian will plan for a what's next meeting/call for the project post-SC to determine what critical functionality is next on the horizon.
      * Long Term
 == Where ==
 ESnet conference bridge:
