@@ -280,6 +280,7 @@ sub fetchSummaryAndValueBuckets(){
     
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.DB.OWHDB.fetchSummaryAndValueBuckets.end");
     $self->{NETLOGGER}->debug( $nlmsg );
+    return $cnt;
 
 }
 
@@ -379,9 +380,12 @@ sub fetchSummaryData(){
                     				 tag        => "datum",
                      				 attributes => \%attributes
                 			);
+            $cnt++;
       } 
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.DB.OWHDB.fetchSummaryData.end");
-    $self->{NETLOGGER}->debug( $nlmsg );	
+    $self->{NETLOGGER}->debug( $nlmsg );
+    
+    return $cnt;
 }
 
 sub createSqlFilter(){

@@ -3102,7 +3102,7 @@ sub retrieveSQL {
         $query = $query . ";" if $query;
     }
     elsif ( $dataType eq "OWAMP" ) {
-    	#determine if we need to show the buckets
+        #determine if we need to show the buckets
     	my $showBuckets = 0;
     	my $tmpBuckEt = $ma_namespaces{'summbuckets'};
     	$tmpBuckEt =~ s/\/$//; #make version without trailing slash
@@ -3110,18 +3110,16 @@ sub retrieveSQL {
         		$showBuckets = 1;
         }
 
-	my $prefix = "summary";
+	    my $prefix = "summary";
         my $uri    = "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921/";
         if($showBuckets){
              $uri = $ma_namespaces{'summbuckets'};
         }
 
-	startData( $parameters->{output}, $id, $parameters->{mid}, undef );
-
     	#create object for owhdb
     	my $owhdbI = new perfSONAR_PS::DB::owhdb(
                     DBH         => $dbh->{HANDLE},
-		    NSPREFIX    => $prefix,
+		            NSPREFIX    => $prefix,
                     NAMESPACE   => $uri,
                     XMLOUT      => $parameters->{output}
         );
@@ -3129,9 +3127,9 @@ sub retrieveSQL {
     	#get the date table names based on start and end
     	my $startTime = $parameters->{time_settings}->{"START"}->{"internal"};
     	my $endTime = $parameters->{time_settings}->{"END"}->{"internal"};
-	$self->{LOGGER}->info("DATES table query range:$startTime-$endTime");    
-	my $dateTable = $owhdbI->getDateTableList({
-    							startTime   => $startTime,
+        $self->{LOGGER}->info("DATES table query range:$startTime-$endTime");    
+        my $dateTable = $owhdbI->getDateTableList({
+    						    startTime   => $startTime,
     							endTime     => $endTime
     					});
     	
@@ -3139,9 +3137,11 @@ sub retrieveSQL {
     	my $tspecList = \@tspec;
     	
     	#for each date table
-	$self->{LOGGER}->info("NODES and DATA queries");
-	my $si = owptstampi($startTime);
-	my $ei = owptstampi($endTime);
+	    $self->{LOGGER}->info("NODES and DATA queries");
+	    my $si = owptstampi($startTime);
+	    my $ei = owptstampi($endTime);
+	    my $dataCount = 0;
+	    startData( $parameters->{output}, $id, $parameters->{mid}, undef );
     	foreach my $dateEntry (@{$dateTable}){
     		# get src and dst nodeid list
     		my $srcList = $owhdbI->getNodeIdsFromIp({
@@ -3152,10 +3152,13 @@ sub retrieveSQL {
     			tableName   => $dateEntry,
     			node_ip     => $parameters->{dst}
     		});
+            #if can't find source or dest then check the next day
+    		next if ( $#{$srcList} < 0 || $#{$dstList} < 0 );
+            
     		# check if buckets is required
     		if($showBuckets){
     			#If yes, call fetchValueBuckets -  should take care of XML creation
-    			$owhdbI->fetchSummaryAndValueBuckets({
+    			$dataCount += $owhdbI->fetchSummaryAndValueBuckets({
     				tableName   => $dateEntry,
                     send_id     => $srcList,
                     recv_id     => $dstList,
@@ -3166,7 +3169,7 @@ sub retrieveSQL {
     			});
     		}else{
     			# If no, call fetchSummaryData -  should take care of XML creation
-    			$owhdbI->fetchSummaryData({
+    			$dataCount += $owhdbI->fetchSummaryData({
     				tableName   => $dateEntry,
                     send_id     => $srcList,
                     recv_id     => $dstList,
@@ -3179,9 +3182,17 @@ sub retrieveSQL {
     		}
     			
     			
+        }
+        #No results foud
+    	if($dataCount == 0){
+    	    $parameters->{output}->createElement(
+                    prefix     => $prefix,
+                    namespace  => $uri,
+                    tag        => "datum",
+                    content => "Query returned 0 results"
+                );
     	}
-    		
-      endData( $parameters->{output} );
+        endData( $parameters->{output} );
 
     }else {
         my $msg = "Improper eventType found.";
