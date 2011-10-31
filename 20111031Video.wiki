@@ -10,7 +10,8 @@
         * *_ACTION_*: Jeff/Brian will arrange for a discussion with past contributors to try and determine how to get their contributions added back into the base of the project.
         * *_ACTION_*: Jeff/Brian will plan for a what's next meeting/call for the project post-SC to determine what critical functionality is next on the horizon.
      * Long Term
-  * Agenda Topic #1
+  * ISO release plan
+  * pS-PS Project planning
   * Other:
 == Actions  ==
   * Followup on previous actions:
