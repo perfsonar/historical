@@ -1,0 +1,20 @@
+#summary December 13, 2011 Conference Call
+
+=  December 13, 2011 Conference Call 12:00 p.m. EDT =
+
+== Agenda/Minutes ==
+  * Attendees: 
+     * Excused: 
+  * Present proposed LS design changes (Sowmya)
+== Actions  ==
+== Where ==
+ESnet conference bridge:
+
+ * GDS: 00113498555555
+ * Direct Dial: mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-423-9220 then 8555555# at the prompt.
+
+
+== Last Updated ==
+
+$Id$
