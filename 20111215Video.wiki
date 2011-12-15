@@ -6,6 +6,7 @@
   * Attendees: Jeff, Joe, Andy, Sowmya, Brian, Nils, Sowmya, Kavitha
      * Excused: 
   * Brainstorming for perfSONAR vision/problem statement
+     * For list of ideas see [2012DevelopmentIdeasBrainstorm]
      * Present coalesced list of problems we could leverage pS to solve. (Jeff)
       * Customers
        * Important for us to define customers
@@ -113,7 +114,7 @@
 
 == Summary of tasks and priorities  ==
 
-||Task||Priority||
+|| *Task* || *Priority* ||
 ||Better analysis tools ||HIGH||
 ||Better reporting mechanism ||HIGH||
 ||Encourage more end-user development work||HIGH||
