@@ -3,7 +3,7 @@
 =  December 15, 2011 Conference Call 11:30 a.m. EDT =
 
 == Agenda ==
-  * Attendees: Jeff, Joe, Andy, Sowmya, Brian, Nils, Sowmya, Kavitha
+  * Attendees: Jeff, Joe, Andy, Sowmya, Brian, Nils, Sowmya, Kavitha, Aaron
      * Excused: 
   * Brainstorming for perfSONAR vision/problem statement
      * For list of ideas see [2012DevelopmentIdeasBrainstorm]
