@@ -10,15 +10,17 @@ The current rotation includes: Aaron, Jeff, Kavitha, Nils, Andy, Sowmya, Brian
 
 = Schedule =
 
-  * 1st half August, 2011: Andy
-  * 2nd half August, 2011: Aaron
-  * 1st half September, 2011: Sowmya
-  * 2nd half September, 2011: Nils
-  * 1st half October, 2011: Brian
-  * 2nd half October, 2011: Kavitha
-  * 1st half November, 2011: Sowmya
-  * 2nd half November, 2011: Nils
-  * 1st half December, 2011: Jeff
-  * 2nd half December, 2011: Aaron
   * 1st half January, 2012: Andy
-  * 2nd half January, 2011: Brian
+  * 2nd half January, 2012: Brian
+  * 1st half February, 2012: Sowmya
+  * 2nd half February, 2012: Nils
+  * 1st half March, 2012: Kavitha
+  * 2nd half March, 2012: Aaron
+  * 1st half April, 2012: Jeff
+  * 2nd half April, 2012: Andy
+  * 1st half May, 2012: Brian
+  * 2nd half May, 2012: Sowmya
+  * 1st half June, 2012: Nils
+  * 2nd half June, 2012: Kavitha
+  * 1st half July, 2012: Aaron
+  * 2nd half July, 2012: Jeff
