@@ -1,0 +1,59 @@
+*Contents*
+<wiki:toc max_depth="1" />
+
+
+= Better Planning Tools =
+*Priority: * HIGH
+
+*Issues:*
+ * 
+ * 
+
+= Better Reporting Mechanisms =
+*Priority: * HIGH
+
+*Issues:*
+ * 
+ * 
+
+= Encourage more end-user development work =
+*Priority: * HIGH
+
+*Issues:*
+ * 
+ * 
+
+= Lookup Service =
+*Priority: * HIGH
+
+*Issues:*
+ * 
+ * 
+
+= Make tools more firewall friendly =
+*Priority: * MEDIUM
+
+*Issues:*
+ * 
+ * 
+
+= Better integration with Layer2 and below (including IDC and/or OpenFlow) =
+*Priority: * MEDIUM
+
+*Issues:*
+ * 
+ * 
+
+= Handling multiple nodes =
+*Priority: * LOW
+
+*Issues:*
+ * 
+ * 
+
+= Better Data Summarization =
+*Priority: * LOW
+
+*Issues:*
+ * 
+ * 
