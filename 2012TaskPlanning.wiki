@@ -80,8 +80,7 @@
  * Issue 156 - need the ability to limit the size of the data returned  
  * Issue 173 - Archive -i results from bwctl
  * Issue 190 - Add owp archiving into pS-B (current version will simply ignore owp files sent to the collector)
- * Issue 195 - Defaults for bwctl/owamp test options in the pSB
-database
+ * Issue 195 - Defaults for bwctl/owamp test options in the pSB database
  * Issue 298 - Advanced Cacti data collection for localhost
  * Issue 389 - data provenance / better metadata for monitoring data
  * Issue 474 - Summarize aggregate bandwidth estimate for configured tests
