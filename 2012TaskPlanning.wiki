@@ -5,6 +5,8 @@
 = Better Analysis Tools =
 *Priority: * HIGH
 
+*Description: * This category encapsulates issues that take existing data and presents it in a new way that the user can use to more easily diagnose problems. It may also provide explicit statements about what the measurements may mean.
+
 *Issues:*
  * Issue 348 - PSB Results Top & Bottom 10 lists
  * Issue 439 - Red-Green Plots of OWAMP data showing path Availability
@@ -18,6 +20,8 @@
 = Better Reporting Mechanisms =
 *Priority: * HIGH
 
+*Description: * Issues that involve new ways of alerting the user that problems have occurred.
+
 *Issues:*
  * Issue 380 - Unify service status checking between the various GUIs, nagios plugins and LS Registration Daemon
  * Issue 503 - Convert NAGIOS plugins to work with RSV
@@ -26,6 +30,8 @@
 = Encourage more end-user development work =
 *Priority: * HIGH
 
+*Description: * Issues that make it easier for developers to participate in the project by making code easier to use, writing better documentation, and/or providing better facilities for sharing work.  
+
 *Issues:*
  * Issue 183 - Address/Name Normalization in pSB
  * Issue 382 - Package for the client modules
@@ -33,6 +39,8 @@
  
 = Lookup Service =
 *Priority: * HIGH
+
+*Description: * Issues related to improving the lookup service.
 
 *Issues:*
  * Issue 199 - Lookup Service Statistics
@@ -48,6 +56,8 @@
 = Make tools more firewall friendly =
 *Priority: * MEDIUM
 
+*Description: * Issues that make the tools easier to use in a firewalled environment.
+
 *Issues:*
  * Issue 266 - Firewall guidance
  * Issue 381 - Port Administration on pSPT
@@ -55,12 +65,16 @@
 = Better integration with Layer2 and below (including IDC and/or OpenFlow) =
 *Priority: * MEDIUM
 
+*Description: * Issues related to better measurement and monitoring of circuits.
+
 *Issues:*
  * Issue 149 - the TL1 status collector doesn't handle timeouts well
  * Issue 341 - circuit support for regular tests
 
 = Handling multiple nodes =
 *Priority: * LOW
+
+*Description: * Issues related to making it possible to manage a cluster of toolkit nodes and allowing for multiple nodes to be configured in a similar manner.  
 
 *Issues:*
  * Issue 93 - Functional specification of 'centralized configuration service'
@@ -74,6 +88,8 @@
  
 = Better Data Summarization =
 *Priority: * LOW
+
+*Description: * Issues that involve collecting new data and/or extending services to report additional data.
 
 *Issues:*
  * Issue 123 - Error MA
