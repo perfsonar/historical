@@ -35,6 +35,7 @@
 *Priority: * HIGH
 
 *Issues:*
+ * Issue 199 - Lookup Service Statistics
  * Issue 224 - gLS API validation
  * Issue 410 - Lookup Service Registration Request Access Control
  * Issue 419 - additional information needed in the hLS to support service directory
@@ -75,14 +76,20 @@
 *Priority: * LOW
 
 *Issues:*
+ * Issue 123 - Error MA
+ * Issue 156 - need the ability to limit the size of the data returned  
  * Issue 173 - Archive -i results from bwctl
  * Issue 190 - Add owp archiving into pS-B (current version will simply ignore owp files sent to the collector)
+ * Issue 195 - Defaults for bwctl/owamp test options in the pSB
+database
+ * Issue 298 - Advanced Cacti data collection for localhost
  * Issue 389 - data provenance / better metadata for monitoring data
  * Issue 474 - Summarize aggregate bandwidth estimate for configured tests
  * Issue 522 - Additional results from iperf3 stored in the MA
  * Issue 525 - time-based scheduling of perfsonarbuoy tests
  * Issue 527 - Allow user to select v4/v6 testing via scheduled testing interfaces
  * Issue 532 - Alternative View of Communities for pSPT Setup
+ * Issue 549 - clarifying IPv4 vs. IPv6 tests in Regular Testing GUI
  
 = Issues we should mark as WontFix =
 || *Issue* || *Last meaningful update* ||
