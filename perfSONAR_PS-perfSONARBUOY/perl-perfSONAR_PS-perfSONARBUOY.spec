@@ -199,6 +199,7 @@ rm -rf $RPM_BUILD_ROOT
 %{install_base}/bin/bwdb.pl
 %{install_base}/bin/owdb.pl
 %{install_base}/bin/daemon.pl
+%{install_base}/bin/check_pSB_db.pl
 %{install_base}/bin/clean_pSB_db.pl
 %{install_base}/scripts/install_dependencies.sh
 %{install_base}/scripts/prepare_environment_server.sh
