@@ -31,12 +31,12 @@ The following sections describe the installation procedure for each of the produ
 
 === !NetInstall CD ===
 
-The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.2.1.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.2.1.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
+The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.2.1.1.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.2.1.1.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
-user@host:~$ md5sum pS-Performance_Toolkit-NetInstall-3.2.1.iso;cat pS-Performance_Toolkit-NetInstall-3.2.1.iso.md5
-e1b30070021121398966e770b5dd2143  pS-Performance_Toolkit-NetInstall-3.2.1.iso
-e1b30070021121398966e770b5dd2143  pS-Performance_Toolkit-NetInstall-3.2.1.iso
+user@host:~$ md5sum pS-Performance_Toolkit-NetInstall-3.2.1.1.iso;cat pS-Performance_Toolkit-NetInstall-3.2.1.1.iso.md5
+e299ce35dbde8c557420cdf933ddbb5e  pS-Performance_Toolkit-NetInstall-3.2.1.1.iso
+e299ce35dbde8c557420cdf933ddbb5e  pS-Performance_Toolkit-NetInstall-3.2.1.1.iso
 }}}
 
 If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  If the value _*DOES NOT*_ match, consider re-downloading the file.  After burning, please insert the CD into the target machine to boot.  Some items to consider:
@@ -284,12 +284,12 @@ An important thing to note is that in the description above, there is no IP addr
 
 === Live CD ===
 
-The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-LiveCD-3.2.1.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-LiveCD-3.2.1.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
+The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-LiveCD-3.2.1.1.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-LiveCD-3.2.1.1.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
-user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.2.1.iso;cat pS-Performance_Toolkit-LiveCD-3.2.1.iso.md5 
-e0f8338433802695a9f3ce6d68c25df4  pS-Performance_Toolkit-LiveCD-3.2.1.iso
-e0f8338433802695a9f3ce6d68c25df4  pS-Performance_Toolkit-LiveCD-3.2.1.iso
+user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.2.1.1.iso;cat pS-Performance_Toolkit-LiveCD-3.2.1.1.iso.md5 
+f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.2.1.1.iso
+f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.2.1.1.iso
 }}}
 
 If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  If the value _*DOES NOT*_ match, consider re-downloading the file.  After burning, please insert the CD into the target machine to boot.  Some items to consider:
