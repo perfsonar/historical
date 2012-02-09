@@ -1,18 +1,16 @@
-#summary Feb 06, 2012 Conference Call
+#summary Feb 13, 2012 Conference Call
 
-=  February 06, 2012 Conference Call 2:30 p.m. EDT =
+=  February 13, 2012 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: Brian, Jeff, Andy, Sowmya, Nils, Aaron
+  * Attendees:
      * Excused: 
 
 == Follow-up on Actions  ==
-     * New Items
-        *  Andy tagged several items for bug fix release 3.2.2, and assigned owners to tasks. Goal it to complete these by Feb 27
-        * Everyone to look at the "Requirements" that Aaron added to the use case document, and think about performance requirements.
-        * Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
-
      * Previous Items
+        *  *_ACTION_*: Andy tagged several items for bug fix release 3.2.2, and assigned owners to tasks. Goal it to complete these by Feb 27
+        * *_ACTION_*: Everyone to look at the "Requirements" that Aaron added to the use case document, and think about performance requirements.
+        * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
         * *_ACTION_*: Jeff/Brian will arrange for a discussion with past contributors to try and determine how to get their contributions added back into the base of the project.
         * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
         * *_ACTION_*: Andy will talk with Atlas to discuss improving test/release process.
@@ -21,7 +19,8 @@
      * Long Term
         *
 == Agenda Topics ==
-  * TOPIC-1
+  * Review LS Use Cases
+  * Discuss next steps for documenting road-map
 == Actions  ==
      * Short Term
      * Long Term
