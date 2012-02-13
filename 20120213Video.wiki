@@ -14,15 +14,22 @@
         * *_ACTION_*: Jeff/Brian will arrange for a discussion with past contributors to try and determine how to get their contributions added back into the base of the project.
         * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
         * *_ACTION_*: Andy will talk with Atlas to discuss improving test/release process.
-        * *_ACTION_*: Jeff will get feedback from university constituents for brainstorming effort. (Perhaps from the IU NOC.)
-        * *_ACTION_*: Joe and/or Brian will get feedback from a lab constituent for brainstorming effort. (Perhaps from Eli.)
      * Long Term
         *
 == Agenda Topics ==
   * Review LS Use Cases
+    * Kavitha will review for completeness.
   * Discuss next steps for documenting road-map
 == Actions  ==
      * Short Term
+        *  *_ACTION_*: Andy tagged several items for bug fix release 3.2.2, and assigned owners to tasks. Goal it to complete these by Feb 27
+        * *_ACTION_*: Everyone to look at the "Requirements" that Aaron added to the use case document, and think about performance requirements.
+        * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
+        * *_ACTION_*: Jeff will respond to the Atlas reqeusts for features.
+        * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
+        * *_ACTION_*: Andy will setup a meeting with Atlas (Brian and Jeff) to discuss improving test/release process.
+        * *_ACTION_*: Discuss next steps for documenting road-map
+== Actions  ==
      * Long Term
         *
 == Where ==
