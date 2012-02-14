@@ -335,7 +335,7 @@ sub usage() {
     print "clean_pSB_db.pl <options>\n";
     print "    -h,--help                            displays this message.\n";
     print "    --maxdays days                       maximum age (in days) of data to keep in database. Not valid for bwctl databases. Defaults to 90.\n";
-    print "    --maxmonths months                   maximum number of months to keep in database. Must be used for bwctl databases. Defaults to 3.\n";
+    print "    --maxmonths months                   maximum number of months to keep in database. Must be used for bwctl databases. Defaults to 3.\n";
     print "    --dbtype type                        Indicates type of data in database. Valid value are 'owamp', 'bwctl', and 'traceroute'. Defaults to 'owamp'.\n";
     print "    --dbname name                        name of database to access. Defaults to 'owamp'.\n";
     print "    --dbuser user                        name of database user. Defaults to root.\n";
@@ -347,8 +347,8 @@ sub usage() {
     print "    --save-dumps                         indicates that databse dumps of expired tables should be kept in dumpdir. Active by default.\n";
     print "    --no-save-dumps                      indicates that expired database data should be deleted and dumps not saved.\n";
     print "    --compress-dumps                     indicates that databse dumps of expired tables should be compressed. Active by default.\n";
-    print "    --drop-tables                        drop database tables that exceed the maximum age. Active by default.";
-    print "    --no-drop-tables                     do not drop database tables that exceed the maximum age.";
+    print "    --drop-tables                        drop database tables that exceed the maximum age. Active by default.\n";
+    print "    --no-drop-tables                     do not drop database tables that exceed the maximum age.\n";
     print "    --no-compress-dumps                  indicates that expired database data should remain uncompressed.\n";
     print "    --table-suffixes table[,table...]    suffixes of table names to be removed/backed-up.\n";
     print "    --tar-cmd cmd                        path to tar command.\n";
