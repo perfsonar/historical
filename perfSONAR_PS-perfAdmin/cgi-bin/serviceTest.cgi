@@ -20,7 +20,7 @@ use HTML::Template;
 use XML::LibXML;
 use Socket;
 use Data::Validate::IP qw(is_ipv4);
-use Net::IPv6Addr;
+use Net::IP;
 use English qw( -no_match_vars );
 
 use FindBin qw($RealBin);
@@ -207,7 +207,7 @@ else {
                 $temp{"ifIndex"}   = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifIndex", 1 ), 0 );
                 $temp{"ipAddress"} = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ipAddress", 1 ), 0 );
                 unless ( is_ipv4( $temp{"ipAddress"} ) ) {
-                    unless ( &Net::IPv6Addr::is_ipv6( $temp{"ipAddress"} ) ) {
+                    unless ( &Net::IP::ip_is_ipv6( $temp{"ipAddress"} ) ) {
                         my $packed_ip = gethostbyname( $temp{"ipAddress"} );
                         if ( defined $packed_ip and $packed_ip ) {
                             $temp{"ipAddress"} = inet_ntoa( $packed_ip );
@@ -221,7 +221,7 @@ else {
                 }
                 $temp{"ifAddress"} = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifAddress", 1 ), 0 );
                 unless ( is_ipv4( $temp{"ifAddress"} ) ) {
-                    unless ( &Net::IPv6Addr::is_ipv6( $temp{"ifAddress"} ) ) {
+                    unless ( &Net::IP::ip_is_ipv6( $temp{"ifAddress"} ) ) {
                         my $packed_ip = gethostbyname( $temp{"ifAddress"} );
                         if ( defined $packed_ip and $packed_ip ) {
                             $temp{"ifAddress"} = inet_ntoa( $packed_ip );
@@ -333,7 +333,7 @@ else {
                 }
                 $shost = $src unless $shost;
             }
-            elsif ( &Net::IPv6Addr::is_ipv6( $src ) ) {
+            elsif ( &Net::IP::ip_is_ipv6( $src ) ) {
                 $saddr = $src;
                 $shost = $src;
 
@@ -359,7 +359,7 @@ else {
                 }
                 $dhost = $dst unless $dhost;
             }
-            elsif ( &Net::IPv6Addr::is_ipv6( $dst ) ) {
+            elsif ( &Net::IP::ip_is_ipv6( $dst ) ) {
                 $daddr = $dst;
                 $dhost = $dst;
 
@@ -702,7 +702,7 @@ else {
                 }
                 $shost = $src unless $shost;
             }
-            elsif ( &Net::IPv6Addr::is_ipv6( $src ) ) {
+            elsif ( &Net::IP::ip_is_ipv6( $src ) ) {
                 $saddr = $src;
                 $shost = $src;
 
@@ -728,7 +728,7 @@ else {
                 }
                 $dhost = $dst unless $dhost;
             }
-            elsif ( &Net::IPv6Addr::is_ipv6( $dst ) ) {
+            elsif ( &Net::IP::ip_is_ipv6( $dst ) ) {
                 $daddr = $dst;
                 $dhost = $dst;
 
@@ -1067,7 +1067,7 @@ else {
                 }
                 $shost = $src unless $shost;
             }
-            elsif ( &Net::IPv6Addr::is_ipv6( $src ) ) {
+            elsif ( &Net::IP::ip_is_ipv6( $src ) ) {
                 $saddr = $src;
                 $shost = $src;
 
@@ -1093,7 +1093,7 @@ else {
                 }
                 $dhost = $dst unless $dhost;
             }
-            elsif ( &Net::IPv6Addr::is_ipv6( $dst ) ) {
+            elsif ( &Net::IP::ip_is_ipv6( $dst ) ) {
                 $daddr = $dst;
                 $dhost = $dst;
 
@@ -1419,7 +1419,7 @@ __END__
 =head1 SEE ALSO
 
 L<CGI>, L<HTML::Template>, L<XML::LibXML>, L<Socket>, L<Data::Validate::IP>,
-L<English>, L<Net::IPv6Addr>, L<perfSONAR_PS::Client::MA>,
+L<English>, L<Net::IP>, L<perfSONAR_PS::Client::MA>,
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Utils::ParameterValidation>
 
 To join the 'perfSONAR-PS Users' mailing list, please visit:

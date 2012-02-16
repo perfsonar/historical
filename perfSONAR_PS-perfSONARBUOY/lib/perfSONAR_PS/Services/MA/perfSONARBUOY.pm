@@ -48,7 +48,7 @@ use Fcntl ':flock';
 use Date::Manip;
 use Math::Int64;
 use Data::Validate::IP qw(is_ipv4);
-use Net::IPv6Addr;
+use Net::IP;
 use File::Basename;
 
 use perfSONAR_PS::Config::OWP;
@@ -1630,7 +1630,7 @@ sub addressType {
         $self->{NETLOGGER}->debug( $nlmsg );
         return "ipv4";
     }
-    elsif ( &Net::IPv6Addr::is_ipv6( $parameters->{address} ) ) {
+    elsif ( &Net::IP::ip_is_ipv6( $parameters->{address} ) ) {
         $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.addressType.end", {ipType => 'ipv6'});
         $self->{NETLOGGER}->debug( $nlmsg );
         return "ipv6";
@@ -3346,7 +3346,7 @@ __END__
 
 L<Log::Log4perl>, L<Module::Load>, L<Digest::MD5>, L<English>,
 L<Params::Validate>, L<Sys::Hostname>, L<Fcntl>, L<Date::Manip>,
-L<Math::Int64>, L<Data::Validate::IP>, L<Net::IPv6Addr>, L<File::Basename>,
+L<Math::Int64>, L<Data::Validate::IP>, L<Net::IP>, L<File::Basename>,
 L<perfSONAR_PS::Config::OWP>,L<perfSONAR_PS::Config::OWP::Utils>,
 L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
 L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>,

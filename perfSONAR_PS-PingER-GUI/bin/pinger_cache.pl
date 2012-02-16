@@ -26,7 +26,7 @@ use Getopt::Long;
 use Data::Dumper;
 use Data::Validate::IP qw(is_ipv4);
 use Data::Validate::Domain qw( is_domain );
-use Net::IPv6Addr;
+use Net::IP;
 use Net::CIDR;
 use JSON::XS;
 use File::Copy;
@@ -101,7 +101,7 @@ for my $root ( @{ $gls->{ROOTS} } ) {
                         $matrix1{$root}{$accessPoint} = 1;
                     }
                 }
-                elsif ( $unt_test and &Net::IPv6Addr::is_ipv6( $unt_test ) ) {
+                elsif ( $unt_test and &Net::IP::ip_is_ipv6( $unt_test ) ) {
                     # do noting (for now)
                     $hls{$accessPoint}{"INFO"} = $accessPoint."|".$serviceName."|".$serviceType."|".$serviceDescription;
                     $matrix1{$root}{$accessPoint} = 1;

@@ -57,7 +57,7 @@ use Net::Ping;
 use LWP::Simple;
 use File::stat;
 use Data::Validate::IP qw(is_ipv4);
-use Net::IPv6Addr;
+use Net::IP;
 use Hash::Merge qw( merge );
 
 use perfSONAR_PS::Services::MA::General;
@@ -968,7 +968,7 @@ sub summarizeLS {
                     $serviceSummaryMap{$set}{"addresses"}->{$host} = 1 unless exists $serviceSummaryMap{$set}{"addresses"}->{$host};
                     $summaryMap{"addresses"}->{$host} = 1 unless exists $summaryMap{"addresses"}->{$host};
                 }
-                elsif ( &Net::IPv6Addr::is_ipv6( $host ) ) {
+                elsif ( &Net::IP::ip_is_ipv6( $host ) ) {
 
                     # unused currently
                 }
@@ -1714,7 +1714,7 @@ sub summarizeHosts {
     }
 
     foreach my $host ( @{ $parameters->{hostarray} } ) {
-        next if is_ipv4( $host ) or &Net::IPv6Addr::is_ipv6( $host );
+        next if is_ipv4( $host ) or &Net::IP::ip_is_ipv6( $host );
         my @hostArray = split( /\./, $host );
         my $host_len = $#hostArray;
         for my $len ( 1 .. $host_len ) {
@@ -3686,7 +3686,7 @@ __END__
 
 L<Log::Log4perl>, L<Time::HiRes>, L<Params::Validate>, L<Digest::MD5>,
 L<Net::CIDR>, L<Net::IPTrie>, L<Net::Ping>, L<LWP::Simple>, L<File::stat>,
-L<Data::Validate::IP>, L<Net::IPv6Addr>, L<Hash::Merge>,
+L<Data::Validate::IP>, L<Net::IP>, L<Hash::Merge>,
 L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Services::LS::General>,
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>, L<perfSONAR_PS::DB::XMLDB>
 L<perfSONAR_PS::Error_compat>, L<perfSONAR_PS::Utils::ParameterValidation>,
