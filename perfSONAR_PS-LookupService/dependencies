@@ -19,7 +19,7 @@ Log::Log4perl
 Module::Load
 Net::CIDR
 Net::IPTrie
-Net::IPv6Addr
+Net::IP
 Net::Ping
 Params::Validate
 Sleepycat::DbXml

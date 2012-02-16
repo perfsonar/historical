@@ -81,7 +81,7 @@ the following Perl libraries, libraries, and external tools to function:
     - Math::BigFloat
     - Math::Int64
     - Module::Load
-    - Net::IPv6Addr
+    - Net::IP
     - Net::Ping
     - Params::Validate
     - Socket

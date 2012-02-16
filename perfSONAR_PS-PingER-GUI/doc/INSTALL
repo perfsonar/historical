@@ -82,7 +82,7 @@ the following Perl libraries, libraries, and external tools to function:
     - LWP::UserAgent
     - Log::Log4perl
     - Net::CIDR
-    - Net::IPv6Addr
+    - Net::IP
     - Params::Validate
     - Time::HiRes
     - XML::LibXML

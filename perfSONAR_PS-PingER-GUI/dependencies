@@ -29,7 +29,7 @@ MIME::Types
 MRO::Compat
 Net::CIDR
 Net::DNS
-Net::IPv6Addr
+Net::IP
 Net::Ping
 NetAddr::IP
 POSIX

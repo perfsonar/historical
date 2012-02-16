@@ -28,7 +28,7 @@ Log::Log4perl
 Math::BigFloat
 Math::Int64
 Module::Load
-Net::IPv6Addr
+Net::IP
 Net::Ping
 POSIX
 Params::Validate
