@@ -3,7 +3,7 @@
 =  February 27, 2012 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees:
+  * Attendees: Sowmya, 
      * Excused: 
 
 == Follow-up on Actions  ==
@@ -29,6 +29,19 @@
 == Actions  ==
      * Long Term
         *
+
+== Notes ==
+ * 3.2.2:
+  * *ACTION:* Aaron will finish 3.2.2 issues by Wednesday
+  * *ACTION:* Sowmya will create rpms when Aaron's changes are done. 
+  * *ACTION:* Andy will update checklist with some 3.2.2 specific items. Will compare to list Nils already started.
+
+ * OWAMP
+  * Seeing sawtooth pattern to GEANT hosts on some ESnet hosts
+  * Also seeing multiple data points per minute
+  * Internet2 hosts seems to only have data in one direction, but results are flat
+  * *ACTION:* Andy will turn on raw data collection on ESnet to see if that reveals anything
+ 
 == Where ==
 ESnet conference bridge:
 
