@@ -47,6 +47,7 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Is the Lookup Service registering the configured address?
   * `_____` Does the traceroute_scheduler restart after a configuration change?
   * `_____` Are Apache directory indexes disabled?
+  * `_____` Is nscd enabled?
 
 === Scheduled Tests ===
   * `_____` Are the labels, prompts, and pop-ups clear and informative?
@@ -54,7 +55,6 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Do the tests in "Scheduled Tests" have all the hosts that were being tested to in the previous version?
   * `_____` Do the tests in "Scheduled Tests" have the same test parameters as in the previous version?
   * `_____` Are hostnames and IPv6 addresses displayed correctly?
-  * `_____` Is nscd enabled?
 
 === Cacti SNMP Monitoring ===
   * `_____` Can you still use the cacti administration interface?
