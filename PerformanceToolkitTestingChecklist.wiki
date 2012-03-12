@@ -13,11 +13,14 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Is there a 'bwctl' database?
   * `_____` Is there a 'pingerMA' database?
   * `_____` Is there a 'tracerouteMA' database?
+  * `_____` Do the 'clean_pSB_db.pl' and 'check_pSB_db.pl' display help correctly?
+  * `_____` Does the default db DB user get granted the correct permissions for DB access?
 
 === Administrative Information ===
   * `_____` Are the labels, prompts, and pop-ups clear and informative?
   * `_____` Does the "Host Information" match what it was before the upgrade?
   * `_____` Is the list of communities the host participates in the same as before the upgrade?
+  * `_____` Are the FAQ and documentation up-to-date?
 
 === NTP ===
   * `_____` Did your previous NTP configuration get preserved? This can be checked in the NTP Administrative GUI
@@ -40,12 +43,18 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Are the labels, prompts, and pop-ups clear and informative?
   * `_____` Does the list of which services are enabled match what it was before the upgrade?
   * `_____` Are the services listed as enabled actually running, and are those listed as disabled, not running? Can be checked via the "Services On This Node" link.
+  * `_____` Are iptables and other services still running after the upgrade?
+  * `_____` Is the Lookup Service registering the configured address?
+  * `_____` Does the traceroute_scheduler restart after a configuration change?
+  * `_____` Are Apache directory indexes disabled?
 
 === Scheduled Tests ===
   * `_____` Are the labels, prompts, and pop-ups clear and informative?
   * `_____` Did all your previous tests get saved, and are they listed?
   * `_____` Do the tests in "Scheduled Tests" have all the hosts that were being tested to in the previous version?
   * `_____` Do the tests in "Scheduled Tests" have the same test parameters as in the previous version?
+  * `_____` Are hostnames and IPv6 addresses displayed correctly?
+  * `_____` Is nscd enabled?
 
 === Cacti SNMP Monitoring ===
   * `_____` Can you still use the cacti administration interface?
