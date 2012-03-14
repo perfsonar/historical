@@ -55,7 +55,13 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Do the tests in "Scheduled Tests" have all the hosts that were being tested to in the previous version?
   * `_____` Do the tests in "Scheduled Tests" have the same test parameters as in the previous version?
   * `_____` Are hostnames and IPv6 addresses displayed correctly?
-
+  * `_____` Are hostnames and IPv6 addresses displayed correctly?
+  * `_____` Are you able to add a new bwctl test and see results within the test interval?
+  * `_____` Are you able to add a new owamp test and see results within a few minutes of adding it?
+  * `_____` Are you able to add a new traceroute test and see results within the test interval?
+  * `_____` Are you able to remove a bwctl test and see that it is no longer collecting new data?
+ * `_____` Are you able to remove a owamp test and see that it is no longer collecting new data?
+ * `_____` Are you able to remove a traceroute test and see that it is no longer collecting new data?
 === Cacti SNMP Monitoring ===
   * `_____` Can you still use the cacti administration interface?
   * `_____` Are all the devices you configure previously still configured?
