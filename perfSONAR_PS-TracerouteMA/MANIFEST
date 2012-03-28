@@ -8,6 +8,7 @@ bin/traceroute_master.pl
 bin/traceroute_scheduler.pl
 doc/INSTALL
 doc/README
+doc/LICENSE
 etc/daemon.conf
 etc/daemon_logger.conf
 etc/ondemand_mp-daemon.conf
