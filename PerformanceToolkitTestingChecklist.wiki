@@ -54,14 +54,7 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Did all your previous tests get saved, and are they listed?
   * `_____` Do the tests in "Scheduled Tests" have all the hosts that were being tested to in the previous version?
   * `_____` Do the tests in "Scheduled Tests" have the same test parameters as in the previous version?
-  * `_____` Are hostnames and IPv6 addresses displayed correctly?
-  * `_____` Are hostnames and IPv6 addresses displayed correctly?
-  * `_____` Are you able to add a new bwctl test and see results within the test interval?
-  * `_____` Are you able to add a new owamp test and see results within a few minutes of adding it?
-  * `_____` Are you able to add a new traceroute test and see results within the test interval?
-  * `_____` Are you able to remove a bwctl test and see that it is no longer collecting new data?
- * `_____` Are you able to remove a owamp test and see that it is no longer collecting new data?
- * `_____` Are you able to remove a traceroute test and see that it is no longer collecting new data?
+ 
 === Cacti SNMP Monitoring ===
   * `_____` Can you still use the cacti administration interface?
   * `_____` Are all the devices you configure previously still configured?
@@ -105,6 +98,16 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Try to re-add an existing server. Should fail.
   * `_____` Click reset and make sure that the NTP server you added still exists.
   * `_____` Click "Select Closest Servers". After it has finished, no more than 5 of the servers should be selected. If any servers cannot be contacted, they should be marked in red, and have a tooltip when you move your mouse over them. Click save, and verify that the /etc/ntp.conf contains the selected hosts.
+
+=== Scheduled Tests ===
+ * `_____` Are hostnames and IPv6 addresses displayed correctly?
+  * `_____` Are hostnames and IPv6 addresses displayed correctly?
+  * `_____` Are you able to add a new bwctl test and see results within the test interval?
+  * `_____` Are you able to add a new owamp test and see results within a few minutes of adding it?
+  * `_____` Are you able to add a new traceroute test and see results within the test interval?
+  * `_____` Are you able to remove a bwctl test and see that it is no longer collecting new data?
+ * `_____` Are you able to remove a owamp test and see that it is no longer collecting new data?
+ * `_____` Are you able to remove a traceroute test and see that it is no longer collecting new data?
 
 === External BWCTL Limits ===
   * `_____` Edit the "Unpriviledged Clients" and make changes to the limits, hit save and see that /etc/bwctld/bwctld.limits has been updated, and that the "regular" group has the limits you specified.
