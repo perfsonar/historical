@@ -9,14 +9,14 @@
 == Follow-up on Actions  ==
      * Previous Items
         * *ACTION:* Andy will turn on raw data collection on ESnet to see if that reveals anything
-            *done*
+          *  *done*
         * *_ACTION_*: Everyone to look at the "Requirements" that Aaron added to the use case document, and think about performance requirements.
         * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
         * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
         * *_ACTION_*: Andy will setup a meeting with Atlas (Brian and Jeff) to discuss improving test/release process.
-            *done*
+          *  *done*
         * *_ACTION_*: Kavitha will review LS Use Case doc for completeness.
-            *done*
+          *  *done*
 == Agenda Topics ==
   * Discuss pending bug-fix release.
         * Waiting for -4/-6 flags for owamp/bwctl. Should be done today.
