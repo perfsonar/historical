@@ -93,13 +93,13 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Click 'save', make sure that everything that should be enabled is started, and everything that should be disabled is stopped
 
 === Scheduled Tests ===
-  * `_____` Are hostnames, IPv4 addresses, and IPv6 addresses displayed correctly?
   * `_____` Are you able to add a new bwctl test and see results within the test interval?
   * `_____` Are you able to add a new owamp test and see results within a few minutes of adding it?
   * `_____` Are you able to add a new traceroute test and see results within the test interval?
   * `_____` Are you able to remove a bwctl test and see that it is no longer collecting new data?
   * `_____` Are you able to remove a owamp test and see that it is no longer collecting new data?
   * `_____` Are you able to remove a traceroute test and see that it is no longer collecting new data?
+  * `_____` Are hostnames, IPv4 addresses, and IPv6 addresses displayed correctly?
 
 === NTP ===
   * `_____` Select and deselect ntp servers. Click save and check that /etc/ntp.conf contains those servers and that ntpd has been restarted.
