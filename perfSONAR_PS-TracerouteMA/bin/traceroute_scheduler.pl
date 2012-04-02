@@ -7,13 +7,17 @@ use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
 use perfSONAR_PS::Common;
-use perfSONAR_PS::Utils::Daemon qw/daemonize setids lockPIDFile unlockPIDFile/;
+use perfSONAR_PS::Utils::Daemon qw/daemonize setids unlockPIDFile/;
 use perfSONAR_PS::Utils::NetLogger;
 use perfSONAR_PS::Services::MP::TracerouteScheduler;
 
 use Getopt::Long;
 use Config::General;
 use Log::Log4perl qw/:easy/;
+
+use Fcntl qw(:DEFAULT :flock);
+use File::Basename;
+use English '-no_match_vars';
 
 # set the process name
 $0 = "traceroute_scheduler.pl";
@@ -57,7 +61,7 @@ if ( not $PIDFILE ) {
 }
 
 if ( not $PIDFILE ) {
-    $PIDFILE = "/var/run/ls_cache_daemon.pid";
+    $PIDFILE = "/var/run/traceroute-scheduler.pid";
 }
 
 ( $status, $res ) = lockPIDFile( $PIDFILE );
@@ -167,4 +171,26 @@ exit( 0 );
 
 sub signalHandler {
     exit( 0 );
+}
+
+#Need custom lock function since need to ignore child errors for traceroute libs to work
+sub lockPIDFile {
+    my ( $pidfile ) = @_;
+    return ( -1, "Can't write pidfile: $pidfile" ) unless -w dirname( $pidfile );
+    sysopen( PIDFILE, $pidfile, O_RDWR | O_CREAT ) or return ( -1, "Couldn't open file: $pidfile" );
+    flock( PIDFILE, LOCK_EX );
+    my $p_id = <PIDFILE>;
+    chomp( $p_id ) if ( defined $p_id );
+    if ( defined $p_id and $p_id ) {
+        my $PSVIEW;
+
+        open( $PSVIEW, "-|", "ps -p " . $p_id ) or return ( -1, "Open failed for pid: $p_id" );
+        my @output = <$PSVIEW>;
+        close( $PSVIEW );
+        if ( $#output > 0 ) {
+            return ( -1, "Application is already running on pid: $p_id" );
+        }
+    }
+
+    return ( 0, *PIDFILE );
 }
