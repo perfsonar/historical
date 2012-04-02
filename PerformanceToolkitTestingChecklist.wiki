@@ -89,7 +89,7 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Check that the following services were restarted: Lookup Service, PingER, SNMP MA, perfSONAR-BUOY Measurement Archive, ls registration daemon
   * `_____` Check that NPAD's and NDT's webpages got updated:
   * `_____` NDT: `http://[host url]:7123`
-  * `_____` NPAD: `http://[host url]:3000`
+  * `_____` NPAD: `http://[host url]:8000`
   * `_____` Check the contents of the hLS to make sure that the description information for services is updated.
   * `_____` You can use the following URL to check (*Please allow at least 10 minutes for service registration*): `http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://[host_url]:8095/perfSONAR_PS/services/hLS`
 
