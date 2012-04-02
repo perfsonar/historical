@@ -93,8 +93,7 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` Click 'save', make sure that everything that should be enabled is started, and everything that should be disabled is stopped
 
 === Scheduled Tests ===
-  * `_____` Are hostnames and IPv6 addresses displayed correctly?
-  * `_____` Are hostnames and IPv6 addresses displayed correctly?
+  * `_____` Are hostnames, IPv4 addresses, and IPv6 addresses displayed correctly?
   * `_____` Are you able to add a new bwctl test and see results within the test interval?
   * `_____` Are you able to add a new owamp test and see results within a few minutes of adding it?
   * `_____` Are you able to add a new traceroute test and see results within the test interval?
