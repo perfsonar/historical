@@ -9,12 +9,17 @@
      * Previous Items
         * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
         * *_ACTION_*: When release is ready, Andy will ask NLM to run security scan tests against it.
+            * done. Have not looked through results yet.
 == Agenda Topics ==
   * Discuss pending bug-fix release
+    * Pushed out the RC. Two major issues: 1) liveCD: upgrade removed all tests that are hostnames from the owmesh.conf file. (Phillipe reported.) 2) Root unavailable - Likely bad burn of CD but following up.
   * Update on ATLAS dashboard app
+    * Will try and be compatible at the API level.
+    * We should just keep in touch and followup periodically.
   * Geant interoperability (Any update?)
-    * no update
+    * May meet next week to advance Surfnet testing.
   * SMM
+    * May show dashboard.
 == Future Agenda Topics ==
   * Review LS update action plan
     * Use Case Review
