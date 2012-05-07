@@ -1,0 +1,27 @@
+= Mesh Configuration =
+
+<wiki:toc max_depth="6" />
+
+== Goal ==
+
+The goal is to ease the construction of mesh configurations where an organization, virtual or real, has a large number of test points that are controlled from, and whose results are viewable from a central location.
+
+== Overview ==
+
+The idea is to have a central description, available at a specific URL, that defines the properties of the mesh including, but not limited to, who the members are, which tests are being performed between them, where the test results are stored, and who the administrators of the mesh and of the individual members of the mesh. The members of the mesh can then be configured to use this centralized description to see which tests to perform, and where to store those test results. One or more GUIs could then be pointed at the URL, which could then visualize the mesh using the data collected by the members.
+
+== Trust ==
+
+The big issue with centralized mesh configuration is how to members can trust the mesh definitions. The approach here reuses the existing trust capabilities built-in to HTTP. Organizations can use certificates, and SSL to ensure that the mesh description can be trusted. It also allows them to use existing infrastructure (e.g. SSH) to enable organizations to define who has access to update the mesh configuration. By reusing the well-understood trust mechanisms available for web pages, it becomes easy for administrators to understand, and trust the process as well as to tailor the level of trust, and access as needed by their organization.
+
+== Mesh Definition Details ==
+
+Each mesh definition lives at a specific URL. The mesh definition contains a description of all the members of the mesh, the types of tests that the mesh should be performing, as well as where the results are stored and are available from.
+
+There is an agent on each member of the mesh that periodically retrieves the mesh definition, and configures the local machine to perform the tests required of it in the mesh definition. In the future, it might be reasonable to look into a push mechanism, but for now, periodic polling should be sufficient.
+
+The mesh definition contains a list of members, a list of tests to be performed between one or more of those members, locations for the results to be stored in and retrieved from, a list of administrative contacts for the mesh and administrative contacts for the individual members.
+
+== Last Updated ==
+
+$Id$
