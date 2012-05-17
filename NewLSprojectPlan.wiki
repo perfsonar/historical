@@ -2,13 +2,27 @@
 
 = Introduction =
 
-Milestone 1
+Milestone 0: Complete
+ * Use Case Document
+ * Design Document
+ * API Document
+ * early prototype to test performance
+
+Milestone 1: by August 1
+
+Basic simple lookup service complete, including the following tasks:
+ * full API support
+ * robust error handling
+ * packaged as an RPM
+ * documentation
+ * initial toolkit integration, including updated ls_registration_daemon, pSB, and directory service
+ * ability to pull data from old hLSes into the new LS
 
 
+Milestone 2: by October 1
 
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+Adds the following features
+ * implementation of a couple different security models
+ * full set of client APIs in multiple languages
+ 
+ 
