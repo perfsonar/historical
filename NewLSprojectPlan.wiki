@@ -2,13 +2,13 @@
 
 = Introduction =
 
-Milestone 0: Complete
+Milestone 0: Complete, May 15, 2012
  * Use Case Document
  * Design Document
  * API Document
  * early prototype to test performance
 
-Milestone 1: by August 1
+Milestone 1: by August 1, 2012
 
 Basic simple lookup service complete, including the following tasks:
  * full API support - 7 days
@@ -28,7 +28,7 @@ Basic simple lookup service complete, including the following tasks:
 
 Total Days: 36 days (FTE)
 
-Milestone 2: by October 1
+Milestone 2: by October 1, 2012
 
 Adds the following features
  * implementation of a couple different security models
@@ -36,5 +36,7 @@ Adds the following features
    * Query Agent
    * Streaming
  * full set of client APIs in multiple languages
+ * full toolkit integration
+ 
  
  
