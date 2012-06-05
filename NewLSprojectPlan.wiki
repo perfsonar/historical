@@ -38,5 +38,8 @@ Adds the following features
  * full set of client APIs in multiple languages
  * full toolkit integration
  
+Milestone 3: date TDB
+  * "standardization" of new API thru some standards organization (e.g. OGF)
+
  
  
