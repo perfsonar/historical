@@ -11,18 +11,30 @@ Milestone 0: Complete
 Milestone 1: by August 1
 
 Basic simple lookup service complete, including the following tasks:
- * full API support
- * robust error handling
- * packaged as an RPM
- * documentation
- * initial toolkit integration, including updated ls_registration_daemon, pSB, and directory service
- * ability to pull data from old hLSes into the new LS
+ * full API support - 7 days
+    * Renew/Delete - 3 days
+    * support for multi-values - 2 days
+    * support for metacharacter(`*`)  - 2 days
+ * robust error handling/reporting  - 5 days 
+ * packaged as an RPM  - 4 days
+ * documentation - 2 days
+ * Logging - 4 days
+ * Configuration file/scripts - 4 days
+ * initial toolkit integration - 6 days
+   * including updated ls_registration_daemon - 2 days
+   * pSB - 2 days
+   * directory service - 2 days
+ * ability to pull data from old hLSes into the new LS - 4 days
 
+Total Days: 36 days (FTE)
 
 Milestone 2: by October 1
 
 Adds the following features
  * implementation of a couple different security models
+ * Subscribe API
+   * Query Agent
+   * Streaming
  * full set of client APIs in multiple languages
  
  
