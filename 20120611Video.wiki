@@ -3,11 +3,17 @@
 =  June 11, 2012 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees:
+  * Attendees: Andy, Kavitha, Aaron, Jeff, Sowmya, Warren, Andrew
      * Excused: 
 == Follow-up on Actions  ==
     * *_ACTION_*: Jeff/Brian will continue to work on redesigning pS-PS web presence.
 == Agenda Topics ==
+  * Andy: Updated liveCD. (Patches from Carl) Looking at Aaron's config stuff.
+  * Kavitha: Waiting for feedback on NDT updates.
+  * Aaron: Working on mesh-config stuff. Waiting for feedback from Andy and Jimmy(NYU).
+  * Sowmya: Working on LS prototype. Implementing query features. Interacting with Brazillians.
+  * Warren: Hired to implement algorithms from Constantine. Looking for problem detection in delay data.
+  * Andrew: Working on CentOS 6 upgrade for toolkit.
 == Future Agenda Topics ==
   * Review LS update action plan
     * Use Case Review
@@ -15,6 +21,7 @@
   * Roadmap
   * Geant interoperability (Any update?)
 == Actions  ==
+    * *_ACTION_*: Jeff/Brian will continue to work on redesigning pS-PS web presence.
 == Notes ==
 == Where ==
 ESnet conference bridge:
