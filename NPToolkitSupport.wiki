@@ -21,6 +21,6 @@ The current rotation includes: Aaron, Jeff, Kavitha, Nils, Andy, Sowmya, Brian
   * 1st half May, 2012: Brian
   * 2nd half May, 2012: Sowmya
   * 1st half June, 2012: Aaron
-  * 2nd half June, 2012: Kavitha
+  * 2nd half June, 2012: Andy
   * 1st half July, 2012: Nils
-  * 2nd half July, 2012: Jeff
+  * 2nd half July, 2012: Kavitha
