@@ -10,7 +10,7 @@ Autoreq: 0
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-SNMPMA
-Version:        3.2.1
+Version:        3.2.2
 Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS SNMP Measurement Archive
 License:        distributable, see LICENSE
