@@ -1,4 +1,4 @@
-package ESxSNMP_API;
+package perfSONAR_PS::DB::ESxSNMP_API;
 
 use LWP::UserAgent;
 use JSON::XS;
