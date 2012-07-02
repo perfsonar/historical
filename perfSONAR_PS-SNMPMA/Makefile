@@ -1,6 +1,6 @@
 PACKAGE=perfSONAR_PS-SNMPMA
 ROOTPATH=/opt/perfsonar_ps/snmp_ma
-VERSION=3.2.1
+VERSION=3.2.2
 RELEASE=3
 
 default:
