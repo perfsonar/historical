@@ -3,7 +3,6 @@ Makefile
 bin/client.pl
 bin/daemon.pl
 bin/tracedb.pl
-bin/traceroute.pl
 bin/traceroute_master.pl
 bin/traceroute_scheduler.pl
 doc/INSTALL
@@ -70,7 +69,6 @@ lib/perfSONAR_PS/Utils/Daemon.pm
 lib/perfSONAR_PS/Utils/NetLogger.pm
 lib/perfSONAR_PS/Utils/ParameterValidation.pm
 lib/perfSONAR_PS/XML/Document.pm
-modules.rules
 scripts/install_dependencies.sh
 scripts/prepare_environment_client.sh
 scripts/prepare_environment_server.sh
