@@ -61,6 +61,86 @@ sub init {
         return -1;
     }
     
+    #Handle LS Registration
+    unless ( exists $self->{CONF}->{"tracerouteMA"}->{enable_registration} ) {
+        if ( exists $self->{CONF}->{enable_registration} and $self->{CONF}->{enable_registration} ) {
+            $self->{CONF}->{"tracerouteMA"}->{enable_registration} = $self->{CONF}->{enable_registration};
+        }
+        else {
+            $self->{CONF}->{enable_registration} = 0;
+            $self->{CONF}->{"tracerouteMA"}->{enable_registration} = 0;
+        }
+        $self->{LOGGER}->warn( "Setting 'enable_registration' to \"" . $self->{CONF}->{"tracerouteMA"}->{enable_registration} . "\"." );
+    }
+
+    if ( $self->{CONF}->{"tracerouteMA"}->{"enable_registration"} ) {
+        unless ( exists $self->{CONF}->{"tracerouteMA"}->{"ls_instance"}
+            and $self->{CONF}->{"tracerouteMA"}->{"ls_instance"} )
+        {
+            if ( defined $self->{CONF}->{"ls_instance"}
+                and $self->{CONF}->{"ls_instance"} )
+            {
+                $self->{LOGGER}->warn( "Setting \"ls_instance\" to \"" . $self->{CONF}->{"ls_instance"} . "\"" );
+                $self->{CONF}->{"tracerouteMA"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
+            }
+            else {
+                $self->{LOGGER}->warn( "No LS instance specified for pSB service" );
+            }
+        }
+
+        unless ( exists $self->{CONF}->{"tracerouteMA"}->{"ls_registration_interval"}
+            and $self->{CONF}->{"tracerouteMA"}->{"ls_registration_interval"} )
+        {
+            if ( defined $self->{CONF}->{"ls_registration_interval"}
+                and $self->{CONF}->{"ls_registration_interval"} )
+            {
+                $self->{LOGGER}->warn( "Setting \"ls_registration_interval\" to \"" . $self->{CONF}->{"ls_registration_interval"} . "\"" );
+                $self->{CONF}->{"tracerouteMA"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
+            }
+            else {
+                $self->{LOGGER}->warn( "Setting registration interval to 4 hours" );
+                $self->{CONF}->{"tracerouteMA"}->{"ls_registration_interval"} = 14400;
+            }
+        }
+
+        if ( not $self->{CONF}->{"tracerouteMA"}->{"service_accesspoint"} ) {
+            unless ( $self->{CONF}->{external_address} ) {
+                $self->{LOGGER}->fatal( "With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address" );
+                return -1;
+            }
+            $self->{LOGGER}->info( "Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT} );
+            $self->{CONF}->{"tracerouteMA"}->{"service_accesspoint"} = "http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT};
+        }
+
+        unless ( exists $self->{CONF}->{"tracerouteMA"}->{"service_description"}
+            and $self->{CONF}->{"tracerouteMA"}->{"service_description"} )
+        {
+            my $description = "perfSONAR_PS Traceroute MA";
+            if ( $self->{CONF}->{site_name} ) {
+                $description .= " at " . $self->{CONF}->{site_name};
+            }
+            if ( $self->{CONF}->{site_location} ) {
+                $description .= " in " . $self->{CONF}->{site_location};
+            }
+            $self->{CONF}->{"tracerouteMA"}->{"service_description"} = $description;
+            $self->{LOGGER}->warn( "Setting 'service_description' to '$description'." );
+        }
+
+        unless ( exists $self->{CONF}->{"tracerouteMA"}->{"service_name"}
+            and $self->{CONF}->{"tracerouteMA"}->{"service_name"} )
+        {
+            $self->{CONF}->{"tracerouteMA"}->{"service_name"} = "Traceroute MA";
+            $self->{LOGGER}->warn( "Setting 'service_name' to 'Traceroute MA'." );
+        }
+
+        unless ( exists $self->{CONF}->{"tracerouteMA"}->{"service_type"}
+            and $self->{CONF}->{"tracerouteMA"}->{"service_type"} )
+        {
+            $self->{CONF}->{"tracerouteMA"}->{"service_type"} = "MA";
+            $self->{LOGGER}->warn( "Setting 'service_type' to 'MA'." );
+        }
+    }
+    
     #Register handlers
     $handler->registerMessageHandler( "SetupDataRequest",   $self );
     $handler->registerMessageHandler( "MetadataKeyRequest", $self );
