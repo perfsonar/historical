@@ -27,7 +27,7 @@ In general, it is recommended you run MaDDash on a host with the perfSONAR-PS To
 Installation is currently supported via an RPM distribution through yum. If running the software on the perfSONAR-PS Toolkit, your installation will be pointing at the necessary yum repositories by default and no further setup is required. If you wish to install the toolkit on a host that does NOT run the perfSONAR-PS Toolkit, see http://software.internet2.edu for full details on setting up your yum environment.
 
 == Packages ==
-The following MaDDash related packages are currently available:
+The following packages are used by the current default MaDDash installation:
  * _maddash_ - Container package that has dependencies on the _maddash-server_, _maddash-webui_, and perl-perfSONAR_PS-Nagios packages. The package itself does not install any additional software, it simply pulls in the aforementioned packages.
  * _maddash-server_ - The backend server that schedules checks and makes results available via a REST/JSON interface running on an embedded web server. This package has a dependency on java which will also be installed during the yum installation process.
  * _maddash-webui_ - The web pages that display the dashboard. It consists of a set of CGI scripts that run under Apache. The server contacts the REST server run by the maddash-server package and then presents the data on the web page.
