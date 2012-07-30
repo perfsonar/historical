@@ -1,0 +1,223 @@
+This page provides instructions for installing and configuring the Monitoring and Debugging Dashboard (MaDDash). 
+
+<wiki:toc max_depth="3" />
+
+= Quick Start =
+ # Login to a host running the perfSONAR-PS Toolkit 3.2.2 or later. 
+ # Run the following command as a privileged user to install the software:
+{{{
+# yum install maddash
+}}}
+ # Open the file _/etc/maddash/maddash-server/maddash.yaml_ and change the following properties
+  # Under the _groups_ section, change the _myOwampHosts_ list and the _myBwctlHosts_ list to the list of OWAMP and BWCTL hosts you wish to check, respectively
+  # Do a search and replace for _example.mydomain.local_ and change it to the hostname of the toolkit host on which the software is installed. This information will be used to generate the graphs.
+ # Restart the server:
+{{{
+# /etc/init.d/maddash-server restart
+}}}
+ # Open the maddash web page in your browser at the following URL (replace MYHOST with the name of your host): http://MYHOST/maddash-webui
+ # You should now be able to view the results of the checks being run. See the remainder of this document for more detailed customization features. 
+
+= Installation Information ==
+
+== System Requirements ==
+In general, it is recommended you run MaDDash on a host with the perfSONAR-PS Toolkit installed. Any host meeting the Toolkit requirements should be sufficient. If you do not want to use a toolkit host, then most modern systems running a 32-bit or 64-bit version CentoS 5 or CentOS 6 should be sufficient. No other operating systems are supported at this time. 
+
+== Yum Repository Setup ==
+Installation is currently supported via an RPM distribution through yum. If running the software on the perfSONAR-PS Toolkit, your installation will be pointing at the necessary yum repositories by default and no further setup is required. If you wish to install the toolkit on a host that does NOT run the perfSONAR-PS Toolkit, see http://software.internet2.edu for full details on setting up your yum environment.
+
+== Packages ==
+The following MaDDash related packages are currently available:
+ * _maddash_ - Container package that has dependencies on the _maddash-server_, _maddash-webui_, and perl-perfSONAR_PS-Nagios packages. The package itself does not install any additional software, it simply pulls in the aforementioned packages.
+ * _maddash-server_ - The backend server that schedules checks and makes results available via a REST/JSON interface running on an embedded web server. This package has a dependency on java which will also be installed during the yum installation process.
+ * _maddash-webui_ - The web pages that display the dashboard. It consists of a set of CGI scripts that run under Apache. The server contacts the REST server run by the maddash-server package and then presents the data on the web page.
+ * _perl-perfSONAR_PS-Nagios_ - Installs the perfSONAR Nagios checks that can alarm based on throughput, loss and other data returned by perfSONAR services. 
+
+
+= MadDash Server =
+== Starting the service ==
+{{{
+# /etc/init.d/maddash-server start
+}}}
+
+== Stopping the service ==
+{{{
+# /etc/init.d/maddash-server stop
+}}}
+
+== Restarting the service ==
+{{{
+# /etc/init.d/maddash-server restart
+}}}
+
+== Logs ==
+Log detail and file locations can be edited by modifying the file */etc/maddash/maddash-server/log4j.properties*.
+
+The following logs are available by default:
+|| Log || Description ||
+||_/var/log/maddash/maddash-server.log_ || Log for general errors and output ||
+||_/var/log/maddash/maddash-server.netlogger.log_ || Logs formatted in the NetLogger format ||
+||_/var/log/maddash/maddash-server.out_ || If anything gets written to STDOUT, it will appear here. Often useful as a last resort if software is behaving in unexpected ways. ||
+
+== Configuration Guide ==
+The main configuration file for the maddash-server component is located at */etc/maddash/maddash-server/maddash.yaml*
+
+The file is in [http://www.yaml.org/ YAML] format. In this file you define the checks you want to run and how they are organized. You can also tweak setting for the embedded web server and various other aspects of the software. The configuration file is broken into the following primary sections:
+ * _groups_ - In general, this is the section where you define lists of hosts that you want to check. You can define any number of custom groups in this section. When you define _grids_ these groups will be used to define what constitutes the rows and columns. In theory they don't have to be hosts, but for the perfSONAR checks this is the common case because your dimensions are endpoints of a test.
+ * _checks_ - This is where you define how to run each check. For Nagios checks, this means defining the command-line script to run and arguments to pass it. 
+ * _grids_  - This is where you define how the groups will be applied to the checks. You define the _groups_ that will compose the rows and columns, then define the type of check that will be run.
+ * _dashboards_ - This is where you group _grids_ together.
+
+There are also a number of miscellaneous parameters related to the general operation of the service. Each of these property categories is described in the remainder of this section.
+
+=== groups ===
+*groups* are used to define the resources that will compose the rows and columns of a grid. For the perfSONAR checks, this is often used to group the endpoints used in performance tests together (e.g. create a group for all the hosts running OWAMP tests and another for all the hosts running BWCTL tests). The names, members and number of groups is all customizable. _groups_ take the following format:
+{{{
+groups:
+    groupName:
+        - "member"
+        - "member"
+}}}
+
+All groups go under the _group_ block. In the example above _groupName_ can replaced with any alphanumeric string that does not contain whitespace. For example "myOwampHosts", "campusHosts", or any other string that meets the requirements. This name will be used later in the configuration, so its important to make note of it. In the above example, you should change _member_ to the name of the host or other resource you want in the list. 
+
+=== checks ===
+
+==== General Parameters ====
+*checks* are where you provide instructions as to how results should be obtained. Checks take the current format in the configuration file:
+{{{
+checks:
+    checkName :
+       ...check-parameters...
+
+}}}
+The _checkName_ can be any alphanumeric string with no whitespace. It is used to identify the check later in the file, so you should note it. For example you could name it something like "owampLossCheck" or "bwctl100Gbps". The following parameters are available for the check:
+||Name||Type||Required||Description||
+||name||String||Yes||A human-readable name used for display purposes when describing this check||
+||description||String||Yes||Human-readable text describing the purpose of this check. The description field accepts the template variables %row and %col that will be populated with the current row and column values respectively when the check in applied to a grid.||
+||type||String||Yes||The type of check. Currently the software supports _net.es.maddash.checks.NagiosCheck_, _net.es.maddash.checks.PSNagiosCheck_, and _net.es.maddash.checks.RandomCheck_ ||
+||params||YAML Object||Type dependent||A YAML object containing parameters specific to the check. See the [MaDDashInstall#Type-specific_Parameters Type-specific Parameters] section.||
+||checkInterval||int||Yes||How frequently to run the check in seconds||
+||retryInterval||int||Yes||How frequently to run the check in seconds if it encounters a state different from the current state||
+||retryAttempts||int||Yes||The number of consecutive times a new state must be seen before it changes the state of the check. For example, if a check has been OK for many days, but suddenly a critical is seen, then a critical state must be seen 2 more times before the status will change||
+||timeout||int||Yes||The number of seconds to wait for the check to return. If it does not return in this timeframe, the check is set to the UNKNOWN status.||
+
+==== Type-specific Parameters ====
+Currently the software supports the following types of checks:
+ * _net.es.maddash.checks.NagiosCheck_ - This check is performed using Nagios command. The parameters provided describe how to run that command.
+ * _net.es.maddash.checks.PSNagiosCheck_ - This check is a perfSONAR Nagios command. It is an extension of _net.es.maddash.checks.NagiosCheck_, but includes additional fields to collect information necessary to display graphs from the perfSONAR-PS toolkit.
+ * _net.es.maddash.checks.RandomCheck_ - This should only be used for testing. This check returns a random result every time it runs. 
+
+===== net.es.maddash.checks.NagiosCheck =====
+||Name||Type||Required||Description||
+||command||String||Yes||The full nagios command to run on the local system. It accepts the template variables %row and %col that will be populated with the row and column values when applied to a grid.||
+
+===== net.es.maddash.checks.PSNagiosCheck =====
+||Name||Type||Required||Description||
+||command||String||Yes||See [MaDDashInstall#net.es.maddash.checks.NagiosCheck net.es.maddash.checks.NagiosCheck]||
+||maUrl||YAML Object||Yes||The URL of the measurement archive where performance data related to this check may be retrieved. This accepts the template variables listed in the [MaDDashInstall#PSNagiosCheck_Template_Variables PSNagiosCheck Template Variables] section. The object has one key that is called "default" which will be the default URL used for any cell in a grid. If you provide a key that matches a member of the group used for the rows, every item in that row will use the specific MA URL provided.||
+||graphUrl||String||Yes||A URL where a graph of data related to the check can be retrieved. This accepts the template variables listed in the [MaDDashInstall#PSNagiosCheck_Template_Variables PSNagiosCheck Template Variables] section. ||
+||metaDataKeyLookup||String||Yes||A URL where metaDataKeys can be looked up for the data. These are often needed to generate the graph URL. This accepts some of the template variables listed in the [MaDDashInstall#PSNagiosCheck_Template_Variables PSNagiosCheck Template Variables] section. _Note: Some variables it cannot accept because it is responsible for generating them._||
+
+ ===== PSNagiosCheck Template Variables  =====
+||Name||Description||
+||%row||The row in the grid associated with this check at the time its run||
+||%col||The column in the grid associated with this check at the time its run||
+||%maUrl||The url of the measurement archive. You can't use this in the maUrl parameters as this is generated from that template.||
+||%maKeyF||A comma-separated list of the metaDataKeys for the forward direction of a test. This cannot be used in metaDataKeyLookup as it is generated after the URL that is called.||
+||%maKeyR||A comma-separated list of the metaDataKeys for the reverse direction of a test. This cannot be used in metaDataKeyLookup as it is generated after the URL that is called.||
+||%srcName||The hostname of the source endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
+||%srcIP||The IP address of the source endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
+||%dstName||The hostname of the destination endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
+||%dstIP||The IP of the destination endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
+||%eventType||The eventType returned by metaDataKeyLookup of the destination endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
+||%event.delayBuckets||The string _http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317_||
+||%event.delay||The string _http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921_||
+||%event.bandwidth||The string _http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0_||
+||%event.iperf||The string _http://ggf.org/ns/nmwg/tools/iperf/2.0_||
+||%event.utilization||_The string http://ggf.org/ns/nmwg/characteristic/utilization/2.0_||
+
+=== grids ===
+*grids* associate _groups_ with _checks_ and arrange them in a two-dimensional structure. Grids are arranged as a list of objects with the following parameters: 
+
+||Name||Type||Required||Description||
+||name||String||Yes||A human readable name of the grid||
+||rows||String||Yes||The name of the _group_ that will compose the rows of the grid. This must match a group name defined in the _groups_ section of the configuration file or an error will be returned. ||
+||columns||String||Yes||The name of the _group_ that will compose the columns of the grid. This must match a group name defined in the _groups_ section of the configuration file or an error will be returned. ||
+||checks||List of Strings||Yes||The name of the _check_ elements that need to be run for each row and column. Each element must match a check name defined under the _checks_ section of the configuration or an error will be returned.||
+||rowOrder||String||Yes||Specifies how the rows should be ordered. Valid values are _alphabetical_, which will sort them alphabetically, or _group_ which will present them exactly in the order they are defined in the _group_ section.||
+||colOrder||String||Yes||Specifies how the columns should be ordered. Valid values are _alphabetical_, which will sort them alphabetically, or _group_ which will present them exactly in the order they are defined in the _group_ section.||
+||excludeSelf||boolean||Yes||If set to 1, then a check will not be run where the value of the current row is equal to the value of the current column. If set to 0, then a check will be run in this case.||
+||columnAlgorithm||boolean||Yes||Determines which checks will be run. Valid values are as follows: all - Run a check between every row and column; afterSelf - Run a check to every host that's defined after the current row in the 'rows' group; beforeSelf - Run a check to every host that's defined before the current row in the 'rows' group||
+||statusLabels||YAML object||Yes||Describes what each status means. Its structured as a set of key/value pairs where the key is the status and the value is the description of the status. Valid status values are _ok_, _warning_, _critical_, _unknown_ and _notrun_. You do not need to define every status if not all are applicable to your check.||
+
+=== dashboards ===
+*dashboards* group grids together. You define them as as a list of YAML objects with the following properties:
+
+||Name||Type||Required||Description||
+||name||String||Yes||The name you want displayed as the title of the dashboard||
+||grids||List of YAML objects||Yes||The list of grids you want included in this dashboard. Each item in the list has one property _name_, where you specify the name of the grid. This must map to a _name_ property for one of the defined grids in the configuration file.||
+
+=== Other Properties ===
+
+The following list some global properties available for controlling the behavior of the maddash-server instance.
+
+==== General Properties ====
+||Name||Type||Required||Description||
+||database||String||Yes||The path to the directory where the database is stored||
+||jobThreadPoolSize||Integer||No||The maximum number of checks that can run in parallel. Defaults to 50||
+||jobBatchSize||Integer||No||The maximum number of checks that can be running or waiting to run in memory. Defaults to 250.||
+||disableScheduler||Boolean||No||If set to 1 then the server will only run as a REST server and not execute any new checks. Default is 0.||
+||skipTableBuild||Boolean||No||If set to 1 then the database tables will not be built and indexes will not be built/rebuilt. The first time you run the server it must be set to 0. After that, you may find that setting it to 1 significantly speeds-up boot time. Keeping it on though has the advantage of rebuilding indexes on startup which can improve query performance.||
+
+==== Web Server Properties ====
+||Name||Type||Required||Description||
+||serverHost||String||No||The hostname of the interface where the web server should listen. Defaults to localhost.||
+||http||YAML Object||Yes (unless https specified)||Parameters related to http. See [MaDDashInstall#http_properties http properties] section.||
+||https||YAML Object||Yes (unless http specified)||Parameters related to https. See [MaDDashInstall#https_properties https properties] section.||
+
+===== http properties =====
+||Name||Type||Required||Description||
+||port||Integer||Yes||The port on which the web server should listen for HTTP connections||
+||proxyMode||String||Yes||Reserved for future use. Currently let's the server know that if it is behind a proxy. This may be used in later implementation to extract headers that forward information related to authentication. ||
+
+===== https properties =====
+||Name||Type||Required||Description||
+||port||Integer||Yes||The port on which the web server should listen for HTTPS connections||
+||keystore||String||Yes||The keystore containing the key 'mykey' to use as the ssl server certificate. It should also contain any trusted certificates if doing client authentication.||
+||keystorePassword||String||Yes||The password to access the keystore.||
+||clientAuth||String||Yes||Indicates whether a client to the rest server must have a trusted SSL certificate. Valid values are _require_, _want_ and _off_. _require_ means the user MUST have a trusted certificate or the request will be rejected. _want_ means the server will check the certificate if one is presented, but will not reject requests that do not provide one. _off_ means no certificate is required.||
+||proxyMode||String||Yes||Reserved for future use. Currently let's the server know that if it is behind a proxy. This may be used in later implementation to extract headers that forward information related to authentication. ||
+
+= MaDDash Web UI ==
+== Installation information ==
+The maddash-webui is a web application that runs under Apache. The web scripts and resources are installed in _/opt/maddash/maddash-webui_. In addition, an Apache configuration file is installed at _/etc/httpd/conf.d/apache-maddash.conf that sets-up the /maddash-webui URL. It also creates a reverse proxy for request to the URL /maddash to localhost port 8881. If you modify the server port for maddash, you will also need to update this configuration.
+
+
+== Customization ==
+The interface provides some customization options in the JSON config file */opt/maddash/maddash-webui/etc/config.json*. It provides the following options:
+||Name||Type||Required||Description||
+||title||String||Yes||The title displayed at the very top of the web page||
+||defaultDashboard||String||Yes||The name of the default dashboard to display when someone visits /maddash-webui. It MUST match the name of a dashboard defined in your maddash-server.yaml file.||
+||grids||JSON object||No||Custom layout features for individual grids. See [MaDDashInstall#grids_properties grids properties] section.||
+
+==== grids properties ====
+grids are specified as follows (where _gridName_ is the name of the grid you want to adjust):
+{{{
+"grids":{
+        "gridName":{
+            ...properties...
+        },
+    },
+}}}
+
+The following properties are available:
+
+||Name||Type||Required||Description||
+||cellSize||Integer||No||The height and width in pixels of one cell in the grid||
+||cellPadding||Integer||No||The space between cells of the grid||
+||textBlockSize||Integer||No||The length of the text blocks at the top of the grid||
+
+= Source Code =
+ * *Stable release:* https://esnet-perfsonar.googlecode.com/svn/tags/maddash-1.0-rc1/
+ * *Development release:* https://esnet-perfsonar.googlecode.com/svn/trunk/maddash/
