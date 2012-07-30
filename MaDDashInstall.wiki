@@ -32,7 +32,7 @@ The following MaDDash related packages are currently available:
  * _maddash-server_ - The backend server that schedules checks and makes results available via a REST/JSON interface running on an embedded web server. This package has a dependency on java which will also be installed during the yum installation process.
  * _maddash-webui_ - The web pages that display the dashboard. It consists of a set of CGI scripts that run under Apache. The server contacts the REST server run by the maddash-server package and then presents the data on the web page.
  * _perl-perfSONAR_PS-Nagios_ - Installs the perfSONAR Nagios checks that can alarm based on throughput, loss and other data returned by perfSONAR services. 
-
+ * _perl-perfSONAR_PS-serviceTest_ - Provides the performance graphs used by the maddash-webui package for perfSONAR checks. 
 
 = MadDash Server =
 == Starting the service ==
