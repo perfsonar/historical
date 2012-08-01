@@ -23,4 +23,4 @@ The current rotation includes: Aaron, Kavitha, Nils, Andy, Sowmya, Brian
   * January 1 - 15, 2013: Kavitha
   * January 16 - 31, 2013: Nils
   * February 1 - 14, 2012: Sowmya
-  * February 15 - 28, 2012: Aaron
+  * February 15 - 28, 2012: Brian
