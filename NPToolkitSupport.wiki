@@ -5,22 +5,22 @@
 The core NP Toolkit support team has decided to divide up support responsibility as follows.
 There will be a primary support person at all times, on a .5 month rotation. This person is responsible for answering support email, and assigning tasks to others if appropriate. If the primary person is unavailable, they are responsible for finding their own replacement.
 
-The current rotation includes: Aaron, Kavitha, Nils, Andy, Sowmya
+The current rotation includes: Aaron, Kavitha, Nils, Andy, Sowmya, Brian
 (Please volunteer if you'd like to be added to the rotation!)
 
 = Schedule =
 
-  * 1st half August, 2012: Nils
-  * 2nd half August, 2012: Sowmya
-  * 1st half September, 2012: Aaron
-  * 2nd half September, 2012: Andy
-  * 1st half October, 2012: Kavitha
-  * 2nd half October, 2012: Nils
-  * 1st half November, 2012: Sowmya
-  * 2nd half November, 2012: Aaron
-  * 1st half December, 2012: Andy
-  * 2nd half December, 2012: Kavitha
-  * 1st half January, 2013: Nils
-  * 2nd half January, 2013: Sowmya
-  * 1st half February, 2012: Aaron
-  * 2nd half February, 2012: Andy
+  * August 1 - August 15, 2012: Nils
+  * August 16 - August 31, 2012: Sowmya
+  * September 1 - 15, 2012: Aaron
+  * September 16 - 30, 2012: Andy
+  * October 1 - 15, 2012: Kavitha
+  * October 16 - 31, 2012: Nils
+  * November 1 - 15, 2012: Sowmya
+  * November 16 - 30, 2012: Brian
+  * December 1 - 15, 2012: Aaron
+  * December 16 - 31, 2012: Andy
+  * January 1 - 15, 2013: Kavitha
+  * January 16 - 31, 2013: Nils
+  * February 1 - 14, 2012: Sowmya
+  * February 15 - 28, 2012: Aaron
