@@ -8,8 +8,8 @@ This page provides instructions for installing and configuring the Monitoring an
 {{{
 # yum install maddash
 }}}
- # Open the file _/etc/maddash/maddash-server/maddash.yaml_ and change the following properties
-  # Under the _groups_ section, change the _myOwampHosts_ list and the _myBwctlHosts_ list to the list of OWAMP and BWCTL hosts you wish to check, respectively
+ # Open the file _/etc/maddash/maddash-server/maddash.yaml_ and change the following properties (_Note: Use spaces and not tabs in this file. YAML does not allow tabs._)
+  # Under the _groups_ section, change the _myOwampHosts_ list and the _myBwctlHosts_ list to the list of OWAMP and BWCTL hosts you wish to check, respectively. _NOTE: If you comment out one of the groups because you don't want any BWCTL or OWAMP checks, then also remove the corresponding entry under the "grids" section of the file_
   # Do a search and replace for _example.mydomain.local_ and change it to the hostname of the toolkit host on which the software is installed. This information will be used to generate the graphs.
  # Restart the server:
 {{{
