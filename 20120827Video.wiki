@@ -16,8 +16,12 @@
     * Nils: 
     * Aaron: 
 
-  * Web10G Discussion
-  
+  * Web10G Discussion (rough agenda, very open to change)
+   * Brief status update of projects
+   * Collaboration areas
+    * Web10G version of the toolkit?
+    * What to do about NDT/NPAD?
+   
 
 == Future Agenda Topics ==
   * Roadmap
