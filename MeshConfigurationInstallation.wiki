@@ -1,22 +1,49 @@
 = perfSONAR Mesh Configuration Install Instructions =
 
+<wiki:toc max_depth="6" />
+
 The perfSONAR-PS Mesh Configuration service allows the configuration of a
 "mesh" of hosts so that they all perform the same set of tests with other hosts
 in the mesh. This allows the deployment of disparate hosts while allowing
 centralized control over them.
+
+The idea is to have a central description, available at a specific URL, that
+defines the properties of the mesh including, but not limited to, who the
+members are, which tests are being performed between them, where the test
+results are stored, and who the administrators of the mesh and of the
+individual members of the mesh. The members of the mesh can then be configured
+to use this centralized description to see which tests to perform, and where to
+store those test results.
 
 == Installation ==
 
 Installation using YUM lets the package manager do the work of finding and
 installing the dependencies.  The following command is all that is needed:
 
+{{{
 (sudo) yum install perl-perfSONAR_PS-MeshConfig-Agent
+}}}
 
 There may be several prerequisites to install depending on the age of your
 system.  To ensure that all are found, please be sure to install one of the
 alternative repositories above. 
 
 == Configuration ==
+
+=== The Mesh Configuration ===
+
+The mesh configuration is stored in a .json file that can be retrieved from a
+well-known URL. To ease the building of the .json, there is a script included
+with the RPM called "build_json". This script converts a config file in
+Config::General format into the appropriate .json. There is an commented
+example file in the RPM available in
+"/opt/perfsonar_ps/mesh_config/doc/example.conf". You can view it online
+[http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/mesh_config/perfSONAR_PS-MeshConfig/doc/example.conf here].
+
+To use the build_json tool, you can run `build_json -input example.conf -output
+example.json`. This will convert the configuration file named example.conf into
+a json file named example.json.  This file can then be placed into a well-known
+location to be downloaded by agents running on the mesh's hosts.
 
 === The Agent ===
 
@@ -197,15 +224,4 @@ The PingER archive should be available at:
   read_url: http://[host]:8075/perfSONAR_PS/services/pinger/ma
 }}}
 
-=== The Mesh Configuration ===
 
-The mesh configuration is stored in a .json file that can be retrieved from a
-well-known URL. To ease the building of the .json, there is an included script
-"build_json". This script converts a config file in Config::General format into
-the appropriate .json. There is an commented example file located in
-"doc/example.conf".
-
-To use the build_json tool, you can run 'build_json -input example.conf -output
-example.json'. This will convert the configuration file named example.conf into
-a json file named example.json.  This file can then be placed into a well-known
-location to be downloaded by other agents.
