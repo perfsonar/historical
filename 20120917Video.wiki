@@ -19,6 +19,7 @@
   * Manual hostname specification on the toolkit 
   * Lookup Service transition plan
    * https://docs.google.com/document/d/1WTarLzv2a_pNtFLySr3V2LOTtoEBYewvsISnMXFdTEw/edit 
+ * NPAD issue
 
 == Future Agenda Topics ==
   * Roadmap
