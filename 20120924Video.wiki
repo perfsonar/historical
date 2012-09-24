@@ -27,7 +27,28 @@
     * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
     
 == Notes ==
-
+ * Developer Updates
+    * Andy: 
+     * Went through issues with Aaron and Brian.
+     * Current POW, has been relatively quiet so far
+    * Sowmya: 
+     * Working on perfSONAR client design for lookup service
+     * Looking at issues assigned to her in issue tracker
+    * Brian:
+     * No updates
+    * Andrew:
+     * Working on CentOS 6 distro, sent to list for testing
+     * Looking at upgrade scripts for CentOS 6
+    * Aaron: 
+     * Working on LS map and getting it deployed
+    * Nils:  
+     * Did some work on mesh config tool to get IPv6 address to work in maddash file
+     * Cleaned up some thing on LS report
+    * Kavitha:
+     * Should have rc2 of NDT out later today    
+  * 3.3. Issues and Assignments
+   * Assigned Sowmya 654 and 655
+   * Assigned Andy to 653 to add Jason's patch
 
     
 == Where ==
