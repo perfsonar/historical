@@ -50,6 +50,7 @@ use Math::Int64;
 use Data::Validate::IP qw(is_ipv4);
 use Net::IP;
 use File::Basename;
+use File::Copy qw(move);
 
 use perfSONAR_PS::Config::OWP;
 use perfSONAR_PS::Config::OWP::Utils;
@@ -581,6 +582,7 @@ sub createStorage {
 
     my $errorFlag = 0;
     my $dbTr      = q{};
+    my $tmp_file;
 
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         unless ( exists $parameters->{metadatadb} and $parameters->{metadatadb} ) {
@@ -604,7 +606,9 @@ sub createStorage {
         }
     }
     elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
-        my $fh = new IO::File "> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
+        $tmp_file = $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} . ".tmp";
+
+        my $fh = new IO::File "> " . $tmp_file;
         if ( defined $fh ) {
             print $fh "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
             print $fh "<nmwg:store xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
@@ -1035,7 +1039,7 @@ sub createStorage {
                                 $errorFlag++ if $parameters->{"error"};
                             }
                             elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
-                                my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
+                                my $fh = new IO::File ">> " . $tmp_file;
                                 if ( defined $fh ) {
                                     print $fh $metadata . "\n" . $data . "\n";
                                     $fh->close;
@@ -1471,7 +1475,7 @@ $dbh->closeDB();
                                     $errorFlag++ if $parameters->{"error"};
                                 }
                                 elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
-                                    my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
+                                    my $fh = new IO::File ">> " . $tmp_file;
                                     if ( defined $fh ) {
                                         print $fh $metadata . "\n" . $data . "\n";
                                         $fh->close;
@@ -1521,7 +1525,7 @@ $dbh->closeDB();
         }
     }
     elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
-        my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
+        my $fh = new IO::File ">> " . $tmp_file;
         if ( defined $fh ) {
             print $fh "</nmwg:store>\n";
             $fh->close;
@@ -1531,6 +1535,30 @@ $dbh->closeDB();
             $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
             $self->{NETLOGGER}->debug( $nlmsg );
             return -1;
+        }
+
+        my $current_md5;
+        my $new_md5;
+
+        if ( open( FILE1, $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} ) ) {
+            binmode( FILE1 );
+            $current_md5 = Digest::MD5->new->addfile( *FILE1 )->hexdigest;
+            close( FILE1 );
+        }
+
+        if ( open( FILE2, $tmp_file ) ) {
+            binmode( FILE2 );
+            $new_md5 = Digest::MD5->new->addfile( *FILE2 )->hexdigest;
+            close( FILE2 );
+        }
+
+        if ( not $current_md5 or $current_md5 ne $new_md5 ) {
+            $self->{LOGGER}->debug( "Updating store file" );
+            move( $tmp_file, $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} );
+        }
+        else {
+            $self->{LOGGER}->debug( "newly generated file is the same as is currently loaded: $new_md5/$current_md5" );
+            system( "rm -f " . $tmp_file );
         }
     }
     else {
