@@ -104,14 +104,14 @@ when building your mesh configuration, your bwctl archive will be available at:
 
 {{{
   read_url:  http://[host]:8085/perfSONAR_PS/services/pSB
-  write_url: [host]:8569
+  write_url: [host]:8570
 }}}
 
 The owamp archive should be available at:
 
 {{{
   read_url: http://[host]:8085/perfSONAR_PS/services/pSB
-  write_url: [host]:8570
+  write_url: [host]:8569
 }}}
 
 The perfSONARBUOY Archive can hold bwctl and owamp test results. To install the
