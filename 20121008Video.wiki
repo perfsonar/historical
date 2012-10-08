@@ -3,20 +3,36 @@
 =   October 08, 2012 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Sowmya, Andy, Andrew, Aaron, Nils, Warren, Kavitha
   
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
 
 == Agenda Topics ==
   * Developer Updates
-    * Andy: 
-    * Sowmya: 
-    * Brian:
-    * Nils:  
     * Aaron: 
-    * Warren
+     * Working on mesh configuration stuff 
+     * Working on making it live nicely with current Toolkit GUIs. Got it partially working, needs some more testing.
+     * Andy: Esnet has mesh config deployed, working well
+    * Nils:
+      * Fixed some small bugs that were assigned to him
+      * Working currently on figuring out if dojo can be updated
+      * Did some testing with NDT, and it worked
+    * Kavitha: 
+     *  Fixed some bugs on NDT
+    * Sowmya: 
+      * No updates, on travel last week 
+    * Warren:  
+     * Not much to report. Been working on detection code. 
     * Andrew:
+      * LiveUSB is working with the overlay file system. John Bigrow is testing it now.
+      * Built some new ISOs for LiveCD and NetInstall
+      * Working through some of the issues on the new issue.
+      * Working on patching NPAD to fix URL on web page after install.
+    * Andy:
+     * Built new kernels, uploaded right before call. Will try some installs and updates, then announce. 
+     * Talking to USATLAS about using MaDDash
+     * Working on ESnet pt transition to Linux
   * TBD
 == Future Agenda Topics ==
   * Roadmap
