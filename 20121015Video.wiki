@@ -9,6 +9,7 @@
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
 
 == Agenda Topics ==
+  * discussion with web10G developers
   * Developer Updates
     * Aaron: 
     * Nils:
