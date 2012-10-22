@@ -3,7 +3,7 @@
 =   October 22, 2012 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees:
+  * Attendees: Brian Tierney, Sowmya Balasubramanian, Aaron Brown, Andy Lake, Kavitha Kumar, Nils Jacobson, Chris Rapier
 
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
@@ -11,12 +11,19 @@
 == Agenda Topics ==
   * Developer Updates
     * Sowmya: 
-    * Aaron: 
-    * Andrew:
-    * Andy:
-    * Brian
-    * Nils:
+     * 
     * Kavitha:
+     * 
+    * Aaron: 
+     * 
+    * Nils:
+     * 
+    * Andy:
+     * 
+    * Chris
+     * 
+    * Brian
+     * 
 
 == Future Agenda Topics ==
   * Roadmap
@@ -26,7 +33,26 @@
     * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
     
 == Notes ==
-    
+ * Developer Updates
+    * Sowmya: 
+     * Started making changes to lookup services 
+    * Kavitha:
+     * No updates
+    * Aaron: 
+     * Fixed a few minor bugs in NDT
+     * Will setup SCinet mesh config and dashboard
+    * Nils:
+     * Fixed some bugs last week in issue tracker
+     * Tested Andrew's ISOs, they worked 
+    * Andy:
+     * Met with Sowmya about lookup service records document
+     * Working through Linux conversion, all PTs done, OWAMP's up next 
+    * Chris
+        * Just about have the CentOS 6 2.6.32 patch ready
+    * Brian
+      * A call last week with Jason, Aaron and Andy to talk about how to organize some perfsonar efforts in the future
+      * Key component is that there will be a research track developed mostly by Martin Swany's team and another group dedicated to moving production track.
+  
 == Where ==
 ESnet conference bridge:
  * GDS: 00113498555555
