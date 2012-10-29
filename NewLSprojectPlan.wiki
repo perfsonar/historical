@@ -9,7 +9,7 @@ is modelled after the UNIS, developed at Indiana University for the GENI project
 
 Requirements and Use Case Document: http://goo.gl/nKxQ9
 
-Design Document: http://goo.gl/nuCSt
+Design Document: http://goo.gl/rx7qC
 
 Description of perfSONAR records: http://goo.gl/HgTM5
 
