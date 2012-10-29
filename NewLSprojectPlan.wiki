@@ -7,7 +7,15 @@ is modelled after the UNIS, developed at Indiana University for the GENI project
 
 = Documents =
 
-= Project Plan
+Requirements and Use Case Document: http://goo.gl/nKxQ9
+
+Design Document: http://goo.gl/nuCSt
+
+Description of perfSONAR records: http://goo.gl/HgTM5
+
+API Document: http://goo.gl/Ajf9z
+
+= Project Plan =
 
 Milestone 0: Complete, May 15, 2012
  * Use Case Document
