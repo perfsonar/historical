@@ -1,6 +1,13 @@
-#summary Project Plan for the new Lookup Service
+#summary Description and Project Plan for the new Lookup Service
 
 = Introduction =
+
+ESnet is developing a new lookup service to replace current perfSONAR-PS lookup service. This new LS
+is modelled after the UNIS, developed at Indiana University for the GENI project.
+
+= Documents =
+
+= Project Plan
 
 Milestone 0: Complete, May 15, 2012
  * Use Case Document
@@ -8,7 +15,7 @@ Milestone 0: Complete, May 15, 2012
  * API Document
  * early prototype to test performance
 
-Milestone 1: by August 1, 2012
+Milestone 1: Complete,  September 1, 2012
 
 Basic simple lookup service complete, including the following tasks:
  * full API support - 7 days
@@ -28,7 +35,7 @@ Basic simple lookup service complete, including the following tasks:
 
 Total Days: 36 days (FTE)
 
-Milestone 2: by October 1, 2012
+Milestone 2: by December 1, 2012
 
 Adds the following features
  * implementation of a couple different security models
@@ -39,7 +46,7 @@ Adds the following features
  * full toolkit integration
  
 Milestone 3: date TDB
-  * "standardization" of new API thru some standards organization (e.g. OGF)
+  * discuss a possible "standardization" of new API thru some standards organization (e.g. OGF)
 
  
  
