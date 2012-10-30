@@ -26,33 +26,36 @@ Milestone 0: Complete, May 15, 2012
 Milestone 1: Complete,  September 1, 2012
 
 Basic simple lookup service complete, including the following tasks:
- * full API support - 7 days
-    * Renew/Delete - 3 days
-    * support for multi-values - 2 days
-    * support for metacharacter(`*`)  - 2 days
- * robust error handling/reporting  - 5 days 
- * packaged as an RPM, JAR  - 4 days
- * documentation - 2 days
- * Logging - 4 days
- * Configuration file/scripts - 4 days
- * Performance testing - 2 days
+ * full API support
+    * Renew/Delete
+    * support for multi-values
+    * support for metacharacter(`*`) 
+ * robust error handling/reporting 
+ * packaged as an RPM, JAR
+ * documentation
+ * Logging
+ * Configuration file/scripts
+ * Performance testing
 
-Total Days: 28 days (FTE)
-
-Milestone 2: by December 1, 2012
+Milestone 2: by December 15, 2012
 
 Adds the following features
+ * Subscribe API
+   * HTTP Streaming
+ * perfSONAR Records Definition Document
+ * Client API document
+ * perfSONAR Client API document
+ * Clients
+   * Perl, Java
  * toolkit integration
    * including updated ls_registration_daemon
    * pSB
    * directory service
  * ability to pull data from old hLSes into the new LS
- * Subscribe API
-   * HTTP Streaming
- * full set of client APIs in multiple languages
  
 Milestone 3
  * implementation of a couple different security models
+ * Clients - Python
 
 Milestone 4: date TDB
   * discuss a possible "standardization" of new API thru some standards organization (e.g. OGF)
