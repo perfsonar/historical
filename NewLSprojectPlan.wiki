@@ -35,25 +35,26 @@ Basic simple lookup service complete, including the following tasks:
  * documentation - 2 days
  * Logging - 4 days
  * Configuration file/scripts - 4 days
- * initial toolkit integration - 6 days
-   * including updated ls_registration_daemon - 2 days
-   * pSB - 2 days
-   * directory service - 2 days
- * ability to pull data from old hLSes into the new LS - 4 days
+
 
 Total Days: 36 days (FTE)
 
 Milestone 2: by December 1, 2012
 
 Adds the following features
- * implementation of a couple different security models
+ * toolkit integration
+   * including updated ls_registration_daemon
+   * pSB
+   * directory service
+ * ability to pull data from old hLSes into the new LS
  * Subscribe API
-   * Query Agent
-   * Streaming
+   * HTTP Streaming
  * full set of client APIs in multiple languages
- * full toolkit integration
  
-Milestone 3: date TDB
+Milestone 3
+ * implementation of a couple different security models
+
+Milestone 4: date TDB
   * discuss a possible "standardization" of new API thru some standards organization (e.g. OGF)
 
  
