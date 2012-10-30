@@ -37,6 +37,7 @@ Basic simple lookup service complete, including the following tasks:
  * Configuration file/scripts
  * Performance testing
 
+
 Milestone 2: by December 15, 2012
 
 Adds the following features
