@@ -31,13 +31,13 @@ Basic simple lookup service complete, including the following tasks:
     * support for multi-values - 2 days
     * support for metacharacter(`*`)  - 2 days
  * robust error handling/reporting  - 5 days 
- * packaged as an RPM  - 4 days
+ * packaged as an RPM, JAR  - 4 days
  * documentation - 2 days
  * Logging - 4 days
  * Configuration file/scripts - 4 days
+ * Performance testing - 2 days
 
-
-Total Days: 36 days (FTE)
+Total Days: 28 days (FTE)
 
 Milestone 2: by December 1, 2012
 
