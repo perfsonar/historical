@@ -38,15 +38,13 @@ Basic simple lookup service complete, including the following tasks:
  * Performance testing
 
 
-Milestone 2: by December 15, 2012
+Milestone 2: by December 1, 2012
 
 Adds the following features
- * Subscribe API
-   * HTTP Streaming
  * perfSONAR Records Definition Document
  * Client API document
  * perfSONAR Client API document
- * Clients
+ * LS Clients
    * Perl, Java
  * toolkit integration
    * including updated ls_registration_daemon
@@ -55,8 +53,11 @@ Adds the following features
  * ability to pull data from old hLSes into the new LS
  
 Milestone 3
+ * Subscribe API
+   * HTTP Streaming
+ * LS Clients - Python
+ * perfSONAR clients
  * implementation of a couple different security models
- * Clients - Python
 
 Milestone 4: date TDB
   * discuss a possible "standardization" of new API thru some standards organization (e.g. OGF)
