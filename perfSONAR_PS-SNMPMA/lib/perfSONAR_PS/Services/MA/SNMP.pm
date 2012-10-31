@@ -87,7 +87,7 @@ relied upon by internal aspects of the perfSONAR-PS framework.
 Called at startup by the daemon when this particular module is loaded into
 the perfSONAR-PS deployment.  Checks the configuration file for the necessary
 items and fills in others when needed. Initializes the backed metadata storage
-(DBXML or a simple XML file) and builds the internal 'key hash' for the 
+(sqlite or a simple XML file) and builds the internal 'key hash' for the 
 MetadataKey exchanges.  Finally the message handler loads the appropriate 
 message types and eventTypes for this module.  Any other 'pre-startup' tasks
 should be placed in this function.
@@ -99,7 +99,6 @@ ways:
                    a DOM for each access.  Therefore it is opened once by the
                    daemon and used by each connection.  A $self object can
                    be used for this.
- - XMLDB - File handles are opened and closed for each connection.
 
 =cut
 
@@ -146,37 +145,8 @@ sub init {
         }
     }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        eval { load perfSONAR_PS::DB::XMLDB; };
-        if ( $EVAL_ERROR ) {
-            $self->{LOGGER}->fatal( "Couldn't load perfSONAR_PS::DB::XMLDB: $EVAL_ERROR" );
-            return -1;
-        }
-
-        unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_file"}
-            and $self->{CONF}->{"snmp"}->{"metadata_db_file"} )
-        {
-            $self->{LOGGER}->warn( "Value for 'metadata_db_file' is not set, setting to 'snmpstore.dbxml'." );
-            $self->{CONF}->{"snmp"}->{"metadata_db_file"} = "snmpstore.dbxml";
-        }
-
-        if ( exists $self->{CONF}->{"snmp"}->{"metadata_db_name"}
-            and $self->{CONF}->{"snmp"}->{"metadata_db_name"} )
-        {
-            if ( exists $self->{DIRECTORY} and $self->{DIRECTORY} and -d $self->{DIRECTORY} ) {
-                unless ( $self->{CONF}->{"snmp"}->{"metadata_db_name"} =~ "^/" ) {
-                    $self->{CONF}->{"snmp"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"snmp"}->{"metadata_db_name"};
-                    $self->{LOGGER}->info( "Setting \"metadata_db_name\" to \"" . $self->{DIRECTORY} . "/" . $self->{CONF}->{"snmp"}->{"metadata_db_name"} . "\"" );
-                }
-            }
-            unless ( -d $self->{CONF}->{"snmp"}->{"metadata_db_name"} ) {
-                system( "mkdir " . $self->{CONF}->{"snmp"}->{"metadata_db_name"} );
-                $self->{LOGGER}->info( "Creating directory \"" . $self->{CONF}->{"snmp"}->{"metadata_db_name"} . "\"" );
-            }
-        }
-        else {
-            $self->{LOGGER}->fatal( "Value for 'metadata_db_name' is not set." );
-            return -1;
-        }
+        $self->{LOGGER}->fatal( "'metadata_db_type' of type xmldb no longer supported. Please change to 'file' or 'sqlite'" );
+        return -1;
     }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
         unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_file"}
@@ -387,34 +357,6 @@ sub init {
             return -1;
         }
     }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        my $error      = q{};
-        my $metadatadb = $self->prepareDatabases;
-        unless ( $metadatadb ) {
-            $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"snmp"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"snmp"}->{"metadata_db_file"} . "\": " . $error );
-            return -1;
-        }
-
-        if ( $self->{CONF}->{"snmp"}->{"db_autoload"} and $self->{CONF}->{"snmp"}->{"autoload_metadata_db_file"} ) {
-            my $status = $self->loadXMLDB( { metadatadb => $metadatadb } );
-            if ( $status == -1 ) {
-                $self->{LOGGER}->fatal( "Canot open XMLDB, aborting." );
-                return -1;
-            }
-        }
-
-        my ( $status, $res ) = $self->buildHashedKeys( { metadatadb => $metadatadb, metadatadb_type => "xmldb" } );
-        unless ( $status == 0 ) {
-            $self->{LOGGER}->fatal( "Error building key database: $res" );
-            return -1;
-        }
-
-        $self->{HASH_TO_ID} = $res->{hash_to_id};
-        $self->{ID_TO_HASH} = $res->{id_to_hash};
-
-        $metadatadb->closeDB( { error => \$error } );
-        $self->{METADATADB} = q{};
-    }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
         #make sure database is created
         my $metadatadb = $self->prepareSQLiteDatabases;
@@ -619,27 +561,6 @@ sub refresh_store_file {
     return 0;
 }
 
-=head2 prepareDatabases($self, { doc })
-
-Opens the XMLDB and returns the handle if there was not an error.  The optional
-argument can be used to pass an error message to the given message and 
-return this in response to a request.
-
-=cut
-
-sub prepareDatabases {
-    my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { doc => 0 } );
-
-    my $error = q{};
-    my $metadatadb = new perfSONAR_PS::DB::XMLDB( { env => $self->{CONF}->{"snmp"}->{"metadata_db_name"}, cont => $self->{CONF}->{"snmp"}->{"metadata_db_file"}, ns => \%ma_namespaces, } );
-    unless ( $metadatadb->openDB( { txn => q{}, error => \$error } ) == 0 ) {
-        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "There was an error opening \"" . $self->{CONF}->{"snmp"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"snmp"}->{"metadata_db_file"} . "\": " . $error );
-        return;
-    }
-    return $metadatadb;
-}
-
 =head2 prepareSQLiteDatabases($self)
 
 Opens the SQLite metadata database
@@ -656,76 +577,6 @@ sub prepareSQLiteDatabases {
     }
     
     return $metadatadb;
-}
-
-=head2 loadXMLDB( { metadatadb } ) 
-
-If the deployment has an existing store file, but would like to utilize an XML
-DB instance, this function will load the old data into an existing XML DB.  This
-operation is non-destructive.
-
-=cut
-
-sub loadXMLDB {
-    my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { metadatadb => 1 } );
-
-    my $sourceError = q{};
-    my $sourceDB = new perfSONAR_PS::DB::File( { file => $self->{CONF}->{"snmp"}->{"autoload_metadata_db_file"} } );
-    $sourceDB->openDB( { error => \$sourceError } );
-    unless ( $sourceDB ) {
-        $self->{LOGGER}->fatal( "Couldn't initialize store file: $sourceError" );
-        return -1;
-    }
-
-    my $dom = $sourceDB->getDOM;
-    if ( $dom ) {
-        my $error     = q{};
-        my $errorFlag = 0;
-        my $dbTr      = q{};
-        $dbTr = $parameters->{metadatadb}->getTransaction( { error => \$error } );
-        unless ( $dbTr ) {
-            $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-            undef $dbTr;
-            $self->{LOGGER}->error( "Database error: \"" . $error . "\", aborting." );
-            return -1;
-        }
-
-        foreach my $data ( $dom->getDocumentElement->getChildrenByTagNameNS( "http://ggf.org/ns/nmwg/base/2.0/", "data" ) ) {
-            my $dHash = md5_hex( $data->toString );
-            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data->toString, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$error } );
-            $self->{LOGGER}->debug( "Inserting \"" . $data->toString . "\" as \"" . $dHash . "\"." );
-
-            my $metadata = find( $dom->getDocumentElement, "./nmwg:metadata[\@id=\"" . $data->getAttribute( "metadataIdRef" ) . "\"]" )->get_node( 1 );
-            my $mdHash = md5_hex( $metadata->toString );
-            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata->toString, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$error } );
-            $self->{LOGGER}->debug( "Inserting \"" . $metadata->toString . "\" as \"" . $mdHash . "\"." );
-        }
-
-        if ( $errorFlag ) {
-            $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-            undef $dbTr;
-            $self->{LOGGER}->error( "Database error: \"" . $error . "\", aborting." );
-            return -1;
-        }
-        else {
-            my $status = $parameters->{metadatadb}->commitTransaction( { txn => $dbTr, error => \$error } );
-            if ( $status == 0 ) {
-                undef $dbTr;
-            }
-            else {
-                $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-                undef $dbTr;
-                $self->{LOGGER}->error( "Database error: \"" . $error . "\", aborting." );
-                return -1;
-            }
-        }
-    }
-    else {
-        $self->{LOGGER}->fatal( "Source file \"" . $self->{CONF}->{"snmp"}->{"autoload_metadata_db_file"} . "\" error, aborting." );
-        return -1;
-    }
-    return 0;
 }
 
 =head2 buildHashedKeys($self {})
@@ -758,33 +609,6 @@ sub buildHashedKeys {
                     $self->{LOGGER}->debug( "Key id $hash maps to data element " . $data->getAttribute( "id" ) );
                 }
             }
-        }
-    }
-    elsif ( $metadatadb_type eq "xmldb" ) {
-        my $metadatadb = $self->prepareDatabases( { doc => $parameters->{output} } );
-        my $error = q{};
-        unless ( $metadatadb ) {
-            my $msg = "Database could not be opened.";
-            $self->{LOGGER}->fatal( $msg );
-            return ( -1, $msg );
-        }
-
-        my $parser = XML::LibXML->new();
-        my @results = $metadatadb->query( { query => "/nmwg:store[\@type=\"MAStore\"]/nmwg:data", txn => q{}, error => \$error } );
-
-        my $len = $#results;
-        if ( $len == -1 ) {
-            my $msg = "Nothing returned for database search.";
-            $self->{LOGGER}->error( $msg );
-            return ( -1, $msg );
-        }
-
-        for my $x ( 0 .. $len ) {
-            my $hash = md5_hex( $results[$x] );
-            my $data = $parser->parse_string( $results[$x] );
-            $id_to_hash{$hash} = $data->getDocumentElement->getAttribute( "id" );
-            $hash_to_id{ $data->getDocumentElement->getAttribute( "id" ) } = $hash;
-            $self->{LOGGER}->debug( "Key id $hash maps to data element " . $data->getDocumentElement->getAttribute( "id" ) );
         }
     }
     elsif ( $metadatadb_type eq "sqlite" ) {
@@ -848,13 +672,7 @@ We then sleep for some amount of time and do it again.
 sub registerLS {
     my ( $self, $sleep_time ) = validateParamsPos( @_, 1, { type => SCALARREF }, );
 
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        unless ( -d $self->{CONF}->{"snmp"}->{"metadata_db_name"} ) {
-            $self->{LOGGER}->fatal( "XMLDB is not defined, disallowing registration." );
-            return -1;
-        }
-    }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
         unless ( -f $self->{CONF}->{"snmp"}->{"metadata_db_file"} ) {
             $self->{LOGGER}->fatal( "Store file not defined, disallowing registration." );
             return -1;
@@ -909,15 +727,6 @@ sub registerLS {
     my @resultsString = ();
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
         @resultsString = $self->{METADATADB}->query( { query => "/nmwg:store/nmwg:metadata", error => \$error } );
-    }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        my $metadatadb = $self->prepareDatabases;
-        unless ( $metadatadb ) {
-            $self->{LOGGER}->fatal( "Database could not be opened." );
-            return -1;
-        }
-        @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata", txn => q{}, error => \$error } );
-        $metadatadb->closeDB( { error => \$error } );
     }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
         my $metadatadb = $self->prepareSQLiteDatabases;
@@ -1218,13 +1027,7 @@ sub maMetadataKeyRequest {
     my $mdId  = q{};
     my $dId   = q{};
     my $error = q{};
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $self->{METADATADB} = $self->prepareDatabases( { doc => $parameters->{output} } );
-        unless ( $self->{METADATADB} ) {
-            throw perfSONAR_PS::Error_compat( "Database could not be opened." );
-            return;
-        }
-    }elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
         $self->{METADATADB} = $self->prepareSQLiteDatabases();
         unless ( $self->{METADATADB} ) {
             throw perfSONAR_PS::Error_compat( "SQLite database could not be opened." );
@@ -1263,10 +1066,7 @@ sub maMetadataKeyRequest {
         );
 
     }
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $self->{LOGGER}->debug( "Closing database." );
-        $self->{METADATADB}->closeDB( { error => \$error } );
-    }
+
     return;
 }
 
@@ -1315,9 +1115,6 @@ sub metadataKeyRetrieveKey {
     my $query = q{};
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
         $query = "/nmwg:store/nmwg:data[\@id=\"" . $hashId . "\"]";
-    }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $query = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data[\@id=\"" . $hashId . "\"]";
     }
 
     $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
@@ -1390,9 +1187,6 @@ sub metadataKeyRetrieveMetadataData {
         if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
             $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
         }
-        elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-            $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
-        }
     
         $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
         $results             = $parameters->{metadatadb}->querySet( { query => $queryString } );
@@ -1414,9 +1208,6 @@ sub metadataKeyRetrieveMetadataData {
     
         if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
             $queryString = "/nmwg:store/nmwg:data";
-        }
-        elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-            $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
         }
     
         if ( $eventTypes->size() or $supportedEventTypes->size() ) {
@@ -1521,13 +1312,7 @@ sub maDataInfoRequest {
     my $mdId  = q{};
     my $dId   = q{};
     my $error = q{};
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $self->{METADATADB} = $self->prepareDatabases( { doc => $parameters->{output} } );
-        unless ( $self->{METADATADB} ) {
-            throw perfSONAR_PS::Error_compat( "Database could not be opened." );
-            return;
-        }
-    }elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
         $self->{METADATADB} = $self->prepareSQLiteDatabases();
         unless ( $self->{METADATADB} ) {
             throw perfSONAR_PS::Error_compat( "SQLite database could not be opened." );
@@ -1566,10 +1351,7 @@ sub maDataInfoRequest {
         );
 
     }
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $self->{LOGGER}->debug( "Closing database." );
-        $self->{METADATADB}->closeDB( { error => \$error } );
-    }
+
     return;
 }
 
@@ -1618,11 +1400,7 @@ sub dataInfoRetrieveKey {
         $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
         $results = $parameters->{metadatadb}->querySet( { query => $query } );
     }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $query = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data[\@id=\"" . $hashId . "\"]";
-        $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
-        $results = $parameters->{metadatadb}->querySet( { query => $query } );
-    }elsif( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ){
+    elsif( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ){
         $results = $self->sqLiteCreateKeyData( { metadatadb => $parameters->{metadatadb}, keyId => "$hashId" } );
     }
 
@@ -1734,9 +1512,6 @@ sub dataInfoRetrieveMetadataData {
         if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
             $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
         }
-        elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-            $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
-        }
     
         $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
     
@@ -1759,9 +1534,6 @@ sub dataInfoRetrieveMetadataData {
     
         if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
             $queryString = "/nmwg:store/nmwg:data";
-        }
-        elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-            $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
         }
     
         if ( $eventTypes->size() or $supportedEventTypes->size() ) {
@@ -1899,13 +1671,7 @@ sub maSetupDataRequest {
     my $mdId  = q{};
     my $dId   = q{};
     my $error = q{};
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $self->{METADATADB} = $self->prepareDatabases( { doc => $parameters->{output} } );
-        unless ( $self->{METADATADB} ) {
-            throw perfSONAR_PS::Error_compat( "Database could not be opened." );
-            return;
-        }
-    }elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ) {
         $self->{METADATADB} = $self->prepareSQLiteDatabases();
         unless ( $self->{METADATADB} ) {
             throw perfSONAR_PS::Error_compat( "SQLite database could not be opened." );
@@ -1944,10 +1710,7 @@ sub maSetupDataRequest {
             }
         );
     }
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $self->{LOGGER}->debug( "Closing database." );
-        $self->{METADATADB}->closeDB( { error => \$error } );
-    }
+    
     $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.SetupDataRequest.end" );
     $self->{NETLOGGER}->debug( $msg );
     return;
@@ -2009,11 +1772,7 @@ sub setupDataRetrieveKey {
         $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
         $results = $parameters->{metadatadb}->querySet( { query => $query } );
     }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $query = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data[\@id=\"" . $hashId . "\"]";
-        $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
-        $results = $parameters->{metadatadb}->querySet( { query => $query } );
-    }elsif( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ){
+    elsif( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ){
         $results = $self->sqLiteCreateKeyData( { metadatadb => $parameters->{metadatadb}, keyId => "$hashId" } );
     }
 
@@ -2101,9 +1860,6 @@ sub setupDataRetrieveMetadataData {
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
         $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
     }
-    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
-    }
 
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "sqlite" ){
         $results = $self->sqLiteCreateMetadata({ metadatadb => $parameters->{metadatadb}, node => $parameters->{metadata} });
@@ -2137,9 +1893,6 @@ sub setupDataRetrieveMetadataData {
     
         if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
             $queryString = "/nmwg:store/nmwg:data";
-        }
-        elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-            $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
         }
     
         if ( $eventTypes->size() or $supportedEventTypes->size() ) {

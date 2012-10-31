@@ -22,7 +22,6 @@ Module::Load
 Net::Ping
 Params::Validate
 RRDp
-Sleepycat::DbXml
 Socket
 Storable
 Sys::Hostname
