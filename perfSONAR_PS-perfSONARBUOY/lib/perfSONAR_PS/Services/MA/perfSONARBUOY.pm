@@ -201,37 +201,8 @@ sub init {
         }
     }
     elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        eval { load perfSONAR_PS::DB::XMLDB; };
-        if ( $EVAL_ERROR ) {
-            $self->{LOGGER}->fatal( "Couldn't load perfSONAR_PS::DB::XMLDB: $EVAL_ERROR" );
-            return -1;
-        }
-
-        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} )
-        {
-            $self->{LOGGER}->warn( "Value for 'metadata_db_file' is not set, setting to 'psbstore.dbxml'." );
-            $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} = "psbstore.dbxml";
-        }
-
-        if ( exists $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} )
-        {
-            if ( exists $self->{DIRECTORY} and $self->{DIRECTORY} and -d $self->{DIRECTORY} ) {
-                unless ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} =~ "^/" ) {
-                    $self->{LOGGER}->warn( "Setting the value of \"\" to \"" . $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} . "\"" );
-                    $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"};
-                }
-            }
-            unless ( -d $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} ) {
-                $self->{LOGGER}->warn( "Creating \"" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} . "\" for the \"metadata_db_name\"" );
-                system( "mkdir " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} );
-            }
-        }
-        else {
-            $self->{LOGGER}->fatal( "Value for 'metadata_db_name' is not set." );
-            return -1;
-        }
+        $self->{LOGGER}->fatal( "A metadata_db_type of 'xmldb' is no longer supported. Please set to 'file'. " );
+        return -1;
     }
     else {
         $self->{LOGGER}->fatal( "Wrong value for 'metadata_db_type' set." );
@@ -332,31 +303,6 @@ sub init {
             $self->{LOGGER}->fatal( "Couldn't initialize store file: $error" );
             return -1;
         }
-    }
-    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        my $error      = q{};
-        my $metadatadb = $self->prepareDatabases;
-        unless ( $metadatadb ) {
-            $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
-            return -1;
-        }
-
-        unless ( $self->createStorage( { metadatadb => $metadatadb, error => \$error } ) == 0 ) {
-            $self->{LOGGER}->fatal( "Couldn't load the XMLDB - service cannot start" );
-            return -1;
-        }
-
-        $metadatadb->closeDB( { error => \$error } );
-        $self->{METADATADB} = q{};
-
-        my ( $status, $res ) = $self->buildHashedKeys( { metadatadb => $metadatadb, metadatadb_type => "xmldb" } );
-        unless ( $status == 0 ) {
-            $self->{LOGGER}->fatal( "Error building key database: $res" );
-            return -1;
-        }
-
-        $self->{HASH_TO_ID} = $res->{hash_to_id};
-        $self->{ID_TO_HASH} = $res->{id_to_hash};
     }
     else {
         $self->{LOGGER}->fatal( "Wrong value for 'metadata_db_type' set." );
@@ -509,37 +455,6 @@ sub buildHashedKeys {
             }
         }
     }
-    elsif ( $metadatadb_type eq "xmldb" ) {
-        my $metadatadb = $self->prepareDatabases( { doc => $parameters->{output} } );
-        my $error = q{};
-        unless ( $metadatadb ) {
-            my $msg = "Database could not be opened.";
-            $self->{LOGGER}->fatal( $msg );
-            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.buildHashedKeys.end", {status => -1});
-            $self->{NETLOGGER}->debug( $nlmsg );
-            return ( -1, $msg );
-        }
-
-        my $parser = XML::LibXML->new();
-        my @results = $metadatadb->query( { query => "/nmwg:store[\@type=\"MAStore\"]/nmwg:data", txn => q{}, error => \$error } );
-
-        my $len = $#results;
-        if ( $len == -1 ) {
-            my $msg = "Nothing returned for database search.";
-            $self->{LOGGER}->error( $msg );
-            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.buildHashedKeys.end", {status => -1});
-            $self->{NETLOGGER}->debug( $nlmsg );
-            return ( -1, $msg );
-        }
-
-        for my $x ( 0 .. $len ) {
-            my $hash = md5_hex( $results[$x] );
-            my $data = $parser->parse_string( $results[$x] );
-            $id_to_hash{$hash} = $data->getDocumentElement->getAttribute( "id" );
-            $hash_to_id{ $data->getDocumentElement->getAttribute( "id" ) } = $hash;
-            $self->{LOGGER}->debug( "Key id $hash maps to data element " . $data->getDocumentElement->getAttribute( "id" ) );
-        }
-    }
     else {
         my $msg = "Wrong value for 'metadata_db_type' set.";
         $self->{LOGGER}->fatal( $msg );
@@ -561,7 +476,7 @@ sub buildHashedKeys {
 =head2 createStorage($self { metadatadb, error } )
 
 Given the information in the AMI databases, construct appropriate metadata
-structures into either a file or the XMLDB.  This allows us to maintain the 
+structures into a file.  This allows us to maintain the 
 query mechanisms as defined by the other services.  Also performs the steps
 necessary for building the 'key' cache that will speed up access to the data
 by providing a fast handle that points directly to a key.
@@ -584,28 +499,7 @@ sub createStorage {
     my $dbTr      = q{};
     my $tmp_file;
 
-    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        unless ( exists $parameters->{metadatadb} and $parameters->{metadatadb} ) {
-            $parameters->{metadatadb} = $self->prepareDatabases;
-            unless ( exists $parameters->{metadatadb} and $parameters->{metadatadb} ) {
-                $self->{LOGGER}->fatal( "There was an error opening \"" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $parameters->{"error"} );
-                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
-                $self->{NETLOGGER}->debug( $nlmsg );
-                return -1;
-            }
-        }
-
-        $dbTr = $parameters->{metadatadb}->getTransaction( { error => \$parameters->{"error"} } );
-        unless ( $dbTr ) {
-            $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$parameters->{"error"} } ) if $dbTr;
-            undef $dbTr;
-            $self->{LOGGER}->fatal( "Database error: \"" . $parameters->{"error"} . "\", aborting." );
-            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
-            $self->{NETLOGGER}->debug( $nlmsg );
-            return -1;
-        }
-    }
-    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $tmp_file = $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} . ".tmp";
 
         my $fh = new IO::File "> " . $tmp_file;
@@ -1030,15 +924,7 @@ sub createStorage {
                             my @eT = ( "http://ggf.org/ns/nmwg/tools/iperf/2.0", "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0" );
                             $data .= $self->generateData( { id => $id, testspec => \@temp, eT => \@eT, db => $dbsourceBW, user => $dbuserBW, pass => $dbpassBW } );
 
-                            if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-                                my $dHash  = md5_hex( $data );
-                                my $mdHash = md5_hex( $metadata );
-                                $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                                $errorFlag++ if $parameters->{"error"};
-                                $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                                $errorFlag++ if $parameters->{"error"};
-                            }
-                            elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+                            if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
                                 my $fh = new IO::File ">> " . $tmp_file;
                                 if ( defined $fh ) {
                                     print $fh $metadata . "\n" . $data . "\n";
@@ -1466,15 +1352,7 @@ $dbh->closeDB();
     
                                 $data .= $self->generateData( { id => $id, testspec => \@temp, eT => $owpEt, db => $dbsourceOWP, user => $dbuserOWP, pass => $dbpassOWP } );
     
-                                if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-                                    my $dHash  = md5_hex( $data );
-                                    my $mdHash = md5_hex( $metadata );
-                                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                                    $errorFlag++ if $parameters->{"error"};
-                                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$parameters->{"error"} } );
-                                    $errorFlag++ if $parameters->{"error"};
-                                }
-                                elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+                                if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
                                     my $fh = new IO::File ">> " . $tmp_file;
                                     if ( defined $fh ) {
                                         print $fh $metadata . "\n" . $data . "\n";
@@ -1500,31 +1378,7 @@ $dbh->closeDB();
        $owdbh->closeDB(); 
    }
 
-    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        if ( $errorFlag ) {
-            $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$parameters->{"error"} } ) if $dbTr;
-            undef $dbTr;
-            $self->{LOGGER}->fatal( "Database error: \"" . $parameters->{"error"} . "\", aborting." );
-            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
-            $self->{NETLOGGER}->debug( $nlmsg );
-            return -1;
-        }
-        else {
-            my $status = $parameters->{metadatadb}->commitTransaction( { txn => $dbTr, error => \$parameters->{"error"} } );
-            if ( $status == 0 ) {
-                undef $dbTr;
-            }
-            else {
-                $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$parameters->{"error"} } ) if $dbTr;
-                undef $dbTr;
-                $self->{LOGGER}->fatal( "Database error: \"" . $parameters->{"error"} . "\", aborting." );
-                $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.createStorage.end", {status => -1});
-                $self->{NETLOGGER}->debug( $nlmsg );
-                return -1;
-            }
-        }
-    }
-    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         my $fh = new IO::File ">> " . $tmp_file;
         if ( defined $fh ) {
             print $fh "</nmwg:store>\n";
@@ -1695,37 +1549,6 @@ sub confHierarchy {
     return;
 }
 
-=head2 prepareDatabases($self, { doc })
-
-Opens the XMLDB and returns the handle if there was not an error.  The optional
-argument can be used to pass an error message to the given message and 
-return this in response to a request.
-
-=cut
-
-sub prepareDatabases {
-    my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { doc => 0 } );
-    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.prepareDatabases.start");
-    $self->{NETLOGGER}->debug( $nlmsg );
-    
-    my $error = q{};
-    my $metadatadb = new perfSONAR_PS::DB::XMLDB( { env => $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"}, cont => $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"}, ns => \%ma_namespaces, } );
-    unless ( $metadatadb->openDB( { txn => q{}, error => \$error } ) == 0 ) {
-        $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.prepareDatabases.end", {'status' => -1});
-        $self->{NETLOGGER}->debug( $nlmsg );
-        throw perfSONAR_PS::Error_compat( "error.perfSONAR-BUOY.xmldb", "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
-        return;
-    }
-    $self->{LOGGER}->info( "Returning \"" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} . "\"" );
-
-    
-    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.prepareDatabases.end");
-    $self->{NETLOGGER}->debug( $nlmsg );
-
-    return $metadatadb;
-}
-
 =head2 registerLS($self $sleep_time)
 
 Given the service information (specified in configuration) and the contents of
@@ -1741,15 +1564,7 @@ sub registerLS {
     $self->{NETLOGGER}->debug( $nlmsg );
     
 
-    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        unless ( -d $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} ) {
-            $self->{LOGGER}->fatal( "XMLDB is not defined, disallowing registration." );
-            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.end", {'status' => -1});
-            $self->{NETLOGGER}->debug( $nlmsg );
-            return -1;
-        }
-    }
-    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         unless ( -f $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} ) {
             $self->{LOGGER}->fatal( "Store file not defined, disallowing registration." );
             $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.end", {'status' => -1});
@@ -1802,17 +1617,6 @@ sub registerLS {
     my @resultsString = ();
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         @resultsString = $self->{METADATADB}->query( { query => "/nmwg:store/nmwg:metadata", error => \$error } );
-    }
-    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        my $metadatadb = $self->prepareDatabases;
-        unless ( $metadatadb ) {
-            $self->{LOGGER}->error( "Database could not be opened." );
-            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.end", {'status' => -1});
-            $self->{NETLOGGER}->debug( $nlmsg );
-            return -1;
-        }
-        @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata", txn => q{}, error => \$error } );
-        $metadatadb->closeDB( { error => \$error } );
     }
     else {
         $self->{LOGGER}->error( "Wrong value for 'metadata_db_type' set." );
@@ -2113,17 +1917,8 @@ sub maMetadataKeyRequest {
     my $mdId  = q{};
     my $dId   = q{};
     my $error = q{};
-    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $self->{METADATADB} = $self->prepareDatabases( { doc => $parameters->{output} } );
-        unless ( $self->{METADATADB} ) {
-            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maMetadataKeyRequest.end", {status => -1});
-            $self->{NETLOGGER}->debug( $nlmsg );
-            throw perfSONAR_PS::Error_compat( "Database could not be opened." );
-            return;
-        }
-    }
-    unless ( ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" )
-        or ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) )
+
+    unless ( ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) )
     {
         $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maMetadataKeyRequest.end", {status => -1});
         $self->{NETLOGGER}->debug( $nlmsg );
@@ -2158,10 +1953,6 @@ sub maMetadataKeyRequest {
             }
         );
 
-    }
-    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $self->{LOGGER}->debug( "Closing database." );
-        $self->{METADATADB}->closeDB( { error => \$error } );
     }
 
     
@@ -2224,9 +2015,6 @@ sub metadataKeyRetrieveKey {
     my $query = q{};
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $query = "/nmwg:store/nmwg:data[\@id=\"" . $hashId . "\"]";
-    }
-    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $query = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data[\@id=\"" . $hashId . "\"]";
     }
 
     $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
@@ -2296,9 +2084,6 @@ sub metadataKeyRetrieveMetadataData {
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
     }
-    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
-    }
 
     $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
 
@@ -2317,9 +2102,6 @@ sub metadataKeyRetrieveMetadataData {
 
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $queryString = "/nmwg:store/nmwg:data";
-    }
-    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
     }
 
     if ( $eventTypes->size() or $supportedEventTypes->size() ) {
@@ -2438,17 +2220,7 @@ sub maSetupDataRequest {
     my $mdId  = q{};
     my $dId   = q{};
     my $error = q{};
-    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $self->{METADATADB} = $self->prepareDatabases( { doc => $parameters->{output} } );
-        unless ( $self->{METADATADB} ) {
-            $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maSetupDataRequest.end", { status => -1 });
-            $self->{NETLOGGER}->debug( $nlmsg );
-            throw perfSONAR_PS::Error_compat( "Database could not be opened." );
-            return;
-        }
-    }
-    unless ( ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" )
-        or ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) )
+    unless ( ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) )
     {
         $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maSetupDataRequest.end", { status => -1 });
         $self->{NETLOGGER}->debug( $nlmsg );
@@ -2483,10 +2255,6 @@ sub maSetupDataRequest {
                 output             => $parameters->{output}
             }
         );
-    }
-    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $self->{LOGGER}->debug( "Closing database." );
-        $self->{METADATADB}->closeDB( { error => \$error } );
     }
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.maSetupDataRequest.end");
     $self->{NETLOGGER}->debug( $nlmsg );
@@ -2554,9 +2322,6 @@ sub setupDataRetrieveKey {
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $query = "/nmwg:store/nmwg:data[\@id=\"" . $hashId . "\"]";
     }
-    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $query = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data[\@id=\"" . $hashId . "\"]";
-    }
 
     $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
 
@@ -2581,10 +2346,6 @@ sub setupDataRetrieveKey {
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $query2 = "/nmwg:store/nmwg:metadata[\@id=\"" . $md_id_val . "\"]";
     }
-    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $query2 = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[\@id=\"" . $md_id_val . "\"]";
-    }
-
     $self->{LOGGER}->debug( "Running query \"" . $query . "\"" );
 
     my $results2 = $parameters->{metadatadb}->querySet( { query => $query2 } );
@@ -2685,9 +2446,6 @@ sub setupDataRetrieveMetadataData {
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
     }
-    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
-    }
 
     $self->{LOGGER}->debug( "Running query \"" . $queryString . "\"" );
 
@@ -2707,9 +2465,6 @@ sub setupDataRetrieveMetadataData {
 
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $queryString = "/nmwg:store/nmwg:data";
-    }
-    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
     }
 
     if ( $eventTypes->size() or $supportedEventTypes->size() ) {
