@@ -3,7 +3,7 @@
 =   November 19, 2012 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: Andy, Andrew, Brian, Sowmya, Eric, Kavitha, Aaron 
+  * Attendees:
 
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
