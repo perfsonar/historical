@@ -1,9 +1,9 @@
 #summary December 3, 2012 Conference Call
 
-=   December 3, 2012 Conference Call 3:30 p.m. EDT =
+=   December 3, 2012 Conference Call 12:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Andy, Sowmya, Brian, Nils, Kavitha, Aaron, Warren
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
 
@@ -15,6 +15,7 @@
     * Aaron
     * Andrew
     * Brian
+    * Warren
   * Kernel updates and announcements
   * Release status
 
@@ -26,8 +27,48 @@
     * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
     
 == Notes ==
- 
-
+  * Warren Pythia Status
+    * Work doing prediction algorithms
+    * Gathers incoming OWAMP data and traceroute data and does analysis
+    * Three RPMs:
+        * Modified owstats
+        * Agent
+    * Would like ESnet to deploy, but hosts aren't on Linux yet
+    * Currently agent not in repo, may want different license
+    * Need to look at owstats and getting it into repo
+    * Working on a better front-end
+    * Warren's student may contact Andy before next week
+  * Developer Updates
+    * Andy
+      * Worked on adding new meshes to dashboard
+      * Worked on OWAMP issues
+      * Starting to look at getting traceroute GUI on toolkit
+    * Sowmya 
+     * Just got back from trip, no update
+    * Brian
+     * Talked to Jason last week about doing a "Quick Install" document
+    * Kavitha
+     * Worked on the Internet2 portal 
+    * Nils
+     * Yum kernel rpms updated
+    * Aaron
+     * Fixing mesh configuration for USATLAS issues
+     * Worked on Django front-end for mesh configuration GUI
+  * Kernel updates and announcements
+    * Aaron wondering if the person who takes the kernel build process should also handle finding testers and sending announcements
+    * On-call person needs to send volunteer
+    * Overall process for volunteer
+     * Need someone to send initial announcement to list
+     * Build new RPMs
+     * Tell people to test it internally
+     * Upload to yum repo
+     * Send announcement
+    * Create wiki page that documents kernel process (mailing list to join). Andy will create this page. 
+  * Release status
+    * Not quite as far along on the Lookup Service testing. Goal would be to get beta of toolkit by JointTechs. 
+    * Backup plan is name it 3.2.3 and just include CentOS 6 updates
+    * That mean that people need to have most of issues addressed by Christmas break. Only 7 working days until JointTechs once we get back. 
+    * LiveCD issues that Andrew is working on 
 == Where ==
 ESnet conference bridge:
  * GDS: 00113498555555
