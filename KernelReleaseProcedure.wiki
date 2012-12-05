@@ -1,0 +1,91 @@
+The perfSONAR-PS Toolkit runs a web100 version of the standard CentOS kernel. The perfSONAR-PS team is responsible for patching and building a web100 version of the kernel each time a new kernel gets released. When a new kernel is released by CentOS, all new toolkits created or existing NetInstall users that update, well receive the non-web100 version of the kernel until we release a web100 version. This will break NDT and NPAD until the new kernel released.
+
+In order to mitigate problems when a new kernel becomes available we have developed a process for identifying, announcing, and releasing a new kernel. The steps for doing so and the individuals responsible are outlined in this document.
+
+= Process Overview =
+|| *Step* || *Description* || *Assignee* ||
+|| 1 ||Identify when a new kernel has been released|| Current support person (see  [NPToolkitSupport])||
+|| 2 ||Request volunteer to act as kernel release manager|| Current support person (see  [NPToolkitSupport])||
+|| 3 ||Inform user community CentOS has released new kernel||Kernel Release Manager||
+|| 4 ||Build Kernel|| Kernel Release Manager||
+|| 5 ||Request testers try localinstall of RPMs|| Kernel Release Manager||
+|| 6 ||Upload RPMs to yum repository and request testers|| Kernel Release Manager||
+|| 7 ||Announce RPMs as available|| Kernel Release Manager||
+
+= Step 1: Identify when a new kernel is available = 
+*Assignee:* Current support person (see  [NPToolkitSupport])
+
+Currently all package updates go to the mailing list centos-announce@centos.org. The perfSONAR-PS Toolkit support person should monitor this list. All individuals in the support rotation MUST subscribe to this mailing list. You may join this mailing list at at http://lists.centos.org/mailman/listinfo/centos-announce. 
+
+= Step 2: Request volunteer to act as kernel release manager = 
+*Assignee:* Current support person (see  [NPToolkitSupport])
+
+Once a new kernel is identified as available, the current support person should send a request to i2-perfsonar@internet2.edu asking for a volunteer to build the kernel and lead the remainder of the process. This person will be referred to as the Kernel Release Manager. Once this person has been assigned, they weill proceed with the remainder of the steps.
+
+= Step 3: Inform user community CentOS has released new kernel =
+*Assignee:* Kernel Release Manager
+
+The kernel release manager should then send a note to our user community, letting them know a new kernel has become available. The mailing lists to contact and the email template are below (note the CVE_LINK URL can be found in the CentOS announcement email):
+ * *Mailing Lists*
+  * performance-node-users@internet2.edu
+  * perfsonar-ps-users@internet2.edu
+ * *Subject:* RedHat CVE and New CentOS Kernel
+ * *Message:*
+{{{
+All;
+
+Last night marked the release of a new Red Hat CVE:
+
+<! -- CVE_LINK -->
+
+If you are a NetInstall user, a 'yum update' may give you a new non-web100 kernel and therefore break access to NDT/NPAD. Consult our FAQ for more info: http://psps.perfsonar.net/toolkit/FAQs.html#Q30
+
+Our read of the CVE does not find any issue of concern specific to the toolkit. Its possible the host may be vulnerable to some types of DoS attacks in some particular cases. If you are in doubt about your kernel, feel free to review the CVE,  upgrade to the latest version, and forgo NDT/NPAD support for the time being.  We are in the process of building and testing a new kernel, and will alert you when we have our web100 patched version available. We'll try to have it ready as soon as possible.
+
+Thank you for your patience,
+pS-PS team
+}}}
+
+= Step 4: Build Kernel =
+*Assignee:* Kernel Release Manager
+
+The next step is to path and build the kernel. A mock setup is highly recommended for performing the build. Technical details and instructions for building the kernel can be found here: [ToolkitBuildingFAQs].
+
+= Step 5: Request testers try localinstall of RPMs =
+*Assignee:* Kernel Release Manager
+
+After the RPMs successfully build, the Kernel Release Manager should send an email to i2-perfsonar@internet2.edu requesting people test the new RPMs. Since the new RPMs should not yet be uploaded to the primary yum repository, they should be made available for download by uplaoding to a web server or some other means. Testers should at a minimum do the following steps.
+ # Verify NDT and NPAD function properly prior to the upgrade
+ # Download the new kernel RPMs
+ # Install the relevant kernel RPMs with the command _yum localinstall *rpm-name*_
+ # Restart the test machine
+ # Run _uname -a_ to verify the new kernel is running
+ # Verify NDT and NPAD still function properly 
+
+Those are the minimum steps. Depending on the nature of the kernel changes, it may useful to check other information as well. 
+
+= Step 6:Upload RPMs to yum repository and request testers = 
+*Assignee:* Kernel Release Manager
+
+After testers verify that local installs have not caused an issue, the Kernel Release Manager should upload the RPMs to the yum repository at https://cvs3.internet2.edu/svn/web100_kernel. Once completed the Kernel Release manager should email i2-perfsonar@internet2.edu and have others test that "yum update" and fresh installs work properly. 
+
+= Step 7: Announce RPMs as available =
+*Assignee:* Kernel Release Manager
+
+Once all the above steps are complete and things appear to work, the update should be announced to the user communities. The following email should be sent (its often good to reply to the email sent in step 3 so the original note is included).
+
+ * *Mailing Lists*
+  * performance-node-users@internet2.edu
+  * perfsonar-ps-users@internet2.edu
+ * *Subject:* New web100 Kernel available 
+ * *Message:*
+{{{
+All,
+
+New web100 kernel packages are now available for netinstall users of the perfSONAR-PS toolkit. You may run 'yum update' to grab the new kernel. You should restart your host after the upgrade completes. Full details on this particular patch can be found in the previous email.
+
+Note this is just a kernel upgrade and the other perfSONAR-PS packages have NOT been updated.  As we often do with incremental kernel updates, we will not be providing a new LiveCD for this particular update. Please let us know if you have any questions or issues.
+
+Thank you,
+pS-PS team
+}}}
