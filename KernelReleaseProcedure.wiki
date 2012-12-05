@@ -1,4 +1,4 @@
-The perfSONAR-PS Toolkit runs a web100 version of the standard CentOS kernel. The perfSONAR-PS team is responsible for patching and building a web100 version of the kernel each time a new kernel gets released. When a new kernel is released by CentOS, all new toolkits created or existing NetInstall users that update, well receive the non-web100 version of the kernel until we release a web100 version. This will break NDT and NPAD until the new kernel released.
+The perfSONAR-PS Toolkit runs a web100 version of the standard CentOS kernel. The perfSONAR-PS team is responsible for patching and building a web100 version of the kernel each time a new kernel gets released. When a new kernel is released by CentOS, all new toolkits created or existing NetInstall users that update, well receive the non-web100 version of the kernel until we release a web100 version. This will break NDT and NPAD until the new kernel is released.
 
 In order to mitigate problems when a new kernel becomes available we have developed a process for identifying, announcing, and releasing a new kernel. The steps for doing so and the individuals responsible are outlined in this document.
 
@@ -15,12 +15,12 @@ In order to mitigate problems when a new kernel becomes available we have develo
 = Step 1: Identify when a new kernel is available = 
 *Assignee:* Current support person (see  [NPToolkitSupport])
 
-Currently all package updates go to the mailing list centos-announce@centos.org. The perfSONAR-PS Toolkit support person should monitor this list. All individuals in the support rotation MUST subscribe to this mailing list. You may join this mailing list at at http://lists.centos.org/mailman/listinfo/centos-announce. 
+Currently all package updates go to the mailing list centos-announce@centos.org. The perfSONAR-PS Toolkit support person should monitor this list. All individuals in the support rotation MUST subscribe to this mailing list. You may join this mailing list at http://lists.centos.org/mailman/listinfo/centos-announce. 
 
 = Step 2: Request volunteer to act as kernel release manager = 
 *Assignee:* Current support person (see  [NPToolkitSupport])
 
-Once a new kernel is identified as available, the current support person should send a request to i2-perfsonar@internet2.edu asking for a volunteer to build the kernel and lead the remainder of the process. This person will be referred to as the Kernel Release Manager. Once this person has been assigned, they weill proceed with the remainder of the steps.
+Once a new kernel is identified as available, the current support person should send a request to i2-perfsonar@internet2.edu asking for a volunteer to build the kernel and lead the remainder of the process. This person will be referred to as the Kernel Release Manager. Once this person has been assigned, they will proceed with the remainder of the steps.
 
 = Step 3: Inform user community CentOS has released new kernel =
 *Assignee:* Kernel Release Manager
@@ -54,7 +54,7 @@ The next step is to path and build the kernel. A mock setup is highly recommende
 = Step 5: Request testers try localinstall of RPMs =
 *Assignee:* Kernel Release Manager
 
-After the RPMs successfully build, the Kernel Release Manager should send an email to i2-perfsonar@internet2.edu requesting people test the new RPMs. Since the new RPMs should not yet be uploaded to the primary yum repository, they should be made available for download by uplaoding to a web server or some other means. Testers should at a minimum do the following steps.
+After the RPMs successfully build, the Kernel Release Manager should send an email to i2-perfsonar@internet2.edu requesting people test the new RPMs. Since the new RPMs should not yet be uploaded to the primary yum repository, they should be made available for download by uploading to a web server or some other means. Testers should at a minimum do the following steps.
  # Verify NDT and NPAD function properly prior to the upgrade
  # Download the new kernel RPMs
  # Install the relevant kernel RPMs with the command _yum localinstall *rpm-name*_
