@@ -10,6 +10,7 @@ use constant TRACEROUTE_EVENT_TYPE => 'http://ggf.org/ns/nmwg/tools/traceroute/2
 use constant TRACEROUTE_PREFIX => 'traceroute';
 use constant METADATA_PARAMS => ['firstTtl', 'maxTtl', 'waitTime', 'pause', 'packetSize', 'numBytes', 'arguments'];
 use constant HOP_DB_MAP => {'ttl' => 'ttl', 'addr' => 'hop', 'queryNum' => 'queryNum', 'delay' => 'value'};
+use constant HOP_DB_ERR_VALS => { 'delay' => 0 };
 use constant HOP_DB_MAP_OPTIONAL => {'numBytes' =>'numBytes'};
 use fields 'LOGGER','NETLOGGER', 'DB_PARAMS';
 
@@ -211,6 +212,7 @@ sub registerData {
     my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.Collector.Traceroute.registerData.start");
     $self->{NETLOGGER}->debug( $nlmsg );
     my $hop_db_map = HOP_DB_MAP;
+    my $hop_db_err_vals = HOP_DB_ERR_VALS;
     my $hop_db_map_optional = HOP_DB_MAP_OPTIONAL;
     my $dbh = new perfSONAR_PS::DB::SQL( { name => $self->{DB_PARAMS}->{name}, user => $self->{DB_PARAMS}->{user}, pass => $self->{DB_PARAMS}->{pass} } );
     $dbh->openDB;
@@ -279,14 +281,19 @@ sub registerData {
         $hop_values{'measurement_id'} = $meas_id;
         my $datum_elem = $datum->get_node($datum_i);
         #get required attributes
+        $hop_values{'addrType'} = $self->getHopType($datum_elem->getAttribute('hop'));
         foreach my $hop_field( keys %{ $hop_db_map } ){
-            if(!defined $datum_elem->getAttribute($hop_db_map->{$hop_field})){
+            if($hop_values{'addrType'} eq 'error' && exists $hop_db_err_vals->{$hop_field}){
+                $hop_values{$hop_field} = $hop_db_err_vals->{$hop_field};
+            }elsif(!defined $datum_elem->getAttribute($hop_db_map->{$hop_field})){
+                
                 my $errMsg = "Missing required datum attribute " . $hop_db_map->{$hop_field};
                 $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.Collector.Traceroute.registerData.end", {msg=> $errMsg, status => -1});
                 $self->{NETLOGGER}->debug( $nlmsg );
                 throw perfSONAR_PS::Error_compat( $errMsg );
+            }else{
+                $hop_values{$hop_field} = $datum_elem->getAttribute($hop_db_map->{$hop_field});
             }
-            $hop_values{$hop_field} = $datum_elem->getAttribute($hop_db_map->{$hop_field});
         }
         #get optional attributes
         foreach my $hop_field_opt( keys %{ $hop_db_map_optional } ){
@@ -294,7 +301,6 @@ sub registerData {
                 $hop_values{$hop_field_opt} = $datum_elem->getAttribute($hop_db_map_optional->{$hop_field_opt});
             }
         }
-        $hop_values{'addrType'} = $self->getHopType($datum_elem->getAttribute('hop'));
         my $hop_result = $dbh->insert({table => "${table_prefix}_HOPS", argvalues => \%hop_values});
         if($hop_result == -1){
             my $errMsg = "Error inserting hop into database ";
