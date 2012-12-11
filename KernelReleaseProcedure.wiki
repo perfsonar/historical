@@ -67,7 +67,7 @@ Those are the minimum steps. Depending on the nature of the kernel changes, it m
 = Step 6:Upload RPMs to yum repository and request testers = 
 *Assignee:* Kernel Release Manager
 
-After testers verify that local installs have not caused an issue, the Kernel Release Manager should upload the RPMs to the yum repository at https://cvs3.internet2.edu/svn/web100_kernel. Once completed the Kernel Release manager should email i2-perfsonar@internet2.edu and have others test that "yum update" and fresh installs work properly. 
+After testers verify that local installs have not caused an issue, the Kernel Release Manager should upload the RPMs to the subversion(svn) repository at https://cvs3.internet2.edu/svn/web100_kernel. These RPMs are soon available at the yum repository at http://software.internet2.edu/web100_kernel/rpms/. At this point, the Kernel Release Manager should email i2-perfsonar@internet2.edu and have others test that "yum update" and fresh installs work properly.
 
 = Step 7: Announce RPMs as available =
 *Assignee:* Kernel Release Manager
