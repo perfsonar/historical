@@ -2,8 +2,7 @@
 
 = Introduction =
 
-ESnet is developing a new lookup service to replace current perfSONAR-PS lookup service. This new LS
-is modelled after the UNIS component of [https://github.com/GENI-GEMINI/GEMINI/wiki/GEMINI-Components GEMINI], developed at Indiana University for the GENI project.
+ESnet is developing a new lookup service to replace current perfSONAR-PS lookup service. This new LS, called the sLS (simple Lookup Service), is modelled after the UNIS component of [https://github.com/GENI-GEMINI/GEMINI/wiki/GEMINI-Components GEMINI], developed at Indiana University for the GENI project.
 
 = Documents =
 
@@ -14,6 +13,8 @@ Design Document: http://goo.gl/rx7qC
 Description of perfSONAR records: http://goo.gl/HgTM5
 
 API Document: http://goo.gl/Ajf9z
+
+Transition Plan: http://goo.gl/rWCUI
 
 = Project Plan =
 
