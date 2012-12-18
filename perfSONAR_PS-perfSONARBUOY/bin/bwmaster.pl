@@ -1259,6 +1259,19 @@ sub bwctl {
             ATTR     => 'BWTestDuration'
         )
     );
+    push @cmd, ( "-6" ) if (
+        $conf->get_val(
+            TESTSPEC => $ms->{'TESTSPEC'},
+            ATTR     => 'BWIPv6Only'
+        )
+    );
+    push @cmd, ( "-4" ) if (
+        $conf->get_val(
+            TESTSPEC => $ms->{'TESTSPEC'},
+            ATTR     => 'BWIPv4Only'
+        )
+    );
+
     push @cmd, ( "-d", "$ms->{'MEASUREMENTSET'}/$recv/$send", "-s", $saddr, "-c", $raddr );
 
     my $cmd = join " ", @cmd;
