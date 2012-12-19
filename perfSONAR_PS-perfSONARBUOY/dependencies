@@ -32,7 +32,6 @@ Net::IP
 Net::Ping
 POSIX
 Params::Validate
-Sleepycat::DbXml
 Socket
 Sys::Hostname
 Sys::Syslog

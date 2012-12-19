@@ -59,7 +59,7 @@ sub new {
         }
     }
 
-    $self->{CLIENT} = ESxSNMP_API->new($self->{SERVER_URL});
+    $self->{CLIENT} = perfSONAR_PS::DB::ESxSNMP_API->new($self->{SERVER_URL});
 
     return $self;
 }
@@ -157,7 +157,7 @@ sub openDB {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, {} );
 
-    $self->{CLIENT} = ESxSNMP_API->new($self->{SERVER_URL});
+    $self->{CLIENT} = perfSONAR_PS::DB::ESxSNMP_API->new($self->{SERVER_URL});
 
     return 0;
 }

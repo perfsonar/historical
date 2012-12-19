@@ -7,7 +7,7 @@
 %define init_script_traceroute_scheduler traceroute_scheduler
 %define init_script_traceroute_mp traceroute_ondemand_mp
 
-%define relnum 3
+%define relnum 4
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-TracerouteMA
@@ -110,6 +110,8 @@ Requires:		perl(Term::ReadKey)
 Requires:		perl(Time::HiRes)
 Requires:		perl(XML::LibXML)
 Requires:       perl-perfSONAR_PS-TracerouteMA-config
+Requires:       traceroute
+
 %description client
 The Traceroute MPs conists of tools that perform measurements on the beacons as well as client applications that can interact with the web service.
 

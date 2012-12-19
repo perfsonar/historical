@@ -1192,12 +1192,39 @@ sub bwctl {
     # bwmaster uses the -W instead of -w so the window size is configured
     # dynamically if possible.
     #
-    push @cmd, ( "-W", $val ) if (
-        $val = $conf->get_val(
-            TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR     => 'BWWindowSize'
-        )
-    );
+#    push @cmd, ( "-W", $val ) if (
+#        $val = $conf->get_val(
+#            TESTSPEC => $ms->{'TESTSPEC'},
+#            ATTR     => 'BWWindowSize'
+#        )
+#    );
+
+    my $send_window = $conf->get_val( NODE => $send, ATTR => 'BWWindowSize' );
+    my $recv_window = $conf->get_val( NODE => $recv, ATTR => 'BWWindowSize' );
+    if ($send_window or $recv_window) {
+        if ($send_window and $recv_window) {
+            if ($send_window > $recv_window) {
+                push @cmd, ( "-W", $send_window);
+            }                      
+            else {                 
+                push @cmd, ( "-W", $recv_window);
+            }                      
+        }                          
+        elsif ($send_window) {
+            push @cmd, ( "-W", $send_window);
+        }
+        else {
+            push @cmd, ( "-W", $recv_window);
+        }
+    }          
+    else {     
+        push @cmd, ( "-W", $val ) if (
+            $val = $conf->get_val(
+                TESTSPEC => $ms->{'TESTSPEC'},
+                ATTR     => 'BWWindowSize'
+            )
+        );
+    }
 
     if ( $conf->get_val( TESTSPEC => $ms->{'TESTSPEC'}, ATTR => 'BWUDP' ) ) {
         if ( $conf->get_val( TESTSPEC => $ms->{'TESTSPEC'}, ATTR => 'BWTCP' ) ) {
@@ -1232,6 +1259,19 @@ sub bwctl {
             ATTR     => 'BWTestDuration'
         )
     );
+    push @cmd, ( "-6" ) if (
+        $conf->get_val(
+            TESTSPEC => $ms->{'TESTSPEC'},
+            ATTR     => 'BWIPv6Only'
+        )
+    );
+    push @cmd, ( "-4" ) if (
+        $conf->get_val(
+            TESTSPEC => $ms->{'TESTSPEC'},
+            ATTR     => 'BWIPv4Only'
+        )
+    );
+
     push @cmd, ( "-d", "$ms->{'MEASUREMENTSET'}/$recv/$send", "-s", $saddr, "-c", $raddr );
 
     my $cmd = join " ", @cmd;

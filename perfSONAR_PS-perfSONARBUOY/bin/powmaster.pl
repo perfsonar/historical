@@ -1283,6 +1283,18 @@ sub powstream {
             ATTR     => 'OWPBUCKETWIDTH'
         )
     );
+    push @cmd, ( "-6" ) if (
+        $conf->get_val(
+            TESTSPEC => $ms->{'TESTSPEC'},
+            ATTR     => 'OWPIPV6ONLY'
+        )
+    );
+    push @cmd, ( "-4" ) if (
+        $conf->get_val(
+            TESTSPEC => $ms->{'TESTSPEC'},
+            ATTR     => 'OWPIPV4ONLY'
+        )
+    );
 
     push @cmd, ( $oaddr );
 
