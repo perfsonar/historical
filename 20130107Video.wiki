@@ -3,7 +3,7 @@
 =   January 7, 2013 Conference Call 12:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Sowmya, Andrew, Brian, Aaron, Nils, Kavitha
   
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
@@ -16,6 +16,7 @@
     * Nils 
     * Andrew
     * Brian
+    
   * Release status
 
 == Future Agenda Topics ==
@@ -28,14 +29,32 @@
 == Notes ==
   * Developer Updates
     * Andy
+     * Working on LS registration daemon and MA registration
+     * LS registration is basically done 
+     * MA work is basically done
     * Sowmya 
-    * Kavitha
+     * Working on bootstrapping and packaging servers
+     * Plan to setup on a couple ESnet servers, should give it to Internet2. Hope to start on that Wednesday.
     * Aaron
+     * Just got back from vacation, not much to talk about
+     * Make sure we include mesh config in package list
+     * GUI mesh config will not be ready
+    * Kavitha
+     * Fixed NDT bug that user reported. Will jus email directly.
+     * Fixed bug in bwdb.pl
+    * Nils
+     * No updates
     * Andrew
+     * Found issue with CentOS revisions on svn server not getting updated, so people we downloading old revision repeatedly
+     * Hoping to get CentOS 5 -> CentOS 6 transition working. User accounts are the biggest issue and probably not crucial for first beta. 
+     * Also need to look at mirror list. New Zealand guys reported there was an issue with some of them timing out. 
+     * We need to get documentation updated. We should point to the mesh config, get install and toolkit docs updated. Need a better directory of documentation.
     * Brian
-    * Warren
+     * Have to figure out if we are meeting in Bloomington this Spring
+     
   * Release status
-  
+    * Will try to have all packages ready be Wednesday. Will build images on Wednesday and test from there. Hopefully by C.O.B. Friday will have toolkit ready.
+    
  
 == Where ==
 ESnet conference bridge:
@@ -44,7 +63,6 @@ ESnet conference bridge:
  * phone: 1-510-423-9220 then 8555555# at the prompt.
 The free Cisco Jabber desktop video conferencing service also works with the ESnet ECS service. 
 Just register and download the client from http:// ciscojabbervideo.com, and connect using the meeting ID:  8555555@es.net
-
 
 
 == Last Updated ==

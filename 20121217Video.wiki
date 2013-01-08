@@ -3,7 +3,7 @@
 =   December 17, 2012 Conference Call 12:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Andy, Sowya, Andrew, Aaron, Nils, Kavitha
   
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
@@ -28,13 +28,28 @@
 == Notes ==
   * Developer Updates
     * Andy
+     * Working on traceroute GUI. Talked to WI guys.
     * Sowmya 
-    * Kavitha
+     * LiveCD testing for Andrew. Sent him output
+     * Working lookup service client
     * Aaron
+     * Working on Django GUI. Will have Shawn test. Has instance up for Andy to test.
+     * Goal is to have something up by beginning of the end of year
+     * Aaron noted that a number of group like USATLAS, Italian ATLAS, and talking to some other.
+    * Nils
+     * Fixed a few small issues from issue tracker
+     * Will do Nessus testing when we have full toolkit
+    * Kavitha
+     * No updates
     * Andrew
+     * Working with Sowmya on fix for LiveCD. Looks like its grabbing the older version
+     * Almost done with 64 bit install
     * Brian
-    * Warren
+     * Convinced a few people to deploy new lookup service. Probably just hold of on testing new RPM.
+     * Working on wash-pt1 orange
+     * Question about Active vs Inactive
   * Release status
+    * Lookup service stuff needs to be done. We'll see how it goes this week and Andy and Sowmya will coordinate.
   
  
 == Where ==
