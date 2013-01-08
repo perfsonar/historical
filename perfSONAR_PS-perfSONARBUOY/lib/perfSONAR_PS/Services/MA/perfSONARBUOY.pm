@@ -51,6 +51,7 @@ use Data::Validate::IP qw(is_ipv4);
 use Net::IP;
 use File::Basename;
 use File::Copy qw(move);
+use XML::LibXML;
 
 use perfSONAR_PS::Config::OWP;
 use perfSONAR_PS::Config::OWP::Utils;
@@ -63,6 +64,7 @@ use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::OWPDB;
 use perfSONAR_PS::DB::owhdb;
 use perfSONAR_PS::DB::SQL;
+use perfSONAR_PS::Utils::MARegistrationManager;
 use perfSONAR_PS::Utils::NetLogger;
 use perfSONAR_PS::Utils::ParameterValidation;
 
@@ -118,23 +120,6 @@ sub init {
     $self->{LOGGER} = get_logger( "perfSONAR_PS::Services::MA::perfSONARBUOY" );
 
     $self->{NETLOGGER} = get_logger( "NetLogger" );
-
-
-    unless ( exists $self->{CONF}->{"root_hints_url"} ) {
-        $self->{CONF}->{"root_hints_url"} = q{};
-        $self->{LOGGER}->info( "gLS Hints file was not set, automatic discovery of hLS instance disabled." );
-    }
-
-    if ( exists $self->{CONF}->{"root_hints_file"} and $self->{CONF}->{"root_hints_file"} ) {
-        unless ( $self->{CONF}->{"root_hints_file"} =~ "^/" ) {
-            $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"root_hints_file"};
-            $self->{LOGGER}->debug( "Setting full path to 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
-        }
-    }
-    else {
-        $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/gls.root.hints";
-        $self->{LOGGER}->info( "Setting 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
-    }
 
     if ( exists $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} and $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} ) {
         unless ( -d $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} ) {           
@@ -286,6 +271,49 @@ sub init {
             $self->{CONF}->{"perfsonarbuoy"}->{"service_type"} = "MA";
             $self->{LOGGER}->warn( "Setting 'service_type' to 'MA'." );
         }
+        
+        #initialize the key database
+        if ( not $self->{CONF}->{"ls_key_db"} ) {
+            $self->{CONF}->{"ls_key_db"} = '/var/lib/perfsonar/perfsonarbuoy_ma/lsKey.db';
+        }
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_key_db"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_key_db"} )
+        {
+            $self->{CONF}->{"perfsonarbuoy"}->{"ls_key_db"} = $self->{CONF}->{"ls_key_db"};
+            $self->{LOGGER}->warn( "Setting 'ls_key_db' to " . $self->{CONF}->{"perfsonarbuoy"}->{"ls_key_db"});
+        }
+        
+        #set site parameters
+        $self->_mergeSiteConfig('project');
+        $self->_mergeSiteConfig('name');
+        $self->_mergeSiteConfig('domain');
+        $self->_mergeSiteConfig('city');
+        $self->_mergeSiteConfig('region');
+        $self->_mergeSiteConfig('country');
+        $self->_mergeSiteConfig('zip_code');
+        $self->_mergeSiteConfig('latitude');
+        $self->_mergeSiteConfig('longitude');
+        
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"site_project"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"site_project"} )
+        {
+            if ( defined $self->{CONF}->{"site_project"}
+                and $self->{CONF}->{"site_project"} )
+            {
+                $self->{LOGGER}->warn( "Setting \"site_project\" to \"" . $self->{CONF}->{"site_project"} . "\"" );
+                $self->{CONF}->{"perfsonarbuoy"}->{"site_project"} = $self->{CONF}->{"site_project"};
+            }
+        }
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"site_name"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"site_name"} )
+        {
+            if ( defined $self->{CONF}->{"site_name"}
+                and $self->{CONF}->{"site_name"} )
+            {
+                $self->{LOGGER}->warn( "Setting \"site_name\" to \"" . $self->{CONF}->{"site_name"} . "\"" );
+                $self->{CONF}->{"perfsonarbuoy"}->{"site_name"} = $self->{CONF}->{"site_name"};
+            }
+        }
     }
 
     $handler->registerMessageHandler( "SetupDataRequest",   $self );
@@ -310,6 +338,24 @@ sub init {
     }
 
     return 0;
+}
+
+=head2 _mergeSiteConfig($self $param)
+
+Merges global site parameter into perfsonarbuoy configuration if it doesn't exist. May
+be able to replace with common mergeConfig, but didn't want to conflict with existing 
+setters in init.
+=cut
+sub _mergeSiteConfig() {
+    my ($self, $param) = @_;
+    
+     unless(exists $self->{CONF}->{"perfsonarbuoy"}->{"site_$param"} and 
+                $self->{CONF}->{"perfsonarbuoy"}->{"site_$param"} ) {
+        if ( defined $self->{CONF}->{"site_$param"} and $self->{CONF}->{"site_$param"} ) {
+            $self->{LOGGER}->debug( "Setting \"site_$param\" to \"" . $self->{CONF}->{"site_$param"} . "\"" );
+            $self->{CONF}->{"perfsonarbuoy"}->{"site_$param"} = $self->{CONF}->{"site_$param"};
+        }
+    }
 }
 
 =head2 needLS($self {})
@@ -1581,37 +1627,6 @@ sub registerLS {
 
     my ( $status, $res );
     my $ls = q{};
-
-    my @ls_array = ();
-    my @array = split( /\s+/, $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} );
-    foreach my $l ( @array ) {
-        $l =~ s/(\s|\n)*//g;
-        push @ls_array, $l if $l;
-    }
-    @array = split( /\s+/, $self->{CONF}->{"ls_instance"} );
-    foreach my $l ( @array ) {
-        $l =~ s/(\s|\n)*//g;
-        push @ls_array, $l if $l;
-    }
-
-    my @hints_array = ();
-    @array = split( /\s+/, $self->{CONF}->{"root_hints_url"} );
-    foreach my $h ( @array ) {
-        $h =~ s/(\s|\n)*//g;
-        push @hints_array, $h if $h;
-    }
-
-    if ( !defined $self->{LS_CLIENT} ) {
-        my %ls_conf = (
-            SERVICE_TYPE        => $self->{CONF}->{"perfsonarbuoy"}->{"service_type"},
-            SERVICE_NAME        => $self->{CONF}->{"perfsonarbuoy"}->{"service_name"},
-            SERVICE_DESCRIPTION => $self->{CONF}->{"perfsonarbuoy"}->{"service_description"},
-            SERVICE_ACCESSPOINT => $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"},
-        );
-        $self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote( \@ls_array, \%ls_conf, \@hints_array );
-    }
-
-    $ls = $self->{LS_CLIENT};
     
     my $error         = q{};
     my @resultsString = ();
@@ -1631,7 +1646,73 @@ sub registerLS {
         $self->{NETLOGGER}->debug( $nlmsg );
         return -1;
     }
-    $ls->registerStatic( \@resultsString );
+    
+    #build interface list and test set
+    my $parser = XML::LibXML->new();
+    my %host_interfaces = ();
+    my %test_set = ();
+    my %unique_event_types = ();
+    my @ma_types_list = ();
+    foreach my $resultStr(@resultsString){
+        my $doc = $parser->parse_string( $resultStr );
+        my $mdSrc = find($doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='endPointPair']/*[local-name()='src']/\@value");        
+        my $mdDst = find($doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='endPointPair']/*[local-name()='dst']/\@value");
+        my $mdEventType = find($doc->getDocumentElement, "./*[local-name()='eventType']");
+        next unless($mdSrc && $mdDst && $mdEventType);
+        $host_interfaces{$mdSrc} = 1;
+        $host_interfaces{$mdDst} = 1;
+        if(!$test_set{$mdSrc}){
+            $test_set{$mdSrc} = ();
+        }
+        if(!$test_set{$mdSrc}{$mdDst}){
+            $test_set{$mdSrc}{$mdDst} = ();
+        }
+        my @tmp = ();
+        foreach my $et(@{$mdEventType}){
+            push @tmp, $et->textContent; 
+            $unique_event_types {$et->textContent} = 1;   
+        }
+        push @{$test_set{$mdSrc}{$mdDst}}, \@tmp;
+        #$self->{LOGGER}->info("Source: $mdSrc, Destination: $mdDst, Event Type: " . @{$mdEventType});
+    }
+    my @interface_list = keys %host_interfaces;
+    
+    #organize event types into list for service registration
+    my @event_types_list = keys %unique_event_types;
+    if($unique_event_types{$ma_namespaces{'bwctl'}} || $unique_event_types{$ma_namespaces{'iperf'}}
+        || $unique_event_types{$ma_namespaces{'achievable'}}){
+        push @ma_types_list, 'bwctl';
+    }
+    if($unique_event_types{$ma_namespaces{'owamp'}} || $unique_event_types{$ma_namespaces{'summary'}}
+        || $unique_event_types{$ma_namespaces{'summbuckets'}} || 
+        $unique_event_types{$ma_namespaces{'owd'}}){
+        push @ma_types_list, 'owamp';
+    }
+    
+    my $service_params = { 
+                      serviceLocator => $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"}, 
+                      serviceType => 'ma', 
+     				  serviceName => $self->{CONF}->{"perfsonarbuoy"}->{"service_name"}, 
+     				  eventTypes => \@event_types_list,
+     				  maTypes => \@ma_types_list,
+ 					 };
+    $service_params->{'communities'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_project"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_project"});
+    $service_params->{'site_name'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_name"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_name"});
+ 	$service_params->{'domains'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_domain"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_domain"});
+ 	$service_params->{'city'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_city"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_city"});
+ 	$service_params->{'region'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_region"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_region"});
+ 	$service_params->{'country'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_country"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_country"});
+ 	$service_params->{'zip_code'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_zip_code"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_zip_code"});
+ 	$service_params->{'latitude'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_latitude"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_latitude"});
+ 	$service_params->{'longitude'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_longitude"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_longitude"});
+
+    #handle registration
+    if(!defined $self->{LS_CLIENT}){
+        $self->{LS_CLIENT} = perfSONAR_PS::Utils::MARegistrationManager->new();
+        $self->{LS_CLIENT}->init(ls_url => $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}, ls_key_db => $self->{CONF}->{"perfsonarbuoy"}->{"ls_key_db"});
+    }
+    $self->{LS_CLIENT}->register(service_params => $service_params, interfaces => \@interface_list, test_set => \%test_set);
+     
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.end");
     $self->{NETLOGGER}->debug( $nlmsg );
     return 0;
