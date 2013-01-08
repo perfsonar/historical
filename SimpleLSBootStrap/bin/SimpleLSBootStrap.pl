@@ -10,12 +10,14 @@ use URI;
 use Getopt::Long;
 use LWP::Simple;
 use SimpleLookupService::Client::SimpleLS;
+use JSON qw( encode_json decode_json);
 
 
 my $basedir     = "$RealBin/";
 my $configdir   = "$basedir/../etc";
 my $configfile = "$configdir/hosts.yml";
-my $outputFile = "$configdir/activehosts.yml";
+my $outputFile = "$configdir/activehosts.json";
+my $defaultPriority = 100;
 
 
 my $mode ='';
@@ -47,10 +49,18 @@ if($mode eq '' || ($mode !~ m/server|client/i )){
 					if($ret==0){
 						$ls->connect();
 						my $status = $ls->getStatus();
+						my $hostpriority;
+						
+						if(defined $host->{'priority'}){
+							$hostpriority = $host->{'priority'};
+						}else{
+							$hostpriority = $defaultPriority;
+						}
+						
 						my $hostref = {
 										locator => $locator,
 										status => $status,
-										priority => $host->{'priority'}
+										priority => $hostpriority
 										};
 										
 						push (@hostsoutput, $hostref); 
@@ -62,7 +72,10 @@ if($mode eq '' || ($mode !~ m/server|client/i )){
 		
 		if(@hostsoutput){
 			my $outputhash = {hosts => \@hostsoutput};
-			YAML::Syck::DumpFile($outputFile, $outputhash);
+			#YAML::Syck::DumpFile($outputFile, $outputhash);
+			open FILEHANDLE, ">", $outputFile;		
+			print FILEHANDLE encode_json($outputhash);
+			close FILEHANDLE;
 			exit(0);
 		}
 	}elsif($mode =~ m/client/i){
@@ -77,7 +90,13 @@ if($mode eq '' || ($mode !~ m/server|client/i )){
 					my $res = getstore($locator,$file);
 					
 					
-					my $activehostlist =  YAML::Syck::LoadFile($file);
+					#my $activehostlist =  YAML::Syck::LoadFile($file);
+					open FILEHANDLE, "<", $file;
+					my @lines = <FILEHANDLE>;
+					print @lines;
+					my $json = new JSON;
+					$json = $json->relaxed;
+					my $activehostlist = $json->decode(@lines);
 					my @activeHosts = @{$activehostlist->{'hosts'}};
 				
 					my $minPriority = 100;
@@ -86,7 +105,7 @@ if($mode eq '' || ($mode !~ m/server|client/i )){
 						my $priority = $activehost->{'priority'};
 						my $status = $activehost->{'status'};
 						
-						if(defined $status && $status eq "alive" && defined $priority && $priority<$minPriority){
+						if(defined $status && $status eq "alive" && defined $priority && $priority<=$minPriority){
 							$minPriority = 	$priority;
 							$minPriorityHost = $activehost->{'locator'};
 							
@@ -97,6 +116,9 @@ if($mode eq '' || ($mode !~ m/server|client/i )){
 						
 						print $minPriorityHost;
 						exit(0);
+					}else{
+						print "Error! No active LS found!";
+						exit(-1);
 					}
 					
 				
