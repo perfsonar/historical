@@ -67,6 +67,7 @@ use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::Utils::MARegistrationManager;
 use perfSONAR_PS::Utils::NetLogger;
 use perfSONAR_PS::Utils::ParameterValidation;
+use SimpleLookupService::Client::Bootstrap;
 
 my %ma_namespaces = (
     nmwg       => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -206,6 +207,18 @@ sub init {
     }
 
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} ) {
+        
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_bootstrap_file"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_bootstrap_file"} )
+        {
+            if ( defined $self->{CONF}->{"ls_bootstrap_file"}
+                and $self->{CONF}->{"ls_bootstrap_file"} )
+            {
+                $self->{LOGGER}->warn( "Setting \"ls_bootstrap_file\" to \"" . $self->{CONF}->{"ls_bootstrap_file"} . "\"" );
+                $self->{CONF}->{"perfsonarbuoy"}->{"ls_bootstrap_file"} = $self->{CONF}->{"ls_bootstrap_file"};
+            }
+        }
+            
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}
             and $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} )
         {
@@ -216,8 +229,21 @@ sub init {
                 $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
             }
             else {
-                $self->{LOGGER}->warn( "No LS instance specified for pSB service" );
+                my $ls_bootstrap = SimpleLookupService::Client::Bootstrap->new();
+                if($self->{CONF}->{"perfsonarbuoy"}->{"ls_bootstrap_file"}){
+                    $ls_bootstrap->init(file => $self->{CONF}->{"perfsonarbuoy"}->{"ls_bootstrap_file"});
+                }else{
+                    $ls_bootstrap->init();
+                }
+                $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} = $ls_bootstrap->register_url();
             }
+        }
+        
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} )
+        {
+            $self->{LOGGER}->fatal( "Unable to determine LS instance" );
+            return -1;
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"}

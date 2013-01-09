@@ -25,6 +25,7 @@ use perfSONAR_PS::Utils::NetLogger;
 use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Config::OWP::Conf;
 use perfSONAR_PS::DB::SQL;
+use SimpleLookupService::Client::Bootstrap;
 
 sub init {
     my ( $self, $handler ) = @_;
@@ -75,6 +76,19 @@ sub init {
     }
 
     if ( $self->{CONF}->{"tracerouteMA"}->{"enable_registration"} ) {
+    
+        
+        unless ( exists $self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"}
+            and $self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"} )
+        {
+            if ( defined $self->{CONF}->{"ls_bootstrap_file"}
+                and $self->{CONF}->{"ls_bootstrap_file"} )
+            {
+                $self->{LOGGER}->warn( "Setting \"ls_bootstrap_file\" to \"" . $self->{CONF}->{"ls_bootstrap_file"} . "\"" );
+                $self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"} = $self->{CONF}->{"ls_bootstrap_file"};
+            }
+        }
+        
         unless ( exists $self->{CONF}->{"tracerouteMA"}->{"ls_instance"}
             and $self->{CONF}->{"tracerouteMA"}->{"ls_instance"} )
         {
@@ -85,7 +99,13 @@ sub init {
                 $self->{CONF}->{"tracerouteMA"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
             }
             else {
-                $self->{LOGGER}->warn( "No LS instance specified for pSB service" );
+                my $ls_bootstrap = SimpleLookupService::Client::Bootstrap->new();
+                if($self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"}){
+                    $ls_bootstrap->init(file => $self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"});
+                }else{
+                    $ls_bootstrap->init();
+                }
+                $self->{CONF}->{"tracerouteMA"}->{"ls_instance"} = $ls_bootstrap->register_url();
             }
         }
 
