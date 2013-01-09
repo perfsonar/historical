@@ -1,0 +1,6 @@
+--- 
+hosts: 
+  - 
+    locator: http://odev-vm-7.es.net/ls/activehosts.yml
+    priority: ~
+    status: alive
