@@ -16,17 +16,22 @@ BuildArch:      noarch
 
 Requires:               perl(FindBin)
 Requires:               perl(Getopt::Long)
-Requires:               perl(IO::File)
+Requires:               perl(JSON)
+Requires:               perl(LWP)
 Requires:               perl(LWP::Simple)
-Requires:               perl(LWP::UserAgent)
-Requires:               perl(Log::Log4perl)
+Requires:               perl(Net::Ping)
+Requires:               perl(Params::Validate)
+Requires:               perl(Time::HiRes)
+Requires:               perl(URI)
+Requires:               perl(YAML::Syck)
+Requires:               perl(DateTime::Format::ISO8601)
 Requires:       perl
 Requires:       coreutils
 Requires:       shadow-utils
 Requires:       chkconfig
 
 %description
-The perfSONAR_PS-Nagios Plugins can be used with Nagios to monitor the various perfSONAR services.
+The perfSONAR_PS SimpleLS BootStrap is used to monitor/retrieve currently active Simple LS nodes.
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
@@ -44,7 +49,7 @@ make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} rpminstall
 
 
 %post
-mkdir -p /var/log/perfsonar/SimpleLS/bootstrap
+mkdir -p /var/log/SimpleLS/bootstrap
 chown perfsonar:perfsonar /var/log/SimpleLS/bootstrap
 
 
