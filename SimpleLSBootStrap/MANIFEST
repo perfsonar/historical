@@ -1,0 +1,9 @@
+MANIFEST
+Makefile
+bin/SimpleLSBootStrap.pl
+dependencies
+etc/activehosts.json
+etc/hosts.yml
+doc/README
+lib/SimpleLookupService/Client/SimpleLS.pm
+perl-perfSONAR_PS-SimpleLSBootStrap.spec
