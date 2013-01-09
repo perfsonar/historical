@@ -37,6 +37,9 @@ Requires:       coreutils
 Requires:       shadow-utils
 Requires:       chkconfig
 
+%description server
+Package for host to determine and publish active list of Lookup Services
+
 %package client
 Summary:  Package for host running Lookup service clients to determine best Simple Lookup Service to use
 Requires:               perl(FindBin)
@@ -55,6 +58,9 @@ Requires:       coreutils
 Requires:       shadow-utils
 Requires:       chkconfig
 
+%description client
+Package for host running Lookup service clients to determine best Simple Lookup Service to use
+
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
 /usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
@@ -64,7 +70,7 @@ Requires:       chkconfig
 
 %build
 
-%install server
+%install
 rm -rf $RPM_BUILD_ROOT
 
 make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} rpminstall
@@ -73,14 +79,6 @@ mkdir -p $RPM_BUILD_ROOT/etc/init.d
 
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_server} > scripts/%{init_script_server}.new
 install -D -m 755 scripts/%{init_script_server}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_server}
-
-%install client
-rm -rf $RPM_BUILD_ROOT
-
-make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} rpminstall
-
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
-
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_client} > scripts/%{init_script_client}.new
 install -D -m 755 scripts/%{init_script_client}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_client}
 
@@ -103,8 +101,12 @@ rm -rf $RPM_BUILD_ROOT
 %config %{install_base}/etc/activehosts.json
 %config %{install_base}/etc/SimpleLSBootStrapServerDaemon.conf
 %config %{install_base}/etc/SimpleLSBootStrapServerDaemon-logger.conf
+%attr(0755,perfsonar,perfsonar) /etc/init.d/%{init_script_server}
+%attr(0755,perfsonar,perfsonar) %{install_base}/scripts/%{init_script_server}
 %attr(0755,perfsonar,perfsonar) %{install_base}/bin/SimpleLSBootStrapServerDaemon.pl
+%attr(0755,perfsonar,perfsonar) %{install_base}/bin/SimpleLSBootStrap.pl
 %attr(0755,perfsonar,perfsonar) %{install_base}/lib/*
+%{install_base}/dependencies
 %{install_base}/doc/*
 
 %files client
@@ -113,5 +115,7 @@ rm -rf $RPM_BUILD_ROOT
 %config %{install_base}/etc/service_url
 %config %{install_base}/etc/SimpleLSBootStrapClientDaemon.conf
 %config %{install_base}/etc/SimpleLSBootStrapClientDaemon-logger.conf
+%attr(0755,perfsonar,perfsonar) /etc/init.d/%{init_script_client}
+%attr(0755,perfsonar,perfsonar) %{install_base}/scripts/%{init_script_client}
 %attr(0755,perfsonar,perfsonar) %{install_base}/bin/SimpleLSBootStrapClientDaemon.pl
 %attr(0755,perfsonar,perfsonar) %{install_base}/lib/*
