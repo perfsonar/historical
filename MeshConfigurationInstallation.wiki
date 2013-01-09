@@ -96,6 +96,11 @@ the results, and to make them available. These archives are configured by
 default on the Toolkit hosts, but need to be specially configured on
 non-Toolkit hosts.
 
+Each Measurement Archive, unless otherwise indicated, has a "read_url" and a
+"write_url". The "read_url" is the URL that can be used to query for the test
+results. The "write_url" is the URL that the host performing the test will write
+the results to.
+
 === perfSONARBUOY Measurement Archive ===
 
 If you are installing the agent on a Toolkit host, and the test results for the
@@ -223,5 +228,3 @@ The PingER archive should be available at:
 {{{
   read_url: http://[host]:8075/perfSONAR_PS/services/pinger/ma
 }}}
-
-
