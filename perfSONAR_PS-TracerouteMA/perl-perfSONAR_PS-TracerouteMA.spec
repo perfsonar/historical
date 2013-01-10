@@ -1,4 +1,4 @@
-%define _unpackaged_files_terminate_build      0
+%define _unpackaged_files_terminate_build 0
 %define install_base /opt/perfsonar_ps/traceroute_ma
 
 # init scripts must be located in the 'scripts' directory
@@ -10,74 +10,32 @@
 %define relnum 1
 %define disttag pSPS
 
-Name:           perl-perfSONAR_PS-TracerouteMA
-Version:        3.3
-Release:        %{relnum}.%{disttag}
-Summary:        perfSONAR_PS Traceroute Measurement Archive and Collection System
-License:        distributable, see LICENSE
-Group:          Development/Libraries
-URL:            http://search.cpan.org/dist/perfSONAR_PS-TracerouteMA/
-Source0:        perfSONAR_PS-TracerouteMA-%{version}.%{relnum}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildArch:      noarch
-Requires:       perl
+Name:			perl-perfSONAR_PS-TracerouteMA
+Version:		3.3
+Release:		%{relnum}.%{disttag}
+Summary:		perfSONAR_PS Traceroute Measurement Archive and Collection System
+License:		Distributable, see LICENSE
+Group:			Development/Libraries
+URL:			http://search.cpan.org/dist/perfSONAR_PS-TracerouteMA/
+Source0:		perfSONAR_PS-TracerouteMA-%{version}.%{relnum}.tar.gz
+BuildRoot:		%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch:		noarch
+Requires:		perl
 
 %description
-Traceroute MA is a framework, storage system, and querable web service for traceroute data.
+Traceroute MA is a framework, storage system, and querable web service for
+traceroute data.
 
-%package server
-Summary:        perfSONAR_PS Traceroute Measurement Archive and Collection System
-Group:          Applications/Network
-Requires:		perl(Carp)
-Requires:		perl(Config::General)
-Requires:		perl(Cwd)
-Requires:		perl(DBI)
-Requires:		perl(Data::UUID)
-Requires:		perl(Data::Validate::IP)
-Requires:		perl(Digest::MD5)
-Requires:		perl(English)
-Requires:		perl(Error)
-Requires:		perl(Exporter)
-Requires:		perl(Fcntl)
-Requires:		perl(File::Basename)
-Requires:		perl(File::Copy)
-Requires:		perl(File::Temp)
-Requires:		perl(FileHandle)
-Requires:		perl(Getopt::Long)
-Requires:		perl(HTTP::Daemon)
-Requires:		perl(IO::File)
-Requires:		perl(LWP::Simple)
-Requires:		perl(LWP::UserAgent)
-Requires:		perl(Log::Log4perl)
-Requires:		perl(Math::BigFloat)
-Requires:		perl(Math::Int64)
-Requires:		perl(Module::Load)
-Requires:		perl(Net::Ping)
-Requires:		perl(POSIX)
-Requires:		perl(Params::Validate)
-Requires:		perl(Socket)
-Requires:		perl(Symbol)
-Requires:		perl(Term::ReadKey)
-Requires:		perl(Time::HiRes)
-Requires:		perl(XML::LibXML)
-Requires:	    perl-DBD-MySQL
-Requires:	    mysql
-Requires:	    mysql-server
-Requires:	    libdbi-dbd-mysql
-Requires:       perl-perfSONAR_PS-TracerouteMA-config
-Requires:       perl-perfSONAR_PS-SimpleLS-BootStrap-client
-
-Requires:       chkconfig
-Requires:       shadow-utils
-Requires:       coreutils
-Requires:       initscripts
-
-%description server
-The Traceroute MA server consists of the tools that interact with the database and collect measurements from local or remote beacons.
+%package config
+Summary:		perfSONAR_PS Traceroute MA Configuration Information
+Group:			Development/Tools
+%description config
+The Traceroute MA config package contains a configuration file that both the
+server and client packages require to operate.
 
 %package client
-Summary:        perfSONAR_PS Traceroute MPs and registration system
-Group:          Applications/Network
+Summary:		perfSONAR_PS Traceroute MPs and registration system
+Group:			Applications/Communications
 Requires:		perl(Carp)
 Requires:		perl(Config::General)
 Requires:		perl(Cwd)
@@ -110,19 +68,62 @@ Requires:		perl(Symbol)
 Requires:		perl(Term::ReadKey)
 Requires:		perl(Time::HiRes)
 Requires:		perl(XML::LibXML)
-Requires:       perl-perfSONAR_PS-TracerouteMA-config
-Requires:       traceroute
-
+Requires:		perl-perfSONAR_PS-TracerouteMA-config
+Requires:		traceroute
 %description client
-The Traceroute MPs conists of tools that perform measurements on the beacons as well as client applications that can interact with the web service.
+The Traceroute MPs conists of tools that perform measurements on the beacons
+as well as client applications that can interact with the web service.
 
-%package config
-Summary:        perfSONAR_PS Traceroute MA Configuration Information
-Group:          Applications/Network
-%description config
-The Traceroute MA config package contains a configuration file that both the server and client packages require to operate.  
+%package server
+Summary:		perfSONAR_PS Traceroute Measurement Archive and Collection System
+Group:			Applications/Communications
+Requires:		perl(Carp)
+Requires:		perl(Config::General)
+Requires:		perl(Cwd)
+Requires:		perl(DBI)
+Requires:		perl(Data::UUID)
+Requires:		perl(Data::Validate::IP)
+Requires:		perl(Digest::MD5)
+Requires:		perl(English)
+Requires:		perl(Error)
+Requires:		perl(Exporter)
+Requires:		perl(Fcntl)
+Requires:		perl(File::Basename)
+Requires:		perl(File::Copy)
+Requires:		perl(File::Temp)
+Requires:		perl(FileHandle)
+Requires:		perl(Getopt::Long)
+Requires:		perl(HTTP::Daemon)
+Requires:		perl(IO::File)
+Requires:		perl(LWP::Simple)
+Requires:		perl(LWP::UserAgent)
+Requires:		perl(Log::Log4perl)
+Requires:		perl(Math::BigFloat)
+Requires:		perl(Math::Int64)
+Requires:		perl(Module::Load)
+Requires:		perl(Net::Ping)
+Requires:		perl(POSIX)
+Requires:		perl(Params::Validate)
+Requires:		perl(Socket)
+Requires:		perl(Symbol)
+Requires:		perl(Term::ReadKey)
+Requires:		perl(Time::HiRes)
+Requires:		perl(XML::LibXML)
+Requires:		perl-DBD-MySQL
+Requires:		perl-perfSONAR_PS-TracerouteMA-config
+Requires:		perl-perfSONAR_PS-SimpleLS-BootStrap-client
+Requires:		chkconfig
+Requires:		coreutils
+Requires:		initscripts
+Requires:		libdbi-dbd-mysql
+Requires:		mysql
+Requires:		mysql-server
+Requires:		shadow-utils
+%description server
+The Traceroute MA server consists of the tools that interact with the database
+and collect measurements from local or remote beacons.
 
-%pre server
+%pre config
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
 /usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
@@ -130,7 +131,7 @@ The Traceroute MA config package contains a configuration file that both the ser
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
 /usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
-%pre config
+%pre server
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
 /usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
@@ -140,29 +141,28 @@ The Traceroute MA config package contains a configuration file that both the ser
 %build
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
-make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} rpminstall
+make ROOTPATH=%{buildroot}/%{install_base} rpminstall
 
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
+mkdir -p %{buildroot}/etc/init.d
 
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_traceroute_ma} > scripts/%{init_script_traceroute_ma}.new
-install -m 755 scripts/%{init_script_traceroute_ma}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_traceroute_ma}
+install -m 0755 scripts/%{init_script_traceroute_ma}.new %{buildroot}/etc/init.d/%{init_script_traceroute_ma}
 
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_traceroute_master} > scripts/%{init_script_traceroute_master}.new
-install -m 755 scripts/%{init_script_traceroute_master}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_traceroute_master}
+install -m 0755 scripts/%{init_script_traceroute_master}.new %{buildroot}/etc/init.d/%{init_script_traceroute_master}
 
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_traceroute_scheduler} > scripts/%{init_script_traceroute_scheduler}.new
-install -m 755 scripts/%{init_script_traceroute_scheduler}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_traceroute_scheduler}
+install -m 0755 scripts/%{init_script_traceroute_scheduler}.new %{buildroot}/etc/init.d/%{init_script_traceroute_scheduler}
 
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_traceroute_mp} > scripts/%{init_script_traceroute_mp}.new
-install -m 755 scripts/%{init_script_traceroute_mp}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_traceroute_mp}
+install -m 0755 scripts/%{init_script_traceroute_mp}.new %{buildroot}/etc/init.d/%{init_script_traceroute_mp}
 
-%post server
-mkdir -p /var/log/perfsonar
-chown perfsonar:perfsonar /var/log/perfsonar
+%clean
+rm -rf %{buildroot}
 
-/sbin/chkconfig --add traceroute_ma
+%post config
 
 %post client
 mkdir -p /var/log/perfsonar
@@ -175,22 +175,33 @@ chown -R perfsonar:perfsonar /var/lib/perfsonar
 /sbin/chkconfig --add traceroute_scheduler
 /sbin/chkconfig --add traceroute_ondemand_mp
 
-%post config
+%post server
+mkdir -p /var/log/perfsonar
+chown perfsonar:perfsonar /var/log/perfsonar
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+/sbin/chkconfig --add traceroute_ma
 
-%files server
+%preun client
+
+if [ $1 -eq 0 ]; then
+    /sbin/chkconfig --del traceroute_master
+    /sbin/service traceroute_master stop
+    /sbin/chkconfig --del traceroute_scheduler
+    /sbin/service traceroute_scheduler stop
+    /sbin/chkconfig --del traceroute_ondemand_mp
+    /sbin/service traceroute_ondemand_mp stop
+fi
+
+%preun server
+if [ $1 -eq 0 ]; then
+    /sbin/chkconfig --del traceroute_ma
+    /sbin/service traceroute_ma stop
+fi
+
+%files config
 %defattr(-,perfsonar,perfsonar,-)
-%config(noreplace) %{install_base}/etc/daemon.conf
-%config(noreplace) %{install_base}/etc/daemon_logger.conf
-%{install_base}/bin/tracedb.pl
-%{install_base}/bin/daemon.pl
-%{install_base}/scripts/install_dependencies.sh
-%{install_base}/scripts/prepare_environment_server.sh
-%{install_base}/scripts/traceroute_ma
-%{install_base}/lib/*
-/etc/init.d/traceroute_ma
+%doc %{install_base}/doc/*
+%config(noreplace) %{install_base}/etc/owmesh.conf
 
 %files client
 %defattr(-,perfsonar,perfsonar,-)
@@ -214,27 +225,17 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/traceroute_scheduler
 /etc/init.d/traceroute_ondemand_mp
 
-%files config
+%files server
 %defattr(-,perfsonar,perfsonar,-)
-%doc %{install_base}/doc/*
-%config(noreplace) %{install_base}/etc/owmesh.conf
-
-%preun server
-if [ $1 -eq 0 ]; then
-    /sbin/chkconfig --del traceroute_ma
-    /sbin/service traceroute_ma stop
-fi
-
-%preun client
-
-if [ $1 -eq 0 ]; then
-    /sbin/chkconfig --del traceroute_master
-    /sbin/service traceroute_master stop
-    /sbin/chkconfig --del traceroute_scheduler
-    /sbin/service traceroute_scheduler stop
-    /sbin/chkconfig --del traceroute_ondemand_mp
-    /sbin/service traceroute_ondemand_mp stop
-fi
+%config(noreplace) %{install_base}/etc/daemon.conf
+%config(noreplace) %{install_base}/etc/daemon_logger.conf
+%{install_base}/bin/tracedb.pl
+%{install_base}/bin/daemon.pl
+%{install_base}/scripts/install_dependencies.sh
+%{install_base}/scripts/prepare_environment_server.sh
+%{install_base}/scripts/traceroute_ma
+%{install_base}/lib/*
+/etc/init.d/traceroute_ma
 
 %changelog
 * Wed Oct 6 2010 andy@es.net 3.2-RC1

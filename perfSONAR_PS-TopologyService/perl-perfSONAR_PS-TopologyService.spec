@@ -2,52 +2,52 @@
 
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 topology_service
-# %define init_script_2 ls_registration_daemon
 
-%define relnum  1
+%define relnum 1
 %define disttag pSPS
 
-Name:           perl-perfSONAR_PS-TopologyService
-Version:        3.3
-Release:        %{relnum}.%{disttag}
-Summary:        perfSONAR_PS Topology Service
-License:        distributable, see LICENSE
-Group:          Development/Libraries
-URL:            http://search.cpan.org/dist/perfSONAR_PS-TopologyService/
-Source0:        perfSONAR_PS-TopologyService-%{version}.%{relnum}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildArch:      noarch
-Requires:       perl(Carp)
-Requires:       perl(Config::General)
-Requires:       perl(Cwd)
-Requires:       perl(Data::Dumper)
-Requires:       perl(Data::UUID)
-Requires:       perl(Digest::MD5)
-Requires:       perl(English)
-Requires:       perl(Error)
-Requires:       perl(Exporter)
-Requires:       perl(Fcntl)
-Requires:       perl(File::Basename)
-Requires:       perl(FindBin)
-Requires:       perl(Getopt::Long)
-Requires:       perl(HTTP::Daemon)
-Requires:       perl(IO::File)
-Requires:       perl(LWP::Simple)
-Requires:       perl(LWP::UserAgent)
-Requires:       perl(Log::Log4perl)
-Requires:       perl(Module::Load)
-Requires:       perl(Net::Ping)
-Requires:       perl(POSIX)
-Requires:       perl(Params::Validate)
-Requires:       perl(Sleepycat::DbXml)
-Requires:       perl(Time::HiRes)
-Requires:       perl(XML::LibXML) >= 1.61
-Requires:       perl(base)
-Requires:       perl(lib)
-Requires:       perl(warnings)
+Name:			perl-perfSONAR_PS-TopologyService
+Version:		3.3
+Release:		%{relnum}.%{disttag}
+Summary:		perfSONAR_PS Topology Service
+License:		Distributable, see LICENSE
+Group:			Development/Libraries
+URL:			http://psps.perfsonar.net/topology/
+Source0:		perfSONAR_PS-TopologyService-%{version}.%{relnum}.tar.gz
+BuildRoot:		%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch:		noarch
+Requires:		perl(Carp)
+Requires:		perl(Config::General)
+Requires:		perl(Cwd)
+Requires:		perl(Data::Dumper)
+Requires:		perl(Data::UUID)
+Requires:		perl(Digest::MD5)
+Requires:		perl(English)
+Requires:		perl(Error)
+Requires:		perl(Exporter)
+Requires:		perl(Fcntl)
+Requires:		perl(File::Basename)
+Requires:		perl(FindBin)
+Requires:		perl(Getopt::Long)
+Requires:		perl(HTTP::Daemon)
+Requires:		perl(IO::File)
+Requires:		perl(LWP::Simple)
+Requires:		perl(LWP::UserAgent)
+Requires:		perl(Log::Log4perl)
+Requires:		perl(Module::Load)
+Requires:		perl(Net::Ping)
+Requires:		perl(POSIX)
+Requires:		perl(Params::Validate)
+Requires:		perl(Sleepycat::DbXml)
+Requires:		perl(Time::HiRes)
+Requires:		perl(XML::LibXML) >= 1.61
+Requires:		perl(base)
+Requires:		perl(lib)
+Requires:		perl(warnings)
 
 %description
-The perfSONAR-PS Topology Service delivers stored topology information when queried.
+The perfSONAR-PS Topology Service delivers stored topology information when
+queried.
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
@@ -59,17 +59,17 @@ The perfSONAR-PS Topology Service delivers stored topology information when quer
 %build
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
-make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} install
+make ROOTPATH=%{buildroot}/%{install_base} install
 
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
+mkdir -p %{buildroot}/etc/init.d
 
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_1} > scripts/%{init_script_1}.new
-install -D -m 755 scripts/%{init_script_1}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_1}
+install -D -m 0755 scripts/%{init_script_1}.new %{buildroot}/etc/init.d/%{init_script_1}
 
-#awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_2} > scripts/%{init_script_2}.new
-#install -D -m 755 scripts/%{init_script_2}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_2}
+%clean
+rm -rf %{buildroot}
 
 %post
 mkdir -p /var/log/perfsonar
@@ -83,26 +83,19 @@ fi
 chown -R perfsonar:perfsonar /var/lib/perfsonar
 
 /sbin/chkconfig --add %{init_script_1}
-#/sbin/chkconfig --add %{init_script_2}
 
 %preun
 if [ "$1" = "0" ]; then
-    # Totally removing the service
-    /etc/init.d/%{init_script_1} stop
-    /sbin/chkconfig --del %{init_script_1}
-#   /etc/init.d/%{init_script_2} stop
-#   /sbin/chkconfig --del %{init_script_2}
+	# Totally removing the service
+	/etc/init.d/%{init_script_1} stop
+	/sbin/chkconfig --del %{init_script_1}
 fi
 
 %postun
 if [ "$1" != "0" ]; then
-    # An RPM upgrade
-    /etc/init.d/%{init_script_1} restart
-#   /etc/init.d/%{init_script_2} restart
+	# An RPM upgrade
+	/etc/init.d/%{init_script_1} restart
 fi
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(0644,perfsonar,perfsonar,0755)

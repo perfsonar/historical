@@ -1,26 +1,26 @@
-%define _unpackaged_files_terminate_build      0
+%define _unpackaged_files_terminate_build 0
 %define install_base /opt/perfsonar_ps/lookup_service
 
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 lookup_service
 
-# sysconfig scripts must be located in the 'scripts' directory, and prefixed
-# with "sysconfig-" (e.g. sysconfig-lookup_service)
+# sysconfig scripts must be located in the 'scripts' directory, and prefixed with "sysconfig-" (e.g. sysconfig-lookup_service)
 %define sysconfig_1   lookup_service
 
-%define relnum 3
+%define relnum 2
 %define disttag pSPS
 
-Name:           perl-perfSONAR_PS-LookupService
-Version:        3.2.1
-Release:        %{relnum}.%{disttag}
-Summary:        perfSONAR_PS Lookup Service
-License:        distributable, see LICENSE
-Group:          Development/Libraries
-URL:            http://search.cpan.org/dist/perfSONAR_PS-LookupService/
-Source0:        perfSONAR_PS-LookupService-%{version}.%{relnum}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildArch:      noarch
+Name:			perl-perfSONAR_PS-LookupService
+Version:		3.2.2
+Release:		%{relnum}.%{disttag}
+Summary:		perfSONAR_PS Lookup Service
+License:		Distributable, see LICENSE
+Group:			Development/Libraries
+URL:			http://psps.perfsonar.net/lookup/
+Source0:		perfSONAR_PS-LookupService-%{version}.%{relnum}.tar.gz
+BuildRoot:		%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch:		noarch
+Requires:		perl
 Requires:		perl(Clone)
 Requires:		perl(Config::General)
 Requires:		perl(Data::UUID)
@@ -52,15 +52,14 @@ Requires:		perl(Params::Validate)
 Requires:		perl(Sys::Hostname)
 Requires:		perl(Time::HiRes)
 Requires:		perl(XML::LibXML) >= 1.60
-#Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-Requires:       perl
-Requires:       dbxml
-Requires:       coreutils
-Requires:       shadow-utils
-Requires:       chkconfig
+Requires:		chkconfig
+Requires:		coreutils
+Requires:		dbxml
+Requires:		shadow-utils
 
 %description
-The perfSONAR-PS Lookup Service can function in one of two roles: global root or home lookup service.  Please read the documentation for instructions.  
+The perfSONAR-PS Lookup Service can function in one of two roles: global root
+or home lookup service. Please read the documentation for instructions.
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
@@ -72,16 +71,19 @@ The perfSONAR-PS Lookup Service can function in one of two roles: global root or
 %build
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
-make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} rpminstall
+make ROOTPATH=%{buildroot}/%{install_base} rpminstall
 
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
+mkdir -p %{buildroot}/etc/init.d
 
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_1} > scripts/%{init_script_1}.new
-install -D -m 755 scripts/%{init_script_1}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_1}
+install -D -m 0755 scripts/%{init_script_1}.new %{buildroot}/etc/init.d/%{init_script_1}
 
-install -D scripts/sysconfig-%{sysconfig_1} $RPM_BUILD_ROOT/etc/sysconfig/%{sysconfig_1}
+install -D scripts/sysconfig-%{sysconfig_1} %{buildroot}/etc/sysconfig/%{sysconfig_1}
+
+%clean
+rm -rf %{buildroot}
 
 %post
 mkdir -p /var/log/perfsonar
@@ -95,8 +97,11 @@ chown -R perfsonar:perfsonar /var/lib/perfsonar
 
 /sbin/chkconfig --add lookup_service
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+%preun
+if [ $1 -eq 0 ]; then
+	/sbin/chkconfig --del lookup_service
+	/sbin/service lookup_service stop
+fi
 
 %files
 %defattr(-,perfsonar,perfsonar,-)
@@ -108,20 +113,14 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/*
 /etc/sysconfig/*
 
-%preun
-if [ $1 -eq 0 ]; then
-    /sbin/chkconfig --del lookup_service
-    /sbin/service lookup_service stop
-fi
-
 %changelog
 * Wed Sep 29 2010 zurawski@internet2.edu 3.2-1
 - Updated init scripts
 - Package fixes (build using mock)
 - Bugfixes
-  - http://code.google.com/p/perfsonar-ps/issues/detail?id=213
-  - http://code.google.com/p/perfsonar-ps/issues/detail?id=297	 
-  - http://code.google.com/p/perfsonar-ps/issues/detail?id=390
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=213
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=297	 
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=390
 
 * Mon May 17 2010 zurawski@internet2.edu 3.1-11
 - Netlogger logging
@@ -143,8 +142,8 @@ fi
 - Fixes to to documentation and package structure.  
 - Adding DCN utilities
 - Bugfixes
-  - http://code.google.com/p/perfsonar-ps/issues/detail?id=213
-  - http://code.google.com/p/perfsonar-ps/issues/detail?id=297
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=213
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=297
 
 * Tue Jul 21 2009 zurawski@internet2.edu 3.1-5
 - Shared library upgrades.
@@ -154,12 +153,11 @@ fi
 
 * Mon Jul 6 2009 zurawski@internet2.edu 3.1-3
 - Bugfix to inclcude perl(Clone) as a dep.
-  - http://code.google.com/p/perfsonar-ps/issues/detail?id=187
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=187
 
 * Thu May 7 2009 zurawski@internet2.edu 3.1-2
 - Bugfixes
-  - http://code.google.com/p/perfsonar-ps/issues/detail?id=159
+ - http://code.google.com/p/perfsonar-ps/issues/detail?id=159
 
 * Thu Mar 12 2009 zurawski@internet2.edu 3.1-1
 - Initial release as an RPM
-

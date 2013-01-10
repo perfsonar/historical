@@ -1,4 +1,4 @@
-%define _unpackaged_files_terminate_build      0
+%define _unpackaged_files_terminate_build 0
 %define install_base /opt/perfsonar_ps/perfAdmin
 
 # cron/apache entry are located in the 'scripts' directory
@@ -8,16 +8,17 @@
 %define relnum 1
 %define disttag pSPS
 
-Name:           perl-perfSONAR_PS-perfAdmin
-Version:        3.3
-Release:        %{relnum}.%{disttag}
-Summary:        perfSONAR_PS perfAdmin
-License:        distributable, see LICENSE
-Group:          Development/Libraries
-URL:            http://search.cpan.org/dist/perfSONAR_PS-perfAdmin
-Source0:        perfSONAR_PS-perfAdmin-%{version}.%{relnum}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildArch:      noarch
+Name:			perl-perfSONAR_PS-perfAdmin
+Version:		3.3
+Release:		%{relnum}.%{disttag}
+Summary:		perfSONAR_PS perfAdmin Perl module
+License:		Distributable, see LICENSE
+Group:			Development/Libraries
+URL:			http://search.cpan.org/dist/perfSONAR_PS-perfAdmin/
+Source0:		perfSONAR_PS-perfAdmin-%{version}.%{relnum}.tar.gz
+BuildRoot:		%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch:		noarch
+Requires:		perl
 Requires:		perl(AnyEvent) >= 4.81
 Requires:		perl(AnyEvent::HTTP)
 Requires:		perl(CGI)
@@ -46,11 +47,12 @@ Requires:		perl(Params::Validate)
 Requires:		perl(Time::HiRes)
 Requires:		perl(Time::Local)
 Requires:		perl(XML::LibXML) >= 1.60
-#Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-Requires:       perl
-Requires:       httpd
+Requires:		httpd
+
 %description
-The perfSONAR-PS perfAdmin package is a series of simple web-based GUIs that interact with the perfSONAR Information Services (IS) to locate and display remote datasets.
+The perfSONAR-PS perfAdmin package is a series of simple web-based GUIs that
+interact with the perfSONAR Information Services (IS) to locate and display
+remote datasets.
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
@@ -62,19 +64,22 @@ The perfSONAR-PS perfAdmin package is a series of simple web-based GUIs that int
 %build
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
-make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} rpminstall
+make ROOTPATH=%{buildroot}/%{install_base} rpminstall
 
-mkdir -p $RPM_BUILD_ROOT/etc/cron.d
+mkdir -p %{buildroot}/etc/cron.d
 
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{crontab} > scripts/%{crontab}.new
-install -D -m 600 scripts/%{crontab}.new $RPM_BUILD_ROOT/etc/cron.d/%{crontab}
+install -D -m 0600 scripts/%{crontab}.new %{buildroot}/etc/cron.d/%{crontab}
 
-mkdir -p $RPM_BUILD_ROOT/etc/httpd/conf.d
+mkdir -p %{buildroot}/etc/httpd/conf.d
 
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{apacheconf} > scripts/%{apacheconf}.new
-install -D -m 644 scripts/%{apacheconf}.new $RPM_BUILD_ROOT/etc/httpd/conf.d/%{apacheconf}
+install -D -m 0644 scripts/%{apacheconf}.new %{buildroot}/etc/httpd/conf.d/%{apacheconf}
+
+%clean
+rm -rf %{buildroot}
 
 %post
 mkdir -p /var/log/perfsonar
@@ -88,9 +93,6 @@ chown -R root:root /etc/cron.d/perfAdmin.cron
 
 /etc/init.d/crond restart
 /etc/init.d/httpd restart
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,perfsonar,perfsonar,-)
@@ -155,4 +157,3 @@ rm -rf $RPM_BUILD_ROOT
 
 * Thu Jul 9 2009 zurawski@internet2.edu 3.1-1
 - Initial release as an RPM
-

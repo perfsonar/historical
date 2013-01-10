@@ -3,101 +3,100 @@
 
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 PingER
+
 %define disttag pSPS
 %define relnum 1
 
-Name:           perl-perfSONAR_PS-PingER-server
-Version:        3.3
-Release:        %{relnum}.%{disttag}
-Summary:        perfSONAR_PS PingER  Measurement Archive and Collection System
-License:        distributable, see LICENSE
-Group:          Development/Libraries
-URL:            http://search.cpan.org/dist/perfSONAR_PS-PingER/
-Source0:        perfSONAR_PS-PingER-server-%{version}.%{relnum}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildArch:      noarch
-
-
-###Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-Requires:       perl(DateTime) >= 0.41
-Requires:       perl(DateTime::Format::Builder) >= 0.7901
-Requires:       perl(Carp) >= 0.41
-Requires:       perl(Carp::Clan) >= 0.41
-Requires:       perl(Config::General)
-Requires:       perl(Class::Accessor)
-Requires:       perl(Class::Fields)
-Requires:       perl(aliased) >= 0
-Requires:       perl(Cwd)
-Requires:       perl(DBI)
-Requires:       perl(DB_File)
-Requires:       perl(Data::UUID)
-Requires:       perl(Date::Manip)
-Requires:       perl(Digest::MD5)
-Requires:       perl(English)
-Requires:       perl(Error)
-Requires:       perl(Exporter)
-Requires:       perl(Fcntl)
-Requires:       perl(File::Basename)
-Requires:       perl(File::Path)
-Requires:       perl(File::Temp)
-Requires:       perl(File::Copy)
-Requires:       perl(FileHandle)
-Requires:       perl(FindBin)
-Requires:       perl(Getopt::Long)
-Requires:       perl(Getopt::Std)
-Requires:       perl(HTTP::Daemon)
-Requires:       perl(Hash::Merge)
-Requires:       perl(IO::File)
-Requires:       perl(IO::Interface)
-Requires:       perl(IO::Socket)
-Requires:       perl(Log::Log4perl) >= 1
-Requires:       perl(LWP::Simple)
-Requires:       perl(LWP::UserAgent)
-Requires:       perl(Mail::Sender)
-Requires:       perl(Math::BigFloat)
-Requires:       perl(Math::BigInt)
-Requires:       perl(Math::Int64)
-Requires:       perl(Module::Load)
-Requires:       perl(Net::Ping)
-Requires:       perl(Net::DNS)
-Requires:       perl(Net::Domain)
-Requires:       perl(Net::Interface)
-Requires:       perl(NetAddr::IP)
-Requires:       perl(POSIX)
-Requires:       perl(Pod::Usage)
-Requires:       perl(Params::Validate)
-Requires:       perl(Readonly)
-Requires:       perl(Regexp::Common)
-Requires:       perl(Socket)
-Requires:       perl(Statistics::Descriptive)
-Requires:       perl(Scalar::Util)
-Requires:       perl(Sys::Hostname)
-Requires:       perl(Sys::Syslog)
-Requires:       perl(Text::CSV_XS)
-Requires:       perl(Term::ReadKey)
-Requires:       perl(Time::HiRes)
-Requires:       perl(XML::LibXML) >= 1.62
-Requires:       perl(constant)
-Requires:       perl(version) >= 0.5
-Requires:       perl(fields)
-Requires:       perl(aliased)
-Requires:       perl(base)
-Requires:       perl-DBD-MySQL
-Requires:       mysql-server 
-Requires:       libdbi-dbd-mysql
-###Requires:       libdbi-dbd-sqlite
-Requires:       coreutils
-Requires:       shadow-utils
-Requires: 	chkconfig
+Name:			perl-perfSONAR_PS-PingER-server
+Version:		3.3
+Release:		%{relnum}.%{disttag}
+Summary:		perfSONAR_PS PingER  Measurement Archive and Collection System
+License:		Distributable, see LICENSE
+Group:			Development/Libraries
+URL:			http://psps.perfsonar.net/pinger/
+Source0:		perfSONAR_PS-PingER-server-%{version}.%{relnum}.tar.gz
+BuildRoot:		%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch:		noarch
+Requires:		perl
+Requires:		perl(DateTime) >= 0.41
+Requires:		perl(DateTime::Format::Builder) >= 0.7901
+Requires:		perl(Carp) >= 0.41
+Requires:		perl(Carp::Clan) >= 0.41
+Requires:		perl(Config::General)
+Requires:		perl(Class::Accessor)
+Requires:		perl(Class::Fields)
+Requires:		perl(aliased) >= 0
+Requires:		perl(Cwd)
+Requires:		perl(DBI)
+Requires:		perl(DB_File)
+Requires:		perl(Data::UUID)
+Requires:		perl(Date::Manip)
+Requires:		perl(Digest::MD5)
+Requires:		perl(English)
+Requires:		perl(Error)
+Requires:		perl(Exporter)
+Requires:		perl(Fcntl)
+Requires:		perl(File::Basename)
+Requires:		perl(File::Path)
+Requires:		perl(File::Temp)
+Requires:		perl(File::Copy)
+Requires:		perl(FileHandle)
+Requires:		perl(FindBin)
+Requires:		perl(Getopt::Long)
+Requires:		perl(Getopt::Std)
+Requires:		perl(HTTP::Daemon)
+Requires:		perl(Hash::Merge)
+Requires:		perl(IO::File)
+Requires:		perl(IO::Interface)
+Requires:		perl(IO::Socket)
+Requires:		perl(Log::Log4perl) >= 1
+Requires:		perl(LWP::Simple)
+Requires:		perl(LWP::UserAgent)
+Requires:		perl(Mail::Sender)
+Requires:		perl(Math::BigFloat)
+Requires:		perl(Math::BigInt)
+Requires:		perl(Math::Int64)
+Requires:		perl(Module::Load)
+Requires:		perl(Net::Ping)
+Requires:		perl(Net::DNS)
+Requires:		perl(Net::Domain)
+Requires:		perl(Net::Interface)
+Requires:		perl(NetAddr::IP)
+Requires:		perl(POSIX)
+Requires:		perl(Pod::Usage)
+Requires:		perl(Params::Validate)
+Requires:		perl(Readonly)
+Requires:		perl(Regexp::Common)
+Requires:		perl(Socket)
+Requires:		perl(Statistics::Descriptive)
+Requires:		perl(Scalar::Util)
+Requires:		perl(Sys::Hostname)
+Requires:		perl(Sys::Syslog)
+Requires:		perl(Text::CSV_XS)
+Requires:		perl(Term::ReadKey)
+Requires:		perl(Time::HiRes)
+Requires:		perl(XML::LibXML) >= 1.62
+Requires:		perl(constant)
+Requires:		perl(version) >= 0.5
+Requires:		perl(fields)
+Requires:		perl(aliased)
+Requires:		perl(base)
+Requires:		chkconfig
+Requires:		coreutils
+Requires:		libdbi-dbd-mysql
+Requires:		mysql-server
+Requires:		perl-DBD-MySQL
+Requires:		shadow-utils
 
 %description
-The perfSONAR_PS PingER MA/MP allows one to make ICMP ping data available in SQL databases using the perfSONAR 
- protocols. The perfSONAR_PS PingER allows the collection of data from ICMP ping which is stored inside of the SQL databases.
+The perfSONAR_PS PingER MA/MP allows one to make ICMP ping data available in
+SQL databases using the perfSONAR protocols. The perfSONAR_PS PingER allows
+the collection of data from ICMP ping which is stored inside of the SQL
+databases.
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
 /usr/sbin/useradd -g perfsonar -r -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
-
 
 %prep
 %setup -q -n perfSONAR_PS-PingER-server-%{version}.%{relnum}
@@ -105,26 +104,17 @@ The perfSONAR_PS PingER MA/MP allows one to make ICMP ping data available in SQL
 %build
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
-make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} install
+make ROOTPATH=%{buildroot}/%{install_base} install
 
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
+mkdir -p %{buildroot}/etc/init.d
 
 awk "{gsub(/^PREFIX=.*/,\"PREFIX=%{install_base}\"); print}" scripts/%{init_script_1} > scripts/%{init_script_1}.new
-install -m 755 scripts/%{init_script_1}.new $RPM_BUILD_ROOT/etc/init.d/%{init_script_1}
+install -m 0755 scripts/%{init_script_1}.new %{buildroot}/etc/init.d/%{init_script_1}
 
 %clean
-rm -rf $RPM_BUILD_ROOT
-
-%files
-%defattr(0644,perfsonar,perfsonar,0755)
-%doc %{install_base}/doc/*
-%config(noreplace) %{install_base}/etc/*
-%attr(0755,perfsonar,perfsonar) %{install_base}/bin/*
-%attr(0755,perfsonar,perfsonar) %{install_base}/scripts/*
-%{install_base}/lib/*
-%attr(0755,perfsonar,perfsonar) /etc/init.d/*
+rm -rf %{buildroot}
 
 %post
 mkdir -p %{logging_base}
@@ -141,6 +131,15 @@ echo " This will configure the MA/MP database and webservice's endpoint"
 echo " More information can be found in the                            "
 echo "    /opt/perfsonar_ps/PingER/doc/INSTALL file                    "
 echo "-----------------------------------------------------------------"
+
+%files
+%defattr(0644,perfsonar,perfsonar,0755)
+%doc %{install_base}/doc/*
+%config(noreplace) %{install_base}/etc/*
+%attr(0755,perfsonar,perfsonar) %{install_base}/bin/*
+%attr(0755,perfsonar,perfsonar) %{install_base}/scripts/*
+%{install_base}/lib/*
+%attr(0755,perfsonar,perfsonar) /etc/init.d/*
 
 %changelog
 
