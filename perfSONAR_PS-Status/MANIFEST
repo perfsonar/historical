@@ -3,6 +3,7 @@ Makefile
 bin/client.pl
 bin/collector.pl
 bin/service.pl
+dependencies
 doc/Changes
 doc/INSTALL
 doc/LICENSE

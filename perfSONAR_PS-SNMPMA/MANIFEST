@@ -87,7 +87,6 @@ lib/perfSONAR_PS/DB/File.pm
 lib/perfSONAR_PS/DB/Ganglia.pm
 lib/perfSONAR_PS/DB/RRD.pm
 lib/perfSONAR_PS/DB/SQL.pm
-lib/perfSONAR_PS/DB/XMLDB.pm
 lib/perfSONAR_PS/Error.pm
 lib/perfSONAR_PS/Error_compat.pm
 lib/perfSONAR_PS/EventTypeEquivalenceHandler.pm
@@ -103,6 +102,7 @@ lib/perfSONAR_PS/Transport.pm
 lib/perfSONAR_PS/Utils/NetLogger.pm
 lib/perfSONAR_PS/Utils/ParameterValidation.pm
 lib/perfSONAR_PS/XML/Document.pm
+perl-perfSONAR_PS-SNMPMA.spec
 scripts/install_dependencies.sh
 scripts/makeStore.pl
 scripts/prepare_environment.sh

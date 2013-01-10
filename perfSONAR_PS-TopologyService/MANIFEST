@@ -2,6 +2,7 @@ MANIFEST
 Makefile
 bin/client.pl
 bin/daemon.pl
+dependencies
 doc/Changes
 doc/INSTALL
 doc/LICENSE

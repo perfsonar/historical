@@ -120,7 +120,6 @@ lib/perfSONAR_PS/Config/OWP/Utils.pm
 lib/perfSONAR_PS/DB/File.pm
 lib/perfSONAR_PS/DB/OWPDB.pm
 lib/perfSONAR_PS/DB/SQL.pm
-lib/perfSONAR_PS/DB/XMLDB.pm
 lib/perfSONAR_PS/DB/owhdb.pm
 lib/perfSONAR_PS/Error.pm
 lib/perfSONAR_PS/Error_compat.pm
@@ -156,7 +155,6 @@ lib/SimpleLookupService/Client/RecordManager.pm
 lib/SimpleLookupService/Client/SimpleLS.pm
 lib/SimpleLookupService/Client/Query.pm
 lib/SimpleLookupService/Client/Registration.pm
-
 modules.rules
 perl-perfSONAR_PS-perfSONARBUOY.spec
 scripts/install_dependencies.sh

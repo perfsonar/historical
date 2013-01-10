@@ -1,5 +1,6 @@
 MANIFEST
 Makefile
+dependencies
 doc/apache.conf
 etc/.htaccess
 etc/GeneralSystem.conf

@@ -1,7 +1,7 @@
 PACKAGE=perfSONAR_PS-TracerouteMA
 ROOTPATH=/opt/perfsonar_ps/traceroute_ma
-VERSION=3.2.1
-RELEASE=3
+VERSION=3.3
+RELEASE=1
 
 default:
 	@echo No need to build the package. Just run \"make install\"

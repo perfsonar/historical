@@ -1,6 +1,7 @@
 MANIFEST
 Makefile
 bin/pinger_cache.pl
+dependencies
 doc/Changes
 doc/INSTALL
 doc/LICENSE
@@ -144,6 +145,7 @@ lib/perfSONAR_PS/Utils/DNS.pm
 lib/perfSONAR_PS/Utils/NetLogger.pm
 lib/perfSONAR_PS/Utils/ParameterValidation.pm
 lib/perfSONAR_PS/XML/Document.pm
+perl-perfSONAR_PS-PingER-GUI.spec
 pinger_gui_conf.yml
 root/css/gui.css
 root/css/mystyle.css

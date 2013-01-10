@@ -1,26 +1,24 @@
-%define _unpackaged_files_terminate_build      0
+%define _unpackaged_files_terminate_build 0
 %define install_base /opt/perfsonar_ps/client_api
 
 %define relnum 1
 %define disttag pSPS
 
-Name:           perl-perfSONAR_PS-Client-API
-Version:        3.1
+Name:			perl-perfSONAR_PS-Client-API
+Version:		3.3
 Release:        %{relnum}.%{disttag}
-Summary:        perfSONAR_PS Client API
-License:        distributable, see LICENSE
-Group:          Development/Libraries
-URL:            http://search.cpan.org/dist/perfSONAR_PS-Client-API
-Source0:        perfSONAR_PS-Client-API-%{version}.%{relnum}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildArch:      noarch
-#Requires:		perl(AnyEvent) >= 4.81
-
-#Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-Requires:       perl
+Summary:		perfSONAR_PS Client API
+License:		Distributable, see LICENSE
+Group:			Development/Libraries
+URL:			http://search.cpan.org/dist/perfSONAR_PS-Client-API
+Source0:		perfSONAR_PS-Client-API-%{version}.%{relnum}.tar.gz
+BuildRoot:		%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch:		noarch
+Requires:		perl
 
 %description
-The perfSONAR-PS Client API package contains the libraries used to contact perfSONAR services.  Examples of how to use the API are included for reference.  
+The perfSONAR-PS Client API package contains the libraries used to contact
+perfSONAR services. Examples of how to use the API are included for reference.
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
@@ -32,16 +30,16 @@ The perfSONAR-PS Client API package contains the libraries used to contact perfS
 %build
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
-make ROOTPATH=$RPM_BUILD_ROOT/%{install_base} rpminstall
+make ROOTPATH=%{buildroot}/%{install_base} rpminstall
+
+%clean
+rm -rf %{buildroot}
 
 %post
 mkdir -p /var/log/perfsonar
 chown perfsonar:perfsonar /var/log/perfsonar
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,perfsonar,perfsonar,-)
@@ -54,4 +52,3 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Wed Feb 11 2010 zurawski@internet2.edu 3.1-1
 - Initial release as an RPM
-

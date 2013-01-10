@@ -1,7 +1,7 @@
 PACKAGE=perfSONAR_PS-SimpleLS-BootStrap
 ROOTPATH=/opt/SimpleLS/bootstrap
 VERSION=3.3
-RELEASE=0
+RELEASE=1
 
 default:
 	@echo No need to build the package. Just run \"make install\"
