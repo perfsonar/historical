@@ -65,6 +65,7 @@ Requires:	    mysql
 Requires:	    mysql-server
 Requires:	    libdbi-dbd-mysql
 Requires:       perl-perfSONAR_PS-TracerouteMA-config
+Requires:       perl-perfSONAR_PS-SimpleLS-BootStrap-client
 
 Requires:       chkconfig
 Requires:       shadow-utils

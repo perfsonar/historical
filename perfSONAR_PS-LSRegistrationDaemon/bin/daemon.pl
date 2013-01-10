@@ -31,7 +31,10 @@ use perfSONAR_PS::LSRegistrationDaemon::NPAD;
 use perfSONAR_PS::LSRegistrationDaemon::GridFTP;
 use perfSONAR_PS::LSRegistrationDaemon::Ping;
 use perfSONAR_PS::LSRegistrationDaemon::Traceroute;
-
+use perfSONAR_PS::LSRegistrationDaemon::Host;
+use perfSONAR_PS::LSRegistrationDaemon::ToolkitHost;
+use SimpleLookupService::Client::Bootstrap;
+use DBI;
 use Getopt::Long;
 use Config::General;
 use Log::Log4perl qw/:easy/;
@@ -161,12 +164,19 @@ else {
     $logger->level( $output_level ) if $output_level;
 }
 
-if ( not $conf{"ls_instance"} ) {
-    $logger->error( "You must specify which LS Registration Daemon to register with." );
-    exit(-1);
-} elsif (ref $conf{"ls_instance"} eq "ARRAY" or $conf{"ls_instance"} =~ /,/ or $conf{"ls_instance"} =~ / /) {
-    $logger->error( "You can only specify a single LS Registration Daemon to register with.");
-    exit(-1);
+#determine URL
+if(!$conf{ls_instance}){
+    my $ls_bootstrap = SimpleLookupService::Client::Bootstrap->new();
+    if($conf{ls_bootstrap_file}){
+        $ls_bootstrap->init(file => $conf{ls_bootstrap_file});
+    }else{
+        $ls_bootstrap->init();
+    }
+    $conf{ls_instance} = $ls_bootstrap->register_url();
+}
+if(!$conf{ls_instance}){
+    $logger->error("Unable to determine ls_instance");
+    return -1;
 }
 
 if ( not $conf{"ls_interval"} ) {
@@ -181,6 +191,27 @@ if ( not $conf{"check_interval"} ) {
 
 # the interval is configured in hours
 $conf{"ls_interval"} = $conf{"ls_interval"} * 60 * 60;
+
+#initialize the key database
+if ( not $conf{"ls_key_db"} ) {
+    $logger->info( "No LS key database found" );
+    $conf{"ls_key_db"} = '/var/lib/perfsonar/ls_registration_daemon/lsKey.db';
+}
+my $ls_key_dbh = DBI->connect('dbi:SQLite:dbname=' . $conf{"ls_key_db"}, '', '');
+my $ls_key_create  = $ls_key_dbh->prepare('CREATE TABLE IF NOT EXISTS lsKeys (uri VARCHAR(255) PRIMARY KEY, expires BIGINT NOT NULL, checksum VARCHAR(255) NOT NULL, duplicateChecksum VARCHAR(255) NOT NULL)');
+$ls_key_create->execute();
+if($ls_key_create->err){
+    $logger->error( "Error creating key database: " . $ls_key_create->errstr );
+    exit( -1 );
+}
+#delete expired entries from local db
+my $ls_key_clean_expired  = $ls_key_dbh->prepare('DELETE FROM lsKeys WHERE expires < ?');
+$ls_key_clean_expired->execute(time);
+if($ls_key_clean_expired->err){
+    $logger->error( "Error cleaning out expired keys: " . $ls_key_clean_expired->errstr );
+    exit( -1 );
+}
+$ls_key_dbh->disconnect();
 
 my $site_confs = $conf{"site"};
 if ( not $site_confs ) {
@@ -198,11 +229,11 @@ my @site_params = ();
 
 foreach my $site_conf ( @$site_confs ) {
     my $site_merge_conf = mergeConfig( \%conf, $site_conf );
-
+    $site_merge_conf->{'ls_key_db'} = $conf{'ls_key_db'};
     my $services = init_site( $site_merge_conf );
 
     if ( not $services ) {
-        print "Couldn't initialize site. Exitting.";
+        print "Couldn't initialize site. Exiting.";
         exit( -1 );
     }
 
@@ -241,13 +272,14 @@ unlockPIDFile( $fileHandle );
 foreach my $params ( @site_params ) {
 
     # every site will register separately
+    my $update_id = time .'';
     my $pid = fork();
     if ( $pid != 0 ) {
         push @child_pids, $pid;
         next;
     }
     else {
-        handle_site( $params->{conf}, $params->{services} );
+        handle_site( $params->{conf}, $params->{services}, $update_id );
     }
 }
 
@@ -383,6 +415,53 @@ sub init_site {
             exit( -1 );
         }
     }
+    
+    ##
+    # Parse host configurations
+    my $hosts_conf = $site_conf->{host};
+    if ($hosts_conf && ref( $hosts_conf ) ne "ARRAY" ) {
+        my @tmp = ();
+        push @tmp, $hosts_conf;
+        $hosts_conf = \@tmp;
+    }
+    
+    foreach my $curr_host_conf ( @$hosts_conf ) {
+
+        my $host_conf = mergeConfig( $site_conf, $curr_host_conf );
+        
+        if ( not $host_conf->{'type'} ) {
+
+            # complain
+            $logger->error( "Error: No host type specified: " . $host_conf->{type} );
+            exit( -1 );
+        }
+        elsif ( lc( $host_conf->{type} ) eq "manual" ) {
+            my $host = perfSONAR_PS::LSRegistrationDaemon::Host->new();
+            if ( $host->init( $host_conf ) != 0 ) {
+
+                # complain
+                $logger->error( "Error: Couldn't initialize host watcher" );
+                exit( -1 );
+            }
+            push @services, $host;
+        }
+        elsif ( lc( $host_conf->{type} ) eq "toolkit" ) {
+            my $host = perfSONAR_PS::LSRegistrationDaemon::ToolkitHost->new();
+            if ( $host->init( $host_conf ) != 0 ) {
+
+                # complain
+                $logger->error( "Error: Couldn't initialize toolkit host watcher" );
+                exit( -1 );
+            }
+            push @services, $host;
+        }
+        else {
+
+            # error
+            $logger->error( "Error: Unknown host type: " . $conf{type} );
+            exit( -1 );
+        }
+    }
 
     return \@services;
 }
@@ -395,11 +474,11 @@ through and refreshes the services, and pauses for "check_interval" seconds.
 =cut
 
 sub handle_site {
-    my ( $site_conf, $services ) = @_;
+    my ( $site_conf, $services, $update_id ) = @_;
 
     while ( 1 ) {
         foreach my $service ( @$services ) {
-            $service->refresh();
+            $service->refresh($update_id);
         }
 
         sleep( $site_conf->{"check_interval"} );

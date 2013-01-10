@@ -21,6 +21,8 @@ BuildArch:      noarch
 # Requires:		perl(Config::General)
 Requires:       perl
 Requires: 		perl(Config::General)
+Requires:       perl(DateTime::Format::ISO8601)
+Requires:       perl(DBD::SQLite)
 Requires: 		perl(English)
 Requires: 		perl(Exporter)
 Requires: 		perl(Fcntl)
@@ -41,9 +43,11 @@ Requires: 		perl(POSIX)
 Requires: 		perl(Params::Validate)
 Requires: 		perl(Regexp::Common)
 Requires: 		perl(Socket)
+Requires: 		perl(Sys::MemInfo)
 Requires: 		perl(Time::HiRes)
 Requires: 		perl(XML::LibXML)
 Requires: 		perl(base)
+Requires:       perl-perfSONAR_PS-SimpleLS-BootStrap-client
 Requires: 		shadow-utils
 Requires: 		coreutils
 Requires: 		chkconfig
@@ -91,6 +95,9 @@ rm -rf $RPM_BUILD_ROOT
 %post
 mkdir -p /var/log/perfsonar
 chown perfsonar:perfsonar /var/log/perfsonar
+
+mkdir -p /var/lib/perfsonar/ls_registration_daemon
+chown -R perfsonar:perfsonar /var/lib/perfsonar
 
 /sbin/chkconfig --add %{init_script_1}
 #/sbin/chkconfig --add %{init_script_2}

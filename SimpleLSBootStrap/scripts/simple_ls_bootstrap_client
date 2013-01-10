@@ -1,0 +1,92 @@
+#!/bin/bash
+#
+# Init file for Simple LS Bootstrap Client Daemon
+#
+# chkconfig: 2345 59 20
+# description: Simple LS Bootstrap Client Daemon
+#
+
+PREFIX=/opt/SimpleLS/bootstrap
+BINDIR=${PREFIX}/bin
+CONFDIR=${PREFIX}/etc
+RUNDIR=/var/run
+
+CONFFILE=${CONFDIR}/SimpleLSBootStrapClientDaemon.conf
+LOGGERFILE=${CONFDIR}/SimpleLSBootStrapClientDaemon-logger.conf
+PIDFILE=${RUNDIR}/SimpleLSBootStrapClientDaemon.pid
+
+USER=perfsonar
+GROUP=perfsonar
+
+DAEMON_CMD="${BINDIR}/SimpleLSBootStrapClientDaemon.pl --config=${CONFFILE} --pidfile=${PIDFILE} --logger=${LOGGERFILE} --user=${USER} --group=${GROUP}"
+
+ERROR=0
+ARGV="$@"
+if [ "x$ARGV" = "x" ] ; then 
+    ARGS="help"
+fi
+
+for ARG in $@ $ARGS
+do
+    # check for pidfile
+    if [ -f $PIDFILE ] ; then
+        PID=`cat $PIDFILE`
+        if [ "x$PID" != "x" ] && kill -0 $PID 2>/dev/null ; then
+            STATUS="Simple LS Bootstrap Client Daemon (pid $PID) running"
+            RUNNING=1
+        else
+            STATUS="Simple LS Bootstrap Client Daemon (pid $PID?) not running"
+            RUNNING=0
+        fi
+    else
+        STATUS="Simple LS Bootstrap Client Daemon (no pid file) not running"
+        RUNNING=0
+    fi 
+
+    case $ARG in
+    start)
+	echo $DAEMON_CMD
+
+	if $DAEMON_CMD ; then
+	    echo "$0 $ARG: Simple LS Bootstrap Client Daemon started"
+            touch /var/lock/subsys/simple_ls_bootstrap_client_daemon
+	else
+	    echo "$0 $ARG: Simple LS Bootstrap Client Daemon could not be started"
+	    ERROR=3
+	fi
+	;;
+    stop)
+	if [ $RUNNING -eq 0 ]; then
+	    echo "$0 $ARG: $STATUS"
+	    continue
+	fi
+	if kill $PID ; then
+	    echo "$0 $ARG: Simple LS Bootstrap Client Daemon stopped"
+            rm /var/lock/subsys/simple_ls_bootstrap_client_daemon
+	else
+	    echo "$0 $ARG: Simple LS Bootstrap Client Daemon could not be stopped"
+	    ERROR=4
+	fi
+	;;
+    restart)
+    	$0 stop; echo "waiting..."; sleep 10; $0 start;
+	;;
+    *)
+	echo "usage: $0 (start|stop|restart|help)"
+	cat <<EOF
+
+start      - start Simple LS Bootstrap Client Daemon
+stop       - stop Simple LS Bootstrap Client Daemon
+restart    - restart Simple LS Bootstrap Client Daemon if running by sending a SIGHUP or start if 
+             not running
+help       - this screen
+
+EOF
+	ERROR=2
+    ;;
+
+    esac
+
+done
+
+exit $ERROR

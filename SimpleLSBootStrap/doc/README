@@ -1,0 +1,29 @@
+SimpleLS BootStrap
+
+INTRODUCTION
+The SimpleLS BootStrap program is a standalone perl program
+that can be run in client or server mode. When run as a client, 
+it contacts the url in the config file and retrieves the lookup service 
+and prints it to standard output.When run as server, it contacts the 
+list of urls in the config file and checks the health of each of
+the lookup services and updates the status in a file.
+
+
+INSTALLATION
+The package is available as an rpm. Download the rpm and use yum to install.
+
+
+RUNNING
+Client mode:
+1) Update config file with the url that contains list of active hosts
+2) Invoke the program using "perl SimpleLSBootStrap.pl client"
+3) Output will be printed to standard output.
+
+It is recommended to use cron to run this at regular intervals and redirect the 
+output to a file.
+
+Server mode:
+1) Update config file with list of well-known LSes.
+2) Invoke the program using "perl SimpleLSBootStrap.pl server"
+3) Output is written to a file.
+4) If you want to run it as a service, make sure that the file is accessible from the web.

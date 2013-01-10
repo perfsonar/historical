@@ -20,10 +20,12 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Services::MA::General;
+use perfSONAR_PS::Utils::MARegistrationManager;
 use perfSONAR_PS::Utils::NetLogger;
 use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Config::OWP::Conf;
 use perfSONAR_PS::DB::SQL;
+use SimpleLookupService::Client::Bootstrap;
 
 sub init {
     my ( $self, $handler ) = @_;
@@ -74,6 +76,19 @@ sub init {
     }
 
     if ( $self->{CONF}->{"tracerouteMA"}->{"enable_registration"} ) {
+    
+        
+        unless ( exists $self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"}
+            and $self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"} )
+        {
+            if ( defined $self->{CONF}->{"ls_bootstrap_file"}
+                and $self->{CONF}->{"ls_bootstrap_file"} )
+            {
+                $self->{LOGGER}->warn( "Setting \"ls_bootstrap_file\" to \"" . $self->{CONF}->{"ls_bootstrap_file"} . "\"" );
+                $self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"} = $self->{CONF}->{"ls_bootstrap_file"};
+            }
+        }
+        
         unless ( exists $self->{CONF}->{"tracerouteMA"}->{"ls_instance"}
             and $self->{CONF}->{"tracerouteMA"}->{"ls_instance"} )
         {
@@ -84,7 +99,13 @@ sub init {
                 $self->{CONF}->{"tracerouteMA"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
             }
             else {
-                $self->{LOGGER}->warn( "No LS instance specified for pSB service" );
+                my $ls_bootstrap = SimpleLookupService::Client::Bootstrap->new();
+                if($self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"}){
+                    $ls_bootstrap->init(file => $self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"});
+                }else{
+                    $ls_bootstrap->init();
+                }
+                $self->{CONF}->{"tracerouteMA"}->{"ls_instance"} = $ls_bootstrap->register_url();
             }
         }
 
@@ -139,6 +160,35 @@ sub init {
             $self->{CONF}->{"tracerouteMA"}->{"service_type"} = "MA";
             $self->{LOGGER}->warn( "Setting 'service_type' to 'MA'." );
         }
+        
+        unless ( exists $self->{CONF}->{"tracerouteMA"}->{"ls_key_db"}
+            and $self->{CONF}->{"tracerouteMA"}->{"ls_key_db"} )
+        {
+            $self->{CONF}->{"tracerouteMA"}->{"ls_key_db"} = $self->{CONF}->{"ls_key_db"};
+            $self->{LOGGER}->warn( "Setting 'ls_key_db' to " . $self->{CONF}->{"ls_key_db"});
+        }
+        
+        #initialize the key database
+        if ( not $self->{CONF}->{"ls_key_db"} ) {
+            $self->{CONF}->{"ls_key_db"} = '/var/lib/perfsonar/traceroute_ma/lsKey.db';
+        }
+        unless ( exists $self->{CONF}->{"tracerouteMA"}->{"ls_key_db"}
+            and $self->{CONF}->{"tracerouteMA"}->{"ls_key_db"} )
+        {
+            $self->{CONF}->{"tracerouteMA"}->{"ls_key_db"} = $self->{CONF}->{"ls_key_db"};
+            $self->{LOGGER}->warn( "Setting 'ls_key_db' to " . $self->{CONF}->{"tracerouteMA"}->{"ls_key_db"});
+        }
+        
+        #set site parameters
+        $self->_mergeSiteConfig('project');
+        $self->_mergeSiteConfig('name');
+        $self->_mergeSiteConfig('domain');
+        $self->_mergeSiteConfig('city');
+        $self->_mergeSiteConfig('region');
+        $self->_mergeSiteConfig('country');
+        $self->_mergeSiteConfig('zip_code');
+        $self->_mergeSiteConfig('latitude');
+        $self->_mergeSiteConfig('longitude');
     }
     
     #Register handlers
@@ -194,40 +244,40 @@ sub registerLS {
         $l =~ s/(\s|\n)*//g;
         push @ls_array, $l if $l;
     }
-    @array = split( /\s+/, $self->{CONF}->{"ls_instance"} );
-    foreach my $l ( @array ) {
-        $l =~ s/(\s|\n)*//g;
-        push @ls_array, $l if $l;
-    }
-
-    my @hints_array = ();
-
-    if ( !defined $self->{LS_CLIENT} ) {
-        my %ls_conf = (
-            SERVICE_TYPE        => $self->{CONF}->{"tracerouteMA"}->{"service_type"},
-            SERVICE_NAME        => $self->{CONF}->{"tracerouteMA"}->{"service_name"},
-            SERVICE_DESCRIPTION => $self->{CONF}->{"tracerouteMA"}->{"service_description"},
-            SERVICE_ACCESSPOINT => $self->{CONF}->{"tracerouteMA"}->{"service_accesspoint"},
-        );
-        $self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote( \@ls_array, \%ls_conf, \@hints_array );
-    }
     
-    #query database
+    #Query database to build test set
     my $dbh = new perfSONAR_PS::DB::SQL( { name => $self->{DB_PARAMS}->{name}, user => $self->{DB_PARAMS}->{user}, pass => $self->{DB_PARAMS}->{pass} } );
     $dbh->openDB;
-    my $psDoc = new perfSONAR_PS::XML::Document();
-    $self->buildMetaData({
-        dbh => $dbh,
-        output => $psDoc
-    });
+    my ($test_set,$interfaces) = $self->buildTestSet(dbh => $dbh);
     $dbh->closeDB;
     
-    #Send registration request
-    my $mdString = $psDoc->getValue();
-    $mdString =~ s/<\/nmwg:metadata>\s*<nmwg:metadata/<\/nmwg:metadata>\n<nmwg:metadata/g;
-    my @metadata = split "\n", $mdString;
-    $self->{LS_CLIENT}->registerStatic( \@metadata );
-    
+    #Build service registration
+    my @event_types_list = ( TRACEROUTE_EVENT_TYPE );
+    my @ma_types_list = ( 'traceroute' );
+    my $service_params = { 
+                      serviceLocator => $self->{CONF}->{"tracerouteMA"}->{"service_accesspoint"}, 
+                      serviceType => 'ma', 
+     				  serviceName => $self->{CONF}->{"tracerouteMA"}->{"service_name"}, 
+     				  eventTypes => \@event_types_list,
+     				  maTypes => \@ma_types_list,
+ 					 };
+    $service_params->{'communities'} = $self->{CONF}->{"tracerouteMA"}->{"site_project"} if($self->{CONF}->{"tracerouteMA"}->{"site_project"});
+    $service_params->{'site_name'} = $self->{CONF}->{"tracerouteMA"}->{"site_name"} if($self->{CONF}->{"tracerouteMA"}->{"site_name"});
+ 	$service_params->{'domains'} = $self->{CONF}->{"tracerouteMA"}->{"site_domain"} if($self->{CONF}->{"tracerouteMA"}->{"site_domain"});
+ 	$service_params->{'city'} = $self->{CONF}->{"tracerouteMA"}->{"site_city"} if($self->{CONF}->{"tracerouteMA"}->{"site_city"});
+ 	$service_params->{'region'} = $self->{CONF}->{"tracerouteMA"}->{"site_region"} if($self->{CONF}->{"tracerouteMA"}->{"site_region"});
+ 	$service_params->{'country'} = $self->{CONF}->{"tracerouteMA"}->{"site_country"} if($self->{CONF}->{"tracerouteMA"}->{"site_country"});
+ 	$service_params->{'zip_code'} = $self->{CONF}->{"tracerouteMA"}->{"site_zip_code"} if($self->{CONF}->{"tracerouteMA"}->{"site_zip_code"});
+ 	$service_params->{'latitude'} = $self->{CONF}->{"tracerouteMA"}->{"site_latitude"} if($self->{CONF}->{"tracerouteMA"}->{"site_latitude"});
+ 	$service_params->{'longitude'} = $self->{CONF}->{"tracerouteMA"}->{"site_longitude"} if($self->{CONF}->{"tracerouteMA"}->{"site_longitude"});
+
+    #Register 
+    if(!defined $self->{LS_CLIENT}){
+        $self->{LS_CLIENT} = perfSONAR_PS::Utils::MARegistrationManager->new();
+        $self->{LS_CLIENT}->init(ls_url => $ls_array[0], ls_key_db => $self->{CONF}->{"tracerouteMA"}->{"ls_key_db"});
+    }
+    $self->{LS_CLIENT}->register(service_params => $service_params, interfaces => $interfaces, test_set => $test_set);
+ 
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.Traceroute.registerLS.end");
     $self->{NETLOGGER}->info( $nlmsg );
     
@@ -661,6 +711,75 @@ sub buildMetaData{
     return (1, \%tspec_map, $tspec_keys, \@dateList);
 }
 
+sub buildTestSet{
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            dbh => 1,
+            
+        }
+    );
+    
+    my %test_set = ();
+    my @interfaces = ();
+    my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.Traceroute.buildTestSet.start");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    #Determine the time range
+    my @dateList = ();
+    
+    #Begin queries
+    my $dateSql = 'SELECT year, month, day FROM DATES';
+    #get the dates
+    my $date_results = $parameters->{dbh}->query( { query => "$dateSql" } );
+    if(@{$date_results} == 0){
+        my $msg = "No data found in given time range";
+        my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.Traceroute.buildTestSet.end", { status => -1, msg => $msg });
+        $self->{NETLOGGER}->debug( $nlmsg );
+        throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
+        return (\%test_set, \@interfaces);
+    }
+    foreach my $date_row(@{$date_results}){
+        push @dateList, sprintf "%04d%02d%02d", $date_row->[0], $date_row->[1], $date_row->[2];
+    }
+    
+    # get the test specs.
+    
+    my $testSpecSQL = "";
+    for(my $date_i = 0; $date_i < @dateList; $date_i++){
+        $testSpecSQL .= " UNION " if($date_i != 0);
+        $testSpecSQL .= "(SELECT src, dst FROM " . $dateList[$date_i] . "_TESTSPEC)";
+    }
+    
+    my $tspec_results = $parameters->{dbh}->query( { query => "$testSpecSQL" } );
+    if(@{$tspec_results} == 0){
+        my $msg = "No matching tests found";
+        my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.Traceroute.buildTestSet.end", { status => -1, msg => $msg });
+        $self->{NETLOGGER}->debug( $nlmsg );
+        throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
+        return (\%test_set, \@interfaces);
+    }
+    
+    my %unique_interfaces = ();
+    foreach my $tspec_row(@{$tspec_results}){
+        $self->{LOGGER}->debug("src: " . $tspec_row->[0] . ", dst: " . $tspec_row->[1]);
+        $unique_interfaces{$tspec_row->[0]} = 1;
+        $unique_interfaces{$tspec_row->[1]} = 1;
+        if(!$test_set{$tspec_row->[0]}){
+            $test_set{$tspec_row->[0]} = ();
+        }
+        if(!$test_set{$tspec_row->[0]}{$tspec_row->[1]}){
+            my @tmp = ( TRACEROUTE_EVENT_TYPE );
+            $test_set{$tspec_row->[0]}{$tspec_row->[1]} = ( \@tmp );
+        }
+    }
+    @interfaces = keys %unique_interfaces;
+    
+    $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.Traceroute.buildTestSet.end");
+    $self->{NETLOGGER}->debug( $nlmsg );
+    return (\%test_set, \@interfaces);
+}
+
 #Copied from pSB MA
 sub confHierarchy {
     my ( $self, @args ) = @_;
@@ -680,4 +799,22 @@ sub confHierarchy {
     }
     return;
 
+}
+
+=head2 _mergeSiteConfig($self $param)
+
+Merges global site parameter into traceroute MA configuration if it doesn't exist. May
+be able to replace with common mergeConfig, but didn't want to conflict with existing 
+setters in init.
+=cut
+sub _mergeSiteConfig() {
+    my ($self, $param) = @_;
+    
+     unless(exists $self->{CONF}->{"tracerouteMA"}->{"site_$param"} and 
+                $self->{CONF}->{"tracerouteMA"}->{"site_$param"} ) {
+        if ( defined $self->{CONF}->{"site_$param"} and $self->{CONF}->{"site_$param"} ) {
+            $self->{LOGGER}->debug( "Setting \"site_$param\" to \"" . $self->{CONF}->{"site_$param"} . "\"" );
+            $self->{CONF}->{"tracerouteMA"}->{"site_$param"} = $self->{CONF}->{"site_$param"};
+        }
+    }
 }

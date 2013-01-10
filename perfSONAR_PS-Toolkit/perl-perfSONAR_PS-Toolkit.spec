@@ -106,6 +106,7 @@ Requires:       perl-perfSONAR_PS-LookupService
 Requires:       perl-perfSONAR_PS-perfSONARBUOY-server
 Requires:       perl-perfSONAR_PS-perfSONARBUOY-client
 Requires:       perl-perfSONAR_PS-perfSONARBUOY-config
+Requires:       perl-perfSONAR_PS-SimpleLS-BootStrap-client
 Requires:       perl-perfSONAR_PS-SNMPMA
 Requires:       perl-perfSONAR_PS-serviceTest
 Requires:       ndt
@@ -131,6 +132,7 @@ Requires(post):       perl-perfSONAR_PS-LookupService
 Requires(post):       perl-perfSONAR_PS-perfSONARBUOY-server
 Requires(post):       perl-perfSONAR_PS-perfSONARBUOY-client
 Requires(post):       perl-perfSONAR_PS-perfSONARBUOY-config
+Requires(post):       perl-perfSONAR_PS-SimpleLS-BootStrap-client
 Requires(post):       perl-perfSONAR_PS-SNMPMA
 Requires(post):       perl-perfSONAR_PS-serviceTest
 Requires(post):       perl-perfSONAR_PS-TracerouteMA-config
@@ -269,6 +271,7 @@ cp -f /opt/perfsonar_ps/toolkit/etc/default_service_configs/hLS.conf /opt/perfso
 cp -f /opt/perfsonar_ps/toolkit/etc/default_service_configs/snmp_ma.conf /opt/perfsonar_ps/snmp_ma/etc/daemon.conf
 cp -f /opt/perfsonar_ps/toolkit/etc/default_service_configs/traceroute_ma.conf /opt/perfsonar_ps/traceroute_ma/etc/daemon.conf
 cp -f /opt/perfsonar_ps/toolkit/etc/default_service_configs/traceroute_master.conf /opt/perfsonar_ps/traceroute_ma/etc/traceroute-master.conf
+cp -f /opt/perfsonar_ps/toolkit/etc/default_service_configs/SimpleLSBootStrap-hosts-client.yml /opt/SimpleLS/bootstrap/etc/hosts-client.yml 
 
 #make sure traceroute_scheduler uses pSB owmesh file
 rm /opt/perfsonar_ps/traceroute_ma/etc/owmesh.conf
