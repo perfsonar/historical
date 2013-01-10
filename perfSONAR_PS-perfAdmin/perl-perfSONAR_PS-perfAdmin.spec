@@ -5,11 +5,11 @@
 %define crontab perfAdmin.cron
 %define apacheconf perfAdmin.conf
 
-%define relnum 3
+%define relnum 1
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-perfAdmin
-Version:        3.2.1
+Version:        3.3
 Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS perfAdmin
 License:        distributable, see LICENSE

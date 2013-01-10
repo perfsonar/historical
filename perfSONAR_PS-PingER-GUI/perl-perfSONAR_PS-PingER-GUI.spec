@@ -5,11 +5,11 @@
 %define crontab pinger_cache.cron
 %define disttag pSPS
 %define apacheconf pinger_gui.conf
-%define relnum 3
+%define relnum 1
 %define _unpackaged_files_terminate_build 0
 
 Name:           perl-perfSONAR_PS-PingER-GUI
-Version:        3.2.1
+Version:        3.3
 Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS PingER  data charts GUI
 License:        distributable, see LICENSE

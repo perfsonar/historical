@@ -4,11 +4,11 @@
 %define init_script_1 topology_service
 # %define init_script_2 ls_registration_daemon
 
-%define relnum  3
+%define relnum  1
 %define disttag pSPS
 
 Name:           perl-perfSONAR_PS-TopologyService
-Version:        3.2.1
+Version:        3.3
 Release:        %{relnum}.%{disttag}
 Summary:        perfSONAR_PS Topology Service
 License:        distributable, see LICENSE
