@@ -310,8 +310,8 @@ sub init {
         }
         
         #set site parameters
-        $self->_mergeSiteConfig('project');
-        $self->_mergeSiteConfig('name');
+        $self->_mergeSiteConfig('site_project');
+        $self->_mergeSiteConfig('site_name');
         $self->_mergeSiteConfig('domain');
         $self->_mergeSiteConfig('city');
         $self->_mergeSiteConfig('region');
@@ -375,11 +375,11 @@ setters in init.
 sub _mergeSiteConfig() {
     my ($self, $param) = @_;
     
-     unless(exists $self->{CONF}->{"perfsonarbuoy"}->{"site_$param"} and 
-                $self->{CONF}->{"perfsonarbuoy"}->{"site_$param"} ) {
-        if ( defined $self->{CONF}->{"site_$param"} and $self->{CONF}->{"site_$param"} ) {
-            $self->{LOGGER}->debug( "Setting \"site_$param\" to \"" . $self->{CONF}->{"site_$param"} . "\"" );
-            $self->{CONF}->{"perfsonarbuoy"}->{"site_$param"} = $self->{CONF}->{"site_$param"};
+     unless(exists $self->{CONF}->{"perfsonarbuoy"}->{"$param"} and 
+                $self->{CONF}->{"perfsonarbuoy"}->{"$param"} ) {
+        if ( defined $self->{CONF}->{"$param"} and $self->{CONF}->{"$param"} ) {
+            $self->{LOGGER}->debug( "Setting \"$param\" to \"" . $self->{CONF}->{"$param"} . "\"" );
+            $self->{CONF}->{"perfsonarbuoy"}->{"$param"} = $self->{CONF}->{"$param"};
         }
     }
 }
@@ -1724,13 +1724,13 @@ sub registerLS {
  					 };
     $service_params->{'communities'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_project"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_project"});
     $service_params->{'site_name'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_name"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_name"});
- 	$service_params->{'domains'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_domain"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_domain"});
- 	$service_params->{'city'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_city"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_city"});
- 	$service_params->{'region'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_region"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_region"});
- 	$service_params->{'country'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_country"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_country"});
- 	$service_params->{'zip_code'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_zip_code"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_zip_code"});
- 	$service_params->{'latitude'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_latitude"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_latitude"});
- 	$service_params->{'longitude'} = $self->{CONF}->{"perfsonarbuoy"}->{"site_longitude"} if($self->{CONF}->{"perfsonarbuoy"}->{"site_longitude"});
+ 	$service_params->{'domains'} = $self->{CONF}->{"perfsonarbuoy"}->{"domain"} if($self->{CONF}->{"perfsonarbuoy"}->{"domain"});
+ 	$service_params->{'city'} = $self->{CONF}->{"perfsonarbuoy"}->{"city"} if($self->{CONF}->{"perfsonarbuoy"}->{"city"});
+ 	$service_params->{'region'} = $self->{CONF}->{"perfsonarbuoy"}->{"region"} if($self->{CONF}->{"perfsonarbuoy"}->{"region"});
+ 	$service_params->{'country'} = $self->{CONF}->{"perfsonarbuoy"}->{"country"} if($self->{CONF}->{"perfsonarbuoy"}->{"country"});
+ 	$service_params->{'zip_code'} = $self->{CONF}->{"perfsonarbuoy"}->{"zip_code"} if($self->{CONF}->{"perfsonarbuoy"}->{"zip_code"});
+ 	$service_params->{'latitude'} = $self->{CONF}->{"perfsonarbuoy"}->{"latitude"} if($self->{CONF}->{"perfsonarbuoy"}->{"latitude"});
+ 	$service_params->{'longitude'} = $self->{CONF}->{"perfsonarbuoy"}->{"longitude"} if($self->{CONF}->{"perfsonarbuoy"}->{"longitude"});
 
     #handle registration
     if(!defined $self->{LS_CLIENT}){

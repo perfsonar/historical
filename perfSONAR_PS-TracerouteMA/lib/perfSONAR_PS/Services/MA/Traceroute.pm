@@ -180,8 +180,8 @@ sub init {
         }
         
         #set site parameters
-        $self->_mergeSiteConfig('project');
-        $self->_mergeSiteConfig('name');
+        $self->_mergeSiteConfig('site_project');
+        $self->_mergeSiteConfig('site_name');
         $self->_mergeSiteConfig('domain');
         $self->_mergeSiteConfig('city');
         $self->_mergeSiteConfig('region');
@@ -263,13 +263,13 @@ sub registerLS {
  					 };
     $service_params->{'communities'} = $self->{CONF}->{"tracerouteMA"}->{"site_project"} if($self->{CONF}->{"tracerouteMA"}->{"site_project"});
     $service_params->{'site_name'} = $self->{CONF}->{"tracerouteMA"}->{"site_name"} if($self->{CONF}->{"tracerouteMA"}->{"site_name"});
- 	$service_params->{'domains'} = $self->{CONF}->{"tracerouteMA"}->{"site_domain"} if($self->{CONF}->{"tracerouteMA"}->{"site_domain"});
- 	$service_params->{'city'} = $self->{CONF}->{"tracerouteMA"}->{"site_city"} if($self->{CONF}->{"tracerouteMA"}->{"site_city"});
- 	$service_params->{'region'} = $self->{CONF}->{"tracerouteMA"}->{"site_region"} if($self->{CONF}->{"tracerouteMA"}->{"site_region"});
- 	$service_params->{'country'} = $self->{CONF}->{"tracerouteMA"}->{"site_country"} if($self->{CONF}->{"tracerouteMA"}->{"site_country"});
- 	$service_params->{'zip_code'} = $self->{CONF}->{"tracerouteMA"}->{"site_zip_code"} if($self->{CONF}->{"tracerouteMA"}->{"site_zip_code"});
- 	$service_params->{'latitude'} = $self->{CONF}->{"tracerouteMA"}->{"site_latitude"} if($self->{CONF}->{"tracerouteMA"}->{"site_latitude"});
- 	$service_params->{'longitude'} = $self->{CONF}->{"tracerouteMA"}->{"site_longitude"} if($self->{CONF}->{"tracerouteMA"}->{"site_longitude"});
+ 	$service_params->{'domains'} = $self->{CONF}->{"tracerouteMA"}->{"domain"} if($self->{CONF}->{"tracerouteMA"}->{"domain"});
+ 	$service_params->{'city'} = $self->{CONF}->{"tracerouteMA"}->{"city"} if($self->{CONF}->{"tracerouteMA"}->{"city"});
+ 	$service_params->{'region'} = $self->{CONF}->{"tracerouteMA"}->{"region"} if($self->{CONF}->{"tracerouteMA"}->{"region"});
+ 	$service_params->{'country'} = $self->{CONF}->{"tracerouteMA"}->{"country"} if($self->{CONF}->{"tracerouteMA"}->{"country"});
+ 	$service_params->{'zip_code'} = $self->{CONF}->{"tracerouteMA"}->{"zip_code"} if($self->{CONF}->{"tracerouteMA"}->{"zip_code"});
+ 	$service_params->{'latitude'} = $self->{CONF}->{"tracerouteMA"}->{"latitude"} if($self->{CONF}->{"tracerouteMA"}->{"latitude"});
+ 	$service_params->{'longitude'} = $self->{CONF}->{"tracerouteMA"}->{"longitude"} if($self->{CONF}->{"tracerouteMA"}->{"longitude"});
 
     #Register 
     if(!defined $self->{LS_CLIENT}){
@@ -810,11 +810,11 @@ setters in init.
 sub _mergeSiteConfig() {
     my ($self, $param) = @_;
     
-     unless(exists $self->{CONF}->{"tracerouteMA"}->{"site_$param"} and 
-                $self->{CONF}->{"tracerouteMA"}->{"site_$param"} ) {
-        if ( defined $self->{CONF}->{"site_$param"} and $self->{CONF}->{"site_$param"} ) {
-            $self->{LOGGER}->debug( "Setting \"site_$param\" to \"" . $self->{CONF}->{"site_$param"} . "\"" );
-            $self->{CONF}->{"tracerouteMA"}->{"site_$param"} = $self->{CONF}->{"site_$param"};
+     unless(exists $self->{CONF}->{"tracerouteMA"}->{"$param"} and 
+                $self->{CONF}->{"tracerouteMA"}->{"$param"} ) {
+        if ( defined $self->{CONF}->{"$param"} and $self->{CONF}->{"$param"} ) {
+            $self->{LOGGER}->debug( "Setting \"$param\" to \"" . $self->{CONF}->{"$param"} . "\"" );
+            $self->{CONF}->{"tracerouteMA"}->{"$param"} = $self->{CONF}->{"$param"};
         }
     }
 }
