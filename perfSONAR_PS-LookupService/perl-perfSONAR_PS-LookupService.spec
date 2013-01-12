@@ -109,6 +109,7 @@ fi
 %{install_base}/bin/*
 %{install_base}/scripts/*
 %{install_base}/lib/*
+%{install_base}/dependencies
 /etc/init.d/*
 /etc/sysconfig/*
 
