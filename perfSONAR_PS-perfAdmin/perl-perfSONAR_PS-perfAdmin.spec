@@ -1,4 +1,3 @@
-%define _unpackaged_files_terminate_build 0
 %define install_base /opt/perfsonar_ps/perfAdmin
 
 # cron/apache entry are located in the 'scripts' directory
@@ -102,6 +101,7 @@ chown -R root:root /etc/cron.d/perfAdmin.cron
 %{install_base}/cgi-bin/*
 %{install_base}/scripts/*
 %{install_base}/lib/*
+%{install_base}/dependencies
 /etc/cron.d/*
 /etc/httpd/conf.d/*
 

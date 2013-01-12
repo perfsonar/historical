@@ -122,6 +122,7 @@ fi
 %defattr(0644,perfsonar,perfsonar,0755)
 %doc %{install_base}/doc/*
 %config %{install_base}/etc/*
+%{install_base}/dependencies
 %attr(0755,perfsonar,perfsonar) %{install_base}/bin/*
 %attr(0755,perfsonar,perfsonar) %{install_base}/scripts/*
 %{install_base}/lib/*

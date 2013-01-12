@@ -61,7 +61,7 @@ queried.
 %install
 rm -rf %{buildroot}
 
-make ROOTPATH=%{buildroot}/%{install_base} install
+make ROOTPATH=%{buildroot}/%{install_base} rpminstall
 
 mkdir -p %{buildroot}/etc/init.d
 
@@ -100,10 +100,11 @@ fi
 %files
 %defattr(0644,perfsonar,perfsonar,0755)
 %doc %{install_base}/doc/*
+%{install_base}/lib/*
+%{install_base}/dependencies
 %config %{install_base}/etc/*
 %attr(0755,perfsonar,perfsonar) %{install_base}/bin/*
 %attr(0755,perfsonar,perfsonar) %{install_base}/scripts/*
-%{install_base}/lib/*
 %attr(0755,perfsonar,perfsonar) /etc/init.d/*
 
 %changelog

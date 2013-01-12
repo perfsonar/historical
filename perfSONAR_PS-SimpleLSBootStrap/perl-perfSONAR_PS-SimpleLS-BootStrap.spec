@@ -1,4 +1,3 @@
-%define _unpackaged_files_terminate_build 0
 %define install_base /opt/SimpleLS/bootstrap
 %define init_script_server simple_ls_bootstrap_server
 %define init_script_client simple_ls_bootstrap_client

@@ -1,4 +1,3 @@
-%define _unpackaged_files_terminate_build 0
 %define install_base /opt/perfsonar_ps/snmp_ma
 
 # init scripts must be located in the 'scripts' directory
@@ -139,6 +138,7 @@ fi
 %{install_base}/bin/*
 %{install_base}/scripts/*
 %{install_base}/lib/*
+%{install_base}/dependencies
 /etc/init.d/*
 
 %changelog

@@ -1,4 +1,3 @@
-%define _unpackaged_files_terminate_build 0
 %define install_base /opt/perfsonar_ps/perfsonarbuoy_ma
 
 # init scripts must be located in the 'scripts' directory
@@ -208,6 +207,7 @@ fi
 %files config
 %defattr(-,perfsonar,perfsonar,-)
 %doc %{install_base}/doc/*
+%{install_base}/dependencies
 %config(noreplace) %{install_base}/etc/owmesh.conf
 
 %files client

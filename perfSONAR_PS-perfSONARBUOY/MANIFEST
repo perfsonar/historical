@@ -155,7 +155,6 @@ lib/SimpleLookupService/Client/RecordManager.pm
 lib/SimpleLookupService/Client/SimpleLS.pm
 lib/SimpleLookupService/Client/Query.pm
 lib/SimpleLookupService/Client/Registration.pm
-modules.rules
 perl-perfSONAR_PS-perfSONARBUOY.spec
 scripts/install_dependencies.sh
 scripts/perfsonarbuoy_bw_collector
