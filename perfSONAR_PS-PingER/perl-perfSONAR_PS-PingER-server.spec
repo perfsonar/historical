@@ -142,6 +142,8 @@ echo "-----------------------------------------------------------------"
 %attr(0755,perfsonar,perfsonar) /etc/init.d/*
 
 %changelog
+* Fri Jan 11 2013 asides@es.net 3.3-1
+- 3.3 beta release
 
 * Mon Mar 14 2011 maxim@fnal.gov v3.1.14
 - added support for the IPv6

@@ -129,5 +129,8 @@ fi
 %attr(0755,perfsonar,perfsonar) /etc/init.d/*
 
 %changelog
+* Fri Jan 11 2013 asides@es.net 3.3-1
+- 3.3 beta release
+
 * Wed Oct 01 2009 aaron@internet2.edu 3.1-1
 - Initial spec file

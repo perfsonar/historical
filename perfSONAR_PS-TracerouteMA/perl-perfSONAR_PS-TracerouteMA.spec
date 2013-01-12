@@ -238,5 +238,8 @@ fi
 /etc/init.d/traceroute_ma
 
 %changelog
+* Fri Jan 11 2013 asides@es.net 3.3-1
+- 3.3 beta release
+
 * Wed Oct 6 2010 andy@es.net 3.2-RC1
 - Initial file specification

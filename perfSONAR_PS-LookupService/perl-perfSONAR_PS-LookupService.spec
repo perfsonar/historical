@@ -1,4 +1,3 @@
-%define _unpackaged_files_terminate_build 0
 %define install_base /opt/perfsonar_ps/lookup_service
 
 # init scripts must be located in the 'scripts' directory

@@ -126,6 +126,9 @@ fi
 %attr(0755,perfsonar,perfsonar) /etc/init.d/*
 
 %changelog
+* Fri Jan 11 2013 asides@es.net 3.3-1
+- 3.3 beta release
+
 * Tue Sep 22 2009 zurawski@internet2.edu 3.1-3
 - useradd option change
 - mysql fixes

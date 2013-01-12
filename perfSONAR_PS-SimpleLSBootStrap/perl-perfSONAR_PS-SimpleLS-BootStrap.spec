@@ -124,5 +124,8 @@ rm -rf %{buildroot}
 %attr(0755,perfsonar,perfsonar) %{install_base}/lib/*
 
 %changelog
+* Fri Jan 11 2013 asides@es.net 3.3-1
+- 3.3 beta release
+
 * Thu Jan 10 2013 andy@es.net 3.3
 - Initial RPM build

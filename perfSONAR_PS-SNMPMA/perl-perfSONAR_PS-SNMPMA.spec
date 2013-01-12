@@ -142,6 +142,9 @@ fi
 /etc/init.d/*
 
 %changelog
+* Fri Jan 11 2013 asides@es.net 3.3-1
+- 3.3 beta release
+
 * Wed Sep 29 2010 zurawski@internet2.edu 3.2-1
 - Updated init scripts
 - Package fixes (build using mock)
