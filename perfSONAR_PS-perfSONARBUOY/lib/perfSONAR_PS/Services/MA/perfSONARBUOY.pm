@@ -58,7 +58,6 @@ use perfSONAR_PS::Config::OWP::Utils;
 use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
-use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::OWPDB;
@@ -3239,7 +3238,7 @@ L<Params::Validate>, L<Sys::Hostname>, L<Fcntl>, L<Date::Manip>,
 L<Math::Int64>, L<Data::Validate::IP>, L<Net::IP>, L<File::Basename>,
 L<perfSONAR_PS::Config::OWP>,L<perfSONAR_PS::Config::OWP::Utils>,
 L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>,
+L<perfSONAR_PS::Messages>,
 L<perfSONAR_PS::Error_compat>, L<perfSONAR_PS::DB::File>,
 L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::Utils::ParameterValidation>
 

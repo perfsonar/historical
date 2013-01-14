@@ -17,7 +17,6 @@ use fields 'LOGGER','NETLOGGER', 'DB_PARAMS', 'LS_CLIENT';
 
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
-use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Utils::MARegistrationManager;
