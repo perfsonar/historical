@@ -79,7 +79,7 @@ This page contains a checklist of things to test before releasing a Performance 
   * `_____` If you deleted a "Popular Community" from the communities list, does it get added back to the Popular Communities list
   * `_____` Save the administrative information
   * `_____` Did all the information get saved? Click Reset and make sure nothing changes
-  * `_____` Check that the following services were restarted: PingER, SNMP MA, perfSONAR-BUOY Measurement Archive, Traceroute Measurement Archive ls registration daemon
+  * `_____` Check that the following services were restarted: PingER, SNMP MA, perfSONAR-BUOY Measurement Archive, Traceroute Measurement Archive, LS Registration Daemon
   * `_____` Check that NPAD's and NDT's webpages got updated:
   * `_____` NDT: `http://[host url]:7123`
   * `_____` NPAD: `http://[host url]:8000`
