@@ -10,20 +10,33 @@ The following guide describes in detail the steps required to set up version 3.3
 
 The system recommendations for the pS Performance toolkit are now located [http://psps.perfsonar.net/toolkit/hardware.html here].
 
+== Downloads ==
+
+||Distribution||Architecture||Download||
+||NetInstall||i386|| [http://software.internet2.edu/pSPT3.3-rc1/pS-Performance_Toolkit-3.3rc1-NetInstall-i386.iso iso] [http://software.internet2.edu/pSPT3.3-rc1/pS-Performance_Toolkit-3.3rc1-NetInstall-i386.iso.md5 md5]||
+|| ||x86_64|| [http://software.internet2.edu/pSPT3.3-rc1/pS-Performance_Toolkit-3.3rc1-NetInstall-x86_64.iso iso] [http://software.internet2.edu/pSPT3.3-rc1/pS-Performance_Toolkit-3.3rc1-NetInstall-x86_64.iso.md5 md5]||
+||LiveCD||i386|| [http://software.internet2.edu/pSPT3.3-rc1/pS-Performance_Toolkit-3.3rc1-LiveCD-i386.iso iso] [http://software.internet2.edu/pSPT3.3-rc1/pS-Performance_Toolkit-3.3rc1-LiveCD-i386.iso.md5 md5]||
+|| ||x86_64|| [http://software.internet2.edu/pSPT3.3-rc1/pS-Performance_Toolkit-3.3rc1-LiveCD-x86_64.iso iso] [http://software.internet2.edu/pSPT3.3-rc1/pS-Performance_Toolkit-3.3rc1-LiveCD-x86_64.iso.md5 md5]||
+||LiveUSB||i386|| [http://software.internet2.edu/pSPT3.3-rc1/pS-Performance_Toolkit-3.3rc1-LiveUSB-i386.iso iso] [http://software.internet2.edu/pSPT3.3-rc1/pS-Performance_Toolkit-3.3rc1-LiveUSB-i386.iso.md5 md5]||
+|| ||x86_64|| [http://software.internet2.edu/pSPT3.3-rc1/pS-Performance_Toolkit-3.3rc1-LiveUSB-x86_64.iso iso] [http://software.internet2.edu/pSPT3.3-rc1/pS-Performance_Toolkit-3.3rc1-LiveUSB-x86_64.iso.md5 md5] [deploy-script]||
+
+
 == Installation ==
 
-Version 3.3rc1 of the pS Performance Toolkit consists of two primary installation mediums:
+Version 3.3rc1 of the pS Performance Toolkit consists of three primary installation mediums:
 
  * [pSPerformanceToolkit33#NetInstall_CD NetInstall CD]
    * Allows the entire OS image to be installed directly to a host's hard disk
    * Requires network connectivity to download necessary packages
-   * Does not support _upgrade_ functions from prior versions of the pS Performance Toolkit
    * Allows an upgrade path directly from the host via _*yum*_ - no physical access to the machine will be required.  
  * [pSPerformanceToolkit33#Live_CD Live CD]
-   * Classic use case.  
-     * Can run without harming host's hard disk contents
-     * Can run and store measurements on host's hard disk
-   * Ability to upgrade from prior versions of the pS Performance Toolkit
+   * Boots and runs directly from CD
+   * Can run without harming host's hard disk contents
+   * Can run and store measurements on host's hard disk
+ * [pSPerformanceToolkit33#Live_USB Live USB]
+  * Newest install option
+  * Supports hosts with CD-ROM drive
+  * Runs the same as the LiveCD
  
 The following sections describe the installation procedure for each of the products.
 
@@ -342,6 +355,21 @@ https://[host address]/toolkit
 }}}
 
 An important thing to note is that in the description above, there is no IP address or hostname found for this host currently.  This will need to be rectified in the [pSPerformanceToolkit33#Console console configuration] step.  
+
+=== Live USB ==
+
+You can mount the downloaded image onto a USB drive using the script found [http://anonsvn.internet2.edu/svn/nptoolkit/branches/ASIDES_CentOS_6.3/scripts/deploy_liveusb.sh here]. Once you have downloaded the script, its usage is as follows:  
+ 
+{{{
+Usage: bash deploy_liveusb.sh [--arch <arch>] <device> [diskimage]
+E.g.: bash deploy_liveusb.sh /dev/sdb1 (to use flash drive partition)
+  or: bash deploy_liveusb.sh /dev/sdb (to wipe flash drive and create new partition)
+  or: bash deploy_liveusb.sh /dev/sdb1 image.iso (to specify ISO disk image)
+Warning: SuperUser privileges required to use this script.
+}}}
+ 
+ 
+
 
 == Configuration ==
 
