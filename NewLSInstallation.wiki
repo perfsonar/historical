@@ -10,9 +10,8 @@ This page details the installation instruction for CentOS. For any other flavor 
 = Installation =
 
 == Download == 
-The SimpleLookupService rpm can be downloaded from here: http://odev-vm-7.es.net/perfsonar-packages/new-ls/lookup-service-0.1-3.noarch.rpm
+The SimpleLookupService rpm is available in yum repo here: http://software.internet2.edu/rpms/i386/main/RPMS/
 
-Source RPM: http://odev-vm-7.es.net/perfsonar-packages/new-ls/lookup-service-0.1-3.src.rpm
 
 == Dependencies ==
 This software requires the following:
@@ -61,6 +60,26 @@ The package will be under /opt/lookup-service. Config file: /opt/lookup-service/
 
 == Check if service is running ==
 From a browser, try http://`<`host:port`>`/lookup/records
+
+== Configuring the Lookup Service ==
+The lookup service uses a yaml based configuration file. The current lookup service supports the following options:
+
+=== Lookup Service settings ===
+  * host - hostname or the ip address of the host where the lookup service is running. Default value: localhost
+  * port - port where lookup service listens for connections. Default value: 8080 
+  * (lease) max - in seconds, maximum lease time that can be granted to a record. Default value: 2592000
+  * (lease) min - in seconds, minimum lease time that can be granted to a record. Default value: 7200
+  * (lease) default - in seconds, if no lease time is requested, this is granted. Default value: 1800
+
+=== Database settings ===
+  * DBUrl - the host name where MongoDB is running. Default value: 127.0.0.1
+  * DBPort - the port number where MongoDB is running. Default value: 27017
+  * DBName - name of the database. Default value: LookupService
+  * DBCollName - name of the collection name. Default value: services
+  * username - username for access (future)
+  * password - password for access (future)
+  * pruneInterval - interval at which the stale entries are removed from the database
+  * pruneThreshold -  the duration for which expired records can live in the database before they are renewed or cleaned up 
 
 == Simple Curl examples ==
 === Registration === 
