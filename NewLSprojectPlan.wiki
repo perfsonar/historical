@@ -16,6 +16,8 @@ API Document: http://goo.gl/Ajf9z
 
 Transition Plan: http://goo.gl/rWCUI
 
+Installation Instructions: http://code.google.com/p/perfsonar-ps/wiki/NewLSInstallation
+
 = Project Plan =
 
 Milestone 0: Complete, May 15, 2012
