@@ -59,14 +59,14 @@ The package will be under /opt/lookup-service. Config file: /opt/lookup-service/
   * To restart: service lookup-service restart
 
 == Check if service is running ==
-From a browser, try http://`<`host:port`>`/lookup/records
+From a browser, try http://your-sLS.yourdomain.org:8090/lookup/records
 
 == Configuring the Lookup Service ==
 The lookup service uses a yaml based configuration file. The current lookup service supports the following options:
 
 === Lookup Service settings ===
   * host - hostname or the ip address of the host where the lookup service is running. Default value: localhost
-  * port - port where lookup service listens for connections. Default value: 8080 
+  * port - port where lookup service listens for connections. Default value: 8090 
   * (lease) max - in seconds, maximum lease time that can be granted to a record. Default value: 2592000
   * (lease) min - in seconds, minimum lease time that can be granted to a record. Default value: 7200
   * (lease) default - in seconds, if no lease time is requested, this is granted. Default value: 1800
@@ -83,24 +83,24 @@ The lookup service uses a yaml based configuration file. The current lookup serv
 
 == Simple Curl examples ==
 === Registration === 
-curl -v -H "Content-Type: application/json" –X POST -d '{"group-domains”:[ "es.net"],"service-locator":["nash-owamp.es.net"],"service-name":["ESnet-nash Ping Responder"],"service-type”:[ "ping"],"type”:[ "service"]}' http://ps4.es.net:9095/lookup/records 
+curl -v -H "Content-Type: application/json" –X POST -d '{"group-domains”:[ "es.net"],"service-locator":["nash-owamp.es.net"],"service-name":["ESnet-nash Ping Responder"],"service-type”:[ "ping"],"type”:[ "service"]}' http://your-sLS.yourdomain.org:8090/lookup/records 
 
 
 === Registration example 2 === 
-curl -v -H "Content-Type: application/json" –X POST -d '{"type":["host"],"group-domains":[ "es.net"],"host-name":["nash-owamp.es.net"],"host-OS":[ "Linux"]}' http://ps4.es.net:9095/lookup/records 
+curl -v -H "Content-Type: application/json" –X POST -d '{"type":["host"],"group-domains":[ "es.net"],"host-name":["nash-owamp.es.net"],"host-OS":[ "Linux"]}' http://your-sLS.yourdomain.org:8090/lookup/records 
 
 
 === Query === 
-curl -v -H "Content-Type: application/js" -X GET http://ps4.es.net:9095/lookup/records/?group-domains=es.net\&service-type=ping\&type=service\&operator=any 
+curl -v -H "Content-Type: application/js" -X GET http://your-sLS.yourdomain.org:8090/lookup/records/?group-domains=es.net\&service-type=ping\&type=service\&operator=any 
 
 === Renew ===
-curl -v -H "Content-Type: application/json" -X POST http://ps4.es.net:9095/lookup/service/<service-id`>`
+curl -v -H "Content-Type: application/json" -X POST http://your-sLS.yourdomain.org:8090/lookup/service/<service-id`>`
 
 === Delete === 
-curl -v -H "Content-Type: application/json" -X DELETE http://ps4.es.net:9095/lookup/service/<service-id`>`
+curl -v -H "Content-Type: application/json" -X DELETE http://your-sLS.yourdomain.org:8090/lookup/service/<service-id`>`
 
 === Get Service === 
-curl -v -H "Content-Type: application/json" -X GET http://ps4.es.net:9095/lookup/service/<service-id`>`
+curl -v -H "Content-Type: application/json" -X GET http://your-sLS.yourdomain.org:8090/lookup/service/<service-id`>`
 
 === Get Value of a particular key in service ===
-curl -v -H -X GET http://ps4.es.net:9095/lookup/service/<service-id`>`/record-service-domain
+curl -v -H -X GET http://your-sLS.yourdomain.org:8090/lookup/service/<service-id`>`/record-service-domain
