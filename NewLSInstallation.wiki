@@ -47,7 +47,8 @@ The Java jdk downloads can be found here: http://www.oracle.com/technetwork/java
 Download rpm and use yum to install it. 
 
 = Running Lookup Service =
-The package will be under /opt/lookup-service. Config file: /opt/lookup-service/etc. 
+The package will be under /opt/lookup-service. Config file: /etc/lookup-service/lookup-service.yaml.
+Log files can be found under: /var/log/lookup-service 
 
   # Configure the host and port options. 
   # MongoDB config options are configured for the default host and port (127.0.0.1,  27017). If it is different, then modify the DB config options accordingly.
