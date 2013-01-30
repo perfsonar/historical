@@ -46,30 +46,7 @@ if($server->getStatus() eq "alive"){
 	my $response = $client->query();
 	print scalar @{$response}, "\n";
 	
-	my %list = ();
-	foreach my $service (@{$response}){
-		foreach my $serviceLocator (@{$service->getServiceLocators()}){
-			print $serviceLocator,"|",@{$service->getServiceName()},"|",@{$service->getServiceType()};
-			if($service->getServiceType()->[0] eq 'ma'){
-				print "|", @{$service->getValue('ma-type')};
-			}
-			
-			print "|",$service->getSiteName()->[0];
-			print "|";
-			foreach my $project (@{$service->getValue('group-communities')}){
-				print "project:", $project;
-			}
-			print "|", time;
-			
-			print @{$service->getServiceEventType()};
-			print "\n";
-			
-		}
-	}
-	
-	
-	
-	
+	my %list = ();	
 	foreach my $service (@{$response}){
 		my %file_service_tracker = ();
 		my %counter = ();
