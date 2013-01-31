@@ -25,6 +25,10 @@ use SimpleLookupService::Client::SimpleLS;
 use perfSONAR_PS::Client::LS::PSQueryObjects::PSServiceQueryObject;
 use perfSONAR_PS::Client::LS::PSRecords::PSService;
 
+use SimpleLookupService::Client::Bootstrap;
+
+use URI;
+
 my $basedir = "$RealBin";
 #my $base =  "/var/lib/perfsonar/perfAdmin/cache";
 #should change base directory before moving to production
@@ -34,12 +38,21 @@ my $EXP_TIME = time - 3600*24;#expire after 24 hours
 my $query = perfSONAR_PS::Client::LS::PSQueryObjects::PSServiceQueryObject->new();
 $query->init();
 
+my $bootstrap =  SimpleLookupService::Client::Bootstrap->new();
+$bootstrap->init({file => "$basedir/../etc/service_url" });
+my $serverlist = $bootstrap->query_urls();
 
-my $server = SimpleLookupService::Client::SimpleLS->new();
-$server->init({host=>"ps4.es.net", port=>9095});
-$server->connect();
-
-if($server->getStatus() eq "alive"){
+print @{$serverlist};
+foreach my $s (@{$serverlist}){
+	my $url = URI->new($s);
+    my $hostname = $url->host();
+    my $port = $url->port();
+    
+    my $server = SimpleLookupService::Client::SimpleLS->new();
+	$server->init({host=>$hostname, port=>$port});
+	$server->connect();
+	
+	if($server->getStatus() eq "alive"){
 	my $client = perfSONAR_PS::Client::LS::PSClient::PSQuery->new();
 	$client->init({server=>$server, query=>$query});
 
@@ -50,7 +63,7 @@ if($server->getStatus() eq "alive"){
 	foreach my $service (@{$response}){
 		my %file_service_tracker = ();
 		my %counter = ();
-		foreach my $et (@{$service->getServiceEventType()}){
+		LOOP:foreach my $et (@{$service->getServiceEventType()}){
 			my $file = q{};
 			    if ( $et eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" or $et eq "http://ggf.org/ns/nmwg/tools/snmp/2.0" or $et eq "utilization" ) {
         			$file = "list.snmpma";
@@ -102,25 +115,25 @@ if($server->getStatus() eq "alive"){
     			next unless $file;
     			print "\n",$file,"\n";
     			
-    			#OPEN FILE AND KEEP UNEXPIRED
-			    my %cached_hosts = ();
-			    if(-e $base . "/" . $file){
-			        open( IN, "< ". $base . "/" . $file) or croak "can't open $base/$file for reading.";
-			        
-			        while( <IN>){
-			            chomp;
-			            my @fields = split /\|/;
-			            if( @fields < 6 ){
-			                print "Invalid line in $base/$file\n";
-			                next;
-			            }
-			            my @tmpKws = split( /\,/, $fields[4] );
-			            if($fields[5] && $fields[5] =~ /\d+/ && $fields[5] > $EXP_TIME){
-			                $cached_hosts{ $fields[0] } = { CONTACT => $fields[0], NAME => $fields[1], TYPE => $fields[2], DESC => $fields[3], KEYWORDS => \@tmpKws, TIMESTAMP => $fields[5] };
-			            }
-			        }
-			        close ( IN );
-			    }
+				#OPEN FILE AND KEEP UNEXPIRED
+				my %cached_hosts = ();
+				if(-e $base . "/" . $file){
+					open( IN, "< ". $base . "/" . $file) or croak "can't open $base/$file for reading.";
+							        
+					while( <IN>){
+						chomp;
+						my @fields = split /\|/;
+						if( @fields < 6 ){
+							print "Invalid line in $base/$file\n";
+							next;
+						}
+						my @tmpKws = split( /\,/, $fields[4] );
+							  if($fields[5] && $fields[5] =~ /\d+/ && $fields[5] > $EXP_TIME){
+							        $cached_hosts{ $fields[0] } = { CONTACT => $fields[0], NAME => $fields[1], TYPE => $fields[2], DESC => $fields[3], KEYWORDS => \@tmpKws, TIMESTAMP => $fields[5] };
+							  }
+					}
+					close ( IN );
+				}
 
 			    my $writetype = ">";
 			    $writetype = ">>" if exists $counter{$file};
@@ -185,18 +198,16 @@ if($server->getStatus() eq "alive"){
 			        print OUT $cached_hosts{$cache_key}->{"TIMESTAMP"} if $cached_hosts{$cache_key}->{"TIMESTAMP"};
 			        print OUT "\n";
 			        print $file , " - ", $cached_hosts{$cache_key}->{"CONTACT"}, " (cached)\n";
+			        
+			        last LOOP;
 			    }
 			    
-			    close( OUT );			    
+			    close( OUT );		
+			    
+			   	    
 		}
-		
-		
-		
+				
 	}
 	
 }
-
-
-
-
-
+}
