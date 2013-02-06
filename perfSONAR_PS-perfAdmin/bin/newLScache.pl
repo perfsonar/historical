@@ -32,9 +32,8 @@ use Data::Dumper;
 
 my $basedir = "$RealBin";
 
-#my $base =  "/var/lib/perfsonar/perfAdmin/cache";
-#should change base directory before moving to production
-my $base     = "$basedir/cache";
+my $base =  "/var/lib/perfsonar/perfAdmin/cache";
+#my $base     = "$basedir/cache";
 my $EXP_TIME = time - 3600 * 24;    #expire after 24 hours
 
 my $query =
