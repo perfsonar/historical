@@ -48,8 +48,9 @@ my $serverlist = $bootstrap->query_urls();
 print @{$serverlist};
 my @result = ();
 my %resultList;
+my %LSKeywords = ();
 foreach my $s ( @{$serverlist} ) {
-	my %keywords;
+	my %keywordCount;
 	my $url      = URI->new($s);
 	my $hostname = $url->host();
 	my $port     = $url->port();
@@ -67,6 +68,7 @@ foreach my $s ( @{$serverlist} ) {
 
 		#extract required fields from result and store in a hash
 	  SERVICE: foreach my $service ( @{$response} ) {
+	  		
 			my %service = ();
 			my $key     = '';
 			my @et      = @{ $service->getServiceEventType() };
@@ -189,6 +191,7 @@ foreach my $s ( @{$serverlist} ) {
 					$keyword .= ",";
 				}
 				$keyword .= "project:" . $community;
+				$keywordCount{$community} = 1;
 			}
 
 			$service{'service-keyword'} = $keyword;
@@ -204,9 +207,11 @@ foreach my $s ( @{$serverlist} ) {
 
 		}
 	}
+	
+	$LSKeywords{$s}->{"KEYWORDS"} = \%keywordCount ;
 }
 
-print Dumper(%resultList);
+print Dumper(%LSKeywords);
 
 my %list = ();
 foreach my $file ( keys %resultList ) {
@@ -313,4 +318,39 @@ foreach my $file ( keys %resultList ) {
 	close(OUT);
 
 }
+
+
+#cache keywords in case some are missing
+if( -e $base . "/list.keywords"){
+    open( KEYWORDS, "<" . $base . "/list.keywords" ) or croak "can't open keyword list";
+    while( <KEYWORDS> ){
+        chomp;
+        my @fields = split /\|/;
+        if( @fields != 3 ){
+            next;
+        }
+        if($fields[2] < $EXP_TIME || !$fields[1]){
+            next;
+        }
+        $LSKeywords{$fields[0]}{"KEYWORDS"}{$fields[1]} = 1;
+        print "Cached Keyword: " . $fields[0] . " -> " . $fields[1] . "\n";
+    }
+    close KEYWORDS;
+}
+
+
+# should we do some verification/validation here?
+open( KEYWORDS, ">" . $base . "/list.keywords" ) or croak "can't open keyword list";
+foreach my $h ( keys %LSKeywords ) {
+
+    if ( exists $LSKeywords{$h}{"KEYWORDS"} and $LSKeywords{$h}{"KEYWORDS"} ) {
+
+        foreach my $k ( keys %{ $LSKeywords{$h}{"KEYWORDS"} } ) {
+            print KEYWORDS "$h|$k|" . time . "\n";
+        }
+    }
+
+}
+close( KEYWORDS );
+
 
