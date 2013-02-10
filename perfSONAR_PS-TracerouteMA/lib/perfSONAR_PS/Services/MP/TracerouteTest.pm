@@ -3,7 +3,7 @@ package perfSONAR_PS::Services::MP::TracerouteTest;
 use strict;
 use warnings;
 
-our $VERSION = 3.1;
+our $VERSION = 3.3;
 use Data::Validate::IP qw(is_ipv4 is_ipv6);
 use File::Copy qw(move);
 use File::Temp qw(tempfile);

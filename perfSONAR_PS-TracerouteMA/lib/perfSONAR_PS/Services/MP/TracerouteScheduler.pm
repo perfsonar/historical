@@ -3,7 +3,7 @@ package perfSONAR_PS::Services::MP::TracerouteScheduler;
 use strict;
 use warnings;
 
-our $VERSION = 3.1;
+our $VERSION = 3.3;
 
 use perfSONAR_PS::Utils::NetLogger;
 use perfSONAR_PS::Utils::ParameterValidation;

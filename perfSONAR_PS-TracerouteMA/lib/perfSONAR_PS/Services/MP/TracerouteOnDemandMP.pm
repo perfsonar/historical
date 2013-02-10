@@ -3,7 +3,7 @@ package perfSONAR_PS::Services::MP::TracerouteOnDemandMP;
 use strict;
 use warnings;
 
-our $VERSION = 3.1;
+our $VERSION = 3.3;
 
 use base 'perfSONAR_PS::Services::Base';
 use constant TRACEROUTE_EVENT_TYPE => 'http://ggf.org/ns/nmwg/tools/traceroute/2.0';

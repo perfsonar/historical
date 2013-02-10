@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use base 'Net::Traceroute';
 
-our $VERSION = 3.1;
+our $VERSION = 3.3;
 
 use XML::LibXML;
 use Log::Log4perl qw(get_logger);

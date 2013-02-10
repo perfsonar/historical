@@ -3,7 +3,7 @@ package perfSONAR_PS::Services::MP::TracerouteSender;
 use strict;
 use warnings;
 
-our $VERSION = 3.1;
+our $VERSION = 3.3;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common qw(makeEnvelope genuid);
 use perfSONAR_PS::Transport;

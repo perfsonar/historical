@@ -7,7 +7,7 @@ use fields 'STATE', 'LOGGER', 'NETLOGGER', 'IPTRIE', 'CLAIMTREE';
 use strict;
 use warnings;
 
-our $VERSION = 3.2;
+our $VERSION = 3.3;
 
 =head1 NAME
 

@@ -3,7 +3,7 @@ package perfSONAR_PS::DB::OWPDB;
 use strict;
 use warnings;
 
-our $VERSION = 3.1;
+our $VERSION = 3.3;
 use DBI;
 use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);

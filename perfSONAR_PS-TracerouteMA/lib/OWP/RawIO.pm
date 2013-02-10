@@ -3,7 +3,7 @@ package OWP::RawIO;
 use strict;
 use warnings;
 
-our $VERSION = 3.1;
+our $VERSION = 3.3;
 
 =head1 NAME
 

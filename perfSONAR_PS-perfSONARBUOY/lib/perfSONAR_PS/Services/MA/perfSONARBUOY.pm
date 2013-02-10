@@ -3,7 +3,7 @@ package perfSONAR_PS::Services::MA::perfSONARBUOY;
 use strict;
 use warnings;
 
-our $VERSION = 3.2;
+our $VERSION = 3.3;
 
 use base 'perfSONAR_PS::Services::Base';
 

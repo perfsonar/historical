@@ -2,7 +2,7 @@ package Utils;
 use strict;
 use warnings;
 use English qw( -no_match_vars );
-use version; our $VERSION = '3.2';
+our $VERSION = 3.3;
 
 =head1 NAME
 
