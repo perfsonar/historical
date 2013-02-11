@@ -3,17 +3,13 @@
 =   February 11, 2013 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: Aaron, Jason, Brian, Andrew, Andy, Kavitha
+  * Attendees: Andy, Aaron, Sowmya
   
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
 
 == Agenda Topics ==
   * Developer Updates
-    * Aaron
-    * Kavitha
-    * Andy
-    * Andrew
   * Release Status
 
 == Future Agenda Topics ==
@@ -24,6 +20,18 @@
     * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
     
 == Notes ==
+ * Developer Updates
+  * Skip
+ * Release Status
+  * Have not heard back on Ian's MTU issue
+  * Partition Issue
+    * Have Andrew put debug command options in backing_store. Have write to file and David mail to us. 
+  * LS Bootstrap
+   * Ping added to LS bootstrap by Sowmay
+   * Andy will modify MAs to boot if can;t find LS and add boostrap to service watcher
+  * Upgrade process
+   * Andy and Aaron will meet with Andrew at 4pm to discuss status
+  
   == Where ==
 ESnet conference bridge:
  * GDS: 00113498555555
