@@ -32,7 +32,7 @@ use Data::Dumper;
 
 my $basedir = "$RealBin";
 
-my $base =  "/var/lib/perfsonar/perfAdmin/cache";
+my $base =  "/var/lib/perfsonar/perfAdmin/cachenewLS";
 #my $base     = "$basedir/cache";
 my $EXP_TIME = time - 3600 * 24;    #expire after 24 hours
 
@@ -41,10 +41,10 @@ my $query =
 $query->init();
 
 my $bootstrap = SimpleLookupService::Client::Bootstrap->new();
-$bootstrap->init( { file => "$basedir/../etc/service_url" } );
+$bootstrap->init();
 my $serverlist = $bootstrap->query_urls();
 
-print @{$serverlist};
+#print @{$serverlist};
 my @result = ();
 my %resultList;
 my %LSKeywords = ();
@@ -178,8 +178,13 @@ foreach my $s ( @{$serverlist} ) {
 			}
 
 			$service{'service-location'} = $servicelocation;
+			
+			
+			my @communities=();
+			if ($service->getCommunities()){
+			    push @communities, @{$service->getCommunities()};
+			}
 
-			my @communities = @{ $service->getCommunities() };
 			my $first_kw    = 1;
 			my $keyword     = '';
 			foreach my $community (@communities) {
@@ -210,13 +215,14 @@ foreach my $s ( @{$serverlist} ) {
 	$LSKeywords{$s}->{"KEYWORDS"} = \%keywordCount ;
 }
 
-print Dumper(%LSKeywords);
+#print Dumper(%LSKeywords);
 
+my %counter              = ();
 my %list = ();
 foreach my $file ( keys %resultList ) {
 	my $serviceref           = $resultList{$file};
 	my %file_service_tracker = ();
-	my %counter              = ();
+	#my %counter              = ();
 
 	print "\n", $file, "\n";
 
