@@ -13,7 +13,7 @@ use constant NMWG_PREFIX => 'nmwg';
 use constant NMWGT_NS => 'http://ggf.org/ns/nmwg/topology/2.0/';
 use constant NMWGT_PREFIX => 'nmwgt';
 use constant METADATA_PARAMS => ['firstTtl', 'maxTtl', 'waitTime', 'pause', 'packetSize', 'numBytes', 'arguments'];
-use fields 'LOGGER','NETLOGGER', 'DB_PARAMS', 'LS_CLIENT';
+use fields 'LOGGER','NETLOGGER', 'DB_PARAMS', 'LS_CLIENT', 'LS_URL';
 
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
@@ -85,26 +85,6 @@ sub init {
             {
                 $self->{LOGGER}->warn( "Setting \"ls_bootstrap_file\" to \"" . $self->{CONF}->{"ls_bootstrap_file"} . "\"" );
                 $self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"} = $self->{CONF}->{"ls_bootstrap_file"};
-            }
-        }
-        
-        unless ( exists $self->{CONF}->{"tracerouteMA"}->{"ls_instance"}
-            and $self->{CONF}->{"tracerouteMA"}->{"ls_instance"} )
-        {
-            if ( defined $self->{CONF}->{"ls_instance"}
-                and $self->{CONF}->{"ls_instance"} )
-            {
-                $self->{LOGGER}->warn( "Setting \"ls_instance\" to \"" . $self->{CONF}->{"ls_instance"} . "\"" );
-                $self->{CONF}->{"tracerouteMA"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
-            }
-            else {
-                my $ls_bootstrap = SimpleLookupService::Client::Bootstrap->new();
-                if($self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"}){
-                    $ls_bootstrap->init(file => $self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"});
-                }else{
-                    $ls_bootstrap->init();
-                }
-                $self->{CONF}->{"tracerouteMA"}->{"ls_instance"} = $ls_bootstrap->register_url();
             }
         }
 
@@ -232,17 +212,34 @@ sub needLS {
     return ( $self->{CONF}->{"tracerouteMA"}->{enable_registration} or $self->{CONF}->{enable_registration} );
 }
 
+=head2 _chooseLS($self {})
+
+Determines the LS URL to use when registering
+
+=cut
+sub _chooseLS {
+    my ( $self ) = @_;
+    
+    if( exists $self->{CONF}->{"tracerouteMA"}->{"ls_instance"}
+            and $self->{CONF}->{"tracerouteMA"}->{"ls_instance"} ) {
+        $self->{LS_URL} = $self->{CONF}->{"tracerouteMA"}->{"ls_instance"};
+    }elsif( defined $self->{CONF}->{"ls_instance"} and $self->{CONF}->{"ls_instance"} ) {
+        $self->{LS_URL} = $self->{CONF}->{"ls_instance"};
+    }else {
+        my $ls_bootstrap = SimpleLookupService::Client::Bootstrap->new();
+        if($self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"}){
+            $ls_bootstrap->init(file => $self->{CONF}->{"tracerouteMA"}->{"ls_bootstrap_file"});
+        }else{
+            $ls_bootstrap->init();
+        }
+        $self->{LS_URL} = $ls_bootstrap->register_url();
+    }
+}
+
 sub registerLS {
     my $self = shift;
     my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.Traceroute.registerLS.start");
     $self->{NETLOGGER}->info( $nlmsg );
-    
-    my @ls_array = ();
-    my @array = split( /\s+/, $self->{CONF}->{"tracerouteMA"}->{"ls_instance"} );
-    foreach my $l ( @array ) {
-        $l =~ s/(\s|\n)*//g;
-        push @ls_array, $l if $l;
-    }
     
     #Query database to build test set
     my $dbh = new perfSONAR_PS::DB::SQL( { name => $self->{DB_PARAMS}->{name}, user => $self->{DB_PARAMS}->{user}, pass => $self->{DB_PARAMS}->{pass} } );
@@ -271,6 +268,20 @@ sub registerLS {
  	$service_params->{'longitude'} = $self->{CONF}->{"tracerouteMA"}->{"longitude"} if($self->{CONF}->{"tracerouteMA"}->{"longitude"});
 
     #Register 
+    #determine LS
+    $self->_chooseLS() if(!defined $self->{LS_URL});
+    unless($self->{LS_URL}){
+        $self->{LOGGER}->warn("Unable to determine LS, skipping registration for now") unless($self->{LS_URL});
+        return 0;
+    }
+    #handle if array for backward compatibility
+    my @ls_array = ();
+    my @array = split( /\s+/, $self->{LS_URL} );
+    foreach my $l ( @array ) {
+        $l =~ s/(\s|\n)*//g;
+        push @ls_array, $l if $l;
+    }
+    #create client
     if(!defined $self->{LS_CLIENT}){
         $self->{LS_CLIENT} = perfSONAR_PS::Utils::MARegistrationManager->new();
         $self->{LS_CLIENT}->init(ls_url => $ls_array[0], ls_key_db => $self->{CONF}->{"tracerouteMA"}->{"ls_key_db"});

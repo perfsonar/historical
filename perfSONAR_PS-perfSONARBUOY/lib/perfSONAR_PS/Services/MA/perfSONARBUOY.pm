@@ -7,7 +7,7 @@ our $VERSION = 3.3;
 
 use base 'perfSONAR_PS::Services::Base';
 
-use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER', 'RES', 'HASH_TO_ID', 'ID_TO_HASH', 'STORE_FILE_MTIME', 'BAD_MTIME', 'NETLOGGER';
+use fields 'LS_CLIENT', 'LS_URL', 'NAMESPACES', 'METADATADB', 'LOGGER', 'RES', 'HASH_TO_ID', 'ID_TO_HASH', 'STORE_FILE_MTIME', 'BAD_MTIME', 'NETLOGGER';
 
 =head1 NAME
 
@@ -217,34 +217,7 @@ sub init {
                 $self->{CONF}->{"perfsonarbuoy"}->{"ls_bootstrap_file"} = $self->{CONF}->{"ls_bootstrap_file"};
             }
         }
-            
-        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} )
-        {
-            if ( defined $self->{CONF}->{"ls_instance"}
-                and $self->{CONF}->{"ls_instance"} )
-            {
-                $self->{LOGGER}->warn( "Setting \"ls_instance\" to \"" . $self->{CONF}->{"ls_instance"} . "\"" );
-                $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
-            }
-            else {
-                my $ls_bootstrap = SimpleLookupService::Client::Bootstrap->new();
-                if($self->{CONF}->{"perfsonarbuoy"}->{"ls_bootstrap_file"}){
-                    $ls_bootstrap->init(file => $self->{CONF}->{"perfsonarbuoy"}->{"ls_bootstrap_file"});
-                }else{
-                    $ls_bootstrap->init();
-                }
-                $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} = $ls_bootstrap->register_url();
-            }
-        }
         
-        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} )
-        {
-            $self->{LOGGER}->fatal( "Unable to determine LS instance" );
-            return -1;
-        }
-
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"}
             and $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} )
         {
@@ -382,6 +355,31 @@ sub _mergeSiteConfig() {
         }
     }
 }
+
+=head2 _chooseLS($self {})
+
+Determines the LS URL to use when registering
+
+=cut
+sub _chooseLS {
+    my ( $self ) = @_;
+    
+    if( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} ) {
+        $self->{LS_URL} = $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"};
+    }elsif( defined $self->{CONF}->{"ls_instance"} and $self->{CONF}->{"ls_instance"} ) {
+        $self->{LS_URL} = $self->{CONF}->{"ls_instance"};
+    }else {
+        my $ls_bootstrap = SimpleLookupService::Client::Bootstrap->new();
+        if($self->{CONF}->{"perfsonarbuoy"}->{"ls_bootstrap_file"}){
+            $ls_bootstrap->init(file => $self->{CONF}->{"perfsonarbuoy"}->{"ls_bootstrap_file"});
+        }else{
+            $ls_bootstrap->init();
+        }
+        $self->{LS_URL} = $ls_bootstrap->register_url();
+    }
+}
+
 
 =head2 needLS($self {})
 
@@ -1630,7 +1628,7 @@ We then sleep for some amount of time and do it again.
 
 sub registerLS {
     my ( $self, $sleep_time ) = validateParamsPos( @_, 1, { type => SCALARREF }, );
-
+    
     my $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.start");
     $self->{NETLOGGER}->debug( $nlmsg );
     
@@ -1695,7 +1693,9 @@ sub registerLS {
         my @tmp = ();
         foreach my $et(@{$mdEventType}){
             push @tmp, $et->textContent; 
-            $unique_event_types {$et->textContent} = 1;   
+            my $tmp_et = $et->textContent;
+            $tmp_et .= '/' if($tmp_et !~ /\/$/);
+            $unique_event_types {$tmp_et} = 1;   
         }
         push @{$test_set{$mdSrc}{$mdDst}}, \@tmp;
         #$self->{LOGGER}->info("Source: $mdSrc, Destination: $mdDst, Event Type: " . @{$mdEventType});
@@ -1730,11 +1730,16 @@ sub registerLS {
  	$service_params->{'zip_code'} = $self->{CONF}->{"perfsonarbuoy"}->{"zip_code"} if($self->{CONF}->{"perfsonarbuoy"}->{"zip_code"});
  	$service_params->{'latitude'} = $self->{CONF}->{"perfsonarbuoy"}->{"latitude"} if($self->{CONF}->{"perfsonarbuoy"}->{"latitude"});
  	$service_params->{'longitude'} = $self->{CONF}->{"perfsonarbuoy"}->{"longitude"} if($self->{CONF}->{"perfsonarbuoy"}->{"longitude"});
-
+    
     #handle registration
+    $self->_chooseLS() if(!defined $self->{LS_URL});
+    unless($self->{LS_URL}){
+        $self->{LOGGER}->warn("Unable to determine LS, skipping registration for now") unless($self->{LS_URL});
+        return 0;
+    }
     if(!defined $self->{LS_CLIENT}){
         $self->{LS_CLIENT} = perfSONAR_PS::Utils::MARegistrationManager->new();
-        $self->{LS_CLIENT}->init(ls_url => $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}, ls_key_db => $self->{CONF}->{"perfsonarbuoy"}->{"ls_key_db"});
+        $self->{LS_CLIENT}->init(ls_url => $self->{LS_URL}, ls_key_db => $self->{CONF}->{"perfsonarbuoy"}->{"ls_key_db"});
     }
     $self->{LS_CLIENT}->register(service_params => $service_params, interfaces => \@interface_list, test_set => \%test_set);
      
