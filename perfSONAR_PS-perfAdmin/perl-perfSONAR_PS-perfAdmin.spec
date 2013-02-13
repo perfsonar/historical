@@ -85,7 +85,6 @@ mkdir -p /var/log/perfsonar
 chown perfsonar:perfsonar /var/log/perfsonar
 
 mkdir -p /var/lib/perfsonar/perfAdmin/cache
-mkdir -p /var/lib/perfsonar/perfAdmin/cachenewLS
 chown -R perfsonar:perfsonar /var/lib/perfsonar/perfAdmin
 
 chown -R apache:apache /opt/perfsonar_ps/perfAdmin/etc

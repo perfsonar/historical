@@ -23,8 +23,6 @@ use YAML::Syck;
 use URI;
 use JSON qw( decode_json);
 
-use SimpleLookupService::Client::SimpleLS;
-
 use fields 'LOGGER', 'CONF', 'NEXT_UPDATE';
 
 =head2 new()
@@ -94,7 +92,8 @@ sub _find_hosts {
       croak "No hosts in list";
     }
     my $err_msg = '';   
-    my @activeHosts;
+    my $minPriority = 100;
+    my $minPriorityHost = "";
     foreach my $host(@hosts){
         my $locator = $host->{'locator'};
         if(!defined $locator){
@@ -121,40 +120,30 @@ sub _find_hosts {
             $err_msg .= "Unable to decode JSON. " . $@;
             next;
         }
-        
+        my @activeHosts = @{$activehostlist->{'hosts'}};
         
         #Determine URL
-        foreach my $activehost(@{$activehostlist->{'hosts'}}){
-        	my $locator = $activehost->{'locator'};
-        	my $url = URI->new($locator);
-        	my $hostname = $url->host();
-        	my $port = $url->port();
-        	
+        foreach my $activehost(@activeHosts){
+            my $priority = $activehost->{'priority'};
             my $status = $activehost->{'status'};
-            my $ahost = $activehost;
-            if(defined $status && $status eq "alive"){
-            	my $ls = SimpleLookupService::Client::SimpleLS->new();
-            	my $ret = $ls->init({host=>$hostname, port=>$port});
-            	if($ret==0){
-            		$ls->connect();
-            		my $latency = $ls->getLatency();
-            		$ahost->{'latency'} = $latency;
-                	push(@activeHosts, $ahost);
-            	}
+            
+            if(defined $status && $status eq "alive" && defined $priority && $priority<=$minPriority){
+                $minPriority = 	$priority;
+                $minPriorityHost = $activehost->{'locator'};
+                
             }
         }                
     }
     
     #verify we found host
-    if(! @activeHosts){
+    if(!$minPriorityHost){
         croak "No active LS found: " . $err_msg;
     }
     
-    my %hostList = {'hosts' => \@activeHosts};
     #Output to file
-    #open FOUT, ">". $self->{CONF}->{output_file} or croak 'Unable to write to ' . $self->{CONF}->{output_file};
-    YAML::Syck::DumpFile($self->{CONF}->{output_file},\%hostList) or croak 'Unable to write to ' . $self->{CONF}->{output_file};
-    #close FOUT;
+    open FOUT, ">". $self->{CONF}->{output_file} or croak 'Unable to write to ' . $self->{CONF}->{output_file};
+    print FOUT $minPriorityHost;
+    close FOUT;
 }
 
 __END__
