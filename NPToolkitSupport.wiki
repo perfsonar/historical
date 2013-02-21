@@ -9,18 +9,16 @@ The current rotation includes: Aaron, Kavitha, Nils, Andy, Sowmya, Brian
 (Please volunteer if you'd like to be added to the rotation!)
 
 = Schedule =
-
-  * August 1 - August 15, 2012: Nils
-  * August 16 - August 31, 2012: Sowmya
-  * September 1 - 15, 2012: Aaron
-  * September 16 - 30, 2012: Andy
-  * October 1 - 15, 2012: Kavitha
-  * October 16 - 31, 2012: Nils
-  * November 1 - 15, 2012: Sowmya
-  * November 16 - 30, 2012: Brian
-  * December 1 - 15, 2012: Aaron
-  * December 16 - 31, 2012: Andy
-  * January 1 - 15, 2013: Kavitha
-  * January 16 - 31, 2013: Nils
-  * February 1 - 14, 2012: Sowmya
-  * February 15 - 28, 2012: Brian
+  * February 15 - 28, 2013: Brian
+  * March 1 - 15, 2013: Aaron
+  * March 16 - 31, 2013: Andy
+  * April 1 - 15, 2013: Kavitha
+  * April 16 - 30, 2013: Nils
+  * May  1 - 15, 2013: Sowmya
+  * May 16 - 31, 2013: Brian
+  * June 1 - 15, 2013: Aaron
+  * June 16 - 30, 2013: Andy
+  * July 1 - 31, 2013: Kavitha
+  * July 16 - 31, 2013: Nils
+  * August 1 - 15, 2013: Sowmya
+  * August 16 - 31, 2013: Brian
