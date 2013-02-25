@@ -3,7 +3,7 @@
 =   February 25, 2013 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Andy, Sowmya, Brian, Aaron, Nils
   
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
@@ -12,7 +12,8 @@
   * Developer Updates
   * Release Status
   * Packaging for OSG 
-
+  * Support Topics
+  
 == Future Agenda Topics ==
   * Roadmap
   * Geant interoperability (Any update?)
@@ -21,6 +22,44 @@
     * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
     
 == Notes ==
+  * Developer Updates
+   * Sowmya
+    * No updates
+    * Still haven't heard from Ian Gable about MTU error
+   * Nils
+    * No updates
+   * Brian
+    * Working on getting owamp on plug computer, having some time issues
+   * Andy
+    * Worked with Andrew on update
+    * LiveCD was working for Andrew, Andy had issue on VM where he could not login
+    * NetInstall scripts are supposed to be working
+   * Aaron
+    * Added an include mechanism to mesh configuration
+  * Release Status
+    * Aaron to add default port bwctl stuff
+    * Andrew looking into LiveCD issue with user accounts found by Andy
+    * NetInstall scripts about ready
+    * Hope to test and have out the door later this week.
+  * Packaging for OSG
+    * OSG looking to deploy perfSONAR
+    * Have distribution system based around yum, NetInstall and LiveCD might not really make sense
+    * Could do level 1 and level 2 install 
+    * Andy will take closer look at it and report next week
+     * Make sure to look at how to handle restarts and db clean
+     * Database initailization
+  * Support Topics
+   * Alesandro
+    * Needs to send us owmesh file
+   * Dwayne
+    * Needs to send us owmesh file
+   * Enzo
+    * Should check NTP is working properly
+    * ESnet testers saw similar issues, need to check test ports and lbl-owamp logs 
+   * Other issues
+    * Sowmya noticed 3.3rc1 owamp_bwctl logs not getting written to. Probably a syslog change.
+    * bwctld.limits issue with same subne in multiple classes. need to determine how difficult it would be to make GUI support it. Also should check script that generates it. 
+
   
   == Where ==
 ESnet conference bridge:
