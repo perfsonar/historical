@@ -10,7 +10,7 @@ This page details the installation instruction for CentOS. For any other flavor 
 = Installation =
 
 == Download == 
-The SimpleLookupService rpm is available in yum repo here: http://software.internet2.edu/rpms/i386/main/RPMS/
+The SimpleLookupService rpm is available in yum repo here: http://software.internet2.edu/rpms/i386/main/RPMS/lookup-service-0.1-3.noarch.rpm
 
 
 == Dependencies ==
