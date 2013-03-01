@@ -4,7 +4,7 @@
 %define crontab perfAdmin.cron
 %define apacheconf perfAdmin.conf
 
-%define relnum 1
+%define relnum 2 
 %define disttag pSPS
 
 Name:			perl-perfSONAR_PS-perfAdmin

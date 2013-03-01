@@ -5,7 +5,7 @@
 %define init_script_1 PingER
 
 %define disttag pSPS
-%define relnum 1
+%define relnum 2 
 
 Name:			perl-perfSONAR_PS-PingER-server
 Version:		3.3

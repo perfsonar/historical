@@ -5,7 +5,7 @@
 %define crontab pinger_cache.cron
 %define apacheconf pinger_gui.conf
 
-%define relnum 1
+%define relnum 2 
 %define disttag pSPS
 
 Name:			perl-perfSONAR_PS-PingER-GUI
