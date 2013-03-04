@@ -21,7 +21,24 @@
     
 == Notes ==
   * Developer Updates
-  
+    * Andy
+     * Wrote upgrade scripts for NetInstall, made some tweaks to LiveCD netinstall
+     * Re-build bwctl and owamp rpms this morning to capture recent changes
+     * In process of building ISOs, hope o have uploaded by end of day
+     * Would like feedback from people on cal by C.O.B. Wednesday. If things go well shoot for end of the week to announce (maybe early next week).
+   * Nils
+     * No updates
+    * Brian
+     * New LS installed in Japan
+     * It should get added to LS list
+     * Aaron: Does iperf3 do rate limiting? Brian: yes. not sure how much it will help with 1G -> 10g case. Need more experimenting.
+     * Aaron: Should modify bwctl to pass rate limit option at some point
+    * Sowmya
+     * No updates, working on LS again
+    * Aaron
+     * Updated owamp and bwctl configs to use the firewall test ports 
+     
+    
   == Where ==
 ESnet conference bridge:
  * GDS: 00113498555555
