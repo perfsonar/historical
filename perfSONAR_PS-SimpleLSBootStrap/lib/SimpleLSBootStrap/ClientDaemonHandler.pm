@@ -138,6 +138,7 @@ sub _find_hosts {
             	if($ret==0){
             		$ls->connect();
             		my $latency = $ls->getLatency();
+            		$latency =~ s/ms$//; #strip units
             		$ahost->{'latency'} = $latency;
                 	push(@activeHosts, $ahost);
             	}
@@ -150,7 +151,7 @@ sub _find_hosts {
         croak "No active LS found: " . $err_msg;
     }
     
-    my %hostList = {'hosts' => \@activeHosts};
+    my %hostList = ('hosts' => \@activeHosts);
     #Output to file
     #open FOUT, ">". $self->{CONF}->{output_file} or croak 'Unable to write to ' . $self->{CONF}->{output_file};
     YAML::Syck::DumpFile($self->{CONF}->{output_file},\%hostList) or croak 'Unable to write to ' . $self->{CONF}->{output_file};
