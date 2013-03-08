@@ -3,7 +3,7 @@
 =   March 4, 2013 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: Andy, Sowmya, Brian, Aaron, Nils
+  * Attendees: 
   
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
@@ -19,9 +19,9 @@
     * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
     
 == Notes ==
-  * Developer Updates
+
   
-  == Where ==
+== Where ==
 ESnet conference bridge:
  * GDS: 00113498555555
  * Direct Dial: mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
