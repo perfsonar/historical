@@ -3,7 +3,7 @@
 =   March 4, 2013 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Andy, Aaron, Sowmya, Brian, Nils, Kavitha
   
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
@@ -12,6 +12,7 @@
   * Developer Updates
   * Release Status
   
+  
 == Future Agenda Topics ==
   * Roadmap
 
@@ -19,8 +20,26 @@
     * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
     
 == Notes ==
-
-  
+  * Developer Updates
+   * Andy
+    * CentOS 6.4 released over weekend. Rebuilding kernel. aufs patch did not apply cleanly. 
+    * Will look at bug Sowmya reported. Likely problem where two groups have same GID.
+   * Brian
+    * Testing bwctl and iperf stuff with JSON ability
+   * Aaron
+    * Release updated CentOS 5 kernel
+    * USATLAS have started using the includes. Have a few issues with JSON validation. Has a quick work around will implement today likely, and work on longer-term solution later.
+   * Nils
+    * Testing the release
+   * Sowmya 
+    * Tested RCs
+    * Working on the lookup service
+   * Kavitha
+    * No updates
+  * Release Status
+   * Goal is Wednesday. Rebuilding kernels and fixing upgrade scripts
+   * Documentation needed for upgrade and ports
+   * Need to start thinking about next 6 months plan. Brian will create wiki for brainstorming
 == Where ==
 ESnet conference bridge:
  * GDS: 00113498555555
