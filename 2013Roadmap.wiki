@@ -1,0 +1,31 @@
+= perfSONAR Toolkit 2013 Roadmap =
+
+Here are some initial thoughts on priorities for 2013. Please add your ideas here.
+
+= Details =
+
+
+Q1:
+   * release of v3.3 of the toolkit
+   * RPM bundles for "level 1" and "level 2" installs
+   * integration of iperf3 with bwctl
+   
+Q2: 
+   * added functionality for LS: 
+       * pub/sub capability, so can deploy custom caches
+       * easy to use client APIs
+   * start working on REST/JSON-based owamp MA, that supports rrd-like summarization
+   * better LS GUI that provide cut/paste bwctl and owping commands
+   * finish/polish Maddash/owmesh integration
+   * issue tracker IDs:
+
+Q3:
+   * REST/JSON APIs for all remaning services
+   * issue tracker IDs:
+
+
+Q4:
+   * release of v3.4 of the toolkit
+
+
+
