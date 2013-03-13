@@ -24,9 +24,9 @@ Q3:
    * email alerts from Maddash
    * traceroute visualization integrated with owamp/bwctl data
    * REST/JSON APIs for all remaning services
+   * ability to do on-demand testing
    * issue tracker IDs:
 
 
 Q4:
    * release of v3.4 of the toolkit
-
