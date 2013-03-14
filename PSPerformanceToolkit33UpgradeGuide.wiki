@@ -1,0 +1,61 @@
+#summary perfSONAR Performance Toolkit v3.3 Upgrade Guide
+
+= Introduction =
+
+This page details the steps required for users to upgrade to version 3.3 from previous versions of the toolkit. This is the first distribution based upon CentOS 6 which introduces numerous major changes at the operating system level.  As a result, some of the steps may be more involved than previous upgrades. Follow the instructions below based on the type of distribution you are upgrading.
+
+= Upgrading a 3.2.x LiveCD Disribution =
+
+Upgrading a LiveCD running Toolkit version 3.2.x to a new LiveCD running 3.3 should be very similar to previous LiveCD upgrades if you have done them in the past. The process involves burning a the latest ISO to a CD, replacing the 3.2 CD in the disk drive and rebooting. Upon reboot, you will need to reset your root password, but all other data and user accounts should be migrated. The exact steps are below:
+
+ # Download the LiveCD [http://software.internet2.edu/pSPT3.3-rc2/pS-Performance_Toolkit-LiveCD-3.3rc2.iso iso] and [http://software.internet2.edu/pSPT3.3-rc2/pS-Performance_Toolkit-LiveCD-3.3rc2.iso.md5 md5 checksum]  
+ # Once downloaded please verify the MD5 sum:
+{{{
+user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.3rc2.iso;cat pS-Performance_Toolkit-LiveCD-3.3rc2.iso.md5 
+f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3rc2.iso
+f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3rc2.iso
+}}}
+ # Burn the ISO image to a CD using your favorite CD burning software.
+ # Shutdown your 3.2.x Toolkit instance
+ # Remove the 3.2.x CD and replace it with the new 3.3 disc
+ # Power-on the machine and let it boot.
+ # You should see a login screen. You will need to reset the root password. The default password is an empty string. You will be prompted to change the password the first time you login as a root user.
+ # All other user accounts, service configurations and performance data should have been migrated. At this point your host should be fully migrated.
+
+_NOTE: If you would like to upgrade a LiveCD installation running 3.2.x to a system running the NetInstall version of 3.3, you may follow the instructions in the section Upgrading a 3.2.x NetInstall Distribution _
+
+= Upgrading a 3.2.x NetInstall Distribution =
+
+Upgrading a 3.2.x NetInstall distribution to 3.3 requires using a script to backup key configuration files, doing a clean 3.3 installation and using a restore script to place your data and configuration on the new installation. You will need a location where you can remotely copy the backup files while you perform the upgrade.  Unlike previous updates, a simple "yum update" will not grab the new distribution. This stems from the migration from CentOS5 to CentOS6. The exact steps are below:
+ # Login to you 3.2.x host's command-line interface via SSH or a terminal
+ # Download the backup script [http://software.internet2.edu/pSPT3.3-rc2/ps-toolkit-migrate-backup.sh here] . You can use the following command to download it directly to your host:
+{{{
+wget http://software.internet2.edu/pSPT3.3-rc2/ps-toolkit-migrate-backup.sh 
+}}}
+ # Run the following command to make the script executable
+{{{
+chmod 755 ps-toolkit-migrate-backup.sh 
+}}}
+ # Run the script giving it the name of the gzipped tarball you would like generated as the only parameter. In the command below, all backups will be stored in the home directory in a file call ps-toolkit-3.2-backup.tgz:
+{{{
+./ ps-toolkit-migrate-backup.sh  ~/ps-toolkit-3.2-backup.tgz
+}}}
+ # Remotely copy the backup file to a new machine. You may use a tool such as scp to accomplish this task, for example:
+{{{
+scp ps-toolkit-3.2-backup.tgz user@remotehost.example:ps-toolkit-3.2-backup.tgz
+}}}
+*NOTE: The backup script saves non-root user accounts/password, test configurations, test data and a few other key service configuration files. It does NOT backup every file on the system, so data in home directories or other changes made outside of the Toolkit GUIs will be not be saved. Please verify you have all your important files, especially if you choose to replace the existing partition in the next step*
+ # Once you have transferred the backup files off of the old host, you may follow the steps of a clean installation found [pSPerformanceToolkit33#NetInstall_CD here]. You may perform the clean installation on the 3.2 host and remove the old partition or you may choose a new physical host.  Return to these instructions after OS installation is complete. For best results, after the OS install DO NOT create any non-root user or begin reconfiguring any services. You may enable SSH if you don;t have access to the terminal.
+ # Login to the system as root
+ # Copy the backup tarball (called ps-toolkit-3.2-backup.tgz in our previous examples) generated to the new system. Again, you can use scp or any other remote copy method. 
+ # Run the restore script with the following command, replacing ps-toolkit-3.2-backup.tgz with the file path to your backup file generated in previous steps:
+{{{
+$ /opt/perfsonar_ps/toolkit/scripts/ps-toolkit-migrate-restore.sh ps-toolkit-3.2-backup.tgz
+}}}
+
+ # Reboot the host
+ # Your configurations should now be restored. If you notice any problems with the upgrade script please contact the perfSONAR Toolkit users mailing list.
+
+
+= Upgrading versions older than 3.2 =
+It is recommend that users of versions of the toolkit prior to 3.2 upgrade to the latest version in the 3.2.x line prior to attempting an upgrade. 
