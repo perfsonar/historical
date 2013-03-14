@@ -31,7 +31,8 @@ Version 3.3rc2 of the pS Performance Toolkit consists of three primary installat
  * [pSPerformanceToolkit33#NetInstall_CD NetInstall CD]
    * Allows the entire OS image to be installed directly to a host's hard disk
    * Requires network connectivity to download necessary packages
-   * Allows an upgrade path directly from the host via _*yum*_ - no physical access to the machine will be required.  
+   * Provides easy bug fixs/upgrades via the standard _*yum*_ mechanisms- no physical access to the machine will be required.  
+   * NOTE: This the the version we recommend, unless your security policy favors the LiveCD
  * [pSPerformanceToolkit33#Live_CD Live CD]
    * Boots and runs directly from CD
    * Can run without harming host's hard disk contents
