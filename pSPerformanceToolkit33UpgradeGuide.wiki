@@ -4,6 +4,10 @@
 
 This page details the steps required for users to upgrade to version 3.3 from previous versions of the toolkit. This is the first distribution based upon CentOS 6 which introduces numerous major changes at the operating system level.  As a result, some of the steps may be more involved than previous upgrades. Follow the instructions below based on the type of distribution you are upgrading.
 
+= Firewalls and Port Changes =
+For this release we have updated some of the default ports used by the tools. The goal is to make it easier to run perfSONAR behind a firewall. Toward that end, many of the defaults were changed to match the recommendations in of a draft white paper by the Performance Working Group found [http://fasterdata.es.net/assets/fasterdata/20130308-Firewall-PerfWG.pdf here]. Many of the port ranges that were changed are those that were previously ephemeral ports to a more specific range. Please review that document if you run the toolkit behind a firewall. For those of you that have set some of the ports to different values, your port ranges should be maintained via the upgrade process. For those just using default values, they will now conform to the aforementioned document. These ports are subject to change prior to the finalization of both 3.3 and the white paper.
+
+
 = Upgrading a 3.2.x LiveCD Disribution =
 
 Upgrading a LiveCD running Toolkit version 3.2.x to a new LiveCD running 3.3 should be very similar to previous LiveCD upgrades if you have done them in the past. The process involves burning a the latest ISO to a CD, replacing the 3.2 CD in the disk drive and rebooting. Upon reboot, you will need to reset your root password, but all other data and user accounts should be migrated. The exact steps are below:
@@ -20,7 +24,8 @@ f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3rc2.iso
  # Remove the 3.2.x CD and replace it with the new 3.3 disc
  # Power-on the machine and let it boot.
  # You should see a login screen. You will need to reset the root password. The default password is an empty string. You will be prompted to change the password the first time you login as a root user.
- # All other user accounts, service configurations and performance data should have been migrated. At this point your host should be fully migrated.
+ # All your user accounts, service configurations and performance data should have been migrated. You will need to update your administrative information to conform to the new location fields defined by the toolkit by following the instructions [pSPerformanceToolkit33#Administrative_Information here].
+ # Your host should now be successfully upgraded! If you notice any problems with the upgrade process please contact the perfSONAR Toolkit users mailing list.
 
 _NOTE: If you would like to upgrade a LiveCD installation running 3.2.x to a system running the NetInstall version of 3.3, you may follow the instructions in the section Upgrading a 3.2.x NetInstall Distribution _
 
@@ -52,7 +57,8 @@ scp ps-toolkit-3.2-backup.tgz user@remotehost.example:ps-toolkit-3.2-backup.tgz
 $ /opt/perfsonar_ps/toolkit/scripts/ps-toolkit-migrate-restore.sh ps-toolkit-3.2-backup.tgz
 }}}
  # Reboot the host
- # Your configurations should now be restored. If you notice any problems with the upgrade script please contact the perfSONAR Toolkit users mailing list.
+ # All your user accounts, service configurations and performance data should have been migrated. You will need to update your administrative information to conform to the new location fields defined by the toolkit by following the instructions [pSPerformanceToolkit33#Administrative_Information here].
+ # Your host should now be successfully upgraded! If you notice any problems with the upgrade process please contact the perfSONAR Toolkit users mailing list.
 
 
 = Upgrading versions older than 3.2 =
