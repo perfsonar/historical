@@ -40,11 +40,10 @@ chmod 755 ps-toolkit-migrate-backup.sh
 {{{
 ./ ps-toolkit-migrate-backup.sh  ~/ps-toolkit-3.2-backup.tgz
 }}}
- # Remotely copy the backup file to a new machine. You may use a tool such as scp to accomplish this task, for example:
+ # Remotely copy the backup file to a new machine. *NOTE: The backup script saves non-root user accounts/password, test configurations, test data and a few other key service configuration files. It does NOT backup every file on the system, so data in home directories or other changes made outside of the Toolkit GUIs will be not be saved. Please verify you have all your important files, especially if you choose to replace the existing partition in the next step.* You may use a tool such as scp to accomplish the copy task, for example:
 {{{
 scp ps-toolkit-3.2-backup.tgz user@remotehost.example:ps-toolkit-3.2-backup.tgz
 }}}
-*NOTE: The backup script saves non-root user accounts/password, test configurations, test data and a few other key service configuration files. It does NOT backup every file on the system, so data in home directories or other changes made outside of the Toolkit GUIs will be not be saved. Please verify you have all your important files, especially if you choose to replace the existing partition in the next step*
  # Once you have transferred the backup files off of the old host, you may follow the steps of a clean installation found [pSPerformanceToolkit33#NetInstall_CD here]. You may perform the clean installation on the 3.2 host and remove the old partition or you may choose a new physical host.  Return to these instructions after OS installation is complete. For best results, after the OS install DO NOT create any non-root user or begin reconfiguring any services. You may enable SSH if you don;t have access to the terminal.
  # Login to the system as root
  # Copy the backup tarball (called ps-toolkit-3.2-backup.tgz in our previous examples) generated to the new system. Again, you can use scp or any other remote copy method. 
@@ -52,7 +51,6 @@ scp ps-toolkit-3.2-backup.tgz user@remotehost.example:ps-toolkit-3.2-backup.tgz
 {{{
 $ /opt/perfsonar_ps/toolkit/scripts/ps-toolkit-migrate-restore.sh ps-toolkit-3.2-backup.tgz
 }}}
-
  # Reboot the host
  # Your configurations should now be restored. If you notice any problems with the upgrade script please contact the perfSONAR Toolkit users mailing list.
 
