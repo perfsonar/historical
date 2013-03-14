@@ -18,6 +18,7 @@ Q2:
    * start working on REST/JSON-based owamp MA, that supports rrd-like summarization
    * better LS GUI that provide cut/paste bwctl and owping commands
    * finish/polish Maddash/Mesh config integration, including config GUI
+   * web10G integration
    * issue tracker IDs:
 
 Q3:
