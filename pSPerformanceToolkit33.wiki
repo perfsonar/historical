@@ -38,7 +38,7 @@ Version 3.3rc2 of the pS Performance Toolkit consists of three primary installat
    * Can run and store measurements on host's hard disk
  * [pSPerformanceToolkit33#Live_USB Live USB]
   * Newest install option
-  * Supports hosts with CD-ROM drive
+  * Supports hosts without CD-ROM drive
   * Runs the same as the LiveCD
  
 The following sections describe the installation procedure for each of the products.
