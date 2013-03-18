@@ -229,6 +229,7 @@ fi
 %defattr(-,perfsonar,perfsonar,-)
 %config(noreplace) %{install_base}/etc/daemon.conf
 %config(noreplace) %{install_base}/etc/daemon_logger.conf
+%{install_base}/bin/clean_pSB_db.pl
 %{install_base}/bin/tracedb.pl
 %{install_base}/bin/daemon.pl
 %{install_base}/scripts/install_dependencies.sh

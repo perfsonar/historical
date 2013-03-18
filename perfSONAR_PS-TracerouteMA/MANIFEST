@@ -1,5 +1,6 @@
 MANIFEST
 Makefile
+bin/clean_pSB_db.pl
 bin/client.pl
 bin/daemon.pl
 bin/tracedb.pl
