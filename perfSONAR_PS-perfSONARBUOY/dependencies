@@ -13,6 +13,7 @@ Error
 Exporter
 Fcntl
 File::Basename
+File::Copy
 File::Path
 File::Temp
 FileHandle

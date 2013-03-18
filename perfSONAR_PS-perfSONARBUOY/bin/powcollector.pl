@@ -108,6 +108,7 @@ use OWP::Helper;
 use Sys::Syslog;
 use File::Basename;
 use File::Temp qw(tempfile);
+use File::Copy;
 use Fcntl ':flock';
 use FileHandle;
 use IO::Socket;
@@ -204,6 +205,7 @@ undef $slog;
 #
 my $debug   = $conf->get_val( ATTR => 'DEBUG',   TYPE => $ttype );
 my $verbose = $conf->get_val( ATTR => 'VERBOSE', TYPE => $ttype );
+my $archive = $conf->get_val( ATTR => 'ARCHIVE', TYPE => $ttype );
 my $owpsuffix     = $conf->must_get_val( ATTR => 'SessionSuffix', TYPE => $ttype );
 my $sumsuffix     = $conf->must_get_val( ATTR => 'SummarySuffix' );
 my $sessionsumcmd = $conf->must_get_val( ATTR => 'BinDir', TYPE => $ttype );
@@ -1301,7 +1303,11 @@ sub do_req {
         #
         # But for now... do absolutely nothing - other than respond to
         # the client that the file was received successfully.
-
+        if ( defined ( $archive )) {
+            my $base_filename = basename($req{'FNAME'});
+            mkpath($archdir."\/$req{'SENDNODE'}"."\/$req{'RECVNODE'}");
+            copy($tfname,$archdir."\/$req{'SENDNODE'}"."\/$req{'RECVNODE'}"."\/$base_filename") or die "Copy failed: $!";
+        }
         unlink $ldiefile;
         $ldiefile = undef;
         $resp{'FILEMD5'} = $req{'FILEMD5'};
