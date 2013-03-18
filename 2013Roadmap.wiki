@@ -15,13 +15,16 @@ Q2:
    * added functionality for LS: 
        * pub/sub capability, so can deploy custom caches
        * easy to use client APIs
+       * LS security (maybe Q3)
    * start working on REST/JSON-based owamp MA, that supports rrd-like summarization
-   * better LS GUI that provide cut/paste bwctl and owping commands
+   * better LS GUI that provide cut/paste bwctl and owping commands, and better "community" support
    * finish/polish Maddash/Mesh config integration, including config GUI
+   * finalize central Mesh config GUI
    * web10G integration
-   * issue tracker IDs:
+   * issue tracker IDs: 549, 603, 604, 611, 612, 629, 631, 635
 
 Q3:
+   * release 3.3.1?
    * email alerts from Maddash
    * traceroute visualization integrated with owamp/bwctl data
    * REST/JSON APIs for all remaning services
@@ -30,4 +33,4 @@ Q3:
 
 
 Q4:
-   * release of v3.4 of the toolkit
+   * release of v3.4 of the toolkit?
