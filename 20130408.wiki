@@ -3,7 +3,7 @@
 =   April 8, 2013 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Sowmya, Andy, Nils, Aaron, Brian
   
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
@@ -21,6 +21,26 @@
     * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
     
 == Notes ==
+ * Developer Updates
+  * Andy 
+   * LS backward compatibility script
+   * Working on getting contacts registered
+  * Sowmya
+   * Added the TOS bit to the GUI
+   * Added pulldown-menu and lat/long checks
+  * Nils
+   * No updates
+  * Aaron
+   * Worked on OWAMP DB - more later.
+  * Brian
+   * nuttcp works so we can add it
+* Release
+   * OWAMP DB
+    * timestamps duplicated in multiple formats in multiple columns. since owamp has many rows, leads to a lot of disk space. IU has been running it for a few days, saw 60% decrease in size of tables.
+    * Changes are backward compatible and we think I should put in rc3
+    * Will not do anymore substantial change
+   * R&E Networks
+    * Will set mirror list for kickstart, but up to user to change for updates
 
 == Where ==
 ESnet conference bridge:
