@@ -764,10 +764,6 @@ sub init_date {
         tspec_id        INT UNSIGNED NOT NULL,
         si              INT UNSIGNED NOT NULL,
         ei              INT UNSIGNED NOT NULL,
-        stimestamp      BIGINT UNSIGNED NOT NULL,
-        etimestamp      BIGINT UNSIGNED NOT NULL,
-        start_time      TEXT(128),
-        end_time        TEXT(128),
         bucket_width    FLOAT NOT NULL,
         basei           INT NOT NULL,
         i               INT NOT NULL,
@@ -1104,10 +1100,6 @@ sub add_session {
 			        tspec_id,
 			        si,
 			        ei,
-			        stimestamp,
-			        etimestamp,
-			        start_time,
-			        end_time,
                     bucket_width,
                     basei,
                     i,
@@ -1117,8 +1109,7 @@ sub add_session {
 		        VALUES(
                         ?,?,?,
                         ?,?,?,
-                        ?,?,?,
-                        ?,?,?,
+                        ?,?,
                         ?,?)";
         if ( !( $sth = $dbh->prepare( $sql ) ) ) {
             ldie "Prep: Insert $testname";
@@ -1128,7 +1119,7 @@ sub add_session {
         # Loop on the buckets to insert all of them
         #
         while ( @buckets ) {
-            if ( !( $rc = $sth->execute( $send_id, $recv_id, $tspec_id, owptstampi( $sttime ), owptstampi( $ettime ), $sttime, $ettime, owpgmstring( $sttime ), owpgmstring( $ettime ), $reqh->{'BUCKET_WIDTH'}, $bucketmin, $buckets[0] - $bucketmin, $buckets[1], $reqh->{'SESSION_FINISHED'} ) ) ) {
+            if ( !( $rc = $sth->execute( $send_id, $recv_id, $tspec_id, owptstampi( $sttime ), owptstampi( $ettime ), $reqh->{'BUCKET_WIDTH'}, $bucketmin, $buckets[0] - $bucketmin, $buckets[1], $reqh->{'SESSION_FINISHED'} ) ) ) {
                 ldie "Insert $testname";
             }
 
