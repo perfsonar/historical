@@ -34,7 +34,7 @@
    * Worked on OWAMP DB - more later.
   * Brian
    * nuttcp works so we can add it
-* Release
+ * Release
    * OWAMP DB
     * timestamps duplicated in multiple formats in multiple columns. since owamp has many rows, leads to a lot of disk space. IU has been running it for a few days, saw 60% decrease in size of tables.
     * Changes are backward compatible and we think I should put in rc3
