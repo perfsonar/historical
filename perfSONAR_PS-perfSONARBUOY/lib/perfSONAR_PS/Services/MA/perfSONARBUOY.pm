@@ -291,27 +291,8 @@ sub init {
         $self->_mergeSiteConfig('zip_code');
         $self->_mergeSiteConfig('latitude');
         $self->_mergeSiteConfig('longitude');
-        
-        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"site_project"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"site_project"} )
-        {
-            if ( defined $self->{CONF}->{"site_project"}
-                and $self->{CONF}->{"site_project"} )
-            {
-                $self->{LOGGER}->warn( "Setting \"site_project\" to \"" . $self->{CONF}->{"site_project"} . "\"" );
-                $self->{CONF}->{"perfsonarbuoy"}->{"site_project"} = $self->{CONF}->{"site_project"};
-            }
-        }
-        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"site_name"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"site_name"} )
-        {
-            if ( defined $self->{CONF}->{"site_name"}
-                and $self->{CONF}->{"site_name"} )
-            {
-                $self->{LOGGER}->warn( "Setting \"site_name\" to \"" . $self->{CONF}->{"site_name"} . "\"" );
-                $self->{CONF}->{"perfsonarbuoy"}->{"site_name"} = $self->{CONF}->{"site_name"};
-            }
-        }
+        $self->_mergeSiteConfig('full_name');
+        $self->_mergeSiteConfig('administrator_email');
     }
 
     $handler->registerMessageHandler( "SetupDataRequest",   $self );
@@ -1730,6 +1711,16 @@ sub registerLS {
  	$service_params->{'zip_code'} = $self->{CONF}->{"perfsonarbuoy"}->{"zip_code"} if($self->{CONF}->{"perfsonarbuoy"}->{"zip_code"});
  	$service_params->{'latitude'} = $self->{CONF}->{"perfsonarbuoy"}->{"latitude"} if($self->{CONF}->{"perfsonarbuoy"}->{"latitude"});
  	$service_params->{'longitude'} = $self->{CONF}->{"perfsonarbuoy"}->{"longitude"} if($self->{CONF}->{"perfsonarbuoy"}->{"longitude"});
+    #setup administrator
+    my $administrator = 0;
+    if($self->{CONF}->{"perfsonarbuoy"}->{"full_name"} ||
+        $self->{CONF}->{"perfsonarbuoy"}->{"administrator_email"}){
+        my $name = $self->{CONF}->{"perfsonarbuoy"}->{"full_name"} ? $self->{CONF}->{"perfsonarbuoy"}->{"full_name"} : $self->{CONF}->{"perfsonarbuoy"}->{"administrator_email"};
+        $administrator = {
+            name => $name,
+            email => $self->{CONF}->{"perfsonarbuoy"}->{"administrator_email"}
+        };
+    }
     
     #handle registration
     $self->_chooseLS() if(!defined $self->{LS_URL});
@@ -1741,7 +1732,7 @@ sub registerLS {
         $self->{LS_CLIENT} = perfSONAR_PS::Utils::MARegistrationManager->new();
         $self->{LS_CLIENT}->init(ls_url => $self->{LS_URL}, ls_key_db => $self->{CONF}->{"perfsonarbuoy"}->{"ls_key_db"});
     }
-    $self->{LS_CLIENT}->register(service_params => $service_params, interfaces => \@interface_list, test_set => \%test_set);
+    $self->{LS_CLIENT}->register(service_params => $service_params, interfaces => \@interface_list, test_set => \%test_set, administrator => $administrator, );
      
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.pSB.registerLS.end");
     $self->{NETLOGGER}->debug( $nlmsg );

@@ -168,6 +168,8 @@ sub init {
         $self->_mergeSiteConfig('zip_code');
         $self->_mergeSiteConfig('latitude');
         $self->_mergeSiteConfig('longitude');
+        $self->_mergeSiteConfig('full_name');
+        $self->_mergeSiteConfig('administrator_email');
     }
     
     #Register handlers
@@ -266,6 +268,16 @@ sub registerLS {
  	$service_params->{'zip_code'} = $self->{CONF}->{"tracerouteMA"}->{"zip_code"} if($self->{CONF}->{"tracerouteMA"}->{"zip_code"});
  	$service_params->{'latitude'} = $self->{CONF}->{"tracerouteMA"}->{"latitude"} if($self->{CONF}->{"tracerouteMA"}->{"latitude"});
  	$service_params->{'longitude'} = $self->{CONF}->{"tracerouteMA"}->{"longitude"} if($self->{CONF}->{"tracerouteMA"}->{"longitude"});
+    #setup administrator
+    my $administrator = 0;
+    if($self->{CONF}->{"tracerouteMA"}->{"full_name"} ||
+        $self->{CONF}->{"tracerouteMA"}->{"administrator_email"}){
+        my $name = $self->{CONF}->{"tracerouteMA"}->{"full_name"} ? $self->{CONF}->{"tracerouteMA"}->{"full_name"} : $self->{CONF}->{"tracerouteMA"}->{"administrator_email"};
+        $administrator = {
+            name => $name,
+            email => $self->{CONF}->{"tracerouteMA"}->{"administrator_email"}
+        };
+    }
 
     #Register 
     #determine LS
@@ -286,7 +298,7 @@ sub registerLS {
         $self->{LS_CLIENT} = perfSONAR_PS::Utils::MARegistrationManager->new();
         $self->{LS_CLIENT}->init(ls_url => $ls_array[0], ls_key_db => $self->{CONF}->{"tracerouteMA"}->{"ls_key_db"});
     }
-    $self->{LS_CLIENT}->register(service_params => $service_params, interfaces => $interfaces, test_set => $test_set);
+    $self->{LS_CLIENT}->register(service_params => $service_params, interfaces => $interfaces, test_set => $test_set, administrator => $administrator);
  
     $nlmsg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.Traceroute.registerLS.end");
     $self->{NETLOGGER}->info( $nlmsg );
