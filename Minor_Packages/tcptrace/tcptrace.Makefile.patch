@@ -1,0 +1,12 @@
+--- Makefile.in	2004-03-04 15:33:56.000000000 -0500
++++ Makefile.in	2013-04-16 16:30:23.772072906 -0400
+@@ -122,6 +122,9 @@
+ # define GROK_ERF if you want tcptrace to understand the output
+ # format of the Endace Technology dagsnap program */
+ DEFINES += -DGROK_ERF
++# define options needed by libnet. Solves problem with 64 bit compilation on redhat boxes
++DEFINES += `libnet-config --defines`
++
+ 
+ ################################################################## 
+ # 
