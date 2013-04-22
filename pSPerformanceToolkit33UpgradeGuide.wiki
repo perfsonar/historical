@@ -12,7 +12,7 @@ For this release we have updated some of the default ports used by the tools. Th
 
 Upgrading a LiveCD running Toolkit version 3.2.x to a new LiveCD running 3.3 should be very similar to previous LiveCD upgrades if you have done them in the past. The process involves burning a the latest ISO to a CD, replacing the 3.2 CD in the disk drive and rebooting. Upon reboot, you will need to reset your root password, but all other data and user accounts should be migrated. The exact steps are below:
 
- # Download the LiveCD [http://software.internet2.edu/pSPT3.3-rc3/pS-Performance_Toolkit-LiveCD-3.3rc3.iso iso] and [http://software.internet2.edu/pSPT3.3-rc3/pS-Performance_Toolkit-LiveCD-3.3rc3.iso.md5 md5 checksum]  
+ # Download the LiveCD iso and md5 checksum [http://software.internet2.edu/pSPT3.3-rc3/ here]
  # Once downloaded please verify the MD5 sum:
 {{{
 user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.3rc3.iso;cat pS-Performance_Toolkit-LiveCD-3.3rc3.iso.md5 
