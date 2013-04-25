@@ -112,7 +112,7 @@ There are some options to select:
 
  * Activate on boot will enable this interface to start when the computer starts
  * Enable IPv4 support is the most common situation, and enables the user to use IPv4 addressing
- * Enable IPv6 support enables the user to use IPv4 addressing
+ * Enable IPv6 support enables the user to use IPv6 addressing
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-13.png
 
