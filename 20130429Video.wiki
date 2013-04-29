@@ -3,7 +3,7 @@
 =   April 29, 2013 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Nils, Sowmya, Brian, Andy,  Kavitha
   
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
@@ -11,12 +11,21 @@
 == Agenda Topics ==
   * Developer Updates
    * Andy
+    * RC3 out last week
+    * Kernel built. will let RC testers know its ready.
    * Sowmya
-   * Aaron
+    * Subscribe client about close to completion
+    * Next step to test on ESnet
    * Brian
-   * Kavitha
+    * Met with Web10G at SMM. Still need to backport current version to CentOS6 kernel. Talking to student about getting NDT working.
+    * Nils
+     * No updates
+    * Kavitha
+     * No updates
   * Release Status
-
+   * Andy and Aaron will look at yum repo organization
+   * Need to verify LS registration and LS cache scripts a bit more. Andy and Sowmya will work on that.
+   * Hopefully can finalize things in next 1-2 weeks
 
 == Future Agenda Topics ==
   * Roadmap
@@ -25,7 +34,12 @@
     * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
     
 == Notes ==
-
+ * Developer Updates
+   * Andy
+   * Sowmya
+   * Brian
+   * Nils
+  * Release Status
 
 == Where ==
 ESnet conference bridge:
