@@ -18,7 +18,7 @@ info or it may be provided directly via the command-line.
 
 clean_pSB_db.pl [I<options>]
 clean_pSB_db.pl [B<--dbuser> username][B<--dbpassword> password][B<--dbhost> hostname][B<--dbname> database] [I<options>]
-clean_pSB_db.pl [B<--owmesh-dir> owmeshdir][B<--dbtype> owamp|bwctl] [I<options>]
+clean_pSB_db.pl [B<--owmesh-dir> owmeshdir][B<--dbtype> owamp|bwctl|traceroute] [I<options>]
 
 =over
 
@@ -26,9 +26,9 @@ clean_pSB_db.pl [B<--owmesh-dir> owmeshdir][B<--dbtype> owamp|bwctl] [I<options>
 
 displays this message.
 
-=item B<--dbtype> owamp|bwctl
+=item B<--dbtype> owamp|bwctl|traceroute
 
-indicates type of data in database. Valid value are 'owamp' or 'bwctl'. Defaults to 'owamp'.
+indicates type of data in database. Valid value are 'owamp', 'bwctl', or 'traceroute'. Defaults to 'owamp'.
 
 =item B<--dbname> name
 
@@ -71,7 +71,7 @@ use POSIX;
 
 #var definitions
 my $DEFAULT_DB_HOST = 'localhost';
-my %OW_TYPES = ( 'owamp' => 'OWP', 'bwctl' => 'BW');
+my %OW_TYPES = ( 'owamp' => 'OWP', 'bwctl' => 'BW', 'traceroute' => 'TRACE');
 my %valid_tables = ();
 
 #Set option default
@@ -102,8 +102,8 @@ unless ( $result ){
     exit 1;
 }
 
-if( $dbtype ne "owamp" && $dbtype ne "bwctl" ){
-    print STDERR "Option 'dbtype' must be 'owamp' or 'bwctl'\n";
+if( $dbtype ne "owamp" && $dbtype ne "bwctl" && $dbtype ne "traceroute"){
+    print STDERR "Option 'dbtype' must be 'owamp', 'bwctl', or 'traceroute'\n";
     &usage();
     exit 1;
 }
