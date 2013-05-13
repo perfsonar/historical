@@ -24,7 +24,23 @@
     * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
     
 == Notes ==
-
+  * Developer Updates
+    * Andy
+     * Fixed a bunch of 3.3 things, getting ready to build
+    * Sowmya
+     * Worked on LS
+     * On-call person, Brian is on-call next
+    * Aaron
+     * Patched BWCTL to output info about scheduled slots
+     * Pretty large fuzz factor noticed so far still looking
+     * Brian asked if he had played much with bwctl+iperf3. We should check what happens if client does not specify -T, may pick iperf3.
+    * Brian
+     * Looking a how can help CCNIE community with Jason
+    * Warren
+     * Working on new pythia RPMs to patch the GUI
+     * Once cleaned up may be worth trying to get on a few more machines 
+     
+        
 == Where ==
 ESnet conference bridge:
  * GDS: 00113498555555
