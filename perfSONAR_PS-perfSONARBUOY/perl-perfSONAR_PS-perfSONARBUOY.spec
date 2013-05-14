@@ -7,7 +7,7 @@
 %define init_script_owp_collector perfsonarbuoy_owp_collector
 %define init_script_owp_master perfsonarbuoy_owp_master
 
-%define relnum 4 
+%define relnum 5
 %define disttag pSPS
 
 Name:			perl-perfSONAR_PS-perfSONARBUOY
