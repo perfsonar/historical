@@ -3,18 +3,14 @@
 =   May 20, 2013 Conference Call 2:30 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Brian, Andy, Aaron
   
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
 
 == Agenda Topics ==
-  * Developer Updates
-   * Andy
-   * Brian
-   * Nils
-   * Kavitha
   * Release Status
+
 
 == Future Agenda Topics ==
   * Roadmap
@@ -23,13 +19,8 @@
     * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
     
 == Notes ==
-  * Developer Updates
-    * Andy
-    * Sowmya
-    * Aaron
-    * Brian
-    * Warren
-     
+  * Release Status
+   * RC4 about ready, will announce at the end of the day
         
 == Where ==
 ESnet conference bridge:
