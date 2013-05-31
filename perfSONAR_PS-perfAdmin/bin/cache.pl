@@ -61,6 +61,7 @@ my $base =  "/var/lib/perfsonar/perfAdmin/cache";
 my %hls     = ();
 my %matrix1 = ();
 my %matrix2 = ();
+my %ma_tests     = ();
 
 my @roots   = ();
 my $content = get $hints;
@@ -87,7 +88,7 @@ $gls->init();
 
 croak "roots not found" unless ( scalar( @roots ) > 0 );
 
-print "Number of GLS queried:", scalar @roots;
+print "Number of GLS queried:", scalar @roots . "\n";
 foreach my $root ( @roots ) {
     print "Trying root '" . $root . "'\n" if $DEBUGFLAG;
 
@@ -112,7 +113,7 @@ foreach my $root ( @roots ) {
 
 my $results = $gls->wait_all( { timeout => 60, parallelism => 8 } );
 my @gls_stats = ();
-print "Total GLS reponse received:", scalar keys %{$results};
+print "Total GLS reponse received:" . scalar keys %{$results} . "\n";
 foreach my $key ( keys %{$results} ) {
     my $response_info = $results->{$key};
 
@@ -222,8 +223,8 @@ $ls->init();
 
 my %hls_results = ();
 my @hlses       = keys %hls;
-print "\n Number of HLS queried:", scalar @hlses;
-$results = query_hlses( { hlses => \@hlses, event_type => "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0", format => 1 } );
+print "\n Number of HLS queried:" . scalar @hlses .  "\n";
+$results = query_hlses( { hlses => \@hlses, event_type => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0", format => 1 } );
 
 my @java_hlses = ();
 
@@ -328,12 +329,24 @@ foreach my $h ( keys %hls_results ) {
             next unless $id eq $metadataIdRef;
 
             $logger->debug( "Found matching data\n" );
-
-            $logger->debug( "Querying for keywords in :" . $d1->toString . "\n" );
-
-            # get the keywords
+            $logger->debug( "Querying for keywords and endpoints in :" . $d1->toString . "\n" );
+            
+            #Get get source and dest 
+            my %ma_test = ();
             my @keyword_list = ();
-            my $keyword_elems = find( $d1, "./nmwg:metadata/summary:parameters/nmwg:parameter", 0 );
+            my $endpointpair_elem = find( $d1, "./nmwg:metadata/*[local-name()='subject']/*[local-name()='endPointPair']", 0 );
+            foreach my $ep ( $endpointpair_elem->get_nodelist ) {
+                my $source = find( $ep, "./*[local-name()='src']/\@value", 0 );
+                my $dest = find( $ep, "./*[local-name()='dst']/\@value", 0 );
+                print "Source: $source   Dest: $dest\n";
+                if($source && $dest){
+                   $ma_test{'source'} = $source;
+                   $ma_test{'destination'} = $dest;
+                }
+            }
+            
+            # get the keywords
+            my $keyword_elems = find( $d1, "./nmwg:metadata/nmwg:parameters/nmwg:parameter", 0 );
             foreach my $k ( $keyword_elems->get_nodelist ) {
                 $logger->debug( "Found attribute: " . $k->getAttribute( "name" ) );
                 my $name = $k->getAttribute( "name" );
@@ -370,12 +383,16 @@ foreach my $h ( keys %hls_results ) {
 
                     # we should be tracking things here, eliminate duplicates
                     foreach my $cp ( @contactPoints ){
+                        if($ma_test{'source'} && $ma_test{'destination'}){
+                            $ma_tests{$value}{$cp}{$ma_test{'source'}}{$ma_test{'destination'}} = 1;
+                        }
+                        
                         unless ( exists $dups{$value}{$cp} and $dups{$value}{$cp} ) {
                             $dups{$value}{$cp} = 1;
                             $matrix2{$h}{$cp}  = 1;
     
                             if ( exists $list{$value} ) {
-                                push @{ $list{$value} }, { CONTACT => $cp, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription, KEYWORDS => \@keyword_list, TIMESTAMP => time  };
+                                push @{ $list{$value} }, { CONTACT => $cp, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription, KEYWORDS => \@keyword_list, TIMESTAMP => time };
                             }
                             else {
                                 my @temp = ( { CONTACT => $cp, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription, KEYWORDS => \@keyword_list, TIMESTAMP => time  } );
@@ -598,6 +615,42 @@ foreach my $h ( keys %hls ) {
 close( KEYWORDS );
 close( HLS );
 
+#read in cached MA tests
+if( -e $base . "/list.ma_tests"){
+    open (MATEST, "<" . $base . "/list.ma_tests");
+    while( <MATEST> ){
+        chomp;
+        my @fields = split /\|/;
+        if( @fields != 5 ){
+            next;
+        }
+        if($ma_tests{$fields[0]}{$fields[1]}{$fields[2]}{$fields[3]}){
+            next;
+        }
+        if($fields[4] < $EXP_TIME){
+            next;
+        }
+        $ma_tests{$fields[0]}{$fields[1]}{$fields[2]}{$fields[3]} = $fields[4];
+    }
+    close MATEST;
+}
+
+#write ma tests
+open (MATEST, ">" . $base . "/list.ma_tests");
+foreach my $et(keys %ma_tests){
+    foreach my $cp(keys %{$ma_tests{$et}}){
+        foreach my $src(keys %{$ma_tests{$et}{$cp}}){
+            foreach my $dst(keys %{$ma_tests{$et}{$cp}{$src}}){
+                $ma_tests{$et}{$cp}{$src}{$dst} = time if($ma_tests{$et}{$cp}{$src}{$dst} == 1);
+                print MATEST "$et|$cp|$src|$dst|" . $ma_tests{$et}{$cp}{$src}{$dst} . "\n";
+            }
+        }
+    }
+}
+close MATEST;
+
+
+
 my %file_service_tracker = ();
 my %counter = ();
 foreach my $et ( keys %list ) {
@@ -764,7 +817,7 @@ sub query_hlses {
     my %ret_results = ();
     foreach my $key ( keys %{$results} ) {
         my $response_info = $results->{$key};
-
+        
         # Skip any bad responses
         next unless ( $response_info->{cookie} and $mappings{ $response_info->{cookie} } );
 
