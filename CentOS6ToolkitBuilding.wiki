@@ -1,0 +1,386 @@
+#summary Information for building various components of the Toolkit
+
+== Introduction ==
+
+This page contains information about building the various components of the Toolkit in CentOS 6.
+
+== Kernel ==
+The Toolkit includes a custom version of the CentOS 6 RHEL (Red Hat Enterprise Linux) kernel.
+
+To build this kernel, you will need a host with CentOS 6, and the 'rpm-build' package installed (optionally mock) with at least 5 GB of space available.
+
+  * Download the most recent kernel Source RPM for CentOS 6
+    * Try http://vault.centos.org
+  * Install the kernel source RPM (eg. `rpm -ivh kernel-2.6.32-279.2.1.el6.src.rpm`). This should install files into your RPM build directory (typically /usr/src/redhat if root)
+  * Download patches `aufs2.2-standalone-2.6.32.patch, Makefile.patch, and web100-2.6.32-2.5.27-201001301335.el6.patch` from [http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/kernel/srpm_patches/el6 here] to the `SOURCES` directory in your RPM build directory (the same directory where the kernel sources are stored)
+   * These patches will attempt to perform several tasks when the kernel is built:
+    * aufs patch modifies the kernel to work with the aufs kernel module (kmod) to allow persistent overlays
+    * Makefile patch modifies the kernel makefile to include '.aufs.web100' in the extraversion string
+    * web100 patch modifies the kernel to make 100Mbps TCP streams over wide-area networks possible
+  * Change your working directory to `SOURCES` in your RPM build directory
+  * Several changes must be made to two files `kernel.spec` and `config-generic` 
+
+==== Manually Updating config-generic and SPEC====
+  * Edit the file `config-generic` and add the following lines to the end of the file:
+{{{
+# AUFS options
+CONFIG_AUFS_FS=m
+
+# WEB100 options
+CONFIG_WEB100=y
+CONFIG_WEB100_STATS=y
+CONFIG_WEB100_FPERMS=384
+CONFIG_WEB100_GID=0
+CONFIG_WEB100_NET100=y
+CONFIG_WEB100_NETLINK=y
+}}}
+  * Change your working directory to `SPECS` in your RPM build directory
+  * Edit the `kernel.spec` file with these changes:
+   * Toward the very top of the document you should set a buildid to reflect your custom build as done in the following example:
+{{{
+# Polite request for people who spin their own kernel rpms:
+# please modify the "buildid" define in a way that identifies
+# that the kernel isn't the stock distribution kernel, for example,
+# by setting the define to ".local" or ".bz123456"
+#
+# % define buildid .local
+%define buildid .aufs.web100
+}}}
+   * Slightly farther down the kernel spec file modify the kernel firmware package to be built by default by changing the line:
+{{{
+%define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     0}
+}}}
+   to
+{{{
+ %define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     1}
+}}}
+   * Below the final kernel source and above Patch999999 add these lines:
+{{{
+# Makefile patch
+Patch40000: Makefile.patch
+
+# aufs patches
+Patch50000: aufs2.2-standalone-2.6.32.patch
+
+# web100 patches
+Patch60000: web100-2.6.32-2.5.27-201001301335.el6.patch
+
+# empty final patch file to facilitate testing of kernel patches
+Patch999999: linux-kernel-test.patch
+}}}
+   * Above the line where `linux-kernel-test.patch` is applied add these three lines:
+{{{
+ApplyPatch Makefile.patch
+ApplyPatch aufs2.2-standalone-2.6.32.patch
+ApplyPatch web100-2.6.32-2.5.27-201001301335.el6.patch
+ApplyOptionalPatch linux-kernel-test.patch
+}}}
+
+==== Final Steps ====
+
+   * Finally, you should manually update the changelog in the `kernel.spec` file to reflect the changes made, eg:
+{{{
+%changelog
+* Fri Jul 20 2012 Andrew Sides <asides@es.net> [2.6.32-279.2.1.el6.aufs.web100]
+- Roll in aufs2.2 patches
+- Add separate patch for Makefile extraversion
+
+* Fri Jul 20 2012 Andrew Sides <asides@es.net> [2.6.32-279.2.1.el6.web100]
+- Roll in Web100 patches
+- Package kernel-firmware built by default
+
+* Thu Jul 19 2012 Johnny Hughes <johnny@centos.org>
+- Roll in CentOS Branding
+}}}
+  * To build the kernel SRPM run: `rpmbuild -ba kernel.spec 2> build-err.log | tee build-out.log`
+    * Note: the above command will put error messages into the file `build-err.log`
+  * Change your working directory to `SRPMS` in your RPM build directory
+  * If the above commands were executed properly you should see a kernel SRPM file
+   * If not look through the log files to determine what went wrong
+  * To build the kernel run: `rpmbuild --target i686 --without debug --without kabichk --rebuild [kernel SRPM]`
+   * If new patches have been added, this command may error out due to patches that don't apply cleanly. If so, these patches will need modified as appropriate and the command rerun (look [#Creating_Kernel_Patches here])
+  * The RPMs (and a new SRPM) should now be available in the RPM and SRPM directories in your RPM build directory. They can either be installed directly, or added to a yum repository and installed via that method.
+
+=== Generating Random Bytes ===
+When compiling on a remote host, it is common to see an error like this:
+
+{{{
+Not enough random bytes available.  Please do some other work to give
+the OS a chance to collect more entropy! (Need 266 more bytes)
+}}}
+
+There are a number of ways to generate random bytes on a remote machine, but the easiest way that we've found is to perform parallel 'hdparm' tests. The following script can be run one or more times in the event that the error above is seen.
+
+{{{
+#!/bin/bash
+
+NUM_TESTS=20
+
+if [ -n "$1" ]; then
+    NUM_TESTS=$1
+fi
+
+for i in `seq 1 $NUM_TESTS`; do
+    /sbin/hdparm -t /dev/sda1 &
+done
+}}}
+
+=== Creating Kernel Patches ===
+Unfortunately all of the kernel patches the Toolkit utilizes are intended for the mainstream kernel releases and not the RHEL version that CentOS 6 uses. The RHEL kernel often backports fixes from newer kernel versions essentially creating a hybrid. This presents many issues when applying a patch to the RHEL kernel.
+
+Most patches must first be applied *manually* (by hand) and then regenerated by running a diff between the vanilla RHEL kernel and the patched one: eg. `diff -ur kernel.old/ kernel.new/ > kernel.patch`. In the case of the Toolkit we incorporate two custom patches to the kernel described above: aufs and web100. Likely within the same major kernel version (ie. 2.6.*32*) the existing patches will apply successfully but when a new kernel is released they may have to be recreated or modified.
+
+==== AuFS ====
+Aufs represents a unique problem with using the RHEL kernel. Many of the methods it utilizes are rewritten between the mainstream and the RHEL kernel (the RHEL kernel often includes updates applied to later versions of the mainstream kernel). For this reason, creating a successful and stable aufs patch is quite difficult. To minimize the impacts of patching the kernel there are two patches involved: one patch contains completely necessary and unavoidable patches that must be applied to the kernel, and the other contains patches for the aufs kernel module itself to make it work with the RHEL kernel. Both patches must be created with extreme care as there must be integrity maintained between the kernel, the aufs kernel module, and the aufs user utilites.
+
+To create a new aufs patch will require some understanding of how the kernel operates and experience in programming, as parts of it will likely have to be modified or rewritten by hand. Because we want to use the CentOS RHEL kernel we must use the aufs standalone branch and not the one with full kernel sources. Aufs utilities are also necessary to use aufs but those are a separate package and for the most part can be ignored throughout this process. To patch a new kernel, it is recommended to download several versions of aufs (eg. if your kernel version is 2.6.32 then download aufs intended for mainline kernel versions 2.6.30 through 2.6.36).
+
+Aufs standalone comes with several patches, however the only necessary ones are: `aufs2-base.patch`, `aufs2-standalone.patch`, and `proc_map.patch`. Try patching the CentOS RHEL kernel with these three patches from all the aufs versions you downloaded, each in turn. Determine which group of patches applies the cleanest (has the least errors). Do not delete the extra aufs versions as they may be used later. Start applying the cleanest patches by hand, and if there are issues or references to missing blocks of code consult with the other versions of aufs while taking careful note of what was changed (you may wish to download the full kernel source files from aufs to accomplish this).
+
+After this you are ready to build the kernel using the steps listed [#Kernel above]. If the kernel fails to build consult the build logs to find the issue(s).
+
+The final step in this process is making the aufs kernel module. The initial kernel patch may need to be modified to work with aufs and most likely the aufs sources will have to be patched as well. Try building the kernel module against your patched kernel sources and read though the output logs to address any errors. Likely this process will have to be repeated several times until all the issues are resolved. This part is by far the most difficult, so consult the existing aufs patches for older CentOS RHEL kernel versions.
+
+When this is done you should have a working aufs compatible RHEL kernel and the aufs kernel module.
+
+Aufs kernel patches for various kernel versions can be found [http://aufs.sourceforge.net/ here].
+
+==== Web100 ====
+Fortunately the web100 kernel patch seems to be much a much smoother process as it requires less modification. Manual patching is highly recommended to make sure that things end up where they need to be. Through experience, I have found that lines of code can be inserted where they don't belong which will cause major issues when building and using a kernel. After manual patching is completed simply run a diff between the vanilla kernel and the modified one to produce a patch that will be applied at RPM build time.
+
+Web100 kernel patches for various kernel versions can be found [http://www.web100.org/download/ here].
+
+== Kernel Modules aufs and sk98lin ==
+Ever release requires you to rebuild the aufs and sk98lin modules as well as the kernel. The process for both is as follows.
+ * Download the latest aufs and sk98lin RPMS found in http://software.internet2.edu/web100_kernel/rpms/el6/SRPMS/
+ * On you build host install both Source RPMS 
+{{{
+rpm -iv aufs-kmod-2.2-7.el6.aufs.web100.src.rpm
+rpm -iv sk98lin-kmod-10.92.1.3-7.el6.aufs.web100.src.rpm	
+}}}
+ * Update the installed SPEC file with the following changes:
+ * Update the kversion to match the kernel you are building against
+  * Increase the relnum by 1
+  * Rebuild the source RPM using the new SPEC file
+{{{
+rpmbuild -bs SPECS/aufs-kmod.spec
+rpmbuild -bs SPECS/sk98lin-kmod.spec
+}}}
+ * If using mock, copy the kernel rpms to your holding repo and then start the build. This should complete the build process.
+
+== Customizing The Toolkit ==
+
+The pS-Performance Toolkit, as the LiveCD, LiveUSB, and NetInstall, are built using custom CentOS kickstart files. You can read more about kickstart installations [http://docs.redhat.com/docs/en-US/Red_Hat_Enterprise_Linux/5/html/Installation_Guide/ch-kickstart2.html here]. The kickstart file defines the set of software repositories to use, the set of software to install, and a script that performs some system configuration once the software has been installed. Customizing the toolkit will involve changing one or more of those elements in the kickstart files.
+
+=== Pre-Requisites ===
+
+The build procedures here assume that the toolkit ISOs are being built on CentOS 6. The steps may work on other systems, but have only been tested on CentOS 6.
+
+For building custom versions of the LiveCD, LiveUSB, or NetInstall, you'll need a copy of ImageMagick installed on the host. This should be available via yum. 
+
+For building custom versions of the NetInstall, you will need a copy of mkisofs installed on the host. This should be available via yum.
+
+For building custom versions of the LiveCD and LiveUSB, you will need the livecd-tools package installed on CentOS 6. This should also be available via yum. You can find more installation information [https://projects.centos.org/trac/livecd/wiki/GetToolset here].
+
+=== Building The Toolkit ===
+
+You can download the kickstarts, images and scripts needed to build the toolkit by doing a subversion checkout of http://anonsvn.internet2.edu/svn/nptoolkit/trunk/
+
+There are 6 directories in this subversion repository. The ones of importance for customization are `kickstarts`, `images`, and `scripts`. The `kickstarts` directory contains the files used for generating the kickstarts used by the LiveCD and NetInstall setups. The `scripts` directory contains 3 scripts used for building the toolkit, one for the LiveCD, one for the LiveUSB, and one for the NetInstall as well as a script used to deploy the LiveUSB. The `images` directory contains the image displayed when the CD is first booted.
+
+If you run the script `build_livecd.sh` or `build_liveusb.sh` as root, it should download all the necessary RPMs, and build an ISO of the LiveCD/USB and place it in the resources directory. Similarly, if you run the script `build_netinstall.sh` as root, it should build an ISO of the NetInstall.
+
+As of the CentOS 6 release, there is an option to specify whether to build a 32-bit or 64-bit version. If the script is executed without any parameters it will automatically build a 32-bit version of the Toolkit, however if you wish to build a 64-bit version you must supply the script with an architecture parameter. For example, to build a 64-bit version of the LiveCD you would run `build_livecd.sh --arch x86_64` as root. *Note that this requires all Toolkit software to be rebuilt for 64-bit compatibility.*
+
+The general build process of the LiveCD/USB proceeds as follows:
+  * Patches the 'generic' kickstart file (`centos6-base.cfg`) with LiveCD-specific modifications (`centos6-livecd/usb.patch`)
+  * Calls livecd-creator to build the LiveCD/USB from the kickstart file
+  * Modifies the generated LiveCD/USB to use the proper boot image
+
+The general build process of the NetInstall roceeds as follows:
+  * Patches the 'generic' kickstart file (`centos6-base.cfg`) with NetInstall-specific modifications (`centos6-netinstall.patch`)
+  * Modifies the generic CentOS netinstall CD (in the `resources` directory) to include the kickstart and to boot using it
+  * Modifies the generic CentOS netinstall CD to use the proper boot image
+
+=== Customizing The Toolkit ===
+
+To customize the toolkit, you will need to modify the kickstart file. The `centos6-base.cfg` file in the kickstarts directory is the 'generic' kickstart file. There are 3 patches: `centos6-livecd.patch`, `centos6-liveusb.patch`, and `centos6-netinstall.patch`, that modify this kickstart file.
+
+There are a large number of directives inside the kickstart. The meaning of most of these is outside the scope of this document, but should be available [http://fedoraproject.org/wiki/Anaconda/Kickstart here].
+
+==== Customizing The Software Yum Repositories ====
+
+The set of repositories that will be used to retrieve RPMs from can be customized. This allows you to use a local mirror to speed up builds as well as to include new or customized RPMs. Note, however, that when changing the repositories, you must make sure that the software to be installed (either directly or to satisfy dependencies) must still be available in the set of repositories.
+
+The 'repo' lines specify the set of repositories to use:
+
+{{{
+repo --name=a-Internet2    --baseurl=http://software.internet2.edu/rpms/i386/main/
+}}}
+
+The above line tells the kickstart to use the Internet2 repository and gives the URL of the yum repository.
+
+Note: the repositories here are only used for installation. They will not be available after installation. If you want to make these software repositories available after installation, you must either have the kickstart install an appropriate repository package (see [http://fedoraproject.org/wiki/EPEL/FAQ#How_can_I_install_the_packages_from_the_EPEL_software_repository.3F here] for an example of the repository package), or have the post installation script add the appropriate .repo and key files. 
+
+==== Customizing The Software To Install ====
+
+In the `%packages` section, there are a list of packages to install or not install. Any packages that start with "@" are package groups (e.g. `@core` is the set of core packages). Any packages that start with "-" are packages that should not be installed (e.g. `-sysreport` says to not install the sysreport package). All other packages are normal packages to install like you might do with yum.
+
+You can add any packages here that you might want installed.
+
+==== Customizing The Toolkit System Environment ====
+
+The toolkit system environment can be configured using the `%post script`. This script is run after the software packages have been installed, and allow for modifications to be made to the installed system before it is booted for the first time (or, in the case of the LiveCD/USB, before it is turned into an unmodifiable ISO).
+
+There is an existing `%post` script that performs a number of tasks needed by the toolkit. However, this script can be modified to include any desired configuration for the toolkit system. For example, users could be added, or configuration files could be modified. The existing post installation script includes a wide variety of methods for configuring aspects of the installed system.
+
+The thing to remember when making changes is that the patch files expect to patch the `centos6-base.cfg` file. There are a few ways to go about making changes. One way is to make changes to the `centos6-base.cfg` in such a way that they don't conflict with the patches. This is generally the path of least resistance. Another option, if you only plan on making one of the LiveCD/USBs or NetInstalls, is to patch the `centos6-base.cfg` before making your changes, and then edit the `build_livecd.sh`, `build_liveusb.sh`, or `build_netinstall.sh` and set the `KICKSTART_PATCH=...` line to be `KICKSTART_PATCH=`. This will stop the script from trying to patch the `centos6-base.cfg` file. Lastly, you can edit the `build_netinstall.sh`, and the regenerate or edit the patch files to account for the changes.
+
+== Building Toolkit Packages With Mock ==
+
+[ToolkitDevelopment_MockOverview This page] contains background information on mock. The latter sections assume basic knowledge of mock and 'holding' repositories, and that the holding repository has been configured as described.
+
+[ToolkitDevelopment_SourceRPMs This page] contains information on creating and building source RPMs. The latter sections assume basic knowledge of building source RPMs.
+=== i2_mock utility ===
+
+To ease the use of mock, we built a simple wrapper script over the mock command which simply sets some default values:
+  * The uniqueext value will be set to the callers username 
+  * The architecture is set to "i386"
+  * The default build environment is set to "epel-6" (RedHat6 + the EPEL repositories)
+  * The output directory is set to /home/[username]/holding/[build environment]/[architecture]/[name]
+
+{{{
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+
+Getopt::Long::Configure("pass_through");
+Getopt::Long::Configure("no_ignore_case");
+
+my $uniqueext;
+my $resultdir;
+my $arch;
+my $distro;
+
+my $result = GetOptions("uniqueext=s", \$uniqueext, "resultdir=s", \$resultdir, "arch=s", \$arch, "distro=s", \$distro);
+
+my @remaining_args = @ARGV;
+
+my $srpm = $ARGV[$#ARGV];
+unless ($srpm)
+{
+	print "No source RPM specified.\n";
+	exit(-1);
+}
+
+unless (`rpm -qp $srpm 2>/dev/null`)
+{
+	print "Invalid SRPM: $srpm";
+	exit(-1);
+}
+
+my ($name, $pass, $uid, $gid, $quota, $comment, $gcos, $dir, $shell, $expire) = getpwuid($>);
+
+$arch = "i386" unless ($arch);
+$distro = "epel-6" unless ($distro);
+$uniqueext = $name unless ($uniqueext);
+$resultdir = "/home/$name/holding/$distro/$arch/" . `rpm -qp $srpm 2>/dev/null` unless ($resultdir);
+chomp($resultdir);
+
+my $mycfg = "$distro-$arch";
+$mycfg = "$distro-i386" if ( ! -e "/etc/mock/$mycfg" and $arch eq "i686" and -e "/etc/mock/$distro-i386.cfg");
+
+my @args = ();
+push @args, ("/usr/bin/mock");
+push @args, ("-r", $mycfg);
+push @args, ("--resultdir", $resultdir);
+push @args, ("--uniqueext", $uniqueext);
+push @args, ("--arch", $arch);
+push @args, @remaining_args;
+
+print join(" ", @args) . "\n";
+system(@args);
+}}}
+
+=== I2utils ===
+  * Build a source RPM of I2utils (e.g. I2util-1.1-1.el6.src.rpm)
+    * A copy of the source/spec file is available at svn checkout http://anonsvn.internet2.edu/svn/I2util/trunk I2Util
+  * Run: `i2_mock [I2utils SRPM]` (e.g. `i2_mock I2util-1.1-1.el6.src.rpm`)
+
+=== web100_userland ===
+  * Build a source RPM of web100_userland (e.g. web100_userland-1.8-1.el6.src.rpm)
+    * A copy of the source/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/web100_userland/
+  * Run: `i2_mock [web100_userland SRPM]` (e.g. `web100_userland-1.8-1.el6.src.rpm`)
+
+=== bwctl ===
+  * Place a built RPM of I2utils into the 'holding' repository
+  * Build a source RPM of bwctl (e.g. bwctl-1.4rc1-1.el6.src.rpm)
+    * A copy of the source/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/bwctl/
+  * Run: `i2_mock [bwctl SRPM]` (e.g. `i2_mock bwctl-1.4rc1-1.el6.src.rpm`)
+
+=== owamp ===
+  * Place a built RPM of I2utils into the 'holding' repository
+  * Build a source RPM of owamp (e.g. owamp-3.3rc1-1.el6.src.rpm)
+    * A copy of the source/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/owamp/
+  * Run: `i2_mock [owamp SRPM]` (e.g. `i2_mock owamp-3.3rc1-1.el6.src.rpm`)
+
+=== ndt ===
+  * Place a built RPM of I2utils into the 'holding' repository
+  * Place a built RPM of web100_userland into the 'holding' repository
+  * Build a source RPM of ndt (e.g. ndt-3.6.4-3.el6.src.rpm)
+    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/ndt/
+  * Run: `i2_mock [ndt SRPM]` (e.g. `ndt-3.6.4-3.el6.src.rpm`)
+
+=== npad ===
+  * Place a built RPM of web100_userland into the 'holding' repository
+  * Build a source RPM of npad (e.g. npad-1.5.6-2.el6.src.rpm)
+    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/npad/
+  * Run: `i2_mock [npad SRPM]` (e.g. `i2_mock npad-1.5.6-2.el6.src.rpm`)
+
+=== nuttcp ===
+  * Build a source RPM of nuttcp (e.g. nuttcp-6.1.2-1.el6.src.rpm)
+    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/nuttcp/
+  * Run: `i2_mock [nuttcp SRPM]` (e.g. `i2_mock nuttcp-6.1.2-1.el6.src.rpm`)
+
+=== dbxml ===
+  * Build a source RPM of dbxml (e.g. dbxml-2.5.16-1.el6.src.rpm)
+    * A copy of the source/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/dbxml/
+  * Run: `i2_mock [dbxml SRPM]` (e.g. `i2_mock dbxml-2.5.16-1.el6.src.rpm`)
+
+=== perl dbxml ===
+  * Place a built RPM of dbxml into the 'holding' repository
+  * Build a source RPM of perl-dbxml (e.g. perl-dbxml-2.5.16-1.el6.src.rpm)
+    * A copy of the source/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/dbxml/
+  * Run: `i2_mock [perl-dbxml SRPM]` (e.g. `i2_mock perl-dbxml-2.5.16-1.el6.src.rpm`)
+
+=== kernel ===
+  * Build a source RPM of the kernel. This will involve steps described [#Kernel above]. (e.g. kernel-2.6.32-279.2.1.el6.aufs.web100.src.rpm)
+  * Run `i2_mock --arch i686 --without debug --without kabichk [kernel SRPM]` (e.g. `i2_mock --arch i686 --without debug --without kabichk kernel-2.6.32-279.2.1.el6.aufs.web100.src.rpm`)
+   * NOTE: make sure you have at least 5 GB of available disk space for building the set of kernels
+
+=== aufs kernel module ===
+  * Copy the kernel development RPMS (kernel-devel) into the 'holding' repository
+    * Make note of the kernel version number (e.g. 2.6.32-279.2.1.el6.aufs.web100)
+  * Build a source RPM of the aufs module (e.g. aufs-kmod-2.2-1.el6.src.rpm)
+    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/aufs/
+  * Run `i2_mock --arch i686 -D "kversion [kernel version number]" [aufs-kmod SRPM]` (e.g. `i2_mock --arch i686 -D "kversion 2.6.32-279.2.1.el6.aufs.web100" aufs-kmod-2.2-1.el6.src.rpm`)
+
+=== aufs utilities ===
+  * Copy the aufs-kmod RPMS into the 'holding' repository
+  * Build a source RPM of the aufs utilities (e.g. aufs-util-2.2-1.el6.src.rpm)
+    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/aufs/
+  * Run `i2_mock [aufs-util SRPM]` (e.g. `i2_mock aufs-util-2.2-1.el6.src.rpm`)
+
+=== sk98lin kernel module ===
+  * Copy the kernel development RPMS (kernel-devel) into the 'holding' repository
+    * Make note of the kernel version number (e.g. 2.6.32-279.2.1.el6.aufs.web100)
+  * Build a source RPM of the sk98lin module (e.g. sk98lin-kmod-10.92.1.3-1.el6.src.rpm)
+    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/sk98lin/
+  * Run `i2_mock --arch i686 -D "kversion [kernel version number]" [sk98lin-kmod SRPM]` (e.g. `i2_mock --arch i686 -D "kversion 2.6.32-279.2.1.el6.aufs.web100" sk98lin-kmod-10.92.1.3-1.el6.src.rpm`)
+
+== Last Updated ==
+
+$Id$
