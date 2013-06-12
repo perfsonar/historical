@@ -113,7 +113,7 @@ foreach my $root ( @roots ) {
 
 my $results = $gls->wait_all( { timeout => 60, parallelism => 8 } );
 my @gls_stats = ();
-print "Total GLS reponse received:" . scalar keys %{$results} . "\n";
+print "Total GLS reponse received:" . (scalar keys %{$results}) . "\n";
 foreach my $key ( keys %{$results} ) {
     my $response_info = $results->{$key};
 
@@ -332,16 +332,18 @@ foreach my $h ( keys %hls_results ) {
             $logger->debug( "Querying for keywords and endpoints in :" . $d1->toString . "\n" );
             
             #Get get source and dest 
-            my %ma_test = ();
+            my @ma_test_list = ();
             my @keyword_list = ();
             my $endpointpair_elem = find( $d1, "./nmwg:metadata/*[local-name()='subject']/*[local-name()='endPointPair']", 0 );
             foreach my $ep ( $endpointpair_elem->get_nodelist ) {
+                my %ma_test = ();
                 my $source = find( $ep, "./*[local-name()='src']/\@value", 0 );
                 my $dest = find( $ep, "./*[local-name()='dst']/\@value", 0 );
                 print "Source: $source   Dest: $dest\n";
                 if($source && $dest){
                    $ma_test{'source'} = $source;
                    $ma_test{'destination'} = $dest;
+                   push @ma_test_list, \%ma_test;
                 }
             }
             
@@ -383,10 +385,13 @@ foreach my $h ( keys %hls_results ) {
 
                     # we should be tracking things here, eliminate duplicates
                     foreach my $cp ( @contactPoints ){
-                        if($ma_test{'source'} && $ma_test{'destination'}){
-                            $ma_tests{$value}{$cp}{$ma_test{'source'}}{$ma_test{'destination'}} = 1;
+                        foreach my $ma_test(@ma_test_list){
+                            if($ma_test->{'source'} && $ma_test->{'destination'}){
+                                print "$cp - " . $ma_test->{'source'} . " " . $ma_test->{'destination'};
+                                $ma_tests{$value}{$cp}{$ma_test->{'source'}}{$ma_test->{'destination'}} = 1;
+                            }
                         }
-                        
+                                                
                         unless ( exists $dups{$value}{$cp} and $dups{$value}{$cp} ) {
                             $dups{$value}{$cp} = 1;
                             $matrix2{$h}{$cp}  = 1;
