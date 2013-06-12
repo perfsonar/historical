@@ -297,6 +297,7 @@ sub find_host {
     #add host
     $hosts->{$addresses[0]} = {
         name => $addresses[0],
+        type => 'manual',
         interface => {
                 if_name => $addresses[0],
                 address => \@addresses,
