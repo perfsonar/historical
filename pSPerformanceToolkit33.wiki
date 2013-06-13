@@ -301,6 +301,8 @@ An important thing to note is that in the description above, there is no IP addr
 
 === Live CD ===
 *_Currently there is a known issue running the LiveCD on certain Dell models. See [http://psps.perfsonar.net/toolkit/releasenotes/pspt-3_3.html#known_issues release notes]_*
+
+
 The pS Performance Toolkit [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-LiveCD-3.3.iso iso] and [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-LiveCD-3.3.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
