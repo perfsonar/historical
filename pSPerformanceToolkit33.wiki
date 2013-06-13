@@ -317,11 +317,7 @@ If the calculated value matches the downloaded value, the ISO image is complete 
  * The target machine's BIOS must allow the machine to boot from CD.  If the CD does not boot, adjust the BIOS (normally access via *_F12_*, *_F2_*, *_Del_*, etc.) and try again.  
  * The target hardware should match what is described in [pSPerformanceToolkit33#System_Requirements System Requirements].
 
-After booting the following screen will appear:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/boot.png
-
-Options can be presented at this time (e.g. going into single user mode) but if nothing is required, simply press enter.  The boot process will commence after this:
+While booting, options can be presented (e.g. going into single user mode) but if nothing is required, simply press enter.  The boot process will commence after this:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/boot-msg.png
 
@@ -665,7 +661,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/getaddress-2.
 
 Enter this address in a web browser, and the following screen will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-home-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-home-1.png
 
 
 The menu on the left side of the screen has the following areas that can be viewed and configured, this guide will examine each:
@@ -703,7 +699,7 @@ The menu on the left side of the screen has the following areas that can be view
 
 The _*home*_ page, is linked via the _Local Performance Services_ button:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-home-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-home-1.png
 
 This page lists the measurement tools currently on this node as well as the versions of each piece of software.  There are 3 states for each tool:
 
@@ -781,11 +777,11 @@ _perfAdmin_ is a series of CGI scripts that display data from perfSONAR services
 
 The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-pa-throughput-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-pa-throughput-1.png
 
 Once the host is collecting data, a screen similar to the following will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-pa-throughput-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-pa-throughput-2.png
 
 There are three sections to the GUI:
 
@@ -795,7 +791,7 @@ There are three sections to the GUI:
 
 Graphs can be produced for individual tests:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-pa-throughput-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-pa-throughput-3.png
 
 ==== perfAdmin OWAMP ====
 
@@ -803,11 +799,11 @@ _perfAdmin_ is a series of CGI scripts that display data from perfSONAR services
 
 The first capture is seen when the service does not have any information to display, or may be in the _Disabled_ or _Not Running_ state:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-pa-owd-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-pa-owd-1.png
 
 Once the host is collecting data, a screen similar to the following will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-pa-owd-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-pa-owd-2.png
 
 There are three sections to the GUI:
 
@@ -816,7 +812,7 @@ There are three sections to the GUI:
 
 Graphs can be produced for individual tests:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-pa-owd-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-pa-owd-3.png
 
 ==== perfAdmin PingER ====
 
@@ -1092,7 +1088,7 @@ Authenticate with the _*knoppix*_ user or any other user that has _administrativ
 
 The _enabled services_ screen lists the services that will start and stop when the machine does.  The screen looks similar to this:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-enabled.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-enabled.png
 
 A breakdown of each service:
 
@@ -1425,7 +1421,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-scheduled
 
 Upon adding a traceroute test via the _Add New Traceroute Test_ button, the following dialog will appear:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-scheduled-trace-1.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-scheduled-trace-1.png
 
 Enter the following information:
 
@@ -1444,27 +1440,27 @@ After saving, the test is setup but there are no hosts associated with the test.
  * Manually entering hostnames/IP addresses
  * Searching the perfSONAR information services for [pSPerformanceToolkit33#Communities communities]
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-scheduled-trace-2.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-scheduled-trace-2.png
 
 The user can manually enter a test host as seen in this example:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-scheduled-trace-3.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-scheduled-trace-3.png
 
 The host will be added to the list of tests hosts. 
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-scheduled-trace-4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-scheduled-trace-4.png
 
 Use of the [pSPerformanceToolkit33#Communities Communities] keywords will also reveal hosts that are in the same community as the host.  Below shows the search for hosts in the _*Internet2*_ community:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-scheduled-trace-5.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-scheduled-trace-5.png
 
 When the list returns, they will display on the page.  The user can then click and add new hosts to the test that are already in the same community.  Below is what happens after adding a host from this list:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-scheduled-trace-6.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-scheduled-trace-6.png
 
 When done, press the _Save_ button to commit the changes to disk, and restart the affected services.
 
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit331/web-scheduled-trace-7.png
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/web-scheduled-trace-7.png
 
 Note that if the user chooses to leave this page before saving the following warning may appear (depending on the web browser used):
 
