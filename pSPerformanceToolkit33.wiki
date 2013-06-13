@@ -13,12 +13,12 @@ The system recommendations for the pS Performance toolkit are now located [http:
 == Downloads ==
 
 ||Distribution||Architecture||Download||
-||NetInstall||i386|| [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-3.3-NetInstall-i386.iso iso] [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-3.3-NetInstall-i386.iso.md5 md5]||
-|| ||x86_64|| [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-3.3-NetInstall-x86_64.iso iso] [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-3.3-NetInstall-x86_64.iso.md5 md5]||
-||LiveCD||i386|| [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-3.3-LiveCD-i386.iso iso] [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-3.3-LiveCD-i386.iso.md5 md5]||
-|| ||x86_64|| [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-3.3-LiveCD-x86_64.iso iso] [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-3.3-LiveCD-x86_64.iso.md5 md5]||
-||LiveUSB||i386|| [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-3.3-LiveUSB-i386.iso iso] [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-3.3-LiveUSB-i386.iso.md5 md5]||
-|| ||x86_64|| [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-3.3-LiveUSB-x86_64.iso iso] [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-3.3-LiveUSB-x86_64.iso.md5 md5] [http://anonsvn.internet2.edu/svn/nptoolkit/branches/CentOS_6.4/scripts/deploy_liveusb.sh deploy-script]||
+||NetInstall||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3-NetInstall-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3-NetInstall-i386.iso.md5 md5]||
+|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3-NetInstall-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3-NetInstall-x86_64.iso.md5 md5]||
+||LiveCD||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3-LiveCD-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3-LiveCD-i386.iso.md5 md5]||
+|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3-LiveCD-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3-LiveCD-x86_64.iso.md5 md5]||
+||LiveUSB||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3-LiveUSB-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3-LiveUSB-i386.iso.md5 md5]||
+|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3-LiveUSB-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3-LiveUSB-x86_64.iso.md5 md5] [http://anonsvn.internet2.edu/svn/nptoolkit/branches/CentOS_6.4/scripts/deploy_liveusb.sh deploy-script]||
 
 == Upgrading ==
 If you are upgrading a from previous version of the perfSONAR-PS Toolkit, please see our [pSPerformanceToolkit33UpgradeGuide upgrade guide].
@@ -48,7 +48,7 @@ The following sections describe the installation procedure for each of the produ
 
 === !NetInstall CD ===
 
-The pS Performance Toolkit [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-NetInstall-3.3.iso iso] and [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-NetInstall-3.3.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
+The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.3.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.3.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
 user@host:~$ md5sum pS-Performance_Toolkit-NetInstall-3.3.iso;cat pS-Performance_Toolkit-NetInstall-3.3.iso.md5
@@ -303,7 +303,7 @@ An important thing to note is that in the description above, there is no IP addr
 *_Currently there is a known issue running the LiveCD on certain Dell models. See [http://psps.perfsonar.net/toolkit/releasenotes/pspt-3_3.html#known_issues release notes]_*
 
 
-The pS Performance Toolkit [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-LiveCD-3.3.iso iso] and [http://software.internet2.edu/pSPT3.3/pS-Performance_Toolkit-LiveCD-3.3.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
+The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-LiveCD-3.3.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-LiveCD-3.3.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
 user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.3.iso;cat pS-Performance_Toolkit-LiveCD-3.3.iso.md5 
