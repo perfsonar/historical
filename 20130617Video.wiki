@@ -26,7 +26,29 @@
     * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
     
 == Notes ==
-        
+  * Developer Updates
+   * Aaron
+    * Gave workshop
+    * Started analyzing bwctl slot information
+    * Brian hopeful Aaron can test bwctl and iperf3
+   * Andrew
+    * Working on services directory. Using django and memcached.
+    * Sent around survey on interface
+   * Andy
+    * perfSONAR release out the door
+    * Working on getting 3.3 on ESnet and cleaning-up mesh config
+   * Brian
+    * Vacation last week
+   * Luke
+    *  Wrapped up some unit tests on LS client
+   * Sowmya
+    * Fixed a couple of bugs
+    * Working on bugs with subscribe interface bug
+   * Warren
+    * Working on final report for Pythia
+    * Committing last of code for Pythia
+    * Andy will deploy agents this week on ESnet
+      
 == Where ==
 ESnet conference bridge:
  * GDS: 00113498555555
