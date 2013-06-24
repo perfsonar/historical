@@ -3,7 +3,7 @@
 =   June 24, 2013 Conference Call 1:00 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Andy, Aaron, Sowmya
   
 == Follow-up on Actions  ==
     * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
@@ -11,14 +11,16 @@
 == Agenda Topics ==
   * Developer Updates
    * Aaron
-   * Andrew
+    * Not much to update, been work
+    * Aaron suggest pushing alpha setting to some non-zero default in bwctl
    * Andy
-   * Brian
-   * Jason
-   * Kavitha
-   * Nils
+    * Updated dashboard to MeshConfig
+    * Tracking down issues in ESnet's internal mesh
+    * Currently have support duty, so dealing with lots of those emails
    * Sowmya
+    * Working on subscribe API
  * LiveCD issues
+  * Coming up with a udev script is our best option here likely. Aaron might try to look at it before he leaves for vacation and Andy will try to find some cycles to put something together after that.
 
 
 == Future Agenda Topics ==
