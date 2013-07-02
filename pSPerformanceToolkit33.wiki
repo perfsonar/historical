@@ -62,39 +62,27 @@ If the calculated value matches the downloaded value, the ISO image is complete 
  * The target machine's BIOS must allow the machine to boot from CD.  If the CD does not boot, adjust the BIOS (normally access via *_F12_*, *_F2_*, *_Del_*, etc.) and try again.  
  * The target hardware should match what is described in [pSPerformanceToolkit33#System_Requirements System Requirements].
 
-After booting the following screen will appear:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-1.png
-
-Options can be presented at this time (e.g. going into single user mode) but if nothing is required, simply press enter.  The boot process will commence after this:
+After booting the following screen will appear and options can be presented at this time (e.g. going into single user mode) but if nothing is required, simply press enter or wait a few seconds.  The boot process will commence after this:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-2.png
 
-The CentOS installer will start automatically, and load several drivers.  
+It will prompt you for the installation media. Always select *Local CD/DVD*:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-3.png
-
-Since this installer relies on access to the network to download operating system files, setting up network access is required.  This screen enables both IPv4 and IPv6 in either DHCP or Static modes.  Select what works best before proceeding:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-4.png
-
-The system will apply the settings to interfaces it can find on the system:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-5.png
-
-After establishing network connectivity, some files will be downloaded to continue the process:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-6.png
-
-The installer will proceed into the next stage:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-7.png
 
 The installer will now ask a series of questions before setting up the system:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-8.png
 
-The first step is to select the target hard disk.  The user will have the option to use existing disks and partitions (if they can be read) or deleting the partitions and starting over.  Do what works best for the target host:
+The first step is to select the timezone. Choose the appropriate option from the displayed list:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-tz.png
+
+The next step is to set your root password:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-pw.png
+
+You then select the target hard disk.  The user will have the option to use existing disks and partitions (if they can be read) or deleting the partitions and starting over.  Do what works best for the target host:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-9.png
 
@@ -102,146 +90,23 @@ The system may display warnings if the disk is targeted to be altered from an ex
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-10.png
 
-The next step will allow the user the option to modify and review the partition choices:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-11.png
-
-Even though the network interface was initially set up before to download the initial install files, the user must still configure it for _regular_ use.  This screen allows the user to make changes to the networking configuration:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-12.png
-
-There are some options to select:
-
- * Activate on boot will enable this interface to start when the computer starts
- * Enable IPv4 support is the most common situation, and enables the user to use IPv4 addressing
- * Enable IPv6 support enables the user to use IPv6 addressing
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-13.png
-
-This screen allows a choice between DHCP and static configurations for the IPv4 address:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-14.png
-
-This screen allows a choice between DHCP and static configurations for the IPv6 address:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-15.png
-
-The last networking option is the manual setting of the hostname.  If the host is being statically configured, this step can be used to set the hostname.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-16.png
-
-The next screen sets the clock (_*N.B.*_ most systems are set to UTC) and the timezone.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-17.png
-
-The root password must be set next, be sure to remember the password:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-18.png
-
-The system is mostly configured - the listing of available packages will be retrieved from the CentOS mirror:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-19.png
-
-The next screen will allow the user to choose which _package groups_ can be installed.  By default all functionality that a pS Performance Toolkit node will need is already selected or enabled.  It is strongly suggested that users do not de-select the initial packages - this may lead to complications in configuring/operating the pS Performance Toolkit.  The choice of additional packages can be used to add other tools to the target host.  The user does not have to select anything additional, but for the interested more information on what is inside of each group is available in the [http://www.centos.org/docs/5/html/Installation_Guide-en-US/s1-pkgselection-s390.html CentOS Documentation].  In general the following groups are available:
-
- * Administration Tools
- * Authoring and Publishing
- * <font color="red">_*Base*_</font> - Enabled by default and _*REQUIRED*_
- * Beagle
- * Clustering
- * Cluster Storages
- * Development Libraries
- * Development Tools
- * Dialup Networking Support
- * DNS Name Server
- * Editors
- * Educational Software
- * Emacs
- * Engineering and Scientific
- * Fedora Packager
- * FreeNX and NX
- * FTP Server
- * Games and Entertainment
- * GNOME Desktop Environment
- * GNOME Software Development
- * Graphical Internet
- * Graphics
- * Hardware Support
- * Horde
- * Java
- * Java Development
- * KDE (K Desktop Environment)
- * KDE Software Development
- * KVM
- * Legacy Network Server
- * Legacy Software Development
- * Legacy Software Support
- * Mail Server
- * Mono
- * MySQL Database
- * Network Servers
- * News Server
- * Office/Productivity
- * OpenFabrics Enterprise Distribution
- * PostgreSQL Database
- * Printing Support
- * Ruby
- * Server Configuration Tools
- * Sound and Video
- * System Tools
- * <font color="red">_*Text-based Internet*_</font> - Enabled by default
- * Tomboy
- * Virtualization
- * Web Development
- * Web Server
- * Window Managers
- * Windows File Server
- * XFCE-4.4
- * X Software Development
- * X Window System
- * Yum Utilities
-
-Select the groups that make the most sense for the installation (e.g. if this is a standalone server, XWindows may not be necessary).  Also note that if a package is not selected that may be useful in the future, it may be installed after the server is complete by using the _*yum*_ tool:
-
-{{{
-sudo yum install PACKAGENAME
-}}}
-
-or
-
-{{{
-sudo yum groupinstall GROUPNAME
-}}}
-
-After completing, press _*OK*_.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-20.png
-
-The system will now calculate the packages to install:
+The system will now determine the packages to install:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-21.png
 
-The system will keep an install log in _*/root*_.  This is am important file to save in case there are problems with the install, *do not* delete this file.  
+It will then initialize the install process:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-22.png
 
-The filesystem will be formatted:
+It will then begin installing packages. This may take a few minutes as it has to download and install many files:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-23.png
-
-The packages and times to install will be calculated:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-24.png
-
-Depending on the amount of packages to install, and the speed of the network connection, the following may take minutes or hours:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-25.png
 
 The following is a common, but recoverable, error.  The CentOS mirror network experiences connectivity and validity problems from time to time.  The installer is structured to always check the files it downloads and verify the MD5 fingerprint to be sure that the file is complete.  If a file is not complete, it should be deleted and re-downloaded.  When the following screen appears, press the _*RETRY*_ button.  Note that sometimes this may need to be pressed a couple of times.  
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-26.png
 
-The process will complete and finish by installing the bootloader (to allow the user in to the new operating system):
+Assuming everything goes smoothly the package installation will complete:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/pSPerformanceToolkit33/netinstall-27.png
 
