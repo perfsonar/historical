@@ -12,12 +12,12 @@ For this release we have updated some of the default ports used by the tools. Th
 
 Upgrading a LiveCD running Toolkit version 3.2.x to a new LiveCD running 3.3 should be very similar to previous LiveCD upgrades if you have done them in the past. The process involves burning a the latest ISO to a CD, replacing the 3.2 CD in the disk drive and rebooting. Upon reboot, you will need to reset your root password, but all other data and user accounts should be migrated. The exact steps are below:
 
- # Download the LiveCD iso and md5 checksum [http://software.internet2.edu/pSPT3.3-rc3/ here]
+ # Download the LiveCD iso and md5 checksum [http://software.internet2.edu/pS-Performance_Toolkit/ here]
  # Once downloaded please verify the MD5 sum:
 {{{
-user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.3rc3.iso;cat pS-Performance_Toolkit-LiveCD-3.3rc3.iso.md5 
-f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3rc3.iso
-f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3rc3.iso
+user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.3iso;cat pS-Performance_Toolkit-LiveCD-3.3.iso.md5 
+f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.iso
+f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.iso
 }}}
  # Burn the ISO image to a CD using your favorite CD burning software.
  # Shutdown your 3.2.x Toolkit instance
@@ -33,9 +33,9 @@ _NOTE: If you would like to upgrade a LiveCD installation running 3.2.x to a sys
 
 Upgrading a 3.2.x NetInstall distribution to 3.3 requires using a script to backup key configuration files, doing a clean 3.3 installation and using a restore script to place your data and configuration on the new installation. You will need a location where you can remotely copy the backup files while you perform the upgrade.  Unlike previous updates, a simple "yum update" will not grab the new distribution. This stems from the migration from CentOS5 to CentOS6. The exact steps are below:
  # Login to you 3.2.x host's command-line interface via SSH or a terminal
- # Download the backup script [http://software.internet2.edu/pSPT3.3-rc3/ps-toolkit-migrate-backup.sh here] . You can use the following command to download it directly to your host:
+ # Download the backup script [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-Toolkit/scripts/ps-toolkit-migrate-backup.sh here] . You can use the following command to download it directly to your host:
 {{{
-wget http://software.internet2.edu/pSPT3.3-rc3/ps-toolkit-migrate-backup.sh 
+wget http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-Toolkit/scripts/ps-toolkit-migrate-backup.sh 
 }}}
  # Run the following command to make the script executable
 {{{
