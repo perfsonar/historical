@@ -91,13 +91,22 @@ foreach my $s ( @{$serverlist} ) {
 "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0"
 					or $et[0] eq
 "http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0"
-					or $et[0] eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" )
+					or $et[0] eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" 
+                                          or $et[0] eq
+"http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0/"
+                                        or $et[0] eq
+"http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0/"
+                                        or $et[0] eq
+"http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0/"
+                                        or $et[0] eq "http://ggf.org/ns/nmwg/tools/iperf/2.0/")
 				{
 					$key = "list.psb.bwctl";
 				}
 				elsif ($et[0] eq "http://ggf.org/ns/nmwg/tools/owamp/2.0"
 					or $et[0] eq
 "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921"
+                                        or $et[0] eq "http://ggf.org/ns/nmwg/tools/owamp/2.0/"
+                                        or $et[0] eq "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921/"
 				  )
 				{
 					$key = "list.psb.owamp";
@@ -166,14 +175,17 @@ foreach my $s ( @{$serverlist} ) {
 			}
 
 			if ( $service->getCity() ) {
+			    $servicelocation .= ', ' if($servicelocation);
 				$servicelocation .= $service->getCity()->[0];
 			}
 
 			if ( $service->getRegion() ) {
+			    $servicelocation .= ', ' if($servicelocation);
 				$servicelocation .= $service->getRegion()->[0];
 			}
 
 			if ( $service->getCountry() ) {
+			    $servicelocation .= ', ' if($servicelocation);
 				$servicelocation .= $service->getCountry()->[0];
 			}
 
@@ -217,6 +229,11 @@ foreach my $s ( @{$serverlist} ) {
 
 #print Dumper(%LSKeywords);
 
+#Total hack to map keywords to their services since gui doesn't properly use keyword fields
+open( HLSOUT, ">" . $base . "/list.hls" )
+	  or croak "can't open $base/list.hls for writing.";
+open( HLSMAPOUT, ">" . $base . "/list.hlsmap" )
+	  or croak "can't open $base/list.hlsmap for writing.";
 my %counter              = ();
 my %list = ();
 foreach my $file ( keys %resultList ) {
@@ -286,6 +303,24 @@ foreach my $file ( keys %resultList ) {
 		print OUT time;
 		print OUT "\n";
 		print $file , " - ", $serviceLocator, "\n";
+		
+		#print to HLS map
+		print HLSOUT $serviceLocator, "|";
+		print HLSOUT $service{'service-name'} if $service{'service-name'};
+		print HLSOUT "|";
+		print HLSOUT $service{'service-type'} if $service{'service-type'};
+		print HLSOUT "|";
+		print HLSOUT $service{'service-location'} if $service{'service-location'};
+		print HLSOUT "|";
+		print HLSOUT $service{'service-keyword'} if $service{'service-keyword'};
+		print HLSOUT "|";
+		print HLSOUT time;
+		print HLSOUT "\n";
+		print HLSMAPOUT $serviceLocator, "|";
+		print HLSMAPOUT $serviceLocator, "|";
+		print HLSMAPOUT time;
+		print HLSMAPOUT "\n";
+		
 
 	}
 
@@ -319,11 +354,46 @@ foreach my $file ( keys %resultList ) {
 		print OUT "\n";
 		print $file , " - ", $cached_hosts{$cache_key}->{"CONTACT"},
 		  " (cached)\n";
+		
+		#Print to hls map
+		print HLSOUT $cached_hosts{$cache_key}->{"CONTACT"}, "|";
+		print HLSOUT $cached_hosts{$cache_key}->{"NAME"}
+		  if $cached_hosts{$cache_key}->{"NAME"};
+		print HLSOUT "|";
+		print HLSOUT $cached_hosts{$cache_key}->{"TYPE"}
+		  if $cached_hosts{$cache_key}->{"TYPE"};
+		print HLSOUT "|";
+		print HLSOUT $cached_hosts{$cache_key}->{"DESC"}
+		  if $cached_hosts{$cache_key}->{"DESC"};
+		print HLSOUT "|";
+		$first_kw = 1;
+		foreach my $kw ( @{ $cached_hosts{$cache_key}->{"KEYWORDS"} } ) {
+			if ($first_kw) {
+				$first_kw = 0;
+			}
+			else {
+				print HLSOUT ",";
+			}
+			print HLSOUT $kw;
+		}
+		print HLSOUT "|";
+		print HLSOUT $cached_hosts{$cache_key}->{"TIMESTAMP"}
+		  if $cached_hosts{$cache_key}->{"TIMESTAMP"};
+		print HLSOUT "\n";
+		
+		print HLSMAPOUT $cached_hosts{$cache_key}->{"CONTACT"}, "|";
+		print HLSMAPOUT $cached_hosts{$cache_key}->{"CONTACT"}, "|";
+		print HLSMAPOUT $cached_hosts{$cache_key}->{"TIMESTAMP"}
+		  if $cached_hosts{$cache_key}->{"TIMESTAMP"};
+		print HLSMAPOUT "\n"; 
+		
+		
 	}
 	close(OUT);
 
 }
-
+close(HLSOUT);
+close(HLSMAPOUT);
 
 #cache keywords in case some are missing
 if( -e $base . "/list.keywords"){
@@ -357,5 +427,4 @@ foreach my $h ( keys %LSKeywords ) {
 
 }
 close( KEYWORDS );
-
 
