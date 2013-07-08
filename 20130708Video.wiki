@@ -33,14 +33,14 @@
     * GUI could also do things a little smarter, Andy created issue
    * BWCTL alpha setting
     * Aaron said he would look at adding default in previous meeting. He has been on vacation so nothing to report yet,
-  * USB testing
-   * Sowmya can test
-   * Andrew will write-up how to use VMWare to use USB
-  * Dashboard docs
-   * It might be good to suggest people use meshconfig when installing dashboard
-   * Need beter documents
-  * iperf3 integration
-   * Would like to move that up the queue, not sure who to assign it to though
+   * USB testing
+    * Sowmya can test
+    * Andrew will write-up how to use VMWare to use USB
+   * Dashboard docs
+    * It might be good to suggest people use meshconfig when installing dashboard
+    * Need beter documents
+   * iperf3 integration
+    * Would like to move that up the queue, not sure who to assign it to though
   * Developer Updates
    * Andy
     * Working on udev scripts, udev not being consistent about notifications so still looking
