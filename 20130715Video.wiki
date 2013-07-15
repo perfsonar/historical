@@ -27,7 +27,19 @@
     * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
     
 == Notes ==
- 
+   * Developer Updates
+   * Andy
+    * Have script to hopefully fix LiveCD network interface problem. will build new LiveCD soon
+    * Also updated some of the bwctl build scripts to make it easier to build with iperf3 support
+    * Updated bwctl to have default randomization of startTime to 10%
+   * Sowmya
+    * Wrapping-up lookup service
+    * Working on iperf3 integration next
+   * Aaron
+    * Debugging stuff with USATLAS and mesh config. XML-RPC was making messages too big, added fix.
+    * Also ran into some Unicode issues that caused mesh config to get errors
+    * Noted one thing that would be nice is if test didn't finish in time it would be nice to publish result that it did get some data. 
+
 
 == Where ==
 ESnet conference bridge:
