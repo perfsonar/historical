@@ -453,6 +453,9 @@ my $pid = send_data( $conf, $rfd, @dirlist );
 # at the database.
 # (powstream outputs the filenames it produces on stdout.)
 #
+
+my %started = ();
+
 foreach $mset ( @meassets ) {
     my $me;
 
@@ -539,6 +542,12 @@ foreach $mset ( @meassets ) {
 
                 my ( $bindaddr ) = $rhost;
 
+                if ($started{$mset."/".$me."/".$send}) {
+                    warn $mset."/".$me."/".$send.": already exists";
+                    next;
+                }
+                $started{$mset."/".$me."/".$send} = 1;
+
                 warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined( $debug ) );
                 $starttime = OWP::Utils::time2owptime( time );
                 my $powstream_args = { measurement_set => $msetdesc, local_node => $me, local_address => $bindaddr, remote_node => $send, remote_address => $saddr, test_ports => $testports, do_send => 0 };
@@ -610,6 +619,14 @@ foreach $mset ( @meassets ) {
                 }
 
                 my ( $bindaddr ) = $shost;
+
+                if ($started{$mset."/".$recv."/".$me}) {
+                    warn $mset."/".$recv."/".$me.": already exists\n";
+                    next;
+                    #die($mset."/".$recv."/".$me.": already exists");
+                }
+                $started{$mset."/".$recv."/".$me} = 1;
+
 
                 warn "Starting Test=$send:$saddr ===> $recv:$raddr\n" if ( defined( $debug ) );
                 $starttime = OWP::Utils::time2owptime( time );

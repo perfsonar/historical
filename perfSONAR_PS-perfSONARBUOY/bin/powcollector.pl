@@ -217,7 +217,7 @@ my $scale_factor = uint64( '4294967296' );
 #
 # Initialize list of nodes (Only needed to implement debugging/peer validation)
 #
-my @nodes = $conf->must_get_sublist( LIST => 'NODE' );
+my @nodes = $conf->get_sublist( LIST => 'NODE' );
 my %ignore_node;
 my @ignodes = $conf->get_sublist( LIST => 'NODE', ATTR => 'IGNORE' );
 my %ignodename;
@@ -1394,7 +1394,7 @@ sub handle_req {
 
     # Set new process name
     if ( !( $nname = $listen_nodes{ $fh->peerhost } ) ) {
-        $nname = "unknown";
+        $nname = $fh->peerhost;
     }
     $0 = "$scriptname:handle_req[$nname]";
 
