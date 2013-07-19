@@ -1,7 +1,7 @@
 PACKAGE=perfSONAR_PS-perfSONARBUOY
 ROOTPATH=/opt/perfsonar_ps/perfsonarbuoy_ma
 VERSION=3.3
-RELEASE=6
+RELEASE=7
 
 default:
 	@echo No need to build the package. Just run \"make install\"
