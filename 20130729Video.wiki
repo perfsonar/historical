@@ -16,14 +16,34 @@
   * 3.3.1 Release Status
    * LiveCD
    * MeshConfig
+  * Paper 
 
 == Future Agenda Topics ==
   * Roadmap
 
 == Actions  ==
-    
+
+
 == Notes ==
-  
+  * Developer Updates
+   * Aaron
+    * MeshConfig fixes applied, waiting to hear back from USATLAS
+   * Andy
+    * 3.3.1 LiveCD built, gave to BNL, waiting to hear back
+    * Looking at OWAMP MA
+   * Sowmya
+    * Working on LS fix, should be done in next couple days
+   * Jason
+    * XSEDE conference, gave perfSONAR tutorial.
+    * Well attended, sent around some notes to list
+     * Doc are confusing
+     * All different products are confusing
+     * MDM vs. PS confusing
+     * start cleaning out unsupported stuff 
+  * 3.3.1 Release Status
+   * Looks like everything just about ready. Maybe sometime next week we can announce?
+  * Paper 
+   * Ezra and Jason making final passes. Will let group know when its open for edits.
 
 
 == Where ==
