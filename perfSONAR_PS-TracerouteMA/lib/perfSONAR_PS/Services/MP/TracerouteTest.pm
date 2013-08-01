@@ -78,6 +78,13 @@ sub determine_v4_or_v6 {
         }
     }
       
+    if ($self->{'TRACE_PARAMS'}->{'ipv4_only'}) {
+        $endpoint_type = "ipv4";
+    }
+    elsif ($self->{'TRACE_PARAMS'}->{'ipv6_only'}) {
+        $endpoint_type = "ipv6";
+    }
+
     #set the traceroute program
     if($endpoint_type eq "ipv6" ){
         $self->{'TRACE_PARAMS'}->{'trace_program'} = $trace6prog;

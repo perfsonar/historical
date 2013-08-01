@@ -17,7 +17,8 @@ use constant PARAM_MAP => { 'FIRSTTTL' => 'first_hop' , 'MAXTTL' => 'max_ttl',
                             'WAITTIME' => 'query_timeout', 'PAUSE' => 'pause', 
                             'PACKETSIZE' => 'packetlen', 'TIMEOUT' => 'timeout', 
                             'ICMP' => 'use_icmp', 'TRACE4PROG' => 'trace4_program',
-                            'TRACE6PROG' => 'trace4_program', 'PREFIPV4' => 'prefer_ip_v4'};
+                            'TRACE6PROG' => 'trace4_program', 'PREFIPV4' => 'prefer_ip_v4',
+                            'IPV4ONLY' => 'ipv4_only', 'IPV6ONLY' => 'ipv6_only' };
 
 use fields 'LOGGER','NETLOGGER','TRACEROUTE_TESTS';
 
