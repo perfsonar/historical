@@ -721,6 +721,8 @@ sub save_node {
         ldie "save_tspec: Invalid args";
     }
 
+    $args{'ADDR'} =~ s/%.*//;
+
     my $dbh = $args{'DBH'};
     my ( $addr, $port ) = split_addr( $args{'ADDR'} );
     my ( $lname,  $year,  $month )  = get_tprefix( $args{'TIMESTAMP'} );
