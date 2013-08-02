@@ -1,4 +1,4 @@
-#summary perfSONAR Level 1 and Level 2 Install Instructions
+#summary perfSONAR Level 1 Install Instructions
 
 = Introduction =
 
