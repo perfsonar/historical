@@ -2,7 +2,7 @@
 %define init_script_server simple_ls_bootstrap_server
 %define init_script_client simple_ls_bootstrap_client
 
-%define relnum 4 
+%define relnum 5 
 %define disttag pSPS
 
 Name:			perl-perfSONAR_PS-SimpleLS-BootStrap
