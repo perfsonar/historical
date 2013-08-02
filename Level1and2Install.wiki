@@ -19,7 +19,7 @@ perfSONAR combines a number of measurement tools and services. Depending on your
 If you would like to do a Level 1 Installation, follow the instructions found in this section.
 
 == Step 1: Configure Yum ==
-The process configures yum to point at the necessary repositories to get packages needed for perfSONAR. You will to follow the steps below:
+The process configures yum to point at the necessary repositories to get packages needed for perfSONAR. You will need to follow the steps below:
 
 1. Download the EPEL RPM. This RPM will update yum to point at the [http://fedoraproject.org/wiki/EPEL EPEL] repository.
  * *For i386 systems:* wget http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
@@ -82,7 +82,7 @@ ESnet provides a shell script that will download and install the latest bwctld.l
 
 == Step 5: Register your services ==
 
-In order to publish the existence of your measurement services there is a single file you need to edit with some details about your host. You may populate this information by opening _/opt/perfsonar_ps/ls_registration_daemon/etc/ls_registration_daemon.conf. You will see numerous properties you may populate. They are commented out meaning you need to remove the `#` at the beginning of the line for them to take effect. The properties your are *required to set are as follows:
+In order to publish the existence of your measurement services there is a single file you need to edit with some details about your host. You may populate this information by opening */opt/perfsonar_ps/ls_registration_daemon/etc/ls_registration_daemon.conf*. You will see numerous properties you may populate. They are commented out meaning you need to remove the `#` at the beginning of the line for them to take effect. The properties you are *required* to set are as follows:
 
 {{{
 ##Hostname or IP address others can use to access your service
@@ -92,7 +92,7 @@ In order to publish the existence of your measurement services there is a single
 #external_address_if_name eth0
 }}}
 
-In the example above remove the leading `#` before external_address and external_address_if_name respectively. Also replace _myhost.mydomain.example_ and _eth0_ with the values relevant to your host. There are additional fields available for you to set. None of them are required but it is highly recommended you set as many as possible since it will make finding your services easier.  More information on the available fields can be found in the configuration file provided by the RPM install. 
+In the example above remove the leading `#` before external_address and external_address_if_name respectively. Also replace _myhost.mydomain.example_ and _eth0_ with the values relevant to your host. There are additional fields available for you to set. None of them are required but it is highly recommended you set as many as possible since it will make finding your services easier for others. More information on the available fields can be found in the configuration file provided by the RPM install. 
 
 == Step 6: Starting your services ==
 You can start all the services by rebooting the host since all are configured to run by default. Otherwise you may start them with the following commands as a root user:
