@@ -1,4 +1,2 @@
 hosts:
-    - locator: "http://odev-vm-7.es.net/ls/activehosts.yml"
-      
-    
+    - locator: "http://ps1.es.net:8096/lookup/activehosts.json"
