@@ -1,4 +1,6 @@
-#summary perfSONAR Level 1 and Level 2Install Instructions
+#summary perfSONAR Level 1 and Level 2 Install Instructions
+
+<wiki:toc max_depth="2" />
 
 = Introduction =
 
@@ -121,6 +123,6 @@ Repeat each of the following from the Level 1 installation
  * [#Step_5:_Register_your_services Step 5: Register your services]
  * [#Step_6:_Starting_your_services Step 6: Starting your services]
 
-== Step 7: Setup the MeshConfiguration ==
+== Step 7: Setup the Mesh Configuration ==
 
 Follow the instructions [MeshConfigurationInstallation here] to build a regular test mesh. If a test mesh already exists this may just be a matter of editing the URL in /opt/perfsonar_ps/mesh_config/etc/agent_configuration.conf.
