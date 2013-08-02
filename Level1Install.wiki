@@ -5,8 +5,8 @@
 perfSONAR combines a number of measurement tools. Depending on your needs, you may need only a subset of these tools. As such, we have defined three levels of installation that users may perform:
 
  # *Level 1:* The most basic perfSONAR installation which contains a bwctl and owamp server along with tools to publish the location of these tools to the perfSONAR-PS Simple Lookup Service.  This type of installation also contains the bwctl, owamp and ndt command-line clients so that you may run one-time tests to other servers. This installation does not include tools on the target host to initiate tests that run on regular time intervals nor does it contain measurement archives that store result of tests.  The Level 1 install includes everything you need to run one-time tests and for others to find and schedule tests to your site. Full install instructions are contained within the document.
- # *Level 2:* The Level 2 install includes everything in the Level 1 install plus clients to automatically run scheduled tests over specified time intervals. It also includes centralized configuration that can disttibute test configurations across multiple hosts. Full install instructions can be found [here Level2Install]
- # *Level 3:* The full perfSONAR-PS toolkit including everything from Level 1 and Level, in addition to web interfaces, measurement archives, and other tools. Full install instructions can be found [here pSPerformanceToolkit33]
+ # *Level 2:* The Level 2 install includes everything in the Level 1 install plus clients to automatically run scheduled tests over specified time intervals. It also includes centralized configuration that can disttibute test configurations across multiple hosts. Full install instructions can be found [Level2Install here]
+ # *Level 3:* The full perfSONAR-PS toolkit including everything from Level 1 and Level, in addition to web interfaces, measurement archives, and other tools. Full install instructions can be found [pSPerformanceToolkit33 here]
 
 =Level 1 Installation =
 == System Requirements ==
