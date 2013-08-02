@@ -1,20 +1,23 @@
-#summary perfSONAR Level 1 Install Instructions
+#summary perfSONAR Level 1 and Level 2Install Instructions
 
 = Introduction =
 
 perfSONAR combines a number of measurement tools. Depending on your needs, you may need only a subset of these tools. As such, we have defined three levels of installation that users may perform:
 
  # *Level 1:* The most basic perfSONAR installation which contains a bwctl and owamp server along with tools to publish the location of these tools to the perfSONAR-PS Simple Lookup Service.  This type of installation also contains the bwctl, owamp and ndt command-line clients so that you may run one-time tests to other servers. This installation does not include tools on the target host to initiate tests that run on regular time intervals nor does it contain measurement archives that store result of tests.  The Level 1 install includes everything you need to run one-time tests and for others to find and schedule tests to your site. Full install instructions are contained within the document.
- # *Level 2:* The Level 2 install includes everything in the Level 1 install plus clients to automatically run scheduled tests over specified time intervals. It also includes centralized configuration that can disttibute test configurations across multiple hosts. Full install instructions can be found [Level2Install here]
+ # *Level 2:* The Level 2 install includes everything in the Level 1 install plus clients to automatically run scheduled tests over specified time intervals. It also includes centralized configuration that can disttibute test configurations across multiple hosts. Full install instructions can be found within this document.
  # *Level 3:* The full perfSONAR-PS toolkit including everything from Level 1 and Level, in addition to web interfaces, measurement archives, and other tools. Full install instructions can be found [pSPerformanceToolkit33 here]
 
-=Level 1 Installation =
-== System Requirements ==
+= System Requirements =
  * *Operating System: * Any system running either a 32-bit or 64-bit CentOS 6 operating system should be able to follow the process outlined in this document. Other RedHat-based operating systems may work, but are not officially supported at this time.
  * *Hardware:* Most base-level systems should be adequate to run the measurement tools. You may want to explore a 10Gbps network interface card depending on the throughput testing you wish to perform. See the [http://fasterdata.es.net/performance-testing/perfsonar/ps-howto/hardware/ fasterdata.es.net hardware page] for some suggested configurations.
 
-== Step 1: Installing the RPMS ==
-The process installs RPM packages via the yum package manager. You will to follw the steps below
+= Level 1 Installation =
+
+If you would like to do a Level 1 Installation, follow the instructions found in this section.
+
+== Step 1: Configure Yum ==
+The process configures yum to point at the necessary repositories to get packages needed for perfSONAR. You will to follow the steps below:
 
 1. Download the EPEL RPM. This RPM will update yum to point at the [http://fedoraproject.org/wiki/EPEL EPEL] repository.
  * *For i386 systems:* wget http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
@@ -35,14 +38,15 @@ The process installs RPM packages via the yum package manager. You will to follw
 # yum clean all
 }}}
 
-5. Finally, install the perfSONAR_PS-Bundles-Level1 package to install the required tools
+== Step 2: Install the Level 1 RPM ==
+Install the perfSONAR_PS-Bundles-Level1 package containing the required tools:
 {{{
 # yum install perfSONAR_PS-Bundles-Level1
 }}}
 
-The final yum install will install all the perfSONAR tools, dependencies, boot scripts, create pseudo-users, etc. Once yum completes all the software will be installed, and we can move on to the configuration and verification phases.
+This will install all the perfSONAR tools, dependencies, boot scripts, create pseudo-users, etc. Once yum completes all the software will be installed, and we can move on to the configuration and verification phases.
  
-== Step 2: Verify NTP and Tuning Parameters ==
+== Step 3: Verify NTP and Tuning Parameters ==
 The Network Time Protocol (NTP) is required by the tools in order to obtain accurate measurements. Some of the tools such as BWCTL will not even run unless NTP is configured. You can verify NTP is running with the following command:
 {{{
 # /usr/sbin/ntpq -p
@@ -50,7 +54,7 @@ The Network Time Protocol (NTP) is required by the tools in order to obtain accu
 
 Also, it is important to make sure that your host is properly tuned for maximum TCP performance on the WAN. You should verify that cubic, not reno, is the default TCP congestion control algorithm, and that the maximum TCP buffers are big enough for your paths of interest. For more information see the [http://fasterdata.es.net/host-tuning/linux/ host tuning linux page] on fasterdata.es.net.
 
-== Step 3: Firewall and Security Considerations ==
+== Step 4: Firewall and Security Considerations ==
 
 If your host is behind any ACLs or firewalls you should review the [http://stats.es.net/ps-downloads/20130308-Firewall-PerfWG.pdf document here] on the ports that need to be open.
 
@@ -74,7 +78,7 @@ ESnet provides a shell script that will download and install the latest bwctld.l
  chmod +x update_limits.sh
 }}}
 
-== Step 4: Register your services ==
+== Step 5: Register your services ==
 
 In order to publish the existence of your measurement services there is a single file you need to edit with some details about your host. You may populate this information by opening _/opt/perfsonar_ps/ls_registration_daemon/etc/ls_registration_daemon.conf. You will see numerous properties you may populate. They are commented out meaning you need to remove the `#` at the beginning of the line for them to take effect. The properties your are *required to set are as follows:
 
@@ -88,10 +92,35 @@ In order to publish the existence of your measurement services there is a single
 
 In the example above remove the leading `#` before external_address and external_address_if_name respectively. Also replace _myhost.mydomain.example_ and _eth0_ with the values relevant to your host. There are additional fields available for you to set. None of them are required but it is highly recommended you set as many as possible since it will make finding your services easier.  More information on the available fields can be found in the configuration file provided by the RPM install. 
 
-== Step 5: Starting your services ==
+== Step 6: Starting your services ==
 You can start all the services by rebooting the host since all are configured to run by default. Otherwise you may start them with the following commands as a root user:
 {{{
 # /etc/init.d/bwctld start
 # /etc/init.d/owampd start
 # /etc/init.d/ls_registration_daemon start
 }}}
+
+= Level 2 Installation =
+If you would like to do a Level 2 Installation, follow the instructions found in this section.
+
+== Step 1: Configure Yum (see Level 1 instructions) ==
+Follow [#Step_1:_Configure_Yum step 1] of the Level 1 instructions exactly then proceed to the next step. 
+
+== Step 2: Install the Level 2 RPM ==
+Install the perfSONAR_PS-Bundles-Level2 package containing the required tools:
+{{{
+# yum install perfSONAR_PS-Bundles-Level2
+}}}
+
+This will install all the perfSONAR tools, dependencies, boot scripts, create pseudo-users, etc. Once yum completes all the software will be installed, and we can move on to the configuration and verification phases.
+
+== Step 3-6: Repeat Level 1 Steps 3-6 ==
+Repeat each of the following from the Level 1 installation
+ * [#Step_3:_Verify_NTP_and_Tuning_Parameters Step 3: Verify NTP and Tuning Parameters]
+ * [#Step_4:_Firewall_and_Security_Considerations Step 4: Firewall and Security Considerations]
+ * [#Step_5:_Register_your_services Step 5: Register your services]
+ * [#Step_6:_Starting_your_services Step 6: Starting your services]
+
+== Step 7: Setup the MeshConfiguration ==
+
+Follow the instructions [MeshConfigurationInstallation here] to build a regular test mesh. If a test mesh already exists this may just be a matter of editing the URL in /opt/perfsonar_ps/mesh_config/etc/agent_configuration.conf.
