@@ -13,6 +13,80 @@ At SC13 Installfest, a couple of approaches were investigated to better secure a
 -A INPUT -p tcp --dport 22 --syn -m limit --limit 1/m --limit-burst 3 -j ACCEPT
 -A INPUT -p tcp --dport 22 --syn -j DROP
 }}}
-  * TBD
+  * _*Requirements:*_ iptables would need to be enabled on the host with the rules inserted.  There has been prior discussion about if a host firewall would effect WAN testing.  We have not seen this impact results, but a better investigation is needed.  
+  * _*Ease of implementation:*_ Lines of code inserted into template files on a pSPT image.  Would be minimal.  A FAQ item would also work, but would be unlikely to be implemented by most users.  
+  * _*Ease of maintenance:*_ Maintenance would not be required, unless the syntax changed.  
+  * _*Benefits:*_ Prevents brute force attacks - attacker will move on to easier targets.  
+  * _*Detractions:*_  If using another solution (e.g. Fail2ban, denyhosts), the results of such a brute force attack won't show up in logs to allow these tools to ban the address.  
+  * _*Recommendation:*_ TBD after group discussion.  This is a very easy item to implement, with easy to see benefits for a common problem.  
 
-== TBD ==
+== OSSEC ==
+
+  * _*Summary*_: From the web site, OSSEC is an "Open Source Host-based Intrusion Detection System that performs log analysis, file integrity checking, policy monitoring, rootkit detection, real-time alerting and active response.".  
+    * http://www.ossec.net/ 
+  * _*Implementation:*_ This is a very sophisticated program with many tunable knobs.  It consists of 'agents' that do the aforementioned tasks, and a 'controller' portion that manages many agents.  For the sake a pSPT we would need to install a yum repository and the 'controller' code, along with instructing potential users in configuration file they must edit (or we could integrate into the GUI wizard) to personalize the receipt of mails and warnings.  
+    * Installation was very easy via the RPMs
+    * configuration to make it work took only editing a single file 
+    * defaults seemed sensible, but a little high strung in terms of warnings.  This is a matter of taste 
+  * _*Requirements:*_ Installation of a yum repo, agreeing to a license, minor configuration to get email working (e.g. an SMTP server and an address - equally mail could just be sent to the root on the system for local delivery, with the hopes that the admin has configured a mial relay)
+  * _*Ease of implementation:*_ Installation requirements on the pSPT end are minimal.  If we choose to integrate the configuration into the GUI it would require some integration work.  
+  * _*Ease of maintenance:*_ Over time, unless the configuration file drastically changes, there should not be additional maintenance beyond updating RPMs during a release.  
+  * _*Benefits:*_ Full host IDS on the order of SNORT.  Very configurable.  Does have a learning curve to learn how to enable/disable things, but has sensible defaults.  
+  * _*Detractions:*_  Many features could confuse people.  Only useful if you have mail working, e.g. its built to alarm you in real time when someone is logging in, or the system is under active attack
+  * _*Recommendation:*_ TBD.  Seems very useful in it's current form, but a better analysis of integration is needed.  
+
+== Fail2ban ==
+
+  * _*Summary*_: From the web site, fail2ban "scans log files (e.g. /var/log/apache/error_log) and bans IPs that show the malicious signs -- too many password failures, seeking for exploits, etc. Generally Fail2Ban then used to update firewall rules to reject the IP addresses for a specified amount of time, although any arbitrary other action (e.g. sending an email, or ejecting CD-ROM tray) could also be configured. Out of the box Fail2Ban comes with filters for various services (apache, curier, ssh, etc)."
+    * http://www.fail2ban.org/wiki/index.php/Main_Page
+    * Basically its a log scrapper that looks at many things, and not just SSH brute force.  Has lots of configuration for those that are smart enough to read and implement things on their own.  Defaults will protect in a default manner.  
+  * _*Implementation:*_ Python source, packaged as RPMs in EPEL already.  Series of scripts that is run as a daemon 
+  * _*Requirements:*_ Must edit a configuration file to send the mails to someone beyond localroot.  Or just send to local root, and set up mail fwding via SMPT/alias configuration.  
+  * _*Ease of implementation:*_ Installation is easy since things are already in EPEL.  Configuration of mail things should be second nature for sysadmins.  Like OSSEC there could be integration work done to ask mail configuration info in the wizard.  
+  * _*Ease of maintenance:*_ Only required if defaults or software changes.  
+  * _*Benefits:*_ Able to parse different logs of interest for non-normal behavior.  Not as real time as an active solution, since it does rely on log behavior.  Can integrate into many forms of jail/punishment systems if you are willing to learn ho to do so.  Default behavior of altering iptables/tcp-wrappers may be enough for many users.  
+  * _*Detractions:*_  Complexity falls on the end user.  Defaults will do some good, but the power in this is personalizing it.  
+  * _*Recommendation:*_ TBD, Very simple thing to include, but to be useful relies on mail (like most of these tools).  Makes the most sense if the wizard got mail working.  
+
+== denyhosts ==
+
+  * _*Summary*_: From the web page: "DenyHosts is a script intended to be run by Linux system administrators to help thwart SSH server attacks (also known as dictionary based attacks and brute force attacks"
+    * http://denyhosts.sourceforge.net/index.html 
+    * Simplier than Fail2ban, in that it focuses on SSH exclusively.  Because its not as fully featured, its much easier to install/maintain over time.  
+  * _*Implementation:*_ RPM that is already in EPEL
+  * _*Requirements:*_ Beyond RPM installation, the daemon would need to be enabled in chkconfig and integrated with mail to be the most useful.  It will still do its thing (e.g. banning addresses it sees in the logs automatically to tcp-wrappers), but the mail notification is useful.  This would mean the user configuring mail on the host, or having the wizard ask about things like an smtp relay.  
+  * _*Ease of implementation:*_ Simple installatiopn and minimal configuration.  
+  * _*Ease of maintenance:*_ Unless the underlying software changes, there should be little maintenance.  
+  * _*Benefits:*_ Recognition of old, and new, SSH based brute force attacks - quick and easy blocking via tcp-wrappers
+  * _*Detractions:*_  Since its simple, its a one trick pony.  This competes with things like SSH throttling and fail2ban, but there is no reason they can't work together.  
+  * _*Recommendation:*_ TBD, but this one seems like the most likely addition of external software.  Will work without email configuration and defaults are fine (it does help to have email configured, and it can be tuned to be more aggressive).  
+
+== chkrootkit ==
+
+  * _*Summary*_: From the web page: "chkrootkit looks for known "signatures" in trojaned system binaries."
+    * http://chkrootkit.org/faq/
+    * E.g. this is your last line of defence if you feel that you have had a breach.  
+    * The tool itself is very simple, so simple that its not automated by default.  Its the sort of thing that would be invoked by someone on demand, unless you add a crontab entry to have it run nightly (and mail off a summary).  
+  * _*Implementation:*_ Scripted check of known rootkit signatures.  
+  * _*Requirements:*_ Available as an EPEL package.  Does not have a daemon or cron entry by default.  
+  * _*Ease of implementation:*_ Easy to install, but would require a cron entry as well as configuration of email to get the results (e.g. SMTP relay, and alias of the root user perhaps):
+{{{
+0 3 * * * (/usr/bin/chkrootkit 2>&1 | mail -s "chkrootkit output" measurement-alerts@scinet.supercomputing.org)
+}}}
+  * _*Ease of maintenance:*_ It is unlikely that this script will change much over time, with the exception of getting new defitions of rootkits.  
+  * _*Benefits:*_ Dirt simple way to do forensics on a computer.  
+  * _*Detractions:*_  Requires email availability to mail reports.  
+  * _*Recommendation:*_ We should, at a minimum, have this installed in the base group of packages and FAQ how to use it.  Automation via cron is recommended (and from the line above, simple to add).  RKHunter is a little more robust in design, but there is no reason these couldn't work together.  
+
+== rkhunter ==
+
+  * _*Summary*_: Similar to chkrootkit in that it is designed to look for signatures of a break in.  
+    * http://rkhunter.sourceforge.net/
+    * Has the ability to receive updated signatures outside of installing a new binary.  
+  * _*Implementation:*_ RPM available in EPEL.  No configuration file, but the cron script (included) could be modified to send to a specific email address.  Otherwise will send to localroot (and the user would need to ensure a mail relay is configured to handle remote mail delivery).  
+  * _*Requirements:*_ Could install the RPM to have it available, is designed to run in cron (and update itself).  Most useful when resutls of scan are emailed to someone.  
+  * _*Ease of implementation:*_ Simple integration, with the exception of the aforementioned requirement of having a mail relay.  
+  * _*Ease of maintenance:*_ Should not change unless there is a fundamental change in the tool.  
+  * _*Benefits:*_ Like chkrootkit, does a simple evaluation of the host to look for signatures.  Not many options available.  
+  * _*Detractions:*_  Requires email availability to mail reports.  
+  * _*Recommendation:*_ Either this, or chckrootkit (or both) should be installed and available at a minimum.  The most benefit comes from seeing emailed reports.  
