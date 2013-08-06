@@ -6,13 +6,13 @@ At SC13 Installfest, a couple of approaches were investigated to better secure a
 
 == SSH Throttling ==
 
-* _*Summary*_: Lines that can be added to iptables to monitor the number of SSH attempts in a time period.  If the number of attempts exceeds a limitation, iptables will drop packets to prevent login attempts.  This is a method to prevent brute force SSH login attempts.
-* _*Implementation:*_ 
-  * {{{
+  * _*Summary*_: Lines that can be added to iptables to monitor the number of SSH attempts in a time period.  If the number of attempts exceeds a limitation, iptables will drop packets to prevent login attempts.  This is a method to prevent brute force SSH login attempts.
+  * _*Implementation:*_ 
+    * {{{
 # Throttling of SSH
 -A INPUT -p tcp --dport 22 --syn -m limit --limit 1/m --limit-burst 3 -j ACCEPT
 -A INPUT -p tcp --dport 22 --syn -j DROP
 }}}
-* TBD
+  * TBD
 
 == TBD ==
