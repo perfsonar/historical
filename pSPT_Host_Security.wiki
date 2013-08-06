@@ -1,0 +1,18 @@
+#summary Testing out security tools for use on a pSPT host
+
+= Securing a pSPT Host =
+
+At SC13 Installfest, a couple of approaches were investigated to better secure a pSPT host that may be outside of traditional campus protections.  These involved software packages that scan logs for malicious behavior for the most part, as well as some active daemons that monitor behavioral patterns.  The following sections outline the approaches, and offer a recommendation on how useful it may be to include such items in a future pSPT release.  
+
+== SSH Throttling ==
+
+* _*Summary*_: Lines that can be added to iptables to monitor the number of SSH attempts in a time period.  If the number of attempts exceeds a limitation, iptables will drop packets to prevent login attempts.  This is a method to prevent brute force SSH login attempts.
+* _*Implementation:*_ 
+  * {{{
+# Throttling of SSH
+-A INPUT -p tcp --dport 22 --syn -m limit --limit 1/m --limit-burst 3 -j ACCEPT
+-A INPUT -p tcp --dport 22 --syn -j DROP
+}}}
+* TBD
+
+== TBD ==
