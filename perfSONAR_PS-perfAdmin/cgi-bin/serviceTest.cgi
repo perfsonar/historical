@@ -21,6 +21,7 @@ use XML::LibXML;
 use Socket;
 use Data::Validate::IP qw(is_ipv4);
 use Net::IP;
+use HTML::Entities;
 use English qw( -no_match_vars );
 
 use FindBin qw($RealBin);
@@ -38,7 +39,7 @@ print $cgi->header();
 
 my $service;
 if ( $cgi->param( 'url' ) ) {
-    $service = $cgi->param( 'url' );
+    $service = HTML::Entities::encode($cgi->param( 'url' ));
 }
 else {
     $template = HTML::Template->new( filename => "$RealBin/../etc/serviceTest_error.tmpl" );
@@ -49,7 +50,7 @@ else {
 
 my $eventType;
 if ( $cgi->param( 'eventType' ) ) {
-    $eventType = $cgi->param( 'eventType' );
+    $eventType = HTML::Entities::encode($cgi->param( 'eventType' ));
     $eventType =~ s/(\s|\n)*//g;
 }
 else {
