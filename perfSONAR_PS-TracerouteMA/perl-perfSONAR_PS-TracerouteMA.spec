@@ -6,11 +6,11 @@
 %define init_script_traceroute_scheduler traceroute_scheduler
 %define init_script_traceroute_mp traceroute_ondemand_mp
 
-%define relnum 6 
+%define relnum 1 
 %define disttag pSPS
 
 Name:			perl-perfSONAR_PS-TracerouteMA
-Version:		3.3
+Version:		3.3.1
 Release:		%{relnum}.%{disttag}
 Summary:		perfSONAR_PS Traceroute Measurement Archive and Collection System
 License:		Distributable, see LICENSE

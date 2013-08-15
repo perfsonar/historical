@@ -17,8 +17,9 @@ lib/perfSONAR_PS/Common.pm
 lib/perfSONAR_PS/Utils/Daemon.pm
 lib/perfSONAR_PS/Utils/NetLogger.pm
 lib/SimpleLookupService/Client/SimpleLS.pm
+lib/SimpleLookupService/ClientDaemonHandler.pm
 lib/SimpleLSBootStrap/ClientDaemonHandler.pm
 lib/SimpleLSBootStrap/ServerDaemonHandler.pm
-perl-perfSONAR_PS-SimpleLSBootStrap.spec
+perl-perfSONAR_PS-SimpleLS-BootStrap.spec
 scripts/simple_ls_bootstrap_client
 scripts/simple_ls_bootstrap_server

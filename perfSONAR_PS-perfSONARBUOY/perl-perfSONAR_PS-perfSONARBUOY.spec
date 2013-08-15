@@ -7,11 +7,11 @@
 %define init_script_owp_collector perfsonarbuoy_owp_collector
 %define init_script_owp_master perfsonarbuoy_owp_master
 
-%define relnum 7 
+%define relnum 1 
 %define disttag pSPS
 
 Name:			perl-perfSONAR_PS-perfSONARBUOY
-Version:		3.3
+Version:		3.3.1
 Release:		%{relnum}.%{disttag}
 Summary:		perfSONAR_PS perfSONAR-BUOY Measurement Archive and Collection System
 License:		Distributable, see LICENSE

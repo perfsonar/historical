@@ -2,11 +2,11 @@
 %define init_script_server simple_ls_bootstrap_server
 %define init_script_client simple_ls_bootstrap_client
 
-%define relnum 5 
+%define relnum 1
 %define disttag pSPS
 
 Name:			perl-perfSONAR_PS-SimpleLS-BootStrap
-Version:		3.3
+Version:		3.3.1
 Release:		%{relnum}.%{disttag}
 Summary:		perfSONAR_PS SimpleLS BootStrap
 License:		Distributable, see LICENSE
