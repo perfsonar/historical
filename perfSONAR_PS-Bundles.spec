@@ -23,6 +23,7 @@ Requires:		owamp-client
 Requires:		owamp-server
 Requires:		nuttcp
 Requires:		iperf
+Requires:               iperf3
 Requires:		ntp
 Requires:		perl-perfSONAR_PS-LSRegistrationDaemon
 
@@ -39,6 +40,7 @@ Requires:		owamp-client
 Requires:		owamp-server
 Requires:		nuttcp
 Requires:		iperf
+Requires:               iperf3
 Requires:		ntp
 Requires:		perl-perfSONAR_PS-LSRegistrationDaemon
 Requires:		perl-perfSONAR_PS-PingER-server
