@@ -4,6 +4,8 @@
 
 == Introduction ==
 
+(NOTE: this page is for the old perfSONAR lookup service. The new Lookup Service is at: [https://code.google.com/p/simple-lookup-service]
+
 This page outlines the steps necessary to deploy an LS infrastructure for a private domain.  The reasons for doing this can vary from simply being able to locate services similar to a global methodology (e.g. search by keyword, IP range, etc) or using GUIs that would expect services to be located in a gLS instance.  
 
 The following sections will describe how to set up and configure the software packages, along with the necessary modifications that need to be made to supporting software (e.g. perfSONAR services and GUIs).  We will finish with a simple example network that features services, LS instances, and a GUI that will be able to locate measurement data.
