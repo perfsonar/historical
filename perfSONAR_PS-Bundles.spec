@@ -1,4 +1,4 @@
-%define relnum 1 
+%define relnum 2 
 %define disttag pSPS
 
 Version:		3.3.1
