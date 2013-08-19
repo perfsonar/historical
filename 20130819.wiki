@@ -3,14 +3,34 @@
 =   August 19, 2013 Conference Call 1:00 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Brian, 
   
 == Follow-up on Actions  ==
 
 == Agenda Topics ==
   * Developer Updates
+   * Andy
+    * Worked with BNL on LiveCD
+    * Getting 3.3.1 packages updated  
+   * Brian
+    * Planning to have LBL check XSS stuff again
+   * Jason
+    * Will generate script for testing to to pre-determined hosts easily
+   * Sowmya
+    * Finishing up lookup service
+    * Fixed serviceTest XSS fix
+   * Aaron
+    * Added fix for config daemon crashing when it encounters unicode
+    * Added option to bwctl to help deal with firewall. Allows to have sender connect to receiver in places it previously was the other way around, only tested with nuttcp.
+   * Warren
+    * Interviewed some students
+    * Pushed out Jason's iptables to hosts
   * 3.3.1 status
-  
+   * Sowmya has serviceTest ready
+   * MeshConfig ready
+   * NDT we will skip for now, can get in repo for NetInstal when ready. Don't want to block
+   * Andy to finish packaging today, hopefully Wednesday announce 3.3.1
+
 == Future Agenda Topics ==
   * Roadmap
   
