@@ -34,12 +34,10 @@ Version 3.3.1 of the pS Performance Toolkit consists of three primary installati
    * Provides easy bug fixs/upgrades via the standard _*yum*_ mechanisms- no physical access to the machine will be required.  
    * NOTE: This the the version we recommend, unless your security policy favors the LiveCD
  * [pSPerformanceToolkit33#Live_CD Live CD]
-   * *_Currently there is a known issue running the LiveCD on certain Dell models. See [http://psps.perfsonar.net/toolkit/releasenotes/pspt-3_3.html#known_issues release notes]_*
    * Boots and runs directly from CD
    * Can run without harming host's hard disk contents
    * Can run and store measurements on host's hard disk
  * [pSPerformanceToolkit33#Live_USB Live USB]
-   * *_Currently there is a known issue running the LiveUSB on certain Dell models. See [http://psps.perfsonar.net/toolkit/releasenotes/pspt-3_3.html#known_issues release notes]_*
    * Newest install option
    * Supports hosts without CD-ROM drive
    * Runs the same as the LiveCD
@@ -48,7 +46,7 @@ The following sections describe the installation procedure for each of the produ
 
 === !NetInstall CD ===
 
-The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.3.1.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-NetInstall-3.3.1.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
+The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/ iso] and [http://software.internet2.edu/pS-Performance_Toolkit/ md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
 user@host:~$ md5sum pS-Performance_Toolkit-NetInstall-3.3.1.iso;cat pS-Performance_Toolkit-NetInstall-3.3.1.iso.md5
@@ -165,10 +163,8 @@ https://[host address]/toolkit
 An important thing to note is that in the description above, there is no IP address or hostname found for this host currently.  This will need to be rectified in the [pSPerformanceToolkit33#Console console configuration] step. 
 
 === Live CD ===
-*_Currently there is a known issue running the LiveCD on certain Dell models. See [http://psps.perfsonar.net/toolkit/releasenotes/pspt-3_3.html#known_issues release notes]_*
 
-
-The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-LiveCD-3.3.1.iso iso] and [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-LiveCD-3.3.1.iso.md5 md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
+The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/ iso] and [http://software.internet2.edu/pS-Performance_Toolkit/ md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
 user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.3.1.iso;cat pS-Performance_Toolkit-LiveCD-3.3.1.iso.md5 
@@ -226,9 +222,7 @@ https://[host address]/toolkit
 An important thing to note is that in the description above, there is no IP address or hostname found for this host currently.  This will need to be rectified in the [pSPerformanceToolkit33#Console console configuration] step.  
 
 === Live USB ==
-*_Currently there is a known issue running the LiveUSB on certain Dell models. See [http://psps.perfsonar.net/toolkit/releasenotes/pspt-3_3.html#known_issues release notes]_*
-
-You can mount the downloaded image onto a USB drive using the script found [http://anonsvn.internet2.edu/svn/nptoolkit/branches/ASIDES_CentOS_6.3/scripts/deploy_liveusb.sh here]. Once you have downloaded the script, its usage is as follows:  
+You can mount the downloaded image onto a USB drive using the script found [http://anonsvn.internet2.edu/svn/nptoolkit/trunk/scripts/deploy_liveusb.sh here]. Once you have downloaded the script, its usage is as follows:  
  
 {{{
 Usage: bash deploy_liveusb.sh [--arch <arch>] <device> [diskimage]
