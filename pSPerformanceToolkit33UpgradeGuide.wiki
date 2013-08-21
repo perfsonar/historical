@@ -15,9 +15,9 @@ Upgrading a LiveCD running Toolkit version 3.2.x to a new LiveCD running 3.3 sho
  # Download the LiveCD iso and md5 checksum [http://software.internet2.edu/pS-Performance_Toolkit/ here]
  # Once downloaded please verify the MD5 sum:
 {{{
-user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.3iso;cat pS-Performance_Toolkit-LiveCD-3.3.iso.md5 
-f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.iso
-f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.iso
+user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.3.1.iso;cat pS-Performance_Toolkit-LiveCD-3.3.1.iso.md5 
+f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.1.iso
+f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.1.iso
 }}}
  # Burn the ISO image to a CD using your favorite CD burning software.
  # Shutdown your 3.2.x Toolkit instance
