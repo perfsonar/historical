@@ -25,7 +25,7 @@ f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.1.iso
  # Power-on the machine and let it boot.
  # You should see a login screen. You will need to reset the root password. The default password is an empty string. You will be prompted to change the password the first time you login as a root user.
  # All your user accounts, service configurations and performance data should have been migrated. You will need to update your administrative information to conform to the new location fields defined by the toolkit by following the instructions [pSPerformanceToolkit33#Administrative_Information here].
- # Your host should now be successfully upgraded! If you notice any problems with the upgrade process please contact the perfSONAR Toolkit users mailing list.
+ # Your host should now be successfully upgraded! If you notice any problems with the upgrade process please contact the perfSONAR Toolkit users mailing list (perfsonar-ps-users@internet2.edu).
 
 _NOTE: If you would like to upgrade a LiveCD installation running 3.2.x to a system running the NetInstall version of 3.3, you may follow the instructions in the section Upgrading a 3.2.x NetInstall Distribution _
 
@@ -58,7 +58,7 @@ $ /opt/perfsonar_ps/toolkit/scripts/ps-toolkit-migrate-restore.sh ps-toolkit-3.2
 }}}
  # Reboot the host
  # All your user accounts, service configurations and performance data should have been migrated. You will need to update your administrative information to conform to the new location fields defined by the toolkit by following the instructions [pSPerformanceToolkit33#Administrative_Information here].
- # Your host should now be successfully upgraded! If you notice any problems with the upgrade process please contact the perfSONAR Toolkit users mailing list.
+ # Your host should now be successfully upgraded! If you notice any problems with the upgrade process please contact the perfSONAR Toolkit users mailing list (perfsonar-ps-users@internet2.edu).
 
 
 = Upgrading versions older than 3.2 =
