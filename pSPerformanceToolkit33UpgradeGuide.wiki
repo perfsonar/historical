@@ -12,6 +12,13 @@ For this release we have updated some of the default ports used by the tools. Th
 
 Upgrading a LiveCD running Toolkit version 3.2.x to a new LiveCD running 3.3 should be very similar to previous LiveCD upgrades if you have done them in the past. The process involves burning a the latest ISO to a CD, replacing the 3.2 CD in the disk drive and rebooting. Upon reboot, you will need to reset your root password, but all other data and user accounts should be migrated. The exact steps are below:
 
+ # First it is recommended you login to your existing LiveCD and backup your data. This is not strictly required, but will give a fallback option for restoring data if anything goes wrong during the LiveCD upgrade. Follow the steps below to download the backup script, create a backup file, and move the backup file to a remote host.
+{{{
+wget http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-Toolkit/scripts/ps-toolkit-migrate-backup.sh 
+chmod 755 ps-toolkit-migrate-backup.sh 
+./ps-toolkit-migrate-backup.sh  ~/ps-toolkit-3.2-backup.tgz
+scp ps-toolkit-3.2-backup.tgz user@remotehost.example:ps-toolkit-3.2-backup.tgz
+}}}
  # Download the LiveCD iso and md5 checksum [http://software.internet2.edu/pS-Performance_Toolkit/ here]
  # Once downloaded please verify the MD5 sum:
 {{{
@@ -26,6 +33,7 @@ f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.1.iso
  # You should see a login screen. You will need to reset the root password. The default password is an empty string. You will be prompted to change the password the first time you login as a root user.
  # All your user accounts, service configurations and performance data should have been migrated. You will need to update your administrative information to conform to the new location fields defined by the toolkit by following the instructions [pSPerformanceToolkit33#Administrative_Information here].
  # Your host should now be successfully upgraded! If you notice any problems with the upgrade process please contact the perfSONAR Toolkit users mailing list (perfsonar-ps-users@internet2.edu).
+  * If your data is not restored properly you can restore it with the backup file created following steps 7-10 of the NetInstall instructions
 
 _NOTE: If you would like to upgrade a LiveCD installation running 3.2.x to a system running the NetInstall version of 3.3, you may follow the instructions in the section Upgrading a 3.2.x NetInstall Distribution _
 
@@ -43,7 +51,7 @@ chmod 755 ps-toolkit-migrate-backup.sh
 }}}
  # Run the script giving it the name of the gzipped tarball you would like generated as the only parameter. In the command below, all backups will be stored in the home directory in a file call ps-toolkit-3.2-backup.tgz:
 {{{
-./ ps-toolkit-migrate-backup.sh  ~/ps-toolkit-3.2-backup.tgz
+./ps-toolkit-migrate-backup.sh  ~/ps-toolkit-3.2-backup.tgz
 }}}
  # Remotely copy the backup file to a new machine. *NOTE: The backup script saves non-root user accounts/password, test configurations, test data and a few other key service configuration files. It does NOT backup every file on the system, so data in home directories or other changes made outside of the Toolkit GUIs will be not be saved. Please verify you have all your important files, especially if you choose to replace the existing partition in the next step.* You may use a tool such as scp to accomplish the copy task, for example:
 {{{
