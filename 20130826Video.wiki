@@ -1,15 +1,17 @@
-#summary September 9, 2013 Conference Call
+#summary August 26, 2013 Conference Call
 
-=   September 9, 2013 Conference Call 1:00 p.m. EDT =
+=   August 26, 2013 Conference Call 1:00 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Andy, Sowmya, Jason, Aaron, Brian
   
 == Follow-up on Actions  ==
 
 == Agenda Topics ==
  * Developer Updates
-
+ * MA port consolidation
+ * BWCTL allow_unsync by default
+ * Firewall test script
 
 == Future Agenda Topics ==
   * Roadmap
@@ -19,11 +21,36 @@
 == Notes ==
  * Developer Updates
    * Andy
-   * Sowmya
+     * 3.3.1 out, went pretty smooth 
+     * Should determine better way to find people not upgraded. 
    * Brian
+    * Organizing perfSONAR summit with I2 and ESnet
+    * Tuesday Sep 17th is the date
+    * Brian will be updating project plan
    * Jason
+    * At physics workshop last week. Some interest shown in disk tools to measure disk performance.
+     * iperf3 getting some ability that may help. No one wants to test toolkit disk performance so not sure how this would look. 
+    * Want cleaner APIs to feed various systems
+    * Throwing around "wall of shame" idea that shows if domain has a service registered and can I run a test to you
+   * Sowmya
+    * Nothing to update
+   * Aaron
+    * Added hacky way to do "firewall mode" with ping and traceroute to bwctl. Still working out some client issues.
    * Warren
- * TBD
+    * Hired a few students 
+    * Did some nmap scans on some toolkit boxes in region that are on private networks (has permission to do that)
+ * MA port consolidation
+  * Could put stuff behind reverse proxy and run NDT and NPAD
+  * We should create issue and consider for future release. Probably annoying little things to do like hardcoded ports, etc.
+ * BWCTL allow_unsync by default
+  * The advantage is BWCTL will run when it starts, disadvantage is BWCTL will get in funny states if NTP is wildly off and not kill things at the. The individual results of tools like iperf should be fine.
+  * Aaron thinks we should test more and see what types of errors we get when NTP is off. If it has good error messages that tell what's happening it might not be a bad thing.
+  * If the error messages are terrible, we might consider better reporting of what's going on. Right now on the toolkit its hard for users to tell if the red "Not running" is due to this issue or if something is actually wrong. 
+ * Firewall test script
+  * Everyone agrees its a good idea
+  * One thought was we could write specific daemons to accept connections
+   
+
 == Where ==
 ESnet conference bridge:
  * GDS: 00113498555555
