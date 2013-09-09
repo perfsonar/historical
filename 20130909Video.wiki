@@ -3,7 +3,7 @@
 =   September 9, 2013 Conference Call 1:00 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Andy, Brian, Aaron, Jason, Sowmya
   
 == Follow-up on Actions  ==
 
@@ -22,7 +22,21 @@
 == Actions  ==
 
 == Notes ==
+ * Developer Updates
+   * Andy
+    * Not much to update, POW has been relatively quiet
+   * Sowmya
+    * Integrate LS testing work by Luke into main trunk
+   * Aaron
+    * No updates
+   * Brian
+    * Prepping for summit meeting and IU meeting
+   * Jason
+    * Paper is done. 
+    * Will put LS scripts on antg
+    * Would user experience tool be useful? probably, but many questions. Will experiment more at SC. 
 
+ 
 == Where ==
 ESnet conference bridge:
  * GDS: 00113498555555
