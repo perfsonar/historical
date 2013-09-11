@@ -903,7 +903,22 @@ sub add_session {
             warn "$add_file: $_\n";
         }
         warn "END IGNORED: NO SESS Summary: $testname: $add_file";
-        return 1;
+
+        # Average the interval summaries to create an overall summary
+        my ($summary_bw, $summary_jitter, $summary_nlost, $summary_nsent) = (0, 0, 0, 0);
+
+        foreach my $summary_key (keys %sess_summ) {
+            my $summary = $sess_summ{$summary_key};
+
+            $summary_bw += $summary->[2];
+            $summary_jitter += $summary->[3];
+            $summary_nlost += $summary->[4];
+            $summary_nsent += $summary->[5];
+        }
+        $summary_jitter = $summary_jitter / (keys %sess_summ);
+        $summary_bw     = $summary_bw     / (keys %sess_summ);
+
+        @{ $sess_summ{"${min_si}_${max_ei}"} } = ( $min_si, $max_ei, $summary_bw, $summary_jitter, $summary_nlost, $summary_nsent );
     }
 
     my $allowed_variation = 3; #default to 3 seconds
