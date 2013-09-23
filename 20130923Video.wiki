@@ -3,7 +3,7 @@
 =   September 23, 2013 Conference Call 1:00 p.m. EDT =
 
 == Agenda/Minutes ==
-  * Attendees: 
+  * Attendees: Andy, Sowmya, Brian, Jason, 
   
 == Follow-up on Actions  ==
 
@@ -24,10 +24,22 @@
 == Notes ==
   * Developer Updates
    * Andy
+    * New version bwctl pushed out to es.net hosts
+    * Will work on adding some new dashboards per Jason's note
    * Sowmya
+    * Working on some LS testing Package should be ready soon.
    * Brian
+    * Played with tracebox
+    * Meeting with Internet2 went well. Working on governance and will share more with community soon.
    * Jason
+    * See Brian's update
+    * Code sprint next year possibly
+    * Going to LBL this week to talk about Panda
    * Warren
+    * No updates
+   * Aaron
+    * NDT RC release 10 days ago. Later today or tomorrow will do final release.
+    * Also shared new BWCTL release. Installed on ESnet, haven't heard from others
  * TBD
  
 == Where ==
