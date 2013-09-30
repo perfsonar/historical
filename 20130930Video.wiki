@@ -14,7 +14,9 @@
    * Brian
    * Jason
    * Warren
- * TBD
+ * how to handle dual-homed hosts? (Aaron)
+ * how to bwctl scheduling options? (Aaron)
+ * update on call with Geant folks (Brian)
 
 == Future Agenda Topics ==
   * Roadmap
