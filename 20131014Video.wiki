@@ -4,7 +4,7 @@
 
 == Agenda/Minutes ==
 
-  * Attendees: TBD
+ * Attendees: Andy Lake, Jason Zurawski, Sowmya Balasubramanian, Aaron Brown, Brian Tierney, Eric Boyd, Ken Miller
   
 == Follow-up on Actions  ==
 
@@ -21,7 +21,7 @@ TBD
    * Brian
  * NTAC Update from Ken Miller
  * V6/V4 Dual Mesh Testing
-
+ * Program approach and next steps
 == Future Agenda Topics ==
   * Roadmap
   
@@ -30,9 +30,44 @@ TBD
 TBD
  
 == Notes ==
-
-TBD
-  
+ * Developer Updates
+   * Andy
+    * Looked at 3.2.2 issues did a little organization in tracker
+    * Action: Schedule meeting this week to go through tracker
+   * Jason
+    * SCInet work
+    * Working on software that measures wget performance and plots results
+   * Sowmya
+    * Packaged sLS. Sent RPM to others for testing. Requested Aaron could update.
+   * Aaron
+    * As part of dual-homed work, looking at consolidating the "master" scripts. Currently 4 different ones.
+    * Brian: Should we also consolidate formats? Aaron: Possibly but information is very different. 
+    * Merged Web10g branch of NDT into trunk. need others to verify
+   * Brian
+    * Gave a talk at NANOG
+    * Good questions, got thinking about better dual-stack approach
+   * Eric 
+    * See program approach
+ * NTAC Update from Ken Miller
+  * NTAC had a group of 25 people that got together to look at metric availability and headroom.
+  * A couple documents being generated
+  * looking at network holistically may be more desirable. This means setting some baselines and sharing more beyond netflow data and usage,
+  * Also looking at determining when a link should be upgraded. 
+  * Questions about how to test against baseline (i.e. is there existing tools? do we need to develop new ones?)
+  * Will post more information soon
+  * Jason: Really should look hard at using owamp. Smokeping is easy and has nice front-end but ICMP misses a lot. 
+  * Jason: Any thought to SDN monitoring? Ken: Needs to be more thought, doing some initial work
+  * Jason: Might be a good idea to do a write-up on how to do IPv4 vs IPv6 hostnames similar to firewall documents. 
+  * Ken: Also looking at routing policy
+ * V6/V4 Dual Mesh Testing
+  * See updates
+ * program approach and next steps
+  * perfSONAR summit a couple weeks ago. short-term agreement on development tasks 
+  * Plan to go through outstanding issues list. 
+  * Looking at IU's process and how we can get feedback from them
+  * Talking to GEANT on continuing collaboration
+  * Might do a requirements workshop
+  * Will be using SmartSheets to track tasks. 
 == Where ==
 ESnet conference bridge:
  * GDS: 00113498555555
