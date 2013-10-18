@@ -1,0 +1,19 @@
+#summary Current Roadmap for the perfSONAR project
+
+== Development Roadmap for perfSONAR ==
+
+ The following is a list of deliverables for the perfSONAR project in the next year.
+
+  # Extensibility and Ease of Use: Adding REST APIs for all components will make it much easier for others to extend perfSONAR. This is a strong request from the community, and we will address this in the next release. The owamp MA will be rewritten to provide the ability to query for historical summaries of data.
+  # perfSONAR node Cost Reduction: Supporting both latency testing and throughput testing on the same host will be a big win for many organizations. We plan to support this in the next release
+  # Marketing/Communications/Documentation: Documentation needs an overhaul, and new marketing material targeted more at campus CIOs would be helpful
+  # Additional Troubleshooting Capabilities: These tasks include the top requests from users on how to get more value from the perfSONAR toolkit. This includes tool enhancements such as the ability to collect and store TCP retransmit information. Better GUIs are needed as well, but we still need to find a good GUI developer.
+  # Enhanced NOC support: details TBD based on discussions with various NOCs
+  # Enhanced Release Management: utilize automated build/test systems such as OSG uses
+
+
+== Release Roadmap ==
+   * 3.3.2: Bug Fix release, November 2013
+   * 3.4: Next major release that includes deliverables #1, #2, #3, as well as part of #4: Summer 2014
+   * 3.4.1 Bug fix release: Fall 2014
+   * 3.5: Next major release that includes deliverables #4-6, Spring 2015
