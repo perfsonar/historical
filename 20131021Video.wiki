@@ -18,6 +18,7 @@ TBD
    * Sowmya
    * Eric
    * Brian
+ * Road Map
  * Issue Discussion
   * Issue 298
   * Issue 406
@@ -36,7 +37,33 @@ TBD
 TBD
  
 == Notes ==
- *
+ * Developer Updates
+   * Andy
+    * Issue triage with Brian
+    * Working on 3.2.2 issues. Fixed nagios check v6 problem
+   * Sowmya
+     * Working on CentOS 6 and CentOS 5 kernel release
+   * Aaron
+    * Working on new regular testing GUI. Question about publishing data. Will write to DB for now but make it modular for later.
+    * 3.3.2 issues look reasonable
+   * Brian
+    * iperf3 now has -F flag for checking disk speed
+    * It will be hard to add above option to bwctl for security reasons
+   * Eric
+    * First phase of project management aspects with ESnet and I2 have kicked-off
+ * Road Map
+  * Moved 3.4 to Summer and other scheduling shifts
+ * Issue Discussion (see Issues for notes)
+  * Issue 298
+  * Issue 406
+  * Issue 607
+  * Issue 619
+  * Issue 629
+  * Issue 631
+  * Issue 643
+  * Issue 658
+  * Issue 669
+  
 == Where ==
 ESnet conference bridge:
  * GDS: 00113498555555
