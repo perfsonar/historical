@@ -8,7 +8,7 @@
   # Extensibility and Ease of Use: Adding REST APIs for all components will make it much easier for others to extend perfSONAR. This is a strong request from the community, and we will address this in the next release. The owamp MA will be rewritten to provide the ability to query for historical summaries of data.
   # Marketing/Communications/Documentation: Documentation needs an overhaul, and new marketing material targeted more at campus CIOs would be helpful
   # Additional Troubleshooting Capabilities: These tasks include the top requests from users on how to get more value from the perfSONAR toolkit. This includes tool enhancements such as the ability to collect and store TCP retransmit information. Better GUIs are needed as well, but we still need to find a good GUI developer.
-  # Enhanced NOC support: details TBD based on discussions with various NOCs
+  # Enhanced NOC support: details TBD based on discussions with various NOCs. Internet2 to work on refining this action item and identifying resources.
   # Enhanced Release Management: utilize automated build/test systems such as OSG uses
 
 
