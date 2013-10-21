@@ -17,3 +17,8 @@
    * 3.4: Next major release that includes deliverables #1, #2, #3, as well as part of #4: Winter 2014
    * 3.4.1 Bug fix release: Fall 2014
    * 3.5: Next major release that includes deliverables #4-6, Spring 2015
+
+
+== Documentation Roadmap ==
+   * Website update, December 2013
+   * Marketing / Communications Plan, January 2014
