@@ -10,7 +10,7 @@
 %define disttag pSPS
 
 Name:			perl-perfSONAR_PS-TracerouteMA
-Version:		3.3.1
+Version:		3.3.2
 Release:		%{relnum}.%{disttag}
 Summary:		perfSONAR_PS Traceroute Measurement Archive and Collection System
 License:		Distributable, see LICENSE

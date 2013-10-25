@@ -11,7 +11,7 @@
 %define disttag pSPS
 
 Name:			perl-perfSONAR_PS-perfSONARBUOY
-Version:		3.3.1
+Version:		3.3.2
 Release:		%{relnum}.%{disttag}
 Summary:		perfSONAR_PS perfSONAR-BUOY Measurement Archive and Collection System
 License:		Distributable, see LICENSE
