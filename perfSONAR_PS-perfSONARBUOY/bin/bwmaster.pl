@@ -1240,12 +1240,14 @@ sub bwctl {
         );
     }
 
-    push @cmd, ( "-S", $val ) if (
-        $val = $conf->get_val(
-            TESTSPEC => $ms->{'TESTSPEC'},
-            ATTR     => 'BWTosBits'
-        )
+    $val = $conf->get_val(
+        TESTSPEC => $ms->{'TESTSPEC'},
+        ATTR     => 'BWTosBits'
     );
+
+    if ($val and lc($val) ne "nan") {
+        push @cmd, ( "-S", $val );
+    }
 
     push @cmd, ( "-l", $val ) if (
         $val = $conf->get_val(
