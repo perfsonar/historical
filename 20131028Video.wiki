@@ -4,7 +4,7 @@
 
 == Agenda/Minutes ==
 
- * Attendees: 
+ * Attendees: Andy, Sowmya, Brian, Aaron
   
 == Follow-up on Actions  ==
 
@@ -14,10 +14,8 @@ TBD
 
  * Developer Updates
    * Andy
-   * Jason
    * Aaron
    * Sowmya
-   * Eric
    * Brian
  * 3.3.2 release status
  * bwctl problems
@@ -31,7 +29,26 @@ TBD
 TBD
  
 == Notes ==
- 
+  * Developer Updates
+   * Andy
+    * Built 3.3.2 packages. Can test NetInstall (sans bwctl fix).
+    * Aaron: Working on bwctl fix. Not killing process groups properly. Will revrt by tomorrow if no other issue.
+    * Once all built will test internally and then give to a few known testers
+   * Aaron
+    * Beyond bwctl fixes been working on regular testing
+    * Got everything but traceroute and powstream working. Still need to get iperf3 parser working.
+    * Should also look at adding sig handler to iperf3 to spit out state on kill
+   * Sowmya
+    * Fixes done for 3.3.2. Group agreed the security fix was acceptable. 
+   * Brian
+    * New hire Bruce Mah officially started
+ * 3.3.2 release status
+  * See andy udpate
+ * bwctl problems
+  * See aaron update
+ * web10G issue
+  * Looks like web10g will not be supported on CentOS 6 kernels
+  * Need to talk to Jason more
 == Where ==
 ESnet conference bridge:
  * GDS: 00113498555555
