@@ -17,6 +17,8 @@ TBD
    * Aaron
    * Sowmya
    * Brian
+
+ * new email lists
  * 3.3.2 release status
   
 
