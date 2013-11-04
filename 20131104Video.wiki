@@ -4,7 +4,7 @@
 
 == Agenda/Minutes ==
 
- * Attendees:Sowmya, Brian, Aaron, Eric, ??
+ * Attendees:Sowmya, Brian, Aaron, Eric, Warren
   
 == Follow-up on Actions  ==
 
@@ -13,18 +13,22 @@ TBD
 == Agenda Topics ==
 
  * Developer Updates
-   * Andy
    * Aaron
    * Sowmya
    * Brian
 
- * new email lists
- * 3.3.2 release status
+ * new email lists: Eric will send out soon
+ * 3.3.2 release status: testing is underway
   
+Eric reported that Martin and Prasad will be hosting a perfSONAR research workshop in February.
+
+Warren is working on tests with hades, and with smokeping.
+
+Next 2 calls are cancelled due to SC13
+
 
 == Future Agenda Topics ==
-  * Roadmap
-  
+   
 == Actions  ==
  
 TBD
