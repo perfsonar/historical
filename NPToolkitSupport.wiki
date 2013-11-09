@@ -9,18 +9,13 @@ The current rotation includes: Aaron, Jason, Andy, Sowmya, Brian
 (Please volunteer if you'd like to be added to the rotation!)
 
 = Schedule =
-  * May 16 - 31, 2013: Brian
-  * June 1 - 15, 2013: Aaron
-  * June 16 - 30, 2013: Andy
-  * July 1 - 15, 2013 Jason
-  * July 16 - 31, 2013: Aaron
-  * August 1 - 15, 2013: Sowmya
-  * August 16 - 31, 2013: Brian
-  * September 1-15, 2013: Andy
-  * September 16-30, 2013: Jason
+
   * October 1 - 15, 2013: Aaron
   * October 16 - 31, 2013: Sowmya
   * November 1 - 15, 2013: Brian
-  * November 16 - 30, 2013: Andy
+  * November 16 - 23, 2013: Sowmya
+  * November 24 - 30, 2013: Brian
   * December 1 - 15, 2013: Jason
   * December 16-31, 2013: Aaron
+  * Jan 1-15, 2013: Andy
+  * Jan 16-31, 2013: ?
