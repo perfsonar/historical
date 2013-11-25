@@ -21,6 +21,25 @@ TBD
  * 3.3.2 release status
    * Firewall and IDS status
 
+== Notes ==
+ * Developer Updates
+   * Andy
+    * Updated build host
+    * Working on MA overhaul 
+      * Have some design docs, will share this week
+      * Looking at coming up with an implementation plan closer. Trying to understand what we can use from esmond.      
+   * Aaron
+    * Tried an updated powstream, had to revert back to old way 
+   * Sowmya
+    * Working on 3.3.2 release
+    * Incorporating firewall script. I've been adding code to dynamically add ports. Still working on it.
+    * Brian: fail2ban looks like easiest. 
+    * Sowmya will add dependency in Toolkit RPM on fail2ban.
+   * Brian
+    * IU will be helping with some perfSONAR stuff
+ * 3.3.2 release status
+   * Sowmya will try to have firewall script and fail2ban Toolkit dependency done by end of week. Give to beta testers next week. 
+
 == Future Agenda Topics ==
    
 == Actions  ==
