@@ -1,10 +1,10 @@
-#summary December 12, 2013 Conference Call
+#summary December 2, 2013 Conference Call
 
-=   December 12, 2013 Conference Call 1:00 p.m. EST =
+=   December 2, 2013 Conference Call 1:00 p.m. EST =
 
 == Agenda/Minutes ==
 
- * Attendees:
+ * Attendees: Jason, Andy, Sowmya, Brian, Eric
   
 == Follow-up on Actions  ==
 
@@ -23,7 +23,31 @@ TBD
    * CentOS 6.5
 
 == Notes ==
-
+ * Developer Updates
+   * Andy
+    * Shared MA documents with group
+    * Will schedule meeting with Jon Dugan this week
+   * Aaron
+    * Working on getting new BWCTL out. Jason found some minor stuff. Can put current version on ESnet.
+    * Building new kernel RPMs
+   * Sowmya
+    * All firewall changes are made. Added in fail2ban. 
+    * Need kernel RPMs ready.
+    * Removed outbound filtering
+    * Jason going to send SSH throttling line
+    * Action: Sowmya will enable fail2ban
+   * Jason
+    * Tested iptables and fail2ban at SC
+   * Brian
+    * Bruce Mah ramping up on iperf3
+    * Burst of activity while Jef wraps-up
+    * TCP performance should be the same as nuttcp. UDP performance seems slower.
+   * Eric
+    * Been having good conversations with GEANT
+ * 3.3.2 release status
+   * CentOS 6.5
+    * Aaron will build meta-package
+    * 
 
 == Future Agenda Topics ==
    
