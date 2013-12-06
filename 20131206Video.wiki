@@ -1,0 +1,47 @@
+#summary December 6, 2013 Conference Call
+
+=   December 6, 2013 Conference Call 1:00 p.m. EST =
+
+== Agenda/Minutes ==
+
+ * Attendees:
+  
+== Follow-up on Actions  ==
+
+TBD
+
+== Agenda Topics ==
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * Support timeline for CentOS 5 kernel
+ * New MA Design Docs
+  * [https://docs.google.com/document/d/1DFl4bgFxIQtRqYIZPHAT8xW4TACppKq2UeYK13ZsUDk/edit?usp=sharing REST API]
+  * [https://docs.google.com/document/d/1M09ziw5ABfnuHh1R-ONVMkNQGJNIy9V2k2bYYwqBMeA/edit?usp=sharing Database Schema] 
+
+== Notes ==
+ 
+
+== Future Agenda Topics ==
+   
+== Actions  ==
+ 
+TBD
+ 
+ 
+== Where ==
+ESnet conference bridge:
+ * GDS: 00113498555555
+ * Direct Dial: mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-423-9220 then 8555555# at the prompt.
+
+The free Cisco Jabber desktop video conferencing service also works with the ESnet ECS service. 
+Just register and download the client from http://ciscojabbervideo.com, and connect using the meeting ID:  8555555@es.net
+
+== Last Updated ==
+
+$Id$
