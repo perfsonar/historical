@@ -1,6 +1,6 @@
-#summary December 6, 2013 Conference Call
+#summary December 9, 2013 Conference Call
 
-=   December 6, 2013 Conference Call 1:00 p.m. EST =
+=   December 9, 2013 Conference Call 1:00 p.m. EST =
 
 == Agenda/Minutes ==
 
@@ -19,6 +19,7 @@ TBD
    * Jason
    * Eric
  * Support timeline for CentOS 5 kernel
+ * 'Downshifting' BWCTL to test between different speed NICs
  * New MA Design Docs
   * [https://docs.google.com/document/d/1DFl4bgFxIQtRqYIZPHAT8xW4TACppKq2UeYK13ZsUDk/edit?usp=sharing REST API]
   * [https://docs.google.com/document/d/1M09ziw5ABfnuHh1R-ONVMkNQGJNIy9V2k2bYYwqBMeA/edit?usp=sharing Database Schema] 
