@@ -23,6 +23,15 @@ TBD
  * New MA Design Docs
   * [https://docs.google.com/document/d/1DFl4bgFxIQtRqYIZPHAT8xW4TACppKq2UeYK13ZsUDk/edit?usp=sharing REST API]
   * [https://docs.google.com/document/d/1M09ziw5ABfnuHh1R-ONVMkNQGJNIy9V2k2bYYwqBMeA/edit?usp=sharing Database Schema] 
+  * A few discussion topics based on feedback so far:
+   * Source/Dest addressing strategy
+   * Summarization topics
+    * Summarization as time vs sample count
+    * Should Bucket width be in metatdata or part of event type?
+   * How should we represent percentiles in statistical summary?
+   * Bulk writes vs Individual writes?
+
+
 
 == Notes ==
  
