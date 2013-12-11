@@ -1,6 +1,6 @@
-#summary DRAFT Current Roadmap for the perfSONAR project
+#summary Current Roadmap for the perfSONAR project
 
-== DRAFT Development Roadmap for perfSONAR ==
+== Development Roadmap for perfSONAR ==
 
  The following is a list of deliverables for the perfSONAR project in the next year.
 
@@ -13,7 +13,7 @@
 
 
 == Release Roadmap ==
-   * 3.3.2: Bug Fix release, November 2013
+   * 3.3.2: Bug Fix release, December 2013
    * 3.4: Next major release that includes deliverable #1 and part of #4: February 2014
    * 3.4.1 Bug fix release: May 2014
    * 3.5 Next major release that includes deliverable #2, #5, July 2014
