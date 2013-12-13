@@ -18,7 +18,26 @@ TBD
    * Brian
    * Jason
    * Eric
- * Support Statement for CentOS 5 kernel
+ * Support Statement for CentOS 5 kernel - creation of a 'vault'
+{{{
+Subject:
+
+pS Performance Toolkit 3.2 End of Life (EOL)
+
+Body:
+
+Greetings:
+
+This is the notification that the scheduled the End of Life (EOL) for the pS Performance Toolkit v3.2 will be Friday February 28th, 2014.  All architectures of the pS Performance Toolkit v3.2 (i386, x86_64) are impacted, and the software will be removed from the mirrors on that date.  
+
+A frozen version will be migrated to a vault (instructions will be provided for use of this construct at a later date) and v3.2 of this software will remain available indefinitely.  You may use the vault in the same way you have used the mirrors in the past, however no updates will be released for any of the software in this location moving forward.
+
+Accordingly, the perfSONAR-PS Project strongly recommends that you migrate any pS Performance Toolkit installs to the latest version (3.3).  
+
+Thanks;
+
+The pS Performance Toolkit Development Team
+}}}
  * NDT Flash Interface
 
 == Notes ==
