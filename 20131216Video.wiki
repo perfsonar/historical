@@ -4,7 +4,7 @@
 
 == Agenda/Minutes ==
 
- * Attendees:
+ * Attendees: Aaron Brown, Jason Zurawski, Dan Doyle, Sowmya Balasubramanian, Brian Tierney
   
 == Follow-up on Actions  ==
 
@@ -41,8 +41,30 @@ The pS Performance Toolkit Development Team
  * NDT Flash Interface
 
 == Notes ==
-
- TBD
+ * Developer Updates
+   * Andy
+     * Still no kernel SRPM uploaded
+     * Working on deploying esmond
+   * Aaron
+    * Been working on regular testing framework
+    * Working on iperf3 interval issue
+   * Sowmya
+    * Sent in mail: The only update from my side. I got back to working on sLS. The multicache mode passes the basic case(1 core and 1 LS). I am testing it right now with some of the other configuration options.
+   * Jason
+    * Post-SC clean-up
+   * Brian
+    * At the ATLAS meeting talked about dashboard. I have a meeting on wednesday.
+    * Official iperf3 release at end of week
+    * Trying to come-up with date for perfSONAR workshop
+   * Dan Doyle
+    * Lead technical resource from IU. Will be joining calls in future. 
+ * Support Statement for CentOS 5 kernel - creation of a 'vault'
+   * Action: Aaron will setup a separate vault
+ * NDT Flash Interface
+  * Should we use it on the toolkit?
+  * Mlab is working with it
+  * Will continue looking at it and see how things progress
+ * No meeting next two weeks due to holidays
 
 == Future Agenda Topics ==
 
