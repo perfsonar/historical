@@ -117,20 +117,20 @@ Currently the software supports the following types of checks:
 ||command||String||Yes||See [MaDDashInstall#net.es.maddash.checks.NagiosCheck net.es.maddash.checks.NagiosCheck]||
 ||maUrl||YAML Object||Yes||The URL of the measurement archive where performance data related to this check may be retrieved. This accepts the template variables listed in the [MaDDashInstall#PSNagiosCheck_Template_Variables PSNagiosCheck Template Variables] section. The object has one key that is called _default_ which will be the default URL used for any cell in a grid. The remaining keys are members of groups assigned to the row. If default and a row key are specified, the row key is preferred for that row. The value of each key is a map where the key is a member of a group assigned to the column or you can use the _default_ key to apply the URL to every column in the row. If default is specified and a specific value for a column, the specific value for the column is preferred. See the default configuration file for a full example.||
 ||graphUrl||String||Yes||A URL where a graph of data related to the check can be retrieved. This accepts the template variables listed in the [MaDDashInstall#PSNagiosCheck_Template_Variables PSNagiosCheck Template Variables] section. ||
-||metaDataKeyLookup||String||Yes||A URL where metaDataKeys can be looked up for the data. These are often needed to generate the graph URL. This accepts some of the template variables listed in the [MaDDashInstall#PSNagiosCheck_Template_Variables PSNagiosCheck Template Variables] section. _Note: Some variables it cannot accept because it is responsible for generating them._||
+||metaDataKeyLookup||String||Yes||*DEPRECATED* A URL where metaDataKeys can be looked up for the data. These are often needed to generate the graph URL. This accepts some of the template variables listed in the [MaDDashInstall#PSNagiosCheck_Template_Variables PSNagiosCheck Template Variables] section. _Note: Some variables it cannot accept because it is responsible for generating them._||
 
  ===== PSNagiosCheck Template Variables  =====
 ||Name||Description||
 ||%row||The row in the grid associated with this check at the time its run||
 ||%col||The column in the grid associated with this check at the time its run||
 ||%maUrl||The url of the measurement archive. You can't use this in the maUrl parameters as this is generated from that template.||
-||%maKeyF||A comma-separated list of the metaDataKeys for the forward direction of a test. This cannot be used in metaDataKeyLookup as it is generated after the URL that is called.||
-||%maKeyR||A comma-separated list of the metaDataKeys for the reverse direction of a test. This cannot be used in metaDataKeyLookup as it is generated after the URL that is called.||
-||%srcName||The hostname of the source endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
-||%srcIP||The IP address of the source endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
-||%dstName||The hostname of the destination endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
-||%dstIP||The IP of the destination endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
-||%eventType||The eventType returned by metaDataKeyLookup of the destination endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
+||%maKeyF||*DEPRECATED* A comma-separated list of the metaDataKeys for the forward direction of a test. This cannot be used in metaDataKeyLookup as it is generated after the URL that is called.||
+||%maKeyR||*DEPRECATED* A comma-separated list of the metaDataKeys for the reverse direction of a test. This cannot be used in metaDataKeyLookup as it is generated after the URL that is called.||
+||%srcName||*DEPRECATED* The hostname of the source endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
+||%srcIP||*DEPRECATED* The IP address of the source endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
+||%dstName||*DEPRECATED* The hostname of the destination endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
+||%dstIP||*DEPRECATED* The IP of the destination endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
+||%eventType||*DEPRECATED* The eventType returned by metaDataKeyLookup of the destination endpoint of a point-to-point test. This cannot be used in metaDataKeyLookup as it is generated after the URL is called.||
 ||%event.delayBuckets||The string _http://ggf.org/ns/nmwg/characteristic/delay/summary/20110317_||
 ||%event.delay||The string _http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921_||
 ||%event.bandwidth||The string _http://ggf.org/ns/nmwg/characteristics/bandwidth/achievable/2.0_||
@@ -166,7 +166,7 @@ The following list some global properties available for controlling the behavior
 ==== General Properties ====
 ||Name||Type||Required||Description||
 ||database||String||Yes||The path to the directory where the database is stored||
-||jobThreadPoolSize||Integer||No||The maximum number of checks that can run in parallel. Defaults to 50||
+||jobThreadPoolSize||Integer||No||The maximum number of checks that can run in parallel. Defaults to 20||
 ||jobBatchSize||Integer||No||The maximum number of checks that can be running or waiting to run in memory. Defaults to 250.||
 ||disableScheduler||Boolean||No||If set to 1 then the server will only run as a REST server and not execute any new checks. Default is 0.||
 ||skipTableBuild||Boolean||No||If set to 1 then the database tables will not be built and indexes will not be built/rebuilt. The first time you run the server it must be set to 0. After that, you may find that setting it to 1 significantly speeds-up boot time. Keeping it on though has the advantage of rebuilding indexes on startup which can improve query performance.||
