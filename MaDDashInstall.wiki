@@ -249,6 +249,12 @@ The perfSONAR project includes centralized configuration management software tha
  # Go to your MaDDash web interface to verify the results
  # You should now have a MaDDash configuration that will update nightly based on the published mesh
  
+==Installing the package  ==
+The configuration agent is made available in the same yum repository as maddash. To install it, run the following command:
+{{{
+# yum install perl-perfSONAR_PS-MeshConfig-GUIAgent
+}}}
+
 == Configuration Guide ==
 The section provided detailed instructions on the configuration options available and details more advanced topics for those wishing to go beyond the default settings.
 
