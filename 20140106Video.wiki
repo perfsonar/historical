@@ -18,6 +18,7 @@ TBD
    * Brian
    * Jason
    * Eric
+ * Release status
  * pS JS Library - https://npmjs.org/package/perfsonar
  * NTP Vulnerability and Fix Status.  Statement to community?
 
@@ -30,6 +31,7 @@ TBD
    * Brian
    * Jason
    * Eric
+ * Release status
  * pS JS Library - https://npmjs.org/package/perfsonar
  * NTP Vulnerability and Fix Status.  Statement to community?
 
