@@ -7,7 +7,7 @@ This page contains information about building the various components of the Tool
 == Kernel ==
 The Toolkit includes a custom version of the CentOS 6 RHEL (Red Hat Enterprise Linux) kernel.
 
-To build this kernel, you will need a host with CentOS 6, and the 'rpm-build' package installed (optionally mock) with at least 5 GB of space available.
+To build this kernel, you will need a host with CentOS 6, and the 'rpm-build' package installed (optionally mock) with at least 15 GB of space available.
 
   * Download the most recent kernel Source RPM for CentOS 6
     * Try http://vault.centos.org
@@ -45,14 +45,6 @@ CONFIG_WEB100_NETLINK=y
 #
 # % define buildid .local
 %define buildid .aufs.web100
-}}}
-   * Slightly farther down the kernel spec file modify the kernel firmware package to be built by default by changing the line:
-{{{
-%define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     0}
-}}}
-   to
-{{{
- %define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     1}
 }}}
    * Below the final kernel source and above Patch999999 add these lines:
 {{{
@@ -92,14 +84,17 @@ ApplyOptionalPatch linux-kernel-test.patch
 * Thu Jul 19 2012 Johnny Hughes <johnny@centos.org>
 - Roll in CentOS Branding
 }}}
-  * To build the kernel SRPM run: `rpmbuild -ba kernel.spec 2> build-err.log | tee build-out.log`
+  * To build the kernel SRPM run: `rpmbuild -bs kernel.spec 2> build-err.log | tee build-out.log`
     * Note: the above command will put error messages into the file `build-err.log`
   * Change your working directory to `SRPMS` in your RPM build directory
   * If the above commands were executed properly you should see a kernel SRPM file
    * If not look through the log files to determine what went wrong
-  * To build the kernel run: `rpmbuild --target i686 --without debug --without kabichk --rebuild [kernel SRPM]`
-   * If new patches have been added, this command may error out due to patches that don't apply cleanly. If so, these patches will need modified as appropriate and the command rerun (look [#Creating_Kernel_Patches here])
-  * The RPMs (and a new SRPM) should now be available in the RPM and SRPM directories in your RPM build directory. They can either be installed directly, or added to a yum repository and installed via that method.
+  * To build the kernel run mock:
+   * *x86_64:* mock -r epel-6-x86_64 --resultdir=$HOME/mock-results/epel-6-x86_64/ --arch=x86_64 --without=debug --without=kabichk ~/rpmbuild/SRPMS/kernel-2.6.32-431.3.1.el6.aufs.web100.src.rpm
+   * *i386:* mock -r epel-6-i386 --resultdir=$HOME/mock-results/epel-6-i386 --arch=i386 --target=i686 --without=debug --without=kabichk ~/rpmbuild/SRPMS/kernel-2.6.32-431.1.2.0.1.el6.aufs.web100.src.rpm
+   * You also need to run a third command to build the firmware as noarch:
+    * mock -r epel-6-i386 --resultdir=$HOME/mock-results/epel-6-i386 --arch=i386 --target=noarch --without=debug --without=kabichk --with=firmware ~/rpmbuild/SRPMS/kernel-2.6.32-431.1.2.0.1.el6.aufs.web100.src.rpm
+   * If new patches have been added, these commands may error out due to patches that don't apply cleanly. If so, these patches will need modified as appropriate and the command rerun (look [#Creating_Kernel_Patches here])
 
 === Generating Random Bytes ===
 When compiling on a remote host, it is common to see an error like this:
