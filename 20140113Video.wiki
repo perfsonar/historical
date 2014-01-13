@@ -1,0 +1,52 @@
+#summary January 13, 2014 Conference Call
+
+=   January 13, 2014 Conference Call 1:00 p.m. EST =
+
+== Agenda/Minutes ==
+
+ * Attendees: TBD
+  
+== Follow-up on Actions  ==
+
+TBD
+
+== Agenda Topics ==
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * Release status
+
+== Notes ==
+
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * Release status
+== Future Agenda Topics ==
+
+TBD
+   
+== Actions  ==
+ 
+TBD 
+
+== Where ==
+ESnet conference bridge:
+ * GDS: 00113498555555
+ * Direct Dial: mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-423-9220 then 8555555# at the prompt.
+
+The free Cisco Jabber desktop video conferencing service also works with the ESnet ECS service. 
+Just register and download the client from http://ciscojabbervideo.com, and connect using the meeting ID:  8555555@es.net
+
+== Last Updated ==
+
+$Id$
