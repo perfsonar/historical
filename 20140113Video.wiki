@@ -4,7 +4,7 @@
 
 == Agenda/Minutes ==
 
- * Attendees: TBD
+ * Attendees: Brian, Sowmya, Jason, Aaron, Warren, Andy, Dan
   
 == Follow-up on Actions  ==
 
@@ -22,15 +22,34 @@ TBD
  * Release status
 
 == Notes ==
-
  * Developer Updates
    * Andy
+    * Worked on new sLS GUI
+    * Built new Live CD
+    * NTP issue and firewall issue
+    * Interesting mysql issue that we can't do much about
    * Aaron
+    * Working on RPMS for toolkit version with new testing infrastructure
+    * Could potentially use on ESnet to test with iperf3
    * Sowmya
+    * Working on subscribe issues
+    * Working on some 3.4 issues
+    * Need to setup a cache on antg
    * Brian
+    * iperf3 official release is out
+    * sLS GUI is functional 
    * Jason
-   * Eric
+    * Working on materials for IU webinar
+   * Warren
+    * Working on re-implementing Pythia using Hades data
+    * Working on smokeping wrapper for OWAMP
+   * Dan
+    * LiveCD installed and going through checklist
+ * LS Registration Bug on ANTG Host (Sowmya)
+    * Sowmya has a fix 
  * Release status
+    * Will address issues and then re-evaluate later in the week
+    
 == Future Agenda Topics ==
 
 TBD
