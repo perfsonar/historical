@@ -18,6 +18,7 @@ TBD
    * Brian
    * Jason
    * Eric
+ * LS Registration Bug on ANTG Host (Sowmya)
  * Release status
 
 == Notes ==
