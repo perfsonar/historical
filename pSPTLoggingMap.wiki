@@ -1,0 +1,44 @@
+#summary Description of log files and what they map to
+
+= Log file to function mapping =
+
+All of the relevant logs for perfSONAR services are located in '/var/log/perfsonar'.  The following is a mapping between services and the logs the create:
+
+ * MySQL database maintenance scripts:
+   * /var/log/perfsonar/cleanupdb_bwctl.log
+   * /var/log/perfsonar/cleanupdb_owamp.log
+   * /var/log/perfsonar/cleanupdb_traceroute.log
+ * The config daemon is what lets the Web UI write to the various config files when a change is made (e.g. to the administrative info, or a regular test):
+   * /var/log/perfsonar/config_daemon.log
+ * Toolkit script to discover addressees and interface information:
+   * /var/log/perfsonar/discover_external_address.log
+ * The LS cache is a downloaded set of services registered to the lookup service, this log relates to the process of downloading:
+   * /var/log/perfsonar/ls_cache_daemon.log
+ * Each toolkit registers itself with the lookup service, this relates to the status of each service doing that process:
+   * /var/log/perfsonar/ls_registration_daemon.log
+ * Related to the BWCTLD, OWAMPD, and Throughput/Latency regular testing daemons:
+   * /var/log/perfsonar/owamp_bwctl.log
+ * Script that removes temporary testing files from OWAMPD:
+   * /var/log/perfsonar/owampd_cleaner_error.log
+ * Web service front end for the Throughput/Latency regular testing:
+   * /var/log/perfsonar/perfsonarbuoy_ma.log
+ * Logs related to the operation of the PingER service:
+   * /var/log/perfsonar/pinger.log
+ * Logs related to the service_watcher, a process that restarts things that may have ceased operation:
+   * /var/log/perfsonar/service_watcher_error.log
+   * /var/log/perfsonar/service_watcher.log
+ * Logs related to the operation of the SNMP MA service:
+   * /var/log/perfsonar/snmp_ma.log
+ * Logs related to the operation of the Topology service:
+   * /var/log/perfsonar/topology_service.log
+ * Logs related to the operation of the Traceroute Web and Regular testing service:
+   * /var/log/perfsonar/traceroute_ma.log
+   * /var/log/perfsonar/traceroute_ma.netlogger.log
+   * /var/log/perfsonar/traceroute_master.log
+   * /var/log/perfsonar/traceroute_master.netlogger.log
+   * /var/log/perfsonar/traceroute_ondemand_mp.log
+   * /var/log/perfsonar/traceroute_ondemand_mp.netlogger.log
+   * /var/log/perfsonar/traceroute_scheduler.log
+   * /var/log/perfsonar/traceroute_scheduler.netlogger.log
+ * Logs related to the general health of the web pages of the pS Performance Toolkit:
+   * /var/log/perfsonar/web_admin
