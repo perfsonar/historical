@@ -4,7 +4,7 @@
 
 == Agenda/Minutes ==
 
- * Attendees: 
+ * Attendees: Jason, Aaron, Brian, Sowmya, Michael, Eric, Warren
   
 == Follow-up on Actions  ==
 
@@ -23,12 +23,33 @@ TBD
 == Notes ==
  * Developer Updates
    * Andy
+    * Got LiveCD working with firewall rules, gave it to USATLAS
+    * Did some cfengine work to shuffle around ps1-6.es.net hosts. This will lead to a new sLS that replaces ps4.s.net
+    * Also fixed some issues with ESnet sLS registrations
+    * Not much progress on MA code, but did exchange email with Dale Carder about testing
    * Aaron
+    * Got version of the toolkit with new testing framework
+    * Added some code to bwctl to better handle multiple interfaces
    * Sowmya
+    * The ps4 sLS went down and not sure why. Working on adding more logging to prevent this
    * Brian
+    * Meeting with GEANT on Feb 19th
+    * Pushed out new bwctl to all hosts
    * Jason
+    * Next OIN workshop this week. Eli and Jason will be presenting. 
+   * Warren
+    * Asked if can do custom firewall rules. Answer is yes you can
+    * Working on next iteration of Pythia. Discussion of how to get raw data.
+   * Michael
+    * Dan and Michael have been familiarizing themselves with tools
+    * Need to look at the iperf ports in bwctld.conf
+    * Will be getting added to support rotation soon. Andy will update rotation.
    * Eric
+    * No new updates
+    * Will check on new email list for internal stuff
  * Release status
+   * Will go straight to final if current testers say things look good. Shooting for Monday next week.
+   
     
 == Future Agenda Topics ==
 
