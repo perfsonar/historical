@@ -3,21 +3,25 @@
 = Introduction =
 
 The core NP Toolkit support team has decided to divide up support responsibility as follows.
-There will be a primary support person at all times, on a .5 month rotation. This person is responsible for answering support email, and assigning tasks to others if appropriate. If the primary person is unavailable, they are responsible for finding their own replacement.
+There will be a primary support person at all times, on a .5 month rotation. This person is responsible for answering support email, and assigning tasks to others if appropriate. The person should try to respond to emails within 1 working day. If the primary person is unavailable, they are responsible for finding their own replacement.
 
-The current rotation includes: Aaron, Jason, Andy, Sowmya, Brian
+The current rotation includes: Aaron, Jason, Andy, Sowmya, Brian, Dan, Michael
 (Please volunteer if you'd like to be added to the rotation!)
 
 = Schedule =
-  * January 1-15, 2013: Andy
-  * January 16-31, 2013: Sowmya
-  * February 1-14, 2013: Brian
-  * February 15-28, 2013: Aaron
-  * March 1 - 15, 2013: Jason
-  * March 16-31, 2013: Andy
-  * April 1-15, 2013: Sowmya
-  * April 16-30, 2013: Brian
-  * May 1-15, 2013: Aaron
-  * May 16-31, 2013: Jason
-  * June 1-15, 2013: Andy
-  * June 16-31, 2013: Sowmya
+  * January 1-15, 2014: Andy
+  * January 16-31, 2014: Sowmya
+  * February 1-14, 2014: Dan
+  * February 15-28, 2014: Michael
+  * March 1-15, 2014: Brian
+  * March 16-31, 2014: Aaron
+  * April 1-15, 2014: Jason
+  * April 16-30, 2014: Andy
+  * May 1-15, 2014: Sowmya
+  * May 16-31, 2014: Dan
+  * June 1-15, 2014: Michael
+  * June 16-30, 2014: Brian
+  * July 1-15, 2014: Aaron
+  * July 16-31, 2014: Jason
+
+ 
