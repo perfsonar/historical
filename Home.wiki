@@ -19,24 +19,12 @@ A listing of the nodes from all meetings and conference calls can be found in [M
 Ongoing work can be viewed from our anonymous SVN repository: 
 http://anonsvn.internet2.edu/svn/perfSONAR-PS. 
 
- * We have released the first several candidates from our 3.1 software release.
-   * Available at http://software.internet2.edu
- * Service documentation
-   * [SNMPMA SNMP MA] v3.1
-   * [LS Lookup Service] v3.1
-   * PingER
-   * Toplogy Service
-   * Status MA
-   * LS Registration Daemon
-   * perfSONAR-BUOY
- * [API] documentation is now available. 
- * The [NPToolkit] is nearing the first official release, download yours today!.
+ * All software can be found at http://software.internet2.edu
  * [http://code.google.com/p/perfsonar-ps/issues/list Request new features] to the perfSONAR-PS framework.
  
 == For developers ==
 
  * [Developers] info in one location.
- * perfSONAR-PS is entering into a [pSPS20090327Release release phase].  
  * Please adhere to the [CodeRules coding guidelines].
 
 == Mailing Lists ==
