@@ -1,7 +1,0 @@
-<SELECT NAME="select_url" ID="select_url" SIZE="7" MULTIPLE class="fc_st">    
- 	[% FOREACH url IN remote_urls %]	     
- 	   <OPTION class="smver_1" VALUE="[% url.url %]">[% url.url_label %] 
- 	[% END %]
-</SELECT>
-<input type="hidden" name="filter_project" id="filter_project" 
-       value="[% filter_project %]"/>
