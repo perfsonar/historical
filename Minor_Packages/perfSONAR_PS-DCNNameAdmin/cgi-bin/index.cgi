@@ -1,1 +1,0 @@
-dcnAdmin.cgi
