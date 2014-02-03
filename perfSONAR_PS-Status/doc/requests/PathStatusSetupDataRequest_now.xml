@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<nmwg:message type="SetupDataRequest" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-  <!-- Get the most recent status for the links -->
-  <nmwg:metadata id="meta1">
-    <nmwg:eventType>Path.Status</nmwg:eventType>
-  </nmwg:metadata>
-  <nmwg:data id="data1" metadataIdRef="meta1" />
-</nmwg:message>

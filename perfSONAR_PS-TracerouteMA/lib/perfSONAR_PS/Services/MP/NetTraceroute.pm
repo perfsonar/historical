@@ -99,6 +99,8 @@ sub psTraceroute(){
         alarm(0);
     };
     if($@){
+        #make sure timeout is cleared if another exception got us to this block
+        alarm(0);
         #passing error up the stack
         #looks strange but important for alarm to be in eval block
         die "$@";

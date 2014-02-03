@@ -1,6 +1,6 @@
 Name:			iperf3
-Version:		3.0b5
-Release:		1%{?dist}
+Version:		3.0b6
+Release:		4%{?dist}
 Summary:		Measurement tool for TCP/UDP bandwidth performance
 License:		BSD
 Group:			Applications/Internet
@@ -37,7 +37,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS README LICENSE INSTALL RELEASE_NOTES TODO
+%doc AUTHORS README INSTALL TODO
 %{_mandir}/man1/iperf3.1.gz
 %{_mandir}/man3/libiperf.3.gz
 %{_bindir}/iperf3

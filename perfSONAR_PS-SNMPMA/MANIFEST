@@ -3,7 +3,6 @@ Makefile
 bin/client.pl
 bin/configureDaemon.pl
 bin/daemon.pl
-bin/loadStoreFile.pl
 bin/makeDBConfig.pl
 dependencies
 doc/Changes

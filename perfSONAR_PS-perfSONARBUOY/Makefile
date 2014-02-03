@@ -1,6 +1,6 @@
 PACKAGE=perfSONAR_PS-perfSONARBUOY
 ROOTPATH=/opt/perfsonar_ps/perfsonarbuoy_ma
-VERSION=3.3.1
+VERSION=3.3.2
 RELEASE=1
 
 default:
