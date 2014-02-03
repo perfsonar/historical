@@ -1,10 +1,10 @@
-#summary pS Performance Toolkit 3.3.1
+#summary pS Performance Toolkit 3.3.2
 
 <wiki:toc max_depth="6" />
 
 == Introduction ==
 
-The following guide describes in detail the steps required to set up version 3.3.1 of the perfSONAR performance Toolkit ([http://psps.perfsonar.net/toolkit/ pS Performance Toolkit 3.3.1]).  It is important to follow each step in order.  Upon getting stuck, consult the [http://psps.perfsonar.net/toolkit/FAQs.html FAQ] or join the [https://lists.internet2.edu/sympa/info/performance-node-users mailing list].
+The following guide describes in detail the steps required to set up version 3.3.2 of the perfSONAR performance Toolkit ([http://psps.perfsonar.net/toolkit/ pS Performance Toolkit 3.3.2]).  It is important to follow each step in order.  Upon getting stuck, consult the [http://psps.perfsonar.net/toolkit/FAQs.html FAQ] or join the [https://lists.internet2.edu/sympa/info/performance-node-users mailing list].
 
 == System Requirements ==
 
@@ -13,12 +13,12 @@ The system recommendations for the pS Performance toolkit are now located [http:
 == Downloads ==
 
 ||Distribution||Architecture||Download||
-||NetInstall||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.1-NetInstall-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.1-NetInstall-i386.iso.md5 md5]||
-|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.1-NetInstall-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.1-NetInstall-x86_64.iso.md5 md5]||
-||LiveCD||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.1-LiveCD-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.1-LiveCD-i386.iso.md5 md5]||
-|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.1-LiveCD-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.1-LiveCD-x86_64.iso.md5 md5]||
-||LiveUSB||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.1-LiveUSB-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.1-LiveUSB-i386.iso.md5 md5]||
-|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.1-LiveUSB-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.1-LiveUSB-x86_64.iso.md5 md5] [http://anonsvn.internet2.edu/svn/nptoolkit/trunk/scripts/deploy_liveusb.sh deploy-script]||
+||NetInstall||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-NetInstall-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-NetInstall-i386.iso.md5 md5]||
+|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-NetInstall-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-NetInstall-x86_64.iso.md5 md5]||
+||LiveCD||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveCD-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveCD-i386.iso.md5 md5]||
+|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveCD-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveCD-x86_64.iso.md5 md5]||
+||LiveUSB||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso.md5 md5]||
+|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-x86_64.iso.md5 md5] [http://anonsvn.internet2.edu/svn/nptoolkit/trunk/scripts/deploy_liveusb.sh deploy-script]||
 
 == Upgrading ==
 If you are upgrading a from previous version of the perfSONAR-PS Toolkit, please see our [pSPerformanceToolkit33UpgradeGuide upgrade guide].
@@ -26,7 +26,7 @@ If you are upgrading a from previous version of the perfSONAR-PS Toolkit, please
 
 == Installation ==
 
-Version 3.3.1 of the pS Performance Toolkit consists of three primary installation mediums:
+Version 3.3.2 of the pS Performance Toolkit consists of three primary installation mediums:
 
  * [pSPerformanceToolkit33#NetInstall_CD NetInstall CD]
    * Allows the entire OS image to be installed directly to a host's hard disk
@@ -49,9 +49,9 @@ The following sections describe the installation procedure for each of the produ
 The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/ iso] and [http://software.internet2.edu/pS-Performance_Toolkit/ md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
-user@host:~$ md5sum pS-Performance_Toolkit-NetInstall-3.3.1.iso;cat pS-Performance_Toolkit-NetInstall-3.3.1.iso.md5
-e299ce35dbde8c557420cdf933ddbb5e  pS-Performance_Toolkit-NetInstall-3.3.1.iso
-e299ce35dbde8c557420cdf933ddbb5e  pS-Performance_Toolkit-NetInstall-3.3.1.iso
+user@host:~$ md5sum pS-Performance_Toolkit-NetInstall-3.3.2.iso;cat pS-Performance_Toolkit-NetInstall-3.3.2.iso.md5
+e299ce35dbde8c557420cdf933ddbb5e  pS-Performance_Toolkit-NetInstall-3.3.2.iso
+e299ce35dbde8c557420cdf933ddbb5e  pS-Performance_Toolkit-NetInstall-3.3.2.iso
 }}}
 
 If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  If the value _*DOES NOT*_ match, consider re-downloading the file.  After burning, please insert the CD into the target machine to boot.  Some items to consider:
@@ -167,9 +167,9 @@ An important thing to note is that in the description above, there is no IP addr
 The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/ iso] and [http://software.internet2.edu/pS-Performance_Toolkit/ md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
-user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.3.1.iso;cat pS-Performance_Toolkit-LiveCD-3.3.1.iso.md5 
-f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.1.iso
-f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.1.iso
+user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.3.2.iso;cat pS-Performance_Toolkit-LiveCD-3.3.2.iso.md5 
+f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.2.iso
+f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.2.iso
 }}}
 
 If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  If the value _*DOES NOT*_ match, consider re-downloading the file.  After burning, please insert the CD into the target machine to boot.  Some items to consider:
