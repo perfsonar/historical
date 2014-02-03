@@ -4,7 +4,7 @@
 
 == Agenda/Minutes ==
 
- * Attendees: TBD
+ * Attendees: Sowmya
   
 == Follow-up on Actions  ==
 
@@ -23,8 +23,43 @@ TBD
  * NSF pS WS Prep 
 
 == Notes ==
+ * Developer Updates
+   * Andy
+    * Release prep, hopefully should be out today
+    * Worked on test data generation stuff for MA
+   * Sowmya
+    * GeoIP lookup on Admin Info GUI
+    * Worked on display of stuff on toolkit
+    * Still looking at MSU graph issues
+   * Aaron
+    * Plans to start doing an RC of regular testing framerwork after 3.3.2
+    * Also finishing bwctl 1.5.1. Reorganized bwctl options and added some long-form options to make things easier. 
+   * Jason
+    * OIN workshop last week.  
+    * Suggested MTU testing, which would be useful.
+    * Also wanted to pause tests
+   * Brian
+    * No updates 
+   * Eric
+    * No updates
+   * Michael
+    * iperf2 issue resolved
+    * everything else looks good. 
+   * Dan
+    * Started doing support this week
+    * Started testing 3.4 this week.  
+ * Release status
+  * Release today is the plan (see Andy update)
+ * NDT Flash Client (volunteers to install?)
+  * We should start looking at this get a feel. Will let current people on the list get more experience with it. 
+  * IU will start trying to test
+ * NSF pS WS Prep 
+  * Brian, Jason and Eric on hook to do history of perfsonar
+ * Email lists
+  * Table to next week
+ * BWCTL scheduling pings 
+  * Decided that ping should not run at same time as iperf at this time. That's how bwctl currently work. Latency stuff will run at same time up to certain number of hosts.
 
-TBD
 
 == Future Agenda Topics ==
 
