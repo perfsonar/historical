@@ -13,13 +13,13 @@
 
 
 == Release Roadmap ==
-   * 3.3.2: Bug Fix release, December 2013
-   * 3.4: Next major release that includes deliverable #1 and part of #4: February 2014
-   * 3.4.1 Bug fix release: May 2014
-   * 3.5 Next major release that includes deliverable #2, #5, July 2014
-   * 3.6: Next major release that includes deliverables  #4, #6, Fall 2014
+   * 3.3.2: Bug Fix release, Feb 1, 2013
+   * 3.4: Next major release that includes deliverable #1, #2, #5 part of #4: June 2014
+    * First rc in April 2014
+   * 3.4.1 Bug fix release: August 2014
+   * 3.5: Next major release that includes deliverables  #4, #6, Fall 2014
 
 
 == Documentation Roadmap ==
-   * #3, Website update, December 2013
+   * #3, Website update, March 2014
    * #3, Marketing / Communications Plan, January 2014
