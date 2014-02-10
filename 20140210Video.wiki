@@ -20,6 +20,32 @@ TBD
    * Eric
  * Git Conversion
  * Annotations to OWAMP graphs, when BWCTL was running and could have self inflicted loss
+ * proposed email list consolidation. Any comments/disagreements?
+
+{{{
+Merge these 2:
+  https://lists.internet2.edu/sympa/subscribe/i2-perfsonar
+  https://lists.internet2.edu/sympa/subscribe/perfsonar-dev
+ to perfsonar-dev
+
+Merge these 3:
+  https://lists.internet2.edu/sympa/subscribe/perfsonar-user
+  https://lists.internet2.edu/sympa/subscribe/perfsonar-ps-users
+  https://lists.internet2.edu/sympa/subscribe/performance-node-users
+to perfsonar-user
+
+Merge these 3:
+  https://lists.internet2.edu/sympa/subscribe/perfsonar-ps-announce
+  https://lists.internet2.edu/sympa/subscribe/perfsonar-announce
+  https://lists.internet2.edu/sympa/subscribe/performance-node-announce
+ to perfsonar-announce
+
+and make the old names aliases to the new name. These would all be open lists.
+
+We should maybe also maybe have a closed 'core developer' list with just folks with commit rights to the repo?
+
+}}}
+
 
 == Notes ==
 
