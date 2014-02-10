@@ -4,6 +4,7 @@
 
 This page contains information about building the various components of the Toolkit.
 
+
 == Kernel ==
 The Toolkit includes a patched version of the CentOS 5 version of the Linux kernel.
 
