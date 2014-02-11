@@ -9,81 +9,15 @@ The Toolkit includes a custom version of the CentOS 6 RHEL (Red Hat Enterprise L
 
 To build this kernel, you will need a host with CentOS 6, and the 'rpm-build' package installed (optionally mock) with at least 15 GB of space available.
 
+==== Preparing The Kernel Source ====
   * Download the most recent kernel Source RPM for CentOS 6
     * Try http://vault.centos.org
   * Install the kernel source RPM (eg. `rpm -ivh kernel-2.6.32-279.2.1.el6.src.rpm`). This should install files into your RPM build directory (typically /usr/src/redhat if root)
-  * Download patches `aufs2.2-standalone-2.6.32.patch, Makefile.patch, and web100-2.6.32-2.5.27-201001301335.el6.patch` from [http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/kernel/srpm_patches/el6 here] to the `SOURCES` directory in your RPM build directory (the same directory where the kernel sources are stored)
-   * These patches will attempt to perform several tasks when the kernel is built:
-    * aufs patch modifies the kernel to work with the aufs kernel module (kmod) to allow persistent overlays
-    * Makefile patch modifies the kernel makefile to include '.aufs.web100' in the extraversion string
-    * web100 patch modifies the kernel to make 100Mbps TCP streams over wide-area networks possible
+  * Download web100_changes.patch from [https://perfsonar-ps.googlecode.com/git/Toolkit_Building/software/kernel/web100_changes.patch] to the `SOURCES` directory in your RPM build directory (the same directory where the kernel sources are stored)
   * Change your working directory to `SOURCES` in your RPM build directory
-  * Several changes must be made to two files `kernel.spec` and `config-generic` 
+  * Apply the patch with "patch -i web100_changes.patch -p1". This will likely leave a few .rej files around. You will need to edit those files, and manually apply the changes.
 
-==== Manually Updating config-generic and SPEC====
-  * Edit the file `config-generic` and add the following lines to the end of the file:
-{{{
-# AUFS options
-CONFIG_AUFS_FS=m
-
-# WEB100 options
-CONFIG_WEB100=y
-CONFIG_WEB100_STATS=y
-CONFIG_WEB100_FPERMS=384
-CONFIG_WEB100_GID=0
-CONFIG_WEB100_NET100=y
-CONFIG_WEB100_NETLINK=y
-}}}
-  * Change your working directory to `SPECS` in your RPM build directory
-  * Edit the `kernel.spec` file with these changes:
-   * Toward the very top of the document you should set a buildid to reflect your custom build as done in the following example:
-{{{
-# Polite request for people who spin their own kernel rpms:
-# please modify the "buildid" define in a way that identifies
-# that the kernel isn't the stock distribution kernel, for example,
-# by setting the define to ".local" or ".bz123456"
-#
-# % define buildid .local
-%define buildid .aufs.web100
-}}}
-   * Below the final kernel source and above Patch999999 add these lines:
-{{{
-# Makefile patch
-Patch40000: Makefile.patch
-
-# aufs patches
-Patch50000: aufs2.2-standalone-2.6.32.patch
-
-# web100 patches
-Patch60000: web100-2.6.32-2.5.27-201001301335.el6.patch
-
-# empty final patch file to facilitate testing of kernel patches
-Patch999999: linux-kernel-test.patch
-}}}
-   * Above the line where `linux-kernel-test.patch` is applied add these three lines:
-{{{
-ApplyPatch Makefile.patch
-ApplyPatch aufs2.2-standalone-2.6.32.patch
-ApplyPatch web100-2.6.32-2.5.27-201001301335.el6.patch
-ApplyOptionalPatch linux-kernel-test.patch
-}}}
-
-==== Final Steps ====
-
-   * Finally, you should manually update the changelog in the `kernel.spec` file to reflect the changes made, eg:
-{{{
-%changelog
-* Fri Jul 20 2012 Andrew Sides <asides@es.net> [2.6.32-279.2.1.el6.aufs.web100]
-- Roll in aufs2.2 patches
-- Add separate patch for Makefile extraversion
-
-* Fri Jul 20 2012 Andrew Sides <asides@es.net> [2.6.32-279.2.1.el6.web100]
-- Roll in Web100 patches
-- Package kernel-firmware built by default
-
-* Thu Jul 19 2012 Johnny Hughes <johnny@centos.org>
-- Roll in CentOS Branding
-}}}
+==== Building The Kernel ====
   * To build the kernel SRPM run: `rpmbuild -bs kernel.spec 2> build-err.log | tee build-out.log`
     * Note: the above command will put error messages into the file `build-err.log`
   * Change your working directory to `SRPMS` in your RPM build directory
