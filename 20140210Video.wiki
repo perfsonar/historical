@@ -4,7 +4,7 @@
 
 == Agenda/Minutes ==
 
- * Attendees:
+ * Attendees: Jason, Andy, Sowmya, Warren, Dan, Michael
   
 == Follow-up on Actions  ==
 
@@ -48,8 +48,42 @@ We should maybe also maybe have a closed 'core developer' list with just folks w
 
 
 == Notes ==
-
-
+ * Developer Updates
+   * Andy
+    * 3.3.2 release. fixed issue with mirror list
+    * Worked on MA. Worked with Monte on MA rpm. Issues with python version on CentOS.
+   * Sowmya
+    * Fixed bug with owamp plotting, in 3.3.2 repo
+   * Jason
+    * Going to clean-up wiki
+    * Waiting on I2's answers for web site
+    * testing bwctl and kernel build
+   * Warren
+    * Nothing to report
+   * Dan
+    * NDT Flash client not working
+   * Michael
+    * Tested installing NetInstall. Lots of old docs made it tricky
+   * Aaron
+    * Found issue with web100 and sysctl causing the system to crash
+    * New version of BWCTL out. Hopefully do final release at the end of week. 
+ * Git Conversion
+  * Had serious merging issues last week due to the way svn handle's tree conflicts
+  * Suggest move to git on Google Code
+  * Action: Aaron will look at moving to git 
+  * Action: After migration create the wiki where various repos exist
+  * Will also need to update links to anonsvn
+ * Annotations to OWAMP graphs, when BWCTL was running and could have self inflicted loss
+  * Want to mark when bwctl run. Lots of moving parts.
+  * Dan: Can mark user annotations? Action: Add issue
+ * proposed email list consolidation. Any comments/disagreements?
+  * Jason: Would like a tighter list for perfsonar-dev
+  * Jason: What about bwctl, owamp and NDT?
+  * Aaron: Can't get rid of NDT, but maybe owamp and bwctl
+  * Dan: From new user perspective 
+  * Jason and Andy both think we can get rid of bwctl and owamp lists since same people
+  * Jason thinks we should not just auto-add from previous development lists. Reset and let people re-join. Maybe rename to perfsonar-development or something so its completely new. 
+  
 == Future Agenda Topics ==
 
 TBD
