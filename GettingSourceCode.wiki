@@ -1,0 +1,17 @@
+#Getting Source Code
+
+The perfSONAR-PS project consists of multiple components spread across multiple source code repositories. 
+This page captures the locations of those repositories and relevant information for obtaining copies of the source code.
+
+= Source Code Locations =
+
+|| *Name* || *Repository Type* || *Checkout Command* || *Description* ||
+|| perfSONAR-PS || git || git clone https://code.google.com/p/perfsonar-ps/|| The primary source repository for the perfSONAR-PS project. It contains various components such as GUIs, MeshConfig software, LSRegistrationDaemon, Nagios checks and other various components. ||
+|| BWCTL || subversion || svn co https://svn.internet2.edu/svn/bwctl/|| The source repository for the BWCTL tool. BWCTL schedules numerous network tools such as iperf, iperf3, traceroute, ping and others.  ||
+|| MaDDash || subversion || svn co http://esnet-perfsonar.googlecode.com/svn/trunk/maddash || The Monitoring and Debugging Dashboard (MaDDash) code that provides a "dashboard" to display measurement results. The backend job scheduler and the web interface are both found in this repository. ||
+|| Network Diagnosic Tool (NDT) || subversion || svn co http://ndt.googlecode.com/svn/ || The Network Diagnostic Tool (NDT) code that provides simple-to-use GUI-based and command-line tests for obtaining common network metrics. ||
+|| OWAMP || subversion || || The source code for the OWAMP tool that measures one-way delay and loss. ||
+|| Simple Lookup Service (sLS) || subversion || svn co http://simple-lookup-service.googlecode.com/svn/ || The source code for the Simple Lookup Service (sLS). It has the ability to store and retrieve simple records via a REST API. This includes things like descriptions of perfSONAR services and the hosts on which they run.||
+|| Toolkit Building || subversion ||svn co https://svn.internet2.edu/svn/nptoolkit|| Code to build the LiveCD and NetInstall ISO images of the perfSONAR-PS Toolkit.  ||
+|| Yum Repository || subversion || svn co https://cvs3.internet2.edu/svn/software || The Internet2 hosted yum repository containing RPMs of perfSONAR-PS, BWCTL, OWAMP and most of the other packages listed on this page. ||
+|| Yum Repository (Web100 Kernel) || subversion || svn co https://cvs3.internet2.edu/svn/web100_kernel || The Internet2 hosted yum repository containing RPMs for the Web100 kernel ||
