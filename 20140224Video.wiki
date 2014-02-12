@@ -19,7 +19,7 @@ TBD
    * Jason
    * Eric
  * Git Conversion Updates
- * NTP Security Response Update 
+ * NTP Security Response Update & General Discussion on Nimble Responses
  * email list consolidation update
 
 == Notes ==
