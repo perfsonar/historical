@@ -12,17 +12,16 @@ To build this kernel, you will need a host with CentOS 6, and the 'rpm-build' pa
 ==== Preparing The Kernel Source ====
   * Download the most recent kernel Source RPM for CentOS 6
     * Try http://vault.centos.org
-  * Install the kernel source RPM (eg. `rpm -ivh kernel-2.6.32-279.2.1.el6.src.rpm`). This should install files into your RPM build directory (typically /usr/src/redhat if root)
-  * Download web100_changes.patch from [https://perfsonar-ps.googlecode.com/git/Toolkit_Building/software/kernel/web100_changes.patch] to the `SOURCES` directory in your RPM build directory (the same directory where the kernel sources are stored)
-  * Change your working directory to `SOURCES` in your RPM build directory
+  * Unpack the kernel source RPM (eg. `rpm -ivh kernel-2.6.32-279.2.1.el6.src.rpm`) by doing:
+    * rpm2cpio kernel-2.6.32-279.2.1.el6.src.rpm | cpio -id
+    * This will unpack the kernel source RPM into the same directory you are in
+  * Download web100_changes.patch from [https://perfsonar-ps.googlecode.com/git/Toolkit_Building/software/kernel/web100_changes.patch] to the same directory where the kernel sources were unpacked.
   * Apply the patch with "patch -i web100_changes.patch -p1". This will likely leave a few .rej files around. You will need to edit those files, and manually apply the changes.
 
 ==== Building The Kernel ====
-  * To build the kernel SRPM run: `rpmbuild -bs kernel.spec 2> build-err.log | tee build-out.log`
-    * Note: the above command will put error messages into the file `build-err.log`
-  * Change your working directory to `SRPMS` in your RPM build directory
-  * If the above commands were executed properly you should see a kernel SRPM file
-   * If not look through the log files to determine what went wrong
+  * To build the kernel SRPM run: `rpmbuild --define "_sourcedir ." --define "_srcrpmdir ." --nodeps -bs *spec`
+  * If the above commands executed properly you should see a kernel SRPM file
+   * If not look through the output to determine what went wrong
   * To build the kernel run mock:
    * *x86_64:* mock -r epel-6-x86_64 --resultdir=$HOME/mock-results/epel-6-x86_64/ --arch=x86_64 --without=debug --without=kabichk ~/rpmbuild/SRPMS/kernel-2.6.32-431.3.1.el6.aufs.web100.src.rpm
    * *i386:* mock -r epel-6-i386 --resultdir=$HOME/mock-results/epel-6-i386 --arch=i386 --target=i686 --without=debug --without=kabichk ~/rpmbuild/SRPMS/kernel-2.6.32-431.1.2.0.1.el6.aufs.web100.src.rpm
