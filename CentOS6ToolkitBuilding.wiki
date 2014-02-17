@@ -68,6 +68,8 @@ can copy the kernel RPMs in, and then do this:
 createrepo -u /home/mock/holding/epel-6/i386
 createrepo -u /home/mock/holding/epel-6/x86_64
 
+For more details about mock, see [ToolkitDevelopment_MockOverview this page].
+
 === Generating Random Bytes ===
 When compiling on a remote host, it is common to see an error like this:
 
