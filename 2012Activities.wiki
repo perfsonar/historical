@@ -1,0 +1,1343 @@
+#summary List of perfSONAR-PS Activites from 2012
+
+== 2012 Activities ==
+
+  * [2012Activities#20120109Video January 9, 2012 Conference Call]
+  * [2012Activities#20120130Video January 30, 2012 Conference Call]
+  * [2012Activities#20120206Video Feb 06, 2012 Conference Call]
+  * [2012Activities#20120213Video Feb 13, 2012 Conference Call]
+  * [2012Activities#20120227Video Feb 27, 2012 Conference Call]
+  * [2012Activities#20120326Video Mar 26, 2012 Conference Call]
+  * [2012Activities#20120402Video Apr 2, 2012 Conference Call]
+  * [2012Activities#20120409Video Apr 9, 2012 Conference Call]
+  * [2012Activities#20120416Video Apr 16, 2012 Conference Call]
+  * [2012Activities#20120430Video Apr 30, 2012 Conference Call]
+  * [2012Activities#20120507Video May 7, 2012 Conference Call]
+  * [2012Activities#20120512Video Mar 12, 2012 Conference Call]
+  * [2012Activities#20120521Video May 21, 2012 Conference Call]
+  * [2012Activities#20120604Video June 4, 2012 Conference Call]
+  * [2012Activities#20120611Video June 11, 2012 Conference Call]
+  * [2012Activities#20120625Video June 25, 2012 Conference Call]
+  * [2012Activities#20120702Video July 2, 2012 Conference Call]
+  * [2012Activities#20120723Video July 23, 2012 Conference Call]
+  * [2012Activities#20120827Video August 27, 2012 Conference Call]
+  * [2012Activities#20120917Video September 17, 2012 Conference Call]
+  * [2012Activities#20120924Video September 24, 2012 Conference Call]
+  * [2012Activities#20121008Video October 08, 2012 Conference Call]
+  * [2012Activities#20121015Video October 15, 2012 Conference Call]
+  * [2012Activities#20121022Video October 22, 2012 Conference Call]
+  * [2012Activities#20121029Video October 29, 2012 Conference Call]
+  * [2012Activities#20121119Video November 19, 2012 Conference Call]
+  * [2012Activities#20121203Video December 3, 2012 Conference Call]
+  * [2012Activities#20121210Video December 10, 2012 Conference Call]
+  * [2012Activities#20121217Video December 17, 2012 Conference Call]
+  * [2012Activities#2012DevelopmentIdeasBrainstorm DevelopmentIdeasBrainstorm]
+  * [2012Activities#2012TaskPlanning 2012TaskPlanning]
+
+=== 20120109Video ===
+
+  * Attendees: Andy, Nils, Aaron, Jeff
+     * Excused: 
+  * Discussed following actions from December roadmap discussion.
+     * Andy and Nils will look through existing 'issues' and determine how they fit into the actions/priorities discussed at that meeting.
+  * Next call will be the Monday after Jt Techs - Dec 30.
+==== Actions  ====
+     * Short Term
+        * *_ACTION_*: Andy and Nils will look through existing 'issues' and determine how they fit into the actions/priorities discussed at that meeting.
+        * *_ACTION_*: Jeff/Brian will arrange for a discussion with past contributors to try and determine how to get their contributions added back into the base of the project.
+        * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
+        * *_ACTION_*: Andy will talk with Atlas to discuss improving test/release process.
+        * *_ACTION_*: Jeff will get feedback from university constituents for brainstorming effort. (Perhaps from the IU NOC.)
+        * *_ACTION_*: Joe and/or Brian will get feedback from a lab constituent for brainstorming effort. (Perhaps from Eli.)
+
+=== 20120130Video === 
+
+  * Attendees: 
+     * Excused: 
+==== Follow-up on Actions  ====
+     * Short Term
+        * *_ACTION_*: Andy and Nils will look through existing 'issues' and determine how they fit into the actions/priorities discussed at that meeting.
+        * *_ACTION_*: Jeff/Brian will arrange for a discussion with past contributors to try and determine how to get their contributions added back into the base of the project.
+        * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
+        * *_ACTION_*: Andy will talk with Atlas to discuss improving test/release process.
+        * *_ACTION_*: Jeff will get feedback from university constituents for brainstorming effort. (Perhaps from the IU NOC.)
+        * *_ACTION_*: Joe and/or Brian will get feedback from a lab constituent for brainstorming effort. (Perhaps from Eli.)
+
+=== 20120206Video ===
+
+  * Attendees: Brian, Jeff, Andy, Sowmya, Nils, Aaron
+     * Excused: 
+
+==== Follow-up on Actions  ====
+     * New Items
+        *  Andy tagged several items for bug fix release 3.2.2, and assigned owners to tasks. Goal it to complete these by Feb 27
+        * Everyone to look at the "Requirements" that Aaron added to the use case document, and think about performance requirements.
+        * Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
+
+     * Previous Items
+        * *_ACTION_*: Jeff/Brian will arrange for a discussion with past contributors to try and determine how to get their contributions added back into the base of the project.
+        * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
+        * *_ACTION_*: Andy will talk with Atlas to discuss improving test/release process.
+        * *_ACTION_*: Jeff will get feedback from university constituents for brainstorming effort. (Perhaps from the IU NOC.)
+        * *_ACTION_*: Joe and/or Brian will get feedback from a lab constituent for brainstorming effort. (Perhaps from Eli.)
+
+=== 20120213Video ===
+
+  * Attendees:
+     * Excused: 
+
+==== Follow-up on Actions  ====
+     * Previous Items
+        *  *_ACTION_*: Andy tagged several items for bug fix release 3.2.2, and assigned owners to tasks. Goal it to complete these by Feb 27
+        * *_ACTION_*: Everyone to look at the "Requirements" that Aaron added to the use case document, and think about performance requirements.
+        * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
+        * *_ACTION_*: Jeff/Brian will arrange for a discussion with past contributors to try and determine how to get their contributions added back into the base of the project.
+        * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
+        * *_ACTION_*: Andy will talk with Atlas to discuss improving test/release process.
+     * Long Term
+        *
+==== Agenda Topics ====
+  * Review LS Use Cases
+    * Kavitha will review for completeness.
+  * Discuss next steps for documenting road-map
+==== Actions  ====
+     * Short Term
+        *  *_ACTION_*: Andy tagged several items for bug fix release 3.2.2, and assigned owners to tasks. Goal it to complete these by Feb 27
+        * *_ACTION_*: Everyone to look at the "Requirements" that Aaron added to the use case document, and think about performance requirements.
+        * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
+        * *_ACTION_*: Jeff will respond to the Atlas reqeusts for features.
+        * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
+        * *_ACTION_*: Andy will setup a meeting with Atlas (Brian and Jeff) to discuss improving test/release process.
+        * *_ACTION_*: Discuss next steps for documenting road-map
+
+=== 20120227Video ===
+
+  * Attendees: Sowmya, 
+     * Excused: 
+
+==== Follow-up on Actions  ====
+     * Previous Items
+        *  *_ACTION_*: Andy tagged several items for bug fix release 3.2.2, and assigned owners to tasks. Goal it to complete these by Feb 27
+        * *_ACTION_*: Everyone to look at the "Requirements" that Aaron added to the use case document, and think about performance requirements.
+        * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
+        * *_ACTION_*: Jeff will respond to the Atlas reqeusts for features.
+        * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
+        * *_ACTION_*: Andy will setup a meeting with Atlas (Brian and Jeff) to discuss improving test/release process.
+        * *_ACTION_*: Kavitha will review LS Use Case doc for completeness.
+     * Long Term
+        *
+==== Agenda Topics ====
+  * Discuss pending bug-fix release.
+==== Future Agenda Topics ====
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+==== Actions  ====
+     * Short Term
+==== Actions  ====
+     * Long Term
+        *
+
+==== Notes ====
+ * 3.2.2:
+  * *ACTION:* Aaron will finish 3.2.2 issues by Wednesday
+  * *ACTION:* Sowmya will create rpms when Aaron's changes are done. 
+  * *ACTION:* Andy will update checklist with some 3.2.2 specific items. Will compare to list Nils already started.
+
+ * OWAMP
+  * Seeing sawtooth pattern to GEANT hosts on some ESnet hosts
+  * Also seeing multiple data points per minute
+  * Internet2 hosts seems to only have data in one direction, but results are flat
+  * *ACTION:* Andy will turn on raw data collection on ESnet to see if that reveals anything
+
+=== 20120326Video ===
+
+  * Attendees: Sowmya, Andy, Aaron, Nils, Kavitha, Jeff
+     * Excused: 
+
+==== Follow-up on Actions  ====
+     * Previous Items
+        * *ACTION:* Andy will turn on raw data collection on ESnet to see if that reveals anything
+          *  *done*
+        * *_ACTION_*: Everyone to look at the "Requirements" that Aaron added to the use case document, and think about performance requirements.
+        * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
+        * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
+        * *_ACTION_*: Andy will setup a meeting with Atlas (Brian and Jeff) to discuss improving test/release process.
+          *  *done*
+        * *_ACTION_*: Kavitha will review LS Use Case doc for completeness.
+          *  *done*
+==== Agenda Topics ====
+  * Discuss pending bug-fix release.
+        * Waiting for -4/-6 flags for owamp/bwctl. Should be done today.
+        * Will cut release once that is ready, then will do a round of internal testing (Andy/Sowmya/Nils).
+  * Security review from NLM etc...
+        * Ask them to test against new release to see how many of the issues still exist.
+  * Geant interoperability
+        * Nils will think about places we might install HADES.
+==== Future Agenda Topics ====
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+==== Actions  ====
+     * Short Term
+        * *_ACTION_*: Everyone to look at the "Requirements" that Aaron added to the use case document, and think about performance requirements.
+        * *ACTION:* Andy will add a release/testing process doc on the wiki to outline steps and reference the testing checklist
+        * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
+
+=== 20120402Video ===
+
+  * Attendees: Brian, Andy, Sowmya, Aaron, Nils, Kavitha, Jeff
+==== Follow-up on Actions  ====
+     * Previous Items
+        * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
+        * *_ACTION_*: When release is ready, Andy will ask NLM to run security scan tests against it.
+==== Agenda Topics ====
+  * Discuss pending bug-fix release.
+    * New iso's available for testing now.
+    * Will send out a wider request for testers end of week.
+  * Geant interoperability (Any update?)
+==== Future Agenda Topics ====
+  * Working on a dashboard app (virtual org tool)
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+==== Actions  ====
+        * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
+        * *_ACTION_*: When release is ready, Andy will ask NLM to run security scan tests against it.
+
+=== 20120409Video ===
+
+  * Attendees: Brian, Andy, Sowmya, Nils, Kavitha, Jeff
+     * Excused: 
+==== Follow-up on Actions  ====
+     * Previous Items
+        * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
+        * *_ACTION_*: When release is ready, Andy will ask NLM to run security scan tests against it.
+==== Agenda Topics ====
+  * Discuss pending bug-fix release
+    - Latest RC is cut and now in testing. Andy will send out to external testers.
+    * Testing results - asking for feedback by friday.
+  * Update on dashboard app (virtual org tool)
+    * Nice start. Will keep looking for ways.
+  * Geant interoperability (Any update?)
+    * no update
+==== Future Agenda Topics ====
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+
+=== 20120416Video ===
+
+  * Attendees: Aaron, Nils, Kavitha, Brian, Andy, Sowmya, Jeff
+     * Excused: 
+==== Follow-up on Actions  ====
+     * Previous Items
+        * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
+        * *_ACTION_*: When release is ready, Andy will ask NLM to run security scan tests against it.
+            * done. Have not looked through results yet.
+==== Agenda Topics ====
+  * Discuss pending bug-fix release
+    * Pushed out the RC. Two major issues: 1) liveCD: upgrade removed all tests that are hostnames from the owmesh.conf file. (Phillipe reported.) 2) Root unavailable - Likely bad burn of CD but following up.
+  * Update on ATLAS dashboard app
+    * Will try and be compatible at the API level.
+    * We should just keep in touch and followup periodically.
+  * Geant interoperability (Any update?)
+    * May meet next week to advance Surfnet testing.
+  * SMM
+    * May show dashboard.
+==== Future Agenda Topics ====
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+
+=== 20120430Video ===
+
+  * Attendees: Nils, Kavitha, Andy, Sowmya, Jeff
+     * Excused: 
+==== Follow-up on Actions  ====
+     * Previous Items
+        * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
+        * *_ACTION_*: Andy will look through NLM scan results to capture any outstanding issuses.
+            * Done - nothing new
+==== Agenda Topics ====
+  * Discuss current release
+        * Release happened just before SMM. Only glitch was kernel upgrade just after.
+        * *_ACTION_*: Nils will work on ... LS reporting of sites.
+  * Geant interoperability (Any update?)
+  * SMM (update)
+    * Announced software releases in perf-wg
+==== Future Agenda Topics ====
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+
+=== 20120507Video ===
+
+  * Attendees: Aaron, Nils, Andy, Sowmya, Brian, Jeff
+     * Excused: Kavitha
+==== Follow-up on Actions  ====
+     * Previous Items
+        * *_ACTION_*: Nils will work on ... LS reporting of sites.
+==== Agenda Topics ====
+  * Discuss current release
+    * Kernel update process (nagios alarm? can we improve process?)
+  * LS Planning Meeting
+    * Thursday 5/17 2-5
+  * SMM (update)
+    * Interest in Mesh Configuration
+        * Aaron working on high-level solutions
+==== Future Agenda Topics ====
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+  * Geant interoperability (Any update?)
+==== Actions  ====
+    * *_ACTION_*: Jeff/Brian will work on redesigning pS-PS web presence.
+    * *_ACTION_*: Aaron will attempt to get the preview LiveCD kernel we used working for the latest release.
+    * *_ACTION_*: Sowmya will send out LS overview by Friday for next week discussion.
+    * *_ACTION_*: Nils will estimate how much effort CentOS 6 DBXML will be.
+
+=== 20120512Video ===
+
+  * Attendees: Brian, Andy, Sowmya, Nils, Aaron, Kavitha, Jeff
+     * Excused: 
+
+==== Follow-up on Actions  ====
+     * Previous Items
+        *  *_ACTION_*: Andy tagged several items for bug fix release 3.2.2, and assigned owners to tasks. Goal it to complete these by Feb 27
+           *done*
+        * *_ACTION_*: Everyone to look at the "Requirements" that Aaron added to the use case document, and think about performance requirements. (Waiting for input from Matt and Tom.)
+        * *_ACTION_*: Jeff to start document with new structure for web site that focuses on support of data intensive virtual science communities. Brian will then make a pass too.
+        * *_ACTION_*: Jeff will respond to the Atlas reqeusts for features.
+           *done*
+        * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
+           *done*
+        * *_ACTION_*: Andy will setup a meeting with Atlas (Brian and Jeff) to discuss improving test/release process.
+           *done*
+        * *_ACTION_*: Kavitha will review LS Use Case doc for completeness.
+           *done*
+        * *_ACTION_*: Aaron will finish 3.2.2 issues by Wednesday
+           *done*
+        * *_ACTION_*: Sowmya will create rpms when Aaron's changes are done. 
+           *done*
+        * *_ACTION_*: Andy will update checklist with some 3.2.2 specific items. Will compare to list Nils already started.
+        * *_ACTION_*: OWAMP sawtooth issue: Andy will turn on raw data collection on ESnet to see if that reveals anything
+          * Partial fix - patch for pS-B for full data selection.
+          * Still finding loss with Geant interaction. Will look at Hades code and try and get a toolkit installed somewhere on Amsterdam side.
+     * Long Term
+        *
+==== Agenda Topics ====
+  * Licensing
+     * Brian, Jeff and all good with all new releases using Apache 2.0 license. This will allow releases to be put in debian and other software release mirrors.
+  * Discuss pending bug-fix release.
+     * Andy is looking for testers.
+     * Andy is working down the checklist.
+==== Future Agenda Topics ====
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+==== Actions  ====
+        * *_ACTION_*: Andy will update checklist with some 3.2.2 specific items. Will compare to list Nils already started.
+        * *_ACTION_*: Brian will see if SURFnet is willing to put up a toolkit host.
+        * *_ACTION_*: Aaron will modify pS-PS/owamp/bwctl license.
+        * *_ACTION_*: Jeff will add -4/-6 flags to owamp/bwctl
+
+=== 20120521Video ===
+
+  * Attendees: 
+     * Excused: 
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Jeff/Brian will work on redesigning pS-PS web presence.
+    * *_ACTION_*: Aaron will attempt to get the preview LiveCD kernel we used working for the latest release.
+    * *_ACTION_*: Sowmya will send out LS overview by Friday for next week discussion.
+    * *_ACTION_*: Nils will estimate how much effort CentOS 6 DBXML will be.
+==== Agenda Topics ====
+==== Future Agenda Topics ====
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+  * Geant interoperability (Any update?)
+
+=== 20120604Video ===
+
+  * Attendees: Andrew, Andy, Brian, Warren, Sowmya, Aaron, Kavitha, Jeff, John
+     * Excused: 
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Jeff/Brian will work on redesigning pS-PS web presence.
+      * Brian started and checked in some things, Jeff will review and add.
+    * *_ACTION_*: Aaron will attempt to get the preview LiveCD kernel we used working for the latest release.
+      * 
+    * *_ACTION_*: Sowmya will send out LS overview by Friday for next week discussion.
+    * *_ACTION_*: Nils will estimate how much effort CentOS 6 DBXML will be.
+==== Agenda Topics ====
+  * LS status
+    * Review thread with brazillian develpers.
+  * Mesh Config
+    * Lotsa discussion. Andy will contact Aaron about how to implement a sparse host grouping definition.
+==== Future Agenda Topics ====
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+  * Geant interoperability (Any update?)
+==== Actions  ====
+    * *_ACTION_*: Jeff/Brian will continue to work on redesigning pS-PS web presence.
+
+=== 20120611Video ===
+
+  * Attendees: Andy, Kavitha, Aaron, Jeff, Sowmya, Warren, Andrew
+     * Excused: 
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Jeff/Brian will continue to work on redesigning pS-PS web presence.
+==== Agenda Topics ====
+  * Andy: Updated liveCD. (Patches from Carl) Looking at Aaron's config stuff.
+  * Kavitha: Waiting for feedback on NDT updates.
+  * Aaron: Working on mesh-config stuff. Waiting for feedback from Andy and Jimmy(NYU).
+  * Sowmya: Working on LS prototype. Implementing query features. Interacting with Brazillians.
+  * Warren: Hired to implement algorithms from Constantine. Looking for problem detection in delay data.
+  * Andrew: Working on CentOS 6 upgrade for toolkit.
+==== Future Agenda Topics ====
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+  * Geant interoperability (Any update?)
+==== Actions  ====
+    * *_ACTION_*: Jeff/Brian will continue to work on redesigning pS-PS web presence.
+
+=== 20120625Video ===
+
+  * Attendees: Andy, Sowmya, Andrew, Warren, Brian
+     * Excused: Aaron
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Jeff/Brian will continue to work on redesigning pS-PS web presence.
+==== Agenda Topics ====
+  * Andy: 
+    * Packaged up rc of dashboard code as rpm and put in yum repo
+    * Currently being tested a few places.
+  * Sowmya: 
+    * Working on LS. The main thing is to get meta-characters working on search. 
+    * After that, plan to deploy on real host and do some more performance testing
+  * Andrew:
+    * Working on getting CentOS 6 packages built 
+  * Brian
+    * On vacation, but would be nice to have a face-to-face meeting at JointTechs if possible
+  * Warren: 
+    * Working through issue with OWAMP timestamps
+    * Andy: Suspect its an issue with the perl script that formats the time. Will look closer at it.
+    * Warren will be at ESCC but not JT starting Wednesday.
+
+==== Future Agenda Topics ====
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+  * Geant interoperability (Any update?)
+==== Actions  ====
+    * *_ACTION_*: Jeff/Brian will continue to work on redesigning pS-PS web presence.
+
+=== 20120702Video ===
+
+  * Attendees: Andy, Andrew, Warren, Nils, Aaron
+     * Excused: 
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Jeff/Brian will continue to work on redesigning pS-PS web presence.
+==== Agenda Topics ====
+  * Developer Updates
+   * Andy
+    * Worked on OWAMP issue with Warren
+    * Packaged up dashboard s RPM and got it to a tester
+   * Warren
+    * Worked with Andy on OWAMP issue
+    * Look at results of issue and try to narrow
+    * Involved in group call CyberSKAR at University of Calgary, and helping them deploy perfSONAR
+    * Their environment requires a maven plug-in. Andy is going to send java client used in OSCARS. May or may not be useful 
+   * Andrew
+    * Working on building livecd. Has kernel and perfSONAR packages built, aufs is the only package giving trouble right now. Its poorly maintained.
+    * Aaron suggested looking at another solution. Any overlay package should be fine
+    * Andrew said he is close, but if problem persists he may look at something else
+  * Nils
+   * Working on tool to analyze lookup service registrations.
+ * Aaron
+   * Working on mesh configuration
+   * Andy has done testing in generating configs with all ESnet hosts
+   * NYU is also testing right now
+   * Working on GUI to configure it
+   * Warren has offered to help test.
+
+
+==== Future Agenda Topics ====
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+  * Geant interoperability (Any update?)
+==== Actions  ====
+    * *_ACTION_*: Jeff/Brian will continue to work on redesigning pS-PS web presence.
+
+=== 20120723Video ===
+
+  * Attendees: Sowmya, Andy, Nils, Kavitha, Aaron
+     * Excused: 
+
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Jeff/Brian will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+    * Andy: had a couple conversations at JTs. Web10g guys are interested in converting NPAD to web10g. Unstated 'interest' in converting NDT to web10g. May be funding opportunities for converting NDT from NSF. Andrew (intern) may build a version of the toolkit with web10g. Talked about deployment of pS in OSG. They want to do a fairly large deployment. They're interested in central configuration and dashboard stuff. They may write some software to collect data from the MAs. Cleaning up the dashboard. Have an RPM that I gave to NCAR, and install went smooth. Need to fix up some visual things, and then I might send an email out to let folks try it. Doesn't ahve protocol stuff that I've worked on with ATLAS. Talked with Shawn about it, and he's okay with me cutting something.
+    * Sowmya: Was at JTs. Presented the LS at perfWG. Presentation went well. Ken Miller from PSU volunteered to test it. Gave brief description at lightning talk. Couple of people were interested in looking at design. Currently, focusing on packaging, logging and testing.
+    * Nils: Working on mining the lookup service. Next step is to put together a report builder.
+    * Aaron: 
+
+  * Next Release
+    * No one has any clue on the timeline
+    * Andy wants Mesh Configuration stuff in the toolkit for ATLAS/OSG
+    * CentOS 6
+      * transition plan
+    * LS upgrade
+      * transition plan
+    * Tentative plan: look into whether a mesh configuration release before SC is feasible. Hold off on planned CentOS 6 or New LS releases until next year.
+
+==== Future Agenda Topics ====
+  * Review LS update action plan
+    * Use Case Review
+    * Enumeration options
+  * Roadmap
+  * Geant interoperability (Any update?)
+==== Actions  ====
+    * *_ACTION_*: Jeff/Brian will continue to work on redesigning pS-PS web presence.
+
+=== 20120827Video === 
+
+  * Attendees: Chris Rapier, Andrew Sides, Warren Mathews, Brian Tierney, Sowmya Balasubramanian, Aaron Brown, Nils Jacobson, Andy Lake
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+    * Andy: 
+    * Sowmya: 
+    * Brian:
+    * Nils:  
+    * Aaron: 
+    * Warren
+  * Web10G Discussion (rough agenda, very open to change)
+   * Brief status update of projects
+   * Collaboration areas
+    * Web10G version of the toolkit?
+    * What to do about NDT/NPAD?
+   
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+
+ * pSB MA key issues
+  * User noticed order of keys when passed to graph, the shape of the graph changed
+  * Have multiple keys for same data because host and IP changed
+  * Tried putting sleep between requests, didn't change anything.
+  * Compared subjects of request but didn't compare entire request. We should do this to see if we can at least generate reproducibility.
+ * Web10G
+  * Follow-on to web100, a number of performance improvements, better metrics, and renewed effort to get into mainline kernel. Adding metrics for new congestion control algorithms.
+  * More info at http://web10g.org
+  * Hope to have a realtime tcptrace graphic tool by I2 member meeting. 
+  * NDT and NPAD (or some equivalent) needs to work with Web10G for toolkit
+  * Chris has started looking at NPAD locally, but very complex and uses multiple languages.
+  * Chris is thinking about reviewing NDT to just identify the challenges. From what he knows already, a lot of the variable names changed.
+  * ESnet has a contractor who will be working on Web10G support for iperf3 and bwctl support for iperf3
+  * Brian will put contractor in touch with Web!)G so he can stay up-to-date on latest codebase.
+  * Currently backporting patches to kernel
+  * Web10G Developer's workshop at next JointTechs. It would be good to have someone from pS-pS to talk about work, especially if there is a new iperf tool. 
+  * CentOS 6 kernel is important to pS-PS team
+  * Next version of Web10G lib should be out at end of this week
+ * Developer Updates
+    * Andy: 
+     * Went to OSG meeting in Madison last week. 
+     * NPAD was found to be eating a bunch of memory on a bunch of boxes. Likely the result of a bad interaction with a scan-bot/web-bot.  Need more data a only had one set of logs since NPAD clears log on restart. May just do regular restarts.
+     * Brian: Should have meeting to discuss LS migration. Clear from ATLAS/OSG meeting they really want a new LS.
+    * Andrew:
+     * Working on make_path issue in toolkit configure script
+     * Want to do a little more testing with Andy, will then make el6 and ISOs available
+    * Sowmya: 
+     * pSB bug (see above)
+     * Integrating Quartz into LS to do thread scheduling
+     * Working on pub/sub interface
+    * Brian
+     * Items addressed above
+    * Nils: 
+     * Testing Aaron's mesh config 
+     * Continuing work on LS config. Adding count by countries. 
+    * Aaron: 
+     * Items addressed above
+    * Warren
+     * Has been implementing data prediction algorithms. Team will have something packaged soon for testing.
+     * Doing some work in getting perfSONAR to Square Kilometer Array (SKA). Deployed maddash into their portal. The server is currently running on Warren's machine, would like to move it on SKA machine. 
+     * Will look into getting a URL where can see current dashboard and also list of SKA sites if they have public pSB measurement archives.
+
+=== 20120917Video === 
+
+  * Attendees: 
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+    * Andy: 
+    * Sowmya: 
+    * Brian:
+    * Nils:  
+    * Aaron: 
+    * Warren
+  * Manual hostname specification on the toolkit 
+  * Lookup Service transition plan
+   * https://docs.google.com/document/d/1WTarLzv2a_pNtFLySr3V2LOTtoEBYewvsISnMXFdTEw/edit 
+ * NPAD issue
+
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+ * Developer Updates
+  * Andy: 
+   * Working on going through issues, probably talk about those more next week
+   * No issues with mesh config stuff
+    * Needs to ability to write to all the files that got written during the config update process
+  * Aaron: 
+   * Has a Ruby on Rails Google Map of all the perfSONAR services using the data that Nils wrote
+   * Main use is from marketing perspective, but could do some things with find closest point
+  * Sowmya: 
+   * Working on lookup service subscribe API
+  * Andrew:
+   * Working on CentOS 6 toolkit alpha or beta release 
+   * Started looking at using koji build system. Looks like it will be useful. Evaluating what resources we will need to deploy. 
+  * Brian:
+   * BWCTL/iperf3 almost working and almos already for testing
+  * Kavitha:  
+   * Working on NDT fixing bugs and adding some print pages.
+   * Will also have new RPM 
+  * Manual hostname specification on the toolkit 
+   * Action Andy: Add FAQ about this 
+ * Lookup Service transition plan
+  * https://docs.google.com/document/d/1WTarLzv2a_pNtFLySr3V2LOTtoEBYewvsISnMXFdTEw/edit 
+  * *Action:* Brian will send currents set of docs to perfsonar-dev@perfsonar.net
+ * NPAD issue
+  * We'll keep tracking it in issue tracker.  
+
+
+=== 20120924Video === 
+
+  * Attendees: 
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+    * Andy: 
+    * Sowmya: 
+    * Brian:
+    * Nils:  
+    * Aaron: 
+    * Warren
+    * Andrew:
+  * 3.3. Issues and Assignments
+
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+ * Developer Updates
+    * Andy: 
+     * Went through issues with Aaron and Brian.
+     * Current POW, has been relatively quiet so far
+    * Sowmya: 
+     * Working on perfSONAR client design for lookup service
+     * Looking at issues assigned to her in issue tracker
+    * Brian:
+     * No updates
+    * Andrew:
+     * Working on CentOS 6 distro, sent to list for testing
+     * Looking at upgrade scripts for CentOS 6
+    * Aaron: 
+     * Working on LS map and getting it deployed
+    * Nils:  
+     * Did some work on mesh config tool to get IPv6 address to work in maddash file
+     * Cleaned up some thing on LS report
+    * Kavitha:
+     * Should have rc2 of NDT out later today    
+  * 3.3. Issues and Assignments
+   * Assigned Sowmya 654 and 655
+   * Assigned Andy to 653 to add Jason's patch
+
+=== 20121008Video === 
+
+  * Attendees: Sowmya, Andy, Andrew, Aaron, Nils, Warren, Kavitha
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+    * Aaron: 
+     * Working on mesh configuration stuff 
+     * Working on making it live nicely with current Toolkit GUIs. Got it partially working, needs some more testing.
+     * Andy: Esnet has mesh config deployed, working well
+    * Nils:
+      * Fixed some small bugs that were assigned to him
+      * Working currently on figuring out if dojo can be updated
+      * Did some testing with NDT, and it worked
+    * Kavitha: 
+     *  Fixed some bugs on NDT
+    * Sowmya: 
+      * No updates, on travel last week 
+    * Warren:  
+     * Not much to report. Been working on detection code. 
+    * Andrew:
+      * LiveUSB is working with the overlay file system. John Bigrow is testing it now.
+      * Built some new ISOs for LiveCD and NetInstall
+      * Working through some of the issues on the new issue.
+      * Working on patching NPAD to fix URL on web page after install.
+    * Andy:
+     * Built new kernels, uploaded right before call. Will try some installs and updates, then announce. 
+     * Talking to USATLAS about using MaDDash
+     * Working on ESnet pt transition to Linux
+  * TBD
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+
+=== 20121015Video === 
+
+  * Attendees: Aaron Brown, Eric Pouyoul, Sowmya Balasubramanian, Brian Tierney, Andy Lake, Nils Jacobson, Kavitha Kumar, Andrew Sides,
+
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * discussion with web10G developers
+  * Developer Updates
+    * Sowmya: 
+    * Aaron: 
+    * Andrew:
+    * Andy:
+    * Brian
+    * Nils:
+    * Kavitha:
+  * Lookup Service Fields
+
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+ * discussion with web10G developers
+  * John: Looking at NDT code, he thinks it would be more straight-forward than NPAD. Team still looking at NPAD.
+   * John: API should be frozen at the end of October, so people can use it. Shooting for Web10G on the next version of the toolkit. 
+   * John: Working on back-porting Web10G to CentOS kernel.
+   * John said he is willing to look at NDT and make some initial porting. Aaron said they also have someone at I2 or knows of someone who is interested. 
+   * John said he can outline the steps needed and can workout the resources.
+   * John will give an update next week on call
+ * Developer Updates
+  * Sowmya: 
+   * Working LS subscribe 
+  * Aaron: 
+   * Wrote a little Web GUI for MaDDash that integrates into Toolkit
+    * Not clear we want to add the GUI to the toolkit by default, need to think about it more.
+    * Also need to figure out if we are going to update the directory.cgi. May just point to central location if use Aaron's current work since packaging is hard. No Rails RPM for CentOS 6.
+  * Andrew:
+   * Patched NPAD and cleaned up patching process for the RPM
+   * iperf3 RPM uploaded. We can download and test that. Built for 32 bit and 64bit.
+   * Built 64-bit web100 kernel
+  * Andy:
+   * Working on Linux Conversion, started some issues
+  * Brian
+   * Working with Jason and Aaron to come up with milestone for the next year or two.
+  * Nils:
+   * Working on issues.
+    * Andy and Brian: Will talk to someone at LBL about running Nessus against the toolkit.
+  * Kavitha:
+   * Tested some new patches for NDT
+ * Lookup Service Fields
+  * Complex Types
+   * Aaron sent comments and sated going through those
+   * Aaron: Biggest question is how to handle complex types. For example associating contact information. Proposal for addressing in the document.
+   * Eric: Does it make sense to have a contact type? same question for network elements.
+   * If same information is shared between multiple records, it may make sense to split it out
+   * Splitting up records can make record management easier, but it can make queries trickier
+   * For complex types, going to talk to Martin and Ahmed
+  * Domain field
+   * Aaron: We should restrict to actual DNS domain otherwise we will get all sorts of things
+   * Group agreed
+  * Country
+   * Aaron: Should restrict to ISO 2-letter country code
+  * Service Fields
+   * Remove event types from BWCTL, OWAMP, and other non-Measurement archives   
+   * Proposed making domains not a required field or allowing it to be blank.  
+   * Propose adding version to schema to allow namespaces. Andy argued maybe we don't need it.
+   * Also suggested prepend custom keys with a domain to prevent collisions. Group agreed, should enforce in APIs.
+   * Some of the keys contain name like snmp ma and such which are specific to implementations. 
+    
+=== 20121022Video === 
+
+
+  * Attendees: Brian Tierney, Sowmya Balasubramanian, Aaron Brown, Andy Lake, Kavitha Kumar, Nils Jacobson, Chris Rapier
+
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+    * Sowmya: 
+     * 
+    * Kavitha:
+     * 
+    * Aaron: 
+     * 
+    * Nils:
+     * 
+    * Andy:
+     * 
+    * Chris
+     * 
+    * Brian
+     * 
+
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+ * Developer Updates
+    * Sowmya: 
+     * Started making changes to lookup services 
+    * Kavitha:
+     * No updates
+    * Aaron: 
+     * Fixed a few minor bugs in NDT
+     * Will setup SCinet mesh config and dashboard
+    * Nils:
+     * Fixed some bugs last week in issue tracker
+     * Tested Andrew's ISOs, they worked 
+    * Andy:
+     * Met with Sowmya about lookup service records document
+     * Working through Linux conversion, all PTs done, OWAMP's up next 
+    * Chris
+        * Just about have the CentOS 6 2.6.32 patch ready
+    * Brian
+      * A call last week with Jason, Aaron and Andy to talk about how to organize some perfsonar efforts in the future
+      * Key component is that there will be a research track developed mostly by Martin Swany's team and another group dedicated to moving production track.
+
+=== 20121029Video === 
+
+  * Attendees: Andy, Andrew, Brian, Sowmya, Eric, Kavitha, Aaron 
+
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+    * Andy:
+     * No updates 
+     * Fine with doing OSG presentation
+    * Sowmya: 
+     * Has been working on document
+     * Tried LiveCD with CentOS 6 on ps-lat. It can identify the root drive but on reboot it can't find disk. 
+     * Aaron: Try mounting whatever device it indicates and look for nptools directory.
+    * Kavitha:
+     * Reviewing NDT comments, and will probably build another NDT RPM
+    * Aaron: 
+     * SC starts next week.  
+    * Andrew
+     * Out sick last week
+     * Rebuild LiveCd and LiveUSB. 
+     * Taking crack at building 64-bit RPMS this week.
+   * Eric 
+    * No updates
+   * Brian
+    * No updates
+  * Sowmya's documents
+    * Does domain need to be part of the base?
+     * Eric commented it probably doesn't belong in base which agreed with Aaron's previous comment
+    * Does operator belong in record?
+     * Consensus was it does not. It is part of query language so it is a reserved work, but not a record. 
+    * Do we need event-ype?
+     * Aaron and group agreed that it does not belong and was specific to old representation. 
+   * Is communities perfSONAR specific?
+     * we think it is so we will make it part of that. 
+   *  Aaron asked how the client will know what source and destination the MA uses to refer to the host?
+    * This is really a problem with an MA and can narrow it down once they have the MA list
+  * What address do you register based on location?
+    * How do people know which address to use when choice depends on use case?
+    * Andy suggested rule of thumb where you register only addresses when thy add new info, with preference for hostname. 
+  * Do we need to support subnet operations?
+    * Use cases didn't demonstrate need for it when we evaluated those. Can revisit if we decide we need it.
+    * We will keep the field for now but maybe note exact matches
+  * Need example of getting point-to-point data versus data associated with a single interface.
+  * JSON schema
+   * We don't want server enforcing schema or else every time someone added new fields we would need to update all servers.
+   * Aaron: We have defined things, is there a way we could give clients schema and they could use the schema to validate things returned by the server? Eric thinks that its a good idea.    
+
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+
+=== 20121119Video === 
+
+  * Attendees: Brian, Andy, Andrew, Nils, Aaron, Chris
+
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Web 10G 
+  * Developer Updates
+    * Andy
+    * Sowmya 
+    * Kavitha
+    * Aaron
+    * Andrew
+    * Brian
+  * Release status
+
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Web 10G 
+    * Next Monday can give you an RPM of the kernel to try with toolkit. Stats seem accurate, things look pretty good
+    * After that, looking at porting issues for NDT. Shouldn't be too bad. 
+    * 32-bit and 64-bit version available
+    * Andrew will take first crack at trying it
+  * SCinet lesson learned
+    * perfSONAR stuff went pretty smoothly
+    * MaDDash generator bug fixed
+    * Changed OWAMP subsession from 1 minute to 5 minutes. Wondering if we should do this for general release?
+     * Issue was disk write issue most likely. RAID couldn't keep up with write speed. 
+     * Potentially could make graphs a bit more confusing
+     * Would be less data to deal with, but may be better off dealing with new MA
+    * When do we want to release mesh stuff?
+     * Planning to do it with rest of stuff
+     * Needs to finish documentation
+    * MaDDash changes
+     * Added options so could add custom label for hosts 
+    * Multi-homed bwctl host
+     * Used scripts from Dave Lesny that replace iperf command with shell script that setup routes
+     * Might be useful if we can generalize
+     * Adding pre- and post- hooks to bwctl and owamp might help this situation (already has post)
+  * Release status
+   * Would like to do something in mid-December
+   * Roughly half issues are fixed.
+   * Would like to do 32 bit and 64 bit versions
+   * Will start doing issue review at meetings
+  * No meeting next Monday
+
+=== 20121203Video === 
+
+  * Attendees: Andy, Sowmya, Brian, Nils, Kavitha, Aaron, Warren
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+    * Andy
+    * Sowmya 
+    * Kavitha
+    * Aaron
+    * Andrew
+    * Brian
+    * Warren
+  * Kernel updates and announcements
+  * Release status
+
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Warren Pythia Status
+    * Work doing prediction algorithms
+    * Gathers incoming OWAMP data and traceroute data and does analysis
+    * Three RPMs:
+        * Modified owstats
+        * Agent
+    * Would like ESnet to deploy, but hosts aren't on Linux yet
+    * Currently agent not in repo, may want different license
+    * Need to look at owstats and getting it into repo
+    * Working on a better front-end
+    * Warren's student may contact Andy before next week
+  * Developer Updates
+    * Andy
+      * Worked on adding new meshes to dashboard
+      * Worked on OWAMP issues
+      * Starting to look at getting traceroute GUI on toolkit
+    * Sowmya 
+     * Just got back from trip, no update
+    * Brian
+     * Talked to Jason last week about doing a "Quick Install" document
+    * Kavitha
+     * Worked on the Internet2 portal 
+    * Nils
+     * Yum kernel rpms updated
+    * Aaron
+     * Fixing mesh configuration for USATLAS issues
+     * Worked on Django front-end for mesh configuration GUI
+  * Kernel updates and announcements
+    * Aaron wondering if the person who takes the kernel build process should also handle finding testers and sending announcements
+    * On-call person needs to send volunteer
+    * Overall process for volunteer
+     * Need someone to send initial announcement to list
+     * Build new RPMs
+     * Tell people to test it internally
+     * Upload to yum repo
+     * Send announcement
+    * Create wiki page that documents kernel process (mailing list to join). Andy will create this page. 
+  * Release status
+    * Not quite as far along on the Lookup Service testing. Goal would be to get beta of toolkit by JointTechs. 
+    * Backup plan is name it 3.2.3 and just include CentOS 6 updates
+    * That mean that people need to have most of issues addressed by Christmas break. Only 7 working days until JointTechs once we get back. 
+    * LiveCD issues that Andrew is working on 
+
+=== 20121210Video === 
+
+  * Attendees: Aaron, Sowmya, Brian, Andy, Nils, Andrew, Kavitha, Martin 
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+    * Andy
+     * Fixed a few issues last week for release
+     * Started looking Wisconsin's Traceroute GUI
+     * UC Berkeley students also developed traceroute visualizer
+    * Sowmya 
+     * Working on lookup service client
+     * Brian: We are working on Yang Version. Asked Martin if he had one. Martin said he has one in progress and will send it.
+    * Kavitha
+     * Uploaded kernel RPMs. Nils tested 
+     * Andy said he will test this afternoon
+    * Aaron
+     * Mesh config GUI. Hope to have it done by end of year so can test after break/
+    * Nils 
+     * Working on I2 portal
+    * Andrew
+     * Working on getting the 64 bit toolkit up and running
+     * Still having some issues with LiveCD
+     * Working on script to upgrade to CentOS 6
+     * Working on issue with LiveCD. Sowmya will test and see if we can replicate. Might be related to disk formatting issue.
+    * Brian
+     * No updates
+     * Thinking of having Jeff add new option to export JSON file. JSON sounded good to group.
+    * Martin
+     * No updates
+  * Release status
+   * No major issues
+   * Aaron and Nils will look closer at 659
+
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Developer Updates
+    * Andy
+    * Sowmya 
+    * Kavitha
+    * Aaron
+    * Andrew
+    * Brian
+    * Warren
+  * Release status
+
+=== 20121217Video === 
+
+  * Attendees: Andy, Sowya, Andrew, Aaron, Nils, Kavitha
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+    * Andy
+    * Kavitha
+    * Aaron
+    * Nils 
+    * Andrew
+    * Brian
+  * Release status
+
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Developer Updates
+    * Andy
+     * Working on traceroute GUI. Talked to WI guys.
+    * Sowmya 
+     * LiveCD testing for Andrew. Sent him output
+     * Working lookup service client
+    * Aaron
+     * Working on Django GUI. Will have Shawn test. Has instance up for Andy to test.
+     * Goal is to have something up by beginning of the end of year
+     * Aaron noted that a number of group like USATLAS, Italian ATLAS, and talking to some other.
+    * Nils
+     * Fixed a few small issues from issue tracker
+     * Will do Nessus testing when we have full toolkit
+    * Kavitha
+     * No updates
+    * Andrew
+     * Working with Sowmya on fix for LiveCD. Looks like its grabbing the older version
+     * Almost done with 64 bit install
+    * Brian
+     * Convinced a few people to deploy new lookup service. Probably just hold of on testing new RPM.
+     * Working on wash-pt1 orange
+     * Question about Active vs Inactive
+  * Release status
+    * Lookup service stuff needs to be done. We'll see how it goes this week and Andy and Sowmya will coordinate.
+
+=== 2012DevelopmentIdeasBrainstorm ===
+
+==== Customers, Core Constituents, Stakeholders ====
+
+Here is what I think the customers are, sorted in order of priority
+  * ESnet/GRNOC staff
+  * direct customers (eg: US labs and universities)
+  * our customers collaborators (e.g.: sites in Europe and Asia)
+  * the network research community
+  * corporate users
+  * VO organizations with membership of US labs and universities
+
+Question... Who at these organizations? Decision makers? Network engineers? End users?
+
+==== Problems to Solve ====
+
+  * Difficult to manage multiple instances of a the toolkit.
+    Benefactors:
+    * Campuses that want to deploy several nodes around their infrastructure in a small geographical area (or in the case of a system like Penn State - around the entire state at satellite locations)
+    * Regional networks that have several PoPs and want to station a performance node at each location
+    * VOs that are comprised of multiple Campus/Lab facilities and spread perhaps world wide
+    * Backbone networks that want to set up an observatory of their own (or in our case, if we want to freshen ours).
+    Specific suggestions:
+    * Way to export/import group of tests
+    * Full-on gui for multiple-host management
+  * Lookup Service Stability and Speed improvements
+    Benefactors:
+    * Entire infrastructure
+    * Easier to create end-user tools
+    * Lower deployment/help issues - users asking why their host is absent
+    Specific Suggestions:
+    * Rewrite proposal
+  * Better analysis (guide user for "what now" question)
+    Benefactors:
+    * End users, campus/lab dept/division level network engineers
+    * Potentially improved 'value proposition' for decision makers
+    Specific Suggestions:
+    * Something like NDT or Internet2 detective that makes use of historical data and highlights any 'problem' spots
+    * TracerouteMA GUI
+    * Integration of some of the e-center vis tool
+    * customizable dashboard based on 'communities' (e.g: Atlas, 
+Climage, etc...)
+    * more flexible summarization model for owamp
+  * Better reporting mechanism
+    Benefactors:
+    * Engineers/Decision makers - Labs/Univ/VOs
+    Specific Suggestions:
+    * full nagios integration
+  * Encourage more end-user development work
+    Benefactors:
+    * Developers, Decision makers (show more value for investment)
+    Specific Suggestions
+    * App Store - collect the pS apps others have written in one place
+    * Better documentation
+    * Standards work? - definitive protocol would be nice
+      * NML - does it matter?
+      * GN2/pS-PS protocol differences
+    * REST API
+      * JSON data format?
+    * Outreach/workshops
+      * Developers
+      * Users (engineers/decision makers?)
+  * Better integration with Layer2 and below (including IDC and/or OF)
+    Benefactors:
+    * Network engineers for diagnosis
+    * Decision makers if we can expose 'value' of L2 infrastructure
+    Specific Suggestions:
+    * Circuit Monitoring
+    * OpenFlow - flow counters (per application/project etc...)
+
+=== 2012TaskPlanning ===
+
+==== Better Analysis Tools ====
+*Priority: * HIGH
+
+*Description: * This category encapsulates issues that take existing data and presents it in a new way that the user can use to more easily diagnose problems. It may also provide explicit statements about what the measurements may mean.
+
+*Issues:*
+ * Issue 348 - PSB Results Top & Bottom 10 lists
+ * Issue 439 - Red-Green Plots of OWAMP data showing path Availability
+ * Issue 457 - Summarize aggregate bandwidth estimate for configured tests
+ * Issue 487 - Add more owamp troubleshooting capabilites to the toolkit
+ * Issue 492 - Additional documentation needed on what to do after installing the NP Toolkit
+ * Issue 515 - Path MA data visualization 
+ * Issue 537 - better LS directory search for the toolkit
+ * Issue 577 - Ability to view network performance status from a group of toolkit hosts
+ 
+==== Better Reporting Mechanisms ====
+*Priority: * HIGH
+
+*Description: * Issues that involve new ways of alerting the user that problems have occurred.
+
+*Issues:*
+ * Issue 380 - Unify service status checking between the various GUIs, nagios plugins and LS Registration Daemon
+ * Issue 503 - Convert NAGIOS plugins to work with RSV
+ * Issue 528 - Allow loss to specified as a percentage in OWAMP NAGIOS plugin
+ 
+= Encourage more end-user development work =
+*Priority: * HIGH
+
+*Description: * Issues that make it easier for developers to participate in the project by making code easier to use, writing better documentation, and/or providing better facilities for sharing work.  
+
+*Issues:*
+ * Issue 183 - Address/Name Normalization in pSB
+ * Issue 382 - Package for the client modules
+ * Issue 502 - Need to rework google code site to make a easy to find 'contrib' area
+ 
+==== Lookup Service ====
+*Priority: * HIGH
+
+*Description: * Issues related to improving the lookup service.
+
+*Issues:*
+ * Issue 199 - Lookup Service Statistics
+ * Issue 224 - gLS API validation
+ * Issue 410 - Lookup Service Registration Request Access Control
+ * Issue 419 - additional information needed in the hLS to support service directory
+ * issue 452 - Review architecture vulnerabilities (LS and TS)
+ * Issue 486 - lookup service contains a mix of IPs and host names 
+ * Issue 511 - LS summarization and LS Registration Daemon entries
+ * Issue 530 - Disable participation in LS infrastructure
+ * Issue 563 - performance analysis of XML generation
+ 
+==== Make tools more firewall friendly ====
+*Priority: * MEDIUM
+
+*Description: * Issues that make the tools easier to use in a firewalled environment.
+
+*Issues:*
+ * Issue 266 - Firewall guidance
+ * Issue 381 - Port Administration on pSPT
+
+= Better integration with Layer2 and below (including IDC and/or OpenFlow) =
+*Priority: * MEDIUM
+
+*Description: * Issues related to better measurement and monitoring of circuits.
+
+*Issues:*
+ * Issue 149 - the TL1 status collector doesn't handle timeouts well
+ * Issue 341 - circuit support for regular tests
+
+==== Handling multiple nodes ====
+*Priority: * LOW
+
+*Description: * Issues related to making it possible to manage a cluster of toolkit nodes and allowing for multiple nodes to be configured in a similar manner.  
+
+*Issues:*
+ * Issue 93 - Functional specification of 'centralized configuration service'
+ * Issue 234 - perfSONAR-BUOY and PingER have different "grouping" concepts for their test configuration files
+ * Issue 198 - pS-B node equivalence
+ * Issue 246 - Report node names as configured in owmesh file, rather than dns reverse lookups 	
+ * Issue 332 - Normalize Table Display in perfAdmin
+ * Issue 441 - Impart knowledge of the 'local node' into perfAdmin Graphs
+ * Issue 509 - Support for the modular configuration of the MP services
+ * Issue 578 - Ability to share (and specify) configuration of a group of toolkit hosts
+ 
+==== Better Data Summarization ====
+*Priority: * LOW
+
+*Description: * Issues that involve collecting new data and/or extending services to report additional data.
+
+*Issues:*
+ * Issue 123 - Error MA
+ * Issue 156 - need the ability to limit the size of the data returned  
+ * Issue 173 - Archive -i results from bwctl
+ * Issue 190 - Add owp archiving into pS-B (current version will simply ignore owp files sent to the collector)
+ * Issue 195 - Defaults for bwctl/owamp test options in the pSB database
+ * Issue 298 - Advanced Cacti data collection for localhost
+ * Issue 389 - data provenance / better metadata for monitoring data
+ * Issue 474 - Summarize aggregate bandwidth estimate for configured tests
+ * Issue 522 - Additional results from iperf3 stored in the MA
+ * Issue 525 - time-based scheduling of perfsonarbuoy tests
+ * Issue 527 - Allow user to select v4/v6 testing via scheduled testing interfaces
+ * Issue 532 - Alternative View of Communities for pSPT Setup
+ * Issue 549 - clarifying IPv4 vs. IPv6 tests in Regular Testing GUI
+ 
+==== Issues we should mark as WontFix ====
+|| *Issue* || *Last meaningful update* ||
+|| Issue 2 || April 28, 2009 ||
+|| Issue 49 || July 10, 2009 ||
+|| Issue 73 || March 23, 2009 ||
+|| Issue 92 || January 19, 2011 ||
+|| Issue 108 || March 11, 2009 ||
+|| Issue 125 || March 31, 2009 ||
+|| Issue 127 || April 1, 2009 ||
+|| Issue 135 || April 14, 2009 ||
+|| Issue 144 || July 10, 2009 ||
+|| Issue 154 || May 30, 2009 ||
+|| Issue 276 || September 2, 2009 ||
+|| Issue 296 || August 17, 2009 ||
+|| Issue 329 || September 17, 2009 ||
+|| Issue 338 || October 1, 2009 ||
+|| Issue 400 || February 12, 2010 ||
+|| Issue 404 || February 22, 2010 ||
+|| Issue 480 || January 27, 2011 ||
+|| Issue 526 || April 21, 2011 ||
