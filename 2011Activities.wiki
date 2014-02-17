@@ -3,6 +3,34 @@
 == 2011 Activities ==
 
   * [2011Activities#20110110Video Jan 10, 2011 Conference Call]
+  * [2011Activities#20110121Video Jan 21 2011 Conference Call]
+   * [2011Activities#20110207Video Feb 07, 2011 Conference Call]
+  * [2011Activities# 20110214Video Feb 14, 2011 Conference Call]
+  * [2011Activities#20110228Video Feb 28, 2011 Conference Call]
+  * [2011Activities#20110307Video Mar 7, 2011 Conference Call]
+  * [2011Activities#20110321Video Mar21, 2011 Conference Call]
+  * [2011Activities#20110328Video Mar28, 2011 Conference Call]
+  * [2011Activities#20110404Video April 4th, 2011 Conference Call]
+  * [2011Activities#20110425Video April 25th, 2011 Conference Call]
+  * [2011Activities#20110502Video May 2nd, 2011 Conference Call]
+  * [2011Activities#20110509Video May 9nd, 2011 Conference Call]
+  * [2011Activities#20110523Video May 23th, 2011 Conference Call]
+  * [2011Activities#20110627Video June 27th, 2011 Conference Call]
+  * [2011Activities#20110706Video July 6th, 2011 Conference Call]
+  * [2011Activities#20110725Video July 25th, 2011 Conference Call]
+  * [2011Activities#20110801Video Aug 1st, 2011 Conference Call]
+  * [2011Activities#20110808Video Aug 8st, 2011 Conference Call]
+  * [2011Activities#20110815Video Aug 15st, 2011 Conference Call]
+  * [2011Activities#20110829Video Aug 29, 2011 Conference Call]
+  * [2011Activities#20110912Video September 12, 2011 Conference Call]
+  * [2011Activities#20110919Video September 19, 2011 Conference Call]
+  * [2011Activities#20110926Video September 26, 2011 Conference Call]
+  * [2011Activities#20111010Video October 10, 2011 Conference Call]
+  * [2011Activities#20111017Video October 17, 2011 Conference Call]
+  * [2011Activities#20111031Video October 31, 2011 Conference Call]
+  * [2011Activities#20111201Video December 1, 2011 Conference Call]
+  * [2011Activities#20111213Video December 13, 2011 Conference Call]
+  * [2011Activities#20111215Video December 15, 2011 Conference Call]
 
 === 20110110Video ===
 
@@ -38,4 +66,1792 @@
    * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC. (Done with Brian's help.)
    * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
 
+=== 20110121Video ===
+
+ # Attendees:
+   * Joe, Brian, Jason, Andy, Sowmya, Nils, Aaron, Jeff, Maxim
+ # Topics
+   # Release Topics
+   # Visualization tools for the inter-noc diagnostic service ===
+   # E-Center Update
+   # 5 Minute Break
+   # BWCTL Visualization
+   # OWAMP Visualization
+   # IRIS Update
+   # PathMA Visualization
+   # Circuit Monitoring
+
+==== Release Topics === =
+
+ * Presenter: Jason/Aaron
+ * Time Allotted: 45 Mins
+ * Topics to Cover:
+   * Support, QA, Release Management Topics
+     * Defining 1st, 2nd (3rd?) Line Support roles
+       * Mailing list etiquette - who should answer, and when (e.g. 12/24hr wait time for the 'community' to answer)
+       * <b>ACTION:</b> Andy and Jason will be first tier and will work out who will answer what. They will encourage more community self-help.
+       * Process for punting bugs: 1st line debugs and tries to solve, if not open a bug for 2nd line to handle.  Since we are small, do we need 3rd line?
+       * <b>DECISION:</b>
+     * Primary/Backup roles on products
+     * The Return of Code reviews (and not just during release cycles)
+   * Growing the Community through self service
+     * Tutorials and Instructions
+     * 'Build your own toolkit' - Just documentation?  VMware image (updated every now and then) with the tools?  OpenDevNet?
+       * <b>ACTION:</b> Jason will develop a straw-man vmware image with Aaron and Andy will help test.
+   * 3.2.x
+     * Issues Update
+     * Release Schedule
+     * Functionality Additions
+   * 3.3
+     * Issues Update
+     * Development Priorities
+     * Roadmap/Relsease Schedule
+ * Materials: See below.  
+ * Notes:
+ 
+==== 2011 Bug Review ====
+
+The following audit was done to see where we stand on bugs.  Some are being moved up for a closer release date, others may be moving down.  Many are proposed to be closed.  The owners on some are being altered to balance the needs of the project.  
+
+Please review before the call and let Jason know of any comments or concerns.  
+
+===== 3.2.x =====
+
+These are not organized into 3.2.1 vs 3.2.2 and beyond yet.  
+
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=92 92] - Work on Use Cases to further develop 'deployments' reporting web pages
+   * Moving up from 3.3.  Currrently assigned to Brian.  Is work done?  Can this be closed?
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=144 144] - disable buttons on the stats grpahs page for empty graphs
+   * Moving up from 3.3.  Assign to Kavitha
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=160 160] - ESnet SNMP MA Enhancements
+   * Not done (need to add more functionality).  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - Add vmxnet module
+   * Moving up from 3.3.  Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=197 197] - bwctl plots: Verify X axis is scaled by time, and not array index
+   * Assign to Sowmya
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=224 224] - gLS API validation
+   * Moving up from 3.3.  Assign to Jason.
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=245 245] - negative latency from graph is counterintuitive. Should at least explain why it happens
+   * Moving up 3.3.  Assign to Sowmya.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=266 266] - Firewall guidance
+   * Assign to Nils, this is mostly a documentation (non software dev) task.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - LinuxPPS Support
+   * Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=298 298] - Advanced Cacti data collection for localhost
+   * Moving up from 3.3.  Assign to Sowmya.  Also roll in Cacti support for NTP Monitoring (developed by UMich/AGLT2 and used at SC).  Can create a new bug for this if necessary.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=303 303] - Improve CSS support for NPToolkit
+   * Moving up from 3.3.  Assign to Sowmya.  Could just close if we can't find any problems w/ CSS display for major browsers/OSs.    
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=337 337] - Add multiple hosts to scheduled test
+   * Move up from 3.3.  Assign to Kavitha
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=338 338] - owmesh parsing code in perfsonarbuoy_owp_collector needs better error checking
+   * Move up from 3.3.  Assign to Kavitha
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=348 348] - PSB Results Top & Bottom 10 lists
+   * Assign to Sowyma
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=352 352] - upgrade script for pSB databases
+   * Aaron/Kavitha to investigate or close.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=369 369] - Testspec description recorded wrong in pSB database
+   * Move up from 3.3.  Aaron/Kavitha to investigate.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=382 382] - Package for the client modules
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=424 424] - duplicate entries in pSB/bwctl mesh
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=425 425] - SNMP MA/Cacti Reports wrong capacity
+   * Assigned to Aaron to verify and close.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=429 429] - perfAdmin Time Select/Display Descrepency
+   * Move up from 3.3.  Assign to Sowmya
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=430 430] - perfAdmin Pop-up/Tab Graph Behavior
+   * Move up from 3.3.  Assign to Kavitha to reproduce for major browsers, if we can't please close.
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - myricom driver isn't up to date
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=437 437] - display MTU on web-gui
+   * Move up from 3.3.  Assign to Kavitha
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=443 443] - Client::LS::Remote not re-registering when keep-alives fail to hLS
+   * Targeting for next release
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=444 444] - Nagios Plug-In Packaging
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=446 446] - Add option to set timeout in Client::LS
+   * Move up from 3.3.  Assign to Andy
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=447 447] - new version of nuttcp supported by the NPtoolkit
+   * Move up from 3.3.  Assign to Nils/Aaron
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=451 451] - Upgrade NDT to 3.6.x lineage on the pSPT
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=453 453] - Document/Add addiional options to interface configuration
+   * Assign to Nils, also mostly documentation.
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=460 460] - Toggle Time display in perfAdmin graphs
+   * Move up from 3.3.  Assign to Sowmya
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=464 464] - Enhancemts to the Throughput/Latency Testing CGI Pages
+   * Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=465 465] - Security Scan of pSPT Releases
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=466 466] - Capitalization of bps in Utilization Schema
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=467 467] - ixgbe driver isn't up to date
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=468 468] - Additional Metadata Checks in NAGIOS Plugin
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=470 470] - bwctl/owamp limits gui doesn't support IPv6 addresses	
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=471 471] - owamp limits file on pSPT
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=473 473] - Display NTP Status on the Local Services page
+   * Assign to Nils.   
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=475 475] - nagios scripts do not support web proxies
+
+===== 3.3 =====
+
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=73 73] - Client::LS Registration Logic Re-arrange
+   * Related to 186
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=106 106] - bwmaster/bwcontroller: better logging support
+   * Assign to Brian to help define what is still needed, or close
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=125 125] - testconf.pl: Print out description of exactly what tests are configured to run by an owmesh.conf file
+   * Assign to Kavitha
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=149 149] - the TL1 status collector doesn't handle timeouts well
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=154 154] - hLS Topology Support
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=156 156] - need the ability to limit the size of the data returned
+   * Assign to Andy/Sowmya
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=173 173] - Archive -i results from bwctl
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=183 183] - Address/Name Normalization in pSB
+   * Possibly close? 
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - ability to set peer_port and iperf_port using web config GUI
+   * Possible raise in priority.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=186 186] - ls registration daemon needs to support multiple LSes
+   * Related to 73
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=190 190] - Add owp archiving into pS-B (current version will simply ignore owp files sent to the collector)
+   * Being partially addressed by GA Tech project.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=193 193] - Normalize 'units' used in owmesh specification
+   * Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=195 195] - Defaults for bwctl/owamp test options in the pSB database
+   * Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=199 199] - Lookup Service Statistics
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=211 211] - Suspend service start if administrative/connectivity info is not present
+   * Possible upgrade in priority.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=220 220] - CGI scripts are susceptible to client tinkering
+   * Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=242 242] - ps-buoy graph user interface improvements
+   * Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=246 246] - report node names as configured in owmesh file, rather than dns reverse lookups	
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=274 274] - Remove store.xml dependence for pSB
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=276 276] - Smarter Disk Configuration
+   * Should evaluate if this is still even required.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=296 296] - keep all scheduled OWAMP tests in the graphs table, add capability to manage
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=304 304] - Backup utility
+   * Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=321 321] - Link to error logs on services page/perfAdmin GUIs
+   * Assign to Nils
+   * Possible upgrade in priority
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=328 328] - Add feature to admin screen to disable http access
+   * Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=332 332] - Normalize Table Display in perfAdmin
+   * Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=345 345] - support for 'internal' performance toolkit instances
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=349 349] - Identify and Archive the path measured by bwctl & owamp
+   * Assign to Andy
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=354 354] - Linux Memory Support
+   * Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=359 359] - var log export
+   * Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=380 380] - unify service status checking between the various GUIs, nagios plugins and LS Registration Daemon
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=381 381] - Port Administration on pSPT
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=400 400] - Scheduled Tests GUI - When click on Save button - all services restarted instead of one
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=404 404] - Service State: Expected value vs Actual Value
+   * Assign to Kavitha
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=406 406] - Disable (not delete) a regular test
+   * Assign to Kavitha 
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=410 410] - Lookup Service Registration Request Access Control
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=414 414] - SNMP MA does not register keywords with the LS
+   * Assign to Sowmya
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=417 417] - improve toolkit logging
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=418 418] - Run NDT/NPAD from apache
+   * Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=419 419] - additional information needed in the hLS to support service directory
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=438 438] - perfsonarbuoy/bwctl startup loop if ntp is unsynchronized
+   * Assign to Aaron/Kavitha
+   * Possible upgrade in priority.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=439 439] - Red-Green Plots of OWAMP data showing path Availability
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=441 441] - Impart knowledge of the 'local node' into perfAdmin Graphs
+   * Assign to Nils
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=442 442] - multistream support for pSB
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=452 452] - Review architecture vulnerabilities (LS and TS)
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=454 454] - Add GridFTP Servers to LSRegistrationDaemon
+   * Assigned to Andy
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=474 474]	- Archive Failed Test Results
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=476 476] - Automated database backup
+
+===== Future =====
+
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=2 2] - enhancement to SNMP MA: ability to request metadata
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=93 93] - Functional specification of 'centralized configuration service'
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=108 108] - Stack Trace via perfSONAR Messages
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=123 123] - Error MA
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=127 127] - Refactor bwmaster.pl to fetch addresses from 'conf' before forking
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=135 135] - suggested modifications to default bwctl configuration for NPToolkit
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=168 168] - support bwctl/iperf congestion control feature
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=198 198] - pS-B node equivalence
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=234 234] - perfSONAR-BUOY and PingER have different "grouping" concepts for their test configuration files
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=329 329] - more unified nptoolkit configuration
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=341 341] - circuit support for regular tests
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=378 378] - DNS lookups within services, clients, GUIs
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=389 389] - data provenance for monitoring data
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=457 457] - Configuration - Summarize aggregate bandwidth estimate for configured tests
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=459 459] - Nagios plug-in to check toolkit version
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=461 461] - add ability to restrict bwctl tests to R&E networks only on the NPtoolkit
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=472 472] - PXE Boot pSPT
+
+===== Hold/Triage =====
+
+The following bugs should be discussed if they make sense for the project to keep.  
+
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=49 49] - Daemon job to automatically add BWCTL/OWAMP isntances
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=462 462] - Kernel module for IDE SSD drive
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=463 463] - the SFC driver isn't completely up to date
+
+===== Close =====
+
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=1 1] - feature request: SNMP MA: ability to request multiple resolutions, consolidationFunctions, etc. in a single request
+   * The modifictions were complete a long time ago.  If there are additional requests they need to be clarified, otherwise close.
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=8 8] - mysql_socket options
+   * This has not hampered development, I recommend closing.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=45 45] - OWAMP eventType
+   * This was not a problem in deployments, I recommend closing.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=158 158] - bwctl gui needs to have option to save performance graph as image
+   * Current = print screen.  This may be possible in the future GUIs.  Recommend to close.    
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=164 164] - Add option to completely clear disk/partition table and all
+   * Done for netinstall, do we care about live cd?  recommend to close.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=165 165] - Explore syslog-ng, and potential loghost setup
+   * Recommend closing ( see also 339 ).  Can write FAQ items if required.   
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=188 188] - add ntp servers for various geographic locations
+   * Merge w/ 189 into one bug - something to add parallel ntp queries.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=189 189] - Add RNP NTP servers to NPToolkit
+   * Merge w/ 188 into one bug - something to add parallel ntp queries.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=205 205] - Branding for main pS-Perf Toolkit web page
+   * Do we care about making it easier for people to re-brand w/ their own logo?  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=339 339] - ability to configure central syslog host for syslog-ng
+   * Recommend closing ( see also 165 ).  Can write FAQ items if required. 
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=343 343] - status checking functionality for pSB
+   * NAGIOS plugins address this and 344, recomend closing.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=344 344] - status checking functionality for PingER
+   * NAGIOS plugins address this and 343, recomend closing. 
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=372 372] - hanging pinger instances
+   * Recomend closing since its a rare occurance, and there does not appear to be a good solution.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=377 377] - Add database fields to provide unix timestamps for owamp and bwctl data in pSB
+   * I recommend closing since steps were taken to improve time functions.  
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=396 396] - default log location of /var/log/syslog should be changed
+   * It is recommended that 'wizards' can change log locations on their own, everyone else should use the default.  Close?
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=399 399] - MySQL table type comparison
+   * Does not appear to be necessary or constructive.   
+
+==== Priority Assignment ===
+
+Based on an email discussion, brian has asked we consider the following in the 3.2 release series.  
+
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=184 184] - Keep bug at current target.
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=211 211] - Migrate to 3.2.1
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=321 321] - Harder problem, keep at current target
+ * [http://code.google.com/p/perfsonar-ps/issues/detail?id=438 438] - Mirate to 3.2.1.  Display issue is already a target for next, BWCTL/bwmaster will need to be checked.  
+
+==== Visualization tools for the inter-noc diagnostic service ====
+
+ * Presenter: Joe
+ * Time Allotted: 30 Mins
+ * Topics to Cover:
+ * Materials: TBD
+ * Notes:
+ 
+Basically track DICE project requirements and use that to determine any software development that needs to take place.
+
+<b>ACTION:</b> Joe will enter the metadata requirements for bwctl registrations into the issue tracker.
+<b>ACTION:</b> This project will require software development for OWAMP and BWCTL data analysis.
+
+==== E-Center Update ====
+
+ * Presenter: Brian/Andy
+ * Time Allotted: 20 Mins
+ * Topics to Cover:
+ * Materials: http://acs.lbl.gov/~tierney/tmp/E-center-Update.pptx
+ * Notes:
+ 
+TBD
+
+==== 5 Minute Break ====  
+     
+==== OWAMP Visualization ====
+
+ * Presenter: Andy
+ * Time Allotted: 20 Mins
+ * Topics to Cover:
+ * Materials: 
+  * https://stats1.es.net/perfsonar/serviceTest/cgi-bin/front-end.cgi
+  * http://ps-bw.es.net/toolkit/gui/perfAdmin/serviceTestScript/cgi-bin/front-end.cgi
+  * http://odev-vm-15.es.net/red-green/
+  * Go to: http://lbnl.readytalk.com/  id: 4867381 
+ 
+TBD
+
+==== BWCTL Visualization ====
+
+ * Presenter: Brian
+ * Time Allotted: 20 Mins
+ * Topics to Cover:
+ * Materials:
+   * http://acs.lbl.gov/~tierney/tmp/configoptionsPPT.ppt
+   * http://ps-bw.es.net/toolkit/gui/perfAdmin/serviceTestScript/cgi-bin/front-end.cgi
+   * https://stats1.es.net/perfsonar/serviceTest/cgi-bin/front-end.cgi
+   * https://stats1.es.net/cgi-bin/top-10-N-bwctl.cgi
+
+ * Go to: http://lbnl.readytalk.com/  id: 7377764
+ 
+TBD
+
+==== Visualizations ====
+  * <b>ACTION:</b> Aaron and Sowmya will come up with a plan for how to integrate the new owamp/bwctl/top 10 visualizations into the toolkit and/or perfAdmin.
+
+==== IRIS Update ====
+
+ * Presenter: Jeff
+ * Time Allotted: 20 Mins
+ * Topics to Cover:
+ * Materials: TBD
+ * Notes:
+ 
+Will start out with SNMP-MA and active tools. Will integrate in circuit monitoring as that is available.
+
+==== PathMA Visualization ====
+
+ * Presenter: Andy
+ * Time Allotted: 25 Mins
+ * Topics to Cover:
+ * Materials: 
+  * http://odev-vm-15.es.net/traceroute-viz.ppt
+  * Go to: http://lbnl.readytalk.com/  id: 4867381 
+ * Notes:
+ 
+TBD
+
+==== Circuit Monitoring ====
+
+ * Presenter: Aaron
+ * Time Allotted: 45 Mins
+ * Topics to Cover:
+   * Current state of circuit monitoring discusions
+   * Short term roadmap for Internet2 circuit monitoring development
+   * Some open questions in the circuit monitoring front
+ * Materials: [MonitoringPlans]
+ * Notes:
+ 
+TBD
+
+==== Actions ====
+
+ * _*ACTION*_: Jason will look at SNMP store file examples and documentation to verify Bps/bps is correct. Joe will look at ESnet store file generator, and Aaron will verify the Internet2 instance.
+ * _*ACTION*_: Aaron will expand out the project wiki page to include a link to his instrucitons on updating the toolkit.
+ * _*ACTION*_: Nils and Sowmya will attempt to build a release of the pS-PTK using Aaron's documentation.
+ * _*ACTION*_: Jeff will arrange for a future call to focus on 3.3 priorities. After SC. (Done with Brian's help.)
+ * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+
+=== 20110207Video ===	 
+
+ # Attendees:
+   * Andy, Sowmya, Brian, Maxim, Jason, Nils, Aaron, Jeff, Joe, Martin
+ # Followup on previous actions:
+  * _*ACTION*_: Jason will look at SNMP store file examples and documentation to verify Bps/bps is correct. Joe will look at ESnet store file generator, and Aaron will verify the Internet2 instance.
+    * convereting to issues in the tracker.
+  * _*ACTION*_: Aaron will expand out the project wiki page to include a link to his instrucitons on updating the toolkit.
+    * convereting to issues in the tracker.
+  * _*ACTION*_: Nils and Sowmya will attempt to build a release of the pS-PTK using Aaron's documentation.
+    * continuing
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+    * continuing
+ # Developer Updates
+   * Joe: DICE diagnostic service is on track. DICE service delivery is going through more of a project-management process.
+   * Nils: No update
+   * Aaron: Fixed minor bugs on toolkit. Starting circuit-monitoring.
+   * Maxim: Plan on making pingER ipv6 compatible. Discussion
+   * Sowmya: Looking at improving performance of summary buckets in OWAMP.
+   * Brian: Soliciting input on hLS. Are your services discoverable?
+   * Martin: No update
+   * Jeff: No update
+   * Andy: Fixed bugs in Nagios plugins.
+ # Release status
+   * Issue version placement
+   * Timeline:
+     * Release pressures: Summer Jt Techs.
+
+==== Actions ====
+
+  * _*ACTION*_: Nils and Sowmya will attempt to build a release of the pS-PTK using Aaron's documentation.
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+
+=== 20110214Video ===
+
+ # Attendees:
+   * Brian, Andy, Sowmya, Nils, Aaron, Jeff, Joe, Jason, Maxim
+ # Followup on previous actions:
+  * _*ACTION*_: Nils and Sowmya will attempt to build a release of the pS-PTK using Aaron's documentation.
+  * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+  * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.
+ # PathMA Visualization
+   * Presenter: Andy
+   * Topics to Cover:
+   * Materials: 
+    * http://odev-vm-15.es.net/traceroute-viz.ppt
+    * Go to: http://lbnl.readytalk.com/  id: 4867381 
+   * Notes:
+ # Brain-storm the 'what now' question
+   * Now that there are deployments out there, how do we encourage actual use and show utility?
+     * Documentation on next steps
+     * Email list to encourage usage - advertise successes
+     * other???
+   * Ideas:
+     * Encourage nagios tests to looking for low-throughput tests.
+     * Create documentation on how to use the tools to diagnose problems.
+     * Create documentation on what to do first for network operator: setup regular mesh of tests, perhaps nagios config. - Perhaps provide a tab to display a potential nagios config.
+     * Create GUI for doing on-demand tests.
+ # Release issue overview
+   * Prioritize 3.2.1 issues and determine resources needs based on timeline.
+ # Potential solutions to throughput tests with NIC speed mis-matches
+   # FAQ
+   # Register host info
+   # Add flag into bwctl/iperf to fetch the NIC info and put it in the data stream, and include it in the database. (For bwctl, could even trade that info in the control-connection and automatically rate-limit using the window size... but that seems like a bit of a hack. Of course, I have been known to like hacks now and then.)
+   # Other ideas anyone?
+ # Cache daemon issues
+   * Andy will progress with the ideas in the comments of the issue tracker.
+
+==== Actions ====
+
+  * _*ACTION*_: Nils and Sowmya will attempt to build a release of the pS-PTK using Aaron's documentation.
+  * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+  * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.
+  * _*ACTION*_: Andy will check out SLAC traceroute analysis.
+
+=== 20110228Video ===
+
+# Attendees:
+   * Brian
+   * Sowmya
+   * Jason
+   * Jeff
+   * Andy
+   * Maxim
+   * Kavitha
+   * Aaron
+   * Nils
+ # Followup on previous actions:s
+  * _*ACTION*_: Nils and Sowmya will attempt to build a release of the pS-PTK using Aaron's documentation.
+    * Sowmya sent email to Jeff on this matter, tried to start.  Trying to use Mock to build things - couldn't generate NDT rpm.  Nothing in documetation to solve her issue - will send email to list.  
+    * Nils did this on a VMWare image on his laptop, no problems.  
+    * Next steps - make this available for someone to use?  Sowmya and Nils to work together on this now, also improve doc (if something is missing)
+    * Goal is to get a vmware image that others can use to build modules.
+  * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+    * Not yet ... did do a minor code review, needs to make a branch to start this.  
+  * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.
+    * Expect this later tonight - lots of mails.  
+  * _*ACTION*_: Andy will check out SLAC traceroute analysis.
+    * Haven't look at what SLAC started.  
+  * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
+    * Will write up some text issue - Brian started some too - also reference the bug (and the text from the original report) - issue #389.  
+ # Release issue overview
+   * Prioritize 3.2.1 issues and determine resources needs based on timeline.   
+     * Jason will finish review.  
+     * Brian wants to look at 443 - has not been triaged yet by developers.  
+       * Someone will look - Brian thinks this is critical enough to patch immediatly.     
+     * Question about release process - when does something enter into the netinstall repo?  Outside of a release cycle?  Want to limit this.  
+ # Cache daemon issues - status (Andy)
+   * Script that builds the cache will touch some other file - to tell its running
+   * Client will check the touched file, visit other servers as needed
+ # 'What now?' documentation (Brian)
+   * http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/perfsonar-configuration-guide/
+     * What to configure, and why
+   * http://fasterdata.es.net/fasterdata/troubleshooting/overview/
+     * How to debug real problems
+   * Notes:
+     * Took at stab at writing things to address the issues.  
+     * Move content to pSPS?  Point to it?
+     * How to edit on psps.perfsonar?  What is the process.  Action for Jeff to figure this out.  CMS?
+     * Action for everyone to read.  
+ # ls_registration_service - bug #443 (Brian)
+   * See above.  Two issues:
+     * Look at LS Reg Daemon
+     * Look at LS Libraries
+     * Consider the behvior of the LS (gets deleted nightly now...).  
+   * Who can work on this?  Unclear.
+ # latest version of Somya's owamp plotting tool: 
+http://odev-vm-8.es.net/serviceTest/cgi-bin/delayGraph.cgi?url=http://ps-lat.es.net:8085/perfSONAR_PS/services/pSB&key=0c9f303f231defb145c27b966c4ca4aa&length=14400&&dstIP=198.129.254.187&srcIP=128.114.0.205&src=bwctl.ucsc.edu&dst=ps-lat.es.net
+   * Using a javascript package
+   * Loss is the right axis, delay the right.  
+   * Can add/remove the other items from the graph.  
+   * Show/hide url - if zoom, the times don't change.   Do we need this feature?  Yes, may be different in address bar.  
+   * Plotting duplicates, out of order packets?  Should look into the former.  Running out of axis space.  
+   * Reverse direction?  Needs it - maybe not this graph.  Parallel calls to get data from server, makes it faster.  
+ # Other
+  * IPv6 monitoring - mixing with IPv4 vs separate service deployment (Maxim)
+  * Notes:
+    * Everything in pinger is centered around hostname.  Complicates backend model.  Question - what is more desirable, to intriduce v6 and v4 testing in same service?  For same hostname identify both addresses, or deploy 2 services (v4 testing and v6 testing).  Configuration and support is easier in the second case.  
+    * Jeff - pSB treats the address just like any other feature, so mixing tests is not hard.
+
+==== Actions ====
+
+ * _*ACTION*_: Nils and Sowmya will work on combining efforst to build a release of the pS-PTK using Aaron's documentation.
+ * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+ * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.  
+ * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+ * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
+ * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net.  
+
+=== 20110307Video ===
+
+ # Attendees:
+   * Kavitha, Brian, Aaron, Sowmya, Andy, Jeff, Joe
+ # Excused:
+   * Jason 
+ # Followup on previous actions:
+   * _*ACTION*_: Nils and Sowmya will work on combining efforst to build a release of the pS-PTK using Aaron's documentation.
+     * done
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+   * _*ACTION*_: Jason will update the issue tracker to organize issues into versions.  
+     * done
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+   * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
+   * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net. 
+   * _*ACTION*_: All: read / comment on  http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/perfsonar-configuration-guide/ and http://fasterdata.es.net/fasterdata/troubleshooting/overview/
+ # Future Driver Support 
+   * Several "Request for Drivers" types of bugs:
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=172 172] - Add vmxnet module	
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=282 282] - LinuxPPS Support	
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=433 433] - myricom driver isn't up to date
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=462 462] - Kernel module for IDE SSD drive 	 
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=463 463] - the SFC driver isn't completely up to date 
+     * [http://code.google.com/p/perfsonar-ps/issues/detail?id=467 463] - ixgbe driver isn't up to date	 
+   * What do we do in this space?
+     * Accept bugs, build what people need - requires long term support for exotic drivers
+     * Give people the VMWare image/instructions on how to build drivers for netinstall/live cd
+     * Encourage submissions, we would need to check these of course
+   * Email gravitated toward #2, other thoughts?
+    * *Decision is to provide a contrib space. Popular items can be incorporated into the main toolkit as resources allow.*
+ # OWAMP Bucket parameter or event type
+   * There seems to be a performance hit when the buckets are returned. It's not just the DB queries but also the time it takes to generate the XML. 
+    * [http://odev-vm-15.es.net/buckets/no-buckets-plot.png Lifeline - No Buckets ]
+    * [http://odev-vm-15.es.net/buckets/owamp-bucket-with-optplot.png Lifeline - w/Buckets]
+   * We've discussed the folowing options if this became an issue:
+    * Add optional boolean parameters such as "include_value_buckets" and "include_ttl_buckets" to indicate if client desires them. We should have a default which is probably to exclude both since that's the old behavior.
+    * Define a new event type.
+    * *Decision is to create a new event type and in parallel attempt to improve the XML generation.*
+ 
+==== Actions ====
+
+   * _*ACTION*_: Nils and Sowmya will update the pS-PTK build environment documentation.
+   * _*ACTION*_: Nils and Sowmya will create a vmware image for building contributions for the toolkit.
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+   * _*ACTION*_: Jeff and Brian wil look through issue tracker to determine effort level and resources for 3.2.1 tagged items.
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+   * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
+   * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net. 
+   * _*ACTION*_: All: read / comment on  http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/perfsonar-configuration-guide/ and http://fasterdata.es.net/fasterdata/troubleshooting/overview/
+   * _*ACTION*_: Brian will add an issue to deal with 'contributed' drivers and such.
+   * _*ACTION*_: Andy will create a new owamp summary schema and event type with buckets required.
+   * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+
+=== 20110321Video ===
+
+ # Attendees:
+   * Maxim
+     * Merge IPv6 stuff into trunk
+   * Andy
+   * Sowmya
+   * Kavitha
+   * Jeff
+   * Jason
+   * Alan Whinery
+   * Nils
+ # Excused:
+   * Aaron
+   * Brian 
+ # Followup on previous actions:
+   * _*ACTION*_: 
+     * Nils and Sowmya will update the pS-PT build environment documentation.
+     * Nils and Sowmya will create a vmware image for building contributions for the toolkit.   
+       * Doc page up.  Work in progress.  Lots of changes to the image ... doc needs to reflect this.     
+       * Running through VMware build image now.  was scripting things, may aviod this.  Has a concern - how to distrubute?  Sort of big.  How big - 2.2G.  Will be stored on main web site.  
+   * _*ACTION*_: Jason will continue exploring the non-transaction method for opening xmldb. He will also look into timing the operations to see if this will increase performance as well.
+     * no progress
+   * _*ACTION*_: Jeff and Brian will look through issue tracker to determine effort level and resources for 3.2.1 tagged items.
+     * Met last week.  Pushed off certain thigns before ... Brian and ESnet think we can do more.  Move some things into 3.2.1 and assign resources.  Brian/Jeff to talk w/ developers to estimate work.  
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * no progress
+   * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
+     * no progress - will do a bunch of doc updates at once.  
+   * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net. 
+     * Meeting w/ internal people.  
+   * _*ACTION*_: All: read / comment on  http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/perfsonar-configuration-guide/ and http://fasterdata.es.net/fasterdata/troubleshooting/overview/
+     * Jason sent comments, other should do the same.  
+   * _*ACTION*_: Brian will add an issue to deal with 'contributed' drivers and such.
+     * not present, held over
+   * _*ACTION*_: Andy will create a new owamp summary schema and event type with buckets required.
+     * Checked in code.  Updating issue.  Using a special event type now.  Sowmya doing testing?
+   * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * Set up tests.  Sent some results to people a week or so ago.  DB query is taking some time, lots of data is being returned.  She is looking into speeding up DB queries.  Store data in hashes/perl data structures.  
+     * Jeff - what queries is sowmya using for SQL vs what was the original?  Union is not the right way to do it - loop through the tables and build up the data.  
+     * Jason - XML output performance, are you doing string concatenation or writing to a file?  She is storing the values in arrays, so its not really string concatenation.  Has some results.  Not a huge performance hit doing it this way - will send out the results.  
+ # Developer updates?
+   * Andy: Jon Dugan added discards/errors to ESxSNMP.  Store file was huge, really hard to manage.  XPath against this was poor.  Added mdbackend using SQLite.  Re-architect to use this instead?  Future discussion.  
+   * Andy: BWCTL/OWAMP MP.  Started doing this.  
+ # OSG Monitoring
+   * Jason outlines process - OSG needs some monitoring scripts similar to NAGIOS.  We have a proof of concept for the 'LS' status right now.  Need to convert others.
+   * May be hard, RSV likes certain cmd line options.  Jason to talk w/ developers about this
+   * Andy has some time to help Jason convert one of them (throughput?) in the next week or so.  
+   
+==== Actions ====
+
+   * _*ACTION*_: Nils and Sowmya will update the pS-PT build environment documentation and vmware image.
+   * _*ACTION*_: Jeff and Brian will look through issue tracker to determine effort level and resources for 3.2.1 tagged items. 
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+   * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
+   * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net. 
+   * _*ACTION*_: All: read / comment on  http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/perfsonar-configuration-guide/ and http://fasterdata.es.net/fasterdata/troubleshooting/overview/
+   * _*ACTION*_: Brian will add an issue to deal with 'contributed' drivers and such.
+   * _*ACTION*_: Andy will create a new owamp summary schema and event type with buckets required.
+   * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+
+=== 20110328Video ===
+
+ # Attendees:
+   * aaron, nils, sowyma, andy, jeff, maxim, joe, jason, brian
+ # Followup on previous actions:
+   * _*ACTION*_: Nils and Sowmya will update the pS-PT build environment documentation and vmware image.
+     * Nils: No changes.  He and Aaron talked, can make the entire thing smaller if just a KS file is used.  Haven't done any new work on it.  Idea: create a new VM, have it do the netinstall, and use the KS.  
+   * _*ACTION*_: Jeff and Brian will look through issue tracker to determine effort level and resources for 3.2.1 tagged items. 
+     * Getting closer, brian will start marking things off, jeff too.  Need to change assigned people as well as targets.  Need to do effort levels still (need developer input on that).  Jason entering in new labels for time estimates (hours, days, weeks, months) - Brian/Jeff and developers to then fill these in.  
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * nothign new
+   * _*ACTION*_: Jason will add a FAQ item regarding mis-matched NIC speeds.
+     * will do all web updating near the release, there is an issue for this so no longer an action.  
+   * _*ACTION*_: Jeff to figure out how to manage collaborative web space at psps.perfsonar.net. 
+     * Jeff did some stuff, can't happen at Internet2 though.  What about Jason's idea - process to make content in the wiki space then migrate to web.  Objections?  Brian wants svn checkout/checkin of content instead - had problems with this last time (web editors didn't like using svn).  Discussion of using a CMS at ESnet.  SVN may work with just our small group (but hard to move real web devs that use editors involved).  ESnet is using shib to manage stuff (freelance development).  
+   * _*ACTION*_: All: read / comment on  http://fasterdata.es.net/fasterdata/perfSONAR/ps-howto/perfsonar-configuration-guide/ and http://fasterdata.es.net/fasterdata/troubleshooting/overview/
+     * Jason mailed comments, and attached them to the open bugs.  Brian read these over - agrees with most of the comments.  Should make content generic.  Disagreed with the 'go find problems' comment.  Doesn't know next steps for this since we are still dealing with CMS question above.  Jeff: Jason can be editor for the Internet2 side.  Next steps - take content and migrate to pSPS?  Lets do this on the wiki, then edit in a collaborative way.  Brian to migrate the text from HTML to wiki.  Other 2 pages were in wiki already.  3 pages:
+       * Troubleshooting
+       * Collaboration
+       * Configuration
+     * Need to get other people reading.  Sowmya and Kavitha were nominated, Joe too.  Jeff will ask for reviews from the perf wg at the MM.      
+   * _*ACTION*_: Brian will add an issue to deal with 'contributed' drivers and such. (done: issue 502)
+     * Action done, issue still open.  
+   * _*ACTION*_: Andy will create a new owamp summary schema and event type with buckets required.
+     * Updated last week.  Sowmya's GUIs use it now.  Testing on some hosts.  Remove action?  Yes.  
+   * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * Started re-writing some code.  No new performance analysis.  Will do more next week.  
+ # DICE update from Joe
+   * 1 Good thing - we didn't get completely new orders.  Last year the principals had brand new tasks.  This time we can continue on.
+   * Key Issue - need more deterministic outcomes (better project management).  Project Managers (Eric/Joe/Ann) to keep the principals updated better.  Need to give them advanced warning when things don't go well (knowledge in advance).  Reasonable to do, but a change.
+   * Diagnostic service.  Roadmap/project plan - operations group to define service/requirements.  Technical group to implement.  Have been redistricting the service to match the technology that we have already.  Services are pretty much defined.  Need to do test criteria.  After that, the tech group will identify gaps/resources to fix gaps.  If the gaps are large, go back to principals for next steps
+   * Where will there be gaps?  
+     * Ops group needs information from tool failure (e.g. useful error messages that are logged/stored)
+     * AA issues.  IP based alcls are not universally accepted.  Buy in on the doc for the most part.  
+   Next steps - Chris Robb and Dale F will identify where we need acceptance criteria.  Someone from Geant to draft this list.  In 2 weeks(!), which is aggressive.   
+   * Jeff/Joe - we should be doing our own identification of gaps soon (in parallel with the ops group).  Test criteria prevents us from getting a complete set, but we can get some.  
+   * Brian - date for deployment?  Expecting by next DICE meeting (Sept 2011?).  No dates were given, since we still don't have service criteria.  Once we have the gap analysis we will be expected to deploy the 'easy' stuff quickly.  Some of this is deployed already on the backbones.  Hard stuff is still hard (!).  Joe's expectation - 75% complete in a couple of months.  
+   * We have agreed to use 'smartsheet' project planning tool.  Generate reports to the principals every 6 weeks based on the smartsheet.  Ann has started this already (using microsoft planning right now, import).
+   * Josva Kleist is heading the pS development effort in europe.  1st week of May - he will be in the US w/ Jerry S.  Time at Internet2 and LBL.  Eric/Jeff may travel to LBL.  2/3 or 3/4 of May.  Jerry may talk to ESnet about NSI, talk to Internet2 about perfSONAR.    
+   * Jeff/Joe will do some passes on gap analysis.  
+ # Code Review for Maxim's Changes
+   * Do we need to discuss this anymore?  When this gets put in, we need to make sure things don't break.  When it is committed, we need someone to exercise the toolkit stuff (biggest user of these functions).  
+   * Aaron's concerns are valid, perl doesn't do the right thing.  
+   * Aaron to add issue to tracker, tag for 3.2.1 release.  Put lots of info in there.  Will assign to someone.  
+   * Basis for a testing harness?
+ # Documentation Topics
+   * See Jason's email thread for the entire proposal
+   * Maintain the 2 content areas as such:
+     # Web = publishable/polished material that is reviewed on a semi-regular basis.  Content neutral for the perfSONAR-PS community.  
+     # Wiki = 'in-progress' work area and collaboration space.  Content migrates off when 'finished'
+   * Also need to speak to the user types more directly.  E.g. materials for an operator are different than materials for a developer.  Organizing this in some way will cut down on information overload.  
+   * Proposed breakdown by content area:
+     * Informal/Collaboration (Wiki)
+       * Anything that is in-progress will start here, then be moved
+       * Service Design Documents, understood to be in progress
+       * Protocol Design Documents
+       * Release Management
+       * Bug Tracking
+       * Meeting(s) space
+     * Formal (Web)
+       * Installation and Configuration
+         * Step by Step Install (migrate from Wiki)
+         * One Page README - just the facts to get up and running
+       * Using the pSPT
+         * Regular vs Diagnostic Use Case
+         * Why/How to configure tests (What Brian has started)
+         * Care and Feeding of your pSPT (Maintenance procedures, etc.)
+         * Debugging Network Problems
+       * Contributing (some of what Brian has started, but more, and formalized)
+         * Become a Mirror
+         * Building Drivers
+         * Packaging Software
+         * Participation In The Project
+       * Specific spaces for (note, these can use links to other resources - act as a reference for the things these groups would want to do):
+         * Researchers
+           * Kinds of data available
+           * How to access it
+           * How to get in contact with R&E network support staff
+         * Users
+           * Learning to use the pS tools
+           * Learn about network performance (in general)
+           * Getting more help
+         * Operators
+           * Installing
+           * Configuring
+           * Maintaining
+           * Interpreting results
+           * Learn about network performance (in general)
+           * Getting more help
+         * Developers
+           * Developing clients
+           * developing servers
+           * packaging
+           * contributions to the project
+
+==== Actions ====
+
+   * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.  
+   * _*ACTION*_: Jason to add labels to issue tracker for time estimates.  
+   * _*ACTION*_: Brian to share some of the information about managing CMS at ESnet with Shibboleth.  
+   * _*ACTION*_: Jeff to still ask about further use of SVN as a content management system for psps.perfsonar.net
+   * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
+   * _*ACTION*_: Brian to migrate fasterdata content to Wiki
+   * _*ACTION*_: Jason to integrate his comments into Brian's wiki pages + fasterdata content.  Work on additional doc in accordance with the proposal.  
+   * _*ACTION*_: Nils and Sowmya will update the pS-PT build environment documentation and vmware image.
+   * _*ACTION*_: Jeff and Brian will look through issue tracker to determine effort level and resources for 3.2.1 tagged items. 
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+   * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+
+=== 20110404Video ===
+
+ # Attendees:
+   * Maxim, Brian, Andy, Joe, Aaron, Nils, Kavitha
+ # Excused:
+   * Jason  
+ # Followup on previous actions:
+   * _*ACTION*_: ~~Jason to migrate hLS code to a branch~~
+     * Done: https://svn.internet2.edu/svn/perfSONAR-PS/branches/jz-lstransactions/
+     * Next step - merge to trunk?
+   * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.  
+   * _*ACTION*_: ~~Jason to add labels to issue tracker for time estimates~~
+     * Complete  
+   * _*ACTION*_: Brian to share some of the information about managing CMS at ESnet with Shibboleth.  
+     * Complete
+   * _*ACTION*_: Jeff to still ask about further use of SVN as a content management system for psps.perfsonar.net
+     * In progress
+   * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
+   * _*ACTION*_: Brian to migrate fasterdata content to Wiki
+     * In progress
+   * _*ACTION*_: Jason to integrate his comments into Brian's wiki pages + fasterdata content.  Work on additional doc in accordance with the proposal.  
+     * Postpone till next week.
+   * _*ACTION*_: Nils and Sowmya will update the pS-PT build environment documentation and vmware image.
+   * _*ACTION*_: Jeff and Brian will look through issue tracker to determine effort level and resources for 3.2.1 tagged items. 
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+   * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+   * _*ACTION*_: Andy is going to propose a design for async data delivery in the context of a bwctl/owamp MP.
+ # Developer updates
+    * Kavitha - nothing to update
+    * Andy - Nagios RSVP update working with BNL and other OSG people for Gratia. Looking at creating a bwctl/owamp MP. Comparing with EU versions.
+    * Nils - nothing to update
+    * Brian - nothing to add
+    * Maxim - Issue 510. Added option for configurable timeout to keep old alarm semantics. Would like everyone to consider using wwwcurl in place of lwp for protocol transfers. Maxim will work on that. Also interested in adding project-level configuration managment functionality. Basically, the ability to have some amount of the configuration management to be taken from project-specific services.
+    * Aaron - Circuit monitoring. Interacts with OSCARS, registers topo data, collects circuit ids/topology data and caching. Beginning to store measurement stats locally as well.
+    * Joe - nothing to update
+    * Jeff - nothing to update
+
+==== Actions ====
+   * _*ACTION*_: ~~Jason to migrate hLS code to a branch~~
+     * Done: https://svn.internet2.edu/svn/perfSONAR-PS/branches/jz-lstransactions/
+     * Next step - merge to trunk?
+   * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.  
+   * _*ACTION*_: ~~ Jeff and Brian to assign time estimates and owners for 3.2.1 issues.
+   * _*ACTION*_: Jeff to still ask about further use of SVN as a content management system for psps.perfsonar.net
+     * In progress
+   * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
+   * _*ACTION*_: Brian to migrate fasterdata content to Wiki
+     * In progress
+   * _*ACTION*_: Jason to integrate his comments into Brian's wiki pages + fasterdata content.  Work on additional doc in accordance with the proposal.  
+     * Postpone till next week.
+   * _*ACTION*_: Nils will put the next steps for the vmware build environment in the issue tracker.
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+   * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * In progress
+
+=== 20110425Video ===
+
+ # Attendees:
+   * maxim
+   * andy
+   * jason
+   * brian
+   * jeff
+   * sowmya
+   * martin
+   * joe
+   * aaron
+   * nils
+   * kavitha
+ # Excused:
+   * none
+ # Followup on previous actions:
+   * _*ACTION*_: Jason to migrate hLS code to a branch
+     * Done: https://svn.internet2.edu/svn/perfSONAR-PS/branches/jz-lstransactions/
+     * Jason will merge to trunk this week.  
+   * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.  
+     * No Update, try again next week.  
+   * _*ACTION*_: ~~Jeff and Brian to assign time estimates and owners for 3.2.1 issues.~~
+     * Done, create a new action for owners to review by next week.   
+   * _*ACTION*_: Jeff to still ask about further use of SVN as a content management system for psps.perfsonar.net
+     * Sysadmin group will be a guinea pig for using jango as a content manager.  Will know in a couple of weeks how this goes.  Set as a long term action to check back.  
+   * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
+     * Kavitha in progress
+     * Sowmya no comments, thought it was ok.  Headline was a little misleading.  
+     * Joe has not read.  
+   * _*ACTION*_: ~~Brian to migrate fasterdata content to Wiki~~
+     * Done
+   * _*ACTION*_: Jason to integrate his comments into Brian's wiki pages + fasterdata content.  Work on additional doc in accordance with the proposal.  
+     * Jason has not had time, carry over.
+   * _*ACTION*_: Nils will put the next steps for the vmware build environment in the issue tracker.
+     * Added to issue tracker, didn't make any progress on the env yet (busy with other things).  
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * Carry over as a long term action.   
+   * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * Carry over as a long term action.  
+ # LS and LS Registration Daemon, easy to disable via the GUI?
+   * Brian: can disable, but make it "hard to disable".  Want to see lots of warnings to be sure that the user knows the system is less useful in doing this.  
+   * Joe: concerned it is registering garbage
+   * Jeff: Opt in policy vs opt out.  Don't want people to be "surprised" that this was the normal way of operation (e.g. registering).  Document the ramifications of registering vs not.  
+   * Next steps for the releases.   
+     * 3.2.1: Stop registration if not configured (e.g. admin info).  Both the LS reg daemon and the LS (stop it completely).  GUI warnings that note you are not configured/sharing (depends on time estimate).  
+     * 3.3: Checkbox to opt in/opt out.  Warnings that tell you when you are opted out (yellow vs green).  Would override the admin info entered or not.  
+   * Jason to make a bug.  
+ # OWAMP NAGIOS Probe - use percentage instead?
+   * Came from Jason setting up NAGIOS plugins.  found it hard to calculate the percentage he wanted out of the pps and lost vs not lost.  
+   * Jeff objects - notes that entering in lots of 0's is hard.  Jason notes not all networks have 7 0s in front of a decimal point worth of loss.
+   * Andy: not hard to add in percentage as well as the current way to set thresholds.  
+   * Jason to make a bug.  
+ # v6 Support Update
+   * Joe Updates.  Important topic, JET demo for this year.  Also ESnet/DOE importance - Vince very interested.  They will be spending some time ot get this right.  Good idea regardless of this.  Lots of JET discussion after the slide was released (mostly about NDT - Rich had some objections).  Sorry he didn't get the slides to us faster to review.  
+   * ESnet update - found some configuration problems w/ V6, no performance problems (yet).  
+   * NDT Comments - was a problem with the userland library (not NDT).  on our next release, tested to work (so far).  
+   * Looking for full toolkit suport of v6 for the summer?  Depends on what you mean by full support. 
+     * NDT is ok, so are BWCTL and OWAMP as raw tools.  
+     * Jeff - no timeframe for 3.2.1 yet, makes it hard to say if we can get done.  Joe wants to see progress on the slides (turn some yellow things green, etc.).  Focus on one metric for JET test.  This is doable for all.  
+   * Toolkit GUIs ... what do we do here?
+     * v4/v6 force checkboxes in the scheduled testing screens?
+     * Need another layer of error checking to do this - make sure we are getting good data from user (and that hostnames/addresses resolve, etc.)
+     * Underlying tools need to support the 'force v4/v6' option too, bugs open on these already ...
+     * binding v4 and v6 to same host is always a gamble ...
+   * Jason to open a 3.3 issue on this regarding tool/gui interplay.  Will work on other v6 capabilities for 3.2.1 release as we get going in the process.  
+ # [MPDesignProposal]
+   * Andy gives the overview.  See the model/messages.  Goal - measurements take time, request/response is faster.  Don't want to busy wait.  Pub/Sub suggested by Maxim, but we want to stick closer to the model used in pS for other things, e.g. lets go with polling.  Rely on transaction ID to get results later.  Worry about errors being reported from tools too.  Bottom of page describes trust/storage issues.  Complex stuff.  Two possible ways, evils and good things in each method.  Comments?
+   * Jason/Andy discuss the trust, its weird and hard to get.  Andy has the OSCARS experiences in his mind which made him think the MP/MA relationship was harder than MP/Client and Client/MA.  Jeff notes that the problem is easier when you can tell who owns the parts (e.g. if you are the MP and MA owner, trust is easy - harder when 2 - 3 different owners).  Seems we will need to support both, and try to make the auth easier for the easy cases.  
+   * Joe takes a step back to discuss the reason for this - DICE requirements.  Support on demand measurement (US and EU).  Jeff wants to know more about use cases, Joe notes throughput and latency.  Latency is harder most think (difference in HADES/pS).
+   * Jeff makes a pitch for modifying BWCTL to include provisions to exec traceroute, owamp, etc. Could remove some of the logic of controlling tests from the MP layer and into the tools if we did this.  Joe notes the BWCTL protocol is not pS, could be a problem.  Jeff: Could move BWCTL protocol into pS space (something he has thought about before).  Think this may make the task easier.
+   * Discussion moves to us "adding" a session layer into pS - making it statefull.  Server is now maintaining the state just for these tasks.  Getting complex, too complex for DICE.  Should we just leave the socket open for 5 minutes for the test to complete?  Jason calls it lame, Jeff disagrees and says this is how lots of people do it - maybe we do this to meet the immediate need.  
+   * What are the next steps?  Need to find out what the EU is doing (CLMP? OPPD?).  We want to be compatible.  Should also see how things like eCenter and the ESnet Portal work - they have a similar need.  Different use cases of course, but similar needs.  
+   * On demand functionality was always wanted for the toolkit (more than just NDT).  
+   * Actions - Brian/Maxim will work on eCenter/ESnet Portal use case for this interaction.  Jeff/Joe will interact with the EU on the topic of supporting the MP use case.  
+ # Data Provenance/Additional Metadata 
+  * Issue 389
+  * May not do this all today.  Basic idea, add more "stuff" into metadata from a service/host into the Information Services.  Also a DICE requirement.  Interface capacity, tcp alg, etc.  OSCARS does something - registers a node as well.  Can be time based, which makes it tricky.  
+  * Jeff can see a situation where host information is duplicated a lot in test results, doesn't want to see this and would prefer to see it normalized.
+  * LS has a snapshot of the current state of a machine?  Snapshot at each test?  Snapshot only when info changes?
+  * Important distinction to point it: we are blurring the line between the LS and TS with this discussion.  These are all information services, but we still treat them as different things.  TS can handle timebased info (e.g. the same circuit endpoints may have different info when created, we have a lifetime to designate when its alive, etc.).  Don't want to see LS start to handle things that TS should handle unless we start to merge the functions.  
+  * Augment the node (host) object to cover some of this and use in the LS?  Still doesn't have the lifetime features that are needed, would be more at home in the TS.  Use references to track down things.  
+  * Continue on mailing list.  
+  
+==== Actions ====
+
+ * Short Term
+   * _*ACTION*_: Jason to enter a bug for v6 toolkit support (3.3)
+   * _*ACTION*_: Jason to enter a bug for OWAMP NAGIOS plugin improvement.  
+   * _*ACTION*_: Jason to enter a bug for the LS registration issue (3.2.1 and 3.3 versions).     
+   * _*ACTION*_: Jason to migrate hLS code to a branch
+   * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
+   * _*ACTION*_: Jason to integrate his comments into Brian's wiki pages + fasterdata content.  Work on additional doc in accordance with the proposal.  
+   * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+   * _*ACTION*_: Developers to comment/change time estimates 3.2.1 issues.
+ * Long Term
+   * _*ACTION*_: Nils will continue work on vmware build environment
+   * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+   * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+   * _*ACTION*_: Jeff to still ask about further use of SVN as a content management system for psps.perfsonar.net
+
+=== 20110502Video ===
+
+ # Attendees:
+   * Brian, Jason, Jeff, Martin, Aaron, Kavitha, Nils, Andy
+ # Excused:
+   * Joe
+ # Followup on previous actions:
+   * Short Term
+     * _*ACTION*_: ~~Jason to enter a bug for v6 toolkit support (3.3)~~
+       * Done, [http://code.google.com/p/perfsonar-ps/issues/detail?id=527 Issue 527] 
+     * _*ACTION*_: ~~Jason to enter a bug for OWAMP NAGIOS plugin improvement.~~  
+       * Done, [http://code.google.com/p/perfsonar-ps/issues/detail?id=528 Issue 528] 
+     * _*ACTION*_: ~~Jason to enter a bug for the LS registration issue (3.2.1 and 3.3 versions).~~
+       * Done, [http://code.google.com/p/perfsonar-ps/issues/detail?id=529 Issue 529]           
+       * Done, [http://code.google.com/p/perfsonar-ps/issues/detail?id=530 Issue 530]   
+     * _*ACTION*_: ~~Jason to migrate hLS code to a branch~~
+       * Done
+     * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
+     * _*ACTION*_: Jason to integrate his comments into Brian's wiki pages + fasterdata content.  Work on additional doc in accordance with the proposal.  
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Developers to comment/change time estimates 3.2.1 issues.
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Jeff to still ask about further use of SVN as a content management system for psps.perfsonar.net   
+       * Done
+ # Release Discussion
+     * What should/should not be part of the next pS-PS release.
+       * OSCARS .6 dependencies
+ # Supported Architectures
+     * Should we add 64bit?
+       * Mach should make that easier. Sowmya will attempt it.
+ # Host Metadata Issues
+     * Discussion of how host configuration should be referenced with respect to test data.
+ 
+==== Actions ====
+
+     * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
+     * _*ACTION*_: Kavitha/Sowmya/Aaron to comment/change time estimates 3.2.1 issues.
+     * _*ACTION*_: Jason to integrate his comments into Brian's wiki pages + fasterdata content.  Work on additional doc in accordance with the proposal.  
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Jeff to get schedule for implementation of CMS for web space.
+     * _*ACTION*_: Brian/Jeff to work on pS-PS scheduling
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+=== 20110509Video ===
+
+ # Attendees:
+     * Maxim, Brian, Andy, Sowmya, Jason, Aaron, Kavitha, Nils, Martin, Joe
+ # Followup on previous actions:
+   * Short Term
+     * _*ACTION*_: Kavitha/Sowyma/Joe to read Brian's documentation/Jason's Comments.
+     * _*ACTION*_: Kavitha/Sowmya/Aaron to comment/change time estimates 3.2.1 issues.
+     * _*ACTION*_: Jason to integrate his comments into Brian's wiki pages + fasterdata content.  Work on additional doc in accordance with the proposal.  
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Developers to comment/change time estimates 3.2.1 issues.
+     * _*ACTION*_: Martin will develop an action plan for what we want to accomplish at the next OGF in SLC in July.
+     * _*ACTION*_: Martin will have one of his team commit the HTTPS mods to the pS-PS svn in a branch so the rest of the pS-PS team can evaluate the mods.
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Brian/Jeff to work on pS-PS scheduling
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+ # Developer Updates
+     * Martin: Nothing
+     * Jason: Nothing
+     * Joe: DICE discussion happened last week. Geant is considering making all pS HTTP traffic to HTTPS and use server certificates to authenticate transactions. What would Geant backbone MPs accept and what would they recommend to their users? Joe thinks if they accept DOEGrids/inCommon certs that would get most cases but notes that it will cause problems for generic toolkit installs. Josev will go back to Geant and see what certs they will use for sure. There was discussion of next steps for LS.
+     * Andy: Has worked on host metadata. Discussion later.
+     * Brian: Nothing
+     * Sowmya: Working on bwctl/owamp graphs and service test cgi.
+     * Aaron: Packaging ESxSNMP to produce an RPM to make it easier to install. Looking into weird polling problems. Brian asked about making circuit monitoring work with 5.3. Andy may back-port.
+     * Nils: Nothing
+     * Kavitha: Nothing
+     * Maxim: Nothing
+     * Jeff: Nothing
+ # Host metadata
+     * http://code.google.com/p/perfsonar-ps/wiki/HostMetadataProposal
+     * Discussion of examples and parameters. Andy will add some additional host parameters (cpu speed, number of cores) as well as put some specific query examples together.
+ # Updated plots for Toolkit
+  * http://ps-lat.es.net/toolkit/gui/perfAdmin/serviceTestScript/cgi-bin/front-end.cgi?eventType=owamp
+  * http://ps-lat.es.net/toolkit/gui/perfAdmin/serviceTestScript/cgi-bin/front-end.cgi?eventType=bwctl
+==== Actions ====
+ * Short Term
+     * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+     * _*ACTION*_: Sowmya/Aaron to comment/change time estimates 3.2.1 issues.
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Sowmya will package owamp/bwctl plots for others to test.
+     * _*ACTION*_: Andy will add some additional host parameters (cpu speed, number of cores) as well as put some specific query examples together.
+ * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Brian/Jeff to work on pS-PS scheduling
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+=== 20110523Video ===
+
+ # Attendees:
+   * Maxim, Brian, Aaron, Nils, Kavitha, Joe, Andy, Sowmya, Gunter
+ # Excused:
+   * Jason
+ # Followup on previous actions:
+   * Short Term
+     * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+     * _*ACTION*_: Sowmya/Aaron to comment/change time estimates 3.2.1 issues.
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+          * Joe/Jeff will bring up on Friday ESnet/Internet2 call.
+     * _*ACTION*_: Sowmya will package owamp/bwctl plots for others to test.
+     * _*ACTION*_: Andy will add some additional host parameters (cpu speed, number of cores) as well as put some specific query examples together.
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Brian/Jeff to work on pS-PS scheduling
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+ # Discussion on the 3.2.0.1 Netinstall
+   * Status
+     * Brian will have someone at ESnet look at rolling it.
+   * Estimated Completetion (Dev)
+   * Testing
+ # Owamp checking
+   * back off to once/hour
+
+==== Actions ====
+
+     * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+     * _*ACTION*_: Sowmya to comment/change time estimates 3.2.1 issues.
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Sowmya will package owamp/bwctl plots for others to test.
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Brian/Jeff to work on pS-PS scheduling
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+=== 20110627Video ===
+
+ # Attendees:
+   * Nils, Aaron, Kavitha, Andy, Sowmya, Jason, Brian, Jeff, John, Maxim
+ # Excused:
+   * Joe
+ # Followup on previous actions:
+   * Short Term
+     * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+     * _*ACTION*_: Sowmya to comment/change time estimates 3.2.1 issues.
+        * done
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Sowmya will package owamp/bwctl plots for others to test.
+        * Did one cycle through, going to take feedback and create a new rpm this week.
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Brian/Jeff to work on pS-PS scheduling
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+ # Team Updates
+    * Nils: None
+    * Aaron: Working on issues. Would like feedback on cacti.
+    * Kavitha: None
+    * Andy: Working on circuit monitoring - backporting to 0.5.3. Going to focus on open pS issues. Also working on v6 testing.
+    * Sowmya: Working on owamp/bwctl plots. Built CentOS kernel for i386 and i686. Now will work on open issues.
+    * Jason: Working to get pS service into Dynes deployments. Working with LHCONE on getting pS-PS nodes deployed for their use.
+    * Brian: None
+    * John: Working on a plan for ACE. Going to use sflow for accounting. Working with Neil McKee from Inmon.
+    * Maxim: None
+    * Jeff: We will be putting more effort into pS after Jt Techs.
+
+ # Release planning
+    * Still attempting an alpha release by Jt Techs. Brian will take a first cut at prioritizing within 3.2.1 issues for things critical to finish before an alpha release. Developers will accomplish as much as they can in the next 1.5 weeks. Idea is to cut an iso next week Wednesday with whatever can be done by then, and see if it is worth giving out to the community.
+
+==== Actions ====
+
+   * Short Term
+     * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Sowmya will work with Aaron to produce a 3.2.0.1 net install release.
+     * _*ACTION*_: Jason will work with the NOC to make sure pS services are monitored.
+     * _*ACTION*_: Jason will ask for more testers of 3.2.0.1. (Big complainers).
+     * _*ACTION*_: Brian will re-prioritize 3.2.1 issues to outline critical ones for an alpha release.
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+=== 20110706Video ===
+
+ # Attendees:
+   * Brian, Sowmya, Andy, Nils, Kavitha, Aaron, Jeff
+ # Excused:
+   * Jason
+ # Followup on previous actions:
+   * Short Term
+     * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Sowmya will work with Aaron to produce a 3.2.0.1 net install release.
+        * *complete*
+     * _*ACTION*_: Jason will work with the NOC to make sure pS services are monitored.
+        * *complete, the email was sent into the trouble ticket system.  No response from NOC*       
+     * _*ACTION*_: Jason will ask for more testers of 3.2.0.1. (Big complainers).
+        * *complete, software is released*
+     * _*ACTION*_: Brian will re-prioritize 3.2.1 issues to outline critical ones for an alpha release.
+        * *complete*
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+ # Developer updates on status of outstanding issues
+   * Sowmya: Should be done with all assigned issues today.
+   * Andy: Most are ready for testing. Still have open status on tracerouteMA on toolkit. Need to do integration testing. Still have documentation issues.
+   * Aaron: Done with everything marked critical/high except the cacti updates.
+   * Kavitha: Done.
+   * Nils: Done.
+   * Brian, Jeff: No high prio ones.
+
+ # 3.2.1 Release test plan
+   * Jeff suggested we normalize issue *status states* between oscars/pS-PS projects. Brian will discuss with Eric. Jeff will bring up with Chin. Final decision will be made in Fairbanks.
+   * Aaron will write down steps for updating the yum repo. Sowmya will attempt to make the first ISO. Sowmya, Andy and Aaron will test.
+   * Jeff will pull out issues/svn log messages and split out work for finding what is *new* in this release.
+
+==== Actions ====
+
+   * Short Term
+     * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian will discuss with Eric. Jeff will bring up with Chin. Final decision will be made in Fairbanks.
+     * _*ACTION*_: Aaron will write down steps for updating yum repo for new release.
+     * _*ACTION*_: Sowmya will attempt to create a new ISO for 3.2.1rc1 release.
+     * _*ACTION*_: Sowmya, Andy, Aaron will test 3.2.1rc1 ISO.
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+=== 20110725Video ===
+
+ # Attendees:
+   * Andy, Brian, Sowmya, Aaron, Kavitha, Nils, Jeff
+ # Excused:
+   * Jason
+ # Followup on previous actions:
+   * Short Term
+     * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian will discuss with Eric. Jeff will bring up with Chin. Final decision will be made in Fairbanks.
+     * _*ACTION*_: Aaron will write down steps for updating yum repo for new release.
+     * _*ACTION*_: Sowmya will attempt to create a new ISO for 3.2.1rc1 release.
+     * _*ACTION*_: Sowmya, Andy, Aaron will test 3.2.1rc1 ISO.
+     * _*ACTION*_: Jeff will pull out issues/svn log messages and split out work for finding what is *new* in this release.
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+ # Developer updates on status of outstanding issues
+   * Andy: Assigned issues look good. Found a problem with IPv6 on the toolkit. May not work without DHCP? Discussion on best way to access log files.
+   * Brian: Nothing to report, but wants to bring up a discussion topic: Need to discuss the *support model*.
+   * Sowmya: All assigned issues are complete.
+   * Aaron: Still working on Cacti issue. Proposed spllitting the toolkit rpms in a different way to move the configuration changes that currently happen in kickstart into an rpm. Compiled the updated kernel.
+   * Kavitha: No update
+   * Nils: No update
+   * Jeff: Release mangager.
+
+ # 3.2.1rc2 Release Status
+   * Aaron will go through and identify issues that need to be completed for *upgrade process* and a target date for 3.2.1rc2 will be discussed next week.
+
+ # Support model
+   * Proposal: Person of the Week - or person of the month. Responsible to answer email/questions first. Wiki page with PoM listed. Decision is to go forward with this idea on a bi-monthy rotation. Brian will put up a wiki page for assignments.
+
+==== Actions ====
+   * *Did not go over actions from last week, so all previous actions pulled forward to discuss next week.*
+   * Short Term
+     * _*ACTION*_: Brian will put up a wiki page for support assignments.
+     * _*ACTION*_: Aaron will take on splitting the toolkit rpms for upgrade process.
+   * Short Term
+     * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+     * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian will discuss with Eric. Jeff will bring up with Chin. Final decision will be made in Fairbanks.
+     * _*ACTION*_: Aaron will write down steps for updating yum repo for new release.
+     * _*ACTION*_: Sowmya will attempt to create a new ISO for 3.2.1rc1 release.
+     * _*ACTION*_: Sowmya, Andy, Aaron will test 3.2.1rc1 ISO.
+     * _*ACTION*_: Jeff will pull out issues/svn log messages and split out work for finding what is *new* in this release.
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+=== 20110801Video ===
+
+ # Attendees:
+   * Andy, Sowmya, Brian, Aaron, Joe, Jeff, Kavitha, Nils
+ # Excused:
+   * Jason
+ # Followup on previous actions:
+   * Short Term
+     * _*ACTION*_: Brian will put up a wiki page for support assignments.
+        * done
+     * _*ACTION*_: Aaron will take on splitting the toolkit rpms for upgrade process.
+        * done
+     * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+     * _*ACTION*_: Joe and Jeff to do gap analysis for DICE docs.
+        * done
+     * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian will discuss with Eric. Jeff will bring up with Chin. Final decision will be made in Fairbanks.
+     * _*ACTION*_: Aaron will write down steps for updating yum repo for new release.
+        * continuing
+     * _*ACTION*_: Sowmya will attempt to create a new ISO for 3.2.1rc1 release.
+        * done
+     * _*ACTION*_: Sowmya, Andy, Aaron will test 3.2.1rc1 ISO.
+        * done
+     * _*ACTION*_: Jeff will pull out issues/svn log messages and split out work for finding what is *new* in this release.
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+ # Developer updates
+     * Andy: IPv6 issues. /etc/hosts issue - system setup doesn't put ipv6 hostnames in /etc/hosts if static configs are done. Discussion on that issue and suggested resolution.
+     * Sowmya: Done with 3.2.1 issues.
+     * Aaron: Did update for splitting RPMs. Rewrote how some scripts get added in an upgrade situation. Should make toolkit upgrades easier. Still looking at cacti upgrade process.
+     * Kavitha: No update.
+     * Nils: No update.
+     * Joe: Dice product managers meeting and report to principles friday. Need to clarify exactly what is the DICE diagnostic service and what deliverables each org needs to achieve. Going to complete Gap analysis. Need to declare success and move on.
+     * Brian: No update beyond support issues.
+     * Jeff: No update.
+
+ # 3.2.1rc2 Release Status
+     * Dependent on repo issue and /etc/hosts issues from above.
+     * Should incorporate upgrade process and liveCD.
+     * Will attempt to have an ISO ready by Thursday allowing some testing by next Monday. If that works out well, will expand testers to friends and family.
+
+==== Actions ====
+   * Short Term
+     * _*ACTION*_: Aaron will come up with reasonable way to tag repos for testing and rc releases.
+     * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian will discuss with Eric. Jeff will bring up with Chin. Final decision will be made in Fairbanks.
+     * _*ACTION*_: Sowmya will build an ISO for 3.2.1rc2.
+     * _*ACTION*_: Sowmya, Andy, Aaron will test 3.2.1rc2 ISO, including upgrade process.
+     * _*ACTION*_: Jeff will pull out issues/svn log messages and split out work for finding what is *new* in this release.
+   * Long Term
+     * _*ACTION*_: Nils will continue work on vmware build environment
+     * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+     * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+     * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+=== 20110808Video ===
+
+  * Attendees: Brian, Andy, Aaron, Nils
+
+     * Excused: Jeff, Joe, Sowmya, Jason
+
+   * Followup on previous actions:
+     * Short Term
+       * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+       * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
+       * _*ACTION*_: Sowmya will build an ISO for 3.2.1rc2.
+          * Done
+       * _*ACTION*_: Jeff will pull out issues/svn log messages and split out work for finding what is *new* in this release.
+     * Long Term
+       * _*ACTION*_: Nils will continue work on vmware build environment
+       * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+       * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+       * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+   * Developer updates
+      * None
+ 
+  * 3.2.1rc2 Release Status
+     * a couple problems found and fixed (e.g.: IPV6 addresses where not saved properly)
+
+  * Other:
+     * Aaron suggests it is time to clean up the wiki. All agree. Process will be to move pages to an "archive" area. Anyone can (and should) suggest pages for archive, and if no one objects within a few days they can move then to the archive area. Here is Aaron's first list.
+
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkit_Repository_Proposal
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkitPlans
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkit_dev
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkitPingER
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkitPerfSONARBUOY
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkitQuickStart
+      * http://code.google.com/p/perfsonar-ps/wiki/SubversionStructure
+      * http://code.google.com/p/perfsonar-ps/wiki/TopologyRelations
+      * http://code.google.com/p/perfsonar-ps/wiki/PerformanceNodeAdminInterface
+      * http://code.google.com/p/perfsonar-ps/wiki/SubPortQueryOptions
+      * http://code.google.com/p/perfsonar-ps/wiki/InstallDVD_Notes
+      * http://code.google.com/p/perfsonar-ps/wiki/SubversionStructure
+      * http://code.google.com/p/perfsonar-ps/wiki/NPToolkit
+      * http://code.google.com/p/perfsonar-ps/wiki/CatalystEvaluation
+      * http://code.google.com/p/perfsonar-ps/wiki/CurrentE2EMonLimitations
+      * http://code.google.com/p/perfsonar-ps/wiki/FAQ
+      * http://code.google.com/p/perfsonar-ps/wiki/ISOAtlasCentralConfig
+
+  
+==== Actions  ====
+    * need to add message and documentation telling user to reboot after an upgrade (Aaron)
+    * need more testing of 3.2.0 to 3.2.1rc2 upgrade, for both netinstall and LiveCD before sending rc2 out. This will be done by Aaron, Andy, and Sowmya.
+
+=== 20110815Video ===
+
+  * Attendees: Brian, Jason, Andy, Sowmya, Kavitha, Jeff
+     * Excused: Aaron, Nils
+  * Followup on previous actions:
+     * Short Term
+       * _*ACTION*_: Aaron will add message and documentation telling user to reboot after an upgrade
+       * _*ACTION*_: Aaron, Andy, Sowmya will do more testing of 3.2.0 to 3.2.1rc2 upgrade, for both netinstall and LiveCD before sending rc2 out.
+         * DONE
+       * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+       * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
+       * _*ACTION*_: Jeff will pull out issues/svn log messages and split out work for finding what is *new* in this release.
+         * Andy will take this on.
+       * _*ACTION*_: Aaron will archive old/redundant wiki pages and update on progress.
+     * Long Term
+       * _*ACTION*_: Nils will continue work on vmware build environment
+       * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+       * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+       * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+  * Developer updates
+     * Jason: TexasTech is looking at doing a campus wide deployment. Ability to use a GUI to setup a set of MPs and MAs.
+  * Other:
+  
+==== Actions  ====
+     * Short Term
+       * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+       * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
+       * _*ACTION*_: Andy will announce the availability of rc2 for testing.
+       * _*ACTION*_: Andy will create the changes file.
+       * _*ACTION*_: Aaron will archive old/redundant wiki pages and update on progress.
+     * Long Term
+       * _*ACTION*_: Nils will continue work on vmware build environment
+       * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+       * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+       * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+=== 20110829Video ===
+
+  * Attendees: Andy, Sowmya, Kavitha, Aaron, Jeff
+     * Excused: Nils, Brian
+  * Followup on previous actions:
+     * Short Term
+       * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+       * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
+       * _*ACTION*_: Andy will announce the availability of rc2 for testing.
+            * done
+       * _*ACTION*_: Andy will create the changes file.
+            * Will pass something around later today.
+       * _*ACTION*_: Aaron will archive old/redundant wiki pages and update on progress.
+     * Long Term
+       * _*ACTION*_: Nils will continue work on vmware build environment
+       * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+       * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+       * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+  * RC2 Status
+     * Next steps, production release?
+        * Umich tested - no issues
+        * U Hawaii - Alan Whinery, problems - aaron is following up.
+  * Other:
+  
+==== Actions  ====
+     * Short Term
+       * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+       * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
+       * _*ACTION*_: Aaron will archive old/redundant wiki pages and update on progress.
+       * _*ACTION*_: Aaron will follow up with Alan on problems
+       * _*ACTION*_: Andy will get testers from USAtlas - aiming for 3 more testers.
+     * Long Term
+       * _*ACTION*_: Nils will continue work on vmware build environment
+       * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+       * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+       * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+=== 20110912Video ===
+
+  * Attendees: Nils, Kavitha, Andy, Sowmya, Brian, Aaron, Jeff
+     * Excused: 
+  * Followup on previous actions:
+     * Short Term
+       * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+       * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
+          * Jeff and Brian will meet this week thursday.
+       * _*ACTION*_: Aaron will archive old/redundant wiki pages and update on progress.
+          * done - future meeting pages will be combined in a single doc
+       * _*ACTION*_: Aaron will follow up with Alan on problems
+          * Problems due to no dns entry. Sowmya will validate aaron fix.
+       * _*ACTION*_: Andy will get testers from USAtlas - aiming for 3 more testers.
+          * Got 3, and is following up with feedback.
+     * Long Term
+       * _*ACTION*_: Nils will continue work on vmware build environment
+       * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+       * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+       * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+  * RC2 Status
+       * Testing/feedback went well. RC3 should be created and the expectation is that it will go production.
+  * Other:
+  
+==== Actions  ====
+     * Short Term
+       * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+       * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
+       * _*ACTION*_: Andy will coordinate with Sowmya and Aaron to create RC3. Andy will announce to perfSONAR-users to solicite the last round of testing. We expect this version to go production.
+     * Long Term
+       * _*ACTION*_: Nils will continue work on vmware build environment
+       * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+       * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+       * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+=== 20110919Video ===
+
+  * Attendees: Andy, Sowmya, Kavitha, Nils, Aaron, Brian, Jeff
+     * Excused: 
+  * Followup on previous actions:
+     * Short Term
+       * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+       * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
+       * _*ACTION*_: Andy will coordinate with Sowmya and Aaron to create RC3. Andy will announce to perfSONAR-users to solicite the last round of testing. We expect this version to go production.
+     * Long Term
+       * _*ACTION*_: Nils will continue work on vmware build environment
+       * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+       * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+       * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+  * RC3 Status
+       * GUI updates are complete. Security issues are still being tracked down.
+       * Andy will verify yum updates which should address security issues.
+       * Aiming for Wednesday creation of RC3. If no issues found internally, aiming for public release by friday.
+  * Other:
+  
+==== Actions  ====
+     * Short Term
+       * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+       * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
+       * _*ACTION*_: Andy will coordinate with Sowmya and Aaron to create RC3. Andy will announce to perfSONAR-users to solicite the last round of testing. We expect this version to go production.
+       * _*ACTION*_: Nils will verify GUI fixes.
+       * _*ACTION*_: Andy will verify yum updates which should address security issues.
+     * Long Term
+       * _*ACTION*_: Nils will continue work on vmware build environment
+       * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+       * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+       * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+
+=== 20110926Video ===
+
+  * Attendees: Andy, Sowmya, Brian, Aaron, Kavitha
+   
+  * RC3 Status
+
+Netinstall is fully tested. Need to test LiveCD, and then will send an announcement for rc3 to all the lists.
+LiveCD needs a new kernel and a new AUFS module (instructions for this are at: http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs). Email that goes out will explain how to point yum at the rc3 repo.
+  
+==== Actions  ====
+
+  * Somya to build LiveCD for testing
+  * Andy to put together email announcement
+
+=== 20111010Video ===
+
+  * Attendees: Andy, Joe, Sowmya, Kavitha, Nils, Aaron, Brian, Jeff
+     * Excused: 
+  * Followup on previous actions:
+     * Short Term
+       * _*ACTION*_: Jason will write more in the troubleshooting and collaborating documents.
+       * _*ACTION*_: Normalize issue *status states* between oscars/pS-PS projects. Brian and Jeff to work on this
+         * Andy will be release manager, Nils will be backup.
+       * _*ACTION*_: Andy will coordinate with Sowmya and Aaron to create RC3. Andy will announce to perfSONAR-users to solicite the last round of testing. We expect this version to go production.
+         * *DONE*
+       * _*ACTION*_: Nils will verify GUI fixes.
+         * *DONE*
+       * _*ACTION*_: Andy will verify yum updates which should address security issues.
+         * *DONE*
+     * Long Term
+       * _*ACTION*_: Nils will continue work on vmware build environment
+         * Still 64bit issues. Have not worked on in some time.
+         * moved to issue tracker
+       * _*ACTION*_: Andy will check out SLAC traceroute analysis. 
+         * Issue to look at multiple traceroute tools
+       * _*ACTION*_: Sowmya will do more performance analysis of XML generation.
+         * moved to issue tracker
+       * _*ACTION*_: Sowmya will attempt to build X86-64 rpms
+         * moved to issue tracker
+  * Release Status
+       * No new bugs found in RC3. Will roll a new release and update web pages this week - testing to begin on Wednesday. Andy will prepare an announcement letter, and we will collectively review status and likely announce next Monday.
+  * Other:
+
+=== 20111017Video ===
+
+  * Attendees: Brian, Andy, Sowmya, Aaron, Kavitha, Nils, Jeff
+     * Excused: 
+  * Followup on previous actions:
+     * Short Term
+     * Long Term
+  * Release Status
+     * Release is good to go. Andy will announce after the call.
+  * Project Outreach
+     * Brian thinks climate community is next for deployment outreach. Eli is talking to the community about Science DMZs.
+     * Jeff/Brian will arrange for a discussion with past contributors to try and determine how to get their contributions added back into the base of the project.
+     * Jeff/Brian will plan for a what's next meeting/call for the project post-SC to determine what critical functionality is next on the horizon.
+  * Issue statuses
+     * Andy suggested using same issue states from OSCARS project in pS-PS. It was agreed to and Andy will normalize as he has time.
+  * Other:
+     * Next call will be in two weeks.
+==== Actions  ====
+  * Followup on previous actions:
+     * Short Term
+        * *_ACTION_*: Jeff/Brian will arrange for a discussion with past contributors to try and determine how to get their contributions added back into the base of the project.
+        * *_ACTION_*: Jeff/Brian will plan for a what's next meeting/call for the project post-SC to determine what critical functionality is next on the horizon.
+     * Long Term
+
+=== 20111031Video ===
+
+  * Attendees: Brian, Aaron, Nils, Kavitha, Sowmya, Andy, Jeff
+     * Excused: 
+  * Followup on previous actions:
+     * Short Term
+        * *_ACTION_*: Jeff/Brian will arrange for a discussion with past contributors to try and determine how to get their contributions added back into the base of the project.
+        * *_ACTION_*: Jeff/Brian will plan for a what's next meeting/call for the project post-SC to determine what critical functionality is next on the horizon.
+     * Long Term
+        *
+  * ISO release plan
+     * Issues 566-568.
+     * traceroute visualizer - Andy will work with Dan to put on psps website.
+  * Q/A process
+    * Nils will go through issue reports to improve testing checklist.
+    * Andy will talk with Atlas to discuss improving process.
+  * pS-PS Project planning
+    * Come up with the breadth of things to do first, then depth. First brain-storm potential work first meeting after SC, then plan 4 hour vid-conf.
+  * Other:
+==== Actions  ====
+     * Short Term
+        * *_ACTION_*: Jeff/Brian will arrange for a discussion with past contributors to try and determine how to get their contributions added back into the base of the project.
+        * *_ACTION_*: Jeff/Brian will plan for a what's next meeting/call for the project post-SC to determine what critical functionality is next on the horizon.
+        * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
+        * *_ACTION_*: Andy will talk with Atlas to discuss improving test/release process.
+     * Long Term
+
+=== 20111201Video ===
+
+  * Attendees: Sowmya, Brian, Andy, Joe, Nils, Kavitha, Aaron, Jeff
+     * Excused: 
+  * Planning meetings:
+     * Discussion of dates for planning meetings and discussion of homework.
+     * Everyone will be asked to think about who our target constituents are and what probelms we are proposing to solve for them. We should think about this in terms of the effects or results that can be produced.
+     * One area to be addressed separately will be to discuss any areas where we envision technical problems with the infrastructure that need to be addressed to support the problems/solutions we want to address from above.
+==== Actions  ====
+     * Short Term
+        * *_ACTION_*: Jeff/Brian will arrange for a discussion with past contributors to try and determine how to get their contributions added back into the base of the project.
+        * *_ACTION_*: Jeff/Brian will plan for a what's next meeting/call for the project post-SC to determine what critical functionality is next on the horizon.
+        * *_ACTION_*: Nils will go through issue reports to improve testing checklist.
+        * *_ACTION_*: Andy will talk with Atlas to discuss improving test/release process.
+        * *_ACTION_*: Sowmya will send out a proposed design document for the lookup service by Monday.
+        * *_ACTION_*: Jeff will send out an email to solicit brainstorming for 2012 roadmap.
+        * *_ACTION_*: Jeff will get feedback from university constituents for brainstorming effort. (Perhaps from the IU NOC.)
+        * *_ACTION_*: Joe and/or Brian will get feedback from a lab constituent for brainstorming effort. (Perhaps from Eli.)
+
+=== 20111213Video ===
+
+  * Attendees: Brian, Eric, Sowmya, Joe, Jeff, Nils, Kavitha, Aaron, Martin
+   * Excused: Jason
+  * Present proposed LS design changes (Sowmya)
+   * Introduction (Brian)
+    * Goal is to focus on high-level design, not implementation details
+    * Review of issues related to current LS.
+    * Slides list some scalability requirements
+    * Reviewed some non-requirements
+     * Don't register metadat
+     * OSCARS firendly name support. can be in topology
+     * No XQuery support.
+    * Jeff: General statement that we need a requirements document. Overview is good start, but need more specifics.
+    * Joe: We need to make sure we understand how we re-design affects overall perfsonar architecture document.
+     * Brian: Suspect it hasn't changed but we need to review. Also need to determine which document contains architecture details, and what it contains.
+     * *Action:* Find and review LS architecture document. Decide how its changed. 
+   * Design Overview (Eric)
+    * Going to go over some general questions
+    * Has a layered design similar to most modern cloud/distributed services:
+     * Infrastructure layer - messaging, failure detection, security
+     * Data layer - service registration, query processing
+    * Infrastructure layer
+     * Needs to support load requirements highlighted earlier
+     * Constraints include that we have community based deployment (no central organization), worldwide availability, want highly available, and want some security
+     * Jeff: In some ways there is a centralized organization in the form of the perfsonar collaboration
+      * Discussion revolved around what it means to be centralized, and whether it was requirement
+      * Brian/Eric: Design does not necessarily prevent us from having a centralized cloud service. 
+     * Aaron: For security,really the main issue is how does the "client" verify the data is good.
+    * P2P Model
+     * Multi-organization, volunteer-based resources
+    * Joe: Can we look at what services are?
+    * Eric skipped to Data layer slides
+    * Nils: What problems are we trying to solve?
+    * Joe: What's in a service?
+    * Joe: We need to figure out what we no longer are able to handle, how else we are handling it or does it need to be handled.
+    * Service Records
+     * Set of key/value pairs
+     * A few required keys: name, type, url, domain
+     * Aaron: What happens if topology has multiple domains? 
+     * Jeff: Addressed similar concern to Aaron about domains 
+      * Andy: One key thing is that we are using the word "domain" tomean a lot of different things. In the LS context it means "where do I store this", that's it. Should have other parameters to indicate things like "i host topologies X, Y, and Z"
+     * Jeff: Also need to address the security issues
+        * Andy: See slide later
+     * Infrastructure
+      * There is a ring 
+    * Dan: Why do we need a ring if everyone has same routing table?
+    * Martin: For security, you may just have a known CA that if a node has cert from then allowed to join
+     * Eric: Implementation decision
+    * Aaron: I bring up a new domain, where do I register?
+     * Eric: You register with a ring
+     * Andy: More specifically, you register with any node, the node forwards it to the right place
+     * Eric/Brian/Sowmya: Assumes that at least one node stores wildcard. Once stored the routing table is updated with new domain
+     * Caching node
+      * Cache node keeps updated results of a specific query
+      * API to query cache the same
+     * Martin: Caching stuff is right on with what we were thinking for indexing service
+      * *Action:* Martin will send out document on dLS
+     * Eric: We may have more interesting ways to find caches
+     * Aaron: Are there two types of caches? Ones that pre-fetch specific queries, and ones that cache as queries come in.
+      * Eric: yes.
+     * Dan: You don't need caches for this to work. You can build ring and add those later.
+      * Eric: Yes
+     * Security
+      * Infrastructure: Want to limit who can join the ring 
+      * Data Layer: 
+       * Write protection. Service records cannot be modified by rogue client.
+       * No read protection
+      * Jeff: There are distributed hashtables like BigTable and Cassandra. Have we evaluated just using those or another existing p2p system?
+       * Eric: Looked a lot at DHT, wrote one in a previous life. Need to do some more research, but most systems out there almost too-generic and make assumptions that don't apply. A lot of them are not stable yet either.
+       * Dan: There's a lot of stuff out there, a lot of them fall flat on there face when it comes to security
+     * Data Distribution (Sowmya)
+      * Data is stored in ring based on "domain"
+       * Aaron: One problem with querying based on domain is tha will stil have queries like "give me all pingers in world"
+        * Andy: Can't avoid that. That's why we added the caches to deal with those.
+        * Eric: Could store on multiple keys. This may mean we have to store a service multiple times.
+       * Jeff: This is why we need a requirements document. So we can evaluate things like this better. Pointed out some use cases that are not clear given current information.
+        * Nils: It'd be nice to explicitly have requirements defined that allow us to show quantifiable improvement
+        * Joe: I agree. Requirements should be 50% of the work. We haven't written that down yet.
+        * Brian: We've been discussing these problems for years. Need to collect together so improvement clear. 
+      * How services are registered.
+        * Client registers with any node in ring, ring forwards it toright place where it gets stored
+        * Renewals with reg key
+      * Security (Andy)
+       * Up to clients to decide what service it trusts
+       * Martin: Signing services similar to stuff presented for ls in the past
+       * May be able to say if you are a guest/unauthenticated user, can only register specific keys and values
+         * Andy: This will work, but if you start trying to limits when fields are non-null then problem gets much harder
+       * Need to determine what can an anonymous person do
+       * Need requirements to talk about security issues.
+      * Next steps
+       * One main one is need requirements document
+        * Need more people beyond this call to buy-in for this to be successful
+        * Document needs to also explciitly states what it fixes
+        * Need to write why an existing solution does not meet needs
+        * Cloud services
+         * Its ok if individual domain wants to run ls on cloud service
+         * If only commercial services allowed, then that likely will now work
+       * Another meeting about requirements document in January
+       
+==== Actions  ====
+ * Generate a requirements document 
+    * Schedule meeting about requirements document
+ * Group will find and review original LS architecture document. Should determine how its changed.
+ * Martin will send out document on dLS
+
+=== 20111215Video ===
+
+  * Attendees: Jeff, Joe, Andy, Sowmya, Brian, Nils, Sowmya, Kavitha, Aaron
+     * Excused: 
+  * Brainstorming for perfSONAR vision/problem statement
+     * For list of ideas see [2012DevelopmentIdeasBrainstorm]
+     * Present coalesced list of problems we could leverage pS to solve. (Jeff)
+      * Customers
+       * Important for us to define customers
+       * Important to show value with new development. Many of items in the list do tha.
+       * Jeff: One such thing is to provide more detailed information about individual flows
+        * Brian: We have looked at that in the past and most people have good commericial solutions
+        * Jeff: They are not interdomain
+        * Brian: Not clear that security people wouldn't cause it to be abstracted to uselessness
+        * Jeff: Possible that's not the case
+        * Discussion today will be slightly more blue sky and less focused on what resources will do what. Need to prioritize items, can focus on how far done the list after the end of the year
+        * Jeff: Analysis might be important, helps end-users that are not network engineers
+        * Brian: Could spend most of time on documentation
+         * Jeff: That will help current users, may not grow user community
+        * Brian: another way is to grow developer community
+        * Brian: how do we make more useful to CIO?
+         * Jeff: End-user tools that say "can i do this video conference" users from the campus get this bandwidth. These are the top bandwidth campuses. 
+         * Brian: New things ike netflow would be hard to deploy, but could build map from current bwctl or throughput data
+        * Joe: @Jeff are you looking at SLA verification or anything down that path?
+         * Jeff: I was, but less now. In some ways you can think of nagios work as that. 
+     * Joe: A lot of these fall in broad categories
+      * Most of the tools are good for letting us detect problems in other domains...not problems we can solve
+     * Jeff: In past relied on end-user to talk how useful it is. Also have wanted them to build apps.
+     * Brian: Creating better APIs and libs would help this
+     * Brian: Say we have top sites and bottom sites list? what happens when site is on bottom of the list.
+      * In some ways like a campus version of speedtest.net
+      * Joe is goal to raise the top 10%, thebottom 10% etc?
+       * Jeff: could show differentiation between commercial nets and r&e nets. 
+       * Jeff: we should maybe move up the stack and get performance data out of gridftp. that would also show value
+     * *Summary of New Ideas:*
+      * End-user tool (analysis of data)
+      * Look at flow data
+      * Pull performance stats out of GridFTP
+      * Map that shows different campus performance 
+      * Show Top 10% and Bottom 10% of campus performers
+    * Jeff: There is a division of operational versus development tasks
+    * Brian: We could start targeting new communities (i.e. climate)
+    * Handling multple Nodes
+     * Some people want to have multiple nodes, register to single MA
+     * Groups like USATLAS want way to easily setup the tests (i.e. import export tests)
+     * Andy: Low hanging fruit might be to export owmesh file content to URL and allow other hosts to point to it
+     * Jeff; Centralized MA might not be hard
+     * *New Idea:*  - Jeff - Integrate ping into bwctl. Should be easy.
+     * GLIF uses pinger
+      * What's priority? 
+     * Helps people installing, makes life easier but does not necessarily allow them to do new things
+     * Joe: VOs might want to do template so this might be useful
+     * *New Idea:* - Aaron - If more stuff ran under bwctl could do third-party tests. Have one central host that executes all test, 
+     * Run into issues of centralized vs distributed architecture
+     * Need better AA in place likely to do some of this
+     * *Who benefits:* VOs, users with multiple nodes
+     * *Decided Priority:* LOW
+    * *New Idea:* Make tools more firewall friendly (i.e. move all to port 80 or 443)
+     * Web services might be easier
+     * For owamp and bwctl mighthave to tunnel
+     * Aaron: For owamp definitely couldn't tunnel everything. tunnelling udp or tcp makes it not udp.
+     * Jeff: would have to violate RFC to make it on one port, but might be possible.
+     * Not sure if it would be easy to setup tunnels either without manual intervention
+     * Things like Netalyzer only use port 80 - maybe uses some other ports
+     * UDP hard to support in firewalled environments. Would capturing different stats be helpful? Loss is useful but can get that from places than OWAMP. 
+      * Need to evaluate what stats are unique to owamp that we can't get anywhere else
+      * Maybe can find tcp tool that looks at queueing 
+      * TCP solutions will never be perfect measures of loss - lots of things can cause retransmits
+     * *Who benefits:* Network engineers at DOE labs, campuses, hospitals because easier to deploy. 
+     * *Decided priority:* Medium
+    * Lookup Service
+     * Lost of problems: stability, architecture requires lots of queries to all services
+     * Three types of issues
+      * XMLDB issues
+      * Cache issues
+      * Query model
+     * Priority: Low-High (depending on which problem)
+    * Better analysis
+     * NDT or Detective for historical data
+     * Traceroute GUI
+     * Custom dashboard (like ESnet)
+     * Does good job of highligting value
+     * *Priority:* High
+    * Climages
+     * Better data summarization. 
+      * May be low hanging fruit in GUI space. 
+      * Keeping raw data is a matter of disk space. May be low hanging fruit in keep last 1 hour of raw data.
+      * *Priority:* Low
+     * better reporting mechanism
+      * Example: Send around email saying "your network performed this well, this week"
+      * *Priority:* High
+     * More end-user development work
+      * In addition, want to grow open source project
+      * App store 
+       * Lots of stuff out there
+       * Part of this would be guidelines for people to get accepted in the app store
+      * REST APIs
+       * Would this help get us any new developers?
+       * Have people trying to 1) display own data and 2) grab other peoples data.
+       * Another way is better docs and client libraries.
+       * Could do this incrementally.
+      * Priority: High for overall topic (need to decide individual priorities)
+    * Layer 2 Information
+     * A good end-user tool would be useful in this space.
+     * Who does this benefit: Network engineers, maybe end-user if easy to tell traffic is on circuit
+     * *Priority:* Medium(?)
+    * Next Steps:
+     * Meet after at the end of the year to come up with homework assignments and digest priorities.
+  * Determine how existing 'issues' map to identified needs.
+  * Assign homework to determine resources needed to accomplish identified outcomes.
+
+==== Summary of tasks and priorities  ====
+
+|| *Task* || *Priority* ||
+||Better analysis tools ||HIGH||
+||Better reporting mechanism ||HIGH||
+||Encourage more end-user development work||HIGH||
+||Lookup Service||LOW-HIGH||
+||Make tools more firewall friendly||MEDIUM||
+||Better integration with Layer2 and below (including IDC and/or OF)  ||MEDIUM(?)||
+||Handling multple nodes||LOW||
+||Better data summarization ||LOW||
 
