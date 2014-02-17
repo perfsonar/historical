@@ -1,6 +1,6 @@
 #summary pS Performance Toolkit 3.2
 
-<font color=red size=8>This version of the pSPT has been depreciated.  Please visit http://software.internet2.edu/pS-Performance_Toolkit/ to find the latest version.</font>
+<font color=red size=6>This version of the pSPT has been depreciated.  Please visit http://software.internet2.edu/pS-Performance_Toolkit/ to find the latest version.</font>
 
 <wiki:toc max_depth="6" />
 
