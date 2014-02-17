@@ -30,6 +30,44 @@ To build this kernel, you will need a host with CentOS 6, and the 'rpm-build' pa
     * mock -r epel-6-i386 --resultdir=$HOME/mock-results/epel-6-i386 --arch=i386 --target=noarch --without=debug --without=kabichk --with=firmware kernel_file.src.rpm
    * If new patches have been added, these commands may error out due to patches that don't apply cleanly. If so, these patches will need modified as appropriate and the command rerun (look [#Creating_Kernel_Patches here])
 
+== Kernel Modules aufs and sk98lin ==
+Every release requires you to rebuild the aufs and sk98lin modules as well as the kernel. The process for both is as follows.
+ * Download the latest aufs and sk98lin RPMS found in http://software.internet2.edu/web100_kernel/rpms/el6/SRPMS/
+ * You might need to create the mockbuild user on your system:  # useradd -s /sbin/nologin mockbuild
+ * On you build host install both Source RPMS 
+{{{
+rpm -iv aufs-kmod-file.src.rpm
+rpm -iv sk98lin-kmod-file.src.rpm
+}}}
+ * Update the installed SPEC file (in ~/rpmbuild/SOURCES) with the following changes:
+ * Update the kversion to match the kernel you are building against
+  * Increase the Release by 1
+  * Rebuild the source RPM using the new SPEC file, which resides in ~/rpmbuild/SPECS
+{{{
+rpmbuild -bs SPECS/aufs-kmod.spec
+rpmbuild -bs SPECS/sk98lin-kmod.spec
+}}}
+ * If using mock, copy the kernel rpms to your holding repo (see below) and then start the build. This should complete the build process.
+  * mock -r epel-6-x86_64 --resultdir=$HOME/mock-results/epel-6-x86_64/ --arch=x86_64 --without=debug --without=kabichk aufs_file.src.rpm
+  * mock -r epel-6-x86_64 --resultdir=$HOME/mock-results/epel-6-x86_64/ --arch=x86_64 --without=debug --without=kabichk sk98_file.src.rpm 
+  * mock -r epel-6-i386 --resultdir=$HOME/mock-results/epel-6-i386/ --arch=i386 --target=i686 --without=debug aufs_file.src.rpm
+  * mock -r epel-6-i386 --resultdir=$HOME/mock-results/epel-6-i386/ --arch=i386 --target=i686 --without=debug --without=kabichk sk98_file.src.rpm 
+
+=== Setting up a holding repo ===
+In /etc/mock/epel-6-i386.cfg:
+
+[holding]
+name=holding
+baseurl=file:///home/mock/holding/epel-6/i386/
+
+Create a corresponding entry in /etc/mock/epel-6-x86_64.cfg.
+
+The directories /home/mock/holding/[epel-5|epel-6]/[i386|x86_64] are yum repositories created using createrepo. You
+can copy the kernel RPMs in, and then do this:
+
+createrepo -u /home/mock/holding/epel-6/i386
+createrepo -u /home/mock/holding/epel-6/x86_64
+
 === Generating Random Bytes ===
 When compiling on a remote host, it is common to see an error like this:
 
@@ -78,24 +116,6 @@ Aufs kernel patches for various kernel versions can be found [http://aufs.source
 Fortunately the web100 kernel patch seems to be much a much smoother process as it requires less modification. Manual patching is highly recommended to make sure that things end up where they need to be. Through experience, I have found that lines of code can be inserted where they don't belong which will cause major issues when building and using a kernel. After manual patching is completed simply run a diff between the vanilla kernel and the modified one to produce a patch that will be applied at RPM build time.
 
 Web100 kernel patches for various kernel versions can be found [http://www.web100.org/download/ here].
-
-== Kernel Modules aufs and sk98lin ==
-Ever release requires you to rebuild the aufs and sk98lin modules as well as the kernel. The process for both is as follows.
- * Download the latest aufs and sk98lin RPMS found in http://software.internet2.edu/web100_kernel/rpms/el6/SRPMS/
- * On you build host install both Source RPMS 
-{{{
-rpm -iv aufs-kmod-2.2-7.el6.aufs.web100.src.rpm
-rpm -iv sk98lin-kmod-10.92.1.3-7.el6.aufs.web100.src.rpm	
-}}}
- * Update the installed SPEC file with the following changes:
- * Update the kversion to match the kernel you are building against
-  * Increase the relnum by 1
-  * Rebuild the source RPM using the new SPEC file
-{{{
-rpmbuild -bs SPECS/aufs-kmod.spec
-rpmbuild -bs SPECS/sk98lin-kmod.spec
-}}}
- * If using mock, copy the kernel rpms to your holding repo and then start the build. This should complete the build process.
 
 == Customizing The Toolkit ==
 
