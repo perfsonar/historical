@@ -1,0 +1,1581 @@
+#summary List of perfSONAR-PS Activites from 2013
+
+== 2013 Activities ==
+
+  * [2013Activities#20130107Video January 7, 2013 Conference Call]
+  * [2013Activities#20130128Video January 28, 2013 Conference Call]
+  * [2013Activities#20130204Video February 4, 2013 Conference Call]
+  * [2013Activities#20130211Video February 11, 2013 Conference Call]
+  * [2013Activities#20130225Video February 25, 2013 Conference Call]
+  * [2013Activities#20130304Video March 4, 2013 Conference Call]
+  * [2013Activities#20130311Video March 11, 2013 Conference Call]
+  * [2013Activities#20130318Video March 18, 2013 Conference Call]
+  * [2013Activities#20130401Video April 1, 2013 Conference Call]
+  * [2013Activities#20130408Video April 8, 2013 Conference Call]
+  * [2013Activities#20120415Video April 15, 2013 Conference Call]
+  * [2013Activities#20130429Video April 29, 2013 Conference Call]
+  * [2013Activities#20130506Video May 6, 2013 Conference Call]
+  * [2013Activities#20130513Video May 13, 2013 Conference Call]
+  * [2013Activities#20130520Video May 20, 2013 Conference Call]
+  * [2013Activities#20130603Video June 3, 2013 Conference Call]
+  * [2013Activities#20130617Video June 17, 2013 Conference Call]
+  * [2013Activities#20130624Video June 24, 2013 Conference Call]
+  * [2013Activities#20130708Video July 8, 2013 Conference Call]
+  * [2013Activities#20130715Video July 15, 2013 Conference Call]
+  * [2013Activities#20130729Video July 29, 2013 Conference Call]
+  * [2013Activities#20130812Video August 12, 2013 Conference Call]
+  * [2013Activities#20130819Video August 19, 2013 Conference Call]
+  * [2013Activities#20130826Video August 26, 2013 Conference Call]
+  * [2013Activities#20130909Video September 9, 2013 Conference Call]
+  * [2013Activities#20130923Video September 23, 2013 Conference Call]
+  * [2013Activities#20130930Video September 30, 2013 Conference Call]
+  * [2013Activities#20131014Video October 14, 2013 Conference Call]
+  * [2013Activities#20131021Video October 21, 2013 Conference Call]
+  * [2013Activities#20131028Video October 28, 2013 Conference Call]
+  * [2013Activities#20131104Video Nov 4 , 2013 Conference Call]
+  * [2013Activities#20131125Video Nov 25 , 2013 Conference Call]
+  * [2013Activities#20131202Video December 2, 2013 Conference Call]
+  * [2013Activities#20131209Video December 9, 2013 Conference Call]
+  * [2013Activities#20131216Video December 16, 2013 Conference Call]
+  * [2013Activities#2013Roadmap 2013Roadmap]
+
+=== 20130107Video ===
+
+  * Attendees: Sowmya, Andrew, Brian, Aaron, Nils, Kavitha
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+    * Andy
+    * Kavitha
+    * Aaron
+    * Nils 
+    * Andrew
+    * Brian
+    
+  * Release status
+
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Developer Updates
+    * Andy
+     * Working on LS registration daemon and MA registration
+     * LS registration is basically done 
+     * MA work is basically done
+    * Sowmya 
+     * Working on bootstrapping and packaging servers
+     * Plan to setup on a couple ESnet servers, should give it to Internet2. Hope to start on that Wednesday.
+    * Aaron
+     * Just got back from vacation, not much to talk about
+     * Make sure we include mesh config in package list
+     * GUI mesh config will not be ready
+    * Kavitha
+     * Fixed NDT bug that user reported. Will jus email directly.
+     * Fixed bug in bwdb.pl
+    * Nils
+     * No updates
+    * Andrew
+     * Found issue with CentOS revisions on svn server not getting updated, so people we downloading old revision repeatedly
+     * Hoping to get CentOS 5 -> CentOS 6 transition working. User accounts are the biggest issue and probably not crucial for first beta. 
+     * Also need to look at mirror list. New Zealand guys reported there was an issue with some of them timing out. 
+     * We need to get documentation updated. We should point to the mesh config, get install and toolkit docs updated. Need a better directory of documentation.
+    * Brian
+     * Have to figure out if we are meeting in Bloomington this Spring
+     
+  * Release status
+    * Will try to have all packages ready be Wednesday. Will build images on Wednesday and test from there. Hopefully by C.O.B. Friday will have toolkit ready.
+
+=== 20130128Video ===
+
+  * Attendees:
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+    * Andy
+    * Kavitha
+    * Aaron
+    * Nils 
+    * Andrew
+    * Brian
+  * Release status
+
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Developer Updates
+    * Kavitha
+     * Worked on web10g patches. Fixed a few problems. 
+    * Nils 
+     * Put together the kernel patches.
+    * Aaron
+     * Built web10g RPM and userland RPM
+     * Need to get NDT RPM with web10g patch working. It does not cleanly apply to trunk because some style changes that are causing issues.
+     * May want to try making it default for one of the RCs.
+    * Sowmya
+     * Working on cache.pl for new LS
+     * Looked at toolkit page title fix
+     * Aaron: Is their an upgrade procedure? Currently no, not sure if it will be automatic. 
+      * Should have Andrew look at Google geocode which can parse a lot of crazy stuff. 
+     * We need to make LS port consistent for currently deployed.
+    * Brian
+     * I've been cleaning up dashboard
+     * A whole bunch of bwctl servers were in wedged state. Should we restart bwctl?
+      * Also looking that if R&E limits helps problem by limiting bot traffic. Maybe make a checkbox on toolkit?
+      * ACTION: We should add bwctl to restart list for RC2, maybe once a month to start with
+      
+  * Release status
+   * Action: Andy make an issue to add new NTP servers
+   * Aaron will try to get a default tesports range on the toolkit
+   * iperf programmer working on adding JSON output format
+   * Display issue
+    * RH6 uses different display settings which is causing some issues
+   * Nessus issue
+    * Action: Assign Aaron issue to fix critical nessus bug that requires ssl.conf mod
+   * NDT issue
+    * Aaron working on NDT issue Jim reported. Likely a 64-bit issue.
+   * New nuttcp
+    * Action: Andy Create a new issue and assign it to Brian o investigate if works with bwctl
+   * New NDT interface
+    * Action: Andy to add issue to investigate replacing NDT with HTML5 version. Add issue not, 3.3 yet.
+
+=== 20130204Video ===
+
+  * Attendees: Aaron, Jason, Brian, Andrew, Andy, Kavitha
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+    * Aaron
+     * Updated mesh config RPM with ability to specify non-standard ports
+     * Compiled version of Web10G with kernel.
+     * Talked to Chris, said NDT patch works but not sure grabbing all the right data
+    * Kavitha
+     * No updates
+    * Andy
+     * Working on rolling out Linux on owamp servers
+     * Installed new mesh config RPM, looks like it worked
+    * Andrew
+     * Asked about interface setup scripts. Solution probably to update python script 
+     * Working on remaining 3.3 issues
+    * Brian
+     * No updates beyon what's coming up on agenda.
+     * Been testing iperf3 with new JSON format. Can likely use the -f flag. 
+      * Compatibility may be an issue if remote side is not iperf3.
+  * perfSONAR Web Site
+   * Should be easy enough to convert to CMS
+   * We should keep static content under CMS and keep more dynamic content on google code wiki
+   * Not too time sensitive on kicking off Internet2 server, but should do quickly
+   * If we were to move perfsonar.net, we'd need approval from all parties involved.
+   * Also need to think about name change. Maybe dropping PS would be a good thing and just calling it "perfSONAR Toolkit" or similar. Want to be able o distinguish from other distributions to ease communication.
+  * Pythia
+   * Warren has presented some information about Pythia. 
+   * Andy installed on ps-lat.es.net. There are RPMs for client side that upload to central server. 
+   * Almost have it uploading data 
+  * Release status
+    * Fixed a number of issues last week
+     * A few we need to fix
+     * Get NDT RPM in repo
+     * Get Traceroute GUI running 
+     * Fix RH6 display issue  
+    * Decided we should have upgrade procedure for RC2
+    * Try to get other issues done by end of this week.
+
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+
+=== 20130211Video ===
+
+  * Attendees: Andy, Aaron, Sowmya
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+  * Release Status
+
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+ * Developer Updates
+  * Skip
+ * Release Status
+  * Have not heard back on Ian's MTU issue
+  * Partition Issue
+    * Have Andrew put debug command options in backing_store. Have write to file and David mail to us. 
+  * LS Bootstrap
+   * Ping added to LS bootstrap by Sowmay
+   * Andy will modify MAs to boot if can;t find LS and add boostrap to service watcher
+  * Upgrade process
+   * Andy and Aaron will meet with Andrew at 4pm to discuss status
+
+=== 20130225Video ===
+
+  * Attendees: Andy, Sowmya, Brian, Aaron, Nils
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+  * Release Status
+  * Packaging for OSG 
+  * Support Topics
+  
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Developer Updates
+   * Sowmya
+    * No updates
+    * Still haven't heard from Ian Gable about MTU error
+   * Nils
+    * No updates
+   * Brian
+    * Working on getting owamp on plug computer, having some time issues
+   * Andy
+    * Worked with Andrew on update
+    * LiveCD was working for Andrew, Andy had issue on VM where he could not login
+    * NetInstall scripts are supposed to be working
+   * Aaron
+    * Added an include mechanism to mesh configuration
+  * Release Status
+    * Aaron to add default port bwctl stuff
+    * Andrew looking into LiveCD issue with user accounts found by Andy
+    * NetInstall scripts about ready
+    * Hope to test and have out the door later this week.
+  * Packaging for OSG
+    * OSG looking to deploy perfSONAR
+    * Have distribution system based around yum, NetInstall and LiveCD might not really make sense
+    * Could do level 1 and level 2 install 
+    * Andy will take closer look at it and report next week
+     * Make sure to look at how to handle restarts and db clean
+     * Database initailization
+  * Support Topics
+   * Alesandro
+    * Needs to send us owmesh file
+   * Dwayne
+    * Needs to send us owmesh file
+   * Enzo
+    * Should check NTP is working properly
+    * ESnet testers saw similar issues, need to check test ports and lbl-owamp logs 
+   * Other issues
+    * Sowmya noticed 3.3rc1 owamp_bwctl logs not getting written to. Probably a syslog change.
+    * bwctld.limits issue with same subne in multiple classes. need to determine how difficult it would be to make GUI support it. Also should check script that generates it. 
+
+=== 20130304Video ===
+
+  * Attendees: Andy, Sowmya, Brian, Aaron, Nils
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+  * Release Status
+  
+==== Future Agenda Topics ====
+  * Roadmap
+  * Geant interoperability (Any update?)
+  
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Developer Updates
+    * Andy
+     * Wrote upgrade scripts for NetInstall, made some tweaks to LiveCD netinstall
+     * Re-build bwctl and owamp rpms this morning to capture recent changes
+     * In process of building ISOs, hope o have uploaded by end of day
+     * Would like feedback from people on cal by C.O.B. Wednesday. If things go well shoot for end of the week to announce (maybe early next week).
+   * Nils
+     * No updates
+    * Brian
+     * New LS installed in Japan
+     * It should get added to LS list
+     * Aaron: Does iperf3 do rate limiting? Brian: yes. not sure how much it will help with 1G -> 10g case. Need more experimenting.
+     * Aaron: Should modify bwctl to pass rate limit option at some point
+    * Sowmya
+     * No updates, working on LS again
+    * Aaron
+     * Updated owamp and bwctl configs to use the firewall test ports
+
+=== 20130311Video ===
+
+  * Attendees: Andy, Aaron, Sowmya, Brian, Nils, Kavitha
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+  * Release Status
+  
+  
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Developer Updates
+   * Andy
+    * CentOS 6.4 released over weekend. Rebuilding kernel. aufs patch did not apply cleanly. 
+    * Will look at bug Sowmya reported. Likely problem where two groups have same GID.
+   * Brian
+    * Testing bwctl and iperf stuff with JSON ability
+   * Aaron
+    * Release updated CentOS 5 kernel
+    * USATLAS have started using the includes. Have a few issues with JSON validation. Has a quick work around will implement today likely, and work on longer-term solution later.
+   * Nils
+    * Testing the release
+   * Sowmya 
+    * Tested RCs
+    * Working on the lookup service
+   * Kavitha
+    * No updates
+  * Release Status
+   * Goal is Wednesday. Rebuilding kernels and fixing upgrade scripts
+   * Documentation needed for upgrade and ports
+   * Need to start thinking about next 6 months plan. Brian will create wiki for brainstorming
+
+=== 20130318Video ===
+
+  * Attendees: Sowmya, Nils, Aaron, Brian, Kavitha, Andy
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+     
+  * Release Status
+  * Roadmap
+  
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Developer Updates
+   * Andy
+    * Worked on getting release out last week
+    * Will bug people on various calls about testing
+  * Sowmya
+   * Working on LS subscribe feature
+  * Aaron
+   * Got CentOS 5 kernel out
+   * Brian asked about GUI. Its been awhile since Aaron worked on it. A few issues on MeshConfig could be probably closed
+  * Nils
+    * No updates
+  * Brian
+   * Did iperf3+bwctl testing and found some issues. Will let group
+  * Kavitha 
+   * No Updates
+  * Release Status
+   * Look at issues marked as 3.3 and assigned to you. Close, fix, or let us know if you think its something you can't have done in the next week. 
+  * Roadmap
+   * Brian has started [2013Roadmap] document for next few months. Made a few updates today
+   * Q2 starts in 2 weeks, so think of a lot of it as start in Q2 as opposed to finish then
+   * Aaron said he thinks it captures most of the big things and priorities looks right. Still need to do some resource planning on I2 side before can commit too much. Will know more in next week or two.
+
+=== 20130401Video ===
+
+  * Attendees: Sowmya, Andy, Aaron, Andrew, Nils, Kavitha
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+  * Release Status
+  
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Developer Updates
+   * Andy
+    *  Working on LS backward compatibility. Hopefully be done later this week.
+    *  Working on MeshConfig for Esnet and auto generating it
+   * Sowmya
+    *  Working on TOS bit for bwctl
+    *  Will work on Admin Info page and data checking. Would be nice to validate lat/long and have country selection.
+   * Andrew
+    * Working on directorySearch page on stats.es.net> making few small changes.
+   * Aaron
+    *  Fixed owping and powstream to default to port. Will rebuild for no release
+  * Nils
+    *  Fixed a small bug 
+   * Kavitha
+    *  No updates
+   * Brian
+    *  Planning to test bwctl with nuttcp 
+ * Release status
+  * Hopefully can have rc3 ready by the end of next week
+  * Andy will pass issue tracker and make sure nothing is missing thats marked 3.3
+
+=== 20130408Video ===
+
+  * Attendees: Sowmya, Andy, Nils, Aaron, Brian
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+  * Release Status
+   * Yum for R&E networks
+   * OWAMP DB Changes
+  
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+ * Developer Updates
+  * Andy 
+   * LS backward compatibility script
+   * Working on getting contacts registered
+  * Sowmya
+   * Added the TOS bit to the GUI
+   * Added pulldown-menu and lat/long checks
+  * Nils
+   * No updates
+  * Aaron
+   * Worked on OWAMP DB - more later.
+  * Brian
+   * nuttcp works so we can add it
+ * Release
+   * OWAMP DB
+    * timestamps duplicated in multiple formats in multiple columns. since owamp has many rows, leads to a lot of disk space. IU has been running it for a few days, saw 60% decrease in size of tables.
+    * Changes are backward compatible and we think I should put in rc3
+    * Will not do anymore substantial change
+   * R&E Networks
+    * Will set mirror list for kickstart, but up to user to change for updates
+
+=== 20120415Video ===
+
+  * Attendees: Sowmya, Andy, Aaron, Andrew, Brian, Kavitha, Andrew
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+   * Andy
+    * Building images
+   * Sowmya
+    * Nagios plug-in for the lookup service. Almost done, adding ability to check multiple LSes.
+   * Aaron
+    * Branch for Web10G some minor NDT
+    * Changed powstreams retry interval to once every minute rather than 10 secs. Should make logs look better. Longer term could do exponential back-off maybe up limit further.
+   * Brian
+    * Jeff supposedly fixed iperf3 bugs with bwctl.
+   * Kavitha
+    * No updates
+  * Release Status
+    * Repo issues
+     * Will create el6 branch to keep CentOS 6 stuff. May explore further organization in the future. 
+
+
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+
+=== 20130429Video ===
+
+  * Attendees: Nils, Sowmya, Brian, Andy,  Kavitha
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+   * Andy
+    * RC3 out last week
+    * Kernel built. will let RC testers know its ready.
+   * Sowmya
+    * Subscribe client about close to completion
+    * Next step to test on ESnet
+   * Brian
+    * Met with Web10G at SMM. Still need to backport current version to CentOS6 kernel. Talking to student about getting NDT working.
+    * Nils
+     * No updates
+    * Kavitha
+     * No updates
+  * Release Status
+   * Andy and Aaron will look at yum repo organization
+   * Need to verify LS registration and LS cache scripts a bit more. Andy and Sowmya will work on that.
+   * Hopefully can finalize things in next 1-2 weeks
+
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+ * Developer Updates
+   * Andy
+   * Sowmya
+   * Brian
+   * Nils
+  * Release Status
+
+=== 20130506Video ===
+
+  * Attendees: Nils, Sowmya, Brian, Andy,  Kavitha
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+   * Andy
+   * Sowmya
+   * Brian
+   * Nils
+   * Kavitha
+  * Release Status
+
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+
+=== 20130513Video ===
+
+  * Attendees: 
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+   * Andy
+   * Sowmya
+   * Brian
+   * Nils
+   * Kavitha
+  * Release Status
+
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Developer Updates
+    * Andy
+     * Fixed a bunch of 3.3 things, getting ready to build
+    * Sowmya
+     * Worked on LS
+     * On-call person, Brian is on-call next
+    * Aaron
+     * Patched BWCTL to output info about scheduled slots
+     * Pretty large fuzz factor noticed so far still looking
+     * Brian asked if he had played much with bwctl+iperf3. We should check what happens if client does not specify -T, may pick iperf3.
+    * Brian
+     * Looking a how can help CCNIE community with Jason
+    * Warren
+     * Working on new pythia RPMs to patch the GUI
+     * Once cleaned up may be worth trying to get on a few more machines 
+     
+
+=== 20130520Video ===
+
+  * Attendees: Brian, Andy, Aaron
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Release Status
+
+
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Release Status
+   * RC4 about ready, will announce at the end of the day
+
+=== 20130603Video ===
+
+  * Attendees: 
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+   * Andy
+    *
+   * Aaron
+    *
+   * Sowmya
+    *
+   * Brian
+    *
+   * Nils
+    *
+   * Kavitha
+    *
+  * Release Status
+   * Dell interface renaming issue
+   * LS backward compatibility scripts
+   * Yum repo reorganization
+
+
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+
+=== 20130617Video ===
+
+  * Attendees: 
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+   * Aaron
+   * Andrew
+   * Andy
+   * Brian
+   * Jason
+   * Kavitha
+   * Nils
+   * Sowmya
+
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * Developer Updates
+   * Aaron
+    * Gave workshop
+    * Started analyzing bwctl slot information
+    * Brian hopeful Aaron can test bwctl and iperf3
+   * Andrew
+    * Working on services directory. Using django and memcached.
+    * Sent around survey on interface
+   * Andy
+    * perfSONAR release out the door
+    * Working on getting 3.3 on ESnet and cleaning-up mesh config
+   * Brian
+    * Vacation last week
+   * Luke
+    *  Wrapped up some unit tests on LS client
+   * Sowmya
+    * Fixed a couple of bugs
+    * Working on bugs with subscribe interface bug
+   * Warren
+    * Working on final report for Pythia
+    * Committing last of code for Pythia
+    * Andy will deploy agents this week on ESnet
+
+=== 20130624Video ===
+
+  * Attendees: Andy, Aaron, Sowmya
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+   * Aaron
+    * Not much to update, been work
+    * Aaron suggest pushing alpha setting to some non-zero default in bwctl
+   * Andy
+    * Updated dashboard to MeshConfig
+    * Tracking down issues in ESnet's internal mesh
+    * Currently have support duty, so dealing with lots of those emails
+   * Sowmya
+    * Working on subscribe API
+ * LiveCD issues
+  * Coming up with a udev script is our best option here likely. Aaron might try to look at it before he leaves for vacation and Andy will try to find some cycles to put something together after that.
+
+
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+
+=== 20130708Video ===	 
+
+  * Attendees: Andy, Sowmya, Brian, Jason
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+   * Aaron
+   * Andy
+   * Sowmya
+   * Brian
+   * Nils
+   * Kavitha
+   * Jason
+   * Andrew
+
+
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+  * General discussion
+   * 3.3 services not appearing on regular testing GUI
+    * Andy fixed, issue with the cache script.
+    * GUI could also do things a little smarter, Andy created issue
+   * BWCTL alpha setting
+    * Aaron said he would look at adding default in previous meeting. He has been on vacation so nothing to report yet,
+   * USB testing
+    * Sowmya can test
+    * Andrew will write-up how to use VMWare to use USB
+   * Dashboard docs
+    * It might be good to suggest people use meshconfig when installing dashboard
+    * Need beter documents
+   * iperf3 integration
+    * Would like to move that up the queue, not sure who to assign it to though
+  * Developer Updates
+   * Andy
+    * Working on udev scripts, udev not being consistent about notifications so still looking
+    * LiveCD is a lot of trouble, but still in demand
+     * ACTION: Jason will create survey
+    * Upgraded ESnet hosts
+   * Sowmya
+    * LS is in wrap-up phase
+   * Brian
+     * Already updated
+   * Jason
+    * Planning with I2 about web presence
+    * Installfest happenning late July
+    * Need to nail down details of perfSONAR project being working on at Installfest
+     * ACTION: Talk about meta-package details for new RPM or tarball at future meeting
+
+=== 20130715Video ===
+
+  * Attendees: Andy, Aaron, Sowmya
+  
+==== Follow-up on Actions  ====
+    * *_ACTION_*: Brian and Aaron will continue to work on redesigning pS-PS web presence.
+
+==== Agenda Topics ====
+  * Developer Updates
+   * Aaron
+   * Andy
+   * Sowmya
+   * Brian
+   * Nils
+   * Kavitha
+   * Jason
+   * Andrew
+
+
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Actions  ====
+    * *_ACTION_*: Brian/Aaron will continue to work on redesigning pS-PS web presence.
+    
+==== Notes ====
+   * Developer Updates
+   * Andy
+    * Have script to hopefully fix LiveCD network interface problem. will build new LiveCD soon
+    * Also updated some of the bwctl build scripts to make it easier to build with iperf3 support
+    * Updated bwctl to have default randomization of startTime to 10%
+   * Sowmya
+    * Wrapping-up lookup service
+    * Working on iperf3 integration next
+   * Aaron
+    * Debugging stuff with USATLAS and mesh config. XML-RPC was making messages too big, added fix.
+    * Also ran into some Unicode issues that caused mesh config to get errors
+    * Noted one thing that would be nice is if test didn't finish in time it would be nice to publish result that it did get some data. 
+
+=== 20130729Video ===
+
+==== Agenda Topics ====
+  * Developer Updates
+   * Aaron
+   * Andy
+   * Sowmya
+   * Jason
+  * 3.3.1 Release Status
+   * LiveCD
+   * MeshConfig
+  * Paper 
+
+==== Future Agenda Topics ====
+  * Roadmap
+
+==== Notes ====
+  * Developer Updates
+   * Aaron
+    * MeshConfig fixes applied, waiting to hear back from USATLAS
+   * Andy
+    * 3.3.1 LiveCD built, gave to BNL, waiting to hear back
+    * Looking at OWAMP MA
+   * Sowmya
+    * Working on LS fix, should be done in next couple days
+   * Jason
+    * XSEDE conference, gave perfSONAR tutorial.
+    * Well attended, sent around some notes to list
+     * Doc are confusing
+     * All different products are confusing
+     * MDM vs. PS confusing
+     * start cleaning out unsupported stuff 
+  * 3.3.1 Release Status
+   * Looks like everything just about ready. Maybe sometime next week we can announce?
+  * Paper 
+   * Ezra and Jason making final passes. Will let group know when its open for edits.
+
+=== 20130812Video ===
+
+  * Attendees: Jason, Sowmya, Aaron, Brian, Warren, Andy, Martin
+  
+==== Follow-up on Actions  ====
+
+==== Agenda Topics ====
+  * Developer Updates
+   * Aaron
+   * Andy
+   * Sowmya
+   * Jason
+  * 3.3.1 status
+  * Survey Results
+  * BWCTL Ping/Traceroute/owping Support
+  * Level 1 and Level 2 Install next steps
+  * GATech Future Projects 
+  * Host security items
+  
+==== Future Agenda Topics ====
+  * Roadmap
+  
+==== Actions  ====
+
+==== Notes ====
+  * Developer Updates
+   * Andy
+    * Fixed a few 3.3.1 issues
+    * Helped a few people on mailing list
+    * See other items
+   * Aaron
+    * BWCTL changes (see later in agenda)
+   * Sowmya
+    * Wrap-up some of the LS
+    * POW
+    * OWAMP graph fix
+   * Jason
+     * Installfest was successful
+     * Paper submitted
+   * Brian
+    * Playing around with level 1 install
+    * Schedule perfSONAR summit with ESnet senior leadership and i2 leadership to nail-down resource commitments. Meet with other leaders shortly thereafter.
+   * Warren
+    * See agenda
+   * Martin
+    * No updates
+  * 3.3.1 status
+   * MeshConfig fixed
+   * Just waiting on LiveCD
+   * Will look at non-standard port meshconfig issue
+  * Survey Results
+   * Pretty good sample, wide spectrum of users that have run  Toolkit for a long time and a short-time
+   * 75% use Netinstall, about 1/3 use LiveCD
+   * Some confusion about v6 support. Should probably be cleaner how it's presented.
+   * Maybe should send email with LS details at some point
+   * Dual-homing a big issue
+    * would not running owamp continuously help? probably not.
+    * Probably a high priority, but not sure who to assign to yet
+  * BWCTL Ping/Traceroute/owping Support
+    * Aaron modified bwctl to support ping, traceroute, tracepath and owping
+    * Might need to add some hooks to disable tools
+    * Could do cool things like make traceroute maps of servers running bwctl. 
+    * Action: Come back after summit and assign recource
+  * Level 1 and Level 2 Install next steps
+   * Put together new meta-packages for Level and Level 2 install
+   * A few DOE people we should share these with
+   * Notes from Brian:
+    * What requires rrdtool?
+    * install iperf3
+    * Delete ndt and npad from the default config
+    * Brian will look a ktune as additional package to help tune stuff
+  * GATech Future Work 
+   * Lots of things we can use help on
+   * Dual-homing might be a good item since a lot of schools have a setup
+   * PinGER replacement could be interesting. smokeping might be a good item
+  * Host security items
+   * Tried several host-based security tools
+   * Enabled ssh throttling, but requires iptables. Need to understand iptables performance impact
+   * Ran ossec, requires email server. Not suggesting by default, but might be good to provide instructions on how to use
+   * Ran fail2ban which scrapes logs for DDOS attacks. sends email.
+   * rkhunter looks for anything installed. 
+   * Jason would recommend fail2ban, denyhost, and rkhunter
+   * Could add to nptoolkit-configure.py and admin_info on web page (or similar)
+   * aaron suggested dump to root mail buy default, maybe add postfix rule
+   * Action: Should make sure we add the iptables file
+   * Action: Add issue to configure SMTP server
+
+=== 20130819Video ===
+
+  * Attendees: Brian, Andy, Jason, Sowmya, Aaron, Warren
+  
+==== Follow-up on Actions  ====
+
+==== Agenda Topics ====
+  * Developer Updates
+   * Andy
+    * Worked with BNL on LiveCD
+    * Getting 3.3.1 packages updated  
+   * Brian
+    * Planning to have LBL check XSS stuff again
+   * Jason
+    * Will generate script for testing to to pre-determined hosts easily
+   * Sowmya
+    * Finishing up lookup service
+    * Fixed serviceTest XSS fix
+   * Aaron
+    * Added fix for config daemon crashing when it encounters unicode
+    * Added option to bwctl to help deal with firewall. Allows to have sender connect to receiver in places it previously was the other way around, only tested with nuttcp.
+   * Warren
+    * Interviewed some students
+    * Pushed out Jason's iptables to hosts
+  * 3.3.1 status
+   * Sowmya has serviceTest ready
+   * MeshConfig ready
+   * NDT we will skip for now, can get in repo for NetInstal when ready. Don't want to block
+   * Andy to finish packaging today, hopefully Wednesday announce 3.3.1
+
+=== 20130826Video ===
+
+  * Attendees: Andy, Sowmya, Jason, Aaron, Brian
+  
+==== Follow-up on Actions  ====
+
+==== Agenda Topics ====
+ * Developer Updates
+ * MA port consolidation
+ * BWCTL allow_unsync by default
+ * Firewall test script
+
+==== Future Agenda Topics ====
+  * Roadmap
+  
+==== Actions  ====
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+     * 3.3.1 out, went pretty smooth 
+     * Should determine better way to find people not upgraded. 
+   * Brian
+    * Organizing perfSONAR summit with I2 and ESnet
+    * Tuesday Sep 17th is the date
+    * Brian will be updating project plan
+   * Jason
+    * At physics workshop last week. Some interest shown in disk tools to measure disk performance.
+     * iperf3 getting some ability that may help. No one wants to test toolkit disk performance so not sure how this would look. 
+    * Want cleaner APIs to feed various systems
+    * Throwing around "wall of shame" idea that shows if domain has a service registered and can I run a test to you
+   * Sowmya
+    * Nothing to update
+   * Aaron
+    * Added hacky way to do "firewall mode" with ping and traceroute to bwctl. Still working out some client issues.
+   * Warren
+    * Hired a few students 
+    * Did some nmap scans on some toolkit boxes in region that are on private networks (has permission to do that)
+ * MA port consolidation
+  * Could put stuff behind reverse proxy and run NDT and NPAD
+  * We should create issue and consider for future release. Probably annoying little things to do like hardcoded ports, etc.
+ * BWCTL allow_unsync by default
+  * The advantage is BWCTL will run when it starts, disadvantage is BWCTL will get in funny states if NTP is wildly off and not kill things at the. The individual results of tools like iperf should be fine.
+  * Aaron thinks we should test more and see what types of errors we get when NTP is off. If it has good error messages that tell what's happening it might not be a bad thing.
+  * If the error messages are terrible, we might consider better reporting of what's going on. Right now on the toolkit its hard for users to tell if the red "Not running" is due to this issue or if something is actually wrong. 
+ * Firewall test script
+  * Everyone agrees its a good idea
+  * One thought was we could write specific daemons to accept connections
+
+=== 20130909Video ===
+
+  * Attendees: Andy, Brian, Aaron, Jason, Sowmya
+  
+==== Follow-up on Actions  ====
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Sowmya
+   * Brian
+   * Jason
+   * Warren
+ * TBD
+
+==== Future Agenda Topics ====
+  * Roadmap
+  
+==== Actions  ====
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Not much to update, POW has been relatively quiet
+   * Sowmya
+    * Integrate LS testing work by Luke into main trunk
+   * Aaron
+    * No updates
+   * Brian
+    * Prepping for summit meeting and IU meeting
+   * Jason
+    * Paper is done. 
+    * Will put LS scripts on antg
+    * Would user experience tool be useful? probably, but many questions. Will experiment more at SC. 
+
+=== 20130923Video ===
+
+  * Attendees: Andy, Sowmya, Brian, Jason, 
+  
+==== Follow-up on Actions  ====
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Sowmya
+   * Brian
+   * Jason
+   * Warren
+ * TBD
+
+==== Future Agenda Topics ====
+  * Roadmap
+  
+==== Actions  ====
+
+==== Notes ====
+  * Developer Updates
+   * Andy
+    * New version bwctl pushed out to es.net hosts
+    * Will work on adding some new dashboards per Jason's note
+   * Sowmya
+    * Working on some LS testing Package should be ready soon.
+   * Brian
+    * Played with tracebox
+    * Meeting with Internet2 went well. Working on governance and will share more with community soon.
+   * Jason
+    * See Brian's update
+    * Code sprint next year possibly
+    * Going to LBL this week to talk about Panda
+   * Warren
+    * No updates
+   * Aaron
+    * NDT RC release 10 days ago. Later today or tomorrow will do final release.
+    * Also shared new BWCTL release. Installed on ESnet, haven't heard from others
+ * TBD
+
+=== 20130930Video ===
+
+  * Attendees: Andy, Jason, Aaron, Sowmya, Eric B.
+  
+==== Follow-up on Actions  ====
+
+==== Agenda Topics ====
+
+
+==== Future Agenda Topics ====
+  * Roadmap
+  
+==== Actions  ====
+ * Developer Updates
+   * Andy
+   * Jason
+   * Aaron
+   * Sowmya
+   * Eric
+   * Brian
+ * how to handle dual-homed hosts? (Aaron)
+ * how to bwctl scheduling options? (Aaron)
+ * update on call with Geant folks (Brian) 
+ 
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * No updates, helped with a few issues on the list
+   * Jason
+    * Worked on LS issue on the list
+    * Finishing up some slides for presentation
+   * Aaron
+     * See bwctl topics
+     * There is bwctl_debug version. Will give it consistent version number so can add on ESnet
+   * Sowmya
+    * Upgraded antg.es.net to RC version
+    * Testing pub/sub with a few test servers. goes well ten upgrade others
+  * Eric
+    * Met internally with product management and others and are getting up to speed on partnership
+  * Brian
+    * More bwctl/iperf3 testing
+    * Had a meeting with GEANT3 to talk about plans going forward. Still very early.  
+ * how to handle dual-homed hosts? (Aaron)
+  * See's two option:
+   * In meshconfig specify one address for owamp and one for bwctl
+    * Would need work on GUIs and generation of ls_registration_daemon file
+   * Phase 2 the GUI creates a mesh config instead of writing files directly
+   * Somewhat related is how much co-scheduling we allow also some tests of same type my want t use different interfaces. Could lead to configuration that's too confusing.
+ * how to bwctl scheduling options? (Aaron)
+  * Aaron is working on adding settings for this. We will have to figure sane options that don't cause too much complexity for users. 
+ * update on call with Geant folks (Brian)
+  * See Brian's update
+
+=== 20131014Video ===
+
+ * Attendees: Andy Lake, Jason Zurawski, Sowmya Balasubramanian, Aaron Brown, Brian Tierney, Eric Boyd, Ken Miller
+  
+==== Follow-up on Actions  ====
+
+TBD
+
+==== Agenda Topics ====
+
+ * Developer Updates
+   * Andy
+   * Jason
+   * Aaron
+   * Sowmya
+   * Eric
+   * Brian
+ * NTAC Update from Ken Miller
+ * V6/V4 Dual Mesh Testing
+ * Program approach and next steps
+==== Future Agenda Topics ====
+  * Roadmap
+  
+==== Actions  ====
+ 
+TBD
+ 
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Looked at 3.2.2 issues did a little organization in tracker
+    * Action: Schedule meeting this week to go through tracker
+   * Jason
+    * SCInet work
+    * Working on software that measures wget performance and plots results
+   * Sowmya
+    * Packaged sLS. Sent RPM to others for testing. Requested Aaron could update.
+   * Aaron
+    * As part of dual-homed work, looking at consolidating the "master" scripts. Currently 4 different ones.
+    * Brian: Should we also consolidate formats? Aaron: Possibly but information is very different. 
+    * Merged Web10g branch of NDT into trunk. need others to verify
+   * Brian
+    * Gave a talk at NANOG
+    * Good questions, got thinking about better dual-stack approach
+   * Eric 
+    * See program approach
+ * NTAC Update from Ken Miller
+  * NTAC had a group of 25 people that got together to look at metric availability and headroom.
+  * A couple documents being generated
+  * looking at network holistically may be more desirable. This means setting some baselines and sharing more beyond netflow data and usage,
+  * Also looking at determining when a link should be upgraded. 
+  * Questions about how to test against baseline (i.e. is there existing tools? do we need to develop new ones?)
+  * Will post more information soon
+  * Jason: Really should look hard at using owamp. Smokeping is easy and has nice front-end but ICMP misses a lot. 
+  * Jason: Any thought to SDN monitoring? Ken: Needs to be more thought, doing some initial work
+  * Jason: Might be a good idea to do a write-up on how to do IPv4 vs IPv6 hostnames similar to firewall documents. 
+  * Ken: Also looking at routing policy
+ * V6/V4 Dual Mesh Testing
+  * See updates
+ * program approach and next steps
+  * perfSONAR summit a couple weeks ago. short-term agreement on development tasks 
+  * Plan to go through outstanding issues list. 
+  * Looking at IU's process and how we can get feedback from them
+  * Talking to GEANT on continuing collaboration
+  * Might do a requirements workshop
+  * Will be using SmartSheets to track tasks. 
+
+=== 20131021Video ===
+
+ * Developer Updates
+   * Andy
+   * Jason
+   * Aaron
+   * Sowmya
+   * Eric
+   * Brian
+ * Road Map
+ * Issue Discussion
+  * Issue 298
+  * Issue 406
+  * Issue 607
+  * Issue 619
+  * Issue 629
+  * Issue 631
+  * Issue 643
+  * Issue 658
+  * Issue 669
+==== Future Agenda Topics ====
+  * Roadmap
+  
+==== Actions  ====
+ 
+TBD
+ 
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Issue triage with Brian
+    * Working on 3.2.2 issues. Fixed nagios check v6 problem
+   * Sowmya
+     * Working on CentOS 6 and CentOS 5 kernel release
+   * Aaron
+    * Working on new regular testing GUI. Question about publishing data. Will write to DB for now but make it modular for later.
+    * 3.3.2 issues look reasonable
+   * Brian
+    * iperf3 now has -F flag for checking disk speed
+    * It will be hard to add above option to bwctl for security reasons
+   * Eric
+    * First phase of project management aspects with ESnet and I2 have kicked-off
+ * Road Map
+  * Moved 3.4 to Summer and other scheduling shifts
+ * Issue Discussion (see Issues for notes)
+  * Issue 298
+  * Issue 406
+  * Issue 607
+  * Issue 619
+  * Issue 629
+  * Issue 631
+  * Issue 643
+  * Issue 658
+  * Issue 669
+
+=== 20131028Video ===
+
+ * Attendees: Andy, Sowmya, Brian, Aaron
+  
+==== Follow-up on Actions  ====
+
+TBD
+
+==== Agenda Topics ====
+
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+ * 3.3.2 release status
+ * bwctl problems
+ * web10G issue
+
+==== Future Agenda Topics ====
+  * Roadmap
+  
+==== Actions  ====
+ 
+TBD
+ 
+==== Notes ====
+  * Developer Updates
+   * Andy
+    * Built 3.3.2 packages. Can test NetInstall (sans bwctl fix).
+    * Aaron: Working on bwctl fix. Not killing process groups properly. Will revrt by tomorrow if no other issue.
+    * Once all built will test internally and then give to a few known testers
+   * Aaron
+    * Beyond bwctl fixes been working on regular testing
+    * Got everything but traceroute and powstream working. Still need to get iperf3 parser working.
+    * Should also look at adding sig handler to iperf3 to spit out state on kill
+   * Sowmya
+    * Fixes done for 3.3.2. Group agreed the security fix was acceptable. 
+   * Brian
+    * New hire Bruce Mah officially started
+ * 3.3.2 release status
+  * See andy udpate
+ * bwctl problems
+  * See aaron update
+ * web10G issue
+  * Looks like web10g will not be supported on CentOS 6 kernels
+  * Need to talk to Jason more
+
+=== 20131104Video ===
+
+ * Attendees:Sowmya, Brian, Aaron, Eric, Warren
+  
+==== Follow-up on Actions  ====
+
+TBD
+
+==== Agenda Topics ====
+
+ * Developer Updates
+   * Aaron
+   * Sowmya
+   * Brian
+
+ * new email lists: Eric will send out soon
+ * 3.3.2 release status: testing is underway
+  
+Eric reported that Martin and Prasad will be hosting a perfSONAR research workshop in February.
+
+Warren is working on tests with hades, and with smokeping.
+
+Next 2 calls are cancelled due to SC13
+
+=== 20131125Video ===
+
+ * Attendees:
+  
+==== Follow-up on Actions  ====
+
+TBD
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * 3.3.2 release status
+   * Firewall and IDS status
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Updated build host
+    * Working on MA overhaul 
+      * Have some design docs, will share this week
+      * Looking at coming up with an implementation plan closer. Trying to understand what we can use from esmond.      
+   * Aaron
+    * Tried an updated powstream, had to revert back to old way 
+   * Sowmya
+    * Working on 3.3.2 release
+    * Incorporating firewall script. I've been adding code to dynamically add ports. Still working on it.
+    * Brian: fail2ban looks like easiest. 
+    * Sowmya will add dependency in Toolkit RPM on fail2ban.
+   * Brian
+    * IU will be helping with some perfSONAR stuff
+ * 3.3.2 release status
+   * Sowmya will try to have firewall script and fail2ban Toolkit dependency done by end of week. Give to beta testers next week. 
+
+=== 20131202Video ===
+
+ * Attendees: Jason, Andy, Sowmya, Brian, Eric
+  
+==== Follow-up on Actions  ====
+
+TBD
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * 3.3.2 release status
+   * Firewall and IDS status
+   * CentOS 6.5
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Shared MA documents with group
+    * Will schedule meeting with Jon Dugan this week
+   * Aaron
+    * Working on getting new BWCTL out. Jason found some minor stuff. Can put current version on ESnet.
+    * Building new kernel RPMs
+   * Sowmya
+    * All firewall changes are made. Added in fail2ban. 
+    * Need kernel RPMs ready.
+    * Removed outbound filtering
+    * Jason going to send SSH throttling line
+    * Action: Sowmya will enable fail2ban
+   * Jason
+    * Tested iptables and fail2ban at SC
+   * Brian
+    * Bruce Mah ramping up on iperf3
+    * Burst of activity while Jef wraps-up
+    * TCP performance should be the same as nuttcp. UDP performance seems slower.
+   * Eric
+    * Been having good conversations with GEANT
+ * 3.3.2 release status
+   * CentOS 6.5
+    * Aaron will build meta-package
+
+=== 20131209Video ===
+
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * Support timeline for CentOS 5 kernel
+ * 'Downshifting' BWCTL to test between different speed NICs
+ * New MA Design Docs
+  * [https://docs.google.com/document/d/1DFl4bgFxIQtRqYIZPHAT8xW4TACppKq2UeYK13ZsUDk/edit?usp=sharing REST API]
+  * [https://docs.google.com/document/d/1M09ziw5ABfnuHh1R-ONVMkNQGJNIy9V2k2bYYwqBMeA/edit?usp=sharing Database Schema] 
+  * A few discussion topics based on feedback so far:
+   * Source/Dest addressing strategy
+   * Summarization topics
+    * Summarization as time vs sample count
+    * Should Bucket width be in metatdata or part of event type?
+   * How should we represent percentiles in statistical summary?
+   * Bulk writes vs Individual writes?
+
+=== 20131216Video ===
+
+ * Attendees: Aaron Brown, Jason Zurawski, Dan Doyle, Sowmya Balasubramanian, Brian Tierney
+  
+==== Follow-up on Actions  ====
+
+TBD
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * Support Statement for CentOS 5 kernel - creation of a 'vault'
+{{{
+Subject:
+
+pS Performance Toolkit 3.2 End of Life (EOL)
+
+Body:
+
+Greetings:
+
+This is the notification that the scheduled the End of Life (EOL) for the pS Performance Toolkit v3.2 will be Friday February 28th, 2014.  All architectures of the pS Performance Toolkit v3.2 (i386, x86_64) are impacted, and the software will be removed from the mirrors on that date.  
+
+A frozen version will be migrated to a vault (instructions will be provided for use of this construct at a later date) and v3.2 of this software will remain available indefinitely.  You may use the vault in the same way you have used the mirrors in the past, however no updates will be released for any of the software in this location moving forward.
+
+Accordingly, the perfSONAR-PS Project strongly recommends that you migrate any pS Performance Toolkit installs to the latest version (3.3).  
+
+Thanks;
+
+The pS Performance Toolkit Development Team
+}}}
+ * NDT Flash Interface
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+     * Still no kernel SRPM uploaded
+     * Working on deploying esmond
+   * Aaron
+    * Been working on regular testing framework
+    * Working on iperf3 interval issue
+   * Sowmya
+    * Sent in mail: The only update from my side. I got back to working on sLS. The multicache mode passes the basic case(1 core and 1 LS). I am testing it right now with some of the other configuration options.
+   * Jason
+    * Post-SC clean-up
+   * Brian
+    * At the ATLAS meeting talked about dashboard. I have a meeting on wednesday.
+    * Official iperf3 release at end of week
+    * Trying to come-up with date for perfSONAR workshop
+   * Dan Doyle
+    * Lead technical resource from IU. Will be joining calls in future. 
+ * Support Statement for CentOS 5 kernel - creation of a 'vault'
+   * Action: Aaron will setup a separate vault
+ * NDT Flash Interface
+  * Should we use it on the toolkit?
+  * Mlab is working with it
+  * Will continue looking at it and see how things progress
+ * No meeting next two weeks due to holidays
+
+=== 2013Roadmap ===
+
+Q1:
+   * release of v3.3 of the toolkit
+   * RPM bundles for "level 1" and "level 2" installs
+   * integration of iperf3 with bwctl
+   
+Q2: 
+   * improved documentation/website
+   * added functionality for LS: 
+       * pub/sub capability, so can deploy custom caches
+       * easy to use client APIs
+       * LS security (maybe Q3)
+   * start working on REST/JSON-based owamp MA, that supports rrd-like summarization
+   * better LS GUI that provide cut/paste bwctl and owping commands, and better "community" support
+   * finish/polish Maddash/Mesh config integration, including config GUI
+   * finalize central Mesh config GUI
+   * web10G integration
+   * issue tracker IDs: 549, 603, 604, 611, 612, 629, 631, 635
+
+Q3:
+   * release 3.3.1?
+   * email alerts from Maddash
+   * traceroute visualization integrated with owamp/bwctl data
+   * REST/JSON APIs for all remaning services
+   * ability to do on-demand testing
+   * issue tracker IDs:
+
+
+Q4:
+   * release of v3.4 of the toolkit?
