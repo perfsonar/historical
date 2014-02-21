@@ -11,4 +11,4 @@ The following are the currently active perfSONAR collaboration development proje
   * DB Schema: https://docs.google.com/document/d/1M09ziw5ABfnuHh1R-ONVMkNQGJNIy9V2k2bYYwqBMeA/edit?usp=sharing
 
 ==Flash NDT Client==
-  * https://docs.google.com/a/es.net/document/d/1ptD3KEEuQiohq3wW7TFaU4FIgY4uHtCCmt_Z9O7Lcl4/edit#heading=h.dyis3v6l60xv
+  * https://docs.google.com/a/es.net/document/d/1ptD3KEEuQiohq3wW7TFaU4FIgY4uHtCCmt_Z9O7Lcl4/edit
