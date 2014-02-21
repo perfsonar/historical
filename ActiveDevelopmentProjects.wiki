@@ -16,3 +16,7 @@ The following are the currently active perfSONAR collaboration development proje
 
 ==Flash NDT Client==
   * https://docs.google.com/a/es.net/document/d/1ptD3KEEuQiohq3wW7TFaU4FIgY4uHtCCmt_Z9O7Lcl4/edit
+
+== OWAMP ==
+ * RFC: http://tools.ietf.org/rfc/rfc4656.txt
+ * perfSONARBUOY DB Schema: https://perfsonar-ps.googlecode.com/git/perfSONAR_PS-perfSONARBUOY/doc/owamp_database_schema.txt
