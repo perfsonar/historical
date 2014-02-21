@@ -22,6 +22,8 @@ There is an agent on each member of the mesh that periodically retrieves the mes
 
 The mesh definition contains a list of members, a list of tests to be performed between one or more of those members, locations for the results to be stored in and retrieved from, a list of administrative contacts for the mesh and administrative contacts for the individual members.
 
+An example mesh configuration file can be found at [https://perfsonar-ps.googlecode.com/git/perfSONAR_PS-MeshConfig/doc/example.conf]. This file gets converted into a JSON by the build_json program. The JSON file is what gets consumed, and is the canonical source for the mesh. The JSON version of the example mesh configuration can be found at [https://perfsonar-ps.googlecode.com/git/perfSONAR_PS-MeshConfig/doc/example.json]
+
 == Last Updated ==
 
 $Id$
