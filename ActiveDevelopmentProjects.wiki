@@ -20,5 +20,8 @@ The following are the currently active perfSONAR collaboration development proje
 = Previous Development Projects =
 
 == OWAMP ==
- * RFC: http://tools.ietf.org/rfc/rfc4656.txt
- * perfSONARBUOY DB Schema: https://perfsonar-ps.googlecode.com/git/perfSONAR_PS-perfSONARBUOY/doc/owamp_database_schema.txt
+  * RFC: http://tools.ietf.org/rfc/rfc4656.txt
+ 
+== perfSONARBUOY ==
+
+  * DB Schema: https://perfsonar-ps.googlecode.com/git/perfSONAR_PS-perfSONARBUOY/doc/owamp_database_schema.txt
