@@ -1,6 +1,6 @@
 #summary Active Development projects Design Documents.
 
-= Introduction =
+= Current Development Projects =
 
 The following are the currently active perfSONAR collaboration development projects:
 
@@ -8,4 +8,4 @@ new perfSONAR MA (based on ESmond: https://code.google.com/p/esmond/)
 
   * REST API: https://docs.google.com/document/d/1DFl4bgFxIQtRqYIZPHAT8xW4TACppKq2UeYK13ZsUDk/edit?usp=sharing
 
-  * DB Schema: https://docs.google.com/document/d/1M09ziw5ABfnuHh1R-ONVMkNQGJNIy9V2k2bYYwqBMeA/edit?usp=sharing]
+  * DB Schema: https://docs.google.com/document/d/1M09ziw5ABfnuHh1R-ONVMkNQGJNIy9V2k2bYYwqBMeA/edit?usp=sharing
