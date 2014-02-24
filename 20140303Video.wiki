@@ -19,8 +19,8 @@ TBD
    * Jason
    * Eric
  * Research Technology Transfer/Incubation Process
-   * http://dev.globus.org/wiki/Incubator/Incubator_Process
-   * 
+   * Globus: http://dev.globus.org/wiki/Incubator/Incubator_Process
+   * Jason's Writeup: https://drive.google.com/file/d/0B5uJA6NtbwMLMF82OWxwcDhWSkE/edit?usp=sharing
 
 == Notes ==
 
