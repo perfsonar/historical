@@ -2,6 +2,9 @@
 
 =   Feb 24, 2014 Conference Call 1:00 p.m. EST =
 
+Attendees: Aaron, Sowmya, Warren, Michael, Brian, Andy
+
+
 == Agenda/Minutes ==
 
 TBD
@@ -13,9 +16,12 @@ TBD
 == Agenda Topics ==
  * Developer Updates
    * Andy
-   * Aaron
    * Sowmya
    * Brian
+   * Warren
+   * Michael
+   * Dan
+   * Aaron
    * Jason
    * Eric
  * Git Conversion Updates
@@ -24,7 +30,34 @@ TBD
 
 == Notes ==
 
-TBD
+ * Developer Updates
+   * Andy
+    * Worked on MA
+   * Sowmya
+    *  Updated LS RPM
+   * Brian
+    * Met with perfSONAR MDM team last week. MDM group looking at integrating with perfSONAR-PS
+    * perfSONAR workshop was also last week. Lots of interesting SDN topics.
+   * Warren
+    * New perfsonar machines
+   * Michael
+    * Got kernel to build
+    * Noted changelog patch does not apply. Maybe we should remove it since it never applies?
+    * Michael raised question about Web10G. Explained still exploring and making sure tools are compatible.
+    * Michael will also supplement Jason's documentation on virtual machines with VirtualBox stuff
+   * Dan
+    * See Michael's update
+   * Aaron
+    * Released bwctl 1.5.1
+    * Roderick trying the regular testing
+    * Modified LS registration daemon to add BWCTL tools supported
+ * Git Conversion Updates
+  * Moved the source code to git
+  * Moved bwctl and owamp to git repository for perfsonar as well
+ * NTP Security Response Update & General Discussion on Nimble Responses
+  * Table until next week 
+ * email list consolidation update
+  * Table until next week
   
 == Future Agenda Topics ==
 
