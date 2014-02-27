@@ -33,10 +33,12 @@ Version 3.3.2 of the pS Performance Toolkit consists of three primary installati
    * Requires network connectivity to download necessary packages
    * Provides easy bug fixs/upgrades via the standard _*yum*_ mechanisms- no physical access to the machine will be required.  
    * NOTE: This the the version we recommend, unless your security policy favors the LiveCD
+   * Instructions for installing this on a VM are available here: http://psps.perfsonar.net/toolkit/20140226-VMWare-Fusion-pSPT-Netinstall.pdf
  * [pSPerformanceToolkit33#Live_CD Live CD]
    * Boots and runs directly from CD
    * Can run without harming host's hard disk contents
    * Can run and store measurements on host's hard disk
+   * Instructions for installing this on a VM are available here: http://psps.perfsonar.net/toolkit/20140226-VMWare-Fusion-pSPT-LiveCD.pdf
  * [pSPerformanceToolkit33#Live_USB Live USB]
    * Newest install option
    * Supports hosts without CD-ROM drive
