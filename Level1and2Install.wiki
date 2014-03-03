@@ -32,7 +32,7 @@ The process configures yum to point at the necessary repositories to get package
 3. As a root user, install the downloaded RPMs onto the system with the following commands:
 {{{
 # yum localinstall epel-release-6-8.noarch.rpm
-# yum localinstall Internet2-repo-0.3-1.noarch.rpm
+# yum localinstall Internet2-repo-0.4-2.noarch.rpm
 }}}
 
 4. Refresh yum's cache so it detects the new RPMS
