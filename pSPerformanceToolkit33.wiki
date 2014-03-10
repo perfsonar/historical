@@ -18,7 +18,7 @@ The system recommendations for the pS Performance toolkit are now located [http:
 ||LiveCD||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveCD-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveCD-i386.iso.md5 md5]||
 || ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveCD-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveCD-x86_64.iso.md5 md5]||
 ||LiveUSB||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso.md5 md5]||
-|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-x86_64.iso.md5 md5] [http://anonsvn.internet2.edu/svn/nptoolkit/trunk/scripts/deploy_liveusb.sh deploy-script]||
+|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-x86_64.iso.md5 md5] [http://software.internet2.edu/pS-Performance_Toolkit/deploy_liveusb.sh deploy-script]||
 
 == Upgrading ==
 If you are upgrading a from previous version of the perfSONAR-PS Toolkit, please see our [pSPerformanceToolkit33UpgradeGuide upgrade guide].
@@ -235,7 +235,7 @@ user@host:~$ md5sum pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso;cat pS-Perform
 32a3ed9043c36c8db3adf248d04d1410  pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso
 }}}
 
-You can mount the downloaded image onto a USB drive using the script found [http://anonsvn.internet2.edu/svn/nptoolkit/trunk/scripts/deploy_liveusb.sh here]. Once you have downloaded the script, its usage is as follows:  
+You can mount the downloaded image onto a USB drive using the script found [http://software.internet2.edu/pS-Performance_Toolkit/deploy_liveusb.sh here]. Once you have downloaded the script, its usage is as follows:  
  
 {{{
 Usage: bash deploy_liveusb.sh [--arch <arch>] <device> [diskimage]
