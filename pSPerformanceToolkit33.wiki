@@ -165,6 +165,7 @@ https://[host address]/toolkit
 An important thing to note is that in the description above, there is no IP address or hostname found for this host currently.  This will need to be rectified in the [pSPerformanceToolkit33#Console console configuration] step. 
 
 === Live CD ===
+Please note that there is a specific image for running a LiveCD, do not use the LiveUSB or netinstall images for this setup. 
 
 The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/ iso] and [http://software.internet2.edu/pS-Performance_Toolkit/ md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
@@ -224,6 +225,16 @@ https://[host address]/toolkit
 An important thing to note is that in the description above, there is no IP address or hostname found for this host currently.  This will need to be rectified in the [pSPerformanceToolkit33#Console console configuration] step.  
 
 === Live USB ==
+Please note that there is a specific image for running a LiveUSB, do not use the LiveCD or netinstall images for this setup.  
+
+The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/ iso] and [http://software.internet2.edu/pS-Performance_Toolkit/ md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
+
+{{{
+user@host:~$ md5sum pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso;cat pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso.md5 
+32a3ed9043c36c8db3adf248d04d1410  pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso
+32a3ed9043c36c8db3adf248d04d1410  pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso
+}}}
+
 You can mount the downloaded image onto a USB drive using the script found [http://anonsvn.internet2.edu/svn/nptoolkit/trunk/scripts/deploy_liveusb.sh here]. Once you have downloaded the script, its usage is as follows:  
  
 {{{
