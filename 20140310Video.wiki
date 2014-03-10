@@ -2,6 +2,8 @@
 
 =   March 10, 2014 Conference Call 1:00 p.m. EST =
 
+Attendees: Andy, Jason, Dan, Ben, Aaron, Eric
+
 == Agenda/Minutes ==
 
 TBD
@@ -24,9 +26,43 @@ TBD
    * Draft being circulated: https://drive.google.com/file/d/0B5uJA6NtbwMLdkpORWlmTWNNaTA/edit?usp=sharing
 
 == Notes ==
-
-TBD
-  
+ * Nagios checks
+  * Ben Nelson from IU joined and discussed current use of Nagios checks.
+  * Noted that seeing a lot of timeouts with Nagios.
+  * Andy noted new MA should be ready next month, that should help
+  * Could also try maddash, it likely throttles things better for PS then Nagios
+  * Ben noted will try MA when its ready and will keep using MySQL backdoor for current stuff
+ * Developer Updates
+   * Andy
+    * Vacation last week
+    * Worked on esmond. Getting close, just looking at authentication options. All writes, summarizations and queries should be working.
+   * Aaron
+    * Paternity leave last 2 weeks
+    * Fixed typo in Level 2 bundle
+    * Fixed NDT code
+   * Dan
+    * Worked through GeiIP issues on GUIs
+    * Also worked through google API issue in graphs
+    * 3.4 testing
+   * Brian
+    * Minor bug fix for iperf3 coming out in the next couple days
+   * Jason
+    * Cleaning-up mesh
+    * OIN workshop next week
+   * Eric
+    * Nothing else to update
+ * EOL for pSPT 3.2.x and creation of a vault
+  * ACTION: Move them to separate value. Aaron will let us know location. 
+ * Research Technology Transfer/Incubation Process
+  * Reviewed documents. Looks pretty good. next step to hand to steering group.
+ * OSG Test Infrastructure
+  * OSG has a full Koji setup where we could do some testing
+  * They will carve out a section for us to test
+  * May be interested in a meta-package that does not require an ISO
+  * Also would be interested in non-web100 version w/o NDT and NPAD
+    * It would be another version to test is a drawback
+    * Group needs to think about this more
+    
 == Future Agenda Topics ==
 
 TBD
