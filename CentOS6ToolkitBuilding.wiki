@@ -2,7 +2,7 @@
 
 == Introduction ==
 
-This page contains information about building the various components of the Toolkit in CentOS 6.
+This page contains information about building various components of the Toolkit in CentOS 6.
 
 == Kernel ==
 The Toolkit includes a custom version of the CentOS 6 RHEL (Red Hat Enterprise Linux) kernel.
