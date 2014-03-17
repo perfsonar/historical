@@ -1,5 +1,7 @@
 ﻿#summary Information for building various components of the Toolkit
 
+Wiki update test.
+
 == Introduction ==
 
 This page contains information about building the various components of the Toolkit in CentOS 6.
