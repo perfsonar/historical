@@ -20,7 +20,11 @@ TBD
    * Brian
    * Jason
    * Eric
- * TBD
+ * what should be registered in the LS for multi-homed hosts, and how to indicate which interface is for owamp, and which for bwctl
+ * enable sshd by default?
+ * using OSG Kogi for testing
+ 
+
 == Notes ==
  
     
