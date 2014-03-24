@@ -220,7 +220,7 @@ To join the 'perfSONAR Users' mailing list, please visit:
 
 The perfSONAR-PS subversion repository is located at:
 
-  http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk
+  http://perfsonar-ps.googlecode.com/git/
 
 Questions and comments can be directed to the author, or the mailing list.
 Bugs, feature requests, and improvements can be directed here:
