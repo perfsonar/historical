@@ -206,52 +206,6 @@ differences in package management.  The tools are listed below:
      * Debian/Ubuntu: libxml2, libxml2-dev, libxml2-utils
      * RedHat Systems: libxml2, libxml2-devel
 
-=== Subversion ===
-
-Software may be downloaded directly from our anonymous subversion server.  This
-installation method allows for easy upgrades between versions and access to 
-bugfixes immediately.  There are two ways to download from our server, one that
-retrieves all software and another that retrieves only selective services.
-
-To download the entire release:
-
-{{{
-svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1 perfSONAR-PS
-}}}
-  
-The instructions are the same here as for the Tar package.  Note that
-installation may require pre-requisite software.  Read the preceding sections
-for necessary items and suggestions on how to install and configure them.  When
-you wish to update the checkout (to retrieve new development or bugfixes):
-
-{{{
-cd perfSONAR-PS
-svn update
-}}}
-  
-If a single service is all that is required, a similar method is used but also
-note that the service must have access to a "Shared" directory that contains
-perfSONAR-PS libraries:
-
-{{{
-svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1/perfSONAR_PS-SNMPMA/
-svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/RELEASE_3.1/Shared
-}}}
-
-The instructions are also the same as above:
-
-{{{
-cd Shared
-svn update
-}}}
-
-and
-
-{{{
-cd perfSONAR_PS-SNMPMA
-svn update
-}}}
-
 == Configuration ==
 
 The following sections detail the necessary configuration of this service.
