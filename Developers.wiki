@@ -114,67 +114,17 @@ TBD
 
 The development of perfSONAR-PS involves several tools that are meant to make the jobs of developers easier particularly for managing the source code, communication, and tasks to be done.  The following sections offer an introduction to each important item.
 
-=== Subversion ===
+=== Git ===
 
-The main perfSONAR-PS subversion repository is located at the Internet2 offices Ann Arbor Michigan:
+The main perfSONAR-PS source code repository is GIT, more information can be found here:
 
- * [http://anonsvn.internet2.edu/svn/perfSONAR-PS/] - Read only access to the source code
- * [https://svn.internet2.edu/svn/perfSONAR-PS/] - Read/Write access for approved developers
+https://code.google.com/p/perfsonar-ps/source/checkout
 
-Subversion resources can be found [http://svnbook.red-bean.com/en/1.5/svn-book.html here], but a quick guide to useful commands follows:
-
- * Checking out (do initially)
-{{{
-bash$ svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk perfSONAR-PS
-}}}
- * Updating working copy (do frequently)
-{{{
-bash$ svn update
-At revision 7.
-}}}
- * Checking status (do to check the status of items in your local copy).  The two files listed below are new to the repo and modified in the local copy (respectively):
-{{{
-bash$ svn status
-?      newFile
-M      mirrors-Internet2
-}}}
- * Adding
-{{{
-bash$ svn add newFile
-A      newFile
-}}}
- * Deleting
-{{{
-bash$ svn rm RPM-GPG-KEY-Internet2 
-D     RPM-GPG-KEY-Internet2
-}}}
- * Committing (_*always*_ include a svn log message!)
-{{{
-bash$ svn commit
-A    trunk/newFile
-M    trunk/mirrors-Internet2
-D    trunk/RPM-GPG-KEY-Internet2
-}}}
- * Create a branch:
-{{{
-bash$ svn copy https://svn.internet2.edu/svn/perfSONAR-PS/trunk https://svn.internet2.edu/svn/perfSONAR-PS/branches/YOURBRANCHNAME -m "Creating a branch of trunk"
-}}}
- * Merging changes from the trunk to a branch.
-   * First get the revision number that your branch starts with:
-{{{
-bash$ svn log -v --stop-on-copy
-}}}
-   * Use the revision number this returns in the next command, be sure to be in your working copy:
-{{{
-bash$ svn merge -r #FROMABOVE:HEAD
-bash$ https://svn.internet2.edu/svn/perfSONAR-PS/trunk
-}}}  
- 
 ==== Repo Organization ====
 
-Specifically the organization of the subversion repository should resemble this from a high level:
+Specifically the organization of the git repository should resemble this from a high level:
 
-http://perfsonar-ps.googlecode.com/svn/wiki/ReleaseManagement/svn.png
+http://wiki.perfsonar-ps.googlecode.com/git/ReleaseManagement/svn.png
 
 The repository has gone through several changes through our development lifecycle.  Please see a [SubversionStructure primer] on how individual directories (e.g. Trunk, Branches) should look to better understand our methodology.  
 
@@ -197,16 +147,7 @@ Access to the wiki is controlled via [https://www.google.com/accounts/ManageAcco
 
 ==== Editing ====
 
-The wiki can be edited in two ways:
-
- * Web interface
- * Checkout via subversion:
-{{{
-svn checkout https://perfsonar-ps.googlecode.com/svn perfSONAR-PS-Google --username YOURNAME
-}}}
-   * Note that a password is required, you may find it [http://code.google.com/hosting/settings here] (note you must be logged in to view your personal password
-
-When editing the wiki be sure to follow:
+The wiki can be edited via the web interface.  When editing the wiki be sure to follow:
 
  * Formatting rules:
 {{{
@@ -226,7 +167,7 @@ When editing the wiki be sure to follow:
 
 $Id$
 }}}
- * Always enter a log entry (either through the web form or the svn commit script) to each addition.  
+ * Always enter a log entry (either through the web form or the git commit script) to each addition.  
 
 === Issue Tracker ===
 
