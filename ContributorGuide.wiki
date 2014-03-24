@@ -4,7 +4,7 @@
 
 Everyone is encouraged to contribute to the perfSONAR-PS project. The perfSONAR-PS project is meant to be an inclusive community project. That said, we want to make sure that the components included in the perfSONAR-PS library are high quality and follow good coding practices.
 
-Email i2-perfsonar@internet2.edu to request being added as a contributor to this project. 
+Email perfsonar-developer@internet2.edu to request being added as a contributor to this project. 
 
 = Contribute as a user =
 Please submit bug reports to the Issue tracker: http://code.google.com/p/perfsonar-ps/issues/list
@@ -18,10 +18,8 @@ We need help in this area.
 = Contribute Other Code =
 Bug fixes, enhancements, etc.
 
-
 = License =
-All code submitted to perfSONAR-PS must be released under the BSD license:
- * http://www.opensource.org/licenses/bsd-license.php
+All code submitted to perfSONAR-PS must be released under the Apache license
 
 
  
