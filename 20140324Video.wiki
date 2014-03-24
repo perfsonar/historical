@@ -54,8 +54,39 @@ The pS Performance Toolkit Development Team
 }}} 
 
 == Notes ==
+  * Developer Updates
+  * Andy
+   * iperf3 mesh going on ESnet
+   * esmond integrated into regular testing. hopefully deploy on ESnet test hosts soon
+     * Will need to update clients 
+  * Jason
+   * Consolidated mailing lists
+   * Went through NTP servers that are blocked
+  * Dan
+   * Dan tested new kernel
+   * Also looking at issues can help with. Going through the tracker this week.
+  * Michael
+   * No updates
+  * Brian
+   * Did issue tracker clean-up.
+  * Sowmya
+   * Worked on sLS cache. Will probably deploy something in the next week or so. 
+  * Warren
+   * No updates
+  * Aaron
+   * Modified regular testing to do tracepath. Tracepath output is odd, for example with one hop.
+   * Committed some stuff for changes to SSH. RPM will just leave ssh alone. The kickstart will disable it.
+ * Old SVN Repo
+  * Decided to remove old repo
+ * what should be registered in the LS for multi-homed hosts, and how to indicate which interface is for owamp, and which for bwctl
+  * Decided to register in the service record just the addresses you want bwctl/owamp, etc
+ * enable sshd by default?
+  * Enable ssh by default and set start-up script to answer questions about new user 
+ * using OSG Koji for testing
+  * Luke volunteered Dan and Michael to look
+ * EOL Announcement going out Friday, here is the announcement text:
+  * Let Jason know if looks good. 
  
-    
 == Future Agenda Topics ==
 
 TBD
