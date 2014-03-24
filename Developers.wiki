@@ -332,37 +332,20 @@ There are several categories of mailing lists, each targeting specific groups of
 
 
 || *List* || *Audience* ||
-|| https://lists.internet2.edu/sympa/info/i2-perfsonar || perfSONAR-PS Developers Only (Preferred) ||
-|| https://lists.internet2.edu/sympa/info/ps-ps-dev || perfSONAR-PS Developers Only (Preferred) ||
-|| https://lists.internet2.edu/sympa/info/perfsonar-dev || perfSONAR Developers (International effort, not required) || 
-|| https://lists.internet2.edu/sympa/info/bwctl-dev || BWCTL Development || 
+|| https://lists.internet2.edu/sympa/info/perfsonar-developer || perfSONAR Developers || 
 || https://lists.internet2.edu/sympa/info/ndt-dev || NDT Development || 
-|| https://lists.internet2.edu/sympa/info/owamp-dev || OWAMP Development || 
-
 
 ==== User Centric ====
 
-
 || *List* || *Audience* ||
-
-|| https://lists.internet2.edu/sympa/info/perfsonar-ps-users || perfSONAR Users Group (Preferred) ||
-|| https://lists.internet2.edu/sympa/info/performance-node-users || Performance Node Users (Preferred) || 
-|| https://lists.internet2.edu/sympa/info/perfsonar-user || perfSONAR Users Group (International effort, not required) || 
-|| https://lists.internet2.edu/sympa/info/bwctl-users || BWCTL Users || 
+|| https://lists.internet2.edu/sympa/info/perfsonar-user || perfSONAR Users Group  || 
 || https://lists.internet2.edu/sympa/info/ndt-users || NDT Users || 
-|| https://lists.internet2.edu/sympa/info/owamp-users || OWAMP Users || 
-
 
 ==== Low Volume Announcement ====
 
-
 || *List* || *Audience* ||
 || https://lists.internet2.edu/sympa/info/perfsonar-announce || perfSONAR Announcements ||
-|| https://lists.internet2.edu/sympa/info/performance-node-announce || Performance Node Announcements  || 
-|| https://lists.internet2.edu/sympa/info/bwctl-announce || BWCTL Announcements || 
 || https://lists.internet2.edu/sympa/info/ndt-announce || NDT Announcements || 
-|| https://lists.internet2.edu/sympa/info/owamp-announce || OWAMP Announcements ||
-
 
 ==== Community Discussion ====
 
@@ -412,4 +395,3 @@ TBD
 == Last Updated ==
 
 $Id$
-
