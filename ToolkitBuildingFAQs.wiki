@@ -222,7 +222,7 @@ To ease the use of mock, we built a simple wrapper script over the mock command 
 
 === web100_userland ===
   * Build a source RPM of web100_userland (e.g. web100_userland-1.7-1.src.rpm)
-    * A copy of the source/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/web100_userland/
+    * A copy of the source/spec file is available at http://perfsonar-ps.googlecode.com/git/Toolkit_Building/software/web100-userland/
   * Run: `i2_mock [web100_userland rpm]` (e.g. `i2_mock oweb100_userland-1.7-1.src.rpm)
 
 === ndt ===
@@ -252,7 +252,7 @@ To ease the use of mock, we built a simple wrapper script over the mock command 
   * Copy all the kernel development RPMs (*-devel-*rpm) into the 'holding' repository (i.e. i686, PAE and xen version)
     * Make note of the kernel version number (e.g. 2.6.18-194.32.1.el5.web100)
   * Build a source RPM of the aufs module (e.g. aufs-0.20090202.cvs-6.src.rpm)
-    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/aufs/
+    * A copy of the sources/spec file is available at http://perfsonar-ps.googlecode.com/git/Toolkit_Building/software/aufs/
   * Run `i2_mock --arch i686 -D "kernel [kernel version number]" [aufs rpm]` (e.g. `i2_mock --arch i686 -D "kernel 2.6.18-194.32.1.el5.web100" aufs-0.20090202.cvs-6.src.rpm)
 
 === ixgbe kernel module ===
