@@ -2,7 +2,7 @@
 
 =   March 24, 2014 Conference Call 1:00 p.m. EST =
 
-Attendees: ]
+Attendees:
 
 == Agenda/Minutes ==
 
@@ -23,7 +23,31 @@ TBD
  * what should be registered in the LS for multi-homed hosts, and how to indicate which interface is for owamp, and which for bwctl
  * enable sshd by default?
  * using OSG Kogi for testing
- 
+ * EOL Announcement going out Friday, here is the announcement text:
+{{{
+Greetings;
+
+The perfSONAR project has finalized the end of life steps for all 3.2 versions of the pS Performance Toolkit.  As of today, March 28th 2014, this product will not be supported and we strongly encourage all users to migrate to the 3.3 release series immediately.  Note that CentOS packages will continue to be updated by upstream sources, but builds to perfSONAR specific packages will not be available, including web100 patched kernels and build-specific updates to the measurement tools.  
+
+The project has created a "vault" containing the last builds of project software:
+
+ http://software.internet2.edu/vault/
+
+The Internet2 repository software (version 0.2-9 and above for version 3.2 users) contains directives to enable this feature.  The repository package can be found in these locations, or will be updated via YUM:
+
+ http://software.internet2.edu/rpms/el5/x86_64/main/RPMS/Internet2-repo-0.2-9.noarch.rpm
+ http://software.internet2.edu/rpms/el5/i386/main/RPMS/Internet2-repo-0.2-9.noarch.rpm
+
+The Vault will function for existing toolkit builds once enabled, it will not allow someone to install a fresh instance from a netinstall ISO.  To enable this repo:
+
+ 1) Edit the "/etc/yum.repos.d/Internet2-Vault.repo" file and change "enabled = 0" to "enabled = 1" for both repositories in this file
+
+ 2) Run 'yum update' to update the cache of packages
+
+Thanks;
+
+The pS Performance Toolkit Development Team
+}}} 
 
 == Notes ==
  
