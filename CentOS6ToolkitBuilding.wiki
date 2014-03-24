@@ -135,9 +135,9 @@ For building custom versions of the LiveCD and LiveUSB, you will need the livecd
 
 === Building The Toolkit ===
 
-You can download the kickstarts, images and scripts needed to build the toolkit by doing a subversion checkout of http://anonsvn.internet2.edu/svn/nptoolkit/trunk/
+You can download the kickstarts, images and scripts needed to build the toolkit by doing a git checkout of http://perfsonar-ps.googlecode.com/git/Toolkit_Building/
 
-There are 6 directories in this subversion repository. The ones of importance for customization are `kickstarts`, `images`, and `scripts`. The `kickstarts` directory contains the files used for generating the kickstarts used by the LiveCD and NetInstall setups. The `scripts` directory contains 3 scripts used for building the toolkit, one for the LiveCD, one for the LiveUSB, and one for the NetInstall as well as a script used to deploy the LiveUSB. The `images` directory contains the image displayed when the CD is first booted.
+There are 6 directories in this git repository. The ones of importance for customization are `kickstarts`, `images`, and `scripts`. The `kickstarts` directory contains the files used for generating the kickstarts used by the LiveCD and NetInstall setups. The `scripts` directory contains 3 scripts used for building the toolkit, one for the LiveCD, one for the LiveUSB, and one for the NetInstall as well as a script used to deploy the LiveUSB. The `images` directory contains the image displayed when the CD is first booted.
 
 If you run the script `build_livecd.sh` or `build_liveusb.sh` as root, it should download all the necessary RPMs, and build an ISO of the LiveCD/USB and place it in the resources directory. Similarly, if you run the script `build_netinstall.sh` as root, it should build an ISO of the NetInstall.
 
@@ -263,7 +263,7 @@ system(@args);
 
 === web100_userland ===
   * Build a source RPM of web100_userland (e.g. web100_userland-1.8-1.el6.src.rpm)
-    * A copy of the source/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/web100_userland/
+    * A copy of the source/spec file is available at http://perfsonar-ps.googlecode.com/git/Toolkit_Building/software/web100-userland/
   * Run: `i2_mock [web100_userland SRPM]` (e.g. `web100_userland-1.8-1.el6.src.rpm`)
 
 === bwctl ===
@@ -316,13 +316,13 @@ system(@args);
   * Copy the kernel development RPMS (kernel-devel) into the 'holding' repository
     * Make note of the kernel version number (e.g. 2.6.32-279.2.1.el6.aufs.web100)
   * Build a source RPM of the aufs module (e.g. aufs-kmod-2.2-1.el6.src.rpm)
-    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/aufs/
+    * A copy of the sources/spec file is available at http://perfsonar-ps.googlecode.com/git/Toolkit_Building/software/aufs/
   * Run `i2_mock --arch i686 -D "kversion [kernel version number]" [aufs-kmod SRPM]` (e.g. `i2_mock --arch i686 -D "kversion 2.6.32-279.2.1.el6.aufs.web100" aufs-kmod-2.2-1.el6.src.rpm`)
 
 === aufs utilities ===
   * Copy the aufs-kmod RPMS into the 'holding' repository
   * Build a source RPM of the aufs utilities (e.g. aufs-util-2.2-1.el6.src.rpm)
-    * A copy of the sources/spec file is available at http://anonsvn.internet2.edu/svn/nptoolkit/trunk/software/aufs/
+    * A copy of the sources/spec file is available at http://perfsonar-ps.googlecode.com/git/Toolkit_Building/software/aufs/
   * Run `i2_mock [aufs-util SRPM]` (e.g. `i2_mock aufs-util-2.2-1.el6.src.rpm`)
 
 === sk98lin kernel module ===
