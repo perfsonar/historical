@@ -20,6 +20,9 @@ TBD
    * Brian
    * Jason
    * Eric
+ * Old SVN Repo
+   * Disable or delete to prevent confusion (will still be used for RPM repo) including anon
+   * Update docs to point to git
  * what should be registered in the LS for multi-homed hosts, and how to indicate which interface is for owamp, and which for bwctl
  * enable sshd by default?
  * using OSG Kogi for testing
