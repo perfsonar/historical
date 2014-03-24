@@ -554,7 +554,7 @@ L<Net::CIDR>, L<Net::IPTrie>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
-  https://mail.internet2.edu/wws/info/i2-perfsonar
+  https://mail.internet2.edu/wws/info/perfsonar-developer
 
 The perfSONAR-PS subversion repository is located at:
 
