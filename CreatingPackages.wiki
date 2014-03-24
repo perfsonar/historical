@@ -151,7 +151,7 @@ Autoreq: 0
 %_topdir   /YOUR/HOME/DIR/rpmbuild
 %_tmppath  /YOUR/HOME/DIR/rpmbuild/tmp
 user: perfSONAR-PS
-email: i2-perfsonar@internet2.edu
+email: perfsonar-developer@internet2.edu
 %_signature    gpg
 %_gpg_name perfSONAR-PS
 }}}
