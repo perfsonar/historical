@@ -20,7 +20,7 @@ Currently all package updates go to the mailing list centos-announce@centos.org.
 = Step 2: Request volunteer to act as kernel release manager = 
 *Assignee:* Current support person (see  [NPToolkitSupport])
 
-Once a new kernel is identified as available, the current support person should send a request to i2-perfsonar@internet2.edu asking for a volunteer to build the kernel and lead the remainder of the process. This person will be referred to as the Kernel Release Manager. Once this person has been assigned, they will proceed with the remainder of the steps.
+Once a new kernel is identified as available, the current support person should send a request to perfsonar-developer@internet2.edu asking for a volunteer to build the kernel and lead the remainder of the process. This person will be referred to as the Kernel Release Manager. Once this person has been assigned, they will proceed with the remainder of the steps.
 
 = Step 3: Inform user community CentOS has released new kernel =
 *Assignee:* Kernel Release Manager
@@ -54,7 +54,7 @@ The next step is to path and build the kernel. A mock setup is highly recommende
 = Step 5: Request testers try localinstall of RPMs =
 *Assignee:* Kernel Release Manager
 
-After the RPMs successfully build, the Kernel Release Manager should send an email to i2-perfsonar@internet2.edu requesting people test the new RPMs. Since the new RPMs should not yet be uploaded to the primary yum repository, they should be made available for download by uploading to a web server or some other means. Testers should at a minimum do the following steps.
+After the RPMs successfully build, the Kernel Release Manager should send an email to perfsonar-developer@internet2.edu requesting people test the new RPMs. Since the new RPMs should not yet be uploaded to the primary yum repository, they should be made available for download by uploading to a web server or some other means. Testers should at a minimum do the following steps.
  # Verify NDT and NPAD function properly prior to the upgrade
  # Download the new kernel RPMs
  # Install the relevant kernel RPMs with the command _yum localinstall *rpm-name*_
@@ -67,7 +67,7 @@ Those are the minimum steps. Depending on the nature of the kernel changes, it m
 = Step 6:Upload RPMs to yum repository and request testers = 
 *Assignee:* Kernel Release Manager
 
-After testers verify that local installs have not caused an issue, the Kernel Release Manager should upload the RPMs to the subversion(svn) repository at https://cvs3.internet2.edu/svn/web100_kernel. These RPMs are soon available at the yum repository at http://software.internet2.edu/web100_kernel/rpms/. At this point, the Kernel Release Manager should email i2-perfsonar@internet2.edu and have others test that "yum update" and fresh installs work properly.
+After testers verify that local installs have not caused an issue, the Kernel Release Manager should upload the RPMs to the subversion(svn) repository at https://cvs3.internet2.edu/svn/web100_kernel. These RPMs are soon available at the yum repository at http://software.internet2.edu/web100_kernel/rpms/. At this point, the Kernel Release Manager should email perfsonar-developer@internet2.edu and have others test that "yum update" and fresh installs work properly.
 
 = Step 7: Announce RPMs as available =
 *Assignee:* Kernel Release Manager
