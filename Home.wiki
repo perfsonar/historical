@@ -31,7 +31,6 @@ https://code.google.com/p/perfsonar-ps/source/browse/
 == Mailing Lists ==
 
 || *List* || *Audience* ||
-
 || https://mail.internet2.edu/wws/info/perfsonar-developer || perfSONAR Developers (International) || 
 || https://mail.internet2.edu/wws/info/perfsonar-user || perfSONAR Users Group ||
 || https://mail.internet2.edu/wws/info/perfsonar-announce || perfSONAR Announcements (Low Volume) ||
