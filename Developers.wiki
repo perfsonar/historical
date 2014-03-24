@@ -126,11 +126,9 @@ Specifically the organization of the git repository should resemble this from a 
 
 http://wiki.perfsonar-ps.googlecode.com/git/ReleaseManagement/svn.png
 
-The repository has gone through several changes through our development lifecycle.  Please see a [SubversionStructure primer] on how individual directories (e.g. Trunk, Branches) should look to better understand our methodology.  
-
 ==== Code Organization ====
  
-As described in [SubversionStructure], we have organized the code in such a way to facilitate:
+We have organized the code in such a way to facilitate:
 
  * Individual service identity
  * Packaging procedures
