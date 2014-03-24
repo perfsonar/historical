@@ -14,7 +14,7 @@ Upgrading a LiveCD running Toolkit version 3.2.x to a new LiveCD running 3.3 sho
 
  # First it is recommended you login to your existing LiveCD and backup your data. This is not strictly required, but will give a fallback option for restoring data if anything goes wrong during the LiveCD upgrade. Follow the steps below to download the backup script, create a backup file, and move the backup file to a remote host.
 {{{
-wget http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-Toolkit/scripts/ps-toolkit-migrate-backup.sh 
+wget http://perfsonar-ps.googlecode.com/git/perfSONAR_PS-Toolkit/scripts/ps-toolkit-migrate-backup.sh 
 chmod 755 ps-toolkit-migrate-backup.sh 
 ./ps-toolkit-migrate-backup.sh  ~/ps-toolkit-3.2-backup.tgz
 scp ps-toolkit-3.2-backup.tgz user@remotehost.example:ps-toolkit-3.2-backup.tgz
@@ -41,9 +41,9 @@ _NOTE: If you would like to upgrade a LiveCD installation running 3.2.x to a sys
 
 Upgrading a 3.2.x NetInstall distribution to 3.3 requires using a script to backup key configuration files, doing a clean 3.3 installation and using a restore script to place your data and configuration on the new installation. You will need a location where you can remotely copy the backup files while you perform the upgrade.  Unlike previous updates, a simple "yum update" will not grab the new distribution. This stems from the migration from CentOS5 to CentOS6. The exact steps are below:
  # Login to you 3.2.x host's command-line interface via SSH or a terminal
- # Download the backup script [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-Toolkit/scripts/ps-toolkit-migrate-backup.sh here] . You can use the following command to download it directly to your host:
+ # Download the backup script [http://perfsonar-ps.googlecode.com/git/perfSONAR_PS-Toolkit/scripts/ps-toolkit-migrate-backup.sh here] . You can use the following command to download it directly to your host:
 {{{
-wget http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-Toolkit/scripts/ps-toolkit-migrate-backup.sh 
+wget http://perfsonar-ps.googlecode.com/git/perfSONAR_PS-Toolkit/scripts/ps-toolkit-migrate-backup.sh 
 }}}
  # Run the following command to make the script executable
 {{{
