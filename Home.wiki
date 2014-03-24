@@ -16,8 +16,9 @@ A listing of the nodes from all meetings and conference calls can be found in [M
 
 == Current Work ==
 
-Ongoing work can be viewed from our anonymous SVN repository: 
-http://anonsvn.internet2.edu/svn/perfSONAR-PS. 
+Ongoing work can be viewed from our anonymous GIT repository: 
+
+https://code.google.com/p/perfsonar-ps/source/browse/
 
  * All software can be found at http://software.internet2.edu
  * [http://code.google.com/p/perfsonar-ps/issues/list Request new features] to the perfSONAR-PS framework.
@@ -30,18 +31,12 @@ http://anonsvn.internet2.edu/svn/perfSONAR-PS.
 == Mailing Lists ==
 
 || *List* || *Audience* ||
-|| https://mail.internet2.edu/wws/info/i2-perfsonar || perfSONAR-PS Developers Only ||
-|| https://mail.internet2.edu/wws/info/perfsonar-dev || perfSONAR Developers (International) || 
+
+|| https://mail.internet2.edu/wws/info/perfsonar-developer || perfSONAR Developers (International) || 
 || https://mail.internet2.edu/wws/info/perfsonar-user || perfSONAR Users Group ||
-|| https://mail.internet2.edu/wws/info/performance-node-users || Performance Node Users ||  
 || https://mail.internet2.edu/wws/info/perfsonar-announce || perfSONAR Announcements (Low Volume) ||
-|| https://mail.internet2.edu/wws/info/performance-node-announce || Performance Node Announcements (Low Volume) || 
-|| https://mail.internet2.edu/wws/info/bwctl-users || BWCTL Users || 
-|| https://mail.internet2.edu/wws/info/bwctl-announce || BWCTL Announcements (Low Volume) || 
 || https://mail.internet2.edu/wws/info/ndt-users || NDT Users || 
 || https://mail.internet2.edu/wws/info/ndt-announce || NDT Announcements (Low Volume) || 
-|| https://mail.internet2.edu/wws/info/owamp-users || OWAMP Users || 
-|| https://mail.internet2.edu/wws/info/owamp-announce || OWAMP Announcements (Low Volume) ||
 
 == Last Updated ==
 
