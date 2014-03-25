@@ -1,0 +1,111 @@
+#summary Experience in using the OSG Koji Build Tools
+
+= Introduction =
+
+The OSG software team has introduced us to the Koji build system, and we are experimenting in using this to build some of the perfSONAR RPMs.  The following notes were captured on March 25th 2014, as Jason learned how to use this system.  
+
+= Notes =
+
+ # All of these steps assume you have an OSG certificate.  These look a little like this:
+{{{
+[zurawski@localhost ~]$ ls
+user_certificate_and_key.U466.p12  user_certificate.U466.pem
+user_certificate.U466.p7b
+}}}
+ # Visit https://koji-hub.batlab.org with the web browser that has your certificate loaded.  You will need to 'log in' at the top.  Mat will load your DN information into the system, you can extract this from your certificate packages:
+{{{
+[zurawski@poteen ~]$ openssl x509 -noout -in ./user_certificate.U466.pem -subject
+subject= /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Jason Zurawski 672
+}}}
+ # The OSG tool are called from the commandline, so prepare a build VM (I started with a pSPT 3.3.2 netinstall).  Run yum update, and make sure EPEL is installed (with whatever you are using).  
+ # Follow all of the instructions on the build tools page: https://twiki.grid.iu.edu/bin/view/Documentation/Release3/YumRepositories
+    # Install the "yum-priorities" package.  After install make sure plugins=1 is in yum.conf:
+{{{
+sudo yum install yum-priorities
+}}}
+    # Install the OSG repo (this is for EL6/v 3.2 of the OSG tools:
+{{{
+sudo rpm -Uvh http://repo.grid.iu.edu/osg/3.2/osg-3.2-el6-release-latest.rpm
+}}}
+    # Run a yum update:
+{{{
+sudo yum update
+}}}
+ # Install OSG tools:
+{{{
+sudo yum install osg-build
+}}}
+ # To use koji, you need something to make your grid cert available to the tools.  
+    # You can use a proxy to do this:
+{{{
+sudo yum install globus-proxy-utils
+}}}
+    # make a .globus folder in your home directory:
+{{{
+mkdir ~/.globus
+}}}
+    # Extract the private and public key from your certificate bundle:
+{{{
+openssl pkcs12 -in user_certificate_and_key.U466.p12 -nocerts -out ~/.globus/userkey.pem
+
+openssl pkcs12 -in user_certificate_and_key.U466.p12 -clcerts -nokeys -out ~/.globus/usercert.pem
+}}}
+    # Change permissions so that globus is happy:
+{{{
+[zurawski@localhost ~]$ chmod 644 .globus/usercert.pem 
+[zurawski@localhost ~]$ chmod 600 .globus/userkey.pem 
+}}}
+    # Start the proxy:
+{{{
+[zurawski@localhost ~]$ grid-proxy-init -debug
+
+User Cert File: /home/zurawski/.globus/usercert.pem
+User Key File: /home/zurawski/.globus/userkey.pem
+
+Trusted CA Cert Dir: (null)
+
+Output File: /tmp/x509up_u500
+Your identity: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Jason Zurawski 672
+Enter GRID pass phrase for this identity:
+Creating proxy ............++++++
+.++++++
+ Done
+Your proxy is valid until: Wed Mar 26 01:06:05 2014
+}}}
+ # After the proxy is running, you can set up the koji build environment (it will be able to find the proxy that is running):
+{{{
+[zurawski@localhost ~]$ osg-koji setup
+Wrote CA cert bundle '/tmp/osg-koji-setup-qIz2oI/ca-bundle.crt'
+Set up symlink to grid proxy?
+[y/n] ? y
+Proxy symlink created. If using voms-proxy-init, be sure to request an RFC-style proxy (pass -rfc)
+}}}
+ # Download an SRPM to build:
+{{{
+wget -c http://software.internet2.edu/rpms/el6/SRPMS/nuttcp-7.2.1-1.src.rpm
+}}}
+ # Perform the Koji build:
+{{{
+[zurawski@localhost ~]$ osg-koji build --scratch perfsonar-el6 /home/zurawski/nuttcp-7.2.1-1.src.rpm
+Uploading srpm: /home/zurawski/nuttcp-7.2.1-1.src.rpm
+[====================================] 100% 00:00:00  91.93 KiB 107.74 KiB/sec
+Created task: 110036
+Task info: http://koji-hub.batlab.org/koji/taskinfo?taskID=110036
+Watching tasks (this may be safely interrupted)...
+110036 build (perfsonar-el6, nuttcp-7.2.1-1.src.rpm): free
+110036 build (perfsonar-el6, nuttcp-7.2.1-1.src.rpm): free -> open (kojibuilder3.chtc.wisc.edu)
+  110038 buildArch (nuttcp-7.2.1-1.src.rpm, i386): free
+  110037 buildArch (nuttcp-7.2.1-1.src.rpm, x86_64): free
+  110037 buildArch (nuttcp-7.2.1-1.src.rpm, x86_64): free -> open (kojibuilder1.batlab.org)
+  110038 buildArch (nuttcp-7.2.1-1.src.rpm, i386): free -> open (kojibuilder2.chtc.wisc.edu)
+  110037 buildArch (nuttcp-7.2.1-1.src.rpm, x86_64): open (kojibuilder1.batlab.org) -> closed
+  0 free  2 open  1 done  0 failed
+  110038 buildArch (nuttcp-7.2.1-1.src.rpm, i386): open (kojibuilder2.chtc.wisc.edu) -> closed
+  0 free  1 open  2 done  0 failed
+110036 build (perfsonar-el6, nuttcp-7.2.1-1.src.rpm): open (kojibuilder3.chtc.wisc.edu) -> closed
+  0 free  0 open  3 done  0 failed
+
+110036 build (perfsonar-el6, nuttcp-7.2.1-1.src.rpm) completed successfully
+}}}
+ # During the process, there are links that can be viewed for your build: http://koji-hub.batlab.org/koji/taskinfo?taskID=110036
+ # Note that after you are done, the packages have to be downloaded from the web form.  
