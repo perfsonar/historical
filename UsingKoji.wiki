@@ -12,7 +12,7 @@ The OSG software team has introduced us to the Koji build system, and we are exp
 user_certificate_and_key.U466.p12  user_certificate.U466.pem
 user_certificate.U466.p7b
 }}}
- # Visit https://koji-hub.batlab.org with the web browser that has your certificate loaded.  You will need to 'log in' at the top.  Mat will load your DN information into the system, you can extract this from your certificate packages:
+ # Visit https://koji-hub.batlab.org with the web browser that has your certificate loaded.  You will need to 'log in' at the top.  To do this Mátyás Selmeci, matyas _ at_ cs.wisc.edu, will need to load your DN information into the system.  Send him an email with your DN, you can extract this from your certificate packages:
 {{{
 [zurawski@poteen ~]$ openssl x509 -noout -in ./user_certificate.U466.pem -subject
 subject= /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Jason Zurawski 672
