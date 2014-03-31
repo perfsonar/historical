@@ -2,7 +2,7 @@
 
 =   March 31, 2014 Conference Call 1:00 p.m. EST =
 
-Attendees:
+Attendees: Brian, Jason, Aaron, Sowmya, Dan, Michael, Andy
 
 == Agenda/Minutes ==
 
@@ -15,16 +15,38 @@ TBD
 == Agenda Topics ==
  * Developer Updates
    * Andy
+    * Esmond rpms ready
+    * Esmond deployed on Amazon. Ran into issue with regular testing.
+    * Will deploy on ESnet next. Need to talk to Brendan about best approach.
    * Aaron
+    * Added schedule option to bwctl so can specify times for bwctl to run
+    * Next official release of bwctl will be 1.5.2. Not sure when
+    * Brian would like iperf3 dynamic lib in bwctl. RPM needs header files for that to work. 
    * Sowmya
+    * Built a new sLS RPM. Ready to test.
+     * Andy: ps-east and ps-west are ready for testing the sLS
+    * Sowmya will remove overview graphs
    * Dan
+    * See Michael's update 
    * Michael
+    * Comparing tcpinfo to web100 to see what we can use for NDT
+    * Also found tool called bwdetail that does something similar
    * Brian
+    * New iperf3 released 
    * Jason
-   * Eric
-   * Warren
+    * Mailing lists updated 
+    * Jason is pow this week
  * MA registrations
-
+  * Andy proposed we register simplified records of tests
+  * Group agreed on general idea, Andy will come up with more concrete proposal
+ * Geting starting on contributing code
+  * Most of code guidelines on Wiki
+  * Most of commits go to trunk
+ * 3.4 release plan
+  * Target is for late May to have things done, and mid-June for first RC
+ * OSG Koji
+  * Andy, Aaron, Dan, and Michael should get certs as well 
+ 
 == Notes ==
  
 == Future Agenda Topics ==
