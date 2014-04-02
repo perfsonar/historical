@@ -9,7 +9,7 @@ The following guide describes in detail the steps required to set up version 3.3
 == System Requirements ==
 
 The system recommendations for the pS Performance toolkit are now located [http://psps.perfsonar.net/toolkit/hardware.html here].
-
+f
 == Downloads ==
 
 ||Distribution||Architecture||Download||
@@ -32,7 +32,7 @@ Version 3.3.2 of the pS Performance Toolkit consists of three primary installati
    * Allows the entire OS image to be installed directly to a host's hard disk
    * Requires network connectivity to download necessary packages
    * Provides easy bug fixs/upgrades via the standard _*yum*_ mechanisms- no physical access to the machine will be required.  
-   * NOTE: This the the version we recommend, unless your security policy favors the LiveCD
+   * *NOTE: This the the version we recommend, unless your site security policy favors the LiveCD*
    * Instructions for installing this on a VM are available here: http://psps.perfsonar.net/toolkit/20140226-VMWare-Fusion-pSPT-Netinstall.pdf
  * [pSPerformanceToolkit33#Live_CD Live CD]
    * Boots and runs directly from CD
