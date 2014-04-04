@@ -38,7 +38,7 @@ with the RPM called "build_json". This script converts a config file in
 Config::General format into the appropriate .json. There is an commented
 example file in the RPM available in
 "/opt/perfsonar_ps/mesh_config/doc/example.conf". You can view it online
-[http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/mesh_config/perfSONAR_PS-MeshConfig/doc/example.conf here].
+[http://perfsonar-ps.googlecode.com/git/perfSONAR_PS-MeshConfig/doc/example.conf here].
 
 To use the build_json tool, you can run `build_json -input example.conf -output
 example.json`. This will convert the configuration file named example.conf into
