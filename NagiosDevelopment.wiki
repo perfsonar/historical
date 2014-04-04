@@ -1,4 +1,10 @@
-#summary Information on creating and using Nagios plugins<wiki:toc max_depth="6" />== Introduction ==[http://www.nagios.org/ Nagios] is an enterprise level monitoring framework.  This software was designed to give insight into the operations of network services and offer assistence in the location of potential problems.  From the glossy web pages:
+#summary Information on creating and using Nagios plugins
+
+<wiki:toc max_depth="6" />
+
+== Introduction ==
+
+[http://www.nagios.org/ Nagios] is an enterprise level monitoring framework.  This software was designed to give insight into the operations of network services and offer assistence in the location of potential problems.  From the glossy web pages:
 
 {{{
 It's stable, scalable, supported, and extensible.
@@ -30,7 +36,7 @@ The current suggestion is to define these in your perl plugin:
 my %NAGIOS_API_ECODES = ( 'OK' => 0, 'WARNING' => 1, 'CRITICAL' => 2, 'UNKNOWN' => 3 );
 }}}
 
-To allow for appopriate exit.  The current check_perfSONAR code for nagios can be found [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/nagios/check_perfSONAR.pl here].
+To allow for appopriate exit.  The current check_perfSONAR code for nagios can be found [http://perfsonar-ps.googlecode.com/git/perfSONAR_PS-Nagios/bin/check_perfSONAR.pl here].
 
 == Plugin Installation ===
 
@@ -231,4 +237,7 @@ Things look okay - No serious problems were detected during the pre-flight check
 {{{
 [zurawski@patdev1 servers]$ sudo /etc/init.d/nagios restart
 }}}
- == Last Modified ==$Id$ 
+ 
+== Last Modified ==
+
+$Id$ 
