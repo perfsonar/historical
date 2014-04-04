@@ -80,12 +80,11 @@ bash$ svn merge -r2488:3769 https://svn.internet2.edu/svn/perfSONAR-PS/branches/
 bash$ svn commit
 }}}
 
-== perfSONAR-PS SVN Layout ==
+== perfSONAR-PS GIT Layout ==
 
-The main perfSONAR-PS subversion repository is located in Ann Arbor Michigan:
+The main perfSONAR-PS GIT repository is located on Google code:
 
- * [http://anonsvn.internet2.edu/svn/perfSONAR-PS/] - Read only access to the source code
- * [https://svn.internet2.edu/svn/perfSONAR-PS/] - Read/Write access for approved developers
+ * [http://perfsonar-ps.googlecode.com/git/]
 
 Specifically the organization of the subversion repository should resemble this from a high level:
 
@@ -225,7 +224,9 @@ Release related branches are merged back to the trunk *immediately after* a rele
 
 Developers with a private branch may merge anytime they see fit.  Regular merging and updating of a branch is considered a good idea to prevent merge conflicts at a later date.  There are some simple rules that developers must follow when starting a merge:
 
- * When the contents of a branch have been completed and thoroughly tested by the developers, an announcement is made announcing the intention to merge. * The announcement should include a description of the changes as well as the services, libraries, and APIs that may be affected.  Anyone who has a concern should speak up and discuss.   * After a couple of days with no objections, the developers are responsible for merging and resolving any conflicts.
+ * When the contents of a branch have been completed and thoroughly tested by the developers, an announcement is made announcing the intention to merge.
+ * The announcement should include a description of the changes as well as the services, libraries, and APIs that may be affected.  Anyone who has a concern should speak up and discuss.  
+ * After a couple of days with no objections, the developers are responsible for merging and resolving any conflicts.
  * The branch should be deleted after the merge.
 At the discretion of the Release or Project manager, additional testing may be ordered to ensure that the merged changes will not adversely affect the trunk.  This testing would involve:
 
@@ -296,4 +297,3 @@ Release branches will merge changes back to the trunk and will become tags when 
 == Last Updated ==
 
 $Id$
-
