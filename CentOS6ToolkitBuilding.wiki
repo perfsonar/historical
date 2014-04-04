@@ -258,7 +258,7 @@ system(@args);
 
 === I2utils ===
   * Build a source RPM of I2utils (e.g. I2util-1.1-1.el6.src.rpm)
-    * A copy of the source/spec file is available at svn checkout http://anonsvn.internet2.edu/svn/I2util/trunk I2Util
+    * A copy of the source/spec file is available at http://i2util.perfsonar-ps.googlecode.com/git/
   * Run: `i2_mock [I2utils SRPM]` (e.g. `i2_mock I2util-1.1-1.el6.src.rpm`)
 
 === web100_userland ===
