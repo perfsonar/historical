@@ -39,10 +39,10 @@ Every release requires you to rebuild the aufs and sk98lin modules as well as th
 rpm -iv aufs-kmod-file.src.rpm
 rpm -iv sk98lin-kmod-file.src.rpm
 }}}
- * Update the installed SPEC file (in ~/rpmbuild/SOURCES) with the following changes:
- * Update the kversion to match the kernel you are building against
+ * Update the installed SPEC file (in ~/rpmbuild/SPECS) with the following changes:
+  * Update the kversion to match the kernel you are building against
   * Increase the Release by 1
-  * Rebuild the source RPM using the new SPEC file, which resides in ~/rpmbuild/SPECS
+ * Rebuild the source RPM using the new SPEC file, which resides in ~/rpmbuild/SPECS
 {{{
 rpmbuild -bs SPECS/aufs-kmod.spec
 rpmbuild -bs SPECS/sk98lin-kmod.spec
