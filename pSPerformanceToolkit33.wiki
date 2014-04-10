@@ -15,10 +15,10 @@ f
 ||Distribution||Architecture||Download||
 ||NetInstall||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-NetInstall-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-NetInstall-i386.iso.md5 md5]||
 || ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-NetInstall-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-NetInstall-x86_64.iso.md5 md5]||
-||LiveCD||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveCD-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveCD-i386.iso.md5 md5]||
-|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveCD-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveCD-x86_64.iso.md5 md5]||
-||LiveUSB||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso.md5 md5]||
-|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-LiveUSB-x86_64.iso.md5 md5] [http://software.internet2.edu/pS-Performance_Toolkit/deploy_liveusb.sh deploy-script]||
+||LiveCD||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-2-LiveCD-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-2-LiveCD-i386.iso.md5 md5]||
+|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-2-LiveCD-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-2-LiveCD-x86_64.iso.md5 md5]||
+||LiveUSB||i386|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-2-LiveUSB-i386.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-2-LiveUSB-i386.iso.md5 md5]||
+|| ||x86_64|| [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-2-LiveUSB-x86_64.iso iso] [http://software.internet2.edu/pS-Performance_Toolkit/pS-Performance_Toolkit-3.3.2-2-LiveUSB-x86_64.iso.md5 md5] [http://software.internet2.edu/pS-Performance_Toolkit/deploy_liveusb.sh deploy-script]||
 
 == Upgrading ==
 If you are upgrading a from previous version of the perfSONAR-PS Toolkit, please see our [pSPerformanceToolkit33UpgradeGuide upgrade guide].
@@ -230,9 +230,9 @@ Please note that there is a specific image for running a LiveUSB, do not use the
 The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/ iso] and [http://software.internet2.edu/pS-Performance_Toolkit/ md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
-user@host:~$ md5sum pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso;cat pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso.md5 
-32a3ed9043c36c8db3adf248d04d1410  pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso
-32a3ed9043c36c8db3adf248d04d1410  pS-Performance_Toolkit-3.3.2-LiveUSB-i386.iso
+user@host:~$ md5sum pS-Performance_Toolkit-3.3.2-2-LiveUSB-i386.iso;cat pS-Performance_Toolkit-3.3.2-2-LiveUSB-i386.iso.md5 
+32a3ed9043c36c8db3adf248d04d1410  pS-Performance_Toolkit-3.3.2-2-LiveUSB-i386.iso
+32a3ed9043c36c8db3adf248d04d1410  pS-Performance_Toolkit-3.3.2-2-LiveUSB-i386.iso
 }}}
 
 You can mount the downloaded image onto a USB drive using the script found [http://software.internet2.edu/pS-Performance_Toolkit/deploy_liveusb.sh here]. Once you have downloaded the script, its usage is as follows:  
