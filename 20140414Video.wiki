@@ -1,0 +1,48 @@
+#summary April 14, 2014 Conference Call
+
+=   April 14, 2014 Conference Call 1:00 p.m. EST =
+
+Attendees: TBD
+
+== Agenda/Minutes ==
+
+TBD
+  
+== Follow-up on Actions  ==
+
+TBD
+
+== Agenda Topics ==
+
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Dan
+   * Michael
+   * Brian
+   * Jason
+ * Project's role in CVE announcement - develop a timeline/expectations for community?  Identify project resources to better deal with situations?  
+
+== Notes ==
+ 
+== Future Agenda Topics ==
+
+TBD
+   
+== Actions  ==
+ 
+TBD 
+
+== Where ==
+ESnet conference bridge:
+ * GDS: 00113498555555
+ * Direct Dial: mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-423-9220 then 8555555# at the prompt.
+
+The free Cisco Jabber desktop video conferencing service also works with the ESnet ECS service. 
+Just register and download the client from http://ciscojabbervideo.com, and connect using the meeting ID:  8555555@es.net
+
+== Last Updated ==
+
+$Id$
