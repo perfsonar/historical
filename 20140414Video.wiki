@@ -2,7 +2,7 @@
 
 =   April 14, 2014 Conference Call 1:00 p.m. EST =
 
-Attendees: TBD
+Attendees: Andy, Jason, Ken, Aaron, Michael, Dan
 
 == Agenda/Minutes ==
 
@@ -13,7 +13,6 @@ TBD
 TBD
 
 == Agenda Topics ==
-
  * Developer Updates
    * Andy
    * Aaron
@@ -25,7 +24,37 @@ TBD
  * Project's role in CVE announcement - develop a timeline/expectations for community?  Identify project resources to better deal with situations?  
 
 == Notes ==
- 
+ * Developer Updates
+   * Andy
+    * Deployed esmond on some hosts
+    * Created Perl API
+    * Updated nagios checks to talk to esmond
+    * Working on API docs
+    * Andrew Sides started back up
+   * Aaron
+    * Patched Cacti
+    * Worked on streaming bwctld tests (i.e. test that run whenever other stuff isn't)
+   * Jason
+    * Met with OSG last week
+    * Don't support ARM, but they are looking into it.
+    * Feature request for on-demand BWCTL looks like 
+    * Work with Andy and Aaron on identifying toolkit packages for meta package
+    * Resuming wiki work
+   * Dan
+    * Write-up on Koji vs Jenkins. Jenkins seems more generic, Kojii just for RPMs
+    * Started on issues that were identified to do. Will do new charting stuff. 
+   * Michael
+    * Looking at pSB issue
+    * Action: Andy will look through tracker for obsoleted pSB issues
+   * Brian
+    * Security POW - group didn't like the idea. POW can triage
+    * Need to figure out policy as it relates to CVE
+    * First week in June is a code sprint
+    * perfSONAR requirements gathering summit last week. popular session, room was at capacity
+    * lots of interest in $100 perfsonar nodes. lots of questions about that.
+    * Talked about web10g. Seems like support for rh7 is what web10g group is focused on (i.e. 3 series kernels)
+ * Project's role in CVE announcement - develop a timeline/expectations for community?  Identify project resources to better deal with situations?  
+  * See updates
 == Future Agenda Topics ==
 
 TBD
