@@ -1,0 +1,615 @@
+#summary Measurement Archive Client Guide
+
+<wiki:toc max_depth="3" />
+
+= Overview =
+This document describes the basics of reading and writing data from the perfSONAR measurement archive. The measurement archive implements a REST interface where clients can retrieve descriptions of measurements being run and the results of those measurements. It currently offers support for a range of measurements related to throughput, packet delay, packet loss, packet traces and more (with additional data types being added all the time). This document is intended to give developers a basic programming language-neutral understanding of how to interact with the archive. Links to language-specific libraries and more in-depth detail is provided at the [#Other_Resources end of this document].
+
+= Querying Data =
+
+== Getting Started ==
+Querying the measurement archive generally follows the two-step process below:
+ # Find the measurements with the type of data you want
+ # Retrieve the result data for the measurements you find
+
+A quick example helps illustrate this process. First, let's say we we want to know about throughput for a particular set of measurements. In perfSONAR we call this the type of data we are interested-in the *event type*. Let's say we also only want throughput for measurements between two hosts where the host _host1.example.net_ sends data to _host2.example.net_.  Since host1.example.net sends the data we consider it a *source* and since host2.example.net receives data we call it the *destination*. Assuming our measurement archive runs on archive.example.net we can send the following HTTP GET using curl to get the results we want:
+
+{{{
+curl http://archive.example.net/esmond/perfsonar/archive/?event-type=throughput&source=host1.example.net&destination=host2.example.net
+}}}
+
+This returns the following JSON object:
+{{{
+[
+   {
+      "source":"10.1.1.1",
+      "destination":"10.1.1.2",
+      "event-types":[
+         {
+            "base-uri":"/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/packet-retransmits/base",
+            "event-type":"packet-retransmits",
+            "summaries":[
+
+            ],
+            "time-updated":1397482734
+         },
+         {
+            "base-uri":"/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/throughput/base",
+            "event-type":"throughput",
+            "summaries":[
+               {
+                  "summary-type":"average",
+                  "summary-window":"86400",
+                  "time-updated":1397482735,
+                  "uri":"/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/throughput/averages/86400"
+               }
+            ],
+            "time-updated":1397482735
+         },
+         {
+            "base-uri":"/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/failures/base",
+            "event-type":"failures",
+            "summaries":[
+
+            ],
+            "time-updated":1397315930
+         },
+         {
+            "base-uri":"/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/throughput-subintervals/base",
+            "event-type":"throughput-subintervals",
+            "summaries":[
+
+            ],
+            "time-updated":1397482735
+         }
+      ],
+      "input-source":"host1.example.net",
+      "input-destination":"host2.example.net",
+      "ip-transport-protocol":"tcp",
+      "measurement-agent":"10.1.1.1",
+      "metadata-key":"f6b732e9f351487a96126f0c25e5e546",
+      "subject-type":"point-to-point",
+      "time-duration":"20",
+      "time-duration":"14400",
+      "tool-name":"bwctl/iperf3",
+      "uri":"/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/"
+   }
+]
+}}}
+
+Notice we get back an array of objects. In the example above there is just one measurement that matches our search. Notice the source and destination are IP addresses. The archive always stores IP addresses for a measurement but will automatically do any required conversions if you provided DNS names in your search. Also notice there are multiple _event-types_ where one of them matches our search. These other event-types are other data available for the measurement. We just want throughput so we look at the object where _event-type_ is _throughput_ and extract the *base-uri* field which is _/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/throughput/base_. We can then query the last 24 hours (i.e. 86,400 seconds) of throughput measurements with the following HTTP GET request:
+{{{
+curl http://archive.example.net/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/throughput/base?time-range=86400
+}}}
+
+This returns the following list of datapoints where the _ts_ is the time the measurement started and value is the throughput measured in bits per second:
+{{{
+[
+   {
+      "ts":1397421672,
+      "val":7016320000.0
+   },
+   {
+      "ts":1397442692,
+      "val":7225480000.0
+   },
+   {
+      "ts":1397466492,
+      "val":7095460000.0
+   },
+   {
+      "ts":1397482700,
+      "val":7042540000.0
+   }
+]
+}}}
+
+The example above glosses over many details and options, but outlines the normal workflow for querying data. See the remainder of this section for further details on more advanced queries and data types. 
+
+== Finding the right measurements ==
+Finding measurements with parameters relevant to the data you are seeking is the first step in querying the measurement archive. All searches of this type go to the top-level URL (usually /esmond/perfsonar/archive) and you can use HTTP GET parameters to filter the results. Almost any parameter in the measurement objects returned can be used as a search filter. If no results match your search you will get back an empty list. If one or more measurements match your search, you will get back a list of objects describing the measurements called *metadata*. This information includes URIs where you can get the measurement results. Fields and filters common to all measurement objects are listed in the table below:
+|| Field name|| Type || Description ||
+|| source || IP address || The sender in a point-to-point measurement represented as an IPv4 or IPv6 address. When searching you can provide a DNS name and the server will automatically map it to the correct IP address. See [#Searching_by_Endpoint] for more information.||
+|| destination || IP address || The receiver in a point-to-point measurement represented as an IPv4 or IPv6 address. When searching you can provide a DNS name and the server will automatically map it to the correct IP address. See [#Searching_by_Endpoint] for more information. ||
+|| measurement-agent || IP address || The host where the measurement was initiated represented as an IPv4 or IPv6 address. This may be the source, destination or a third-party host depending on the tool. When searching you can provide a DNS name and the server will automatically map it to the correct IP address. See [#Searching_by_Endpoint] for more information. ||
+|| input-source || string || A string indicating exactly how the source address is passed to the tool. *You SHOULD NOT search on this field, use the source instead.* This field is for informational purposes only to indicate whether the underlying tool running the measurement (e.g. bwctl, owping, ping) is passed a DNS name or IP when it runs. While searching is not strictly prohibited, you should almost never search on this field. The source is better since it will do DNS to IP mappings and will provide more consistent results.||
+|| input-destination || string ||  A string indicating exactly how the destination address is passed to the tool. *You SHOULD NOT search on this field, use the destination instead.*  See _input-source_ above for a complete discussion.||
+|| tool-name || string || A string indicating the name of the tool that produced the measurement. Examples include bwctl/iperf, bwctl/iperf or powstream.||
+
+In addition to the fields above, specific measurement types can have context-specific fields that are searchable. A list of these fields is available in the [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Apr11.pdf API specification]. Examples and more information on common searches are provided in the remainder of this section.
+
+=== Listing all the measurements ===
+Perhaps the simplest query one can perform is to list all the measurement metadata for which an archive has data. You can do this by querying the top level URI with no GET filters:
+{{{
+curl "http://archive.example.net:9085/esmond/perfsonar/archive/"
+}}}
+
+=== Searching by Endpoint ===
+It is common to want to search by the endpoints of a point-to-point test. The archive provides two fields for this: *source* and *destination*. These fields are always stored as an IPv4 or IPv6 address depending on the type of address used in the actual measurement. If you provide just the source, all tests that send data from the given host will be returned. Likewise, if you provide just the destination the all hosts receiving data at the particular host will be returned. If both are provided, only tests between the given source and destination will be returned. Examples:
+
+*Match all measurement metadata with source 10.1.1.1*
+{{{
+curl "http://archive.example.net:9085/esmond/perfsonar/archive/?source=10.1.1.1"
+}}}
+
+*Match all measurement metadata with destination 10.1.1.2*
+{{{
+curl "http://archive.example.net:9085/esmond/perfsonar/archive/?destination=10.1.1.2"
+}}}
+
+*Match all measurement metadata with source 10.1.1.1 AND destination 10.1.1.2*
+{{{
+curl "http://archive.example.net:9085/esmond/perfsonar/archive/?source=10.1.1.1&destination=10.1.1.2"
+}}}
+
+Furthermore, when providing a filter in the GET parameters you may provide a DNS name which the server will automatically convert to an IP address before performing the search. This is an enhancement over previous versions of the measurement archive where it was required to know exactly how an address was stored. The DNS name may be a CNAME or have A and/or AAAA records directly. For example, assume the hostname _host1.example.net_ has an A record of 10.1.1.1. We can match all tests where 10.1.1.1 is the source with the following:
+{{{
+curl "http://archive.example.net:9085/esmond/perfsonar/archive/?source=host1.example.net"
+}}}
+
+There is also a special filter for controlling the behavior of the DNS lookups. By default, it will perform DNS lookups for both A and AAAA records. That means if you have two tests involving the same endpoint where one uses IPv4 addresses, the other uses IPv6 addresses AND you provide a hostname with both A and AAAA record, then you will both tests returned by your search. You can control this one of two ways:
+ # Always search using the IP address in the form you wish to match. i.e. Searching with an IPv6 address will only return IPv6 results, searching with the IPv4 address returns only IPv4 results.
+ # Use the special *dns-match-rule* filter in your GET parameters.
+The *dns-match-rule* parameter controls what DNS lookups the server will perform and accepts the following options:
+|| Value || Description ||
+|| v4v6 || Default. Looks up both A and AAAA records and returns both the IPv4 and IPv6 tests it finds. ||
+|| only-v4 || Only performs a A record lookup for a given hostname and thus only returns results matching the IPv4 address. ||
+|| only-v6 || Only performs a AAAA record lookup for a given hostname and thus only returns results matching the IPv6 address. ||
+|| prefer-v4 || Tries an A lookup first but if that fails, tries a AAAA lookup. If the initial A lookup succeeds, only IPv4 results are returned.||
+|| prefer-v6 || Tries an AAAA lookup first but if that fails, tries a A lookup. If the initial AAAA lookup succeeds, only IPv6 results are returned.||
+
+A quick example that returns only results with a source that matches the AAAA record of host1.example.net is below:
+{{{
+curl "http://archive.example.net:9085/esmond/perfsonar/archive/?source=host1.example.net&dns-match-rule=v6-only"
+}}}
+
+=== Searching by Event Type ===
+Another common desire is to search for only those measurements with a particular type of data. There is a special filter called *event-type* that returns this information. This will return any measurement metadata object that has an item in its _event-types_ list where the _event-type_ field equals the provided value. For example, to return only those measurements containing throughput data one could run:
+{{{
+curl "http://archive.example.net:9085/esmond/perfsonar/archive/?event-type=throughput"
+}}}
+
+Event types may also contain summaries. There are multiple types of summaries as described in [#Base_Data_vs_Summaries]. For example, an _average_ summary may take the statistical average of all the measurements over a 24 hour period and post that value to a single data point. This allows for faster retrieval of long ranges of data by reducing the number of datapoints returned. A summary may perform some type of transformation such as a _statistics_ summary that takes a histogram object and returns common statistical measures. There are two relevant fields for a summary: the *summary-type* (which is either _aggregation_, _average_ or _statistics_) and *summary-window* which is the time range (in seconds) that is summarized. Summaries are defined when metadata is created so you can't expect all data to have summaries nor for a summary to be available for a particular time window unless it is explicitly listed in the metadata. For example, we can search for all one-way delay histogram (event type _histogram-owdelay_) with 24 hour statistical summaries as follows:
+{{{
+curl "http://archive.example.net:9085/esmond/perfsonar/archive/?event-type=histogram-owdelay&summary-type=statistics&summary-window=86400"
+}}}
+
+Summaries are explained in more detail in the section [#Base_Data_vs_Summaries].
+
+=== Searching by most recent result time ===
+The previous examples will return all measurement metadata regardless of whether they have received any new data recently. In some cases this is fine, but its often useful to filter-out tests that have not been updated in a long time. For example if you have an old test that is no longer run and will not be updated again, but would like to keep the data around for historical purposes. You can filter measurement metadata based on time with the following special time filters:
+|| Filter || Description ||
+||time|| Match a measurement last updated at the exact time given as a UNIX timestamp ||
+||time-start||Match only measurements that were updated after the given time (inclusive). If time-end nor time-range is defined, then it will return all results from the start time to the current time. In UNIX timestamp format.||
+||time-end||Match only data that was measured before the given time (inclusive). If time-start nor time-range is provided, then will return all data stored in the archive up to and including the end time. In UNIX timestamp format.||
+||time-range|| Only return results that have been updated in the given number of seconds in the past. If time-start nor end-time is defined, then it is the number of seconds in the past from the current time. If only time-start is defined then it is the number of seconds after time-start to search. If only time-end is provided it is the number of seconds before end time to search. If both time-start and time-end are defined, this value is ignored.  ||
+
+Examples of various combinations of the parameters above are provided below:
+
+*Match all measurement metadata updated since April 14, 2014 12:00GMT*
+{{{
+curl "http://archive.example.net:9085/esmond/perfsonar/archive/?time-start=1397476800"
+}}}
+
+*Match all measurement metadata updated before April 14, 2014 12:00GMT*
+{{{
+curl "http://archive.example.net:9085/esmond/perfsonar/archive/?time-end=1397476800"
+}}}
+
+*Match all measurement metadata updated at exactly April 14, 2014 12:00GMT*
+{{{
+curl "http://archive.example.net:9085/esmond/perfsonar/archive/?time=1397476800"
+}}}
+
+*Match all measurement metadata updated between April 14, 2014 12:00GMT and April 15, 2014 12:00GMT*
+{{{
+curl "http://archive.example.net:9085/esmond/perfsonar/archive/?time-start=1397476800&time-end=1397563200"
+}}}
+
+*Match all throughput metadata with source 10.1.1.1 AND destination 10.1.1.2 updated in the last 24 hours*
+{{{
+curl "http://archive.example.net:9085/esmond/perfsonar/archive/?time-range=86400&event-type=throughput&source=10.1.1.1&destination=10.1.1.2"
+}}}
+
+== Retrieving Measurement Results ==
+
+=== Base Data vs Summaries ===
+Once you find the measurements with the parameters you want, you need to retrieve the actual results those measurements are collecting. The location of the data is provided by the list of objects in the *event-types* field. For reference, the _event-types_ object looks something like the following:
+{{{
+{
+...
+"event-types":[
+         {
+            "base-uri":"/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/packet-retransmits/base",
+            "event-type":"packet-retransmits",
+            "summaries":[],
+            "time-updated":1397482734
+         },
+         {
+            "base-uri":"/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/throughput/base",
+            "event-type":"throughput",
+            "summaries":[
+               {
+                  "summary-type":"average",
+                  "summary-window":"86400",
+                  "time-updated":1397482735,
+                  "uri":"/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/throughput/averages/86400"
+               }
+            ],
+            "time-updated":1397482735
+         },
+         {
+            "base-uri":"/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/failures/base",
+            "event-type":"failures",
+            "summaries":[],
+            "time-updated":1397315930
+         },
+         {
+            "base-uri":"/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/throughput-subintervals/base",
+            "event-type":"throughput-subintervals",
+            "summaries":[],
+            "time-updated":1397482735
+         }
+      ],
+...
+}
+}}}
+
+You will notice all of the objects have a *base-uri* field and a few have objects have a _summaries_ list that also contain a URI. In the archive there are two types of data: *base data* and *summarized data*. Base data is exactly what is written to the archive when the measurement is performed, the server does not transform it in anyway. In contrast, summarized data is that which was transformed in some way by the server. All summarized data has a *summary type* and *summary window*. The summary window is the timeframe in seconds described by the summary. A summary window of 0 means it is a direct transformation of the base data (i.e. there should be a one-to-one mapping in the number of base data points and summary data points).  The summary type must be one of the following:
+ * *aggregation* - The data was combined in a context specific way. For example, if the underlying type is numeric it is the sum of all data points in the summary window. If its a histogram it is a union of the two histograms.
+ * *average* - The statistical average of a series of numbers
+ * *statistics* - Currently only applies to the histogram type, but contains common statistical measures of data over the summary window such as minimum, maximum, mean and median.
+
+Summary data such as aggregation and average over large time windows can be a useful way to grab data over long periods of time as it should result in a smaller data set returned than the base data returned over the same timeframe. The _statistics_ summary can be useful even on base data as it provides additional information about each data point. Querying base or summary data depends on the use case.
+
+=== Retrieving time series data ===
+Once you have decided whether you want base or statistical data, retrieving it is simply a matter of doing an HTTP GET to the provide URI. For example, to get all the base throughput data for a particular test, you can run:
+{{{
+    curl "http://archive.example.net/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/throughput/base"
+}}}
+
+In general you will want to filter data based on time and you can do so with the following GET parameters (notice they have the same names and meaing as we used to search the measurement metadata):
+|| Filter || Description ||
+||time|| Match a result recorded at the exact time given (represented as a UNIX timestamp) ||
+||time-start||Match only results recorded after the given time (inclusive). If time-end nor time-range is defined, then it will return all results from the start time to the current time. In UNIX timestamp format.||
+||time-end||Match only data that was measured before the given time (inclusive). If time-start nor time-range is provided, then will return all data stored in the archive up to and including the end time. In UNIX timestamp format.||
+||time-range|| Only return results that have been recorded in the given number of seconds in the past. If time-start nor end-time is defined, then it is the number of seconds in the past from the current time. If only time-start is defined then it is the number of seconds after time-start to search. If only time-end is provided it is the number of seconds before end time to search. If both time-start and time-end are defined, this value is ignored. ||
+
+For example, you can get the last 24 hours of data with the following:
+
+{{{
+    curl "http://archive.example.net/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/throughput/base?time-range=86400"
+}}}
+
+This will return an array of time series object with two fields: *ts* containing the unix timestamp when the measurement was run and *val* containing the result of the object. For example:
+{{{
+[
+   {
+      "ts":1397421672,
+      "val":7016320000.0
+   },
+   {
+      "ts":1397442692,
+      "val":7225480000.0
+   },
+   {
+      "ts":1397466492,
+      "val":7095460000.0
+   },
+   {
+      "ts":1397482700,
+      "val":7042540000.0
+   }
+]
+}}}
+The format of *val* depends on the event type (and in some cases the summary-type as well), some are numeric while others are JSON objects. The next section describes common event types and how to retrieve data.
+
+=== Querying Throughput ===
+*Event Type(s):* throughput
+
+Throughput is a series of integer values always in bits per second. There may be average summaries but in general you will likely query the base data if the throughput tests only run a few times a day. You can do this with a query like the following to get the last 24 hours of throughput data:
+{{{
+curl "http://archive.example.net/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/throughput/base?time-range=86400"
+}}}
+
+Results:
+{{{
+[
+   {
+      "ts":1397421672,
+      "val":7016320000.0
+   },
+   {
+      "ts":1397442692,
+      "val":7225480000.0
+   },
+   {
+      "ts":1397466492,
+      "val":7095460000.0
+   },
+   {
+      "ts":1397482700,
+      "val":7042540000.0
+   }
+]
+}}}
+
+=== Querying Delay/One-way Delay ===
+*Event Type(s):* histogram-rtt, histogram-owdelay
+
+Delay values are stored in a histogram where the histogram bucket is the number of milliseconds measured and the value is the number of packets that were measured to have that value. Delay in terms of the round trip time reported by ping is represented with the event-type *histogram-delay*. One-way delay is represented as "histogram-owdelay". The format of their histograms is exactly the same. Examples of query the 24 hours of base data are below:
+
+*Ping Round Trip Time*
+{{{
+curl "http://archive.example.net/esmond/perfsonar/archive/2355e337a7214611ab1bc5db51e40424/histogram-rtt/base?time-range=86400"
+}}}
+
+*Owamp One-way Delay*
+{{{
+curl "http://archive.example.net/esmond/perfsonar/archive/fce0483e51de49aaa7fcf8884d053134/histogram-owdelay/base?time-range=86400"
+}}}
+
+Results will look something like the following:
+{{{
+[
+   {
+      "ts":1397504013,
+      "val":{
+         "34.4":506,
+         "34.5":85,
+         "34.6":5,
+         "34.7":4
+      }
+   },
+   {
+      "ts":1397504052,
+      "val":{
+         "34.4":510,
+         "34.5":80,
+         "34.6":7,
+         "34.7":3
+      }
+   },
+.....
+]
+}}}
+
+You may interpret the results as for the packet sample starting at time 1397504013 there were 506 packets that took 34.4ms, 85 that took 34.5ms, 5 that too 34.6, etc. Delay tests can run rather frequently thus it can be very useful to use summarized data. Aggregation summaries combine all the histograms in a given time window. For example a histogram for 24 hours may look like the following:
+{{{
+curl "http://archive.example.net/esmond/perfsonar/archive/fce0483e51de49aaa7fcf8884d053134/histogram-owdelay/aggregations/86400"
+[
+   {
+      "ts":1396915200,
+      "val":{
+         "34.2":3,
+         "34.3":38814,
+         "34.4":114820,
+         "34.5":54190,
+         "34.6":7842,
+         "34.7":9595,
+         "34.8":741,
+         "34.9":298,
+         "35":185,
+         "35.1":158,
+         "35.2":112,
+         "35.3":61,
+         "35.4":40,
+         "35.5":19,
+
+      }
+   },
+...
+]
+}}}
+
+Another useful summary for the delay histograms is *statistics*. This calculates common statistical measures of the data. An example of the statistical summaries for each base data point (i.e. summary-window equals 0) is as follows where the field names correspond to standard statistical measures:
+{{{
+curl "http://archive.example.net/esmond/perfsonar/archive/fce0483e51de49aaa7fcf8884d053134/histogram-owdelay/statistics/0"
+[
+   {
+      "ts":1397504795,
+      "val":{
+         "maximum":"34.4",
+         "mean":34.4,
+         "median":34.4,
+         "minimum":"34.4",
+         "mode":[
+            "34.4"
+         ],
+         "percentile-25":34.4,
+         "percentile-75":34.4,
+         "percentile-95":34.4,
+         "standard-deviation":0.0,
+         "variance":0.0
+      }
+   },
+   {
+      "ts":1397504835,
+      "val":{
+         "maximum":"34.4",
+         "mean":34.38233333333333,
+         "median":34.4,
+         "minimum":"34.3",
+         "mode":[
+            "34.4"
+         ],
+         "percentile-25":34.4,
+         "percentile-75":34.4,
+         "percentile-95":34.4,
+         "standard-deviation":0.03813863599495395,
+         "variance":0.001454555555555597
+      }
+   },
+   ...
+]
+}}}
+
+=== Querying Packet Loss ===
+*Event Type(s):* packet-loss-rate
+Packet loss rate measures the number of packets lost over the number of packets sent. It is represented as a floating point number between 0 and 1 where 0 equals 0% packet loss and 1 equals 100% packet loss. You can query the base packet loss data using the packet-loss-rate event type such as in the request below:
+{{{
+"http://archive.example.net/esmond/perfsonar/archive/fce0483e51de49aaa7fcf8884d053134/packet-loss-rate/base"
+[
+   {
+      "ts":1397555532,
+      "val":0.04666666666666667
+   },
+   {
+      "ts":1397555538,
+      "val":0.06666666666666667
+   },
+   {
+      "ts":1397555613,
+      "val":0.0
+   },
+   {
+      "ts":1397555619,
+      "val":0.0
+   },
+]
+}}}
+
+Packet-loss can also have an _aggregation_ summary that give the packet loss percentage over the given summary window. 
+
+
+=== Querying Packet Traces ===
+*Event Type(s):* packet-trace
+The results of a traceroute or tracepath measurement are stored under the packet-trace event type. The result is an array of objects describing the result of each traceroute or tracepath probe. For example:
+{{{
+curl http://archive.example.net:9085/esmond/perfsonar/archive/641860b2004c46a7b21fe26e5ffea9af/packet-trace/base?time-range=600
+[
+   {
+      "ts":1397566094,
+      "val":[
+         {
+            "error_message":null,
+            "ip":"198.124.238.65",
+            "mtu":"9000",
+            "query":"1",
+            "rtt":"0.246",
+            "success":1,
+            "ttl":"1"
+         },
+         {
+            "error_message":null,
+            "ip":"198.124.238.65",
+            "mtu":"9000",
+            "query":"2",
+            "rtt":"0.195",
+            "success":1,
+            "ttl":"1"
+         },
+         {
+            "error_message":null,
+            "ip":"134.55.38.77",
+            "mtu":"9000",
+            "query":"1",
+            "rtt":"22.159",
+            "success":1,
+            "ttl":"2"
+         },
+         {
+            "error_message":null,
+            "ip":"134.55.42.41",
+            "mtu":"9000",
+            "query":"1",
+            "rtt":"22.430",
+            "success":1,
+            "ttl":"3"
+         },
+         {
+            "error_message":null,
+            "ip":"134.55.43.82",
+            "mtu":"9000",
+            "query":"1",
+            "rtt":"33.548",
+            "success":1,
+            "ttl":"4"
+         },
+         {
+            "error_message":null,
+            "ip":"134.55.49.57",
+            "mtu":"9000",
+            "query":"1",
+            "rtt":"44.019",
+            "success":1,
+            "ttl":"5"
+         },
+         {
+            "error_message":null,
+            "ip":"134.55.50.201",
+            "mtu":"9000",
+            "query":"1",
+            "rtt":"65.203",
+            "success":1,
+            "ttl":"6"
+         },
+         {
+            "error_message":null,
+            "ip":"134.55.40.6",
+            "mtu":"9000",
+            "query":"1",
+            "rtt":"67.694",
+            "success":1,
+            "ttl":"7"
+         },
+         {
+            "error_message":null,
+            "ip":"134.55.49.2",
+            "mtu":"9000",
+            "query":"1",
+            "rtt":"68.914",
+            "success":1,
+            "ttl":"8"
+         },
+         {
+            "error_message":null,
+            "ip":"198.129.254.30",
+            "mtu":"9000",
+            "query":"1",
+            "rtt":"68.887",
+            "success":1,
+            "ttl":"9"
+         }
+      ]
+   }
+]
+}}}
+The object fields have the following meaning:
+|| Field Name || Description ||
+||error-message|| A string indicating if an error occurred for the probe. It is null if _success_ is 1 and should be populated if _success_ is 0.||
+||ip|| The IP address returned by the probe ||
+||mtu|| The maximum transmission unit measured by the probe. This is only populated for tracepath tests and will be null if not measured.||
+||query|| For a given _ttl_ a tool may send multiple probes. This distinguishes between probes with the same ttl. ||
+||rtt||The round trip time measured by the probe in milliseconds. ||
+||success||A boolean indicating if the probe succeeded. If it did not, then further details can be found in _error_message_.||
+||ttl||The time-to-live set in the IP headers of the probe. Traceroute and tracepath gradually increase this value to measure the path. The list will always be sorted by ttl. ||
+
+There are no summaries supported for the packet-trace type currently.
+
+=== Full List of Event Types ===
+A few of the common event types have been covered in previous sections, but a full list is provided below for reference (NOTE: See [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Apr11.pdf API Specification] for more formal definitions of each type):
+|| Name || Description ||
+||failures||A record of test failures. A failure is any measurement that was scheduled to run but circumstances led to a state where it is unable to record a measurement. For example, being unable to connect to the remote endpoint. This is an object currently with one field named _error_.||
+||histogram-owdelay|| A histogram describing the observed one-way delays over a time period. Buckets always in milliseconds.||
+||histogram-rtt||A histogram describing the observed packet round-trip times over a over a time period. Buckets always in milliseconds.||
+||histogram-ttl||A histogram describing the observed number of hops (time-to-live) of packets over a time period.||
+||packet-duplicates||The number of duplicate packets sent in a sample.||
+||packet-loss-rate||The number of packets lost divided by the number of packets sent.||
+||packet-trace||The observed packet trace such as that returned by traceroute or tracepath.||
+||packet-count-lost||The number of packets dropped in a sample. This is a raw count of packets and can be combined with packet-count-sent event type data to determine the rate of loss.||
+||packet-count-sent||The number of packets sent in a sample. This is a raw count of packets and can be combined with packet-count-lost event type data to determine the rate of loss.||
+||packet-reorders||The number of packets received out of order for a particular transfer||
+||packet-retransmits||The number of packets retransmitted for a transfer using reliable transport protocol such as TCP.||
+||path-mtu||The maximum transmission unit of a path.||
+||streams-packet-retransmits||For tests running multiple streams, the packet-retransmits for each individual stream. Each stream is represented as a position in an array. If other stream- stats collected, a stream will maintain the same position in each event type.||
+||streams-throughput||For tests running multiple streams, the throughput for each individual stream. Each stream is represented as a position in an array. If other stream- stats collected, a stream should maintain the same position in each event type.||
+||streams-throughput-subintervals||For tests running multiple streams, the throughput subintervals for each inividual stream. Each stream is represented as a position in an array. If other stream- stats collected, a stream will maintain the same position in each event type||
+||throughput||The observed amount of data sent over a period of time. Throughput must be in bits per second(bps).||
+||throughput-subintervals||The throughput for individual subintervals of a throughput test||
+||time-error-estimates||An estimate of the clock error in a sample in milliseconds||
+
+= Other Resources =
+ * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Apr11.pdf API Specification]
+ * [# Perl API]
+ * [# Python API]
