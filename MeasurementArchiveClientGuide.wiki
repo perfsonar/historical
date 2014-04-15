@@ -611,5 +611,5 @@ A few of the common event types have been covered in previous sections, but a fu
 
 = Other Resources =
  * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Apr11.pdf API Specification]
- * [# Perl API]
- * [# Python API]
+ * Perl API - *COMING SOON*
+ * Python API - *COMING SOON*
