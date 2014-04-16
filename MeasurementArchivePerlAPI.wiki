@@ -144,7 +144,7 @@ my $throughput_et = $m->get_event_type("throughput");
 ==Querying Base Measurement Results==
 The *perfSONAR_PS::Client::Esmond::EventType* is the gateway object to pulling down actual results. It provides the following methods:
 || *Method Name* || *Description* ||
-|| *base_uri()* ||Returns the URI where you can get the base data for the event type. See [MeasurementArchiveClientGuide#Base_vs_Summary_Data Measurement Archive Client Guide] for more details on base and summary data.||
+|| *base_uri()* ||Returns the URI where you can get the base data for the event type. See [MeasurementArchiveClientGuide#Base_Data_vs_Summaries Measurement Archive Client Guide] for more details on base and summary data.||
 || *event_type()* || The type of data such as _throughput_ or _packet-loss-rate_.||
 || *time_updated()* ||A Unix timestamp indicating when the event type was last updated. A value of undef means it has never been updated.||
 || *datetime_updated()* ||A DateTime object indicating when the event type was last updated. The same as _time_updated()_ but returns a DateTime object instead of a UNIX timestamp.||
