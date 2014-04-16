@@ -1,0 +1,217 @@
+#summary Measurement Archive Perl API Guide
+
+<wiki:toc max_depth="3" />
+
+= Overview =
+This document describes the basics of reading and writing data from the perfSONAR measurement archive using the PERL API. The measurement archive implements a REST interface where clients can retrieve descriptions of measurements being run and the results of those measurements. It currently offers support for a range of measurements related to throughput, packet delay, packet loss, packet traces and more (with additional data types being added all the time). This document gives developers information on how to interact with the API using the Perl library.
+
+= Where to get the API =
+The API can currently be found in the perfsonar source tree [http://perfsonar-ps.googlecode.com/git/Shared/lib/perfSONAR_PS/Client/Esmond/ here]
+
+Developers or perfSONAR components can link to the files directly. For external project, you currently need to [https://code.google.com/p/perfsonar-ps/source/checkout checkout the source].
+
+= Querying Data =
+
+== Quick start ==
+{{{
+# Define filters
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
+$filters->source("host1.example.net");
+$filters->destination("host2.example.net");
+$filters->time_range(86400);
+$filters->event_type('throughput');
+
+# Connect to api
+my $client = new perfSONAR_PS::Client::Esmond::ApiConnect(
+    url => 'http://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+
+#get measurements matching filters
+my $md = $client->get_metadata();
+die $client->error if($client->error); #check for errors
+#loop through all measurements
+foreach my $m(@{$md}){
+    # get data of a particular event type
+    my $et = $m->get_event_type("throughput");
+    my $data = $et->get_data();
+    die $et->error if($et->error); #check for errors
+    #print all data
+    foreach my $d(@{$data}){
+        print "Time: " . $d->datetime . ", Value: " . $d->val . "\n";
+    }
+}
+}}}
+
+== Defining filters ==
+
+== Retrieving Measurement Results ==
+
+== Querying Base Data ==
+
+== Querying Summary Data ==
+
+
+== Examples ==
+=== Querying Throughput ===
+{{{
+# Define filters
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
+$filters->source("host1.example.net");
+$filters->destination("host2.example.net");
+$filters->time_range(86400);
+$filters->event_type('throughput');
+
+# Connect to api
+my $client = new perfSONAR_PS::Client::Esmond::ApiConnect(
+    url => 'http://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+
+#get measurements matching filters
+my $md = $client->get_metadata();
+die $client->error if($client->error); #check for errors
+#loop through all measurements
+foreach my $m(@{$md}){
+    # get data of a particular event type
+    my $et = $m->get_event_type("throughput");
+    my $data = $et->get_data();
+    die $et->error if($et->error); #check for errors
+    #print all data
+    foreach my $d(@{$data}){
+        print "Time: " . $d->datetime . ", Value: " . $d->val . "\n";
+    }
+}
+}}}
+
+=== Querying Delay/One-way Delay ===
+{{{
+# define filters
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
+$filters->source("host1.example.net");
+$filters->destination("host2.example.net");
+$filters->time_range(86400);
+
+# connect to api
+my $client = new perfSONAR_PS::Client::Esmond::ApiConnect(
+    url => 'http://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+
+#get measurements matching filters
+my $md = $client->get_metadata();
+die $client->error if($client->error); #check for errors
+foreach my $m(@{$md}){
+    my $et = $m->get_event_type("histogram-owdelay");
+    my $data = $et->get_data();
+    die $et->error if($et->error); #check for errors
+    #base data
+    foreach my $d(@{$data}){
+        print "Time: " . $d->datetime . "\n";
+        foreach my $bucket(keys %{$d->val}){
+            print "\t${bucket}ms: " . $d->val->{$bucket} . "\n";
+        }
+    }
+    
+    #get histogram statistics summary for base data
+    my $stats_summ = $et->get_summary('statistics', 0);
+    next unless($stats_summ);
+    my $stats_data = $stats_summ->get_data();
+    die $stats_summ->error if($stats_summ->error);
+    foreach my $stats_d(@{$stats_data}){
+        print "Time: " . $stats_d->datetime . ", Median:" . $stats_d->{val}->{median}. "\n";
+    }
+    
+    #get 24 hour summaries
+    my $agg_summ = $et->get_summary('aggregation', 86400);
+    next unless($agg_summ);
+    my $agg_data = $agg_summ->get_data();
+    return $agg_summ->error if($agg_summ->error);
+    foreach my $agg_d(@{$agg_data}){
+        foreach my $agg_bucket(keys %{$agg_d->val}){
+            print "\t${agg_bucket}ms: " . $agg_d->val->{$agg_bucket}. "\n";
+        }
+    }
+}
+}}}
+
+=== Querying Packet Loss ===
+{{{
+#define filters
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
+$filters->source("host1.example.net");
+$filters->destination("host2.example.net");
+$filters->time_range(86400);
+
+# connect to api
+my $client = new perfSONAR_PS::Client::Esmond::ApiConnect(
+    url => 'http://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+
+#get measurements matching filters
+my $md = $client->get_metadata();
+die $client->error if($client->error); #check for errors
+foreach my $m(@{$md}){
+    my $et = $m->get_event_type("packet-loss-rate");
+    my $data = $et->get_data();
+    die $et->error if($et->error); #check for errors
+    #base data
+    foreach my $d(@{$data}){
+        print "Time: " . $d->datetime . ", Loss: " . $d->val*100.0 . "%\n";
+    }
+    
+    #get 24 hour summaries
+    my $agg_summ = $et->get_summary('aggregation', 86400);
+    next unless($agg_summ);
+    my $agg_data = $agg_summ->get_data();
+    return $agg_summ->error if($agg_summ->error);
+    foreach my $agg_d(@{$agg_data}){
+        print "Time: " . $agg_d->datetime . ", Loss: " . $agg_d->val*100.0 . "%\n";
+    }
+}
+}}}
+
+=== Querying Packet Traces ===
+{{{
+#define filters
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
+$filters->source("host1.example.net");
+$filters->destination("host2.example.net");
+$filters->time_range(86400);
+
+# connect to api
+my $client = new perfSONAR_PS::Client::Esmond::ApiConnect(
+    url => 'http://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+
+#get measurements matching filters
+my $md = $client->get_metadata();
+die $client->error if($client->error); #check for errors
+foreach my $m(@{$md}){
+    my $et = $m->get_event_type("packet-trace");
+    my $data = $et->get_data();
+    die $et->error if($et->error); #check for errors
+    #base data
+    foreach my $d(@{$data}){
+        print "Time: " . $d->datetime . "\n";
+        foreach my $hop(@{$d->val}){
+            print "ttl=" . $hop->ttl . ",query=" . $hop->query;
+            if($hop->{success}){
+                print ",ip=" . $hop->{ip} . ",rtt=" . $hop->{rtt} . ",mtu=" . $hop->{mtu} . "\n"; 
+            }else{
+                print ",error=" . $hop->{error} . "\n"; 
+            }
+        }
+    }
+}
+}}}
+
+= Perl Module Reference =
+
+
+= Other Resources =
+ * [MeasurementArchiveClientGuide General Measurement Archive Client Guide]
+ * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Apr11.pdf API Specification]
+ * Python API - *COMING SOON*
