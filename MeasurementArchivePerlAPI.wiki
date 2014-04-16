@@ -12,7 +12,7 @@ Developers or perfSONAR components can link to the files directly. For external 
 
 = Querying Data =
 
-== Quick start ==
+== Quickstart ==
 {{{
 # Define filters
 my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
@@ -44,16 +44,161 @@ foreach my $m(@{$md}){
 }}}
 
 == Defining filters ==
+The first step to querying the measurement archive is to define a set of filters. If you want a listing of all the measurements run by a measurement archive using default HTTP connection parameters then you can skip this step. The library allows you to filter measurements using the *perfSONAR_PS::Client::Esmond::ApiFilters* module. The class has a a set of well-known filters available as specific functions and also allows the setting of custom filters with direct access to the _metadata_filters_ hash. It also allows you to define various settings related to the HTTP connection. In general, you can call the constructor without any options as follows:
+{{{
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
+}}}
 
-== Retrieving Measurement Results ==
+You can optionally pass the following values to the ApiFilters constructor when creating a new object:
+|| *Property Name* || *Description* ||
+|| *auth_username* || String with the username to pass in the HTTP Authorization header. Not required for querying data, but may be required to write data. ||
+|| *auth_apikey* || String with the API key to pass in the HTTP Authorization header. Not required for querying data, but may be required to write data.||
+|| *ca_certificate_file* || For HTTPS connections only, the absolute path to a file containing a certificate file used to verify the server certificate||
+|| *ca_certificate_path* || For HTTPS connections only, the absolute path to a directory containing one or more certificate files to be used to verify the server||
+|| *timeout* || The timeout in seconds to wait before terminating the HTTP request. Defaults to 60 seconds. ||
+|| *verify_hostname* ||For HTTPS connections only, a boolean indicating whether the hostname must match the common name in the subject of the certificate presented by the server.||
 
-== Querying Base Data ==
+After creating the filters object, you can set various parameters that will limit the results returned by the search by using a set of accessor methods. The methods accept an optional argument containing the value to set. If no argument is provided, it simply returns the value of the field. The full set of methods available for setting common values is provided below:
+|| *Method Name* || *Description* ||
+|| *source([_ip_])* ||An IP address or hostname matching against the sender in a measurement. Hostnames will automatically get mapped to IP addresses by the server, so no need to match the form in which things are stored on the backend.||
+|| *destination([_ip_])* ||An IP address or hostname matching against the receiver in a measurement. Hostnames will automatically get mapped to IP addresses by the server, so no need to match the form in which things are stored on the backend.||
+|| *measurement_agent([_ip_])* ||An IP address or hostname matching against the host that initiated a test. Could either be the source, destination or in some cases a third-party host. Hostnames will automatically get mapped to IP addresses by the server, so no need to match the form in which things are stored on the backend.||
+|| *tool_name([_string_])* || The name of the tool used for the measurement. Examples include _bwctl/iperf3_ and _powstream_.||
+|| *event_type([_string_])* ||Matches only metadata with a certain type for data (e.g. _throughput_, _packet-loss-rate_)||
+|| *summary_type([_string_])* ||Matches only metadata doing certain summaries(e.g. _statistics_, _average_, _aggregation_)||
+|| *summary_window([_seconds_])* ||Matches only metadata with event-types that have summaries over a certain windows (in seconds).||
+|| *time([_timestamp_])* || Match metadata last updated at the exact time given as a UNIX timestamp.||
+|| *time_start([_timestamp_])* ||Match only measurements that were updated after the given time (inclusive). If time_end nor time_range is defined, then it will return all results from the start time to the current time. In UNIX timestamp format.||
+|| *time_end([_timestamp_])* ||Match only data that was measured before the given time (inclusive). If time-start nor time-range is provided, then will return all data stored in the archive up to and including the end time. In UNIX timestamp format.||
+|| *time_range([_seconds_])* ||Only return results that have been updated in the given number of seconds in the past. If time_start nor time-end is defined, then it is the number of seconds in the past from the current time. If only time_start is defined then it is the number of seconds after time_start to search. If only time_end is provided it is the number of seconds before end time to search. If both time_start and time_end are defined, this value is ignored.||
+|| *input_source([_string_])* ||A string indicating exactly how the source address is passed to the tool. *You SHOULD NOT search on this field, use the source instead.* This field is for informational purposes only to indicate whether the underlying tool running the measurement (e.g. bwctl, owping, ping) is passed a DNS name or IP when it runs. While searching is not strictly prohibited, you should almost never search on this field. The source is better since it will do DNS to IP mappings and will provide more consistent ||
+|| *input_destination([_string_])* || A string indicating exactly how the destination address is passed to the tool. *You SHOULD NOT search on this field, use the destination instead.*  See _input-source_ above for a complete discussion.||
 
-== Querying Summary Data ==
+Finally, you can set context-specific parameters that don't have a function by accessing the _metadata`_`filters_ hash directly:
+{{{
+$filters->metadata_filters->{'ip-transport-protocol'} = 'tcp';
+}}}
+
+==Connecting to the API==
+
+Once the filters are defined, you create an instance of *perfSONAR_PS::Client::Esmond::ApiConnect* as follows:
+{{{
+...
+my $client = new perfSONAR_PS::Client::Esmond::ApiConnect(
+    url => 'http://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+}}}
+
+You MUST provide the _url_ parameter with the base URL of the measurement archive (usually ending with _/esmond/perfsonar/archive_) in the constructor. You may optionally define the _filters_ field in the constructor with an instance of *perfSONAR_PS::Client::Esmond::ApiFilters*. If none is provided, all metadata will be returned and default HTTP connection settings will be used. After constructing the ApiConnect object, there is one method, *get_metadata()*, that accepts no arguments available to call:
+{{{
+...
+my $md = $client->get_metadata();
+}}}
+The *get_metadata()* call returns an ArrayRef to a list of *perfSONAR_PS::Client::Esmond::Metadata* objects as described in [#Working_with_Measurement_Metadata Working with Measurement Metadata]. After making a call to *get_metadata()* you can check the *error* property to see if any errors occurred since *get_metadata()* leads to an HTTP GET request. For example:
+{{{
+...
+my $md = $client->get_metadata();
+die $client->error if($client->error); #check for errors
+}}}
+
+==Working with Measurement Metadata==
+As discussed in [#Connecting_to_the_API Connecting to the API] you can retrieve an ArrayRef to a list of *perfSONAR_PS::Client::Esmond::Metadata* objects. These objects describe tests and have the following property methods to retrieve common metadata parameters:
+|| *Method Name* || *Description* ||
+|| *source()* ||An IP address representing the sender in a point-to-point measurement||
+|| *destination()* ||An IP address representing the receiver in a point-to-point measurement||
+|| *measurement_agent()* ||The IP address of the host that initiated the measurement||
+|| *metadata_key()* ||The key used to identify this metadata_object.||
+|| *input_source* ||A string representing the source address exactly as it is passed to the underlying measurement tool.||
+|| *input_destination()* ||A string representing the destination address exactly as it is passed to the underlying measurement tool.||
+|| *subject_type()* ||Indicates the type of parameters to expect in the metadata. In general will always be _point-to-point_.||
+|| *tool_name()* || The name of the tool used to run the underlying measurement.||
+|| *uri()* ||The URI to this individual metadata object||
+|| *event_types()* ||Returns an ArrayRef of strings indicating the event type available. e.g. ['throughput', 'packet-count-sent']||
+
+Additionally, you can retrieve context-specific metadata parameters with the *get_field* call which accepts the field name as a parameter:
+{{{
+...
+    foreach my $m(@{$md}){
+        print $m->get_field('ip-transport-protocol') . "\n";
+    }
+}}}
+
+Finally, there are a special set of methods to work with event types and will act as the gateway to accessing the results. The methods are as follows:
+|| *Method Name* || *Description* ||
+|| *get_all_event_types()* ||Accepts no arguments and returns an ArrayRef of *perfSONAR_PS::Client::Esmond::EventType* objects||
+|| *get_event_type(_string_)* ||Accepts a single argument indicating the type of data you want (e.g.'throughput'). Returns a single *perfSONAR_PS::Client::Esmond::EventType* object or undef if none match||
+
+An example of each:
+{{{
+...
+#print the base uri for every event type
+foreach my $et(@{$m->get_all_event_types()}){
+    print $et->base_uri() . "\n";
+}
+
+#grab a single throughput event type
+my $throughput_et = $m->get_event_type("throughput");
+}}}
+
+==Querying Base Measurement Results==
+The *perfSONAR_PS::Client::Esmond::EventType* is the gateway object to pulling down actual results. It provides the following methods:
+|| *Method Name* || *Description* ||
+|| *base_uri()* ||Returns the URI where you can get the base data for the event type. See [MeasurementArchiveClientGuide#Base_vs_Summary_Data Measurement Archive Client Guide] for more details on base and summary data.||
+|| *event_type()* || The type of data such as _throughput_ or _packet-loss-rate_.||
+|| *time_updated()* ||A Unix timestamp indicating when the event type was last updated. A value of undef means it has never been updated.||
+|| *datetime_updated()* ||A DateTime object indicating when the event type was last updated. The same as _time_updated()_ but returns a DateTime object instead of a UNIX timestamp.||
+|| *summaries()* || An ArrayRef of tuples. The first item in each tuple is the summary type, the second is the summary window. ||
+
+It provides a single *get_data()* method that accepts no arguments for pulling down data. It also provides an *error* property for checking if the *get_data()* call failed. If *get_data()* succeeds it returns an ArrayRef of *perfSONAR_PS::Client::Esmond::DataPayload* objects. *perfSONAR_PS::Client::Esmond::DataPayload* objects have the following properties:
+|| *Property Name* || *Description* ||
+|| *ts* ||The UNIX timestamp of when the measurement was run||
+|| *val* || The value of the measurement. The type depends on the event type. It will either be a primitive type or a Perl HashRef.||
+
+It also contains the following method:
+|| *Method Name* || *Description* ||
+|| *datetime()* ||Returns a DateTime version of the _ts_ property||
+
+A full example is shown below:
+{{{
+...
+my $data = $et->get_data();
+die $et->error if($et->error); #check for errors
+#print all data
+foreach my $d(@{$data}){
+    print "Time: " . $d->datetime . ", Value: " . $d->val . "\n";
+}
+}}}
+
+==Querying Summary Measurement Results==
+The *perfSONAR_PS::Client::Esmond::EventType* contains two more methods for geting summary data:
+
+|| *get_all_summaries()* ||Returns an ArrayRef of *perfSONAR_PS::Client::Esmond::Summary* objects. Returns an empty list if there are no summaries.||
+|| *get_summary(_string_, _seconds_)* ||Returns a a single *perfSONAR_PS::Client::Esmond::Summary* of a given type and summary window.||
+
+The *perfSONAR_PS::Client::Esmond::Summary* module has the following methods:
+|| *Method Name* || *Description* ||
+|| *uri()* ||Returns the URI where you can get the summary data.||
+|| *summary_type()* || The type of summary such as _aggregation_, _average_ or _statistics.||
+|| *summary_window()* ||The time in seconds over which the data is summarized.||
+|| *time_updated()* ||A Unix timestamp indicating when the summary was last updated. A value of undef means it has never been updated.||
+|| *datetime_updated()* ||A DateTime object indicating when the summary was last updated. The same as _time_updated()_ but returns a DateTime object instead of a UNIX timestamp.||
+
+The *perfSONAR_PS::Client::Esmond::Summary* module also has a *get_data()* method that accepts no arguments and returns an ArrayRef of *perfSONAR_PS::Client::Esmond::DataPayload* objects. It also has an *error* property that gets populated if the library is unable to retrieve the summary. These methods follow the exact same format as the *perfSONAR_PS::Client::Esmond::EventType* module. An example of querying summary data below:
+{{{
+#get 24 hour summaries
+my $agg_summ = $et->get_summary('aggregation', 86400);
+die "No summary found" unless($agg_summ);
+my $agg_data = $agg_summ->get_data();
+die $agg_summ->error if($agg_summ->error);
+foreach my $agg_d(@{$agg_data}){
+    print "Time: " . $agg_d->datetime . ", Val: " . $agg_d->val . "\n";
+}
+}}}
 
 
-== Examples ==
-=== Querying Throughput ===
+==Examples==
+===Querying Throughput===
 {{{
 # Define filters
 my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
@@ -84,7 +229,7 @@ foreach my $m(@{$md}){
 }
 }}}
 
-=== Querying Delay/One-way Delay ===
+===Querying Delay/One-way Delay===
 {{{
 # define filters
 my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
@@ -135,7 +280,7 @@ foreach my $m(@{$md}){
 }
 }}}
 
-=== Querying Packet Loss ===
+===Querying Packet Loss===
 {{{
 #define filters
 my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
@@ -172,7 +317,7 @@ foreach my $m(@{$md}){
 }
 }}}
 
-=== Querying Packet Traces ===
+===Querying Packet Traces===
 {{{
 #define filters
 my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
@@ -208,10 +353,8 @@ foreach my $m(@{$md}){
 }
 }}}
 
-= Perl Module Reference =
 
-
-= Other Resources =
+=Other Resources=
  * [MeasurementArchiveClientGuide General Measurement Archive Client Guide]
  * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Apr11.pdf API Specification]
  * Python API - *COMING SOON*
