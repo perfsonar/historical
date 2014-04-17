@@ -357,4 +357,4 @@ foreach my $m(@{$md}){
 =Other Resources=
  * [MeasurementArchiveClientGuide General Measurement Archive Client Guide]
  * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Apr11.pdf API Specification]
- * Python API - *COMING SOON*
+ * [http://antg-dev.es.net/esmond-docs/perfsonar_client.html Python API]
