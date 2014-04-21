@@ -2,7 +2,7 @@
 
 =   April 21, 2014 Conference Call 1:00 p.m. EST =
 
-Attendees: TBD
+Attendees: Andy, Jason, Michael, Dan, Brian
 
 == Agenda/Minutes ==
 
@@ -25,9 +25,28 @@ TBD
    * Reported from various users, appears to be related to defaults for netinstall (that we can't change?)
    * Can we use an existing disk partition monitor, have it send mail?  Can we automatically remove old kernels in a non-destructive way?  Can we resize or merge the partition?
 
-== Notes ==
 
-TBD
+== Notes ==
+ * Developer Updates
+   * Andy
+    * Wrote docs for esmond
+    * Met with RNP, they are evaluating esmond for their uses
+   * Michael
+    * Worked on lost of issues, fixing NaN issue with bwctl limits
+    * Looking at error vs warning in GUI
+   * Dan
+    * Shoring up error message with OWAMP failing when NTP really far off
+    * Looking at graphs next
+    * Brian: It would be nice to collect ntp clock drift. Need aaron, might be a cacti plugin that's easy to install. 
+   * Jason
+    * Waiting for go ahead on new web space
+    * Giving talk later this week, looking at a few issues
+   * Brian
+    * Bruce patched iperf3 with slightly different timing
+ * /boot filling up with kernels.  Anything we can do?
+   * Many things to look at. Not sure we want automated script.
+   * Maybe look at tools to send emails about disk
+   * Jason creating an issue
 
 == Future Agenda Topics ==
 
