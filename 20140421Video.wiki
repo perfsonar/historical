@@ -21,7 +21,9 @@ TBD
    * Michael
    * Brian
    * Jason
- * Other Topics TBD
+ * /boot filling up with kernels.  Anything we can do?
+   * Reported from various users, appears to be related to defaults for netinstall (that we can't change?)
+   * Can we use an existing disk partition monitor, have it send mail?  Can we automatically remove old kernels in a non-destructive way?  Can we resize or merge the partition?
 
 == Notes ==
 
