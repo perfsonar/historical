@@ -905,7 +905,7 @@ An example of delay metadata as published for BWCTL running ping by the perfSONA
    "measurement-agent":"10.1.1.1",
    "destination":"10.1.1.2",
    "ip-transport-protocol":"icmp",
-   "ip-packet-interval":1,
+   "time-probe-interval":1,
    "ip-packet-size":1000,
    "event-types":[
       {
@@ -979,7 +979,7 @@ Similarly, metadata example for powstream as registered by the perfSONAR Regular
    "destination":"10.1.1.2",
    "ip-transport-protocol":"udp",
    "time-duration":60,
-   "ip-packet-interval":0.1,
+   "time-probe-interval":0.1,
    "sample-bucket-width":"0.0001",
    "event-types":[
       {
@@ -1112,7 +1112,7 @@ Similarly an example of publishing the ping and powstream measurement results to
             {
                "event-type":"histogram-ttl",
                "val":{
-                  "247":"88"
+                  "59":"600"
                }
             },
             {
@@ -1207,7 +1207,7 @@ Similarly an example of publishing the BWCTL tracepath measurement results to th
                   {
                      "success":1,
                      "error_message":null,
-                     "ip":"198.124.238.65",
+                     "ip":"10.1.1.1",
                      "query":"1",
                      "ttl":"1",
                      "rtt":"0.278",
@@ -1216,16 +1216,7 @@ Similarly an example of publishing the BWCTL tracepath measurement results to th
                   {
                      "success":1,
                      "error_message":null,
-                     "ip":"198.124.238.65",
-                     "query":"2",
-                     "ttl":"1",
-                     "rtt":"0.287",
-                     "mtu":"9000"
-                  },
-                  {
-                     "success":1,
-                     "error_message":null,
-                     "ip":"134.55.39.9",
+                     "ip":"10.1.1.10",
                      "query":"1",
                      "ttl":"2",
                      "rtt":"22.243",
@@ -1234,7 +1225,7 @@ Similarly an example of publishing the BWCTL tracepath measurement results to th
                   {
                      "success":1,
                      "error_message":null,
-                     "ip":"134.55.42.41",
+                     "ip":"10.1.1.12",
                      "query":"1",
                      "ttl":"3",
                      "rtt":"22.516",
@@ -1243,55 +1234,10 @@ Similarly an example of publishing the BWCTL tracepath measurement results to th
                   {
                      "success":1,
                      "error_message":null,
-                     "ip":"134.55.43.82",
+                     "ip":"10.1.1.2",
                      "query":"1",
                      "ttl":"4",
                      "rtt":"33.562",
-                     "mtu":"9000"
-                  },
-                  {
-                     "success":1,
-                     "error_message":null,
-                     "ip":"134.55.49.57",
-                     "query":"1",
-                     "ttl":"5",
-                     "rtt":"44.063",
-                     "mtu":"9000"
-                  },
-                  {
-                     "success":1,
-                     "error_message":null,
-                     "ip":"134.55.50.201",
-                     "query":"1",
-                     "ttl":"6",
-                     "rtt":"65.163",
-                     "mtu":"9000"
-                  },
-                  {
-                     "success":1,
-                     "error_message":null,
-                     "ip":"134.55.40.6",
-                     "query":"1",
-                     "ttl":"7",
-                     "rtt":"67.598",
-                     "mtu":"9000"
-                  },
-                  {
-                     "success":1,
-                     "error_message":null,
-                     "ip":"134.55.49.2",
-                     "query":"1",
-                     "ttl":"8",
-                     "rtt":"69.006",
-                     "mtu":"9000"
-                  },
-                  {
-                     "success":1,
-                     "error_message":null,
-                     "ip":"198.129.254.30",
-                     "query":"1",
-                     "ttl":"9",
-                     "rtt":"68.931",
                      "mtu":"9000"
                   }
                ]

@@ -353,7 +353,393 @@ foreach my $m(@{$md}){
 }
 }}}
 
+= Publishing Data =
 
+== Quickstart ==
+{{{
+#define filters with authentication information
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters(
+    'auth_username' => 'perfsonar', 
+    'auth_apikey' => '8208b9ad15dbda8e91cb086b0d228857de99fa25',
+    'ca_certificate_file' => '/etc/pki/tls/bundle.crt'
+);
+
+#Post measurement metadata
+my $metadata = new perfSONAR_PS::Client::Esmond::Metadata(
+    url => 'https://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+$metadata->subject_type('point-to-point');
+$metadata->source('10.1.1.1');
+$metadata->destination('10.1.1.2');
+$metadata->input_source('host1.example.net');
+$metadata->input_destination('host2.example.net');
+$metadata->tool_name('bwctl/iperf3');
+$metadata->measurement_agent('10.1.1.1');
+$metadata->set_field('time-interval', 21600);
+$metadata->set_field('time-duration', 20);
+$metadata->add_event_type('throughput');
+$metadata->add_summary_type('throughput', 'average', 86400);
+$metadata->add_event_type('packet-retransmits');
+$metadata->post_metadata();
+die $metadata->error() if $metadata->error();
+
+#post data to single event type
+my $et = $metadata->get_event_type('throughput');
+my $data = new perfSONAR_PS::Client::Esmond::DataPayload('ts' => time. '', 'val' => 1000000000);
+$et->post_data($data);
+die $et->error() if $et->error();
+
+#post multiple time series to multiple event types
+my $bulk_post = $metadata->generate_event_type_bulk_post();
+my $ts = time;
+$bulk_post->add_data_point('throughput', $ts, 2000000000);
+$bulk_post->add_data_point('packet-retransmits', $ts, 10);
+$bulk_post->add_data_point('throughput', $ts-1800, 1000000000);
+$bulk_post->add_data_point('packet-retransmits', $ts-1800, 9);
+$bulk_post->post_data();
+die $bulk_post->error() if $bulk_post->error();
+
+}}}
+
+== Authentication and Authorization ==
+Writing data generally requires authentication and authorization. You can define authentication-related parameters using the options defined in the first table under [#Defining_filters Defining filters]. Specifically the option *auth_username* and *auth_apikey* are important for setting your user credentials. It is also highly recommended you send the message over HTTPS so the credentials are not sent plain-text (especially when sending to an external host). You may control HTTPS settings with the options *ca_certificate_file*, *ca_certificate_path* and/or *verify_hostname*. For example:
+{{{
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters(
+    'auth_username' => 'perfsonar', 
+    'auth_apikey' => '8208b9ad15dbda8e91cb086b0d228857de99fa25',
+    'ca_certificate_file' => '/etc/pki/tls/bundle.crt'
+);
+}}}
+
+== Publishing the Measurement Description ==
+Publishing a new description of a measurement's parameters requires the instantiation of a new _perfSONAR_PS::Client::Esmond::Metadata_ object. Notice this is the same object reurned when querying as described in [#Working_with_Measurement_Metadata Working with Measurement Metadata]. This also means if you want to post data to an existing test, you can use the Metadata object returned directly. Assuming you are using a completely new object though, the object provides a number of setters for common fields:
+
+|| *Method Name* || *Description* ||
+|| *source(_ip_)* ||An IP address representing the sender in a point-to-point measurement||
+|| *destination(_ip_)* ||An IP address representing the receiver in a point-to-point measurement||
+|| *measurement_agent(_ip_)* ||The IP address of the host that initiated the measurement||
+|| *metadata_key(_string_)* ||The key used to identify this metadata_object.||
+|| *input_source(_string_)* ||A string representing the source address exactly as it is passed to the underlying measurement tool.||
+|| *input_destination(_string_)* ||A string representing the destination address exactly as it is passed to the underlying measurement tool.||
+|| *subject_type(_string_)* ||Indicates the type of parameters to expect in the metadata. In general will always be _point-to-point_.||
+|| *tool_name(_string_)* || The name of the tool used to run the underlying measurement.||
+
+In addition you may set context-specific fields with the _set_field_ subroutine that accepts the field name and the value to assign (_NOTE: The value must be a primitive type such as a number or string_):
+{{{
+$metadata->set_field('time-interval', 21600);
+}}}
+
+There are a few special methods for adding new event types and summaries:
+|| *Method Name* || *Description* ||
+|| *add_event_type(_event-type_)* ||Accepts a string with the event type (e.g. _throughput_, _histogram-owdelay_, _packet-loss-rate_) and adds it to the metadata.||
+|| *add_summary_type(_event-type_, _summary-type_, _summary-window_)* ||Adds a summary of the given _summary-type_ (e.g. _average_. _aggregation_, or _statistics_) over the given _summary_window_ (in seconds) for the given _event-type_.||
+
+An example of these methods is provided below:
+{{{
+$metadata->add_event_type('throughput');
+$metadata->add_summary_type('throughput', 'average', 86400);
+$metadata->add_event_type('packet-retransmits');
+}}}
+
+The final step of creating the new metadata is to call the _post_metadata()_ method:
+{{{
+$metadata->post_metadata();
+}}}
+
+This sends an HTTP POST request to the server. If the request fails for any reason, there will be an error message returned by a call to the _error()_ method. If it succeeds, the Metadata object will contain the resulting URIs and metadata_key in addition to the parameters already set. Also remember that if the server determines there is a metadata object that exactly matches, it will return the existing result instead of creating a duplicate. The resulting object can also be used to post measurement results as described in the next few sections.
+
+== Publishing a Single Measurement Result ==
+Once you have the Metadata object by either creating your own as described in [#Publishing_the_Measurement_Description Publishing the Measurement Description] or querying an existing one as described in [#Working_with_Measurement_Metadata Working with Measurement Metadata], you can then retrieve a _perfSONAR_PS::Client::Esmond::EventType_ object with the following:
+{{{
+my $et = $metadata->get_event_type('throughput');
+}}}
+
+You can then post to this event type by creating a new _perfSONAR_PS::Client::Esmond::DataPayload_ with a _ts_ field indicating the time the measurement was performed and a _val_ indicating the result. The _perfSONAR_PS::Client::Esmond::DataPayload_ module is described in detail in [#Querying_Base_Measurement_Results Querying Base Measurement Results] but an example is below:
+{{{
+my $data = new perfSONAR_PS::Client::Esmond::DataPayload('ts' => time. '', 'val' => 1000000000);
+}}}
+
+We then publish the result with the following call to _post_data_ that accepts a single _perfSONAR_PS::Client::Esmond::DataPayload_ parameter:
+{{{
+$et->post_data($data);
+}}}
+
+If the request succeeds then the _error()_ method will return an empty result. The error() method will contain a message describing the problem if something goes wrong. See an example that kills the running program if an error is encountered:
+{{{
+die $et->error() if $et->error();
+}}}
+
+== Publishing Multiple Measurement Results ==
+In addition to publishing single measurements, you may also perform bulk requests for multiple event types and multiple timestamps. All bulk requests go to the same Metadata object. As with the single result case, we must first [#Publishing_the_Measurement_Description create] or [#Working_with_Measurement_Metadata Working retrieve] a Metadata object. We can do this be asking the metadata object to generate a _perfSONAR_PS::Client::Esmond::EventTypeBulkPost_ instance (_NOTE: Do not construct perfSONAR_PS::Client::Esmond::EventTypeBulkPost directly, retrieve it from the Metadata object_):
+{{{
+my $bulk_post = $metadata->generate_event_type_bulk_post();
+}}}
+
+You can then add multiple data points with the _add_data_point_ subroutine:
+|| *Method Name* || *Description* ||
+|| *_add_data_point_(_event-type_, _timestamp_, _value_)* ||Adds a new data point to publish for the given event-type string (_event-type_) at the given UNIX timestamp(_ts_) with the given value (_val_)||
+
+For example:
+{{{
+my $ts = time;
+$bulk_post->add_data_point('throughput', $ts, 2000000000);
+$bulk_post->add_data_point('packet-retransmits', $ts, 10);
+$bulk_post->add_data_point('throughput', $ts-1800, 1000000000);
+$bulk_post->add_data_point('packet-retransmits', $ts-1800, 9);
+}}}
+
+Finally, you can send the result and check for errors from the server with the _post_data()_ and _error()_ functions as shown below:
+{{{
+$bulk_post->post_data();
+die $bulk_post->error() if $bulk_post->error();
+}}}
+
+
+== Examples ==
+
+=== Publishing Throughput Data ===
+{{{
+#Define filters with authentication information
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters(
+    'auth_username' => 'perfsonar', 
+    'auth_apikey' => '8208b9ad15dbda8e91cb086b0d228857de99fa25',
+    'ca_certificate_file' => '/etc/pki/tls/bundle.crt'
+);
+
+#Post measurement metadata
+my $metadata = new perfSONAR_PS::Client::Esmond::Metadata(
+    url => 'https://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+$metadata->subject_type('point-to-point');
+$metadata->source('10.1.1.1');
+$metadata->destination('10.1.1.2');
+$metadata->input_source('host1.example.net');
+$metadata->input_destination('host2.example.net');
+$metadata->tool_name('bwctl/iperf3');
+$metadata->measurement_agent('10.1.1.1');
+$metadata->set_field('ip-transport-protocol', 'tcp');
+$metadata->set_field('time-duration', 20);
+$metadata->set_field('time-interval', 21600);
+$metadata->set_field('bw-parallel-streams', 1);
+$metadata->add_event_type('throughput');
+$metadata->add_summary_type('throughput', 'average', 86400);
+$metadata->add_event_type('failures');
+$metadata->add_event_type('packet-retransmits');
+$metadata->post_metadata();
+die $metadata->error() . "\n" if $metadata->error();
+
+#Bulk post data
+my $bulk_post = $metadata->generate_event_type_bulk_post();
+my $ts = time;
+$bulk_post->add_data_point('throughput', $ts, 2000000000);
+$bulk_post->add_data_point('packet-retransmits', $ts, 10);
+$bulk_post->post_data();
+die $bulk_post->error() if($bulk_post->error());
+
+}}}
+
+=== Publishing Delay(Ping) Data ===
+{{{
+#define filters with authentication information
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters(
+    'auth_username' => 'perfsonar', 
+    'auth_apikey' => '8208b9ad15dbda8e91cb086b0d228857de99fa25',
+    'ca_certificate_file' => '/etc/pki/tls/bundle.crt'
+);
+
+#Post measurement metadata
+my $metadata = new perfSONAR_PS::Client::Esmond::Metadata(
+    url => 'https://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+$metadata->subject_type('point-to-point');
+$metadata->source('10.1.1.1');
+$metadata->destination('10.1.1.2');
+$metadata->input_source('host1.example.net');
+$metadata->input_destination('host2.example.net');
+$metadata->tool_name('bwctl/ping');
+$metadata->measurement_agent('10.1.1.1');
+$metadata->set_field('ip-transport-protocol', 'icmp');
+$metadata->set_field('ip-packet-size', 1000);
+$metadata->set_field('time-interval', 600);
+$metadata->set_field('time-probe-interval', 1);
+$metadata->set_field('sample-size', 100);
+$metadata->add_event_type('histogram-rtt');
+$metadata->add_summary_type('histogram-rtt', 'aggregation', 86400);
+$metadata->add_summary_type('histogram-rtt', 'statistics', 0);
+$metadata->add_summary_type('histogram-rtt', 'statistics', 86400);
+$metadata->add_event_type('packet-loss-rate');
+$metadata->add_summary_type('packet-loss-rate', 'aggregation', 3600);
+$metadata->add_summary_type('packet-loss-rate', 'aggregation', 86400);
+$metadata->add_event_type('histogram-ttl');
+$metadata->add_summary_type('histogram-ttl', 'statistics', 0);
+$metadata->add_event_type('packet-count-lost');
+$metadata->add_event_type('packet-count-sent');
+$metadata->add_event_type('packet-duplicates');
+$metadata->add_event_type('packet-reorders');
+$metadata->add_event_type('failures');
+$metadata->post_metadata();
+die $metadata->error() . "\n" if $metadata->error();
+
+#bulk post data
+my $bulk_post = $metadata->generate_event_type_bulk_post();
+my $ts = time;
+$bulk_post->add_data_point('histogram-rtt', $ts, { '41.00'=> 99, '41.10'=> 1 });
+$bulk_post->add_data_point('packet-loss-rate', $ts, {'numerator'=> 0, 'denominator'=> 100});
+$bulk_post->add_data_point('histogram-ttl', $ts, { '59'=> 100 });
+$bulk_post->add_data_point('packet-count-lost', $ts, 0);
+$bulk_post->add_data_point('packet-count-sent', $ts, 100);
+$bulk_post->add_data_point('packet-duplicates', $ts, 0);
+$bulk_post->add_data_point('packet-reorders', $ts, 0);
+$bulk_post->post_data();
+die $bulk_post->error() if($bulk_post->error());
+
+}}}
+
+=== Publishing One-way Delay(OWAMP) Data ===
+{{{
+#define filters with authentication information
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters(
+    'auth_username' => 'perfsonar', 
+    'auth_apikey' => '8208b9ad15dbda8e91cb086b0d228857de99fa25',
+    'ca_certificate_file' => '/etc/pki/tls/bundle.crt'
+);
+
+#Post measurement metadata
+my $metadata = new perfSONAR_PS::Client::Esmond::Metadata(
+    url => 'https://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+$metadata->subject_type('point-to-point');
+$metadata->source('10.1.1.1');
+$metadata->destination('10.1.1.2');
+$metadata->input_source('host1.example.net');
+$metadata->input_destination('host2.example.net');
+$metadata->tool_name('powstream');
+$metadata->measurement_agent('10.1.1.1');
+$metadata->set_field('ip-transport-protocol', 'udp');
+$metadata->set_field('ip-packet-size', 100);
+$metadata->set_field('time-interval', 0);
+$metadata->set_field('time-probe-interval', .1);
+$metadata->set_field('sample-size', 600);
+$metadata->set_field('sample-bucket-width', .0001);
+$metadata->add_event_type('histogram-owdelay');
+$metadata->add_summary_type('histogram-owdelay', 'aggregation', 3600);
+$metadata->add_summary_type('histogram-owdelay', 'aggregation', 86400);
+$metadata->add_summary_type('histogram-owdelay', 'statistics', 0);
+$metadata->add_summary_type('histogram-owdelay', 'statistics', 3600);
+$metadata->add_summary_type('histogram-owdelay', 'statistics', 86400);
+$metadata->add_event_type('packet-loss-rate');
+$metadata->add_summary_type('packet-loss-rate', 'aggregation', 3600);
+$metadata->add_summary_type('packet-loss-rate', 'aggregation', 86400);
+$metadata->add_event_type('histogram-ttl');
+$metadata->add_summary_type('histogram-ttl', 'statistics', 0);
+$metadata->add_event_type('packet-count-lost');
+$metadata->add_event_type('packet-count-sent');
+$metadata->add_event_type('packet-duplicates');
+$metadata->add_event_type('time-error-estimates');
+$metadata->add_event_type('failures');
+$metadata->post_metadata();
+die $metadata->error() . "\n" if $metadata->error();
+
+#bulk post data
+my $bulk_post = $metadata->generate_event_type_bulk_post();
+my $ts = time;
+$bulk_post->add_data_point('histogram-owdelay', $ts, { '34.5'=> 30, '34.3'=> 440, '34.6' => 7, '34.4' => 123 });
+$bulk_post->add_data_point('packet-loss-rate', $ts, {'numerator'=> 0, 'denominator'=> 600});
+$bulk_post->add_data_point('histogram-ttl', $ts, { '59'=> 600 });
+$bulk_post->add_data_point('packet-count-lost', $ts, 0);
+$bulk_post->add_data_point('packet-count-sent', $ts, 600);
+$bulk_post->add_data_point('packet-duplicates', $ts, 0);
+$bulk_post->add_data_point('time-error-estimates', $ts, 0.000124);
+$bulk_post->post_data();
+die $bulk_post->error() if($bulk_post->error());
+}}}
+
+=== Publishing Packet Loss===
+Note that _packet-loss-rate_ is a special percentage type and thus is not registered as a simple float. It is registered as an object with a _numerator_ and a _denominator_ so that it is easier to summarize. Packet loss is measured by tools such as owamp and ping, but the data registration portion is repeated below to highlight this difference:
+{{{
+...
+$bulk_post->add_data_point('packet-loss-rate', $ts, {'numerator'=> 0, 'denominator'=> 100});
+...
+}}}
+
+=== Publishing Packet Traces ===
+{{{
+#define filters with authentication information
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters(
+    'auth_username' => 'perfsonar', 
+    'auth_apikey' => '8208b9ad15dbda8e91cb086b0d228857de99fa25',
+    'ca_certificate_file' => '/etc/pki/tls/bundle.crt'
+);
+
+#Post measurement metadata
+my $metadata = new perfSONAR_PS::Client::Esmond::Metadata(
+    url => 'https://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+$metadata->subject_type('point-to-point');
+$metadata->source('10.1.1.1');
+$metadata->destination('10.1.1.2');
+$metadata->input_source('host1.example.net');
+$metadata->input_destination('host2.example.net');
+$metadata->tool_name('bwctl/tracepath');
+$metadata->measurement_agent('10.1.1.1');
+$metadata->set_field('ip-transport-protocol', 'icmp');
+$metadata->set_field('time-interval', 600);
+$metadata->add_event_type('failures');
+$metadata->add_event_type('packet-trace');
+$metadata->add_event_type('path-mtu');
+$metadata->post_metadata();
+die $metadata->error() . "\n" if $metadata->error();
+
+#bulk post data
+my $bulk_post = $metadata->generate_event_type_bulk_post();
+my $ts = time;
+$bulk_post->add_data_point('packet-trace', $ts,[
+                  {
+                     "success" => 1,
+                     "error_message" => undef,
+                     "ip" => "10.1.1.1",
+                     "query" => "1",
+                     "ttl" => "1",
+                     "rtt" => "0.278",
+                     "mtu" => "9000"
+                  },
+                  {
+                     "success" => 1,
+                     "error_message" => undef,
+                     "ip" => "10.1.1.10",
+                     "query" => "1",
+                     "ttl" => "2",
+                     "rtt" => "22.243",
+                     "mtu" => "9000"
+                  },
+                  {
+                     "success" => 1,
+                     "error_message" => undef,
+                     "ip" => "10.1.1.12",
+                     "query" => "1",
+                     "ttl" => "3",
+                     "rtt" => "22.516",
+                     "mtu" => "9000"
+                  },
+                  {
+                     "success" => 1,
+                     "error_message" => undef,
+                     "ip" => "10.1.1.2",
+                     "query" => "1",
+                     "ttl" => "4",
+                     "rtt" => "68.931",
+                     "mtu" => "9000"
+                  }
+               ]);
+$bulk_post->add_data_point('path-mtu', $ts, 9000);
+$bulk_post->post_data();
+die $bulk_post->error() if($bulk_post->error());
+}}}
 =Other Resources=
  * [MeasurementArchiveClientGuide General Measurement Archive Client Guide]
  * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Apr11.pdf API Specification]
