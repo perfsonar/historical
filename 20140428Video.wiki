@@ -2,7 +2,7 @@
 
 =   April 28, 2014 Conference Call 1:00 p.m. EST =
 
-Attendees: Andy, Jason, Michael, Dan, Brian
+Attendees: Andy, Jason, Michael, Sowmya, Brian, Aaron
 
 == Agenda/Minutes ==
 
@@ -28,7 +28,45 @@ TBD
  * cacti and NTP monitoring
 
 == Notes ==
-
+ * Developer Updates
+   * Andy
+    * Finished esmond docs
+    * Worked on LS reg proposal
+    * Debugged bwctl with aaron
+    * Various POW things
+   * Michael
+    * Worked on gui for admin info
+    * worked on graphing. see later. 
+   * Brian
+    * Spent some time with cubox and have fedora working
+    * Asked Monte to start looking at GridFTP log feeder
+   * Sowmya
+    * Testing ps-east and ps-west sLS 
+   * Aaron
+    * Debugging issues on bwctl
+    * First issue, RNG was not getting seeded correctly so stuff getting restarted at same time could be problematic
+    * Results were taking too long to come back because of new 10 second timeout to prevent bwctl from finishing. Increased to 60 sec and gave to Andy
+    * Discussion about send and receive side info provided by bwctl. Conclusion was best way would be for iperf3 to share interval info for both sides.
+    * Playing with Cacti scripts to do NTP. Has graph, but not sure stats are right
+    * Looking at source-based routing. Works in Ipv4 but not Ipv6. Maybe we should say we just support interfaces on different subnets?
+   * Jason
+    * Call with CARnet about interesting VPN case
+    * CCINE workshop this week and giving perfsonar talks    
+ * MA LS Registration Proposal (Andy)
+  * https://code.google.com/p/esnet-perfsonar/wiki/NewMALSRegistrations
+  * Aaron suggested change source and destination to source-address and destination-address to allow for possibility of other fields in the future
+  * I was noted that its also possible to register domains and communities for a test 
+  * Other than that looks good.
+ * MA Backward compatibility
+  * We have already adapted Nagios to talk to both, working on adapting graphs
+  * The question is do we need a translation interface that accepts SOAP and maps to esmond?
+  * Group decided it would be best if we ask about clients not already out there. Andy will draft email for approval by group.
+ * new graphs for new MA, design and functionality
+  * Lots of things we want
+  * Conclusion: Get current graphs working with esmond by RC1, for RC2 try to get brand new graphs
+ * cacti and NTP monitoring
+  * See Aaron report
+  
 == Future Agenda Topics ==
 
 TBD
