@@ -21,9 +21,11 @@ TBD
    * Michael
    * Brian
    * Jason
- * MA LS Registartion Proposal (Andy)
+ * MA LS Registration Proposal (Andy)
   * https://code.google.com/p/esnet-perfsonar/wiki/NewMALSRegistrations
  * MA Backward compatibility
+ * new graphs for new MA, design and functionality
+ * cacti and NTP monitoring
 
 == Notes ==
 
