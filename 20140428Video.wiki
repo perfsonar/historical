@@ -1,6 +1,6 @@
-#summary April 21, 2014 Conference Call
+#summary April 28, 2014 Conference Call
 
-=   April 21, 2014 Conference Call 1:00 p.m. EST =
+=   April 28, 2014 Conference Call 1:00 p.m. EST =
 
 Attendees: Andy, Jason, Michael, Dan, Brian
 
@@ -23,7 +23,7 @@ TBD
    * Jason
  * MA LS Registartion Proposal (Andy)
   * https://code.google.com/p/esnet-perfsonar/wiki/NewMALSRegistrations
-
+ * MA Backward compatibility
 
 == Notes ==
 
