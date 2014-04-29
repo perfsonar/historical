@@ -170,9 +170,9 @@ Please note that there is a specific image for running a LiveCD, do not use the 
 The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/ iso] and [http://software.internet2.edu/pS-Performance_Toolkit/ md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
-user@host:~$ md5sum pS-Performance_Toolkit-LiveCD-3.3.2.iso;cat pS-Performance_Toolkit-LiveCD-3.3.2.iso.md5 
-f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.2.iso
-f5ed7dda7bd8e3431c2e648effd9b48d  pS-Performance_Toolkit-LiveCD-3.3.2.iso
+user@host:~$ md5 pS-Performance_Toolkit-3.3.2-2-LiveCD-x86_64.iso;cat pS-Performance_Toolkit-3.3.2-2-LiveCD-x86_64.iso.md5 
+MD5 (pS-Performance_Toolkit-3.3.2-2-LiveCD-x86_64.iso) = 955ca982458576932e17ee24f98f99dd
+955ca982458576932e17ee24f98f99dd  pS-Performance_Toolkit-3.3.2-2-LiveCD-x86_64.iso
 }}}
 
 If the calculated value matches the downloaded value, the ISO image is complete and should be burned to a CD.  If the value _*DOES NOT*_ match, consider re-downloading the file.  After burning, please insert the CD into the target machine to boot.  Some items to consider:
@@ -230,9 +230,9 @@ Please note that there is a specific image for running a LiveUSB, do not use the
 The pS Performance Toolkit [http://software.internet2.edu/pS-Performance_Toolkit/ iso] and [http://software.internet2.edu/pS-Performance_Toolkit/ md5 checksum] are available for download to all interested parties.  Once downloaded please verify the MD5 sum:
 
 {{{
-user@host:~$ md5sum pS-Performance_Toolkit-3.3.2-2-LiveUSB-i386.iso;cat pS-Performance_Toolkit-3.3.2-2-LiveUSB-i386.iso.md5 
-32a3ed9043c36c8db3adf248d04d1410  pS-Performance_Toolkit-3.3.2-2-LiveUSB-i386.iso
-32a3ed9043c36c8db3adf248d04d1410  pS-Performance_Toolkit-3.3.2-2-LiveUSB-i386.iso
+user@host:~$ md5 pS-Performance_Toolkit-3.3.2-2-LiveUSB-x86_64.iso;cat pS-Performance_Toolkit-3.3.2-2-LiveUSB-x86_64.iso.md5 
+MD5 (pS-Performance_Toolkit-3.3.2-2-LiveUSB-x86_64.iso) = 58a3b2862c9d77f11ff09cbdc7b908bd
+58a3b2862c9d77f11ff09cbdc7b908bd  pS-Performance_Toolkit-3.3.2-2-LiveUSB-x86_64.iso
 }}}
 
 You can mount the downloaded image onto a USB drive using the script found [http://software.internet2.edu/pS-Performance_Toolkit/deploy_liveusb.sh here]. Once you have downloaded the script, its usage is as follows:  
