@@ -2,7 +2,7 @@
 
 =   May 5, 2014 Conference Call 1:00 p.m. EST =
 
-Attendees:  
+Attendees:  Dan, Michael, Eric, Brian, Sowmya, Jason, Aaron
 
 == Agenda/Minutes ==
 
@@ -31,7 +31,12 @@ TBD
    
 == Actions  ==
  
-TBD 
+Aaron to poke some folks re: NTP Cacto plots
+
+Aaron to do a rc1 release of bwctl 1.5.3
+
+Brian to write up cubox instructions.
+ 
 
 == Where ==
 ESnet conference bridge:
