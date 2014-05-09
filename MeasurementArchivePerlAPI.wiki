@@ -196,6 +196,73 @@ foreach my $agg_d(@{$agg_data}){
 }
 }}}
 
+==A Note on Time Filters==
+It's important to not an important behavior of the time filters when working with a metadata request versus a data request. When you create a *perfSONAR_PS::Client::Esmond::ApiFilters* object, pass it to a *perfSONAR_PS::Client::Esmond::ApiConnect*, and the call to get_metadata() it will match the _last updated_ time of the metadata. When making a data request, it will only return results _recorded in that time range_. This is a subtle but important difference. For example, let's say you have a metadata object that was last updated 1 minute ago but you ultimately want data from between 2 hours and 1 hour ago. You might be tempted to try something like this:
+{{{
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
+my $now = time;
+$filters->time_start($now - 7200); # 2 hours ago
+$filters->time_end($now - 3600); #1 hour ago
+
+# Connect to api
+my $client = new perfSONAR_PS::Client::Esmond::ApiConnect(
+    url => 'http://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+
+#get measurements matching filters
+my $md = $client->get_metadata(); # this returns empty results
+}}}
+
+The above returns empty results because the above is saying _give me all metadata object last updated between 2 hours and 1 hour ago_ but we have already stated that our metadata was updated more recently. This does not mean there is no data in that time range, just that more recent data exists. Instead we need to adjust the time filters before we query the data. Below will give the results we want:
+{{{
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
+my $now = time;
+$filters->time_start($now - 7200); # return anything updated in the last 2 hours
+
+# Connect to api
+my $client = new perfSONAR_PS::Client::Esmond::ApiConnect(
+    url => 'http://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+
+#get measurements matching filters
+my $md = $client->get_metadata(); # this returns empty results
+foreach my $m(@{$md}){
+    # get data of a particular event type
+    my $et = $m->get_event_type("throughput");
+    $et->filters->time_end($now - 3600); #add the end filter so we only get data up to an hour ago
+    my $data = $et->get_data();
+    die $et->error if($et->error); #check for errors
+    #print all data
+    foreach my $d(@{$data}){
+        print "Time: " . $d->datetime . ", Value: " . $d->val . "\n";
+    }
+}
+}}}
+
+
+== Querying Data bu URI ==
+In some cases you will already have the URI for the summary or base data that you want to request. For example, if you have a web page that first presents the list of tests available as returned by a metadata search, then upon user interaction you return data from a selected result of that search. There is no point in querying the metadata a second time since you should have all the URIs you need from the first request. You can request the data directly by URI with the *get_data(_uri_)* call from *perfSONAR_PS::Client::Esmond::ApiConnect*. For example:
+{{{
+...
+use CGI;
+my $cgi = new CGI;
+my $uri = $cgi->param('data-uri');
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
+$filters->time_range(86400);
+my $client = new perfSONAR_PS::Client::Esmond::ApiConnect(
+    url => 'http://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+my $data = $client->get_data($uri);
+die $client->error if($client->error);
+foreach my $d(@{$data}){
+    print "Time: " . $d->datetime . ", Value: " . $d->val . "\n";
+}
+}}}
+
+
 
 ==Examples==
 ===Querying Throughput===
