@@ -196,8 +196,8 @@ foreach my $agg_d(@{$agg_data}){
 }
 }}}
 
-==A Note on Time Filters==
-It's important to not an important behavior of the time filters when working with a metadata request versus a data request. When you create a *perfSONAR_PS::Client::Esmond::ApiFilters* object, pass it to a *perfSONAR_PS::Client::Esmond::ApiConnect*, and the call to get_metadata() it will match the _last updated_ time of the metadata. When making a data request, it will only return results _recorded in that time range_. This is a subtle but important difference. For example, let's say you have a metadata object that was last updated 1 minute ago but you ultimately want data from between 2 hours and 1 hour ago. You might be tempted to try something like this:
+==Advanced Time Filter Usage==
+It's important to note an important behavior of the time filters when working with a metadata request versus a data request. When you create a *perfSONAR_PS::Client::Esmond::ApiFilters* object, pass it to a *perfSONAR_PS::Client::Esmond::ApiConnect*, and the call to get_metadata() it will match the _last updated_ time of the metadata. When making a data request, it will only return results _recorded in that time range_. This is a subtle but important difference. For example, let's say you have a metadata object that was last updated 1 minute ago but you ultimately want data from between 2 hours and 1 hour ago. You might be tempted to try something like this:
 {{{
 my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
 my $now = time;
@@ -242,7 +242,7 @@ foreach my $m(@{$md}){
 }}}
 
 
-== Querying Data bu URI ==
+== Querying Data by URI ==
 In some cases you will already have the URI for the summary or base data that you want to request. For example, if you have a web page that first presents the list of tests available as returned by a metadata search, then upon user interaction you return data from a selected result of that search. There is no point in querying the metadata a second time since you should have all the URIs you need from the first request. You can request the data directly by URI with the *get_data(_uri_)* call from *perfSONAR_PS::Client::Esmond::ApiConnect*. For example:
 {{{
 ...
