@@ -2,7 +2,7 @@
 
 =   May 12, 2014 Conference Call 1:00 p.m. EDT =
 
-Attendees: 
+Attendees: Brian, Jason, Aaron, Michael, Dan
 
 == Agenda/Minutes ==
 
@@ -13,7 +13,7 @@ TBD
 TBD
 
 == Agenda Topics ==
- * Developer Updates
+  * Developer Updates
    * Andy
    * Aaron
    * Sowmya
@@ -21,10 +21,35 @@ TBD
    * Michael
    * Brian
    * Jason
- * TBD
+ * Issues
 
 == Notes ==
-  
+ * Developer Updates
+   * Andy
+    * Fixed client
+    * Working on toolkit integration
+   * Aaron
+    * BWCTL RC released
+     * Should be deployed on ESnet
+    * Cleaning up Toolkit, removing PingGER, old MAs. updated cacti handling
+    * Looking at getting code signing cert for NDT
+    * Andy said looking at network namespaces too. Will bug Aaron with what he finds. 
+   * Jason
+    * Worked on some quick and dirty graphs to display data
+   * Dan
+    * Working on plotting. Summary page mostly done. Mostly smooth sailing. Talking to Andy about how to increase the performance.
+   * Michael
+    * Fixed issue on highlighting admin info fields
+    * Removed limits section from interface
+   * Sowmya
+    * Building kernel 
+    * Tracking down sLS issue with cache on test server
+   * Brian
+    * GridFTP MA deployed on diskpts
+    * No replies on old SOAP interface. Plan is not to include translation layer.
+    * MP RPMs from GEANT for testing. Will work with Andy to test.
+ * Issues
+  * A few assignment changes, people will review but overall looks OK
 == Future Agenda Topics ==
 
 Any questions on these?
