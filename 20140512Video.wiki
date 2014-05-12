@@ -27,8 +27,10 @@ TBD
   
 == Future Agenda Topics ==
 
-TBD
-   
+Any questions on these?
+
+https://code.google.com/p/perfsonar-ps/issues/list?can=2&q=milestone%3DRelease3.4+AND+status%3DNew+OR+status%3AStarted
+
 == Actions  ==
 
  
