@@ -1,8 +1,8 @@
-= perfSONAR-PS Home =
+= perfSONAR Home =
 
 == Overview ==
 
-perfSONAR-PS is an effort to create a collection of easy to use and easy to 
+perfSONAR is an effort to create a collection of easy to use and easy to 
 install perfSONAR services. These services will be targeted directly at 
 network administrators. The tools should be created using tools that most 
 network administrators are comfortable working with. As such, the first 
