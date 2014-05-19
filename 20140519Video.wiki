@@ -2,7 +2,7 @@
 
 =   May 19, 2014 Conference Call 1:00 p.m. EDT =
 
-Attendees: 
+Attendees: Michael Johnson, Dan Doyle, Joe Breen, Sowmya Balasubramanian, 
 
 == Agenda/Minutes ==
 
@@ -15,8 +15,8 @@ TBD
 == Agenda Topics ==
   * Developer Updates
    * Andy
-   * Aaron
    * Sowmya
+   * Aaron
    * Dan
    * Michael
    * Brian
@@ -24,7 +24,24 @@ TBD
  * TBD
 
 == Notes ==
- 
+   * Developer Updates
+   * Andy
+    * Fixed some issues, esmond packaging mostly working.
+    * IU suggested 5 minute summaries. Andy to add to test servers and defaults on toolkit. 
+   * Michael
+    * Please let Michael know if you have feedback on the GUI
+   * Dan
+    * Backward compatibility discussion fro graphs
+    * Decided to have auto-redirect to old graphs
+   * Sowmya
+    * All NTP servers working in spite of issue description
+     * Will add all other hosts listed there
+     * Aaron: Long list should be fine if "select closest servers" button doesn't take too long
+    * Uploaded web100 kernel with correct signature. Sending announcement today
+   * Aaron
+    * LS registration daemon clean-up. Hopes to have cleaned-up in the next day or two.
+
+
 == Future Agenda Topics ==
 
 == Actions  ==
