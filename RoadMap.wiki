@@ -9,15 +9,14 @@
   # Marketing/Communications/Documentation: Documentation needs an overhaul, and new marketing material targeted more at campus CIOs would be helpful
   # Additional Troubleshooting Capabilities: These tasks include the top requests from users on how to get more value from the perfSONAR toolkit. This includes tool enhancements such as the ability to collect and store TCP retransmit information. Better GUIs are needed as well, but we still need to find a good GUI developer.
   # Enhanced NOC support: details TBD based on discussions with various NOCs. Internet2 to work on refining this action item and identifying resources.
-  # Enhanced Release Management: utilize automated build/test systems such as OSG uses
+  # Enhanced Release Management: utilize automated build/test systems 
 
 
 == Release Roadmap ==
-   * 3.3.2: Bug Fix release, Feb 1, 2013
    * 3.4: Next major release that includes deliverable #1, #2, #5 part of #4: June 2014
     * First rc in late June 2014, 2nd rc late July, final release in August
-   * 3.4.1 Bug fix release: August 2014
-   * 3.5: Next major release that includes deliverables  #4, #6, and others TDB, Fall 2014
+   * 3.4.1 Bug fix release: October 2014 (if needed)
+   * 3.5: Next major release that includes deliverables  #4, #6, and others TDB, end of 2014
 
 
 == Documentation Roadmap ==
