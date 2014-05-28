@@ -17,6 +17,7 @@ Attendees:
    * Antoine
    * Any new person I missed
   * oppd integration into the toolkit
+  * review open 3.4 issues: https://code.google.com/p/perfsonar-ps/issues/list?can=2&q=milestone%3DRelease3.4+AND+status%3DNew+OR+status%3AStarted
   * Code sprint next week: https://docs.google.com/document/d/1W-miUu6IfzX74xkLN9nofixHlDqKbmTOueCde1X92rg/edit?usp=sharing
 
 == Notes ==
