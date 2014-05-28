@@ -2,26 +2,63 @@
 
 =   May 27, 2014 Conference Call 3PM GMT/11:00AM EDT/8:00AM PDT =
 
-Attendees: 
+Attendees: Roland, Sowmya, Brian, Michael, Dan, Roland,
   
 == Agenda Topics ==
   * Developer Updates
    * Andy
-   * Sowmya
    * Aaron
+   * Sowmya
+   * Brian
    * Dan
    * Michael
-   * Brian
-   * Jason
    * Roland 
+   * Ivan
    * Antoine
-   * Any new person I missed
   * oppd integration into the toolkit
   * review open 3.4 issues: https://code.google.com/p/perfsonar-ps/issues/list?can=2&q=milestone%3DRelease3.4+AND+status%3DNew+OR+status%3AStarted
   * Code sprint next week: https://docs.google.com/document/d/1W-miUu6IfzX74xkLN9nofixHlDqKbmTOueCde1X92rg/edit?usp=sharing
+  * Survey discussion
 
 == Notes ==
-   
+ * Developer Updates
+   * Andy
+    * Closed issues
+    * Finishing up LS registration daemon issues
+    * Need to finish some migration scripts 
+   * Aaron
+    * Closing issues
+    * Posted issue about Firewall. All agree that's how we should do it
+    * Debugging owamp issue with Ben Nelson from IU. Very strange issue.
+    * Cacti NTP stuff is packages, just need toolkit to pull it in
+   * Sowmya
+    * Work on LS cache
+    * 4 issues left
+   * Brian
+    * No updates
+   * Dan
+    * Close on the graphs. Should have something to demo later his week. 
+   * Michael
+    * Worked on graphs 
+   * Roland 
+    * Introduced self
+    * Working on building new dev environment
+   * Ivan
+    * Introduced self
+   * Antoine
+    * Introduced self
+    * Working on deploying LS. Waiting on requested partitioning scheme to be completed on host
+    * Looking at migrating SQL MA and other MAs to new MA
+    * Looking at improving MP UI
+  * oppd integration into the toolkit
+   * Andy took a pass, we were generally in agreement
+   * Roland and Anyoine will review, add missing debian stuff
+  * review open 3.4 issues: https://code.google.com/p/perfsonar-ps/issues/list?can=2&q=milestone%3DRelease3.4+AND+status%3DNew+OR+status%3AStarted
+  * Code sprint next week: https://docs.google.com/document/d/1W-miUu6IfzX74xkLN9nofixHlDqKbmTOueCde1X92rg/edit?usp=sharing
+   * Will open a video for everyone (including EU) that remote people can join. This will replace regular call. 
+ * Survey discussion
+  * Brian likes Antoine's questions. Worried about it getting too long.
+
 == Future Agenda Topics ==
 
 == Actions  ==
