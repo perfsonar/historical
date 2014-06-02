@@ -57,6 +57,7 @@ d3.json("http://ma.es.net/data.json",function(error2, jsondata2) {
 </script>
 }}}
   * To defeat this, implement a very simple spin lock:
+{{{
 <script>
 var something, lock = 2;
 
