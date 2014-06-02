@@ -1,0 +1,116 @@
+#summary Notes on making d3 graphs with perfSONAR JSON data
+
+= Introduction =
+
+These are notes recorded in May/June 2014 on working with d3 graphs and perfSONAR JSON data.  
+
+= Notes on d3 use =
+
+The following sections highlight some of the common concerns in d3 graphs:
+
+== Asynchronous Data Access ==
+
+Data calls (e.g. to d3.json, or d3.csv, etc.) can be done in an asynchronous manner.  If you are doing multiple calls, you will need to build in your on synchronization techniques if you want to operate on all of the fetched data simultaneously (e.g. in a graph).   The following is highlights how this can work:
+
+  * The first scope is the 'script' tag, and can contain variables, functions, etc.:
+{{{
+<script>
+
+// things
+
+</script>
+}}}
+  * The second scope would be within the anonymous function called after the asynchronous data fetch.  Note that items after the asyncronous call could execute before that function is complete, e.g.:
+{{{
+<script>
+var something;
+
+d3.json("http://ma.es.net/data.json",function(error, jsondata) {
+
+  // process data 
+
+});
+
+// something else
+
+</script>
+}}}
+  * If a second call is added, they could start/end at different times, meaning if there is a dependence on data for things after, there may be errors:
+{{{
+<script>
+var something;
+
+d3.json("http://ma.es.net/data.json",function(error, jsondata) {
+
+  // process data 
+
+});
+
+d3.json("http://ma.es.net/data.json",function(error2, jsondata2) {
+
+  // process data 
+
+});
+
+// something else
+
+</script>
+}}}
+  * To defeat this, implement a very simple spin lock:
+<script>
+var something, lock = 2;
+
+d3.json("http://ma.es.net/data.json",function(error, jsondata) {
+
+  // process data 
+  if (!--lock) doSomething();
+});
+
+d3.json("http://ma.es.net/data.json",function(error2, jsondata2) {
+
+  // process data 
+
+  if (!--lock) doSomething();
+});
+
+function doSomething() {
+  // something else
+}
+</script>
+}}}
+
+== Dealing w/ Time == 
+
+Javascript likes time expressed in milliseconds, so its often necessary to do this calculation:
+
+{{{
+d.time = new Date(d.ts)*1000;
+}}}
+
+Graphs like the following time format:
+
+{{{
+var parseDate = d3.time.format("%d-%b-%y").parse;
+}}}
+
+== TBD == 
+
+TBD
+
+= Links to Live perfSONAR Examples =
+
+  * ESnet to Amazon testing maddash (source of data): http://ps-dashboard.es.net/index.cgi?dashboard=ESnet%20Amazon%20Testing
+  * Boxplot of BWCTL results: http://stats.es.net/pSd3/box/boxplot-axis-double.html
+  * Line graph of BWCTL results w/ mouseover: http://stats.es.net/pSd3/graph/mouseover-dual-line.html
+
+= Links to External Tutorials =
+
+These were all very useful:
+
+  * Simple Boxplot: http://bl.ocks.org/mbostock/4061502
+  * Advanced Boxplot: http://bl.ocks.org/jensgrubert/7789216
+  * Simple line chart: http://bl.ocks.org/mbostock/3883245
+  * Line chart w/ mouseover: http://bl.ocks.org/mbostock/3902569
+  * Line chart w/ legend: http://bl.ocks.org/ZJONSSON/3918369
+  * Stacked area chart: http://bl.ocks.org/mbostock/3885211
+  * Scatterplot: http://bl.ocks.org/weiglemc/6185069
