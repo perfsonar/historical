@@ -1,0 +1,13 @@
+#summary How to setup and use the esmond MA for GridFTP logs
+
+= Introduction =
+
+Instructions on how to setup and use the esmond MA for GridFTP logs.
+
+Sample data available at: http://lbl-diskpt1.es.net:9085/perfsonar/archive/?format=json
+
+
+
+= Details =
+
+coming soon.
