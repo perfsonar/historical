@@ -28,20 +28,13 @@ At a very high level, a project in Jenkins is a collection of bash scripts that 
 This section defines the expectations of what the Jenkins build system should be able to do at the end of the first rollout. This list may be extended or modified in future versions as needs and expectations shift. This section does not attempt to define how a requirement will be met, please see design.
 
 
-  # Platforms
-Jenkins must be able to build and test packages on all required platforms. For the near term this means on a web100 enabled kernel for CentOS6 in RPM format.
-  # Security
-The Jenkins must be able to enforce a set of users that is capable of logging in and performing actions.
-  # Repeatability 
-Builds must be repeatable from a fresh instance of the host so that previous builds do not influence current builds and we are sure to be building in a clean environment every time.
-  # Package Building
-Jenkins must be able to create packages for all components in perfSONAR. Whenever possible it must be able to execute and analyze the unit tests for a given package. Signing should be left to a human to do as a means of security. Jenkins should not be responsible for automatically pushing packages into a repository.
-  # Web100 Kernel Building
-Jenkins should be able to build a web100 kernel. This might not be entirely automatable due to needing to merge web100 changes into an upstream kernel, but as much as possible should be automated to reduce the need for having special environments set up for this and to make it quicker and easier.
-  # “One Click” Building
-Jenkins should allow developers to build packages with the minimal amount of intervention required, aiming whenever possible for one click style of builds. As projects are added to Jenkins they should be able to infer a set of default options and settings that the developer may override if needed but otherwise function appropriately for a standard build.
-  # History
-Jenkins must maintain a history of builds for use in troubleshooting and project analysis. 
+  # *Platforms* - Jenkins must be able to build and test packages on all required platforms. For the near term this means on a web100 enabled kernel for CentOS6 in RPM format.
+  # *Security* - The Jenkins must be able to enforce a set of users that is capable of logging in and performing actions.
+  # *Repeatability* - Builds must be repeatable from a fresh instance of the host so that previous builds do not influence current builds and we are sure to be building in a clean environment every time.
+  # *Package Building* - Jenkins must be able to create packages for all components in perfSONAR. Whenever possible it must be able to execute and analyze the unit tests for a given package. Signing should be left to a human to do as a means of security. Jenkins should not be responsible for automatically pushing packages into a repository.
+  # *Web100 Kernel Building* - Jenkins should be able to build a web100 kernel. This might not be entirely automatable due to needing to merge web100 changes into an upstream kernel, but as much as possible should be automated to reduce the need for having special environments set up for this and to make it quicker and easier.
+  # *“One Click” Building* - Jenkins should allow developers to build packages with the minimal amount of intervention required, aiming whenever possible for one click style of builds. As projects are added to Jenkins they should be able to infer a set of default options and settings that the developer may override if needed but otherwise function appropriately for a standard build.
+  # *History* - Jenkins must maintain a history of builds for use in troubleshooting and project analysis. 
 
 
 ===Design===
@@ -58,4 +51,3 @@ Each component of perfSONAR, such as bwctl or the toolkit, will be configured as
 When a project builds successfully it will archive the RPM that was generated as part of the build’s history. These RPMs will be able to be fetched via the web UI from any authenticated user. A build history will be maintained for the last 6 months worth of builds to support cases where we can readily see when and what changes broke the build or if we need to grab an older RPM. 
 
 Builds will be configured to auto run weekly without requiring a human’s intervention. A summary of these builds will be sent to the perfsonar-developer list so that developers can easily see if something has gone amiss in the last week’s worth of development and investigate / resolve before release time.
-
