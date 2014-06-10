@@ -1,0 +1,111 @@
+=perfSONAR Enhanced NOC Support and Enhanced Large Scale Deployment Design Document=
+
+==Dan Doyle, Michael Johnson, GlobalNOC at Indiana University==
+
+
+===Introduction===
+The purpose of this document is to describe a set of enhancements to the perfSONAR tools to allow easier and more useful of them by Network Operation Centers (NOCs). These requirements are primarily derived from the GlobalNOC’s uses but should be generalized enough to provide gains for any NOC environment using perfSONAR.
+
+Each enhancement is presented as its own section along with an outline of how it might be implemented.
+
+These enhancements are considered at the time of perfSONAR version 3.3.2.
+
+
+===Notifications / Alarms===
+One desired feature out of the perfSONAR project would be the ability to have thresholds configured for various parts of the regular testing and for those tests to generate notifications if the test results go outside of those thresholds. 
+
+MaDDash already has the ability to configure checks that run periodically using nagios-like checks that query the Measurement Archive for data. These checks can be configured with thresholds that can specify whether a certain return value is considered good, warning, or critical. What it lacks is the ability to inform administrators when some meaningful state change has occurred.
+
+Either by extending MaDDash’s configuration language or by integration with a nagios instance, checks should be able to optionally define a set of criteria for contacting admins via email when the check moves into a new state, such as from good to critical or critical to warning.
+
+Additionally these checks should be configurable to acknowledge that there is a problem and to stop issuing emails in order to prevent cases where there is a known outage on a connection and administrators do not want to be bothered every interval that something is wrong.
+
+Lastly, it would be helpful if metrics about the toolkit instance’s health itself were able to be tracked and thus capable of generating alarms on. Some health metrics that would be useful:
+
+-	number of scheduled tests in the queue
+-	average wait time for test availability in scheduler
+-	whether a given service such as bwctl or the MA is running
+-	whether the host is globally registered
+-	whether NTP is synced
+
+A number of these are able to be home grown such as a script that checks running processes and alarms if it can’t find “bwctld”, but it would be more useful and maintainable if all of this functionality came natively with the toolkit either as a query-able API or an actual nagios-like check.
+
+
+===Enhancements to Testing Suite===
+There are a number of enhancements to bwctl, owamp, and/or the scheduler involved in regular testing that would be useful to a NOC environment. These have all be included in a single category for organizational purposes.
+
+
+*Authenticated User Tests*
+
+A reasonably common issue that comes up is the inability for administrators to perform a test “right now”. Either end might be unable to schedule a test for some period of time despite an administrator wanting to be able to verify something in the near term.
+
+A possible solution to this would have the ability to have certain tests be authenticated and allow those tests to go to the front of the queue. It would additionally be useful if an authenticated test were able to cancel an existing test, such as if a currently running test were say 15 minutes long and even getting to the front of the queue would not help enough.
+
+
+*Deterministic Scheduling of Tests*
+
+Instead of specifying a particular interval such as every 4 hours, being able to specify using a cron-like method to run tests at specific times. An example might be to run a test every other hour on Mon, Wedn, Fri. Implementing this would likely require the authenticated user enhancement also outlined in this section.
+
+The most straightforward implementation of this would likely be to include something akin to the standard way cron entries are described, such as:
+
+0 0 * * 5 
+
+would schedule a test to be run every Friday at exactly midnight.
+
+
+
+*Single Testpoint that Serves both OWAMP and BWCTL*
+
+Having a single device capable of doing OWAMP and BWCTL tests without worry of them interfering with one another’s scheduling or performance is desired for simplification of deployments / maintenance as well as cost reductions in hardware.
+
+	
+*Multihomed Hosts with More than a Single Globally Routable IP*
+
+When hosts are configured to do testing and have more than one interface with a globally routable IP address there is no guarantee that the interface chosen both to send and receive packets on will be the desired interface for the test. This makes the test results untrustworthy and generally makes using multihomed hosts not possible for use in testing different paths.
+
+One possible solution here would be to have the tests create a temporary static route through the desired interface when running the test and then remove the route afterwards using just the standard linux routing table manipulation tools.
+
+	
+*Ability to Run Arbitrary Tests via Unified Scheduler*	
+	
+The unified scheduler is good at making sure the tests do not tread on one another and thus impact the performance of one another. Naturally the scheduler is not aware of external things that could impact the tests, such as doing a large file transfer to the host running the tests, nor is there a good way to signal or indicate to the scheduler that some known external thing is going to be causing problems.
+
+Having the scheduler able to interact with any general script would be one way of resolving this. If a user were able to queue up the file transfer in question to the scheduler, the scheduler would be able to block any other tests (or other scripts) until the script in question had exited and thus generate more accurate test results.
+
+	
+
+===Performance Improvements in Measurement Archive===
+The existing Measurement Archive (MA) performance does not scale to the level that a NOC would need for measuring and monitoring a large scale network. Custom modifications have been made to the checks to enable scaling beyond what they support today but these are not maintainable going forward. 
+
+The use case that the GlobalNOC is looking at in particular is being able to run several hundred checks per minute against the MA using MaDDash.
+
+
+===More than One Test between Two Nodes in MaDDash===
+MaDDash today does not cleanly support the case of multiple tests between the same two nodes, such as where two nodes each have two interfaces that travel separate paths and want to verify that each path is correct. There are existing workarounds such as documenting each interface as a separate node but it would be useful if MaDDash supported this concept natively.
+
+
+===Geographical View in MaDDash===
+When viewing results in MaDDash it is sometimes desireable to be able to get a quick view of the network as it is canonically understood instead of as a grid table. Besides functioning as a pretty visual component, this could further improve understanding of where the tests are laid out and where problems are in the network at any given time.
+
+
+===Ability to have more than One Address Per Class Per Node in PerfSONARBuoy===
+Right now the mesh configuration does not currently allow for more than a single address per class of address per node. There exist workarounds such as declaring arbitrary classes of addresses and then just putting more IPv4 address such as the following:
+
+<NODE=DALL>
+LONGNAME    DALL
+CONTACTADDR    198.71.46.19
+VL2053ADDR     10.13.0.209
+VL2365ADDR     10.13.1.2
+VL2368ADDR     10.13.1.13
+VL2369ADDR     10.13.1.17
+</NODE>
+
+It would be useful if this functionality was supported natively, such as with comma separated values perhaps.
+
+===Extended Limit Definitions===
+Right now the limits file for bwctl allows for restricting users to a particular amount of throughput or disk. A useful addition to this would be adding the ability to restrict the number of tests a particular user or source is able to run in a given timeframe. Some examples in plain English would be:
+
+192.168.13.0/24 can only run 1 bwctl per hour
+140.182.44.26/32 can run no more than 10 tests in a 24 hour period.
+
+The desired goal of this would be to prevent nodes that are set up for ad hoc testing from being continuously tested against by a small amount of users thus delaying or making other users’ tests not runnable. 
