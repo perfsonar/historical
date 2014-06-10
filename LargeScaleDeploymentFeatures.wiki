@@ -1,3 +1,5 @@
+#summary Document describing enhancements to support large scale deployments of perfSONAR such as in a NOC environment.
+
 =perfSONAR Enhanced NOC Support and Enhanced Large Scale Deployment Design Document=
 
 ==Dan Doyle, Michael Johnson, GlobalNOC at Indiana University==
