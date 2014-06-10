@@ -1,0 +1,61 @@
+#summary Automation of pS build and testing document
+
+=perfSONAR Build Automation Design Document=
+
+==Dan Doyle, Michael Johnson, GlobalNOC at Indiana University==
+
+===Introduction===
+The purpose of this document is to describe how we can leverage automated build software to improve the efficiency, accuracy, and turn around time of perfSONAR related packages. 
+
+Today the current process involves a human going in, setting everything up, and building the packages. This works sufficiently well for a small scale project but begins to get problematic as it grows and matures. We would like to get to a place where building and running unit tests on packages is an automatable process for several reasons:
+
+  * Accuracy and consistency of builds increases due to every build happening the same way instead of minor variances due to particulars in each developer’s workflow
+  * Increased speed of testing and packaging with the goal being “one click” capability
+  * Remove dependency on “gray matter” knowledge where only specific people know how to build and test a package.
+  * Ability to easily do builds and tests on various architectures and/or platforms
+  * Maintain a history of builds and testing
+
+
+===Approach===
+The build automation software chosen is Jenkins: http://jenkins-ci.org/
+
+Jenkins is an open source software suite available as standard system packages for a lot of platforms. It is also still under active development and has been used successfully for years at the GlobalNOC to automate a wide array of different projects.
+
+At a very high level, a project in Jenkins is a collection of bash scripts that perform operations and examine the results. It is capable of integrating with common version control systems such as GIT or SVN and can manage “artifacts” of builds such as RPMs or unit test results. Basically if it is doable in a consistent manner from a user on the command line it is doable via a Jenkins job.
+
+
+===Requirements and Scope===
+This section defines the expectations of what the Jenkins build system should be able to do at the end of the first rollout. This list may be extended or modified in future versions as needs and expectations shift. This section does not attempt to define how a requirement will be met, please see design.
+
+
+  # Platforms
+Jenkins must be able to build and test packages on all required platforms. For the near term this means on a web100 enabled kernel for CentOS6 in RPM format.
+  # Security
+The Jenkins must be able to enforce a set of users that is capable of logging in and performing actions.
+  # Repeatability 
+Builds must be repeatable from a fresh instance of the host so that previous builds do not influence current builds and we are sure to be building in a clean environment every time.
+  # Package Building
+Jenkins must be able to create packages for all components in perfSONAR. Whenever possible it must be able to execute and analyze the unit tests for a given package. Signing should be left to a human to do as a means of security. Jenkins should not be responsible for automatically pushing packages into a repository.
+  # Web100 Kernel Building
+Jenkins should be able to build a web100 kernel. This might not be entirely automatable due to needing to merge web100 changes into an upstream kernel, but as much as possible should be automated to reduce the need for having special environments set up for this and to make it quicker and easier.
+  # “One Click” Building
+Jenkins should allow developers to build packages with the minimal amount of intervention required, aiming whenever possible for one click style of builds. As projects are added to Jenkins they should be able to infer a set of default options and settings that the developer may override if needed but otherwise function appropriately for a standard build.
+  # History
+Jenkins must maintain a history of builds for use in troubleshooting and project analysis. 
+
+
+===Design===
+This section describes how the implementation of the various requirements above will be implemented.
+
+The Jenkins host will run on a dedicated server as a protected web accessible application. All interaction with Jenkins will happen through the web interface except in cases where that is not possible such as if it crashes. 
+
+For authentication we will attempt to use Shibboleth to protect the web UI to avoid requiring more login and password information, though if this fails or proves to be too onerous we can revert to using Jenkins built in authentication system.
+
+Jenkins will control a set of virtual machines representing various architectures and platforms that we want to target. For the start this will just be a single CentOS6 web100 kernel based machine that has been set up in a known state and imaged. This will grant us the ability to very easily revert to particular snapshots and ensure that every build process is clean from the one before it. Since this will only be a single machine at the beginning it will live on the same host as the Jenkins master for simplicity’s sake.
+
+Each component of perfSONAR, such as bwctl or the toolkit, will be configured as a separate project in Jenkins. Where necessary dependencies will be created between components that require another component to be built and working first so that triggering a build on any given component will build any other components necessary to properly build and test that component.
+
+When a project builds successfully it will archive the RPM that was generated as part of the build’s history. These RPMs will be able to be fetched via the web UI from any authenticated user. A build history will be maintained for the last 6 months worth of builds to support cases where we can readily see when and what changes broke the build or if we need to grab an older RPM. 
+
+Builds will be configured to auto run weekly without requiring a human’s intervention. A summary of these builds will be sent to the perfsonar-developer list so that developers can easily see if something has gone amiss in the last week’s worth of development and investigate / resolve before release time.
+
