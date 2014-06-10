@@ -91,6 +91,7 @@ When viewing results in MaDDash it is sometimes desireable to be able to get a q
 ===Ability to have more than One Address Per Class Per Node in PerfSONARBuoy===
 Right now the mesh configuration does not currently allow for more than a single address per class of address per node. There exist workarounds such as declaring arbitrary classes of addresses and then just putting more IPv4 address such as the following:
 
+{{{
 <NODE=DALL>
 LONGNAME    DALL
 CONTACTADDR    198.71.46.19
@@ -99,6 +100,7 @@ VL2365ADDR     10.13.1.2
 VL2368ADDR     10.13.1.13
 VL2369ADDR     10.13.1.17
 </NODE>
+}}}
 
 It would be useful if this functionality was supported natively, such as with comma separated values perhaps.
 
