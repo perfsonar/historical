@@ -107,7 +107,9 @@ It would be useful if this functionality was supported natively, such as with co
 ===Extended Limit Definitions===
 Right now the limits file for bwctl allows for restricting users to a particular amount of throughput or disk. A useful addition to this would be adding the ability to restrict the number of tests a particular user or source is able to run in a given timeframe. Some examples in plain English would be:
 
+{{{
 192.168.13.0/24 can only run 1 bwctl per hour
 140.182.44.26/32 can run no more than 10 tests in a 24 hour period.
+}}}
 
 The desired goal of this would be to prevent nodes that are set up for ad hoc testing from being continuously tested against by a small amount of users thus delaying or making other users’ tests not runnable. 
