@@ -22,11 +22,11 @@ Additionally these checks should be configurable to acknowledge that there is a 
 
 Lastly, it would be helpful if metrics about the toolkit instance’s health itself were able to be tracked and thus capable of generating alarms on. Some health metrics that would be useful:
 
-* number of scheduled tests in the queue
-* average wait time for test availability in scheduler
-* whether a given service such as bwctl or the MA is running
-* whether the host is globally registered
-* whether NTP is synced
+  * number of scheduled tests in the queue
+  * average wait time for test availability in scheduler
+  * whether a given service such as bwctl or the MA is running
+  * whether the host is globally registered
+  * whether NTP is synced
 
 A number of these are able to be home grown such as a script that checks running processes and alarms if it can’t find “bwctld”, but it would be more useful and maintainable if all of this functionality came natively with the toolkit either as a query-able API or an actual nagios-like check.
 
