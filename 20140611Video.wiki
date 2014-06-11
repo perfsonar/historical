@@ -2,7 +2,7 @@
 
 =   June 11, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT =
 
-Attendees: 
+Attendees: Brian, Roland, Michael, Dan, Jason, Sowmya,Aaron
   
 == Agenda Topics ==
   * Developer Updates
@@ -18,7 +18,39 @@ Attendees:
   * sLS GUI: Displaying Multiple Interfaces
 
 == Notes ==
- 
+ * Developer Updates
+   * Andy
+    * Fixed bug with MA reporting strange throughput results
+    * Built new LiveCD/USB
+   * Brian
+    * new iperf3 release soon that will send server stats back
+   * Roland
+    * Getting up to speed on git repo
+    * Working on a few code fixes for oppd
+   * Michael
+    * Working on the charts pulling in LS info
+    * Action: Andy to make sure test hosts are registered in LS
+   * Dan
+    * Created issues related to IU large scale deployments
+    * Working on getting an IU testbed for pS and automated build environment. Orders placed for hardware. 
+    * Finishing up integrating the log analysis and final codes
+   * Jason
+    * Starting to work on perfsonar website
+  * Antoine
+   * Deployed simple lookup service. Ready to be tested.
+  * Sowmya
+   * Testing geant server this week
+   * Making some changes to sLS perl client
+   * Looking at ps-west. Related to pub/sub with ANTG
+  * Aaron
+   * Fixed a few issues assigned last week
+   * Released new OWAMP, which revealed new bug. Timeout of control connections. Released fix today. 
+   * Modified BWCTL to use server side information.
+   * Updated regular testing config to do owp test ports  
+ * sLS GUI: Displaying Multiple Interfaces
+  * Currently can edit ls reg by hand to map interfaces to tests
+  * Decided mostly a display issue. Need to document how to change easily.
+ * Next Week: Review remaining 3.4 issues, hopefully start internal testing of full Toolkit
 
 == Future Agenda Topics ==
 
