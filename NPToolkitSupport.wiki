@@ -20,8 +20,8 @@ The current rotation includes: Aaron, Jason, Andy, Sowmya, Brian, Dan, Michael
   * May 1-15, 2014: Sowmya
   * May 16-31, 2014: Dan
   * June 1-15, 2014: Michael
-  * June 16-30, 2014: Brian
+  * June 16-30, 2014: ~~Brian~~ Jason
   * July 1-15, 2014: Aaron
-  * July 16-31, 2014: Jason
+  * July 16-31, 2014: ~~Jason~~ Brian
 
  
