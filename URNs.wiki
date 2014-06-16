@@ -1,4 +1,4 @@
-#summary A short description of the URN scheme
+#summary Historical: A short description of the URN scheme
 =Benefits=
 Currently, each element has a global identifier of some kind. For example, layer3 Interfaces have IP addresses and E2EMon links have a global name. However, each new style of global identifier requires some added code in the LS to handle summarization. URNs offer a standard way to uniquely describe these resources without having each type of element or each project defining its own style of identifier.
 
