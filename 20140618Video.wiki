@@ -15,7 +15,11 @@ Attendees:
    * Roland 
    * Ivan
    * Antoine
+  * Support rotation
   * Review 3.4 status (ready for internal testing?)
+  * Ability to register service access levels (i.e. public vs. private)
+   * Issue 905 
+  * Ping and OWAMP event types
 
 == Notes ==
 
