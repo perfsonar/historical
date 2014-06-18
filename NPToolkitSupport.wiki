@@ -5,23 +5,36 @@
 The core NP Toolkit support team has decided to divide up support responsibility as follows.
 There will be a primary support person at all times, on a .5 month rotation. This person is responsible for answering support email, and assigning tasks to others if appropriate. The person should try to respond to emails within 1 working day. If the primary person is unavailable, they are responsible for finding their own replacement.
 
-The current rotation includes: Aaron, Jason, Andy, Sowmya, Brian, Dan, Michael
+The current rotation includes: 
+ * Aaron Brown
+ *  Jason Zurawski
+ * Andy Lake
+ * Sowmya Balasubramanian
+ * Brian Tierney
+ * Dan Doyle
+ * Michael Johnson 
+ * Ivan Garnizov
+ * Rade Martinovic
+ * Szymon Trocha
+ * Roland Karch
+ * Antoine Delvaux
 (Please volunteer if you'd like to be added to the rotation!)
 
 = Schedule =
-  * January 1-15, 2014: Andy
-  * January 16-31, 2014: Sowmya
-  * February 1-14, 2014: Dan
-  * February 15-28, 2014: Michael
-  * March 1-15, 2014: Brian
-  * March 16-31, 2014: Aaron
-  * April 1-15, 2014: Jason
-  * April 16-30, 2014: Andy
-  * May 1-15, 2014: Sowmya
-  * May 16-31, 2014: Dan
-  * June 1-15, 2014: Michael
-  * June 16-30, 2014: ~~Brian~~ Jason
-  * July 1-15, 2014: Aaron
-  * July 16-31, 2014: ~~Jason~~ Brian
-
+  * June 16-30, 2014: Jason (Backup: Antoine)
+   * Jason swapped with Brian July 16-31
+  * July 1-15, 2014: Aaron  (Backup: Ivan)
+  * July 16-31, 2014: Brian (Backup: Rade)
+   * Brian swapped with Jason June 16-30
+  * August 1-15, 2014: Andy (Backup: Roland)
+  * August 16-31, 2014: Sowmya (Backup: Szymon)
+  * September 1-15, 2014: Dan
+  * September 16-30, 2014: Michael
+  * October 1-15, 2014: Brian
+  * October 16-31, 2014: Aaron
+  * November 1-15, 2014: Jason
+  * November 16-30, 2014: Andy
+  * December 1-15, 2014: Sowmya
+  * December 16-31, 2014: Dan
+  * January 1-15, 2014: Michael
  
