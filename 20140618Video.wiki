@@ -2,9 +2,10 @@
 
 =   June 18, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT =
 
-Attendees: 
+Attendees: Andy, Brian, Sowmya, Dan, Michael, Aaron, Antoine, Murilo
   
 == Agenda Topics ==
+
   * Developer Updates
    * Andy
    * Aaron
@@ -15,6 +16,7 @@ Attendees:
    * Roland 
    * Ivan
    * Antoine
+  * Cacti issue
   * Support rotation
   * Review 3.4 status (ready for internal testing?)
   * Ability to register service access levels (i.e. public vs. private)
@@ -22,6 +24,46 @@ Attendees:
   * Ping and OWAMP event types
 
 == Notes ==
+
+  * Developer Updates
+   * Andy
+    * Finished 3.4 issues
+    * Migrated maddash to github
+   * Dan
+    * Gathering hardware
+    * cleaning up plots with Michael
+   * Michael
+    * Working on the charting, added reverse direction
+    * Added initial implementation of turning on/off displays
+    * Can also move through time on displays now
+   * Brian
+    * iperf3 release
+    * Action: move bootstrap to perfsonar.net
+   * Sowmya
+    * Finished up issues
+    * Remaining issues are post-rc1
+    * Debugging ps-west issue with timeouts.   
+   * Aaron
+    * Working on cacti issue
+    * EPEL packages XML-RPC, broke the config daemon.
+    * bwctl crashes with udp tests
+   * Antoine
+    * Been given green-light to put sLS into production
+    * Finishing last version of MDM MP. Once that is done, want to fully integrate stuff into git (probably next week)
+   * Murilo
+    * Joined for first time, welcome.
+  * Cacti issue
+   * Have fix, will get out today
+  * Support rotation
+   * Will add two people per slot, one U.S. and one European. May do this longer term due to timezones.
+  * Review 3.4 status (ready for internal testing?)
+   * Ready to build for internal testing
+   * Dan will share notes on 854
+   * Antoine can setup mirror on server. Will work with Aaron.
+  * Ping and OWAMP event types
+   * Andy will update event types with -bidir at the end.
+  * Ability to register service access levels (i.e. public vs. private)
+   * ACTION: Andy will add list of values.
 
 == Future Agenda Topics ==
 
