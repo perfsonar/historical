@@ -32,9 +32,9 @@ The current rotation includes:
   * September 16-30, 2014: Michael
   * October 1-15, 2014: Brian
   * October 16-31, 2014: Aaron
-  * November 1-15, 2014: Jason
+  * November 1-15, 2014: Sowmya
   * November 16-30, 2014: Andy
-  * December 1-15, 2014: Sowmya
+  * December 1-15, 2014: Jason
   * December 16-31, 2014: Dan
   * January 1-15, 2014: Michael
  
