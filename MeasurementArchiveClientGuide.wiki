@@ -912,7 +912,7 @@ An example of delay metadata as published for BWCTL running ping by the perfSONA
          "event-type":"failures"
       },
       {
-         "event-type":"histogram-ttl",
+         "event-type":"histogram-ttl-reverse",
          "summaries":[
             {
                "summary-type":"statistics",
@@ -921,10 +921,10 @@ An example of delay metadata as published for BWCTL running ping by the perfSONA
          ]
       },
       {
-         "event-type":"packet-duplicates"
+         "event-type":"packet-duplicates-bidir"
       },
       {
-         "event-type":"packet-loss-rate",
+         "event-type":"packet-loss-rate-bidir",
          "summaries":[
             {
                "summary-type":"aggregation",
@@ -937,7 +937,7 @@ An example of delay metadata as published for BWCTL running ping by the perfSONA
          ]
       },
       {
-         "event-type":"packet-count-lost"
+         "event-type":"packet-count-lost-bidir"
       },
       {
          "event-type":"packet-count-sent"
@@ -960,7 +960,7 @@ An example of delay metadata as published for BWCTL running ping by the perfSONA
          ]
       },
       {
-         "event-type":"packet-reorders"
+         "event-type":"packet-reorders-bidir"
       }
    ],
    "subject-type":"point-to-point",
@@ -970,7 +970,7 @@ An example of delay metadata as published for BWCTL running ping by the perfSONA
 }
 }}}
 
-Similarly, metadata example for powstream as registered by the perfSONAR Regular Testing component:
+Similarly, metadata example for powstream as registered by the perfSONAR Regular Testing component (note the slightly different event types from ping since they actually measure different values):
 {{{
 {
    "tool-name":"powstream",
@@ -1061,24 +1061,24 @@ Example of publishing the ping measurement results to the bulk interface as done
          "ts":1397804761,
          "val":[
             {
-               "event-type":"histogram-ttl",
+               "event-type":"histogram-ttl-reverse",
                "val":{
                   "59":100
                }
             },
             {
-               "event-type":"packet-duplicates",
+               "event-type":"packet-duplicates-bidir",
                "val":0
             },
             {
-               "event-type":"packet-loss-rate",
+               "event-type":"packet-loss-rate-bidir",
                "val":{
                   "denominator":"100",
                   "numerator":"0"
                }
             },
             {
-               "event-type":"packet-count-lost",
+               "event-type":"packet-count-lost-bidir",
                "val":"0"
             },
             {
@@ -1093,7 +1093,7 @@ Example of publishing the ping measurement results to the bulk interface as done
                }
             },
             {
-               "event-type":"packet-reorders",
+               "event-type":"packet-reorders-bidir",
                "val":0
             }
          ]
@@ -1258,13 +1258,18 @@ A few of the common event types have been covered in previous sections, but a fu
 ||failures||A record of test failures. A failure is any measurement that was scheduled to run but circumstances led to a state where it is unable to record a measurement. For example, being unable to connect to the remote endpoint. This is an object currently with one field named _error_.||
 ||histogram-owdelay|| A histogram describing the observed one-way delays over a time period. Buckets always in milliseconds.||
 ||histogram-rtt||A histogram describing the observed packet round-trip times over a over a time period. Buckets always in milliseconds.||
-||histogram-ttl||A histogram describing the observed number of hops (time-to-live) of packets over a time period.||
-||packet-duplicates||The number of duplicate packets sent in a sample.||
+||histogram-ttl||A histogram describing the observed number of hops (time-to-live) of packets over a time period from source to destination.||
+||histogram-ttl-reverse||A histogram describing the observed number of hops (time-to-live) of packets over a time period from destination to source.||
+||packet-duplicates||The number of duplicate packets observed in a sample for a single direction.||
+||packet-duplicates-bidir||The number of duplicate packets observed for a complete packet round trip (from source to destination and then back to source)||
 ||packet-loss-rate||The number of packets lost divided by the number of packets sent.||
+||packet-loss-rate-bidir||The number of packets lost in both directions divided by the number of packets sent over a given summarization window.||
 ||packet-trace||The observed packet trace such as that returned by traceroute or tracepath.||
-||packet-count-lost||The number of packets dropped in a sample. This is a raw count of packets and can be combined with packet-count-sent event type data to determine the rate of loss.||
+||packet-count-lost||The number of packets dropped in one direction. This is a raw count of packets and can be combined with packet­count­sent event type data to determine the rate of unidriectional loss.||
+||packet-count-lost-bidir||The number of packets dropped in both directions. This is a raw count of packets and can be combined with packet­count­sent event type data to determine the rate of biidriectional loss.||
 ||packet-count-sent||The number of packets sent in a sample. This is a raw count of packets and can be combined with packet-count-lost event type data to determine the rate of loss.||
-||packet-reorders||The number of packets received out of order for a particular transfer||
+||packet-reorders||The number of packets received out of order for a unidirectional transfer||
+||packet-reorders-bidir||The number of packets received out of order for a bidirectional transfer||
 ||packet-retransmits||The number of packets retransmitted for a transfer using reliable transport protocol such as TCP.||
 ||path-mtu||The maximum transmission unit of a path.||
 ||streams-packet-retransmits||For tests running multiple streams, the packet-retransmits for each individual stream. Each stream is represented as a position in an array. If other stream- stats collected, a stream will maintain the same position in each event type.||
