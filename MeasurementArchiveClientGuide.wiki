@@ -1253,7 +1253,7 @@ Similarly an example of publishing the BWCTL tracepath measurement results to th
 }}}
 
 = Full List of Event Types =
-A few of the common event types have been covered in previous sections, but a full list is provided below for reference (NOTE: See [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Apr11.pdf API Specification] for more formal definitions of each type):
+A few of the common event types have been covered in previous sections, but a full list is provided below for reference (NOTE: See [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Jun18.pdf API Specification] for more formal definitions of each type):
 || Name || Description ||
 ||failures||A record of test failures. A failure is any measurement that was scheduled to run but circumstances led to a state where it is unable to record a measurement. For example, being unable to connect to the remote endpoint. This is an object currently with one field named _error_.||
 ||histogram-owdelay|| A histogram describing the observed one-way delays over a time period. Buckets always in milliseconds.||

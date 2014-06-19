@@ -815,5 +815,5 @@ die $bulk_post->error() if($bulk_post->error());
 }}}
 =Other Resources=
  * [MeasurementArchiveClientGuide General Measurement Archive Client Guide]
- * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Apr11.pdf API Specification]
+ * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Jun18.pdf API Specification]
  * [http://antg-dev.es.net/esmond-docs/perfsonar_client.html Python API]
