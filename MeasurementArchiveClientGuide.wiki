@@ -1280,6 +1280,6 @@ A few of the common event types have been covered in previous sections, but a fu
 ||time-error-estimates||An estimate of the clock error in a sample in milliseconds||
 
 = Other Resources =
- * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Apr11.pdf API Specification]
+ * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Jun18.pdf API Specification]
  * [MeasurementArchivePerlAPI Perl API]
  * [http://antg-dev.es.net/esmond-docs/perfsonar_client.html Python API]
