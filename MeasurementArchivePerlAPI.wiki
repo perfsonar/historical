@@ -643,15 +643,15 @@ $metadata->add_event_type('histogram-rtt');
 $metadata->add_summary_type('histogram-rtt', 'aggregation', 86400);
 $metadata->add_summary_type('histogram-rtt', 'statistics', 0);
 $metadata->add_summary_type('histogram-rtt', 'statistics', 86400);
-$metadata->add_event_type('packet-loss-rate');
-$metadata->add_summary_type('packet-loss-rate', 'aggregation', 3600);
-$metadata->add_summary_type('packet-loss-rate', 'aggregation', 86400);
-$metadata->add_event_type('histogram-ttl');
-$metadata->add_summary_type('histogram-ttl', 'statistics', 0);
-$metadata->add_event_type('packet-count-lost');
+$metadata->add_event_type('packet-loss-rate-bidir');
+$metadata->add_summary_type('packet-loss-rate-bidir', 'aggregation', 3600);
+$metadata->add_summary_type('packet-loss-rate-bidir', 'aggregation', 86400);
+$metadata->add_event_type('histogram-ttl-reverse');
+$metadata->add_summary_type('histogram-ttl-reverse', 'statistics', 0);
+$metadata->add_event_type('packet-count-lost-bidir');
 $metadata->add_event_type('packet-count-sent');
-$metadata->add_event_type('packet-duplicates');
-$metadata->add_event_type('packet-reorders');
+$metadata->add_event_type('packet-duplicates-bidir');
+$metadata->add_event_type('packet-reorders-bidir');
 $metadata->add_event_type('failures');
 $metadata->post_metadata();
 die $metadata->error() . "\n" if $metadata->error();
@@ -732,7 +732,7 @@ die $bulk_post->error() if($bulk_post->error());
 }}}
 
 === Publishing Packet Loss===
-Note that _packet-loss-rate_ is a special percentage type and thus is not registered as a simple float. It is registered as an object with a _numerator_ and a _denominator_ so that it is easier to summarize. Packet loss is measured by tools such as owamp and ping, but the data registration portion is repeated below to highlight this difference:
+Note that _packet-loss-rate_ is a special percentage type and thus is not registered as a simple float. It is registered as an object with a _numerator_ and a _denominator_ so that it is easier to summarize. Packet loss is measured by tools such as owamp  (packet-loss-rate) and ping (packet-loss-rate-bidir), but the data registration portion is repeated below to highlight this difference:
 {{{
 ...
 $bulk_post->add_data_point('packet-loss-rate', $ts, {'numerator'=> 0, 'denominator'=> 100});
