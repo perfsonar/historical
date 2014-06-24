@@ -22,6 +22,7 @@ This page contains a checklist of things to test, and questions to answer, befor
 === New Installation ===
   * `_____` Could you log in as root on the console with a blank password?
   * `_____` Did addressing the host (e.g. DHCP, Static) work as expected?
+  * `_____` Were you prompted to create a web administrator on first login?
 
 === Upgraded Installation ===
   * `_____` Could you use existing accounts to access the machine?  
@@ -31,19 +32,15 @@ This page contains a checklist of things to test, and questions to answer, befor
 == Upgrade Checklist ==
 
 === GUI/Display ===
-  * `_____` Is the information under _*Host Status*_ (e.g. address, MTU, NTP) expected?  Note that NTP and Global registration may take several hours to complete.  
+  * `_____` Is the information under _*Host Status*_ (e.g. address, MTU, NTP) expected?  Note that NTPmay take several hours to complete.  
   * `_____` Are services running as expected?  Note that BWCTL and OWAMP will not start until NTP has stabilized.  Regular testing will not start unless it has been configured.  
   * `_____` Are the versions under _*Software Versions*_ consistent with the release?
   * `_____` Are the links under _*Performance Toolkit*_ consistent with the release?
   * `_____` Were there any rendering or formatting issues in your browser?  If so please list the browser type, version, and parent OS you are using.  
 
 === Databases ===
-  * `_____` Is there an 'owamp' database?
-  * `_____` Is there a 'bwctl' database?
-  * `_____` Is there a 'pingerMA' database?
-  * `_____` Is there a 'tracerouteMA' database?
-  * `_____` Do the 'clean_pSB_db.pl' and 'check_pSB_db.pl' display help correctly?
-  * `_____` Does the default db DB user get granted the correct permissions for DB access?
+  * `_____` Is cassandra running (/sbin/service cassandra status)?
+  * `_____` Is postgresql running (/sbin/service postgresql status)?
 
 === Administrative Information ===
   * `_____` Did the page ask you to authenticate before entering information?  Were you able to authenticate with root or other administrator credentials?
@@ -58,20 +55,6 @@ This page contains a checklist of things to test, and questions to answer, befor
   * `_____` Did any custom NTP servers you had added get saved?
   * `_____` Was NTP restarted after saving and does an 'ntpq -p' show the new hosts?
 
-=== External BWCTL Limits ===
-  * `_____` Did the page ask you to authenticate before entering information?  Were you able to authenticate with root or other administrator credentials?  Note your browser may cache this.  
-  * `_____` Are the labels, prompts, and pop-ups clear and informative?
-  * `_____` Do the bwctl limits for Unpriviledged Clients and Priviledges clients match what they were before the upgrade?
-  * `_____` Does the list of users match what it was before the upgrade?
-  * `_____` Does the list of networks match what it was before the upgrade?
-
-=== External OWAMP Limits ===
-  * `_____` Did the page ask you to authenticate before entering information?  Were you able to authenticate with root or other administrator credentials?  Note your browser may cache this.  
-  * `_____` Are the labels, prompts, and pop-ups clear and informative?
-  * `_____` Do the owamp limits for Unpriviledged Clients and Priviledges clients match what they were before the upgrade?
-  * `_____` Does the list of users match what it was before the upgrade?
-  * `_____` Does the list of networks match what it was before the upgrade?
-
 === Enabled Services ===
   * `_____` Did the page ask you to authenticate before entering information?  Were you able to authenticate with root or other administrator credentials?  Note your browser may cache this.  
   * `_____` Are the labels, prompts, and pop-ups clear and informative?
@@ -79,7 +62,6 @@ This page contains a checklist of things to test, and questions to answer, befor
   * `_____` Are the services listed as enabled actually running, and are those listed as disabled, not running? Can be checked via the "Services On This Node" link.
   * `_____` Are iptables and other services still running after the upgrade?
   * `_____` Is the Lookup Service registering the configured address?
-  * `_____` Does the traceroute_scheduler restart after a configuration change?
   * `_____` Are Apache directory indexes disabled?
   * `_____` Is nscd enabled?
 
@@ -97,13 +79,9 @@ This page contains a checklist of things to test, and questions to answer, befor
   * `_____` If you created accounts previously, can they still login?
 
 === Graphs ===
-  * `_____` When a host is clicked, does a pop-up window appear with graphed data?  If not, check your browser’s pop-up settings.  
-  * `_____` Are all throughput graphs from the previous version still visible via the the "Throughput" link on the sidebar?
-  * `_____` Are all one-way delay graphs from the previous version still visible via the the "One-Way Delay" link on the sidebar?
-  * `_____` Are all ping graphs from the previous version still visible via the the "Ping Delay" link on the sidebar?
-  * `_____` Are all SNMP utilization graphs from the previous version still visible via the the "Utilization" link on the sidebar?
-  * `_____` Are all Cacti graphs from the previous version still visible via the the "Cacti Graphs" link on the sidebar?
-  * `_____` Are there any errors in the display or rendering (e.g. the graphing libraries) that you have noticed?
+  * `_____` Do the list of configured tests appear in the graphs? Is the information correct?
+  * `_____` When you click on a test, does the graph display?
+  * `_____` Does the graph discover your bandwidth and interface speed
 
 === Traceroute Visualization ===
   * `_____` Does the page load as expected?
@@ -113,7 +91,7 @@ This page contains a checklist of things to test, and questions to answer, befor
 == Testing Checklist ==
 
 === Administrative Information ===
-  * `_____` Change the Organization Name, Host Location, Administrator Name and Administrator Email
+  * `_____` Fill in all administrative information fields. 
   * `_____` Add a community via "Add New Community"
   * `_____` Add multiple "Popular Community" communities
   * `_____` Does the community just added get removed from the Popular Communities list?
@@ -122,20 +100,18 @@ This page contains a checklist of things to test, and questions to answer, befor
   * `_____` If you deleted a "Popular Community" from the communities list, does it get added back to the Popular Communities list
   * `_____` Save the administrative information
   * `_____` Did all the information get saved? Click Reset and make sure nothing changes
-  * `_____` Check that the following services were restarted: PingER, SNMP MA, perfSONAR-BUOY Measurement Archive, Traceroute Measurement Archive, LS Registration Daemon
+  * `_____` Is the warning message about missing admin info still displayed?
   * `_____` Check that NPAD's and NDT's webpages got updated:
   * `_____` NDT: `http://[host url]:7123`
   * `_____` NPAD: `http://[host url]:8000`
-  * `_____` Check the contents of the hLS to make sure that the description information for services is updated.
-  * `_____` You can use the following URL to check (*Please allow at least 10 minutes for service registration*): `http://dc211.internet2.edu/cgi-bin/pA/view.cgi?hls=http://[host_url]:9995/perfSONAR_PS/services/hLS`
+  * `_____` Is you service in the sLS? Check http://stats.es.net/ServicesDirectory/ after 10 minutes or so. Also not that private addresses may be ignored.
 
 === Enabled Services ===
-  * `_____` Select "Only Enable Bandwidth Services", it should enable NDT, NPAD, BWCTL, perfSONAR-BUOY Throughput Testing. It should disable owamp, perfSONAR-BUOY Latency Testing, PingER.
-  * `_____` Select "Only Enabled Latency Services", it should enable owamp, perfSONAR-BUOY Latency Testing, PingER. It should disable NDT, NPAD, BWCTL, perfSONAR-BUOY Throughput Testing
+  * `_____` Select "Only Enable Bandwidth Services", it should enable NDT, NPAD, BWCTL. It should disable owamp.
+  * `_____` Select "Only Enabled Latency Services", it should enable owamp. It should disable NDT, NPAD, and BWCTL
   * `_____` Individually select and deselect components.
   * `_____` Click 'save', make sure that everything that should be enabled is started, and everything that should be disabled is stopped
   * `_____` After entering information, did the page save cleanly?
-  * `_____` Did changes made to servers (e.g. starting stopping SSH as an example) have an immediate effect after saving?
 
 === Scheduled Tests ===
   * `_____` Are you able to add a new bwctl test and see results within the test interval?
@@ -154,34 +130,6 @@ This page contains a checklist of things to test, and questions to answer, befor
   * `_____` Click reset and make sure that the NTP server you added still exists.
   * `_____` Click "Select Closest Servers". After it has finished, no more than 5 of the servers should be selected. If any servers cannot be contacted, they should be marked in red, and have a tooltip when you move your mouse over them. Click save, and verify that the /etc/ntp.conf contains the selected hosts.
   * `_____` After entering information, did the page save cleanly?
-
-=== External BWCTL Limits ===
-  * `_____` Edit the "Unpriviledged Clients" and make changes to the limits, hit save and see that /etc/bwctld/bwctld.limits has been updated, and that the "regular" group has the limits you specified.
-  * `_____` Click "Add User", enter a user name, select a group, and set a password. Hit save and see that /etc/bwctld/bwctld.limits and /etc/bwctld/bwctld.keys have both been updated
-  * `_____` Click "Add User" and try to re-enter the name above. You should receive an error message about the user already existing.
-  * `_____` Click "Change Password", and try to change the user's password. Hit save, and check that /etc/bwctld/bwctld.keys has been updated
-  * `_____` Click "Change Group", and try to change the user's group. Hit save, and check that /etc/bwctld/bwctld.limits has been updated
-  * `_____` Click "Delete" to delete the user you added. Hit save, and check that /etc/bwctld/bwctld.limits and /etc/bwctld/bwctld.keys have been updated.
-  * `_____` Click "Add Network", enter an IP address and netmask and then select a group. Hit save and see that /etc/bwctld/bwctld.limits has been updated
-  * `_____` Click "Add Network" and try to re-enter the address and netmask above. You should receive an error message about the network already existing.
-  * `_____` Click "Change Group", and try to change the networks's group. Hit save, and check that /etc/bwctld/bwctld.limits has been updated
-  * `_____` Click "Delete" to delete the network you added. Hit save, and check that /etc/bwctld/bwctld.limits has been updated.
-  * `_____` After entering information, did the page save cleanly?
-  * `_____` Did the limits you set for either tool prevent access for a class you were trying to block or give enhanced abilities?
-
-=== External OWAMP Limits ===
-  * `_____` Edit the "Unpriviledged Clients" and make changes to the limits, hit save and see that /etc/owampd/owampd.limits has been updated, and that the "regular" group has the limits you specified.
-  * `_____` Click "Add User", enter a user name, select a group, and set a password. Hit save and see that /etc/owampd/owampd.limits and /etc/owampd/owampd.pfs have both been updated
-  * `_____` Click "Add User" and try to re-enter the name above. You should receive an error message about the user already existing.
-  * `_____` Click "Change Password", and try to change the user's password. Hit save, and check that /etc/owampd/owampd.pfs has been updated
-  * `_____` Click "Change Group", and try to change the user's group. Hit save, and check that /etc/owampd/owampd.limits has been updated
-  * `_____` Click "Delete" to delete the user you added. Hit save, and check that /etc/owampd/owampd.limits and /etc/owampd/owampd.pfs have been updated.
-  * `_____` Click "Add Network", enter an IP address and netmask and then select a group. Hit save and see that /etc/owampd/owampd.limits has been updated
-  * `_____` Click "Add Network" and try to re-enter the address and netmask above. You should receive an error message about the network already existing.
-  * `_____` Click "Change Group", and try to change the networks's group. Hit save, and check that /etc/owampd/owampd.limits has been updated
-  * `_____` Click "Delete" to delete the network you added. Hit save, and check that /etc/owampd/owampd.limits has been updated.
-  * `_____` After entering information, did the page save cleanly?
-  * `_____` Did the limits you set for either tool prevent access for a class you were trying to block or give enhanced abilities?
 
 === Reverse Clients (traceroute, tracepath, ping) ===
   * `_____` Do the web pages load as expected?
