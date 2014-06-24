@@ -16,8 +16,12 @@ Attendees:
    * Roland 
    * Ivan
    * Antoine
-  * RC1 Status
-
+  * RC2 Status
+   * Issue 934
+   * Issue 935 
+   * Issue 936
+   * Issue 937 
+   * Issue 938 
 == Notes ==
 
 == Future Agenda Topics ==
