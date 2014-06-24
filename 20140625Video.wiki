@@ -1,0 +1,78 @@
+#summary June 25, 2014 Conference Call
+
+=   June 25, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT =
+
+Attendees: 
+  
+== Agenda Topics ==
+
+  * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Dan
+   * Michael
+   * Roland 
+   * Ivan
+   * Antoine
+  * RC1 Status
+
+== Notes ==
+
+  * Developer Updates
+   * Andy
+    * Finished 3.4 issues
+    * Migrated maddash to github
+   * Dan
+    * Gathering hardware
+    * cleaning up plots with Michael
+   * Michael
+    * Working on the charting, added reverse direction
+    * Added initial implementation of turning on/off displays
+    * Can also move through time on displays now
+   * Brian
+    * iperf3 release
+    * Action: move bootstrap to perfsonar.net
+   * Sowmya
+    * Finished up issues
+    * Remaining issues are post-rc1
+    * Debugging ps-west issue with timeouts.   
+   * Aaron
+    * Working on cacti issue
+    * EPEL packages XML-RPC, broke the config daemon.
+    * bwctl crashes with udp tests
+   * Antoine
+    * Been given green-light to put sLS into production
+    * Finishing last version of MDM MP. Once that is done, want to fully integrate stuff into git (probably next week)
+   * Murilo
+    * Joined for first time, welcome.
+  * Cacti issue
+   * Have fix, will get out today
+  * Support rotation
+   * Will add two people per slot, one U.S. and one European. May do this longer term due to timezones.
+  * Review 3.4 status (ready for internal testing?)
+   * Ready to build for internal testing
+   * Dan will share notes on 854
+   * Antoine can setup mirror on server. Will work with Aaron.
+  * Ping and OWAMP event types
+   * Andy will update event types with -bidir at the end.
+  * Ability to register service access levels (i.e. public vs. private)
+   * ACTION: Andy will add list of values.
+
+== Future Agenda Topics ==
+
+== Actions  ==
+
+== Where ==
+ESnet conference bridge:
+ * GDS: 00113498555555
+ * Direct Dial: mcu1.es.net then down-arrow to meeting 555555 (or if your first, create it...)
+ * phone: 1-510-423-9220 then 8555555# at the prompt.
+
+The free Cisco Jabber desktop video conferencing service also works with the ESnet ECS service. 
+Just register and download the client from http://ciscojabbervideo.com, and connect using the meeting ID:  8555555@es.net
+
+== Last Updated ==
+
+$Id$
