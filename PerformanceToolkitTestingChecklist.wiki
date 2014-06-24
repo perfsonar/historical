@@ -136,7 +136,7 @@ This page contains a checklist of things to test, and questions to answer, befor
   * `_____` Are you able to perform tests to remote and local targets?
   * `_____` Were any errors observed in either step?
 
-=== NDT * NPAD === 
+=== NDT/NPAD === 
   * `_____` Does the system have a functional Web100 kernel (verify with ‘uname –a’)
   * `_____` Do the web pages load?
   * `_____` Can you complete an NDT test (note that your browser will need Java installed)
