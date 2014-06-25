@@ -51,7 +51,10 @@ pS-PS team
 
 The next step is to path and build the kernel. A mock setup is highly recommended for performing the build. Technical details and instructions for building the kernel can be found here: [ToolkitBuildingFAQs].
 
-= Step 5: Request testers try localinstall of RPMs =
+= Step 5: Sign the RPMs =
+rpmsign -resign <rpmname> 
+
+= Step 6: Request testers try localinstall of RPMs =
 *Assignee:* Kernel Release Manager
 
 After the RPMs successfully build, the Kernel Release Manager should send an email to perfsonar-developer@internet2.edu requesting people test the new RPMs. Since the new RPMs should not yet be uploaded to the primary yum repository, they should be made available for download by uploading to a web server or some other means. Testers should at a minimum do the following steps.
@@ -64,19 +67,20 @@ After the RPMs successfully build, the Kernel Release Manager should send an ema
 
 Those are the minimum steps. Depending on the nature of the kernel changes, it may useful to check other information as well. 
 
-= Step 6:Upload RPMs to yum repository and request testers = 
+= Step 7:Upload RPMs to yum repository and request testers = 
 *Assignee:* Kernel Release Manager
 
 After testers verify that local installs have not caused an issue, the Kernel Release Manager should upload the RPMs to the subversion(svn) repository at https://cvs3.internet2.edu/svn/web100_kernel. These RPMs are soon available at the yum repository at http://software.internet2.edu/web100_kernel/rpms/. At this point, the Kernel Release Manager should email perfsonar-developer@internet2.edu and have others test that "yum update" and fresh installs work properly.
 
-= Step 7: Announce RPMs as available =
+= Step 8: Announce RPMs as available =
 *Assignee:* Kernel Release Manager
 
 Once all the above steps are complete and things appear to work, the update should be announced to the user communities. The following email should be sent (its often good to reply to the email sent in step 3 so the original note is included).
 
  * *Mailing Lists*
-  * performance-node-users@internet2.edu
-  * perfsonar-ps-users@internet2.edu
+  * perfsonar-announce@perfsonar.net
+  * perfsonar-user@internet2.edu
+  * perfsonar-developer@internet2.edu
  * *Subject:* New web100 Kernel available 
  * *Message:*
 {{{
@@ -87,5 +91,5 @@ New web100 kernel packages are now available for netinstall users of the perfSON
 Note this is just a kernel upgrade and the other perfSONAR-PS packages have NOT been updated.  As we often do with incremental kernel updates, we will not be providing a new LiveCD for this particular update. Please let us know if you have any questions or issues.
 
 Thank you,
-pS-PS team
+The perfSONAR Team
 }}}
