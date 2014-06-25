@@ -52,7 +52,9 @@ pS-PS team
 The next step is to path and build the kernel. A mock setup is highly recommended for performing the build. Technical details and instructions for building the kernel can be found here: [ToolkitBuildingFAQs].
 
 = Step 5: Sign the RPMs =
-rpmsign -resign <rpmname> 
+{{{
+rpmsign -resign <rpmname>
+}}}
 
 = Step 6: Request testers try localinstall of RPMs =
 *Assignee:* Kernel Release Manager
