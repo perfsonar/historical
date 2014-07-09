@@ -2,7 +2,7 @@
 
 =   July 9, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT =
 
-Attendees:
+Attendees: Dan, Michael, Andy, Ivan, Sowmya, Antoine, Andrew, Eric
   
 == Agenda Topics ==
   * Developer Updates
@@ -18,7 +18,43 @@ Attendees:
   * pS Developer that can make CANS (September 15-17, 2014 in NYC)
 
 == Notes ==
-  
+  * Developer Updates
+   * Andy
+    * Cleaning out issue tracker
+    * Wrestling with LiveCD
+    *  Upgraded pnwg-owamp
+   * Dan
+    * Cleaned up summary tables
+    * Added redirection for graphs
+   * Michael
+    * Fixed reverse direction issues and data not being displayed
+    * Working on getting toggle issue. Will try to have by end of week
+   * Ivan
+    * No updates
+   * Antoine
+    * sLS is running. Testing seems to work. Sowmya will need to test
+    * It is being monitored by GEANT production team. Nagios checks are looking at sLS port.
+    * Sowmya will add to global list of files
+   * Aaron
+    * Made changes to BWCTL so defaults to wider port range
+    * Threw together patch to parallelize registration
+    * Working on NDT RPMs
+    * Working on packaging NDT flash client and others
+   * Sowmya
+    * Confirmed ps-west was a hypervisor issue. Moved it to a new hypervizor and it is doing much better. It also has a bigger resource pool.
+    * Working on making ActiveMQ stand-alone server to help with performance issues
+   * Andrew 
+    * Working on sLS GUI. He has added more advanced search. It has more boolean operators 
+    * Also doing general improvements
+   * Eric
+    * Working on survey and reviewing web site.
+  * RC2 Status
+   * LiveCD giving trouble will probably fix
+   * Goal is to have last few graphing things fixed, firewall issues and few otehr small things discussed fixed by Friday for announcement Friday or Monday.
+  * IU Configuration question
+   * NOC noted it would be nice to having includes in owmesh.conf
+   * Aaron noted the mesconfig does, andy sent link to USATLAS files that use them as example
+
 == Future Agenda Topics ==
 
 == Actions  ==
