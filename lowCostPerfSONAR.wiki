@@ -5,5 +5,10 @@
  Here is a summary of various projects exploring the use of perfSONAR on low-cost hardware.
 
 || *Who*  || *Hardware* || *Project URLs* || *Summary of results* ||
-|| ESnet || [http://www.solid-run.com/products/cubox-i-mini-computer/cubox-i-specifications/ Cubox-i Pro] || TBD || works with both Fedora and Debian, max TCP bw is 350 Mbps ||
-|| Univ Hawaii || TBD || TBD ||
+|| ESnet (Brian Tierney and Nick Buraglio || [http://www.solid-run.com/products/cubox-i-mini-computer/cubox-i-specifications/ Cubox-i Pro] || [http://downloads.es.net/pub/perfsonar/cubox/ images and rpms] || works with both Fedora and Debian, max TCP bw is 350 Mbps ||
+|| Univ Hawaii (Alan Whinery) || Raspberry PI,  BeagleBone Black, Cubox|| TBD || TBD ||
+|| RNP (Murlio Vetter)|| Raspberry PI , Cubox, Blue Appliance 847 || TBD || TBD || 
+|| LSU (Jeffry Handal ) || BeagleBone Blacks || TBD || TBD || 
+|| Nasa Ames (Mark Foster) || MiraBox || TBD || TBD || 
+
+
