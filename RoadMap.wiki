@@ -1,21 +1,27 @@
 #summary Current Roadmap for the perfSONAR
 
-== Development Roadmap for perfSONAR Toolkit 3.5 ==
+== Development Roadmap for perfSONAR Toolkit 3.5 (2015 release) ==
 
 The following tasks are under consideration for release 3.5. These were discussed at the [http://meetings.internet2.edu/media/medialibrary/2014/04/08/20140408-perfSONAR-Roadmap-Internet2-Global-Summit.pdf Internet2 Global Summit]. Also see [https://code.google.com/p/perfsonar-ps/issues/list?can=2&q=milestone=Release3.5 v3.5 issues] in the issue tracker. 
 
 || *Topic Area* || *Feature* || *Lead Org*|| *Description* ||
-|| Impact || $100 perfSONAR Nodes || TBD || XX ||
-|| Impact || Auto-setup perfSONAR || TBD || XX ||
-|| Impact ||  Use-case specific bundles || TBD || XX ||
-|| Usability ||  Improved data visualization || TBD || XX ||
-|| Usability ||  Improved support for network researchers || TBD || XX ||
-|| Usability || Virtual organization GUI || TBD || XX ||
-|| Usability ||  Web Interface Rewrite || TBD || XX ||
+|| Impact || Auto-setup perfSONAR || ESnet || Add a auto-config tool that add the node to a existing mesh, or determines where to start testing too.  ||
+|| Impact ||  Use-case specific bundles || TBD || toolkit alternatives, such as a user-level bundle that does not require root, a separate NDT/web100 bundle, Client-only bundle, DTN host bundle ||
+|| Impact || $100 perfSONAR Nodes || TBD || Several projects are testing perfSONAR on low-cost hardware. Need to coordinate and integrate that work. ||
+|| Usability || Improved NOC support || IU || improved nagios plugins ||
+|| Usability ||  Improved data visualization || TBD || e.g. integration of traceroute data with owamp and bwctl, integrate some of the widgets from my.es.net ||
+|| Usability ||  Improved support for network researchers || TBD || improved APIs and documentation, ability to request large chunks of data ||
+|| Usability || Virtual organization GUI || TBD || GUI for mesh config tool ||
+|| Usability ||  Web Interface Rewrite || IU || update to use modern layout library such as bootstrap ||
 || Efficiency || Improved release process || IU || automated RPM generation, add support for arm, and maybe debian  ||
-|| Efficiency ||  BWCTL Rewrite/enhancements || Internet2 || XX ||
-|| Advanced Networking || perfSONAR Support for SDN || TBD || XX ||
-|| Advanced Networking || NDT replacement || TBD || XX ||
+|| Efficiency ||  BWCTL rewrite/enhancements || Internet2 || refactor code to make it easier to extend/add support for other tools ||
+|| Advanced Networking || perfSONAR Support for SDN || TBD || TBD ||
+|| Advanced Networking || NDT replacement || TBD || many NDT heuristics are not reliable on today's networks, and web100 is no longer supported. ||
+
+== 3.5 Release Roadmap ==
+  * TBD
+
+----
 
 == Development Roadmap for perfSONAR Toolkit 3.4 ==
 
@@ -26,12 +32,9 @@ The following tasks are under consideration for release 3.5. These were discusse
   # Marketing/Communications/Documentation: Documentation needs an overhaul, and new marketing material targeted more at campus CIOs would be helpful
  
 
-
-== Release Roadmap ==
-   * 3.4: Next major release that includes deliverable #1, #2, #5 part of #4: June 2014
-    * First rc in late July 2014, 2nd rc August, final release in early September
+== 3.4 Release Roadmap ==
+   * 3.4 First rc in late July 2014, 2nd rc August, final release in early September
    * 3.4.1 Bug fix release: November 2014 (if needed)
-   * 3.5: Next major release that includes deliverables  #4, #6, and others TDB, end of 2014
 
 
 == Documentation Roadmap ==
