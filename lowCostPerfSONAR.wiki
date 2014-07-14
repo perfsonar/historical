@@ -6,9 +6,7 @@
 
 || *Who*  || *Hardware* || *Project URLs* || *Summary of results* ||
 || ESnet (Brian Tierney and Nick Buraglio || [http://www.solid-run.com/products/cubox-i-mini-computer/cubox-i-specifications/ Cubox-i Pro] || [http://downloads.es.net/pub/perfsonar/cubox/ images and rpms] || works with both Fedora and Debian, max TCP bw is 350 Mbps ||
-|| Univ Hawaii (Alan Whinery) || Raspberry PI,  BeagleBone Black, Cubox|| TBD || TBD ||
-|| RNP (Murlio Vetter)|| Raspberry PI , Cubox, Blue Appliance 847 || TBD || TBD || 
-|| LSU (Jeffry Handal ) || BeagleBone Blacks || TBD || TBD || 
-|| Nasa Ames (Mark Foster) || MiraBox || TBD || TBD || 
-
-
+|| Univ Hawaii (Alan Whinery) || Raspberry PI,  [http://beagleboard.org/black BeagleBone Black], Cubox|| TBD || TBD ||
+|| RNP (Murlio Vetter)|| Raspberry PI , Cubox, [http://engemicro.com.br/mini-pc-blue-appliance-847-wifi-intel-dual-core-2gb-ddr3-hd-320-sata-2-gigabit-lan-2-videos-1-serial-4460.html Blue Appliance 847 ] || TBD || TBD || 
+|| LSU (Jeffry Handal ) || BeagleBone Black || TBD || TBD || 
+|| Nasa Ames (Mark Foster) || [https://www.globalscaletechnologies.com/p-58-mirabox-development-kit.aspx MiraBox] || TBD || TBD || 
