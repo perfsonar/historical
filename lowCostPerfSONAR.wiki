@@ -1,0 +1,9 @@
+#summary Summary of various projects exploring the use of perfSONAR on low-cost hardware
+
+= Introduction =
+
+ Here is a summary of various projects exploring the use of perfSONAR on low-cost hardware.
+
+|| *Who*  || *Hardware* || *Project URLs* || *Summary of results* ||
+|| ESnet || [http://www.solid-run.com/products/cubox-i-mini-computer/cubox-i-specifications/ Cubox-i Pro] || TBD || works with both Fedora and Debian, max TCP bw is 350 Mbps ||
+|| Univ Hawaii || TBD || TBD ||
