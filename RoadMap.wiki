@@ -2,7 +2,7 @@
 
 == Development Roadmap for perfSONAR Toolkit 3.5 ==
 
-The following tasks are under consideration for release 3.5. These were discussed at the Internet2 Global Summit. (See: http://meetings.internet2.edu/media/medialibrary/2014/04/08/20140408-perfSONAR-Roadmap-Internet2-Global-Summit.pdf)
+The following tasks are under consideration for release 3.5. These were discussed at the [http://meetings.internet2.edu/media/medialibrary/2014/04/08/20140408-perfSONAR-Roadmap-Internet2-Global-Summit.pdf Internet2 Global Summit]. Also see [https://code.google.com/p/perfsonar-ps/issues/list?can=2&q=milestone=Release3.5 v3.5 issues] in the issue tracker. 
 
 || *Topic Area* || *Feature* || *Lead Org*|| *Description* ||
 || Impact || $100 perfSONAR Nodes || TBD || XX ||
