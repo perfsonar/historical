@@ -1,0 +1,101 @@
+﻿#summary Information on using Revisor to build installation DVDs for the perfSONAR Toolkit
+
+== Introduction ==
+
+This page contains information about using Revisor to build installation DVDs
+for the perfSONAR Toolkit. We use Revisor to build a self-contained perfSONAR
+Toolkit installation DVD that can be installed on a machine that does not have
+internet connectivity.
+
+Revisor is a package that can be used to build custom installation DVDs and USB
+images, as well as LiveCD and LiveUSB components. The LiveCD and LiveUSB
+components do not have the functionality we require in our LiveCD image, so we
+only use it for its installation DVD functionality.
+
+
+== Building An Installation DVD ==
+
+The scripts to build the installation DVD are all housed in the
+Toolkit_Building portion of the git repository. 
+
+*NB*: You will need to be root in order to build the DVDs
+
+=== Installing Revisor ===
+
+To install Revisor, simply run:
+
+{{{
+yum install http://ftp.scientificlinux.org/linux/scientific/6.4/x86_64/addons/revisor/revisor-cli-2.2-4.sl6_3.noarch.rpm http://ftp.scientificlinux.org/linux/scientific/6.4/x86_64/addons/revisor/sl-revisor-configs-1-6.3.4.noarch.rpm`
+}}}
+
+=== Preparing The Chroot Build Environment ===
+
+If you are building a 64-bit Installation DVD, and are building on a 64-bit
+machine, or are building a 32-bit Installation DVD, and are on a 32-bit
+machine, you can skip this section.
+
+For reasons left unclear by the Revisor developers, it is impossible to build a
+32-bit Installation DVD with a 64-bit userland. The workaround for this is to
+build a 32-bit chroot environment, and use that to build in.
+
+In the Toolkit_Building scripts directory, run the following command:
+
+{{{
+./build_revisor_chroot.sh /path/to/chroot/directory i686
+}}}
+
+This will create a new chroot environment in the specified directory.
+
+*NB*: /proc and /dev are mounted in the chroot environment, so don't just do an
+"rm -rf" of the directory if you want to get rid of it. Make sure you unmount
+the proc and dev directories in the environment first.
+
+=== Building The Installation DVD ===
+
+The build_fulldvd.sh script in the Toolkit_Building scripts directory is used
+to build the installation DVD. To specify which architecture (i386 or x86_64)
+to use, you specify the `--arch` flag. If you built a chroot environment above,
+you'll need to specify where that chroot environment is located using the
+``chroot` flag.
+
+Examples:
+
+{{{
+# Builds the x86-64 version
+./build_fulldvd --arch x86_64
+}}}
+
+{{{
+# Builds the i386 version using the chroot environment located in /var/tmp/reviser_chroot
+./build_fulldvd --arch i386 --chroot /var/tmp/reviser_chroot
+}}}
+
+The resulting ISO will be located in the scripts directory along with a SHA1SUM
+file containing a checksum for the ISO.
+
+== Customizing The Installation ==
+=== Customing The Yum Repositories ===
+Unlike a normal kickstart, the Revisor scripts use a set of configuration files
+to specify which repositories to retrieve RPMs from.
+
+The revisor configuration is stored in the Toolkit_Building revisor directory.
+The 'revisor.conf' has the main configuration, while pspt-i386.conf and
+pspt-x86_64.conf specify, among other things, the yum repositories to retrieve
+the 32-bit and 64-bit RPMs, respectively.
+
+=== Customizing The Kickstart ===
+The scripts install a kickstart onto the resulting installation DVD. The script
+takes the centos6-base.cfg kickstart file in the Toolkit_Building kickstarts
+directory, and applies the centos6-fullinstall.patch to it. The patch disables
+the network installation aspects of the centos6-base.cfg.
+
+The easiest way to modify the patch kickstart is to do the following:
+
+  # Copy centos6-base.cfg to centos6-base.cfg.orig
+  # Run 'patch -p0 -i centos6-fullinstall.patch'
+  # Edit centos6-base.cfg, and make any needed changes 
+  # Run "diff -u centos6-base.cfg.orig centos6-base.cfg"
+
+== Last Updated ==
+
+$Id$
