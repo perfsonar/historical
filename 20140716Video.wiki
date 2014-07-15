@@ -3,6 +3,7 @@
 =   July 16, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT =
 
 Attendees: 
+Excused: Jason
   
 == Agenda Topics ==
  * Developer Updates
