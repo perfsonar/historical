@@ -8,7 +8,7 @@ The following tasks are under consideration for release 3.5. These were discusse
 || Impact || Auto-setup perfSONAR || ESnet || Add a auto-config tool that add the node to a existing mesh, or determines where to start testing too.  ||
 || Impact ||  Use-case specific bundles || TBD || toolkit alternatives, such as a user-level bundle that does not require root, a separate NDT/web100 bundle, Client-only bundle, DTN host bundle ||
 || Impact || $100 perfSONAR Nodes || TBD || Several projects are testing perfSONAR on low-cost hardware. Need to coordinate and integrate that work. ||
-|| Usability || Improved NOC support || IU || improved nagios plugins ||
+|| Usability || Improved NOC support || IU || improved nagios plugins and [LargeScaleDeploymentFeatures more] ||
 || Usability ||  Improved data visualization || TBD || e.g. integration of traceroute data with owamp and bwctl, integrate some of the widgets from my.es.net ||
 || Usability ||  Improved support for network researchers || TBD || improved APIs and documentation, ability to request large chunks of data ||
 || Usability || Virtual organization GUI || TBD || GUI for mesh config tool ||
