@@ -10,7 +10,6 @@ Excused: Jason
    * Andy
    * Dan
    * Ivan
-   * Antoine
    * Aaron
    * Sowmya
    * Murilo
@@ -23,7 +22,49 @@ Excused: Jason
   * pS Developer that can make CANS (September 15-17, 2014 in NYC)
 
 == Notes ==
-
+ * Developer Updates
+   * Andy
+    * Working on getting new code on ESnet
+    * Working on setting up test host for dual-hosts
+   * Aaron
+    * Released new version of toolkit rpm that removes JOwping
+    * Been playing with revisor to build full install. Created wiki page.
+    * Will send something to list on full install soon
+   * Brian
+    * Spoke with NSRC, interested in perfSONAR training in Africa. Very interested in Ubuntu/Debian.
+   * Murilo
+    * We might be able to help with Debian. 
+    * Working on MA. Working with Andy on MA verification. 
+   * Sowmya
+    * Added GEANT sLS to global list of files
+    * Worked on debugging RNP sLS. Wrong version of sLS got restarted. 
+    * Auto-detection of lat/long
+   * Dan
+    * Testing RC and had question on iperf output
+    * Has two hosts for RC testing. Purchase of hardware went through.
+    * Would it be useful to have test between IU and ESnet hosts?
+   * Michael
+    * Working on showing and hiding charts. retransmits have been off by default.
+    * Brian: Retransmits need the 1 second intervals.
+    * Will commit after this meeting
+   * Roland
+    * Presented roadmap, and was well-received. Also got question on Debian support. Will ask Antoine if they are interested.
+    * At GEANT meeting, strong desire for unified implementation and a few feature requests
+   * Ivan
+    * Tested OWAMP MP and ready
+  * RC2 Status
+   * 
+  * Meeting in Indy
+   * Tentatively set meeting Thursday Oct 30th at Tech Exchange. 
+  * LiveCD vs Full Install: What do we want to do?
+   * Cost/benefit is clear. Brian will talk to ESnet management
+   * Roland pointed out useful for marketing. Maybe do a VM image instead?
+  * Graphing bwctl and owamp from separate hosts on same plot
+   * Mesh config is probably easier, can leverage site and host objects, user has to specify
+   * Toolkit is trickier because not explicit what is paired together
+   * Decided to continue next week
+  * BWCTL options available through GUI
+    * Decided to continue next week
 == Future Agenda Topics ==
 
 == Actions  ==
