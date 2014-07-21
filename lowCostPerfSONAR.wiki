@@ -10,7 +10,8 @@
 || RNP (Murlio Vetter)|| Raspberry PI , Cubox, [http://engemicro.com.br/mini-pc-blue-appliance-847-wifi-intel-dual-core-2gb-ddr3-hd-320-sata-2-gigabit-lan-2-videos-1-serial-4460.html Blue Appliance 847 ] || [https://wiki.rnp.br/pages/viewpage.action?pageId=73632000 Install Guide], [https://tnc2014.terena.org/getfile/1050 paper describing project]  || coming soon  || 
 || LSU (Jeffry Handal ) || [http://beagleboard.org/black BeagleBone Black] || coming soon  || coming soon  || 
 || Nasa Ames (Mark Foster) || [https://www.globalscaletechnologies.com/p-58-mirabox-development-kit.aspx MiraBox] || coming soon  || coming soon  || 
-|| KanREN (Casey Russell/Cort Buffington) || Cubox-i ||  coming soon  || coming soon  || 
+|| KanREN (Casey Russell/Cort Buffington) || Cubox-i ||  coming soon  || coming soon  ||
+|| Rick McMullen (Univ Arkansas) || cubox 4i, ARM 7 ||  coming soon  || coming soon  ||
 
 ----
 
