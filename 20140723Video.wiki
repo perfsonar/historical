@@ -2,15 +2,56 @@
 
 =   July 23, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT =
 
-Attendees: 
+Attendees: Andy, Jason, Murilo, Aaron, Sowmya, Brian, Roland, Ivan, Luke, Michael
   
 == Agenda Topics ==
  * Developer Updates
+  * Andy
+  * Ivan
+  * Roland
+  * Jason
+  * Aaron
+  * Brian
+  * Sowmya
+  * Michael
  * Graphing bwctl and owamp from separate hosts on same plot
  * Packaging & OSG Assistance
-
+ * BWCTL GUI options
+  
 == Notes ==
- 
+ * Developer Updates
+  * Andy
+   * RC2 out. yay!
+   * Testing dual-homed tests
+   * Will work on install docs next
+  * Ivan
+    * No news
+  * Roland
+    * See Ivan's update
+    * Need to talk to Antoine about oppd status
+  * Jason
+    * Making a push on the web site
+    * Working on performance issues. Looks like issues with some people's iptables
+  * Aaron
+    * Working on updating bwctl with some port improvements and iperf3 binding
+    * Added JSON page that presents service status
+    * Auto-adds traceroute tests to toolkit host
+    * Working on specific timed tests
+  * Brian
+    * Looking at test meshes
+  * Sowmya
+    * Running pub/sub on ps-east again.
+  * Michael
+    * Continued working on charts
+  * Luke
+    * No updates
+ * Graphing bwctl and owamp from separate hosts on same plot
+  * Action: Michael will work with Andy on parameters. Andy will add paremeters to mesh config.
+ * Packaging & OSG Assistance
+  * Exploring ways OSG can get more involved.
+ * BWCTL GUI options
+  * Action: Aaron will make it so regular testing does not blow away changes
+  
 == Future Agenda Topics ==
 
 == Actions  ==
