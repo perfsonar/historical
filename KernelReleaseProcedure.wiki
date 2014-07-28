@@ -43,7 +43,7 @@ If you are a NetInstall user, a 'yum update' may give you a new non-web100 kerne
 Our read of the CVE does not find any issue of concern specific to the toolkit. Its possible the host may be vulnerable to some types of DoS attacks in some particular cases. If you are in doubt about your kernel, feel free to review the CVE,  upgrade to the latest version, and forgo NDT/NPAD support for the time being.  We are in the process of building and testing a new kernel, and will alert you when we have our web100 patched version available. We'll try to have it ready as soon as possible.
 
 Thank you for your patience,
-pS-PS team
+The perfSONAR Team
 }}}
 
 = Step 4: Build Kernel =
