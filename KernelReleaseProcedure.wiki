@@ -27,8 +27,8 @@ Once a new kernel is identified as available, the current support person should 
 
 The kernel release manager should then send a note to our user community, letting them know a new kernel has become available. The mailing lists to contact and the email template are below (note the CVE_LINK URL can be found in the CentOS announcement email):
  * *Mailing Lists*
-  * performance-node-users@internet2.edu
-  * perfsonar-ps-users@internet2.edu
+   * perfsonar-announce@perfsonar.net
+  * perfsonar-user@internet2.edu
  * *Subject:* RedHat CVE and New CentOS Kernel
  * *Message:*
 {{{
