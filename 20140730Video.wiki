@@ -2,14 +2,15 @@
 
 =   July 30, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT =
 
-Attendees: 
+ * Attendees: 
+ * Excused: Jason
 
 == Agenda Topics ==
  * Developer Updates
   * Andy
   * Ivan
   * Roland
-  * Jason
+  * Jason: At a meeting today, continuing to work on pS Web things
   * Aaron
   * Brian
   * Sowmya
