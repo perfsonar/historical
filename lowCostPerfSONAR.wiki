@@ -12,6 +12,8 @@
 || Nasa Ames (Mark Foster) || [https://www.globalscaletechnologies.com/p-58-mirabox-development-kit.aspx MiraBox] || coming soon  || coming soon  || 
 || KanREN (Casey Russell/Cort Buffington) || Cubox-i ||  coming soon  || coming soon  ||
 || Univ Arkansas (Rick McMullen)|| Cubox 4i, ARM 7 ||  coming soon  || coming soon  ||
+|| AARnet (Alex Dodson)|| [http://lemaker.org/ banana PI] ||  coming soon  || coming soon  ||
+
 
 ----
 
