@@ -7,7 +7,7 @@
 || *Who*  || *Hardware* || *Project URLs* || *Summary of results so far * ||
 || ESnet (Brian Tierney and Nick Buraglio) || [http://www.solid-run.com/products/cubox-i-mini-computer/cubox-i-specifications/ Cubox-i Pro] || [http://downloads.es.net/pub/perfsonar/cubox/ images and rpms], install notes || works with both Fedora and Debian, max TCP bw is 350 Mbps ||
 || Univ Hawaii (Alan Whinery) || Raspberry PI,  [http://beagleboard.org/black BeagleBone Black], Cubox|| coming soon || coming soon  ||
-|| RNP (Murlio Vetter)|| Raspberry PI , Cubox, [http://engemicro.com.br/mini-pc-blue-appliance-847-wifi-intel-dual-core-2gb-ddr3-hd-320-sata-2-gigabit-lan-2-videos-1-serial-4460.html Blue Appliance 847 ] || [https://wiki.rnp.br/pages/viewpage.action?pageId=73632000 Install Guide],  || see below  || 
+|| RNP (Murlio Vetter)|| Raspberry PI , Cubox, [http://engemicro.com.br/mini-pc-blue-appliance-847-wifi-intel-dual-core-2gb-ddr3-hd-320-sata-2-gigabit-lan-2-videos-1-serial-4460.html Blue Appliance 847 ] || [https://wiki.rnp.br/pages/viewpage.action?pageId=73632000 Cubox Install Guide], [https://wiki.rnp.br/pages/viewpage.action?pageId=71525562 Raspberry PI Install Guide], [https://wiki.rnp.br/pages/viewpage.action?pageId=78643344 Blue Appliance 847 Install Guide] || see below  || 
 || LSU (Jeffry Handal ) || [http://beagleboard.org/black BeagleBone Black] || coming soon  || coming soon  || 
 || Nasa Ames (Mark Foster) || [https://www.globalscaletechnologies.com/p-58-mirabox-development-kit.aspx MiraBox] || coming soon  || coming soon  || 
 || KanREN (Casey Russell/Cort Buffington) || Cubox-i ||  coming soon  || coming soon  ||
