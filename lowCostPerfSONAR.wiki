@@ -7,7 +7,7 @@
 || *Who*  || *Hardware* || *Project URLs* || *Summary of results so far * ||
 || ESnet (Brian Tierney and Nick Buraglio) || [http://www.solid-run.com/products/cubox-i-mini-computer/cubox-i-specifications/ Cubox-i Pro] || [http://downloads.es.net/pub/perfsonar/cubox/ images and rpms], install notes || works with both Fedora and Debian, max TCP bw is 350 Mbps ||
 || Univ Hawaii (Alan Whinery) || Raspberry PI,  [http://beagleboard.org/black BeagleBone Black], Cubox|| coming soon || coming soon  ||
-|| RNP (Murlio Vetter)|| Raspberry PI , Cubox, [http://engemicro.com.br/mini-pc-blue-appliance-847-wifi-intel-dual-core-2gb-ddr3-hd-320-sata-2-gigabit-lan-2-videos-1-serial-4460.html Blue Appliance 847 ] || [https://wiki.rnp.br/pages/viewpage.action?pageId=73632000 Install Guide], [https://tnc2014.terena.org/getfile/1050 paper describing project]  || coming soon  || 
+|| RNP (Murlio Vetter)|| Raspberry PI , Cubox, [http://engemicro.com.br/mini-pc-blue-appliance-847-wifi-intel-dual-core-2gb-ddr3-hd-320-sata-2-gigabit-lan-2-videos-1-serial-4460.html Blue Appliance 847 ] || [https://wiki.rnp.br/pages/viewpage.action?pageId=73632000 Install Guide],  || see below  || 
 || LSU (Jeffry Handal ) || [http://beagleboard.org/black BeagleBone Black] || coming soon  || coming soon  || 
 || Nasa Ames (Mark Foster) || [https://www.globalscaletechnologies.com/p-58-mirabox-development-kit.aspx MiraBox] || coming soon  || coming soon  || 
 || KanREN (Casey Russell/Cort Buffington) || Cubox-i ||  coming soon  || coming soon  ||
@@ -23,3 +23,10 @@ Useful Links:
  * [http://perfclub.org/?p=69 Little Boxes In The Internet Monitoring Biz]
  * [http://www.solid-run.com/wiki/Main_Page Cubox Wiki]
  * [http://www.solid-run.com/community/linux-on-cubox-i-and-hummingboard-f8.html Cubox Linux user forum]
+
+RNP Summary:
+
+ * [https://tnc2014.terena.org/getfile/1050  Terena Article] 
+ * Rapsberry PI Works fine with Adafruit Ultimate GPS, for OWD tests.
+ * Cubox  throughput ~600 Mbps.
+ * Blue Appliance 847 works fine with Garmin GPS 18x LVC, for OWD and Bandwidth tests simultaneously on separated NIC interfaces.  Throughput ~900 Mbps.
