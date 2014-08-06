@@ -2,7 +2,7 @@
 
 =   August 6, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT =
 
- * Attendees:
+ * Attendees: John H., Roland, Andy, Sowmya, Murilo, Dan, Michael, Aaron, Antoine, Fausto
 
 == Agenda Topics ==
 
@@ -22,8 +22,8 @@
  * Developer Updates
   * Andy
     * New kernels and LiveCD
-    * 
-    * 
+    * Testing on dual-homed hosts. Seeing strange loss patterns.
+    * Esnet 3.4 deployment started
     * Working on maddash graphs this afternoon
   * Roland
     * Putting finishing touches on oppd packages
