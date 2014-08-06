@@ -19,7 +19,36 @@
  * TBD
  
 == Notes ==
-
+ * Developer Updates
+  * Andy
+    * New kernels and LiveCD
+    * 
+    * 
+    * Working on maddash graphs this afternoon
+  * Roland
+    * Putting finishing touches on oppd packages
+  * Murilo
+    * No update
+  * Sowmya
+    * South African LS is up, troubleshooting a few things
+    * ps-east is running ok, needs to do some more accuracy checks and other things next week
+    * Will work on migrating data
+  * Dan
+    * Debugging a bunch of charting things
+    * Out on vacation next Wednesday
+  * Michael
+    * Committed code for dynamic axes 
+    * Think missing data bug might be duplicate timestamps. Can happen with summarized data especially.
+  * Fausto
+    * No update
+  * Antoine
+    * will be doing final release of pS UI. You can do federated login to the UI using edugain.
+    * Devs working on packaging next for toolkit
+    * Also making use of sLS.
+    * Will contact Brian/Jason about getting perfSONAR UI on web page
+  * John
+    * Continuing with perfSONAR workshops. Doing APAN next week. OIN series coming-up.
+    * Page where linked where small-form factor info 
 == Future Agenda Topics ==
 
 == Actions  ==
