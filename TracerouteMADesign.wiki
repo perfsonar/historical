@@ -15,8 +15,6 @@ The Traceroute MA supports the following message types from the perfsonar schema
  * MetadataKeyRequest - Returns a list of metadata objects in the Traceroute MA and a set of keys that can be used to query data associated with individual metadata with a subsequent setupDataRequest.
  * SetupDataRequest - Returns results of traceroute measurements that match the given subject and parameters. Accepted subject type are keys and endpointPairs.
 
-The format of the traceroute data is described here: http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/rnc/traceroute.rnc
-
 ==== Examples ====
 *MetadataKeyRequest*
 {{{

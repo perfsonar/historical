@@ -479,7 +479,7 @@ _*Reconvene in 2 weeks (16 August)*_
      * how, then, to deal with user-requested summarizations?
      * in the table-o-data model, how are known structures described -- enumerations of names for rows and columns? (do the "rows" of the table need a name, too?)
    # Need an API method to get "just" the metadata. Examples:
-     * what SNMP granularities are available, e.g. !DataInfoRequest [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/perfSONAR_PS-SNMPMA/etc/requests/DataInfoRequest-1.xml XML example].
+     * what SNMP granularities are available, 
      * which data (measurements) are available. e.g., results of !MetadataKeyRequest with an empty subject.
    # Need explicit timeout for synchronous calls
    # A TTL in the result so the client knows how often to ask for new data. Services would need to provid this -- can we specify a default?
@@ -728,7 +728,7 @@ And various combinations of the above.
    * _*ACTION*_: Use Cases
      * No additional use cases were added or discussed beyond Zafar's
  # User Scenarios (Zafar)
-   * Zafar presents his work.  He is working on the GridFTP MA project at SLAC.  General theme: make it easier for users to get data.  Discussion from Maxim/Dan on this.  Not as clear cut as the examples.  Maxim mentions the need to worry about layers.  Dan points out that any API we construct should be useful as a building block to build new layers.  Some mention of a lack of discovery - many in attendance have not read the discovery API for the LS: [http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/gLS/phase_1_color.html#api].  
+   * Zafar presents his work.  He is working on the GridFTP MA project at SLAC.  General theme: make it easier for users to get data.  Discussion from Maxim/Dan on this.  Not as clear cut as the examples.  Maxim mentions the need to worry about layers.  Dan points out that any API we construct should be useful as a building block to build new layers.  Some mention of a lack of discovery - many in attendance have not read the discovery API for the LS
  # Presentation/discussion of V1 of the API
    * Not many read the work since it was posted prior to the call.
    * More discussion on ease of use vs complexity.  This is a common theme that we are spending a lot of time discussing.  Need to broaden the focus beyond this.  
@@ -1500,7 +1500,6 @@ January 31, 2010.
    * Route MA
    * Triggering traceroute measurements
  * Schema for storing traceroute results
-   * Current: http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/rnc/traceroute.rnc
  * Looking beyond traceroute
 
 ==== Product Support ====

@@ -651,7 +651,6 @@ Summer Joint Techs 2008, Lincoln NE,  July 20, 2008  - 1 to 5 Central
    * Performance testing
      * black-box testing of pingER status
        * Maxim will give it a try:
-         * Jason's examples are at http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/test_harness/
          * Bundle a set of test data?
        * Jason will make error conditions for LS/SNMP/pS-B
        * Jason will look test harness data generation for SQL PingER data
@@ -761,7 +760,6 @@ Summer Joint Techs 2008, Lincoln NE,  July 20, 2008  - 1 to 5 Central
  # pS-Performance Testing:
    * black-box performance of pingER service (try using test_harness)
    * Maxim will give it a try:
-     * Jason's examples are at http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/test_harness/
      * Bundle a set of test data?
    * Jason will make error conditions for LS/SNMP/pS-B
    * Jason will look test harness data generation for SQL PingER data
@@ -1222,7 +1220,6 @@ Summer Joint Techs 2008, Lincoln NE,  July 20, 2008  - 1 to 5 Central
        * Others?
      * Status of dLS doc
  # MDM Requirements/Issues
-   * Documentation for MDM process/procedures is at: http://anonsvn.internet2.edu/svn/perfsonar/trunk/perfsonar-doc/release-management/
    * Jeff, Brian, Maxim will review this and be on the MDM release-mgmt call tomorrow.
      * Review requirements to get pS-PS services in MDM-perfSONAR
      * Review testing team procedures for MDM-perfSONAR
