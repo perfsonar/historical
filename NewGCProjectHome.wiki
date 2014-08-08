@@ -21,7 +21,7 @@ We are always looking for more people to join this open source project. See our 
   * [http://psps.perfsonar.net/client-doc.html Client API Guide]
   * [http://code.google.com/p/perfsonar-ps/wiki/ToolkitBuildingFAQs Guide to Building a new Toolkit image]
   * [http://fasterdata.es.net/fasterdata/troubleshooting/overview/ Guide to Troubleshooting Network performance using perfSONAR]
-  * [http://psps.perfsonar.net/toolkit/FAQs.html FAQ]
+  * [http://www.perfsonar.net/about/faq/ FAQ]
 
 
 = Details =

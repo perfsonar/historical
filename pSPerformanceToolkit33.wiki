@@ -4,7 +4,7 @@
 
 == Introduction ==
 
-The following guide describes in detail the steps required to set up version 3.3.2 of the perfSONAR performance Toolkit ([http://psps.perfsonar.net/toolkit/ pS Performance Toolkit 3.3.2]).  It is important to follow each step in order.  Upon getting stuck, consult the [http://psps.perfsonar.net/toolkit/FAQs.html FAQ] or join the [https://lists.internet2.edu/sympa/info/performance-node-users mailing list].
+The following guide describes in detail the steps required to set up version 3.3.2 of the perfSONAR performance Toolkit ([http://psps.perfsonar.net/toolkit/ pS Performance Toolkit 3.3.2]).  It is important to follow each step in order.  Upon getting stuck, consult the [http://www.perfsonar.net/about/faq/ FAQ] or join the [https://lists.internet2.edu/sympa/info/performance-node-users mailing list].
 
 == System Requirements ==
 
@@ -1432,7 +1432,7 @@ This link will re-direct to the current installation instructions for the pS Per
 
 ==== Frequently Asked Question ==== 
 
-This link will re-direct to the [http://psps.perfsonar.net/toolkit/FAQs.html FAQ] page.
+This link will re-direct to the [http://www.perfsonar.net/about/faq/ FAQ] page.
 
 ==== About ==== 
 

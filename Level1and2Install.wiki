@@ -58,7 +58,7 @@ Also, it is important to make sure that your host is properly tuned for maximum 
 
 == Step 4: Firewall and Security Considerations ==
 
-If your host is behind any ACLs or firewalls you should review [http://psps.perfsonar.net/toolkit/FAQs.html#Q6 perfSONAR FAQ entry] and/or the [http://stats.es.net/ps-downloads/20130308-Firewall-PerfWG.pdf document here] on the ports that need to be open.
+If your host is behind any ACLs or firewalls you should review [http://www.perfsonar.net/about/faq/#Q6 perfSONAR FAQ entry] and/or the [http://stats.es.net/ps-downloads/20130308-Firewall-PerfWG.pdf document here] on the ports that need to be open.
 
 Additionally, bwctl allows you to limit the parameters of tests such as duration and bandwidth based on the requesters IP address. It does this through a file called bwctld.limits. You may read the bwctld.limits man page or look at the example file provided under /etc/bwctld/bwctld.limits file. ESnet uses a bwctld.limits file that some sites may find useful. This file is based on the routing table and is updated regularly. It implements the following general policies:
  * Allow unrestricted UDP tests from ESnet test system prefixes.
