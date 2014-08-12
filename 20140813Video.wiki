@@ -18,6 +18,7 @@
   * Murilo
  * 3.4 status
  * Latency metric on new graphs
+ * moving future calls to a new VC system: proposal to use https://www.zoom.us 
  
 == Notes ==
 
