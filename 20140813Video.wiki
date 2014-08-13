@@ -2,7 +2,7 @@
 
 =   August 13 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT =
 
- * Attendees: 
+ * Attendees: Roland, Antoine, Sowmya, Andy, Brian, Michael, Fausto, Murilo
 
 == Agenda Topics ==
 
@@ -21,7 +21,34 @@
  * moving future calls to a new VC system: proposal to use https://www.zoom.us 
  
 == Notes ==
-
+ * Developer Updates
+  * Andy
+    * New kernel and livecd
+    * Working on dual interface testing
+    * Rolling 
+  * Roland
+    * No updates
+  * Antoine
+    * Added psUI wiki page. Wil talk to Jason about getting it added
+  * Sowmya
+    * Stress testing the sLS cache
+  * Brian
+    * No updates
+  * Murilo
+   * No update
+  * Fausto
+   * No updates
+  * Michael
+   * Fixed a bunch of bugs
+   * Andy will share some issues 
+ * 3.4 status
+   * Goal to have next RC in two weeks
+   * Please have code in by next week
+   * Brian and Andy will do an issue pass
+ * Latency metric on new graphs
+   * Decided on minimum, toggle others. Just talking about latency.
+ * moving future calls to a new VC system: proposal to use https://www.zoom.us 
+   * Will start 10 minutes early next week and try Zoom 
 == Future Agenda Topics ==
 
 == Actions  ==
