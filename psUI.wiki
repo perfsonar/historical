@@ -1,4 +1,5 @@
 #summary perfSONAR UI home page
+#labels psUI
 
 = perfSONAR UI =
 
@@ -7,7 +8,7 @@ perfsonarUI is a web application for running and visualizing on-demand tests bet
 
 == Installation ==
 
-An installation guide describes the installation of the psUI for RPM based or Debian distribution.  You can [http://downloads.perfsonar.eu/repositories/documents/perfsonarUI_installation_guide.pdf download it here].
+An installation guide describes the installation of the psUI for RPM based or Debian distributions.  You can [http://downloads.perfsonar.eu/repositories/documents/perfsonarUI_installation_guide.pdf download it here].
 
 == Usage ==
 
@@ -18,4 +19,3 @@ A user guide describing how to use the psUI user interface can be [http://downlo
  * how to troubleshoot a path
  * how to configure the UI
  * how to configure authentication with an indentity provider
-
