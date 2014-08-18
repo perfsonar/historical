@@ -23,7 +23,7 @@ The process configures yum to point at the necessary repositories to get package
 
 1. Download the EPEL RPM. This RPM will update yum to point at the [http://fedoraproject.org/wiki/EPEL EPEL] repository.
  * *For i386 systems:* wget http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
- * *For x86_64 systems:* wget http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
+ * *For x86_64 systems:* wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 
 2. Download the Internet2-repo package that will update yum to point at the repository containing the perfSONAR packages:
  * *For i386 systems:* wget http://software.internet2.edu/rpms/el6/i386/main/RPMS/Internet2-repo-0.4-2.noarch.rpm
