@@ -19,11 +19,11 @@ Items that need to be done for RC3:
 Items that need to be done for real release:
  * Add median option for latency
  * Traceroute page link on chart
- ** Easy to add a link
- ** But what if there is no data?
- *** query ma to see what data is available? ("packet_trace" event type) 
- ** What if you have multiple parameters? traceroute page only supports 2
- *** Display links in graph header 
+  * Easy to add a link
+ * But what if there is no data?
+ * query ma to see what data is available? ("packet_trace" event type) 
+ * What if you have multiple parameters? traceroute page only supports 2
+ * Display links in graph header 
 
 
 
