@@ -9,28 +9,45 @@ Meeting for discussing the state of charts for RC3 and beyond.
 = Notes =
 
 
-= Items that need to be done for RC3 =
+== Items that need to be done for RC3 ==
  * Add ping to charts
  * Style issues
  * Use base data for < 1 day timeframes (maybe 3-days if reasonable)
  * Scaling problem Pagination on table to help with scaling problem with many tests
 
-== Style issues ==
+=== Style issues ===
  * Remove -PS from table page header
  * Make links to charts more obvious/add "Click on a hostname to see a graph of the results" 
  * Fix weird whitespace with multiple hosts at top of individual chart page
  * Red/green may be bad for color-blind people (will someone follow-up on this)?
 
+=== Scaling issues ===
+There are some scaling issues with the table that lists the test hosts. If there are too many tests, it times out. Need to make this scale. For now we'll focus on pagination, but here are some other possibilities.
 
-Items that need to be done for real release:
+* Pagination? Maybe some MA-side stuff to help with this.
+* Parallelize?
+* Have a threshold that doesn’t get you the summaries if it’s over the threshold? ? Add a button to load them with a disclaimer that it may take a while?
+* Progressively load them? (not something we can do with the current library)
+
+== Items that need to be done for real release ==
  * Add median option for latency
  * Traceroute page link on chart
   * Easy to add a link, but what if there is no data?
    * Query ma to see what data is available? ("packet_trace" event type) 
   * What if you have multiple parameters? traceroute page only supports 2
-   * Display links in graph header 
+   * Display links in graph header
+ * Negative latency
+ 
 
 
+=== Negative latency ===
+* Not sure what we want to do.
+* May be helpful to show a warning that you have negative latency
+* Link or popup with more info:
+2 main causes:
+* Bad clock skew (ntp config)
+* testing to something extremely close (hard to get good accuracy with clocks between them)
+* Overlay an icon that you have negative latency and where?
 
 Items that can wait until 3.4.1:
 
