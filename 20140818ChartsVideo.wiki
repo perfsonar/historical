@@ -9,11 +9,17 @@ Meeting for discussing the state of charts for RC3 and beyond.
 = Notes =
 
 
-Items that need to be done for RC3:
+= Items that need to be done for RC3 =
  * Add ping to charts
  * Style issues
  * Use base data for < 1 day timeframes (maybe 3-days if reasonable)
- * Pagination on table to help with scaling problem with many tests
+ * Scaling problem Pagination on table to help with scaling problem with many tests
+
+== Style issues ==
+ * Remove -PS from table page header
+ * Make links to charts more obvious/add "Click on a hostname to see a graph of the results" 
+ * Fix weird whitespace with multiple hosts at top of individual chart page
+ * Red/green may be bad for color-blind people (will someone follow-up on this)?
 
 
 Items that need to be done for real release:
@@ -29,11 +35,7 @@ Items that need to be done for real release:
 Items that can wait until 3.4.1:
 
 
-== Style issues ==
- * Remove -PS from table page header
- * Make links to charts more obvious/add "Click on a hostname to see a graph of the results" 
- * Fix weird whitespace with multiple hosts at top of individual chart page
- * Red/green may be bad for color-blind people (will someone follow-up on this)?
+
 
 
 
