@@ -29,7 +29,7 @@ There are some scaling issues with the table that lists the test hosts. If there
 * Have a threshold that doesn’t get you the summaries if it’s over the threshold? ? Add a button to load them with a disclaimer that it may take a while?
 * Progressively load them? (not something we can do with the current library)
 
-== Items that need to be done for real release ==
+== Items that need to be done for 3.4 release ==
  * Add median option for latency
  * Traceroute page link on chart
   * Easy to add a link, but what if there is no data?
@@ -83,4 +83,3 @@ Might also be able to plot bwctl errors and failures (event type: failures):
 
 
 Log scale — make it an option, if at all
-
