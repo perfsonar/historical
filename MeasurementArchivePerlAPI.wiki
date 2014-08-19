@@ -79,6 +79,8 @@ After creating the filters object, you can set various parameters that will limi
 || *dns_match_prefer_v4()* ||Alias for `dns_match_rule('prefer-v4')`. Maps given DNS names to their A record if they have one, otherwise tries AAAA record||
 || *dns_match_prefer_v6()* ||Alias for `dns_match_rule('prefer-v6')`. Maps given DNS names to their AAAA record if they have one, otherwise tries A record||
 || *dns_match_all()* ||Alias for `dns_match_rule('v4v6')`. Maps DNS names to both A and AAAA records when searching. This is the default behavior if _ dns_match_rule_ is unspecified ||
+|| *limit()* ||An integer indicating the maximum number of metadata objects to return. If not set, all results will be returned. ||
+|| *offset()* ||An integer indicating the number of results to skip in the metadata search. This can be combined with the _limit_ filter to support pagination. See [#Pagination_of_Metadata_Search_Results Pagination of Metadata Search Results] for more details.||
 
 Finally, you can set context-specific parameters that don't have a function by accessing the _metadata`_`filters_ hash directly:
 {{{
@@ -246,6 +248,75 @@ foreach my $m(@{$md}){
     }
 }
 }}}
+
+== Pagination of Metadata Search Results ==
+
+For measurement archives hosting a large number of tests, it may be desirable to limit the number of metadata search results returned. This can be done using the _limit_ and _offset_ filters as follows:
+
+{{{
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
+$filters->limit(10); #return up to 10 results
+$filters->offset(0); # return the first results you find
+
+# Connect to api
+my $client = new perfSONAR_PS::Client::Esmond::ApiConnect(
+    url => 'http://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+
+#get measurements matching filters
+my $md = $client->get_metadata(); # returns first 10 results
+...
+$filters->offset(10); # skip the first 10 results
+$md = $client->get_metadata(); # returns the second 10 results
+
+}}}
+
+As the example shows you can use these options to implement pagination. This is done by keeping the limit option constant and incrementing the offset by the size of limit for each page until you reach the last page. To aid in common calculations like the last page, current page, and the next/previous offset the *perfSONAR_PS::Client::Esmond::Paginator* class is provided. After you define your filters and query your metadataYou can create a *perfSONAR_PS::Client::Esmond::Paginator* instance as follows:
+{{{
+my $paginator = new perfSONAR_PS::Client::Esmond::Paginator(
+    'metadata' => $mds,
+    'filters' => $filters,
+);
+}}}
+
+As shown in the example the constructor requires the properties below:
+|| *Property Name* || *Description* ||
+|| *metadata* || An ArrayRef of *perfSONAR_PS::Client::Esmond::Metadata* objects (such as the results returned by a get_metadata call).  ||
+|| *filters* || The perfSONAR_PS::Client::Esmond::ApiFilters* object used in the query. It is recommended the _limit_ and _offset_ filters are defined for the paginator to be useful.||
+
+Once you have created your paginator, the following methods are available:
+
+|| *Method Name* || *Description* ||
+|| *current_page* || Returns the current page number based on the offset and limit ||
+|| *last_page()* || Returns the last page number based on the offset and limit||
+|| *next_offset()* || Calculates the value to pass to the offset to get next page of data. Returns undef if the current page is the last page. ||
+|| *prev_offset()* ||  Calculates the value to pass to the offset to get previous page of data. Returns undef if the current page is the last page.||
+|| *page_offset(_page_number_)* ||  Calculates the value to pass to the offset for the given page number. If the page number is bigger than the last page undef is returned.||
+
+A full example that grabs all the metadata in chunks of 10 and prints the page number is shown below:
+{{{
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
+$filters->limit(10);
+my $client = new perfSONAR_PS::Client::Esmond::ApiConnect(
+    url => 'http://esmond-dev/perfsonar/archive',
+    filters => $filters
+);
+my $next = 0;
+while(defined $next){
+    $filters->offset($next);
+    my $mds = $client->get_metadata();
+    my $paginator = new perfSONAR_PS::Client::Esmond::Paginator(
+        'metadata' => $mds,
+        'filters' => $filters,
+    );
+    print "Current page is " . $paginator->current_page() . " of " . $paginator->last_page() . "\n";
+    $next = $paginator->next_offset();
+}
+
+}}}
+
+
 
 
 == Querying Data by URI ==
@@ -815,5 +886,5 @@ die $bulk_post->error() if($bulk_post->error());
 }}}
 =Other Resources=
  * [MeasurementArchiveClientGuide General Measurement Archive Client Guide]
- * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Jun18.pdf API Specification]
+ * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Aug19.pdf API Specification]
  * [http://antg-dev.es.net/esmond-docs/perfsonar_client.html Python API]

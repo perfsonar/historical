@@ -116,12 +116,12 @@ Finding measurements with parameters relevant to the data you are seeking is the
 || input-destination || string ||  A string indicating exactly how the destination address is passed to the tool. *You SHOULD NOT search on this field, use the destination instead.*  See _input-source_ above for a complete discussion.||
 || tool-name || string || A string indicating the name of the tool that produced the measurement. Examples include bwctl/iperf, bwctl/iperf or powstream.||
 
-In addition to the fields above, specific measurement types can have context-specific fields that are searchable. A list of these fields is available in the [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Apr11.pdf API specification]. Examples and more information on common searches are provided in the remainder of this section.
+In addition to the fields above, specific measurement types can have context-specific fields that are searchable. A list of these fields is available in the [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Aug19.pdf API specification]. Examples and more information on common searches are provided in the remainder of this section.
 
 === Listing all the measurements ===
 Perhaps the simplest query one can perform is to list all the measurement metadata for which an archive has data. You can do this by querying the top level URI with no GET filters:
 {{{
-curl "http://archive.example.net:9085/esmond/perfsonar/archive/"
+curl "http://archive.example.net/esmond/perfsonar/archive/"
 }}}
 
 === Searching by Endpoint ===
@@ -129,22 +129,22 @@ It is common to want to search by the endpoints of a point-to-point test. The ar
 
 *Match all measurement metadata with source 10.1.1.1*
 {{{
-curl "http://archive.example.net:9085/esmond/perfsonar/archive/?source=10.1.1.1"
+curl "http://archive.example.net/esmond/perfsonar/archive/?source=10.1.1.1"
 }}}
 
 *Match all measurement metadata with destination 10.1.1.2*
 {{{
-curl "http://archive.example.net:9085/esmond/perfsonar/archive/?destination=10.1.1.2"
+curl "http://archive.example.net/esmond/perfsonar/archive/?destination=10.1.1.2"
 }}}
 
 *Match all measurement metadata with source 10.1.1.1 AND destination 10.1.1.2*
 {{{
-curl "http://archive.example.net:9085/esmond/perfsonar/archive/?source=10.1.1.1&destination=10.1.1.2"
+curl "http://archive.example.net/esmond/perfsonar/archive/?source=10.1.1.1&destination=10.1.1.2"
 }}}
 
 Furthermore, when providing a filter in the GET parameters you may provide a DNS name which the server will automatically convert to an IP address before performing the search. This is an enhancement over previous versions of the measurement archive where it was required to know exactly how an address was stored. The DNS name may be a CNAME or have A and/or AAAA records directly. For example, assume the hostname _host1.example.net_ has an A record of 10.1.1.1. We can match all tests where 10.1.1.1 is the source with the following:
 {{{
-curl "http://archive.example.net:9085/esmond/perfsonar/archive/?source=host1.example.net"
+curl "http://archive.example.net/esmond/perfsonar/archive/?source=host1.example.net"
 }}}
 
 There is also a special filter for controlling the behavior of the DNS lookups. By default, it will perform DNS lookups for both A and AAAA records. That means if you have two tests involving the same endpoint where one uses IPv4 addresses, the other uses IPv6 addresses AND you provide a hostname with both A and AAAA record, then you will both tests returned by your search. You can control this one of two ways:
@@ -160,18 +160,18 @@ The *dns-match-rule* parameter controls what DNS lookups the server will perform
 
 A quick example that returns only results with a source that matches the AAAA record of host1.example.net is below:
 {{{
-curl "http://archive.example.net:9085/esmond/perfsonar/archive/?source=host1.example.net&dns-match-rule=v6-only"
+curl "http://archive.example.net/esmond/perfsonar/archive/?source=host1.example.net&dns-match-rule=v6-only"
 }}}
 
 === Searching by Event Type ===
 Another common desire is to search for only those measurements with a particular type of data. There is a special filter called *event-type* that returns this information. This will return any measurement metadata object that has an item in its _event-types_ list where the _event-type_ field equals the provided value. For example, to return only those measurements containing throughput data one could run:
 {{{
-curl "http://archive.example.net:9085/esmond/perfsonar/archive/?event-type=throughput"
+curl "http://archive.example.net/esmond/perfsonar/archive/?event-type=throughput"
 }}}
 
 Event types may also contain summaries. There are multiple types of summaries as described in [#Base_Data_vs_Summaries Base Data vs Summaries]. For example, an _average_ summary may take the statistical average of all the measurements over a 24 hour period and post that value to a single data point. This allows for faster retrieval of long ranges of data by reducing the number of datapoints returned. A summary may perform some type of transformation such as a _statistics_ summary that takes a histogram object and returns common statistical measures. There are two relevant fields for a summary: the *summary-type* (which is either _aggregation_, _average_ or _statistics_) and *summary-window* which is the time range (in seconds) that is summarized. Summaries are defined when metadata is created so you can't expect all data to have summaries nor for a summary to be available for a particular time window unless it is explicitly listed in the metadata. For example, we can search for all one-way delay histogram (event type _histogram-owdelay_) with 24 hour statistical summaries as follows:
 {{{
-curl "http://archive.example.net:9085/esmond/perfsonar/archive/?event-type=histogram-owdelay&summary-type=statistics&summary-window=86400"
+curl "http://archive.example.net/esmond/perfsonar/archive/?event-type=histogram-owdelay&summary-type=statistics&summary-window=86400"
 }}}
 
 Summaries are explained in more detail in the section [#Base_Data_vs_Summaries Base Data vs Summaries].
@@ -188,27 +188,50 @@ Examples of various combinations of the parameters above are provided below:
 
 *Match all measurement metadata updated since April 14, 2014 12:00GMT*
 {{{
-curl "http://archive.example.net:9085/esmond/perfsonar/archive/?time-start=1397476800"
+curl "http://archive.example.net/esmond/perfsonar/archive/?time-start=1397476800"
 }}}
 
 *Match all measurement metadata updated before April 14, 2014 12:00GMT*
 {{{
-curl "http://archive.example.net:9085/esmond/perfsonar/archive/?time-end=1397476800"
+curl "http://archive.example.net/esmond/perfsonar/archive/?time-end=1397476800"
 }}}
 
 *Match all measurement metadata updated at exactly April 14, 2014 12:00GMT*
 {{{
-curl "http://archive.example.net:9085/esmond/perfsonar/archive/?time=1397476800"
+curl "http://archive.example.net/esmond/perfsonar/archive/?time=1397476800"
 }}}
 
 *Match all measurement metadata updated between April 14, 2014 12:00GMT and April 15, 2014 12:00GMT*
 {{{
-curl "http://archive.example.net:9085/esmond/perfsonar/archive/?time-start=1397476800&time-end=1397563200"
+curl "http://archive.example.net/esmond/perfsonar/archive/?time-start=1397476800&time-end=1397563200"
 }}}
 
 *Match all throughput metadata with source 10.1.1.1 AND destination 10.1.1.2 updated in the last 24 hours*
 {{{
-curl "http://archive.example.net:9085/esmond/perfsonar/archive/?time-range=86400&event-type=throughput&source=10.1.1.1&destination=10.1.1.2"
+curl "http://archive.example.net/esmond/perfsonar/archive/?time-range=86400&event-type=throughput&source=10.1.1.1&destination=10.1.1.2"
+}}}
+
+=== Limiting results returned ===
+The following options are available to limit the results returned and do things like pagination of results:
+|| Filter || Description ||
+||limit|| The maximum number of results to return. If not set then all results are returned. ||
+||offset|| The number of tests to skip. Useful for pagination. ||
+
+Examples of these options are provided below:
+
+*Return the first 10 results*
+{{{
+curl "http://archive.example.net/esmond/perfsonar/archive/?limit=10"
+}}}
+
+*Return the second 10 results*
+{{{
+curl "http://archive.example.net/esmond/perfsonar/archive/?limit=10&offset=10"
+}}}
+
+*Ignore the first 10 results and return everything else*
+{{{
+curl "http://archive.example.net/esmond/perfsonar/archive/?&offset=10"
 }}}
 
 == Retrieving Measurement Results ==
@@ -476,7 +499,7 @@ Packet-loss can also have an _aggregation_ summary that give the packet loss per
 *Event Type(s):* packet-trace
 The results of a traceroute or tracepath measurement are stored under the packet-trace event type. The result is an array of objects describing the result of each traceroute or tracepath probe. For example:
 {{{
-curl http://archive.example.net:9085/esmond/perfsonar/archive/641860b2004c46a7b21fe26e5ffea9af/packet-trace/base?time-range=600
+curl http://archive.example.net/esmond/perfsonar/archive/641860b2004c46a7b21fe26e5ffea9af/packet-trace/base?time-range=600
 [
    {
       "ts":1397566094,
@@ -1253,7 +1276,7 @@ Similarly an example of publishing the BWCTL tracepath measurement results to th
 }}}
 
 = Full List of Event Types =
-A few of the common event types have been covered in previous sections, but a full list is provided below for reference (NOTE: See [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Jun18.pdf API Specification] for more formal definitions of each type):
+A few of the common event types have been covered in previous sections, but a full list is provided below for reference (NOTE: See [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Aug19.pdf API Specification] for more formal definitions of each type):
 || Name || Description ||
 ||failures||A record of test failures. A failure is any measurement that was scheduled to run but circumstances led to a state where it is unable to record a measurement. For example, being unable to connect to the remote endpoint. This is an object currently with one field named _error_.||
 ||histogram-owdelay|| A histogram describing the observed one-way delays over a time period. Buckets always in milliseconds.||
@@ -1280,6 +1303,6 @@ A few of the common event types have been covered in previous sections, but a fu
 ||time-error-estimates||An estimate of the clock error in a sample in milliseconds||
 
 = Other Resources =
- * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Jun18.pdf API Specification]
+ * [http://wiki.perfsonar-ps.googlecode.com/git/MeasurementArchiveClientGuide/MeasurementArchiveRESTInterface-2014Aug19.pdf API Specification]
  * [MeasurementArchivePerlAPI Perl API]
  * [http://antg-dev.es.net/esmond-docs/perfsonar_client.html Python API]
