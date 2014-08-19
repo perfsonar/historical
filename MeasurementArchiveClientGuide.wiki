@@ -1294,8 +1294,10 @@ A few of the common event types have been covered in previous sections, but a fu
 ||packet-reorders||The number of packets received out of order for a unidirectional transfer||
 ||packet-reorders-bidir||The number of packets received out of order for a bidirectional transfer||
 ||packet-retransmits||The number of packets retransmitted for a transfer using reliable transport protocol such as TCP.||
+||packet-retransmits-subintervals||The number of packets retransmitted per subinterval of time||
 ||path-mtu||The maximum transmission unit of a path.||
 ||streams-packet-retransmits||For tests running multiple streams, the packet-retransmits for each individual stream. Each stream is represented as a position in an array. If other stream- stats collected, a stream will maintain the same position in each event type.||
+||streams-packet-retransmits-subintervals||For tests running multiple streams, the packet restransmit subintervals for each inividual stream. Each stream is represented as a position in an array. If other stream- stats collected, a stream will maintain the same position in each event type||
 ||streams-throughput||For tests running multiple streams, the throughput for each individual stream. Each stream is represented as a position in an array. If other stream- stats collected, a stream should maintain the same position in each event type.||
 ||streams-throughput-subintervals||For tests running multiple streams, the throughput subintervals for each inividual stream. Each stream is represented as a position in an array. If other stream- stats collected, a stream will maintain the same position in each event type||
 ||throughput||The observed amount of data sent over a period of time. Throughput must be in bits per second(bps).||

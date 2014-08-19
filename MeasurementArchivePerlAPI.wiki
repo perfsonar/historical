@@ -288,11 +288,11 @@ As shown in the example the constructor requires the properties below:
 Once you have created your paginator, the following methods are available:
 
 || *Method Name* || *Description* ||
-|| *current_page()* || Returns the current page number based on the offset and limit ||
-|| *last_page()* || Returns the last page number based on the offset and limit||
+|| *current_page()* || Returns the current page number based on the offset and limit. Page count starts at 1. ||
+|| *last_page()* || Returns the last page number based on the offset and limit. Page count starts at 1.||
 || *next_offset()* || Calculates the value to pass to the offset to get next page of data. Returns undef if the current page is the last page. ||
 || *prev_offset()* ||  Calculates the value to pass to the offset to get previous page of data. Returns undef if the current page is the last page.||
-|| *page_offset(_page_number_)* ||  Calculates the value to pass to the offset for the given page number. If the page number is bigger than the last page undef is returned.||
+|| *page_offset(_page_number_)* ||  Calculates the value to pass to the offset for the given page number (starting at 1). If the page number is bigger than the last page undef is returned.||
 
 A full example that grabs all the metadata in chunks of 10 and prints the page number is shown below:
 {{{
