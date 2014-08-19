@@ -15,7 +15,8 @@ Meeting for discussing the state of charts for RC3 and beyond.
  * Use base data for < 1 day timeframes (maybe 3-days if reasonable)
  * Scaling problem Pagination on table to help with scaling problem with many tests
 
-=== Style issues ===
+=== Style issues === 
+See issue 968
  * Remove -PS from table page header
  * Make links to charts more obvious/add "Click on a hostname to see a graph of the results" 
  * Fix weird whitespace with multiple hosts at top of individual chart page
