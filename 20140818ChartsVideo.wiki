@@ -39,27 +39,25 @@ There are some scaling issues with the table that lists the test hosts. If there
    * Query ma to see what data is available? ("packet_trace" event type) 
   * What if you have multiple parameters? traceroute page only supports 2
    * Display links in graph header
- * Negative latency
+ * Negative latency: add a warning for now
+   * if not too hard, add a overlay icon on the lower axis
+ * optional Log scale for packet loss (if not too hard)
  
 === Questions ===
 
-Want to see v4 and v6 on the same plot?
-
+Eventually will want to see v4 and v6 on the same plot. How to best handle this?
 
 If someone has configured v4 and v6 testing on the same host?
 Currently if you pass in hostnames you get everything? 
 
 
-=== Negative latency ===
+=== Notes on Negative latency ===
  * Not sure what we want to do.
  * May be helpful to show a warning that you have negative latency
  * Link or popup with more info - 2 main causes:
   * Bad clock skew (ntp config)
   * testing to something extremely close (hard to get good accuracy with clocks between them)
  * Overlay an icon indicating that you have negative latency at the top or bottom, 
-
-
-
 
 
 == Items that can wait until 3.4.1 ==
@@ -72,9 +70,8 @@ Might also be able to plot bwctl errors and failures (event type: failures):
  * show icon at top or bottom at timestamp where those occur (good with other types as well)
 
 
-
-== For Later ==
-Create a separate details page
+== other 3.4.1 items ==
+Create a separate "details" page
 
 Box plots:
  * grabs stuff from JSON
@@ -83,6 +80,3 @@ Box plots:
 
 Might also be able to plot bwctl errors and failures (event type: failures):
  * Show icon at top or bottom  at timestamp where those occur (good with other types as well)
-
-
-Log scale — make it an option, if at all
