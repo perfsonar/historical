@@ -16,12 +16,13 @@ Meeting for discussing the state of charts for RC3 and beyond.
  * Scaling problem Pagination on table to help with scaling problem with many tests
 
 === Style issues === 
-See issue 968
- * Remove -PS from table page header
- * Make links to charts more obvious/add "Click on a hostname to see a graph of the results" 
- * Fix weird whitespace with multiple hosts at top of individual chart page
- * Red/green may be bad for color-blind people (will someone follow-up on this)?
+ * Red/green may be bad for color-blind people (will someone follow-up on this)? - See issue 969
    * Jason to followup w/ Matt (8/18)
+These are done - See issue 968
+ * ~~Remove -PS from table page header~~
+ * ~~Make links to charts more obvious/add "Click on a hostname to see a graph of the results" ~~
+ * ~~Fix weird whitespace with multiple hosts at top of individual chart page~~
+
 
 === Scaling issues ===
 There are some scaling issues with the table that lists the test hosts. If there are too many tests, it times out. Need to make this scale. For now we'll focus on pagination, but here are some other possibilities.
