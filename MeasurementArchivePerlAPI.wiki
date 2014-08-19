@@ -272,7 +272,7 @@ $md = $client->get_metadata(); # returns the second 10 results
 
 }}}
 
-As the example shows you can use these options to implement pagination. This is done by keeping the limit option constant and incrementing the offset by the size of limit for each page until you reach the last page. To aid in common calculations like the last page, current page, and the next/previous offset the *perfSONAR_PS::Client::Esmond::Paginator* class is provided. After you define your filters and query your metadataYou can create a *perfSONAR_PS::Client::Esmond::Paginator* instance as follows:
+As the example shows you can use these options to implement pagination. This is done by keeping the limit option constant and incrementing the offset by the size of limit for each page until you reach the last page. To aid in common calculations like the last page, current page, and the next/previous offset the *perfSONAR_PS::Client::Esmond::Paginator* class is provided. After you define your filters and query your metadata, you can create a *perfSONAR_PS::Client::Esmond::Paginator* instance as follows:
 {{{
 my $paginator = new perfSONAR_PS::Client::Esmond::Paginator(
     'metadata' => $mds,
@@ -283,12 +283,12 @@ my $paginator = new perfSONAR_PS::Client::Esmond::Paginator(
 As shown in the example the constructor requires the properties below:
 || *Property Name* || *Description* ||
 || *metadata* || An ArrayRef of *perfSONAR_PS::Client::Esmond::Metadata* objects (such as the results returned by a get_metadata call).  ||
-|| *filters* || The perfSONAR_PS::Client::Esmond::ApiFilters* object used in the query. It is recommended the _limit_ and _offset_ filters are defined for the paginator to be useful.||
+|| *filters* || The *perfSONAR_PS::Client::Esmond::ApiFilters* object used in the query. It is recommended the _limit_ and _offset_ filters are defined for the paginator to be useful.||
 
 Once you have created your paginator, the following methods are available:
 
 || *Method Name* || *Description* ||
-|| *current_page* || Returns the current page number based on the offset and limit ||
+|| *current_page()* || Returns the current page number based on the offset and limit ||
 || *last_page()* || Returns the last page number based on the offset and limit||
 || *next_offset()* || Calculates the value to pass to the offset to get next page of data. Returns undef if the current page is the last page. ||
 || *prev_offset()* ||  Calculates the value to pass to the offset to get previous page of data. Returns undef if the current page is the last page.||
