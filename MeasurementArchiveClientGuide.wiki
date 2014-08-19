@@ -231,7 +231,7 @@ curl "http://archive.example.net/esmond/perfsonar/archive/?limit=10&offset=10"
 
 *Ignore the first 10 results and return everything else*
 {{{
-curl "http://archive.example.net/esmond/perfsonar/archive/?&offset=10"
+curl "http://archive.example.net/esmond/perfsonar/archive/?offset=10"
 }}}
 
 == Retrieving Measurement Results ==
