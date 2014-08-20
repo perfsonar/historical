@@ -2,7 +2,7 @@
 
 =   August 20 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT =
 
- * Attendees: 
+ * Attendees: Andy, Jason, Brian, Roland, Antoine, Aaron, Michael, Fausto
 
 == Agenda Topics ==
 
@@ -20,7 +20,38 @@
  * moving future calls to a new VC system: proposal to use https://www.zoom.us 
  
 == Notes ==
- 
+  * Developer Updates
+  * Andy
+   * Working on new docs 
+   * Added pagination to esmond
+   * Working on expanding ESnet rollout of esmond
+   * BWCTLD upgraded
+  * Antoine
+    * Talking to Jason about pSUI docs
+  * Jason 
+    * Debugging a few performance issues
+  * Brian
+    * Sent out surveys, got some responses already
+    * Playing with GridFTP logs
+    * South African LS 
+  * Aaron
+    * bwctl debugging. seems to be between hosts running iperf3
+  * Roland
+    * Working on document
+    * Worked on OPPD package
+     * Andy testing stuff today
+  * Michael
+   * Working on charts
+   * Plotting ping data
+   * Looking at better colors for the color blind
+  * Fausto
+   * No updates
+ * 3.4 status
+  * Will re-evaluate next week where we are at. Gerrting close on rc2.
+  * Action: Andy contact USATLAS about rc2 testing
+ * moving future calls to a new VC system: proposal to use https://www.zoom.us 
+  * Use zoom for future calls
+
 == Future Agenda Topics ==
 
 == Actions  ==
