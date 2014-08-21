@@ -136,6 +136,9 @@ padding is added onto it.
 
 == Messages ==
 === Common Data Types ===
+==== Integers ====
+All integers are specified in network byte order.
+
 ==== Timestamps ====
 NOTE: The time representation is the NTP timestamp format
 
@@ -152,6 +155,7 @@ Size: 8 bytes
 }}}
 
 Seconds: Unix Timestamp with Epoch of 1900
+
 Fractional Seconds: (usec << 32)/1_000_000UL
 
 ==== Timestamp Error Estimates ====
@@ -182,14 +186,14 @@ Size: 4 bytes
 }}}
 
 Tools:
-|Iperf|0x01|
-|Nuttcp|0x02|
-|Thrulay|0x04|
-|Iperf3|0x08|
-|Ping|0x10|
-|Traceroute|0x20|
-|Tracepath|0x40|
-|Owamp|0x80|
+||Iperf||0x01||
+||Nuttcp||0x02||
+||Thrulay||0x04||
+||Iperf3||0x08||
+||Ping||0x10||
+||Traceroute||0x20||
+||Tracepath||0x40||
+||Owamp||0x80||
 
 NOTE: Multiple tools can be included in the bit mask by doing a bitwise OR of
 the tool values
@@ -206,9 +210,9 @@ Size: 3 bytes
 }}}
 
 Modes:
-| Open | 0x000001 |
-| Authenticated | 0x000002 |
-| Encrypted | 0x000004 |
+|| Open || 0x000001 ||
+|| Authenticated || 0x000002 ||
+|| Encrypted || 0x000004 ||
 
 NOTE: Multiple modes can be included in the bit mask by doing a bitwise OR of
 the mode values
@@ -225,11 +229,11 @@ Size: 1 byte
 }}}
 
 Possible Values:
-| Invalid | 0xFF |
-| OK/Accepted | 0x00 |
-| Rejected | 0x01 |
-| Failed  | 0x02 |
-| Unsupported | 0x04 |
+|| Invalid || 0xFF ||
+|| OK/Accepted || 0x00 ||
+|| Rejected || 0x01 ||
+|| Failed  || 0x02 ||
+|| Unsupported || 0x04 ||
 
 === ServerGreeting Message ===
 Size: 32 bytes
