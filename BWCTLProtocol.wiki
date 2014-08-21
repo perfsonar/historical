@@ -1,0 +1,637 @@
+﻿= BWCTL Protocol =
+
+== Overview ==
+BWCTL has a protocol that is used to schedule a network measurement between two servers. 
+
+There are 3 entities involved in a BWCTL test: the BWCTL client, the BWCTL A
+server and the BWCTL B server. The BWCTL client is the entity that requests the
+two servers perform the test, and receives the results from the servers. The
+BWCTL A server and BWCTL B server are the two servers that perform the test
+between themselves.  The BWCTL A server will connect to the BWCTL B server. The
+BWCTL A server will connect to the BWCTL B server to make sure they are in
+agreement as to the time, as well as to exchange the test results amongst
+themselves. If the requested network measurement requires a TCP connection, the
+TCP connection will also be initiated from the BWCTL A server to the BWCTL B
+server. By default, the test will be performed from the BWCTL A server to the
+BWCTL B server. Depending on the specific network measurement, it is possible
+to have the BWCTL B server perform the test to the BWCTL A server, however, the
+BWCTL A server will still connect to the BWCTL B server, if required.
+
+== BWCTL Test Scheduling Protocol ==
+=== Overview ===
+The BWCTL client makes a connection to the server, and requests a test. The
+server either accepts the test and returns the test time to the client, or the
+server rejects the test. The client may subsequently request a different test
+time if needed. 
+
+The client sends a message to the server to let it know that it agrees with the
+test parameters returned, and the server returns a message to let the client
+know that it's going to perform the test.
+
+When the test measurement has been performed, the server sends a message to the
+client, including the results of the measurement test.
+
+=== Message Exchage ===
+{{{
+[ BWCTL Client ]                             [ BWCTL Server ]
+                 -------------------------->
+                 <-------ServerGreeting-----
+                 --------ClientGreeting---->
+                 <-------ServerOK-----------
+                 --------TestRequest------->
+                 <-------TestAccept---------
+                 --------StartSession------>
+                 <-------StartAck-----------
+                 --------StopSession------->
+                 <-------StopSession--------
+}}}
+
+NOTE: A TimeRequest/TimeResponse message exchange can also appear any time
+after the ServerOK.
+
+NOTE: The client can send multiple TestRequest messages to change the requested
+test options. This is normally done to change the start time for a given test.
+
+NOTE: The client can send a TestRequest message to cancel the requested test
+by specifying a start time of '0'.
+
+NOTE: Either of the server or client can initiate the "StopSession", and the
+other side responds with a StopSession of their own
+
+
+== BWCTL Server Endpoint Communcation ==
+=== Overview ===
+The BWCTL A server makes a connection to the BWCTL B server to ensure that they
+are both in agreement about the current time, as well as to exchange results
+after the test is complete.
+
+The BWCTL A server makes a connection to the BWCTL B server, and requests the
+BWCTL B server's current time. The BWCTL B server responds with the current
+time, and the BWCTL A server then decides if the two hosts are in agreement
+about the current time, cancelling the test if not.
+
+After the measurement test has completed, both the BWCTL A server and the BWCTL
+B server send a message to the other server letting it know that the test is
+complete, and sending the results to the other side.
+
+When the test measurement has been performed, the server sends a message to the
+client informing it that the test is done, and including the results of the
+measurement test.
+
+NOTE: Currently, the BWCTL server does nothing with the results exchanged
+
+=== Message Exchage ===
+{{{
+[ Client Endpoint ]                             [ Server Endpoint ]
+                    -------------------------->
+                    <-------ServerGreeting-----
+                    --------ClientGreeting---->
+                    <-------ServerOK-----------
+                    --------TimeRequest------->
+                    <-------TimeResponse-------
+                    --------StopSession------->
+                    <-------StopSession--------
+}}}
+
+NOTE: Either of the server or client endpoints can initiate the "StopSession",
+and the other side responds with a StopSession of their own
+
+== Authentication/Encryption ==
+=== Authentication ===
+BWCTL supports three security levels: open, authenticated and encrypted. The
+'open' level provides unauthenticated, and unencrypted access to the BWCTL
+server.
+
+In authenticated-mode and encrypted-mode, the client and server have a shared
+private key. As part of the protocol initialization, the server passes a nonce
+to the client, and the client takes that nonce, along with a 16-bit value of
+its own (refered to as the session key), and encrypts it using AES, the
+shared private key and an initialization vector of 0. The client then takes the
+encrypted value (refered to as a token), along with a username, and passes them
+back to the server.
+
+The server looks up the username given by the client, and retrieves the shared
+private key. The server uses the private key to decrypt the token, and compares
+the nonce value received with the one it sent. If they match, the client has
+been authenticated to the server.
+
+=== Encyption ===
+In encrypted-mode, after the client has been authenticated, the client and
+server use AES to encrypt the messages passing back and forth. The only
+exception to this is the ServerOK message. The only encrypted portion of the
+ServerOK message is the server uptime.
+
+As part of the initial message exchange, the client passes an initialization
+vector to the server, and the server passes an initialization vector to the
+client. The client uses the initialization vector that it sends to the server
+as the initialization vector for encrypting the messages it sends to the
+server. The server uses the initialization vector that it sends to the client
+as the initialization vector for encrypting the messages it sends to the
+client.
+
+The encryption is done using AES which encrypts in blocks of 16 bytes. If a
+given message is not divisible by 16 bytes, it is zero-padded to be a multiple
+of 16 bytes in length. If a message is divisible by 16 bytes, a 16-byte zero
+padding is added onto it.
+
+== Messages ==
+=== Common Data Types ===
+==== Timestamps ====
+NOTE: The time representation is the NTP timestamp format
+
+Size: 8 bytes
+
+{{{
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+00|                          Seconds                              |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+04|                    Fractional Seconds                         |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+Seconds: Unix Timestamp with Epoch of 1900
+Fractional Seconds: (usec << 32)/1_000_000UL
+
+==== Timestamp Error Estimates ====
+Size: 2 bytes
+
+{{{
+   0                   1           
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+00|S|Z|  Scale   |    Multiplier  |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+The first bit S should be set if the party generating the timestamp has a
+synchronized clock. The next bit, Z, must be zero.
+
+The error estimate is equal to Multiplier*2^(-32)*2^Scale (in seconds).
+
+==== Tools Bit Mask ====
+Size: 4 bytes
+
+{{{
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+00|                      Tools Bit Mask                           |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+Tools:
+|Iperf|0x01|
+|Nuttcp|0x02|
+|Thrulay|0x04|
+|Iperf3|0x08|
+|Ping|0x10|
+|Traceroute|0x20|
+|Tracepath|0x40|
+|Owamp|0x80|
+
+NOTE: Multiple tools can be included in the bit mask by doing a bitwise OR of
+the tool values
+
+==== Security Modes Bitmask ====
+Size: 3 bytes
+
+{{{
+   0                   1                   2       
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+10|            Modes                              |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+Modes:
+| Open | 0x000001 |
+| Authenticated | 0x000002 |
+| Encrypted | 0x000004 |
+
+NOTE: Multiple modes can be included in the bit mask by doing a bitwise OR of
+the mode values
+
+==== Request Status ====
+Size: 1 byte
+
+{{{
+   0               
+   0 1 2 3 4 5 6 7 
+  +-+-+-+-+-+-+-+-+
+00|   Req Status  |
+  +-+-+-+-+-+-+-+-+
+}}}
+
+Possible Values:
+| Invalid | 0xFF |
+| OK/Accepted | 0x00 |
+| Rejected | 0x01 |
+| Failed  | 0x02 |
+| Unsupported | 0x04 |
+
+=== ServerGreeting Message ===
+Size: 32 bytes
+
+{{{
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+00|                                                               |
+04|                      Unused (12 bytes)                        |
+08|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+12| Proto Version |       Available Modes                         |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+16|                                                               |
+20|                     Challenge (16 bytes)                      |
+24|                                                               |
+28|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+NOTE: The available modes bit mask has all the security modes available on the
+server
+
+=== ClientGreeting Message ===
+Size: 68 bytes
+
+{{{
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+00| Proto Version |        Selected Mode                          |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+04|                                                               |
+08|                     Username (16 bytes)                       |
+12|                                                               |
+16|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+20|                                                               |
+24|                       Token (32 bytes)                        |
+28|                                                               |
+32|                                                               |
+36|                                                               |
+40|                                                               |
+44|                                                               |
+48|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+52|                                                               |
+56|                     Client-IV (16 bytes)                      |
+60|                                                               |
+64|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+NOTE: The "Selected mode bitmask" can only have one mode value included
+
+NOTE: The token is AES(concat(challenge(16),sessionkey(16)))
+
+=== ServerOK Message ===
+Size: 48 bytes
+
+{{{
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+00|                 Available Tools Bit Mask                      |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+04|                      Unused (11 bytes)                        |
+08|                                                               |
+  +                                               +-+-+-+-+-+-+-+-+
+12|                                               |   Req Status  |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+16|                                                               |
+20|                     Server-IV (16 bytes)                      |
+24|                                                               |
+28|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+32|                      Uptime (Timestamp)                       |
+36|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+40|              Integrity Zero Padding (8 bytes)                 |
+44|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+NOTE: The available tools bit mask has all the tools available on the server
+
+=== TimeRequest Message ===
+Size: 32 bytes
+
+{{{
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+00|      4        |                                               |
+  +-+-+-+-+-+-+-+-+                                               |
+04|                        Unused                                 |
+08|                                                               |
+12|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+16|                                                               |
+20|                Integrity Zero Padding (16 bytes)              |
+24|                                                               |
+28|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+=== TimeResponse Message ===
+Size: 32 bytes 
+
+{{{
+   0                   1                   2                   3 
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ 
+00|                          Timestamp                            | 
+04|                                                               | 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ 
+08|     Time Error Estimate       |                               | 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               | 
+12|                            Unused                             | 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ 
+16|                                                               | 
+20|                Integrity Zero Padding (16 bytes)              | 
+24|                                                               | 
+28|                                                               | 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+=== TestRequest Message ===
+Size: 128 bytes
+
+Bandwidth Test Request:
+{{{
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 00|      1        |  UDP  | IPVN  | Conf-Sender   | Conf-Receiver |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 04|                            Duration                           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 08|                        Requested Time                         |
+ 12|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 16|                          Latest Time                          |
+ 20|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 24|        Time Error Estimate    |         Recv Port             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 28|                        Sender Address                         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 32|              Sender Address (cont.) or Unused                 |
+ 36|                                                               |
+ 40|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 44|                        Receiver Address                       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 48|              Receiver Address (cont.) or Unused               |
+ 52|                                                               |
+ 56|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 60|                                                               |
+ 64|                        SID (16 bytes)                         |
+ 68|                                                               |
+ 72|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 76|                          Bandwidth                            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 80|                          Buffer Length                        |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 84|                          Window Size                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 88|                        Report Interval                        |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 92|    Dynamic    |      TOS      |   nParallel   |      MBZ      |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 96|                    Selected Tool Bit Mask                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+100|    Verbose    | Reverse Flow  |  No Endpoint  |               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+104|                            Unused                             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+108|    Out Fmt    | bandwidth-exp |   Omit Time   |     Units     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+112|                                                               |
+116|                Integrity Zero Padding (16 bytes)              |
+120|                                                               |
+124|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+Latency Test Request:
+{{{
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 00|      1        | Unused| IPVN  | Conf-Sender   | Conf-Receiver |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 04|                             Unused                            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 08|                        Requested Time                         |
+ 12|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 16|                          Latest Time                          |
+ 20|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 24|        Time Error Estimate    |         Recv Port             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 28|                        Sender Address                         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 32|              Sender Address (cont.) or Unused                 |
+ 36|                                                               |
+ 40|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 44|                        Receiver Address                       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 48|              Receiver Address (cont.) or Unused               |
+ 52|                                                               |
+ 56|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 60|                                                               |
+ 64|                        SID (16 bytes)                         |
+ 68|                                                               |
+ 72|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 76|        Packet Count           |         Packet Size           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 80|        Inter-Packet Delay     |     TTL       |  Unused       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 84|                                                               |
+ 88|                           Unused                              |
+ 92|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 96|                    Selected Tool Bit Mask                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+100|    Verbose    | Reverse Flow  |  No Endpoint  |               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+104|                                                               |
+108|                            Unused                             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+112|                                                               |
+116|                Integrity Zero Padding (16 bytes)              |
+120|                                                               |
+124|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+Traceroute Test Request:
+{{{
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 00|      1        | Unused| IPVN  | Conf-Sender   | Conf-Receiver |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 04|                            Duration                           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 08|                       Requested Time                          |
+ 12|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 16|                          Latest Time                          |
+ 20|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 24|        Time Error Estimate    |         Recv Port             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 28|                        Sender Address                         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 32|              Sender Address (cont.) or Unused                 |
+ 36|                                                               |
+ 40|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 44|                        Receiver Address                       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 48|              Receiver Address (cont.) or Unused               |
+ 52|                                                               |
+ 56|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 60|                                                               |
+ 64|                        SID (16 bytes)                         |
+ 68|                                                               |
+ 72|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 76|    First TTL  | Last TTL      |       Packet Size             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 80|                                                               |
+ 84|                                                               |
+ 88|                           Unused                              |
+ 92|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 96|                    Selected Tool Bit Mask                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+100|    Verbose    | Reverse Flow  |  No Endpoint  |               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+104|                                                               |
+108|                            Unused                             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+112|                                                               |
+116|                Integrity Zero Padding (16 bytes)              |
+120|                                                               |
+124|                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+NOTE: The "Selected tool bitmask" can only have one tool value included
+
+
+=== TestAccept Message ===
+Size: 32 bytes
+
+{{{
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+00|   Req Status  |  Unused       |        Tool Port              |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+04|                                                               |
+08|                        SID (16 octets)                        |
+12|                                                               |
+16|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+20|                       Reservation Time                        |
+24|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+28|                      Zero Padding (4 octets)                  |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+NOTE: Tool Port is the port that will be used for the testing protocol itself.
+
+=== StartSession Message ===
+Size: 32 bytes
+
+{{{
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+00|      2        |    Unused     |           Peer Port           |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+04|                      Unused (12 bytes)                        |
+08|                                                               |
+12|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+16|                                                               |
+20|                    Zero Padding (16 bytes)                    |
+24|                                                               |
+28|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+NOTE: Peer port is only passed to the 'client' of the test
+
+=== StartAck Message ===
+Size: 32 octets 
+
+{{{
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+00|   Req Status  |    Unused     |           Peer Port           |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+04|                      Unused (12 bytes)                        |
+08|                                                               |
+12|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+16|                                                               |
+20|                    Zero Padding (16 bytes)                    |
+24|                                                               |
+28|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+NOTE: Peer port is only returned by the 'server' of the test
+
+=== StopSession Message ===
+
+ Size: 32 bytes
+
+{{{ 
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+00|      3        |   Req Status  |                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
+04|                       Unused (6 bytes)                        |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+08|                       N-bytes following                       |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+12|                       Unused (4 bytes)                        |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+16|                                                               |
+20|                    Zero Padding (16 bytes)                    |
+24|                                                               |
+28|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+         The following is appended ONLY if (N-bytes != 0)
+
+           ... ASCII TEST RESULTS ... (last block is zero padded)
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+00|                                                               |
+04|                    Zero Padding (16 bytes)                    |
+08|                                                               |
+12|                                                               |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+}}}
+
+
