@@ -217,6 +217,26 @@ Modes:
 NOTE: Multiple modes can be included in the bit mask by doing a bitwise OR of
 the mode values
 
+=== Protocol Version ===
+Size: 1 byte
+
+{{{
+   0               
+   0 1 2 3 4 5 6 7 
+  +-+-+-+-+-+-+-+-+
+00| Proto Version |
+  +-+-+-+-+-+-+-+-+
+}}}
+
+Values:
+|| 0x00 || Ancient version of the client/server. Don't support any tools except iperf ||
+|| 0x01 || Supports multiple testing tools, output format, output units, parallel streams and bandwidth >4G ||
+|| 0x02 || Supports omit parameterfor bandwidth tests (only applicable to iperf3), and the verbose flag ||
+|| 0x04 || Supports reversing the test direction (i.e. sending from server B to server A), and endpoint-less tests ||
+|| 0x05 || Supports setting the TOS bits ||
+
+NOTE: Each protocol version supports all the earlier options
+
 ==== Request Status ====
 Size: 1 byte
 
