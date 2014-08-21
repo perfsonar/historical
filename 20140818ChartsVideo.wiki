@@ -10,8 +10,9 @@ Meeting for discussing the state of charts for RC3 and beyond.
 
 
 == Items that need to be done for RC3 ==
- * Add ping to charts
- * Style issues
+ * ~~Add ping to charts~~
+ * ~~Style issues~~
+ * ~~ Add retransmits to throughput tooltips ~~
  * Use base data for < 1 day timeframes (maybe 3-days if reasonable)
  * Scaling problem Pagination on table to help with scaling problem with many tests
 
