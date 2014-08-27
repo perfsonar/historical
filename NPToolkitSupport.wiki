@@ -28,8 +28,8 @@ The current rotation includes:
    * Brian swapped with Jason June 16-30
   * August 1-15, 2014: Andy (Backup: Roland)
   * August 16-31, 2014: Sowmya (Backup: Szymon)
-  * September 1-15, 2014: Dan
-  * September 16-30, 2014: Michael
+  * September 1-15, 2014: Michael
+  * September 16-30, 2014: Dan
   * October 1-15, 2014: Brian
   * October 16-31, 2014: Aaron
   * November 1-15, 2014: Sowmya
