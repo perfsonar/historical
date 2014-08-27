@@ -2,7 +2,7 @@
 
 =   August 27 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT =
 
- * Attendees: 
+ * Attendees: Brian, Dan, Michael, Aaron, Antoine, Alex, Rade, Stefan, Fausto, Murilo
 
 == Agenda Topics ==
 
@@ -21,7 +21,40 @@
  * 3.4 status
  
 == Notes ==
-
+ * Developer Updates
+  * Andy
+   * Updated esnet hosts to new MA
+   * Debugging MA with aaron
+   * Some profiling of the nagios checks. Some pretty high initialization time. 
+   * Working on install docs
+  * Brian
+   * Survey results are interesting. Lots of request for Debian support.
+   * Added a public central MA at perfsonar-archive.es.net. Plan to use it for gridftp data and cubox testsing
+   * Has an ARM repo with RPMs. Testing it still
+  * Dan
+   * No updates
+  * Michael
+   * Working on remaining tasks for charts. Added ping, updating color scheme, many other tasks. 
+   * Action: Build a new RPM. 
+  * Aaron
+   * Debugging bwctl
+  * Antoine
+   * Testing 3.4 and OPPD
+   * Action: Level 1 and Level 2 need to updated. Andy will create issue. Add oppd.
+  * Rade and Stefan
+   * Looking at new sLS
+   * Action: Antoine will start email thread with Sowmya, Andy, Stefan and Rade to work-out details
+   * Action: Aaron will send jabber info to list again
+   * Working on pSUI
+  * Murilo
+   * Interested in displaying lots of tests on graphs.
+  * Fausto
+   * No updates 
+  * Alex
+   * Would like to talk to Brian about perfSONAR topics. Will schedule a call.
+ * 3.4 status
+  * Looks like next week should have everything done
+  
 == Future Agenda Topics ==
 
 == Actions  ==
