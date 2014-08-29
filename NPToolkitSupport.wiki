@@ -6,6 +6,7 @@ The core NP Toolkit support team has decided to divide up support responsibility
 There will be a primary support person at all times, on a .5 month rotation. This person is responsible for answering support email, and assigning tasks to others if appropriate. The person should try to respond to emails within 1 working day. If the primary person is unavailable, they are responsible for finding their own replacement.
 
 The current rotation includes: 
+
  * Aaron Brown
  *  Jason Zurawski (Will leave regular rotation at end of 2014)
  * Andy Lake
@@ -18,6 +19,8 @@ The current rotation includes:
  * Szymon Trocha
  * Roland Karch
  * Antoine Delvaux
+ * John Hicks
+
 (Please volunteer if you'd like to be added to the rotation!)
 
 = Schedule =
