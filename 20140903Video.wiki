@@ -2,7 +2,7 @@
 
 =   September 3 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT =
 
- * Attendees:
+ * Attendees: Jason, Aaron, Sowmya. Michael, Brian, Syzmon, Rade, Stefan, Antoine, Eric
 
 == Agenda Topics ==
 
@@ -19,7 +19,49 @@
  * 3.4 status
  
 == Notes ==
-  
+ * Developer Updates
+  * Andy
+   * ESnet software update went well
+   * Working on docs
+  * Jason
+   * A lot of people interested in L2 measurements
+   * Working on documentation
+  * Aaron
+   * Minor fixes earlier today to issues
+   * BWCTL protocol documentation
+   * Can't recreate segfaults 
+  * Syzmon
+   * First call, plan to join more in the future
+  * Sowmya
+   * Starting LS
+   * Needs to look at timeouts
+  * Rade
+   * Looking at pS UI bugs with Antoine
+  * Stefan
+   * see Rade's update
+  * Antoine
+   * Looking at various OPPD issues
+  * Brian
+   * New iperf3 updates
+   * Survey responses are in. Summarizing soon. 
+  * Fausto
+   * See Murilo updates
+  * Murilo
+   * Found LS registration bug
+   * Working on MA integration
+  * Alex
+   * Looking at road map stuff
+   * Looking at federated stuff
+  * Michael
+   * Wrapped-up the color scheme
+   * Fixed test list page to compress results if number of tests
+   * Dan working on horizontal scaling
+   * Test hosts working way through system
+ * 3.4rc status
+  * All commits will be in by end of day, internal testing images tomorrow
+  * Andy will continue on documentation
+  * Eric and Brian to verify LiveCD can be discontinued on Friday. Email goes out Monday. 
+
 == Future Agenda Topics ==
 
 == Actions  ==
