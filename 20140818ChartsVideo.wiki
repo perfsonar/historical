@@ -13,7 +13,7 @@ Meeting for discussing the state of charts for RC3 and beyond.
  * Add additional chart parameters to the URL
  * Scaling problem Pagination on table to help with scaling problem with many tests - See issue 972 
  * Improve display so throughput/latency don't overwrite each other so much
- * Add median option for latency - issue 977
+ * Add median option for latency - See issue 977
  * Negative latency: add a warning for now
    * if not too hard, add a overlay icon on the lower axis
  * optional Log scale for packet loss (if not too hard)
