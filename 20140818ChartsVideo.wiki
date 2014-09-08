@@ -37,7 +37,7 @@ There are some scaling issues with the table that lists the test hosts. If there
  * Add additional chart parameters to the URL
  * Add median option for latency
  * Improve display so throughput/latency don't overwrite each other so much
- * Traceroute page link on chart
+ * Traceroute page link on chart - issue 976
   * Easy to add a link, but what if there is no data?
    * Query ma to see what data is available? ("packet_trace" event type) 
   * What if you have multiple parameters? traceroute page only supports 2
