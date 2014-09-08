@@ -33,6 +33,8 @@ There are some scaling issues with the table that lists the test hosts. If there
 * Progressively load them? (not something we can do with the current library)
 
 == Items that need to be done for 3.4 release ==
+ * Ability to share chart URL
+ * Add additional chart parameters to the URL
  * Add median option for latency
  * Improve display so throughput/latency don't overwrite each other so much
  * Traceroute page link on chart
