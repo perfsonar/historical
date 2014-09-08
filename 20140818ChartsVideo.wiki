@@ -17,12 +17,13 @@ Meeting for discussing the state of charts for RC3 and beyond.
  * Scaling problem Pagination on table to help with scaling problem with many tests - See issue 972
 
 
-These are done - See issue 968
- * ~~Remove -PS from table page header~~
+Done
+ * ~~Remove -PS from table page header - See issue 968~~
  * ~~Make links to charts more obvious/add "Click on a hostname to see a graph of the results" ~~
  * ~~Fix weird whitespace with multiple hosts at top of individual chart page~~
 ~~ Style issues ~~
  * ~~Red/green may be bad for color-blind people (will someone follow-up on this)? - See issue 969~~
+ * ~~Traceroute page link on chart~~ - issue 976
 
 === Scaling issues ===
 There are some scaling issues with the table that lists the test hosts. If there are too many tests, it times out. Need to make this scale. For now we'll focus on pagination, but here are some other possibilities.
@@ -37,11 +38,6 @@ There are some scaling issues with the table that lists the test hosts. If there
  * Add additional chart parameters to the URL
  * Add median option for latency
  * Improve display so throughput/latency don't overwrite each other so much
- * Traceroute page link on chart - issue 976
-  * Easy to add a link, but what if there is no data?
-   * Query ma to see what data is available? ("packet_trace" event type) 
-  * What if you have multiple parameters? traceroute page only supports 2
-   * Display links in graph header
  * Negative latency: add a warning for now
    * if not too hard, add a overlay icon on the lower axis
  * optional Log scale for packet loss (if not too hard)
