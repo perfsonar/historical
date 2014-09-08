@@ -8,6 +8,15 @@ Meeting for discussing the state of charts for RC3 and beyond.
 
 = Notes =
 
+== Items that need to be done for 3.4 release ==
+ * Ability to share chart URL
+ * Add additional chart parameters to the URL
+ * Scaling problem Pagination on table to help with scaling problem with many tests - See issue 972 
+ * Improve display so throughput/latency don't overwrite each other so much
+ * Add median option for latency
+ * Negative latency: add a warning for now
+   * if not too hard, add a overlay icon on the lower axis
+ * optional Log scale for packet loss (if not too hard)
 
 == Items that need to be done for RC3 ==
  * ~~Add ping to charts~~
@@ -33,14 +42,6 @@ There are some scaling issues with the table that lists the test hosts. If there
 * Have a threshold that doesn’t get you the summaries if it’s over the threshold? ? Add a button to load them with a disclaimer that it may take a while?
 * Progressively load them? (not something we can do with the current library)
 
-== Items that need to be done for 3.4 release ==
- * Ability to share chart URL
- * Add additional chart parameters to the URL
- * Add median option for latency
- * Improve display so throughput/latency don't overwrite each other so much
- * Negative latency: add a warning for now
-   * if not too hard, add a overlay icon on the lower axis
- * optional Log scale for packet loss (if not too hard)
  
 === Questions ===
 
