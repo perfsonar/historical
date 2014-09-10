@@ -1,46 +1,36 @@
-#summary September 10, 2014 Conference Call
-
-=   September 10, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT =
-
- * Attendees: 
-
-== Agenda Topics ==
-
  * Developer Updates
   * Andy
-  * Ivan
-  * Roland
-  * Jason - Unavailable this week.  Working on creating a support note on the LiveCD for the community along with some updated documentation for the web site to be used with the new release.  
+   * added more to install docs
+   * Building kernel
+   * Refactored nagios checks to decrease dashboard load and increase esmond client libs
+   * Worked with Nick B. to get a working perfcube
   * Aaron
-  * Brian
+   * Upgraded OWAMP limits in place
+   * Some changes for netinstall to work better on USB
   * Sowmya
-  * Michael
-  * Murilo
+   * Working on other non-perfSONAR stuff
   * Antoine
-  * Szymon - Attending E-infrastructure Autumn Workshops (http://www.terena.org/activities/development-support/Moldova2014/programme1.html) with presentation about monitoring and pS. After discussions I will work with Georgia and Azerbaijan (Armenia already did) to establish pS presence between Black and Caspian see. In future a hands-on training for installation and system tuning may be necessary for the countries here.
+   * Testing new image
+   * Is going to try building image
+  * Dan
+   * Added link to traceroute information 
+   * Adding link to graph
+   * Working on pagination 
+  * Murilo
+   * No updates
+  * Fausto
+   * No updates
+  * Ivan
+   * No updates
+  * Rade
+   * Working on pSUI Debian package
+   * Sent email about sLS
+  * Jason
+   * Unavailable this week.  Working on creating a support note on the LiveCD for the community along with some updated documentation for the web site to be used with the new release.  
+  * Szymon
+   * Attending E-infrastructure Autumn Workshops (http://www.terena.org/activities/development-support/Moldova2014/programme1.html) with presentation about monitoring and pS. After discussions I will work with Georgia and Azerbaijan (Armenia already did) to establish pS presence between Black and Caspian see. In future a hands-on training for installation and system tuning may be necessary for the countries here.
  * 3.4 status
- 
-== Notes ==
-
-== Future Agenda Topics ==
-
-== Actions  ==
-
-== Where ==
-Please click this URL to start or join. https://ESNet.zoom.us/j/222169727 
-  
-Join from a dial-in phone: 
-    Dial: +1 (415) 762-9988 or +1 (646) 568-7788
-    Meeting ID: 222 169 727 
-    International numbers available: https://ESNet.zoom.us/zoomconference 
-
-Join from a H.323/SIP room system: 
-
-    Dial: 4.34.125.155 (US East) or 4.35.64.154 (US West) 
-    Meeting ID: 222 169 727 
-
-For example: 222169727@4.34.125.155
-
-== Last Updated ==
-
-$Id$
+  * It's official, no LiveCD
+  * Michael has ben out sick, but a few more graph changes should be in by end of week that add links to traceroute stuff.
+  * Aaron committed some NetInstall changes during call to work better with USB
+  * Target early next week to announce
