@@ -16,6 +16,7 @@
   * Sowmya
   * Michael
   * Murilo
+ * Szymon - Attending E-infrastructure Autumn Workshops (http://www.terena.org/activities/development-support/Moldova2014/programme1.html) with presentation about monitoring and pS. After discussions I will work with Georgia and Azerbaijan (Armenia already did) to establish pS presence between Black and Caspian see. In future a hands-on training for installation and system tuning may be necessary for the countries here.
  * 3.4 status
  
 == Notes ==
