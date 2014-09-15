@@ -9,8 +9,8 @@ Meeting for discussing the state of charts for RC3 and beyond.
 = Notes =
 
 == Items that need to be done for 3.4 release ==
- * Ability to share chart URL
- * Add additional chart parameters to the URL - See issue 959
+ * ~~ Ability to share chart URL ~~
+ * ~~ Add additional chart parameters to the URL ~~ - See issue 959
  * Scaling problem Pagination on table to help with scaling problem with many tests - See issue 972 
  * Improve display so throughput/latency don't overwrite each other so much
  * Add median option for latency - See issue 977
