@@ -8,8 +8,8 @@
  * Developer Updates
  * 3.4 status
  * Toolkit's with multiple interfaces questions
-  - Are source routes added by GUI?
-  - Should we label as "beta" for time-being?
+  * Are source routes added by GUI?
+  * Should we label as "beta" for time-being?
  * Smarter throughput thresholds for nagios checks
 
 
