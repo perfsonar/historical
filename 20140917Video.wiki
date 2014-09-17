@@ -2,7 +2,7 @@
 
 =   September 17, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT/5:00PM CEST =
 
- * Attendees:
+ * Attendees: Rade, Stefan, Andy, Antoine, Roland, Ivan, Sowmya, Dan, Michael, Brian, Szymon, Fausto, Murilo, Marco, Shawn
  * Excused:
   * Jason: At a workshop today, have some feedback for future enhancements I will file bugs on.  
 
@@ -16,7 +16,60 @@
 
 
 == Notes ==
- 
+  * Developer Updates
+   * Andy
+    * LHCONE meeting 
+    * Built new RC images
+    * Updated docs some more
+   * Rade
+    * Fixed bug in pSUI communicating with owamp MP
+    * Fixed debian package bug
+   * Antoine
+    * Tested full install images, found a few things that he will pass along
+    * Some OWAMP MP bug fixes
+   * Roland
+    * Need to do some OPPD stuff
+    * Action: Send out link to Andy to OPPD docs
+   * Ivan
+    * No updates
+   * Sowmya
+    * No updates
+   * Dan
+    * Work on graph performance and zooming
+   * Michael
+    * Worked on last features for RC, they are all committed
+    * Doing pagination, andy needs to look at sorting
+   * Brian
+    * Collected enough data on dual-homed hardware, so gonna start deploying soon
+   * Szymon
+    * Attended conference last week and gave talk on perfsonar. Many interested in installing. 
+   * Shawn
+    * Planning to attend dev meeting in Indy
+    * Brian asked if shawn could test dual-homing. Have hardware, but no human cycles
+    * Murilo indicated they have done dual-homed testing, and also found they did not bump into each other
+   * Fausto
+    * Marco will be replacing 
+   * Murilo
+    * No updates
+ * 3.4 status
+  * Dan working on change
+  * andy will build images 
+ * Toolkit's with multiple interfaces questions
+  * Are source routes added by GUI?
+  * Should we label as "beta" for time-being?
+ * Smarter throughput thresholds for nagios checks
+  * Group like LHCONE see different throughput results, often due to high variation in latency 
+  * Other cases too like mixing 1G and 10G
+  * Function of latency or step function of latency
+  * Ability to override thresholds on box-by-box basis
+ * Indy developer meeting
+  * start thinking about agenda, will have agenda bash next week
+ * LiveCD support
+  * Confirming it has been discontinued. Jason sending email
+ * Central MA
+  * Shawn mentioned probably going to need to start with pull
+  * Still exploring push, but may need more advanced queuing  
+
 == Future Agenda Topics ==
 
 == Actions  ==
