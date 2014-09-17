@@ -3,6 +3,8 @@
 =   September 17, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT/5:00PM CEST =
 
  * Attendees:
+ * Excused:
+  * Jason: At a workshop today, have some feedback for future enhancements I will file bugs on.  
 
 == Agenda Topics ==
  * Developer Updates
