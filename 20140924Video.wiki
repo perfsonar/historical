@@ -2,7 +2,7 @@
 
 =   September 24, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT/5:00PM CEST =
 
- * Attendees: 
+ * Attendees: Shawn, Aaron, Roland, Brian Ivan, Szymon, Fausto, Michael, Dan, Antoine
  * Apologies: 
   * Jason - At a workshop - ongoing web stuff.  
 
@@ -13,6 +13,45 @@
 
 
 == Notes ==
+ * Developer Updates
+    * Andy
+     * Merit talk yesterday 
+     * Working on docs with Brian
+     * Issue clean-up so stuff not Fixed and marked as 3.4 needs to get done
+    * Shawn
+     * Working with WLCG metrics group
+     * Working with Soichi to do some more dynamic mesh config generation
+    * Aaron
+     * Added mesh config fix to report errors better
+     * Debugging ARP issues with Shawn
+    * Roland
+     * Approval to send devs to meeting (probably 5-6 people)
+     * Looking at Debian packages, proposal by Friday to dev list, then on to project management
+    * Brian
+     * No updates
+    * Ivan
+     * No updates
+    * Szymon
+     * Andy will send reply about documentation
+    * Fausto
+     * No updates
+    * Antoine
+     * OPPD log file missing 
+     * Looking at Debian package missing
+    * Michael
+     * Added a URL parameter for zoom range
+     * Added negative latency notice
+    * Dan
+     * Started putting together some automated builds of package 
+ * 3.4 status
+  * RC3 out Monday, a few issues cropped-up
+  * 5 issues in tracker
+  * Get issues done by this Friday
+  * have everything tested by a week from Friday
+  * Target release for Oct 6th
+ * Agenda Bash for Oct Face-to-Face Developer Meeting
+  * Assign people to certain projects, have them lead the project
+  * Brian will send out tentative agenda before next week
 
 == Future Agenda Topics ==
 
