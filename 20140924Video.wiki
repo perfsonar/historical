@@ -3,6 +3,8 @@
 =   September 24, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT/5:00PM CEST =
 
  * Attendees: 
+ * Apologies: 
+  * Jason - At a workshop - ongoing web stuff.  
 
 == Agenda Topics ==
  * Developer Updates
