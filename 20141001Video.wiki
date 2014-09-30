@@ -4,6 +4,7 @@
 
  * Attendees: 
  * Apologies: 
+  * Jason - shellshock damage control + small web updates.  Workshop at CYBERA went well, couple of dev suggestions will put into issue tracker
 
 == Agenda Topics ==
  * Developer Updates
