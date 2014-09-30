@@ -11,6 +11,7 @@
  * Shellshock and auto-updates
  * Should NDT and/or NPAD be disabled by default?
  * 3.4 status
+ * agenda for Oct30 meeting
 
 
 == Notes ==
