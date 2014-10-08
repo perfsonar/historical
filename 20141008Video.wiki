@@ -10,6 +10,7 @@
   * LiveCD ISO location
   * Datastax repo
   * Reported Issues
+  * review agenda for devel meeting: https://docs.google.com/spreadsheets/d/1sz_f4wKt4Or71PzlZvjJFnXSo8hP3-ZM5om37XyeWLE/edit?usp=sharing
 
 == Notes ==
 
