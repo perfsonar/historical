@@ -2,7 +2,7 @@
 
 =   October 8, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT/5:00PM CEST =
 
- * Attendees:
+ * Attendees:Ivan, Brian, Jason, Andy, Aaron, Shawn, Roland, Dan, Michael, Eric, Alex
 
 == Agenda Topics ==
  * Developer Updates
@@ -13,6 +13,49 @@
   * review agenda for devel meeting: https://docs.google.com/spreadsheets/d/1sz_f4wKt4Or71PzlZvjJFnXSo8hP3-ZM5om37XyeWLE/edit?usp=sharing
 
 == Notes ==
+ * Developer Updates
+  * Andy
+   * Worked on getting 3.4 out mostly
+   * Looking at services directory host on stats.es.net with Andrew Sides and Brian to fix some instabilities
+   * Saw 125 hosts this morning when stats was working
+  * Brian
+   * No updates
+  * Jason
+   * Shellshock week
+   * Working on web site 
+   * Will do deep dive on docs.es.net
+  * Aaron
+   * Fixed parsing error in regular testing config
+   * BWCTL man pages update
+  * Shawn
+   * Getting documentation in order for WLCG.
+   * Tighten up IP tables by default
+    * Remove NDT and NPAD
+    * Limit 80/443 to local subnet and WLCG monitoring hosts
+   * Working on auto-generated mesh based on OSG and WLCG database
+   * Trying dual-stacked IPv4/IPv6 host
+  * Roland
+   * Antoine been looking at Debian stuff 
+  * Eric
+   * Request for hosting docs.perfsonar.net in the works
+  * Dan
+   * Did post-mortem on shellshock
+   * Helping IU upgrade to 3.4
+   * Will talk to IU group to scan web page
+  * Michael
+   * No updates
+ * perfSONAR 3.4 after party
+  * LiveCD ISO location
+   * Keep where it is
+  * Datastax repo
+   * Action: Andy to look into pulling it down automatically into repo
+  * Reported Issues
+   * Aaron fixed minor regular testing parsing issue, should not affect most toolkit users
+   * Andy working with George Uhl on problem displaying data
+   * Nothing major, more coming in as we talk
+ * Developer Meeting in Indy
+  * Agenda looks good
+  * Video will be available
 
 == Future Agenda Topics ==
 
