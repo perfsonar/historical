@@ -65,17 +65,17 @@ sent will be OWPSAMPLECOUNT. An example row from the table:
 The send_id and recv_id columns will contain ids from the _NODES table. The
 tspec_id column contain an id from the _TESTSPEC table. You can likely ignore
 si and ei. stimestamp and etimestamp are the start and end timestamps
-respectively. They are 64-bit values, the upper 32-bits is the normal unix
-timestamp, and the lower 32-bits is the nanoseconds resolution. The start_time
-and end_time fields are ISO representations of the unix timestamp. The min
-column is the minimum latency seen in the entire session. The max column is the
-maximum latency seen in the entire session. The minttl column is the minimum
-TTL value seen on the received packets, and maxttl is the maximum TTL value
-seen. These can be used to determine if a route flip occurred or not. The sent
-column has the total number of packets sent. The lost column has the total
-number of columns lost. The dups column has the total number of duplicate
-packets seen. The maxerr has the maximum NTP error seen. You can ignore the
-finished column for now. 
+respectively. They are 64-bit values, the upper 32-bits is the number of
+seconds since 1900, and the lower 32-bits is the nanoseconds resolution. The
+start_time and end_time fields are ISO representations of the unix timestamp.
+The min column is the minimum latency seen in the entire session. The max
+column is the maximum latency seen in the entire session. The minttl column is
+the minimum TTL value seen on the received packets, and maxttl is the maximum
+TTL value seen. These can be used to determine if a route flip occurred or
+not. The sent column has the total number of packets sent. The lost column has
+the total number of columns lost. The dups column has the total number of
+duplicate packets seen. The maxerr has the maximum NTP error seen. You can
+ignore the finished column for now. 
 
 The _DELAY tables contain a histogram of the packets received in the test
 samples. This histogram is divided into buckets of size OWPBUCKETWIDTH seconds.
