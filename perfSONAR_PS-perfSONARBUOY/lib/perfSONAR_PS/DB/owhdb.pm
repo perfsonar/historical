@@ -71,7 +71,7 @@ sub getDateTableList(){
 	my $year;
 	my $month;
 	my $day;
-     $self->{LOGGER}->info("About to process query".$query);
+     $self->{LOGGER}->debug("About to process query".$query);
     my $stmt = $self->{'DBH'}->prepare($query);
     $stmt->execute();
 	
@@ -114,7 +114,7 @@ sub getNodeIdsFromIp(){
 				 
 	my $stmt = $self->{'DBH'}->prepare($query);
     $stmt->execute($args{'node_ip'});
-    $self->{LOGGER}->info("About to process query".$query);
+    $self->{LOGGER}->debug("About to process query".$query);
     my $node_id;
     $stmt->bind_columns(\$node_id);
     
@@ -175,7 +175,7 @@ sub fetchSummaryAndValueBuckets(){
     my $stmt = $self->{'DBH'}->prepare($query);
     $stmt->execute($args{'si'}, $args{'ei'});
     
-   $self->{LOGGER}->info("About to process query".$query);
+   $self->{LOGGER}->debug("About to process query".$query);
 
     my @colnames = \($result{'si'},$result{'ei'},$result{'stimestamp'},$result{'etimestamp'},$result{'start_time'},$result{'end_time'},$result{'min'},$result{'max'},$result{'minttl'},$result{'maxttl'},$result{'sent'},$result{'loss'},$result{'dups'},$result{'maxerr'},$result{'basei'},$result{'i'},$result{'n'});
     $stmt->bind_columns( @colnames );
@@ -324,8 +324,8 @@ sub fetchSummaryData(){
        $query .= " AND $recvCond";
     }   
     $query .= "ORDER BY a.si;";
-    $self->{LOGGER}->info("About to process query".$query);			
-    $self->{LOGGER}->info("send_id,recv_id:".@{$args{'send_id'}}.",".@{$args{'recv_id'}});
+    $self->{LOGGER}->debug("About to process query".$query);			
+    $self->{LOGGER}->debug("send_id,recv_id:".@{$args{'send_id'}}.",".@{$args{'recv_id'}});
     my $stmt = $self->{'DBH'}->prepare($query);
     $stmt->execute($args{'si'}, $args{'ei'});
     
@@ -336,7 +336,7 @@ sub fetchSummaryData(){
     
     #create XML
     while($stmt->fetch()){
-   		$self->{LOGGER}->info("Processing DB results"); 
+   		$self->{LOGGER}->debug("Processing DB results"); 
     		#create summary tag
     		my %attributes = ();
             if ( $timeType eq "unix" ) {
