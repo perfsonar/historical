@@ -1240,6 +1240,13 @@ sub bwctl {
         );
     }
 
+    push @cmd, ( "-L", $val ) if (
+        $val = $conf->get_val(
+            TESTSPEC => $ms->{'TESTSPEC'},
+            ATTR     => 'BWLatestTime'
+        )
+    );
+
     $val = $conf->get_val(
         TESTSPEC => $ms->{'TESTSPEC'},
         ATTR     => 'BWTosBits'
