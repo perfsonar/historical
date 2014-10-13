@@ -1086,7 +1086,7 @@ $dbh->closeDB();
                             if ( $tspecSchema[ $b + 2 ] eq "bucket_width" ) {
                                 $content{"bucket_width"}{"value"} = $result->[$a][$b];
                                 $content{"bucket_width"}{"units"} = "seconds";
-                                $query2 .= "concat(" . $tspecSchema[ $b + 2 ] . ")=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= $tspecSchema[ $b + 2 ] . "=" . $result->[$a][$b];
                                 $query2 .= " and " unless $b == 6;
                             }
                             elsif ( $tspecSchema[ $b + 2 ] eq "num_sample_packets" ) {
@@ -1100,7 +1100,7 @@ $dbh->closeDB();
                             elsif ( $tspecSchema[ $b + 2 ] eq "wait_interval" ) {
                                 $content{"schedule"}{"value"} = "\n        <interval type=\"exp\">" . $result->[$a][$b] . "</interval>\n      ";
                                 $content{"schedule"}{"units"} = "seconds";
-                                $query2 .= "concat(" . $tspecSchema[ $b + 2 ] . ")=\"" . $result->[$a][$b] . "\"";
+                                $query2 .= $tspecSchema[ $b + 2 ] . "=" . $result->[$a][$b];
                                 $query2 .= " and " unless $b == 6;
                             }
                             elsif ( $tspecSchema[ $b + 2 ] eq "dscp" ) {
@@ -3253,7 +3253,7 @@ Bugs, feature requests, and improvements can be directed here:
 
 =head1 VERSION
 
-$Id$
+$Id: perfSONARBUOY.pm 5610 2013-04-12 17:11:29Z alake $
 
 =head1 AUTHOR
 
