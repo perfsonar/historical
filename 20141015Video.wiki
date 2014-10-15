@@ -2,15 +2,58 @@
 
 =   October 15, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT/5:00PM CEST =
 
- * Attendees:
+ * Attendees: Jason, Dan, Michael, Rade, Roland, Ivan, Brian, Aaron, Szymon
 
 == Agenda Topics ==
  * Developer Updates
  * Support rotation updates
  * SSLv3 Vulnerability
-
+ * Debian Packages
+ * Plans for 3.4 release
 
 == Notes ==
+ * Developer Updates
+  * Andy
+   * Working on documentation
+  * Jason
+   * Sent around email about POODLE
+   * Cleaning-up web site
+  * Brian
+   * No updates
+  * Dan
+   * working more on build automation
+   * getting ready for tech exchange
+  * Michael
+   * Working on enhancements to charts
+  * Rade
+   * Worked on pSUI 1.3.2 release
+   * Finishing federated login
+   * Working on sLS integration
+  * Roland
+   * No updates
+  * Ivan
+   * No updates
+  * Aaron
+   * Last night issue with perfsonar.net web site due to shared memcached instance. Two sites contained exact same key
+   * Number of small fixes and changes, cleaned-up source repo
+  * Szymon
+   * no updates
+  * Antoine
+   * Updating wiki on psUI, sending announcement later today
+   * Looking at Debian port see agenda
+ * Support rotation updates
+  * See wiki page
+ * SSLv3 Vulnerability
+  * Wait for SSL patch
+ * Plans for 3.4.1 release
+  * Do a small release next week with compiled fixes
+ * Debian port
+  * Questions about whether we should use /opt
+  * Should we do real perl libraries? Maybe.
+ * Branches and tags
+  * Hard to tag perfsonar currently since a bunch of software in same directory
+  * Challenge is the Shared library
+  * Action: Dan will see if there is an easy way to split things out
  
 == Future Agenda Topics ==
 
