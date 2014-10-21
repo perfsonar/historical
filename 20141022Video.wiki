@@ -6,6 +6,7 @@
 
 == Agenda Topics ==
  * Developer Updates
+ * 3.4.1 status
  * perfSONAR Graphs
  * LS bootstrap file location
 
