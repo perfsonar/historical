@@ -2,7 +2,7 @@
 
 =   October 22, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT/5:00PM CEST =
 
- * Attendees:
+ * Attendees: Andy, Jason, Roland, Ivan, Sowmya, Aaron, Antoine, Michael, Dan, Szymon
 
 == Agenda Topics ==
  * Developer Updates
@@ -11,7 +11,48 @@
  * LS bootstrap file location
 
 == Notes ==
- 
+ * Developer Updates
+  * Action: Create wiki page for dev meeting
+  * Andy
+   * Fixed bug in check_owdelay. Action: Ping people that runs dashboards
+   * Fixed some low hanging fruit for 3.4.1
+   * Answering lots of emails
+  * Jason
+   * Web site doing well
+   * Working on generic perfSONAR slide deck
+   * Busy next 3 weeks with SC
+  * Roland
+   * No updates
+  * Ivan
+   * No updates
+  * Aaron
+   * No updates
+   * Talked about ESnet bwctl issue. Roland recalls similar issue but may have been fixed.
+  * Antoine
+   * Question about where to commit things. Answer was master
+   * Talked about options for OPPD to writing to MA
+  * Dan
+   * Prep work for meeting next week
+  * Michael
+   * Working on perfomance enhancements for graphs
+  * Szymon
+   * Asked about Java 8 update?
+  * Brian
+   * perfCube running at office in ESnet
+   * I2 to ESnet layer 2 test mesh seems to be working
+  * Sowmya
+   * No updates
+ * 3.4.1 status
+  * Shooting for Monday
+ * perfSONAR Graphs
+  * Michael made a bunch of short-term fixes that will help 
+  * Dan to look at mod_perl in short-term
+ * Andy, Dan and Michael all looking at various long-term improvments on both front- and back-ends
+ * LS bootstrap file location
+  * Ok to move perfsonar.net
+  * Action: Andy will setup google code repo, and two reverse proxies will point at it
+ * No meeting next week, face-to-face on Thursday
+
 == Future Agenda Topics ==
 
 == Actions  ==
