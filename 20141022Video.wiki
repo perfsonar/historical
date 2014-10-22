@@ -2,7 +2,7 @@
 
 =   October 22, 2014 Conference Call 3:00PM GMT/11:00AM EDT/8:00AM PDT/5:00PM CEST =
 
- * Attendees: Andy, Jason, Roland, Ivan, Sowmya, Aaron, Antoine, Michael, Dan, Szymon
+ * Attendees: Andy, Jason, Roland, Ivan, Sowmya, Aaron, Antoine, Michael, Dan, Szymon, Brian
 
 == Agenda Topics ==
  * Developer Updates
