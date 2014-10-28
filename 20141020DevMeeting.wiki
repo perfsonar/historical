@@ -2,6 +2,8 @@
 
 =   October 30, 2014 Developer Meeting - Indianapolis, IN =
 
+ ICTC Building, room 407,	535 W. Michigan Street, Indianapolis, IN 46202
+
 = Pre-Meeting Reading =
  * *perfSONAR Packaging and Bundles* - https://docs.google.com/document/d/1qt7FK2LaNoVPCyUnJy7wHI5yMtHMHSZwvMidy-xOBSU/edit?usp=sharing
  * *BWCTL 2.0* - https://docs.google.com/presentation/d/14oRvVC6qjsa_R4_AdqMkiNIoV1JPguQD5UAKmKYoj80/edit?usp=sharing
