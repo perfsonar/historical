@@ -2,7 +2,9 @@
 
 =   October 30, 2014 Developer Meeting - Indianapolis, IN =
 
- ICTC Building, room 407,	535 W. Michigan Street, Indianapolis, IN 46202
+ICTC Building, room 407,	535 W. Michigan Street, Indianapolis, IN 46202
+
+Agenda: https://docs.google.com/spreadsheets/d/1sz_f4wKt4Or71PzlZvjJFnXSo8hP3-ZM5om37XyeWLE/edit?usp=sharing
 
 = Pre-Meeting Reading =
  * *perfSONAR Packaging and Bundles* - https://docs.google.com/document/d/1qt7FK2LaNoVPCyUnJy7wHI5yMtHMHSZwvMidy-xOBSU/edit?usp=sharing
