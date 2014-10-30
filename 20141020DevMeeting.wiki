@@ -7,6 +7,7 @@ ICTC Building, room 407,	535 W. Michigan Street, Indianapolis, IN 46202
 Agenda: https://docs.google.com/spreadsheets/d/1sz_f4wKt4Or71PzlZvjJFnXSo8hP3-ZM5om37XyeWLE/edit?usp=sharing
 
 = Pre-Meeting Reading =
+ * *NDT Future* - https://docs.google.com/presentation/d/12lqg-vOspZtnt05UZa0yftfhEGfLYfI07HPt49AV1Aw/edit
  * *perfSONAR Packaging and Bundles* - https://docs.google.com/document/d/1qt7FK2LaNoVPCyUnJy7wHI5yMtHMHSZwvMidy-xOBSU/edit?usp=sharing
  * *BWCTL 2.0* - https://docs.google.com/presentation/d/14oRvVC6qjsa_R4_AdqMkiNIoV1JPguQD5UAKmKYoj80/edit?usp=sharing
  * *MaDDash Updates* - https://docs.google.com/a/es.net/document/d/1pBMOb1X1Ce_PPlZOKovjk0JgRoiejl3y_E5Z9Wi4DC4/edit#
