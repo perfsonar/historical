@@ -6,6 +6,8 @@ ICTC Building, room 407,	535 W. Michigan Street, Indianapolis, IN 46202
 
 Agenda: https://docs.google.com/spreadsheets/d/1sz_f4wKt4Or71PzlZvjJFnXSo8hP3-ZM5om37XyeWLE/edit?usp=sharing
 
+Meeting Notes: https://code.google.com/p/perfsonar-ps/wiki/Meeting_Notes
+
 = Pre-Meeting Reading =
  * *NDT Future* - https://docs.google.com/presentation/d/12lqg-vOspZtnt05UZa0yftfhEGfLYfI07HPt49AV1Aw/edit
  * *perfSONAR Packaging and Bundles* - https://docs.google.com/document/d/1qt7FK2LaNoVPCyUnJy7wHI5yMtHMHSZwvMidy-xOBSU/edit?usp=sharing
