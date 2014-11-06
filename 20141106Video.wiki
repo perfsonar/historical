@@ -2,12 +2,51 @@
 
 =   November 6, 2014 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/6:00PM CEST =
 
- * Attendees:
- * Apologise: Szymon (I'm not able to attend calls on Thursday)
+* Attendees: Ivan, Brian, Jason, Dan, Michael, Aaron, Roland, Sowmya, Eric
+* Apologise: Szymon (I'm not able to attend calls on Thursday)
 
 == Agenda Topics ==
  * Developer Updates
+  * Andy
+   * Esmond performance improvements
+  * Ivan 
+   * Finished deployment of two perfsonar boxes on DANTE 100G network
+   * Will send LS registration question to list
+  * Brian
+   * Performance testing Mira box. Only 1 core but two NICs. Same price has CuBox. Does 800Mbps.
+  * Jason
+   * SC installation 
+   * Powerpoint template
+  * Dan
+   * Automation bits polished-up
+   * Will be playing with Mira box
+  * Michael
+   * Looking at low cost nodes. Grabbing a BananaPi, looks interesting.
+   * Looking at barbones kits
+   * Looking at security related items. Requesting security scans.
+  * Aaron
+   * Kernels out 
+   * Some web socket performance testing. Can do mid-500mbps on back-to-back testing. Can get 1Gbps to loopback.
+  * Roland
+   * Looking at some new deployment scenarios
+  * Sowmya
+   * Working on LS Cache design document
+  * Antoine
+   * New person working on debian
+  * Eric
+   * See project team item
+ * Project Teams
+  * Management group has organized project teams per last week's discussion
+  * Re-format meeting so teams report on progress in first 10-15 minutes
+  * In two weeks have initial design document and project plan (does not need to be perfect)
  * Deployment Scenarios and Strategies
+  * Best common practices for grabbing updates packages
+  * Ivan curious how others do it
+   * Esnet uses cfengine to manage hosts. Has own repo for PS packages that only gets packages after they are tested. Test by manually updating 2-3 hosts first then push to internal repo.
+   * IU: Same thing but use Puppet instead of cfengine
+   * Ivan will join related project teams and we will continue discussion
+ * Jenkins demo 
+  
 
 == Notes ==
  
