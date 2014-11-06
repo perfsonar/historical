@@ -2,7 +2,8 @@
 
 =   November 6, 2014 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/6:00PM CEST =
 
- * Attendees: 
+ * Attendees:
+ * Apologise: Szymon (I'm not able to attend calls on Thursday)
 
 == Agenda Topics ==
  * Developer Updates
