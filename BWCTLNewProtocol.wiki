@@ -1,0 +1,163 @@
+﻿= BWCTL 2.0 Protocol =
+
+== Overview ==
+BWCTL 2.0 has a REST-ish protocol that is used to schedule a network
+measurement between two servers. 
+
+There are 3 entities involved in a BWCTL test: the BWCTL client, the BWCTL A
+server and the BWCTL B server. The BWCTL client is the entity that requests the
+two servers perform the test, and retrieves the results from the servers. The
+BWCTL sender server and BWCTL receiver server are the two servers that perform
+the test between themselves. The BWCTL servers will each verify that the
+other's test definition matches their own definition, and that their times are
+not too far offset. The BWCTL servers will perform the requested test amongst
+each other, and make the results available for the client.
+
+== BWCTL Test Scheduling Protocol ==
+=== Overview ===
+The BWCTL client retrieves the server status from both BWCTL servers, and makes
+sure that the server times aren't too far offset, that the test being requested
+is possible, and what version of the protocol each server speaks.
+
+The BWCTL client requests a test from the BWCTL A server. The server either
+rejects the test, or accepts the test, and assigns it a time slot. The BWCTL
+client requests the same test, with the new time slot, from the BWCTL B server.
+The BWCTL B server either rejects the test, or accepts the test, possibly
+assigning it a new time slot. If the BWCTL B server rejects the test, the bwctl
+client cancels the test on the BWCTL A server. If the BWCTL B server changes
+the time of the test, or changes it's parameters, the BWCTL client submits the
+changes to the BWCTL A server, who can either accept or reject the changes, or
+assign it a different time, or other parameters. This back and forth continues
+until either both servers agree on the time, and parameters, or the test has
+been deemed impossible given time/parameter constraints.
+
+Once both servers have agreed on the time and parameters, the client updates
+the test on each server to say that it accepts the test. At this point, each
+server connects to the other server and verifies that the test they've accepted
+matches the test that was accepted on the other server, and that their time
+isn't too far offset from the other server's time. The servers each set their
+test statuses to accepted, and then check the remote side to make sure that it
+has accepted the test as well.
+
+After the two servers have both verified and accepted the test parameters, they
+perform the requested test at the requested time. The client polls the servers
+until either side finishes. If one side ended in failure, it should cancel the
+test on the other side, but can let the other side finish up on its own. As
+each server finishes, the client retrieves the results from that server.
+
+=== Server Status ===
+
+|| Endpoint || /bwctl/status ||
+|| GET || Retrieve server status ||
+
+==== Server Status Syntax ====
+The server status consists of an associative array with the following variables:
+
+|| Variable || Format || Meaning ||
+|| protocol || Floating-Point Number || The version of the protocol that the server understands. Currently, 2.0. ||
+|| time || Unix Timestamp || The server's current time ||
+|| ntp_error || Floating-Point Number || The server's maximum NTP error, in seconds ||
+|| available_tools || Array Of Strings || A list of the tools available from the server ||
+|| version || String || The version of BWCTL this server is running ||
+
+
+=== Tests ===
+
+|| Endpoint || /bwctl/tests ||
+|| GET || Retrieve list of tests ||
+|| POST || Request new test ||
+
+|| Endpoint || /bwctl/tests/<id> ||
+|| GET || Retrieve test description ||
+|| PUT || Update test parameters ||
+
+|| Endpoint || /bwctl/tests/<id>/cancel ||
+|| POST || Cancel test ||
+
+|| Endpoint || /bwctl/tests/<id>/accept ||
+|| POST || Accept test ||
+
+
+==== Test Object Syntax ====
+Tests are defined as associative arrays with the following variables:
+
+|| Variable || Format || Meaning ||
+|| client || Client Object || The parameters about the client making the request ||
+|| sender_endpoint || Endpoint Object || The parameters for the server doing the send side of the test ||
+|| receiver_endpoint || Endpoint Object || The parameters for the server doing the receive side of the test ||
+|| tool || String || The tool type to use for the test ||
+|| tool_parameters || Tool-Specific Parameters Object || The tool parameters to use for the test ||
+|| scheduling_parameters || Scheduling Parameters Object || The scheduling parameters for the test ||
+
+==== Client Object Syntax ====
+Client parameters are defined as associative arrays with the following variables:
+
+|| Variable || Format || Meaning ||
+|| protocol || Floating-Point Number || The version of the protocol that the client understands. Currently, 2.0 ||
+|| time || Unix Timestamp || The client's current time ||
+|| ntp_error || Floating-Point Number || The client's maximum NTP error, in seconds ||
+
+==== Endpoint Object Syntax ====
+Endpoints are the ends of a test. They are defined as associate arrays with the following variables:
+
+|| Variable || Format || Meaning ||
+|| address || String with IPv4 or IPv6 address || The IP address for the endpoint ||
+|| test_port || Number || The port to use to perform the test || 
+|| bwctl_protocol || Floating-Point Number || The bwctl protocol spoken by this endpoint. There are two special cases: 0.0 means the endpoint cannot be contacted (e.g. there isn't a remote bwctl endpoint), and 1.0 means the endpoint is running bwctl 1.x ||
+|| legacy_client_endpoint || 0 or 1 || Only valid for bwctl 1.x endpoint. If 0, this endpoint is a server endpoint. If 1, this endpoint is a client endpoint. ||
+|| peer_port || Number || The port to use to contact the endpoint ||
+|| base_path || String || Only valid for bwctl 2.x endpoints. The URI path portion of the URL to contact the bwctl server (e.g. '/bwctl') ||
+|| test_id || String || Only valid for bwctl 2.x endpoints. The identifier on this endpoint for the test to be performed ||
+|| posts_endpoint_status || 0 or 1 || Only valid for bwctl 2.x endpoint. If 0, the other endpoint can contact this endpoint to retrieve test/server status information. If 1, the other endpoint must wait for this endpoint to post its test/server status information ||
+
+==== Scheduling Parameters Object Syntax ====
+Scheduling parameters are used as part of scheduling the test. They are defined as associative arrays with the following variables:
+
+|| Variable || Format || Meaning ||
+|| priority || Number || Defines the priority of this test. Higher priority tests will preempt lower priority tests. The default priority, if unspecified, is 0. Negative number are valid ||
+|| requested_time || Unix Timestamp || The requested start time for a given test ||
+|| latest_acceptable_time || Unix Timestamp || The maximum start time that the client will accept ||
+|| accepted_time || Unix Timestamp || The actual start time that the server accepted for a given test ||
+
+==== Tool Parameters Object Syntax ====
+Tool parameters objects define the tool parameters for a given test. They are
+defined as associate arrays. The acceptable variables are dependent on which
+tool was selected. However, there are 3 classes of tools, and each tool in a
+given class shares all accepted variables with the other tools in the class,
+unless otherwise specified.
+
+|| Class || Tools ||
+|| Throughput || iperf, iperf3, nuttcp ||
+|| Latency || ping, owamp ||
+|| Traceroute || traceroute, tracepath, paris-traceroute ||
+
+===== Throughput Parameters =====
+|| Variable || Format || Meaning ||
+|| duration || Floating-Point Number || The number of seconds that the test will last ||
+|| protocol || String || The protocol to use for the throughput test, all tools currently support "tcp" or "udp" ||
+|| bandwidth || Integer || The bandwidth, in bps, of the test, all tools currently support setting UDP bandwidth. Only iperf3 supports setting TCP bandwidth. ||
+|| parallel_streams || Integer || The number of parallel streams to use for the test ||
+|| report_interval || Floating-Point Number || The number of seconds between when the periodic bandwidth reports ||
+|| window_size || Integer || The TCP window size, in bytes ||
+|| buffer_size || Integer || The length of buffer to read/write, in bytes ||
+|| omit_seconds || Floating-Point Number || Only valid for iperf3. The number of initial seconds to skip when doing bandwidth calculation and reporting ||
+|| tos_bits || Bit Field String || A bit field defining the TOS bits for the test ||
+|| units || String || Defines the bandwidth units for the tool. Meaning is tool-specific ||
+|| output_format || String || Defines the output format for the tool. Meaning is tool-specific ||
+|| receiver_connects || 0 or 1 || Only valid for iperf3 and nuttcp. 0 means that the sending tool connects to the receiving tool (default). 1 means that the receiving tool connects to the sending tool. ||
+
+===== Traceroute Parameters =====
+|| Variable || Format || Meaning ||
+|| maximum_duration || Floating-Point Number || The maximum number of seconds that the test can last ||
+|| protocol || String || The protocol to use for the traceroute test, all tools currently only support "udp" ||
+|| packet_size || Integer || The size, in bytes, of the packets to send, not including the packet headers ||
+|| first_ttl || Integer || Only valid for traceroute and paris-traceoute. The minimum TTL to report ||
+|| last_ttl || Integer || Only valid for traceroute and paris-traceoute. The maximum TTL to report ||
+
+===== Latency Parameters =====
+|| Variable || Format || Meaning ||
+|| packet_count || Integer || The number of packets to send in this test ||
+|| inter_packet_time || Floating-Point Number || The time, in seconds, to wait between successive packet sends ||
+|| packet_size || Integer || The size, in bytes, of the packets to send, not including the packet headers ||
+|| packet_ttl || Integer || Only valid for ping. The TTL to use when sending ||
+|| receiver_connects || 0 or 1 || Only valid for owamp. 0 means that the sending tool connects to the receiving tool (default). 1 means that the receiving tool connects to the sending tool. ||
