@@ -67,14 +67,14 @@ The server status consists of an associative array with the following variables:
 || GET || Retrieve list of tests ||
 || POST || Request new test ||
 
-|| Endpoint || /bwctl/tests/<id> ||
+|| Endpoint || /bwctl/tests/`<id`> ||
 || GET || Retrieve test description ||
 || PUT || Update test parameters ||
 
-|| Endpoint || /bwctl/tests/<id>/cancel ||
+|| Endpoint || /bwctl/tests/`<id`>/cancel ||
 || POST || Cancel test ||
 
-|| Endpoint || /bwctl/tests/<id>/accept ||
+|| Endpoint || /bwctl/tests/`<id`>/accept ||
 || POST || Accept test ||
 
 
