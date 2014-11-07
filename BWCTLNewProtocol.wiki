@@ -1,4 +1,8 @@
-﻿= BWCTL 2.0 Protocol =
+﻿#summary Description of the BWCTL 2.0 Protocol
+
+<wiki:toc max_depth="1" />
+
+= BWCTL 2.0 Protocol =
 
 == Overview ==
 BWCTL 2.0 has a REST-ish protocol that is used to schedule a network
@@ -77,11 +81,16 @@ The server status consists of an associative array with the following variables:
 || Endpoint || /bwctl/tests/`<id`>/accept ||
 || POST || Accept test ||
 
+|| Endpoint || /bwctl/tests/`<id`>/results ||
+|| GET || Retrieve test results ||
 
 ==== Test Object Syntax ====
 Tests are defined as associative arrays with the following variables:
 
 || Variable || Format || Meaning ||
+|| id || String || The server identifier for the test ||
+|| client_status || String || The status of the test from the client's perspective. "pending" and "accepted" are the two valid options. ||
+|| server_status || String || The status of the test from the server's perspective. "pending", "rejected", "accepted", "finished" and "cancelled" are the valid options. ||
 || client || Client Object || The parameters about the client making the request ||
 || sender_endpoint || Endpoint Object || The parameters for the server doing the send side of the test ||
 || receiver_endpoint || Endpoint Object || The parameters for the server doing the receive side of the test ||
@@ -161,3 +170,599 @@ unless otherwise specified.
 || packet_size || Integer || The size, in bytes, of the packets to send, not including the packet headers ||
 || packet_ttl || Integer || Only valid for ping. The TTL to use when sending ||
 || receiver_connects || 0 or 1 || Only valid for owamp. 0 means that the sending tool connects to the receiving tool (default). 1 means that the receiving tool connects to the sending tool. ||
+
+==== Test Results Syntax ====
+Tests results are defined as associative arrays with the following variables:
+
+|| Variable || Format || Meaning ||
+|| status || String || The test status, one of "accepted", "finished", "failed" or "rejected" ||
+|| results || Results Object || The results of the test itself ||
+|| bwctl_errors || Array of BWCTL Error Objects || The errors that BWCTL encountered while trying to execute this test ||
+
+==== Results Object Syntax ====
+Results objects are defined as associative arrays. Individual tools may include
+their own tool-specific variables in the array, which may be ignored by the
+client. The Results object must have the following variable defined:
+
+|| Variable || Format || Meaning ||
+|| tool_results || String || The combination of stdout and stderr for the given tool that was executed ||
+
+==== BWCTL Error Object Syntax ====
+BWCTL error objects are defined as associative arrays with the following variables:
+
+|| Variable || Format || Meaning ||
+|| error_code || Integer || An error code from the big list of errors ||
+|| error_msg || String || A human-readable string description of the error ||
+
+=== Example ===
+
+In the following example, there are 3 entities: the client, server 1 (192.168.0.2) and server 2 (10.0.0.2). 
+
+The client does an HTTP GET request to Server 1 at {{{http://192.168.0.2/bwctl/status}}}. 
+
+Response:
+{{{
+{
+    "version": 2.0.1,
+    "protocol": 2.0,
+    "time": 1415384542,
+    "ntp_error": 1.2,
+    "available_tools": [ "iperf", "iperf3", "nuttcp", "traceroute", "tracepath", "paris-traceroute", "owamp", "ping" ]
+}
+}}}
+
+The client verifies that server 1 has the tools it needs, and that server 1's clock isn't too far offset.
+
+The client does an HTTP GET request to Server 2 at {{{http://10.0.0.2/bwctl/status}}}.
+
+Response:
+{{{
+{
+    "version": 2.0.1,
+    "protocol": 2.0,
+    "time": 1415384543,
+    "ntp_error": 0.5,
+    "available_tools": [ "iperf", "iperf3", "nuttcp", "traceroute", "tracepath", "paris-traceroute", "owamp", "ping" ]
+}
+}}}
+
+The client verifies that server 2 has the tools it needs, and that server 2's clock isn't too far offset.
+
+The client does an HTTP POST request to {{{http://192.168.0.2/bwctl/tests}}}.
+
+Request:
+{{{
+{
+    "client": {
+        "protocol": 2.0,
+        "time": 1415384543,
+        "ntp_error": 0.8
+    },
+    "sender_endpoint": {
+        "address": "192.168.0.2",
+        "bwctl_protocol": 2.0, 
+        "ntp_error": 1.2,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+    },
+    "receiver_endpoint": {
+        "address": "10.0.0.2",
+        "bwctl_protocol": 2.0, 
+        "ntp_error": 0.5,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+    },
+    "tool": "owamp",
+    "tool_parameters": {
+        "packet_count": 10,
+        "inter_packet_time": 1.0,
+        "packet_size": 8000,
+    },
+    "scheduling_parameters": {
+        "requested_time": 1415384543,
+        "latest_time": 1415385143
+    }
+}
+}}}
+
+The server checks its time, and the client's time, and makes sure they're not too far offset. It then schedules the test, and assigns it an id and a test port number.
+
+Response:
+{{{
+{
+    "id": "824b8c78-66ae-11e4-9011-001b214e9203",
+    "client_status": "pending",
+    "server_status": "pending",
+    "client": {
+        "protocol": 2.0,
+        "time": 1415384543,
+        "ntp_error": 0.8
+    },
+    "sender_endpoint": {
+        "address": "192.168.0.2",
+        "test_port": 5012,
+        "bwctl_protocol": 2.0, 
+        "ntp_error": 1.2,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "824b8c78-66ae-11e4-9011-001b214e9203",
+    },
+    "receiver_endpoint": {
+        "address": "10.0.0.2",
+        "bwctl_protocol": 2.0, 
+        "ntp_error": 0.5,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+    },
+    "tool": "owamp",
+    "tool_parameters": {
+        "packet_count": 10,
+        "inter_packet_time": 1.0,
+        "packet_size": 8000,
+    },
+    "scheduling_parameters": {
+        "requested_time": 1415384500,
+        "accepted_time":  1415384700,
+        "latest_time": 1415385100
+    }
+}
+}}}
+
+The client checks that the response is acceptable, and then makes a request to server 2, using the 'accepted_time' from server 1 as the 'requested_time' to server 2.
+
+The client does an HTTP POST to {{{http://10.0.0.2/bwctl/tests}}}.
+
+Request:
+{{{
+{
+    "client": {
+        "protocol": 2.0,
+        "time": 1415384543,
+        "ntp_error": 0.8
+    },
+    "sender_endpoint": {
+        "address": "192.168.0.2",
+        "test_port": 5012,
+        "bwctl_protocol": 2.0, 
+        "ntp_error": 1.2,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "824b8c78-66ae-11e4-9011-001b214e9203",
+    },
+    "receiver_endpoint": {
+        "address": "10.0.0.2",
+        "bwctl_protocol": 2.0, 
+        "ntp_error": 0.5,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+    },
+    "tool": "owamp",
+    "tool_parameters": {
+        "packet_count": 10,
+        "inter_packet_time": 1.0,
+        "packet_size": 8000,
+    },
+    "scheduling_parameters": {
+        "requesteded_time":  1415384700,
+        "latest_time": 1415385100
+    }
+}
+}}}
+
+The server checks its time, and the client's time, and makes sure they're not too far offset. It then schedules the test, and assigns it an id and a test port number.
+
+Response:
+{{{
+{
+    "id": "dcf29080-66af-11e4-9c50-001b214e9203",
+    "client_status": "pending",
+    "server_status": "pending",
+    "client": {
+        "protocol": 2.0,
+        "time": 1415384543,
+        "ntp_error": 0.8
+    },
+    "sender_endpoint": {
+        "address": "192.168.0.2",
+        "test_port": 5012,
+        "bwctl_protocol": 2.0, 
+        "ntp_error": 1.2,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "824b8c78-66ae-11e4-9011-001b214e9203",
+    },
+    "receiver_endpoint": {
+        "address": "10.0.0.2",
+        "bwctl_protocol": 2.0, 
+        "test_port": 5044,
+        "ntp_error": 0.5,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "dcf29080-66af-11e4-9c50-001b214e9203",
+    },
+    "tool": "owamp",
+    "tool_parameters": {
+        "packet_count": 10,
+        "inter_packet_time": 1.0,
+        "packet_size": 8000,
+    },
+    "scheduling_parameters": {
+        "requesteded_time":  1415384700,
+        "accepted_time":  1415384700,
+        "latest_time": 1415385100
+    }
+}
+}}}
+
+The client checks that the response is acceptable, and then updates the test on server 1 to let it know the "test_id" and "test_port" of the receiver endpoint.
+
+The client does an HTTP PUT to {{{http://192.168.0.2/bwctl/tests/dcf29080-66af-11e4-9c50-001b214e9203}}}.
+
+Request:
+{{{
+{
+    "client": {
+        "protocol": 2.0,
+        "time": 1415384543,
+        "ntp_error": 0.8
+    },
+    "sender_endpoint": {
+        "address": "192.168.0.2",
+        "test_port": 5012,
+        "bwctl_protocol": 2.0, 
+        "ntp_error": 1.2,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "824b8c78-66ae-11e4-9011-001b214e9203",
+    },
+    "receiver_endpoint": {
+        "address": "10.0.0.2",
+        "bwctl_protocol": 2.0, 
+        "test_port": 5044,
+        "ntp_error": 0.5,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "dcf29080-66af-11e4-9c50-001b214e9203",
+    },
+    "tool": "owamp",
+    "tool_parameters": {
+        "packet_count": 10,
+        "inter_packet_time": 1.0,
+        "packet_size": 8000,
+    },
+    "scheduling_parameters": {
+        "requesteded_time":  1415384700,
+        "accepted_time":  1415384700,
+        "latest_time": 1415385100
+    }
+}
+}}}
+
+Response:
+{{{
+{
+    "id": "824b8c78-66ae-11e4-9011-001b214e9203",
+    "client_status": "pending",
+    "server_status": "pending",
+    "client": {
+        "protocol": 2.0,
+        "time": 1415384543,
+        "ntp_error": 0.8
+    },
+    "sender_endpoint": {
+        "address": "192.168.0.2",
+        "test_port": 5012,
+        "bwctl_protocol": 2.0, 
+        "ntp_error": 1.2,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "824b8c78-66ae-11e4-9011-001b214e9203",
+    },
+    "receiver_endpoint": {
+        "address": "10.0.0.2",
+        "bwctl_protocol": 2.0, 
+        "test_port": 5044,
+        "ntp_error": 0.5,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "dcf29080-66af-11e4-9c50-001b214e9203",
+    },
+    "tool": "owamp",
+    "tool_parameters": {
+        "packet_count": 10,
+        "inter_packet_time": 1.0,
+        "packet_size": 8000,
+    },
+    "scheduling_parameters": {
+        "requested_time": 1415384500,
+        "accepted_time":  1415384700,
+        "latest_time": 1415385100
+    }
+}
+}}}
+
+The client verifies that nothing has changed from server 1, and then accepts the test on server 1.
+
+It does an HTTP POST to {{{http://192.168.0.2/bwctl/tests/824b8c78-66ae-11e4-9011-001b214e9203/accept}}}
+
+Request:
+{{{
+{
+}
+}}}
+
+Response:
+{{{
+{
+    "client_status": "accepted",
+}
+}}}
+
+The client accepts the test on server 2.
+
+It does an HTTP POST to {{{http://10.0.0.2/bwctl/tests/dcf29080-66af-11e4-9c50-001b214e9203/accept}}}
+
+Request:
+{{{
+{
+}
+}}}
+
+Response:
+{{{
+{
+    "client_status": "accepted",
+}
+}}}
+
+Server 1 does an HTTP GET request to Server 2 at {{{http://10.0.0.2/bwctl/status}}}.
+
+Response:
+{{{
+{
+    "version": 2.0.1,
+    "protocol": 2.0,
+    "time": 1415384543,
+    "ntp_error": 0.5,
+    "available_tools": [ "iperf", "iperf3", "nuttcp", "traceroute", "tracepath", "paris-traceroute", "owamp", "ping" ]
+}
+}}}
+
+Server 1 checks its time, and makes sure that server 2 isn't too far offset.
+
+Server 1 does an HTTP GET request to Server 2 at {{{http://10.0.0.2/bwctl/tests/dcf29080-66af-11e4-9c50-001b214e9203}}}.
+
+Response:
+{{{
+{
+    "id": "dcf29080-66af-11e4-9c50-001b214e9203",
+    "client_status": "accepted",
+    "server_status": "pending",
+    "client": {
+        "protocol": 2.0,
+        "time": 1415384543,
+        "ntp_error": 0.8
+    },
+    "sender_endpoint": {
+        "address": "192.168.0.2",
+        "test_port": 5012,
+        "bwctl_protocol": 2.0, 
+        "ntp_error": 1.2,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "824b8c78-66ae-11e4-9011-001b214e9203",
+    },
+    "receiver_endpoint": {
+        "address": "10.0.0.2",
+        "bwctl_protocol": 2.0, 
+        "test_port": 5044,
+        "ntp_error": 0.5,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "dcf29080-66af-11e4-9c50-001b214e9203",
+    },
+    "tool": "owamp",
+    "tool_parameters": {
+        "packet_count": 10,
+        "inter_packet_time": 1.0,
+        "packet_size": 8000,
+    },
+    "scheduling_parameters": {
+        "requesteded_time":  1415384700,
+        "accepted_time":  1415384700,
+        "latest_time": 1415385100
+    }
+}
+}}}
+
+Server 1 makes sure that the time that server 2 has schedule aligns with its time, and that the test parameters match it's own. It then sets the "server_status" field of its test to "accepted".
+
+Server 2 does an HTTP GET request to Server 1 at {{{http://192.168.0.2/bwctl/status}}}.
+
+Response:
+{{{
+{
+    "version": 2.0.1,
+    "protocol": 2.0,
+    "time": 1415384542,
+    "ntp_error": 1.2,
+    "available_tools": [ "iperf", "iperf3", "nuttcp", "traceroute", "tracepath", "paris-traceroute", "owamp", "ping" ]
+}
+}}}
+
+Server 2 checks its time, and makes sure that server 1 isn't too far offset.
+
+Server 2 does an HTTP GET request to Server 1 at {{{http://192.168.0.2/bwctl/tests/824b8c78-66ae-11e4-9011-001b214e9203}}}.
+
+Response:
+{{{
+{
+    "id": "824b8c78-66ae-11e4-9011-001b214e9203",
+    "client_status": "accepted",
+    "server_status": "pending",
+    "client": {
+        "protocol": 2.0,
+        "time": 1415384543,
+        "ntp_error": 0.8
+    },
+    "sender_endpoint": {
+        "address": "192.168.0.2",
+        "test_port": 5012,
+        "bwctl_protocol": 2.0, 
+        "ntp_error": 1.2,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "824b8c78-66ae-11e4-9011-001b214e9203",
+    },
+    "receiver_endpoint": {
+        "address": "10.0.0.2",
+        "bwctl_protocol": 2.0, 
+        "test_port": 5044,
+        "ntp_error": 0.5,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "dcf29080-66af-11e4-9c50-001b214e9203",
+    },
+    "tool": "owamp",
+    "tool_parameters": {
+        "packet_count": 10,
+        "inter_packet_time": 1.0,
+        "packet_size": 8000,
+    },
+    "scheduling_parameters": {
+        "requested_time": 1415384500,
+        "accepted_time":  1415384700,
+        "latest_time": 1415385100
+    }
+}
+}}}
+
+Server 2 makes sure that the time that server 1 has scheduled aligns with its time, and that the test parameters match it's own. It then sets the "server_status" field of its test to "accepted".
+
+Server 1 does an HTTP GET request to Server 2 at {{{http://10.0.0.2/bwctl/tests/dcf29080-66af-11e4-9c50-001b214e9203}}}.
+
+Response:
+{{{
+{
+    "id": "dcf29080-66af-11e4-9c50-001b214e9203",
+    "client_status": "accepted",
+    "server_status": "accepted",
+    "client": {
+        "protocol": 2.0,
+        "time": 1415384543,
+        "ntp_error": 0.8
+    },
+    "sender_endpoint": {
+        "address": "192.168.0.2",
+        "test_port": 5012,
+        "bwctl_protocol": 2.0, 
+        "ntp_error": 1.2,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "824b8c78-66ae-11e4-9011-001b214e9203",
+    },
+    "receiver_endpoint": {
+        "address": "10.0.0.2",
+        "bwctl_protocol": 2.0, 
+        "test_port": 5044,
+        "ntp_error": 0.5,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "dcf29080-66af-11e4-9c50-001b214e9203",
+    },
+    "tool": "owamp",
+    "tool_parameters": {
+        "packet_count": 10,
+        "inter_packet_time": 1.0,
+        "packet_size": 8000,
+    },
+    "scheduling_parameters": {
+        "requesteded_time":  1415384700,
+        "accepted_time":  1415384700,
+        "latest_time": 1415385100
+    }
+}
+}}}
+
+Server 1 verifies that the "server_status" on Server 2's test is set to 'accepted'. If it is not, server 1 periodically retries until it does.
+
+Server 2 does an HTTP GET request to Server 1 at {{{http://192.168.0.2/bwctl/tests/824b8c78-66ae-11e4-9011-001b214e9203}}}.
+
+Response:
+{{{
+{
+    "id": "824b8c78-66ae-11e4-9011-001b214e9203",
+    "client_status": "accepted",
+    "server_status": "accepted",
+    "client": {
+        "protocol": 2.0,
+        "time": 1415384543,
+        "ntp_error": 0.8
+    },
+    "sender_endpoint": {
+        "address": "192.168.0.2",
+        "test_port": 5012,
+        "bwctl_protocol": 2.0, 
+        "ntp_error": 1.2,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "824b8c78-66ae-11e4-9011-001b214e9203",
+    },
+    "receiver_endpoint": {
+        "address": "10.0.0.2",
+        "bwctl_protocol": 2.0, 
+        "test_port": 5044,
+        "ntp_error": 0.5,
+        "peer_port": 80,
+        "base_path": "/bwctl",
+        "test_id": "dcf29080-66af-11e4-9c50-001b214e9203",
+    },
+    "tool": "owamp",
+    "tool_parameters": {
+        "packet_count": 10,
+        "inter_packet_time": 1.0,
+        "packet_size": 8000,
+    },
+    "scheduling_parameters": {
+        "requested_time": 1415384500,
+        "accepted_time":  1415384700,
+        "latest_time": 1415385100
+    }
+}
+}}}
+
+Server 2 verifies that the "server_status" on Server 1's test is set to
+'accepted'. If it is not, server 2 periodically retries until it does.
+
+The client periodicly retrieves the tests from each server until both are
+'accepted'. It then waits for the test to finish. It may periodicly retry to
+catch failures early.
+
+At the accepted time, Server 2 (the receiver) spawns an OWAMP server that
+listens on the specified test port (5044). Server 1 (the sender) then spawns an
+OWAMP client that connects to the OWAMP server. Once the test ends, each side
+sets its test status to "finished", and records the results for the test.
+
+The client does an HTTP GET request to Server 1 to see if there are results at {{{http://192.168.0.2/bwctl/tests/824b8c78-66ae-11e4-9011-001b214e9203/results}}}.
+
+Response:
+{{{
+{
+    "status": "finished",
+    "tool_results": {
+        "output": "...the output of owping...",
+    },
+}
+}}}
+
+
+The client does an HTTP GET request to Server 2 to see if there are results at {{{http://10.0.0.2/bwctl/tests/dcf29080-66af-11e4-9c50-001b214e9203/results}}}.
+Response:
+{{{
+{
+    "status": "finished",
+    "tool_results": {
+        "output": "...the output of owampd...",
+    },
+}
+}}}
