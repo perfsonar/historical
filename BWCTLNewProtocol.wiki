@@ -59,7 +59,7 @@ The server status consists of an associative array with the following variables:
 
 || Variable || Format || Meaning ||
 || protocol || Floating-Point Number || The version of the protocol that the server understands. Currently, 2.0. ||
-|| time || Unix Timestamp || The server's current time ||
+|| time || Floating-Point Unix Timestamp || The server's current time ||
 || ntp_error || Floating-Point Number || The server's maximum NTP error, in seconds ||
 || available_tools || Array Of Strings || A list of the tools available from the server ||
 || version || String || The version of BWCTL this server is running ||
@@ -103,7 +103,7 @@ Client parameters are defined as associative arrays with the following variables
 
 || Variable || Format || Meaning ||
 || protocol || Floating-Point Number || The version of the protocol that the client understands. Currently, 2.0 ||
-|| time || Unix Timestamp || The client's current time ||
+|| time || Floating-Point Unix Timestamp || The client's current time ||
 || ntp_error || Floating-Point Number || The client's maximum NTP error, in seconds ||
 
 ==== Endpoint Object Syntax ====
@@ -118,15 +118,16 @@ Endpoints are the ends of a test. They are defined as associate arrays with the 
 || base_path || String || Only valid for bwctl 2.x endpoints. The URI path portion of the URL to contact the bwctl server (e.g. '/bwctl') ||
 || test_id || String || Only valid for bwctl 2.x endpoints. The identifier on this endpoint for the test to be performed ||
 || posts_endpoint_status || 0 or 1 || Only valid for bwctl 2.x endpoint. If 0, the other endpoint can contact this endpoint to retrieve test/server status information. If 1, the other endpoint must wait for this endpoint to post its test/server status information ||
+|| client_time_offset || Floating-Point Number || The time difference, in seconds, between the endpoint and the client ||
 
 ==== Scheduling Parameters Object Syntax ====
 Scheduling parameters are used as part of scheduling the test. They are defined as associative arrays with the following variables:
 
 || Variable || Format || Meaning ||
 || priority || Number || Defines the priority of this test. Higher priority tests will preempt lower priority tests. The default priority, if unspecified, is 0. Negative number are valid ||
-|| requested_time || Unix Timestamp || The requested start time for a given test ||
-|| latest_acceptable_time || Unix Timestamp || The maximum start time that the client will accept ||
-|| accepted_time || Unix Timestamp || The actual start time that the server accepted for a given test ||
+|| requested_time || Floating-Point Unix Timestamp || The requested start time for a given test ||
+|| latest_acceptable_time || Floating-Point Unix Timestamp || The maximum start time that the client will accept ||
+|| accepted_time || Floating-Point Unix Timestamp || The actual start time that the server accepted for a given test ||
 
 ==== Tool Parameters Object Syntax ====
 Tool parameters objects define the tool parameters for a given test. They are
