@@ -2,14 +2,50 @@
 
 =   November 13, 2014 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/6:00PM CEST =
 
-* Attendees: 
-* Excused: Jason (@ SC14)
+ * Attendees: Antoine, Aaron, Brian, Sowmya, Dan, Michael, Szymon, Eric, Ivan
+ * Excused: Jason (@ SC14), Luke, John H.
 
 == Agenda Topics ==
  * Developer Updates
    * Jason - Sent the training group doc to the mailing list.  Won't be attending this or next week.   
 
 == Notes ==
+  * Developer Updates
+   * Andy
+    * Metadata performance improvements
+    * Working on project plan for assigned teams
+   * Antoine
+    * No updates
+    * Hakan will join next week and possibly work on bwctl with Aaron
+   * Aaron
+    * Updated mesh config to grab multiple meshes at once for Shawn and Soichi
+    * NDT rc release in very near feature. Will include Flash client.
+   * Brian
+    * No updates
+   * Sowmya
+    * Working on sLS design document
+   * Dan
+    * Hardware ordered for small box testing: Mirabox, bananaPi, BeagleBone Black, intel-based dual NIC nodes
+    * Aaron helped rebuild 3.4 bundles
+    * December 4th is when IU security folks will join
+   * Michael
+    * New toolkit UI docs
+    * Testing vulnerability scanners and made some requests to campus
+   * Szymon
+    * Looking at Michael's doc
+   * Eric
+    * Reaching out to various groups to start planning for 3.6 and SDN
+    * Ivan: Suggested Eric also contact GEANT SDN group
+    * Need to firm up future of I2 NDT hosts
+   * Ivan
+    * Port 8090 needs to be open
+   * Jason - Sent the training group doc to the mailing list.  Won't be attending this or next week.   
+ * OPPD Port and sLS port
+  * Short-term: Port 8090 needs to be open
+  * Long-term: May go away IF new bwctl and OPPD merge
+ * Other
+  * Dan will create everyone Jenkins accounts and schedule separate meetings to discuss more details
+  * Two weeks from now meeting is cancelled due to Thanksgiving
  
 == Future Agenda Topics ==
 
