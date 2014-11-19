@@ -32,6 +32,7 @@ This page contains documents pertaining to project planning for the 3.5 release.
 = New Bundling (including Debian) = 
 
 = LS Scalability =
+ * *Project Description/Timeline:* https://docs.google.com/document/d/1sbd9IojrI9S4fM_nWryI3ausV60wwH4UOvjwt-sUoig/edit?usp=sharing
 
 = NDT =
 
