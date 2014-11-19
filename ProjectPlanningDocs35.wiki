@@ -1,0 +1,54 @@
+#summary Project planning documents for version 3.5 of the toolkit
+= Introduction =
+
+This page contains documents pertaining to project planning for the 3.5 release. Th original list of work items can be found [https://docs.google.com/document/d/1SBmPybl1BgUA1exNIzy32uSIDlGBNvi81ZP3HyVo3qY/edit here].
+
+
+= Central Management = 
+ * *Project Description:* https://docs.google.com/document/d/1r3byo7sO3iNsdZqI7ts2dEhgTOwgeqNBKDKI7gJhIQU/edit?usp=sharing
+ * *Project Timeline:* 
+  * _Google Doc:_ https://docs.google.com/spreadsheets/d/1-lmkKkaiQUKI4xiH-rWawwd-LlF9J73YxsdDuQjRxI8/edit?usp=sharing
+  * _Smartsheet (ask Andy for access):_ https://app.smartsheet.com/b/home?lx=z4cE40Y5m7DQGqcy3XfLfA
+
+= Node AutoConfig =
+ * *Design Document:* https://docs.google.com/document/d/1Ammd8PPx79Fks2xWtiy-m6sxtj2lwvmwz7UZSHtnikU/edit?usp=sharing
+ * *Project Description:* https://docs.google.com/document/d/11MCN1OAeE9o-GNPpB7CcJyj3exCsxec-FLtG-KufXPw/edit?usp=sharing
+ * *Project Timeline:* 
+  * _Google Doc:_ https://docs.google.com/spreadsheets/d/12-mIqatywXSh4AaA5PQF5tTpqyNIG7ojAf8SqlobmPM/edit?usp=sharing
+  * _Smartsheet (ask Andy for access):_ https://app.smartsheet.com/b/home?lx=U1A1gmpVWI41zvSAWO1Yng
+
+= BWCTL = 
+
+= MaDDash = 
+ * *Project Description:* https://docs.google.com/document/d/1L4Kd8Mv8UCgu4WMqrB73x-IMB94y-C_kbodNXIvq4Wc/edit?usp=sharing
+ * *Project Timeline:* 
+  * Version 1.2
+   * _Google Doc:_ https://docs.google.com/spreadsheets/d/1Qs0bHmdJK1iWDkG_laxbW45eMAZtBbLL-Ptpg-mG9xc/edit?usp=sharing
+   * _Smartsheet (ask Andy for access):_ https://app.smartsheet.com/b/home?lx=EjAlBLukKaIuieE2W5WMvQ
+  * Version 2.0
+   * _Google Doc:_ https://docs.google.com/spreadsheets/d/1Uq_O44PC286xuRmgArcwLho3R8ssXGgLxNFzD-wcgFM/edit?usp=sharing
+   * _Smartsheet (ask Andy for access):_ https://app.smartsheet.com/b/home?lx=s6UKLVXsuEDjriB-ArnwqA
+
+= New Bundling (including Debian) = 
+
+= LS Scalability =
+
+= NDT =
+
+= Build/test system =
+
+= New GUI =
+ * Project Description: https://docs.google.com/document/d/17y5KWd7SGMQKCnM2gMTrMtAGrTXoVCm-FnWHZV1eQPg/edit?usp=sharing
+= PS UI =
+
+= $100 Nodes =
+
+= Security =
+
+= SDN Roadmap =
+
+= Training Material =
+
+= Web Site =
+
+= Branding/Marketing =
