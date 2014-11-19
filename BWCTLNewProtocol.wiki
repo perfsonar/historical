@@ -59,7 +59,7 @@ The server status consists of an associative array with the following variables:
 
 || Variable || Format || Meaning ||
 || protocol || Floating-Point Number || The version of the protocol that the server understands. Currently, 2.0. ||
-|| time || Floating-Point Unix Timestamp || The server's current time ||
+|| time || Millisecond-Grandularity ISO Timestamp || The server's current time ||
 || ntp_error || Floating-Point Number || The server's maximum NTP error, in seconds ||
 || available_tools || Array Of Strings || A list of the tools available from the server ||
 || version || String || The version of BWCTL this server is running ||
@@ -103,7 +103,7 @@ Client parameters are defined as associative arrays with the following variables
 
 || Variable || Format || Meaning ||
 || protocol || Floating-Point Number || The version of the protocol that the client understands. Currently, 2.0 ||
-|| time || Floating-Point Unix Timestamp || The client's current time ||
+|| time || Millisecond-Grandularity ISO Timestamp || The client's current time ||
 || ntp_error || Floating-Point Number || The client's maximum NTP error, in seconds ||
 
 ==== Endpoint Object Syntax ====
@@ -125,9 +125,9 @@ Scheduling parameters are used as part of scheduling the test. They are defined 
 
 || Variable || Format || Meaning ||
 || priority || Number || Defines the priority of this test. Higher priority tests will preempt lower priority tests. The default priority, if unspecified, is 0. Negative number are valid ||
-|| requested_time || Floating-Point Unix Timestamp || The requested start time for a given test ||
-|| latest_acceptable_time || Floating-Point Unix Timestamp || The maximum start time that the client will accept ||
-|| accepted_time || Floating-Point Unix Timestamp || The actual start time that the server accepted for a given test ||
+|| requested_time || Millisecond-Grandularity ISO Timestamp || The requested start time for a given test ||
+|| latest_acceptable_time || Millisecond-Grandularity ISO Timestamp || The maximum start time that the client will accept ||
+|| accepted_time || Millisecond-Grandularity ISO Timestamp || The actual start time that the server accepted for a given test ||
 
 ==== Tool Parameters Object Syntax ====
 Tool parameters objects define the tool parameters for a given test. They are
@@ -206,7 +206,7 @@ Response:
 {
     "version": 2.0.1,
     "protocol": 2.0,
-    "time": 1415384542,
+    "time": "2014-11-18T06:37:03.5678Z",
     "ntp_error": 1.2,
     "available_tools": [ "iperf", "iperf3", "nuttcp", "traceroute", "tracepath", "paris-traceroute", "owamp", "ping" ]
 }
@@ -221,7 +221,7 @@ Response:
 {
     "version": 2.0.1,
     "protocol": 2.0,
-    "time": 1415384543,
+    "time": "2014-11-18T06:37:04.12345Z",
     "ntp_error": 0.5,
     "available_tools": [ "iperf", "iperf3", "nuttcp", "traceroute", "tracepath", "paris-traceroute", "owamp", "ping" ]
 }
@@ -236,7 +236,7 @@ Request:
 {
     "client": {
         "protocol": 2.0,
-        "time": 1415384543,
+        "time": "2014-11-18T06:37:04.12345Z",
         "ntp_error": 0.8
     },
     "sender_endpoint": {
@@ -260,8 +260,8 @@ Request:
         "packet_size": 8000,
     },
     "scheduling_parameters": {
-        "requested_time": 1415384543,
-        "latest_time": 1415385143
+        "requested_time": "2014-11-18T06:37:04.12345Z",
+        "latest_time": "2014-11-18T06:37:10.5678Z"
     }
 }
 }}}
@@ -276,7 +276,7 @@ Response:
     "server_status": "pending",
     "client": {
         "protocol": 2.0,
-        "time": 1415384543,
+        "time": "2014-11-18T06:37:04.12345Z",
         "ntp_error": 0.8
     },
     "sender_endpoint": {
@@ -302,9 +302,10 @@ Response:
         "packet_size": 8000,
     },
     "scheduling_parameters": {
-        "requested_time": 1415384500,
-        "accepted_time":  1415384700,
-        "latest_time": 1415385100
+        "requested_time": "2014-11-18T06:37:04.12345Z",
+        "accepted_time":  "2014-11-18T06:37:05.12345Z",
+1415384700,
+        "latest_time": "2014-11-18T06:37:10.5678Z"
     }
 }
 }}}
@@ -318,7 +319,7 @@ Request:
 {
     "client": {
         "protocol": 2.0,
-        "time": 1415384543,
+        "time": "2014-11-18T06:37:04.12345Z",
         "ntp_error": 0.8
     },
     "sender_endpoint": {
@@ -344,8 +345,8 @@ Request:
         "packet_size": 8000,
     },
     "scheduling_parameters": {
-        "requesteded_time":  1415384700,
-        "latest_time": 1415385100
+        "requesteded_time":  "2014-11-18T06:37:05.12345Z",
+        "latest_time": "2014-11-18T06:37:10.5678Z"
     }
 }
 }}}
@@ -360,7 +361,7 @@ Response:
     "server_status": "pending",
     "client": {
         "protocol": 2.0,
-        "time": 1415384543,
+        "time": "2014-11-18T06:37:04.12345Z",
         "ntp_error": 0.8
     },
     "sender_endpoint": {
@@ -388,9 +389,9 @@ Response:
         "packet_size": 8000,
     },
     "scheduling_parameters": {
-        "requesteded_time":  1415384700,
-        "accepted_time":  1415384700,
-        "latest_time": 1415385100
+        "requesteded_time":  "2014-11-18T06:37:05.12345Z",
+        "accepted_time":  "2014-11-18T06:37:05.12345Z",
+        "latest_time": "2014-11-18T06:37:10.5678Z"
     }
 }
 }}}
@@ -404,7 +405,7 @@ Request:
 {
     "client": {
         "protocol": 2.0,
-        "time": 1415384543,
+        "time": "2014-11-18T06:37:04.12345Z",
         "ntp_error": 0.8
     },
     "sender_endpoint": {
@@ -432,9 +433,9 @@ Request:
         "packet_size": 8000,
     },
     "scheduling_parameters": {
-        "requesteded_time":  1415384700,
-        "accepted_time":  1415384700,
-        "latest_time": 1415385100
+        "requesteded_time":  "2014-11-18T06:37:05.12345Z",
+        "accepted_time":  "2014-11-18T06:37:05.12345Z",
+        "latest_time": "2014-11-18T06:37:10.5678Z"
     }
 }
 }}}
@@ -447,7 +448,7 @@ Response:
     "server_status": "pending",
     "client": {
         "protocol": 2.0,
-        "time": 1415384543,
+        "time": "2014-11-18T06:37:04.12345Z",
         "ntp_error": 0.8
     },
     "sender_endpoint": {
@@ -475,9 +476,9 @@ Response:
         "packet_size": 8000,
     },
     "scheduling_parameters": {
-        "requested_time": 1415384500,
-        "accepted_time":  1415384700,
-        "latest_time": 1415385100
+        "requested_time": "2014-11-18T06:37:04.12345Z",
+        "accepted_time":  "2014-11-18T06:37:05.12345Z",
+        "latest_time": "2014-11-18T06:37:10.5678Z"
     }
 }
 }}}
@@ -523,7 +524,7 @@ Response:
 {
     "version": 2.0.1,
     "protocol": 2.0,
-    "time": 1415384543,
+    "time": "2014-11-18T06:37:04.12345Z",
     "ntp_error": 0.5,
     "available_tools": [ "iperf", "iperf3", "nuttcp", "traceroute", "tracepath", "paris-traceroute", "owamp", "ping" ]
 }
@@ -541,7 +542,7 @@ Response:
     "server_status": "pending",
     "client": {
         "protocol": 2.0,
-        "time": 1415384543,
+        "time": "2014-11-18T06:37:04.12345Z",
         "ntp_error": 0.8
     },
     "sender_endpoint": {
@@ -569,9 +570,9 @@ Response:
         "packet_size": 8000,
     },
     "scheduling_parameters": {
-        "requesteded_time":  1415384700,
-        "accepted_time":  1415384700,
-        "latest_time": 1415385100
+        "requesteded_time":  "2014-11-18T06:37:05.12345Z",
+        "accepted_time":  "2014-11-18T06:37:05.12345Z",
+        "latest_time": "2014-11-18T06:37:10.5678Z"
     }
 }
 }}}
@@ -585,7 +586,7 @@ Response:
 {
     "version": 2.0.1,
     "protocol": 2.0,
-    "time": 1415384542,
+    "time": "2014-11-18T06:37:03.5678Z",
     "ntp_error": 1.2,
     "available_tools": [ "iperf", "iperf3", "nuttcp", "traceroute", "tracepath", "paris-traceroute", "owamp", "ping" ]
 }
@@ -603,7 +604,7 @@ Response:
     "server_status": "pending",
     "client": {
         "protocol": 2.0,
-        "time": 1415384543,
+        "time": "2014-11-18T06:37:04.12345Z",
         "ntp_error": 0.8
     },
     "sender_endpoint": {
@@ -631,9 +632,9 @@ Response:
         "packet_size": 8000,
     },
     "scheduling_parameters": {
-        "requested_time": 1415384500,
-        "accepted_time":  1415384700,
-        "latest_time": 1415385100
+        "requested_time": "2014-11-18T06:37:04.12345Z",
+        "accepted_time":  "2014-11-18T06:37:05.12345Z",
+        "latest_time": "2014-11-18T06:37:10.5678Z"
     }
 }
 }}}
@@ -650,7 +651,7 @@ Response:
     "server_status": "accepted",
     "client": {
         "protocol": 2.0,
-        "time": 1415384543,
+        "time": "2014-11-18T06:37:04.12345Z",
         "ntp_error": 0.8
     },
     "sender_endpoint": {
@@ -678,9 +679,9 @@ Response:
         "packet_size": 8000,
     },
     "scheduling_parameters": {
-        "requesteded_time":  1415384700,
-        "accepted_time":  1415384700,
-        "latest_time": 1415385100
+        "requesteded_time":  "2014-11-18T06:37:05.12345Z",
+        "accepted_time":  "2014-11-18T06:37:05.12345Z",
+        "latest_time": "2014-11-18T06:37:10.5678Z"
     }
 }
 }}}
@@ -697,7 +698,7 @@ Response:
     "server_status": "accepted",
     "client": {
         "protocol": 2.0,
-        "time": 1415384543,
+        "time": "2014-11-18T06:37:04.12345Z",
         "ntp_error": 0.8
     },
     "sender_endpoint": {
@@ -725,9 +726,9 @@ Response:
         "packet_size": 8000,
     },
     "scheduling_parameters": {
-        "requested_time": 1415384500,
-        "accepted_time":  1415384700,
-        "latest_time": 1415385100
+        "requested_time": "2014-11-18T06:37:04.12345Z",
+        "accepted_time":  "2014-11-18T06:37:05.12345Z",
+        "latest_time": "2014-11-18T06:37:10.5678Z"
     }
 }
 }}}
