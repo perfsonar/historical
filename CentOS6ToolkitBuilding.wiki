@@ -1,5 +1,7 @@
 ﻿#summary Information for building various components of the Toolkit
 
+<wiki:toc max_depth="6" />
+
 == Introduction ==
 
 This page contains information about building various components of the Toolkit in CentOS 6.

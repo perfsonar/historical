@@ -1,4 +1,4 @@
-#summary Guidelines bor Building source RPM packages
+#summary Guidelines for Building source RPM packages
 
 == Source Packaging Background ==
 
