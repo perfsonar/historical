@@ -1,0 +1,34 @@
+#summary November 20, 2014 Conference Call
+
+=   November 20, 2014 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/6:00PM CEST =
+
+ * Attendees:
+
+== Agenda Topics ==
+ * Project planning
+
+== Notes ==
+
+ 
+== Future Agenda Topics ==
+
+== Actions  ==
+
+== Where ==
+Please click this URL to start or join. https://ESNet.zoom.us/j/222169727 
+  
+Join from a dial-in phone: 
+    Dial: +1 (415) 762-9988 or +1 (646) 568-7788
+    Meeting ID: 222 169 727 
+    International numbers available: https://ESNet.zoom.us/zoomconference 
+
+Join from a H.323/SIP room system: 
+
+    Dial: 4.34.125.155 (US East) or 4.35.64.154 (US West) 
+    Meeting ID: 222 169 727 
+
+For example: 222169727@4.34.125.155
+
+== Last Updated ==
+
+$Id$
