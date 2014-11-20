@@ -1,36 +1,35 @@
-#How to build Debian packages for the toolkit
+#summary How to build Debian packages for perfSONAR
 
-== Debian packaging background ==
+== Building Debian packages for perfSONAR ==
+Debian packaging for perfSONAR tools is described in DebianPackaging.
 
-All Debian packaging related files are contained within the 'debian' directories of each package.
+This document will describe how to actually build the packages from the code repository.
 
-More information about Debian packaging can be found at the following locations:
-- https://www.debian.org/doc/manuals/maint-guide/
-- https://www.debian.org/doc/debian-policy/
-- https://www.debian.org/doc/packaging-manuals/perl-policy/
-
-== perfSONAR Debian packages guidelines ==
-
-=== Package naming ===
-
-=== Version and release numbering ===
-
-== How to actually build a package ==
+== Building host ==
 
 The building host needs the following packages to be installed prior to any build:
-- build-essential
-- devscripts
-- debhelper
-- dh-make
-- dh-make-perl
-- dh-exec
-- quilt
+ * build-essential
+ * devscripts
+ * debhelper
+ * dh-make
+ * dh-make-perl
+ * dh-exec
+ * quilt
 
+This can be easily installed with:
 {{{
 aptitude install build-essential devscripts debhelper dh-make dh-make-perl dh-exec quilt
 }}}
 
-Build command in the package directory (you must have a debian directory inside the package directory):
+== Building a single package ==
+
+As a regular use, launch the following build command in the package directory (you must have a debian directory inside the package directory):
 {{{
 debuild -us -uc -b
 }}}
+
+
+== Building multiple packages ==
+
+
+== Building the toolkit images ==

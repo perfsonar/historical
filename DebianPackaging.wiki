@@ -1,0 +1,64 @@
+#summary Debian packaging specifics for perfSONAR
+
+== Debian packaging background ==
+
+All Debian packaging related files are contained within the 'debian' directories of each package.
+
+More information about Debian packaging can be found at the following locations:
+ * https://www.debian.org/doc/manuals/maint-guide/
+ * https://www.debian.org/doc/debian-policy/
+ * https://www.debian.org/doc/packaging-manuals/perl-policy/
+
+== perfSONAR Debian packages guidelines ==
+
+=== Generalities ===
+
+Debian packaging is a lot easier if usual conventions are followed.  These mainly are:
+
+ * using FHS guidelines (ie: installation in `/usr/`)
+ * using GNU build conventions, for example using the `$DISTDIR` variable in the Makefile
+ * using the regular Makefile with the `install` target
+
+=== Package naming ===
+The [https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Source Debian policy states]: “ _Package names must consist only of lower case letters (a-z), digits (0-9), plus (+) and minus (-) signs, and periods (.). They must be at least two characters long and must start with an alphanumeric character._ ”
+
+We'll have 2 set of names:
+
+ * services, daemons, binaries, etc will have a name starting with *perfsonar-*
+ * common libraries will have a name starting with *libperfsonar-* then suffixed by the implementation language as recommended by the Debian policy (*-perl* for example).
+
+=== Version and release numbering ===
+
+=== Debian specifics ===
+When there are Debian specifics to packaging that cannot be ported back to the main building rules, build patches can be used.  They resides in the `debian/patches` directory and are usually maintained with the `quilt` command.
+
+== List of Debian packages ==
+Here is the list of Debian packages foreseen for the Debian port, a list of services and a list of libraries used by the services:
+
+{{{
+perfsonar-bwctl-mp
+perfsonar-lsregistrationdaemon
+perfsonar-lscachedaemon
+perfsonar-meshconfig-agent
+perfsonar-meshconfig-guiagent
+perfsonar-meshconfig-JSON
+perfsonar-nagios
+perfsonar-owamp-mp
+perfsonar-regulartesting
+perfsonar-sls-bootstrap-client
+perfsonar-sls-bootstrap-server
+perfsonar-service-test
+perfsonar-toolkit
+
+libperfsonar-perl
+libperfsonar-sls-perl
+libperfsonar-net-perl
+libperfsonar-owp-perl
+libperfsonar-oppd-perl
+libperfsonar-meshconfig
+
+esmond
+}}}
+
+== Building packages ==
+Refer to DebianBuild for information about actually building the Debian packages.
