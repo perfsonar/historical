@@ -40,11 +40,15 @@ This page contains documents pertaining to project planning for the 3.5 release.
 
 = Build/test system =
 
+ * * Project Description & Timeline: * https://docs.google.com/document/d/12cQlHVrbnA7cbaYj8TwEF0LRXw_1uf7vixnXpKvykBw/
+
 = New GUI =
  * *Project Description & Timeline:* https://docs.google.com/document/d/17y5KWd7SGMQKCnM2gMTrMtAGrTXoVCm-FnWHZV1eQPg/edit?usp=sharing
 = PS UI =
 
 = $100 Nodes =
+
+ * * Project Description & Timeline: * https://docs.google.com/document/d/1Ef3GHhntef52M-Vhl5PaDbANz7jlJi43WKjozpQcE90/
 
 = Security =
 
