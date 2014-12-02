@@ -32,6 +32,7 @@ This page contains documents pertaining to project planning for the 3.5 release.
 = New Bundling (including Debian) = 
  * *Project Description:*
   * [https://docs.google.com/document/d/11eeTwzscSuzNAC_P7-MNNrLk_TmxLI2kV3HhUM1zji8/edit?usp=sharing Debian Port and Support]
+  * [https://docs.google.com/a/es.net/document/d/1qt7FK2LaNoVPCyUnJy7wHI5yMtHMHSZwvMidy-xOBSU/ New Bundles]
 
 = LS Scalability =
  * *Project Description/Timeline:* https://docs.google.com/document/d/1sbd9IojrI9S4fM_nWryI3ausV60wwH4UOvjwt-sUoig/edit?usp=sharing
