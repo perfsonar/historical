@@ -1,7 +1,7 @@
 #summary Project planning documents for version 3.5 of the toolkit
 = Introduction =
 
-This page contains documents pertaining to project planning for the 3.5 release. Th original list of work items can be found [https://docs.google.com/document/d/1SBmPybl1BgUA1exNIzy32uSIDlGBNvi81ZP3HyVo3qY/edit here].
+This page contains documents pertaining to project planning for the 3.5 release. The original list of work items can be found [https://docs.google.com/document/d/1SBmPybl1BgUA1exNIzy32uSIDlGBNvi81ZP3HyVo3qY/edit here].
 
 
 = Central Management = 
