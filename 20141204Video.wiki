@@ -2,13 +2,17 @@
 
 =   December 4, 2014 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/6:00PM CEST =
 
- * Attendees:
+ * Attendees: Jason, Hakan, Andy, Antoine, Brian, Aaron, Luke, Dan, Michael, Soraya, Sowmya, Eric
  * Apologise: Szymon, Valentin, Roland
 
 == Agenda Topics ==
  * Normalize project plan
-
+ 
 == Notes ==
+ * Normalize project plan
+  * Action: Everyone will normalize smartsheet with time set to "developer days" and not worry about dates at this point. This needs to be done by start of work day on Monday.
+   * If you do not have access to smartsheet, click on the link Soraya sent and click the button to request access
+  * Security talk needs to be re-scheduled from next week to a later date. Preference is for after the 1st of the year, but if that does not work we will fallback to the 18th.
 
  
 == Future Agenda Topics ==
