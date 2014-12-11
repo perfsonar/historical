@@ -2,13 +2,23 @@
 
 =   December 11, 2014 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/5:00PM CET =
 
- * Attendees:
+ * Attendees: Hakan, Brian, Jason, Rade,Soraya, Aaron, Roland, Shawn, Antoine, Dan, Michael, John H., Sowmya, Ivan
  * Apologise: Szymon
 
 == Agenda Topics ==
  * Project plan review
  
 == Notes ==
+ * Project plan review
+  * Everyone filled in estimated FTE time
+  * Managers need to review and prioritize things
+ * Debian Port
+  * Antoine will send some patches with changes, can also look at branch
+ * BWCTL issue
+  * zerocopy on by default
+  * Discussed options on zerocopy defaults and how to set them. Agreed to leave as default but need to document. Also look at adding options to overwrite.
+  * Looking at race condition as well
+
 
 == Future Agenda Topics ==
 
