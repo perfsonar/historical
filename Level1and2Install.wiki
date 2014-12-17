@@ -21,16 +21,15 @@ If you would like to do a Level 1 Installation, follow the instructions found in
 == Step 1: Configure Yum ==
 The process configures yum to point at the necessary repositories to get packages needed for perfSONAR. You will need to follow the steps below:
 
-1. Install the EPEL RPM. Note that as of September 2014, this is now a part of the CentOS Extras repository.
-
-2. Download the Internet2-repo package that will update yum to point at the repository containing the perfSONAR packages:
- * *For i386 systems:* wget http://software.internet2.edu/rpms/el6/i386/main/RPMS/Internet2-repo-0.4-2.noarch.rpm
- * *For x86_64 systems:* wget http://software.internet2.edu/rpms/el6/x86_64/main/RPMS/Internet2-repo-0.4-2.noarch.rpm
-
-3. As a root user, install the two RPMs onto the system with the following commands:
+1. Install the EPEL RPM. Note that as of September 2014, this is now a part of the CentOS Extras repository. e.g.:
 {{{
-# yum install epel-release
-# yum localinstall Internet2-repo-0.4-2.noarch.rpm
+# rpm -hUv https://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+}}}
+
+2. Download the Internet2-repo package that will update yum to point at the repository containing the perfSONAR packages  (Note: For i386 systems replace x86_64 with i386):
+
+{{{
+#rpm -hUv http://software.internet2.edu/rpms/el6/x86_64/main/RPMS/Internet2-repo-0.5-3.noarch.rpm
 }}}
 
 4. Refresh yum's cache so it detects the new RPMS
