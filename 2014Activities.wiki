@@ -1,0 +1,2368 @@
+#summary List of perfSONAR Activities from 2014
+
+== 2014 Activities ==
+
+  * [2014Activities#20140106Video January 6, 2014 Conference Call]
+  * [2014Activities#20140113Video January 13, 2014 Conference Call]
+  * [2014Activities#20140127Video January 27, 2014 Conference Call]
+  * [2014Activities#20140203Video February 3, 2014 Conference Call]
+  * [2014Activities#20140210Video February 10, 2014 Conference Call]
+  * [2014Activities#20140224Video February 24, 2014 Conference Call]
+  * [2014Activities#20140310Video March 10, 2014 Conference Call]
+  * [2014Activities#20140324Video March 24, 2014 Conference Call]
+  * [2014Activities#20140331Video March 31, 2014 Conference Call]
+  * [2014Activities#20140414Video April 14, 2014 Conference Call]
+  * [2014Activities#20140421Video April 21, 2014 Conference Call]
+  * [2014Activities#20140428Video April 28, 2014 Conference Call]
+  * [2014Activities#20140505Video May 5, 2014 Conference Call]
+  * [2014Activities#20140512Video May 12, 2014 Conference Call]
+  * [2014Activities#20140519Video May 19, 2014 Conference Call]
+  * [2014Activities#20140527Video May 27, 2014 Conference Call]
+  * [2014Activities#20140611Video June 11, 2014 Conference Call]
+  * [2014Activities#20140618Video June 18, 2014 Conference Call]
+  * [2014Activities#20140625Video June 25, 2014 Conference Call]
+  * [2014Activities#20140702Video July 2, 2014 Conference Call]
+  * [2014Activities#20140709Video July 9, 2014 Conference Call]
+  * [2014Activities#20140716Video July 16, 2014 Conference Call]
+  * [2014Activities#20140723Video July 23, 2014 Conference Call]
+  * [2014Activities#20140730Video July 30, 2014 Conference Call]
+  * [2014Activities#20140806Video August 6, 2014 Conference Call]
+  * [2014Activities#20140813Video August 13, 2014 Conference Call]
+  * [2014Activities#20140818ChartsVideo August 18, 2014 Conference Call]
+  * [2014Activities#20140820Video August 20, 2014 Conference Call]
+  * [2014Activities#20140827Video August 27, 2014 Conference Call]
+  * [2014Activities#20140903Video September 3, 2014 Conference Call]
+  * [2014Activities#20140910Video September 10, 2014 Conference Call]
+  * [2014Activities#20140917Video September 17, 2014 Conference Call]
+  * [2014Activities#20140924Video September 24, 2014 Conference Call]
+  * [2014Activities#20141001Video October 1, 2014 Conference Call]
+  * [2014Activities#20141008Video October 8, 2014 Conference Call]
+  * [2014Activities#20141015Video October 15, 2014 Conference Call]
+  * [2014Activities#20141020DevMeeting October 20, 2014 Conference Call]
+  * [2014Activities#20141022Video October 22, 2014 Conference Call]
+  * [2014Activities#20141106Video November 6, 2014 Conference Call]
+  * [2014Activities#20141113Video November 13, 2014 Conference Call]
+  * [2014Activities#20141204Video December 4, 2014 Conference Call]
+  * [2014Activities#20141211Video December 11, 2014 Conference Call]
+
+=== 20140106Video === 
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * Release status
+ * pS JS Library - https://npmjs.org/package/perfsonar
+ * NTP Vulnerability and Fix Status.  Statement to community?
+
+==== Notes ====
+
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * Release status
+ * pS JS Library - https://npmjs.org/package/perfsonar
+ * NTP Vulnerability and Fix Status.  Statement to community?
+
+=== 20140113Video === 
+
+==== Agenda/Minutes ====
+
+ * Attendees: Brian, Sowmya, Jason, Aaron, Warren, Andy, Dan
+  
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * LS Registration Bug on ANTG Host (Sowmya)
+ * Release status
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Worked on new sLS GUI
+    * Built new Live CD
+    * NTP issue and firewall issue
+    * Interesting mysql issue that we can't do much about
+   * Aaron
+    * Working on RPMS for toolkit version with new testing infrastructure
+    * Could potentially use on ESnet to test with iperf3
+   * Sowmya
+    * Working on subscribe issues
+    * Working on some 3.4 issues
+    * Need to setup a cache on antg
+   * Brian
+    * iperf3 official release is out
+    * sLS GUI is functional 
+   * Jason
+    * Working on materials for IU webinar
+   * Warren
+    * Working on re-implementing Pythia using Hades data
+    * Working on smokeping wrapper for OWAMP
+   * Dan
+    * LiveCD installed and going through checklist
+ * LS Registration Bug on ANTG Host (Sowmya)
+    * Sowmya has a fix 
+ * Release status
+    * Will address issues and then re-evaluate later in the week
+
+=== 20140127Video === 
+
+==== Agenda/Minutes ====
+
+ * Attendees: Jason, Aaron, Brian, Sowmya, Michael, Eric, Warren
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * Release status
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Got LiveCD working with firewall rules, gave it to USATLAS
+    * Did some cfengine work to shuffle around ps1-6.es.net hosts. This will lead to a new sLS that replaces ps4.s.net
+    * Also fixed some issues with ESnet sLS registrations
+    * Not much progress on MA code, but did exchange email with Dale Carder about testing
+   * Aaron
+    * Got version of the toolkit with new testing framework
+    * Added some code to bwctl to better handle multiple interfaces
+   * Sowmya
+    * The ps4 sLS went down and not sure why. Working on adding more logging to prevent this
+   * Brian
+    * Meeting with GEANT on Feb 19th
+    * Pushed out new bwctl to all hosts
+   * Jason
+    * Next OIN workshop this week. Eli and Jason will be presenting. 
+   * Warren
+    * Asked if can do custom firewall rules. Answer is yes you can
+    * Working on next iteration of Pythia. Discussion of how to get raw data.
+   * Michael
+    * Dan and Michael have been familiarizing themselves with tools
+    * Need to look at the iperf ports in bwctld.conf
+    * Will be getting added to support rotation soon. Andy will update rotation.
+   * Eric
+    * No new updates
+    * Will check on new email list for internal stuff
+ * Release status
+   * Will go straight to final if current testers say things look good. Shooting for Monday next week.
+
+=== 20140203Video === 
+
+==== Agenda/Minutes ====
+
+ * Attendees: Sowmya, Aaron, Jason, Andy, Brian, Michael, Dan, Eric
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * Release status
+ * NDT Flash Client (volunteers to install?)
+ * NSF pS WS Prep 
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Release prep, hopefully should be out today
+    * Worked on test data generation stuff for MA
+   * Sowmya
+    * GeoIP lookup on Admin Info GUI
+    * Worked on display of stuff on toolkit
+    * Still looking at MSU graph issues
+   * Aaron
+    * Plans to start doing an RC of regular testing framerwork after 3.3.2
+    * Also finishing bwctl 1.5.1. Reorganized bwctl options and added some long-form options to make things easier. 
+   * Jason
+    * OIN workshop last week.  
+    * Suggested MTU testing, which would be useful.
+    * Also wanted to pause tests
+   * Brian
+    * No updates 
+   * Eric
+    * No updates
+   * Michael
+    * iperf2 issue resolved
+    * everything else looks good. 
+   * Dan
+    * Started doing support this week
+    * Started testing 3.4 this week.  
+ * Release status
+  * Release today is the plan (see Andy update)
+ * NDT Flash Client (volunteers to install?)
+  * We should start looking at this get a feel. Will let current people on the list get more experience with it. 
+  * IU will start trying to test
+ * NSF pS WS Prep 
+  * Brian, Jason and Eric on hook to do history of perfsonar
+ * Email lists
+  * Table to next week
+ * BWCTL scheduling pings 
+  * Decided that ping should not run at same time as iperf at this time. That's how bwctl currently work. Latency stuff will run at same time up to certain number of hosts.
+
+=== 20140210Video === 
+
+==== Agenda/Minutes ====
+
+ * Attendees: Jason, Andy, Sowmya, Warren, Dan, Michael
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * Git Conversion
+ * Annotations to OWAMP graphs, when BWCTL was running and could have self inflicted loss
+ * proposed email list consolidation. Any comments/disagreements?
+
+{{{
+Merge these 2:
+  https://lists.internet2.edu/sympa/subscribe/i2-perfsonar
+  https://lists.internet2.edu/sympa/subscribe/perfsonar-dev
+ to perfsonar-dev
+
+Merge these 3:
+  https://lists.internet2.edu/sympa/subscribe/perfsonar-user
+  https://lists.internet2.edu/sympa/subscribe/perfsonar-ps-users
+  https://lists.internet2.edu/sympa/subscribe/performance-node-users
+to perfsonar-user
+
+Merge these 3:
+  https://lists.internet2.edu/sympa/subscribe/perfsonar-ps-announce
+  https://lists.internet2.edu/sympa/subscribe/perfsonar-announce
+  https://lists.internet2.edu/sympa/subscribe/performance-node-announce
+ to perfsonar-announce
+
+and make the old names aliases to the new name. These would all be open lists.
+
+We should maybe also maybe have a closed 'core developer' list with just folks with commit rights to the repo?
+
+}}}
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * 3.3.2 release. fixed issue with mirror list
+    * Worked on MA. Worked with Monte on MA rpm. Issues with python version on CentOS.
+   * Sowmya
+    * Fixed bug with owamp plotting, in 3.3.2 repo
+   * Jason
+    * Going to clean-up wiki
+    * Waiting on I2's answers for web site
+    * testing bwctl and kernel build
+   * Warren
+    * Nothing to report
+   * Dan
+    * NDT Flash client not working
+   * Michael
+    * Tested installing NetInstall. Lots of old docs made it tricky
+   * Aaron
+    * Found issue with web100 and sysctl causing the system to crash
+    * New version of BWCTL out. Hopefully do final release at the end of week. 
+ * Git Conversion
+  * Had serious merging issues last week due to the way svn handle's tree conflicts
+  * Suggest move to git on Google Code
+  * Action: Aaron will look at moving to git 
+  * Action: After migration create the wiki where various repos exist
+  * Will also need to update links to anonsvn
+ * Annotations to OWAMP graphs, when BWCTL was running and could have self inflicted loss
+  * Want to mark when bwctl run. Lots of moving parts.
+  * Dan: Can mark user annotations? Action: Add issue
+ * proposed email list consolidation. Any comments/disagreements?
+  * Jason: Would like a tighter list for perfsonar-dev
+  * Jason: What about bwctl, owamp and NDT?
+  * Aaron: Can't get rid of NDT, but maybe owamp and bwctl
+  * Dan: From new user perspective 
+  * Jason and Andy both think we can get rid of bwctl and owamp lists since same people
+  * Jason thinks we should not just auto-add from previous development lists. Reset and let people re-join. Maybe rename to perfsonar-development or something so its completely new. 
+  
+=== 20140224Video === 
+
+Attendees: Aaron, Sowmya, Warren, Michael, Brian, Andy
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Sowmya
+   * Brian
+   * Warren
+   * Michael
+   * Dan
+   * Aaron
+   * Jason
+   * Eric
+ * Git Conversion Updates
+ * NTP Security Response Update & General Discussion on Nimble Responses
+ * email list consolidation update
+
+==== Notes ====
+
+ * Developer Updates
+   * Andy
+    * Worked on MA
+   * Sowmya
+    *  Updated LS RPM
+   * Brian
+    * Met with perfSONAR MDM team last week. MDM group looking at integrating with perfSONAR-PS
+    * perfSONAR workshop was also last week. Lots of interesting SDN topics.
+   * Warren
+    * New perfsonar machines
+   * Michael
+    * Got kernel to build
+    * Noted changelog patch does not apply. Maybe we should remove it since it never applies?
+    * Michael raised question about Web10G. Explained still exploring and making sure tools are compatible.
+    * Michael will also supplement Jason's documentation on virtual machines with VirtualBox stuff
+   * Dan
+    * See Michael's update
+   * Aaron
+    * Released bwctl 1.5.1
+    * Roderick trying the regular testing
+    * Modified LS registration daemon to add BWCTL tools supported
+ * Git Conversion Updates
+  * Moved the source code to git
+  * Moved bwctl and owamp to git repository for perfsonar as well
+ * NTP Security Response Update & General Discussion on Nimble Responses
+  * Table until next week 
+ * email list consolidation update
+  * Table until next week
+  
+=== 20140310Video === 
+
+Attendees: Andy, Jason, Dan, Ben, Aaron, Eric
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * EOL for pSPT 3.2.x and creation of a valut
+ * Research Technology Transfer/Incubation Process
+   * Globus: http://dev.globus.org/wiki/Incubator/Incubator_Process
+   * Draft being circulated: https://drive.google.com/file/d/0B5uJA6NtbwMLdkpORWlmTWNNaTA/edit?usp=sharing
+
+==== Notes ====
+ * Nagios checks
+  * Ben Nelson from IU joined and discussed current use of Nagios checks.
+  * Noted that seeing a lot of timeouts with Nagios.
+  * Andy noted new MA should be ready next month, that should help
+  * Could also try maddash, it likely throttles things better for PS then Nagios
+  * Ben noted will try MA when its ready and will keep using MySQL backdoor for current stuff
+ * Developer Updates
+   * Andy
+    * Vacation last week
+    * Worked on esmond. Getting close, just looking at authentication options. All writes, summarizations and queries should be working.
+   * Aaron
+    * Paternity leave last 2 weeks
+    * Fixed typo in Level 2 bundle
+    * Fixed NDT code
+   * Dan
+    * Worked through GeiIP issues on GUIs
+    * Also worked through google API issue in graphs
+    * 3.4 testing
+   * Brian
+    * Minor bug fix for iperf3 coming out in the next couple days
+   * Jason
+    * Cleaning-up mesh
+    * OIN workshop next week
+   * Eric
+    * Nothing else to update
+ * EOL for pSPT 3.2.x and creation of a vault
+  * ACTION: Move them to separate value. Aaron will let us know location. 
+ * Research Technology Transfer/Incubation Process
+  * Reviewed documents. Looks pretty good. next step to hand to steering group.
+ * OSG Test Infrastructure
+  * OSG has a full Koji setup where we could do some testing
+  * They will carve out a section for us to test
+  * May be interested in a meta-package that does not require an ISO
+  * Also would be interested in non-web100 version w/o NDT and NPAD
+    * It would be another version to test is a drawback
+    * Group needs to think about this more
+
+=== 20140324Video === 
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Jason
+   * Eric
+ * Old SVN Repo
+   * Disable or delete to prevent confusion (will still be used for RPM repo) including anon
+   * Update docs to point to git
+ * what should be registered in the LS for multi-homed hosts, and how to indicate which interface is for owamp, and which for bwctl
+    * maybe just: tputInterface=[list of addresses], latInterface=[list of addresses]
+ * enable sshd by default?
+ * using OSG Kogi for testing
+ * EOL Announcement going out Friday, here is the announcement text:
+{{{
+Greetings;
+
+The perfSONAR project has finalized the end of life steps for all 3.2 versions of the pS Performance Toolkit.  As of today, March 28th 2014, this product will not be supported and we strongly encourage all users to migrate to the 3.3 release series immediately.  Note that CentOS packages will continue to be updated by upstream sources, but builds to perfSONAR specific packages will not be available, including web100 patched kernels and build-specific updates to the measurement tools.  
+
+The project has created a "vault" containing the last builds of project software:
+
+ http://software.internet2.edu/vault/
+
+The Internet2 repository software (version 0.2-9 and above for version 3.2 users) contains directives to enable this feature.  The repository package can be found in these locations, or will be updated via YUM:
+
+ http://software.internet2.edu/rpms/el5/x86_64/main/RPMS/Internet2-repo-0.2-9.noarch.rpm
+ http://software.internet2.edu/rpms/el5/i386/main/RPMS/Internet2-repo-0.2-9.noarch.rpm
+
+The Vault will function for existing toolkit builds once enabled, it will not allow someone to install a fresh instance from a netinstall ISO.  To enable this repo:
+
+ 1) Edit the "/etc/yum.repos.d/Internet2-Vault.repo" file and change "enabled = 0" to "enabled = 1" for both repositories in this file
+
+ 2) Run 'yum update' to update the cache of packages
+
+Thanks;
+
+The pS Performance Toolkit Development Team
+}}} 
+
+==== Notes ====
+  * Developer Updates
+  * Andy
+   * iperf3 mesh going on ESnet
+   * esmond integrated into regular testing. hopefully deploy on ESnet test hosts soon
+     * Will need to update clients 
+  * Jason
+   * Consolidated mailing lists
+   * Went through NTP servers that are blocked
+  * Dan
+   * Dan tested new kernel
+   * Also looking at issues can help with. Going through the tracker this week.
+  * Michael
+   * No updates
+  * Brian
+   * Did issue tracker clean-up.
+  * Sowmya
+   * Worked on sLS cache. Will probably deploy something in the next week or so. 
+  * Warren
+   * No updates
+  * Aaron
+   * Modified regular testing to do tracepath. Tracepath output is odd, for example with one hop.
+   * Committed some stuff for changes to SSH. RPM will just leave ssh alone. The kickstart will disable it.
+ * Old SVN Repo
+  * Decided to remove old repo
+ * what should be registered in the LS for multi-homed hosts, and how to indicate which interface is for owamp, and which for bwctl
+  * Decided to register in the service record just the addresses you want bwctl/owamp, etc
+ * enable sshd by default?
+  * Enable ssh by default and set start-up script to answer questions about new user 
+ * using OSG Koji for testing
+  * Luke volunteered Dan and Michael to look
+ * EOL Announcement going out Friday, here is the announcement text:
+  * Let Jason know if looks good. 
+
+=== 20140331Video === 
+
+Attendees: Brian, Jason, Aaron, Sowmya, Dan, Michael, Andy
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+    * Esmond rpms ready
+    * Esmond deployed on Amazon. Ran into issue with regular testing.
+    * Will deploy on ESnet next. Need to talk to Brendan about best approach.
+   * Aaron
+    * Added schedule option to bwctl so can specify times for bwctl to run
+    * Next official release of bwctl will be 1.5.2. Not sure when
+    * Brian would like iperf3 dynamic lib in bwctl. RPM needs header files for that to work. 
+   * Sowmya
+    * Built a new sLS RPM. Ready to test.
+     * Andy: ps-east and ps-west are ready for testing the sLS
+    * Sowmya will remove overview graphs
+   * Dan
+    * See Michael's update 
+   * Michael
+    * Comparing tcpinfo to web100 to see what we can use for NDT
+    * Also found tool called bwdetail that does something similar
+   * Brian
+    * New iperf3 released 
+   * Jason
+    * Mailing lists updated 
+    * Jason is pow this week
+ * MA registrations
+  * Andy proposed we register simplified records of tests
+  * Group agreed on general idea, Andy will come up with more concrete proposal
+ * Geting starting on contributing code
+  * Most of code guidelines on Wiki
+  * Most of commits go to trunk
+ * 3.4 release plan
+  * Target is for late May to have things done, and mid-June for first RC
+ * OSG Koji
+  * Andy, Aaron, Dan, and Michael should get certs as well 
+
+=== 20140414Video === 
+
+Attendees: Andy, Jason, Ken, Aaron, Michael, Dan
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Dan
+   * Michael
+   * Brian
+   * Jason
+ * Project's role in CVE announcement - develop a timeline/expectations for community?  Identify project resources to better deal with situations?  
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Deployed esmond on some hosts
+    * Created Perl API
+    * Updated nagios checks to talk to esmond
+    * Working on API docs
+    * Andrew Sides started back up
+   * Aaron
+    * Patched Cacti
+    * Worked on streaming bwctld tests (i.e. test that run whenever other stuff isn't)
+   * Jason
+    * Met with OSG last week
+    * Don't support ARM, but they are looking into it.
+    * Feature request for on-demand BWCTL looks like 
+    * Work with Andy and Aaron on identifying toolkit packages for meta package
+    * Resuming wiki work
+   * Dan
+    * Write-up on Koji vs Jenkins. Jenkins seems more generic, Kojii just for RPMs
+    * Started on issues that were identified to do. Will do new charting stuff. 
+   * Michael
+    * Looking at pSB issue
+    * Action: Andy will look through tracker for obsoleted pSB issues
+   * Brian
+    * Security POW - group didn't like the idea. POW can triage
+    * Need to figure out policy as it relates to CVE
+    * First week in June is a code sprint
+    * perfSONAR requirements gathering summit last week. popular session, room was at capacity
+    * lots of interest in $100 perfsonar nodes. lots of questions about that.
+    * Talked about web10g. Seems like support for rh7 is what web10g group is focused on (i.e. 3 series kernels)
+ * Project's role in CVE announcement - develop a timeline/expectations for community?  Identify project resources to better deal with situations?  
+  * See updates
+
+=== 20140421Video === 
+
+Attendees: Andy, Jason, Michael, Dan, Brian
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Dan
+   * Michael
+   * Brian
+   * Jason
+ * /boot filling up with kernels.  Anything we can do?
+   * Reported from various users, appears to be related to defaults for netinstall (that we can't change?)
+   * Can we use an existing disk partition monitor, have it send mail?  Can we automatically remove old kernels in a non-destructive way?  Can we resize or merge the partition?
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Wrote docs for esmond
+    * Met with RNP, they are evaluating esmond for their uses
+   * Michael
+    * Worked on lost of issues, fixing NaN issue with bwctl limits
+    * Looking at error vs warning in GUI
+   * Dan
+    * Shoring up error message with OWAMP failing when NTP really far off
+    * Looking at graphs next
+    * Brian: It would be nice to collect ntp clock drift. Need aaron, might be a cacti plugin that's easy to install. 
+   * Jason
+    * Waiting for go ahead on new web space
+    * Giving talk later this week, looking at a few issues
+   * Brian
+    * Bruce patched iperf3 with slightly different timing
+ * /boot filling up with kernels.  Anything we can do?
+   * Many things to look at. Not sure we want automated script.
+   * Maybe look at tools to send emails about disk
+   * Jason creating an issue
+
+=== 20140428Video === 
+
+Attendees: Andy, Jason, Michael, Sowmya, Brian, Aaron
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Dan
+   * Michael
+   * Brian
+   * Jason
+ * MA LS Registration Proposal (Andy)
+  * https://code.google.com/p/esnet-perfsonar/wiki/NewMALSRegistrations
+ * MA Backward compatibility
+ * new graphs for new MA, design and functionality
+ * cacti and NTP monitoring
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Finished esmond docs
+    * Worked on LS reg proposal
+    * Debugged bwctl with aaron
+    * Various POW things
+   * Michael
+    * Worked on gui for admin info
+    * worked on graphing. see later. 
+   * Brian
+    * Spent some time with cubox and have fedora working
+    * Asked Monte to start looking at GridFTP log feeder
+   * Sowmya
+    * Testing ps-east and ps-west sLS 
+   * Aaron
+    * Debugging issues on bwctl
+    * First issue, RNG was not getting seeded correctly so stuff getting restarted at same time could be problematic
+    * Results were taking too long to come back because of new 10 second timeout to prevent bwctl from finishing. Increased to 60 sec and gave to Andy
+    * Discussion about send and receive side info provided by bwctl. Conclusion was best way would be for iperf3 to share interval info for both sides.
+    * Playing with Cacti scripts to do NTP. Has graph, but not sure stats are right
+    * Looking at source-based routing. Works in Ipv4 but not Ipv6. Maybe we should say we just support interfaces on different subnets?
+   * Jason
+    * Call with CARnet about interesting VPN case
+    * CCINE workshop this week and giving perfsonar talks    
+ * MA LS Registration Proposal (Andy)
+  * https://code.google.com/p/esnet-perfsonar/wiki/NewMALSRegistrations
+  * Aaron suggested change source and destination to source-address and destination-address to allow for possibility of other fields in the future
+  * I was noted that its also possible to register domains and communities for a test 
+  * Other than that looks good.
+ * MA Backward compatibility
+  * We have already adapted Nagios to talk to both, working on adapting graphs
+  * The question is do we need a translation interface that accepts SOAP and maps to esmond?
+  * Group decided it would be best if we ask about clients not already out there. Andy will draft email for approval by group.
+ * new graphs for new MA, design and functionality
+  * Lots of things we want
+  * Conclusion: Get current graphs working with esmond by RC1, for RC2 try to get brand new graphs
+ * cacti and NTP monitoring
+  * See Aaron report
+
+=== 20140505Video === 
+
+Attendees:  Dan, Michael, Eric, Brian, Sowmya, Jason, Aaron
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Dan
+   * Michael
+   * Brian
+   * Jason
+ * cacti and NTP monitoring: updates?
+
+==== Actions  ====
+ 
+ * Aaron to poke some folks re: NTP Cacto plots
+ * Aaron to do a rc1 release of bwctl 1.5.3
+ * Brian to write up cubox instructions.
+ 
+
+=== 20140512Video === 
+
+Attendees: Brian, Jason, Aaron, Michael, Dan
+
+==== Agenda Topics ====
+  * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Dan
+   * Michael
+   * Brian
+   * Jason
+ * Issues
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Fixed client
+    * Working on toolkit integration
+   * Aaron
+    * BWCTL RC released
+     * Should be deployed on ESnet
+    * Cleaning up Toolkit, removing PingGER, old MAs. updated cacti handling
+    * Looking at getting code signing cert for NDT
+    * Andy said looking at network namespaces too. Will bug Aaron with what he finds. 
+   * Jason
+    * Worked on some quick and dirty graphs to display data
+   * Dan
+    * Working on plotting. Summary page mostly done. Mostly smooth sailing. Talking to Andy about how to increase the performance.
+   * Michael
+    * Fixed issue on highlighting admin info fields
+    * Removed limits section from interface
+   * Sowmya
+    * Building kernel 
+    * Tracking down sLS issue with cache on test server
+   * Brian
+    * GridFTP MA deployed on diskpts
+    * No replies on old SOAP interface. Plan is not to include translation layer.
+    * MP RPMs from GEANT for testing. Will work with Andy to test.
+ * Issues
+  * A few assignment changes, people will review but overall looks OK
+
+==== Future Agenda Topics ====
+
+Any questions on these?
+
+https://code.google.com/p/perfsonar-ps/issues/list?can=2&q=milestone%3DRelease3.4+AND+status%3DNew+OR+status%3AStarted
+
+=== 20140519Video === 
+
+Attendees: Michael Johnson, Dan Doyle, Joe Breen, Sowmya Balasubramanian, 
+
+==== Agenda Topics ==== 
+  * Developer Updates
+   * Andy
+   * Sowmya
+   * Aaron
+   * Dan
+   * Michael
+   * Brian
+   * Jason
+ * TBD
+
+==== Notes ==== 
+   * Developer Updates
+   * Andy
+    * Fixed some issues, esmond packaging mostly working.
+    * IU suggested 5 minute summaries. Andy to add to test servers and defaults on toolkit. 
+   * Michael
+    * Please let Michael know if you have feedback on the GUI
+   * Dan
+    * Backward compatibility discussion fro graphs
+    * Decided to have auto-redirect to old graphs
+   * Sowmya
+    * All NTP servers working in spite of issue description
+     * Will add all other hosts listed there
+     * Aaron: Long list should be fine if "select closest servers" button doesn't take too long
+    * Uploaded web100 kernel with correct signature. Sending announcement today
+   * Aaron
+    * LS registration daemon clean-up. Hopes to have cleaned-up in the next day or two.
+
+=== 20140527Video === 
+
+Attendees: Roland, Sowmya, Brian, Michael, Dan, Roland,
+  
+==== Agenda Topics ====
+  * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Dan
+   * Michael
+   * Roland 
+   * Ivan
+   * Antoine
+  * oppd integration into the toolkit
+  * review open 3.4 issues: https://code.google.com/p/perfsonar-ps/issues/list?can=2&q=milestone%3DRelease3.4+AND+status%3DNew+OR+status%3AStarted
+  * Code sprint next week: https://docs.google.com/document/d/1W-miUu6IfzX74xkLN9nofixHlDqKbmTOueCde1X92rg/edit?usp=sharing
+  * Survey discussion
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Closed issues
+    * Finishing up LS registration daemon issues
+    * Need to finish some migration scripts 
+   * Aaron
+    * Closing issues
+    * Posted issue about Firewall. All agree that's how we should do it
+    * Debugging owamp issue with Ben Nelson from IU. Very strange issue.
+    * Cacti NTP stuff is packages, just need toolkit to pull it in
+   * Sowmya
+    * Work on LS cache
+    * 4 issues left
+   * Brian
+    * No updates
+   * Dan
+    * Close on the graphs. Should have something to demo later his week. 
+   * Michael
+    * Worked on graphs 
+   * Roland 
+    * Introduced self
+    * Working on building new dev environment
+   * Ivan
+    * Introduced self
+   * Antoine
+    * Introduced self
+    * Working on deploying LS. Waiting on requested partitioning scheme to be completed on host
+    * Looking at migrating SQL MA and other MAs to new MA
+    * Looking at improving MP UI
+  * oppd integration into the toolkit
+   * Andy took a pass, we were generally in agreement
+   * Roland and Anyoine will review, add missing debian stuff
+  * review open 3.4 issues: https://code.google.com/p/perfsonar-ps/issues/list?can=2&q=milestone%3DRelease3.4+AND+status%3DNew+OR+status%3AStarted
+  * Code sprint next week: https://docs.google.com/document/d/1W-miUu6IfzX74xkLN9nofixHlDqKbmTOueCde1X92rg/edit?usp=sharing
+   * Will open a video for everyone (including EU) that remote people can join. This will replace regular call. 
+ * Survey discussion
+  * Brian likes Antoine's questions. Worried about it getting too long.
+
+=== 20140611Video === 
+
+Attendees: Brian, Roland, Michael, Dan, Jason, Sowmya,Aaron
+  
+==== Agenda Topics ====
+  * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Dan
+   * Michael
+   * Roland 
+   * Ivan
+   * Antoine
+  * sLS GUI: Displaying Multiple Interfaces
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Fixed bug with MA reporting strange throughput results
+    * Built new LiveCD/USB
+   * Brian
+    * new iperf3 release soon that will send server stats back
+   * Roland
+    * Getting up to speed on git repo
+    * Working on a few code fixes for oppd
+   * Michael
+    * Working on the charts pulling in LS info
+    * Action: Andy to make sure test hosts are registered in LS
+   * Dan
+    * Created issues related to IU large scale deployments
+    * Working on getting an IU testbed for pS and automated build environment. Orders placed for hardware. 
+    * Finishing up integrating the log analysis and final codes
+   * Jason
+    * Starting to work on perfsonar website
+  * Antoine
+   * Deployed simple lookup service. Ready to be tested.
+  * Sowmya
+   * Testing geant server this week
+   * Making some changes to sLS perl client
+   * Looking at ps-west. Related to pub/sub with ANTG
+  * Aaron
+   * Fixed a few issues assigned last week
+   * Released new OWAMP, which revealed new bug. Timeout of control connections. Released fix today. 
+   * Modified BWCTL to use server side information.
+   * Updated regular testing config to do owp test ports  
+ * sLS GUI: Displaying Multiple Interfaces
+  * Currently can edit ls reg by hand to map interfaces to tests
+  * Decided mostly a display issue. Need to document how to change easily.
+ * Next Week: Review remaining 3.4 issues, hopefully start internal testing of full Toolkit
+
+=== 20140618Video === 
+
+Attendees: Andy, Brian, Sowmya, Dan, Michael, Aaron, Antoine, Murilo
+  
+==== Agenda Topics ====
+
+  * Developer Updates
+   * Andy
+   * Aaron
+   * Sowmya
+   * Brian
+   * Dan
+   * Michael
+   * Roland 
+   * Ivan
+   * Antoine
+  * Cacti issue
+  * Support rotation
+  * Review 3.4 status (ready for internal testing?)
+  * Ability to register service access levels (i.e. public vs. private)
+   * Issue 905 
+  * Ping and OWAMP event types
+
+==== Notes ====
+
+  * Developer Updates
+   * Andy
+    * Finished 3.4 issues
+    * Migrated maddash to github
+   * Dan
+    * Gathering hardware
+    * cleaning up plots with Michael
+   * Michael
+    * Working on the charting, added reverse direction
+    * Added initial implementation of turning on/off displays
+    * Can also move through time on displays now
+   * Brian
+    * iperf3 release
+    * Action: move bootstrap to perfsonar.net
+   * Sowmya
+    * Finished up issues
+    * Remaining issues are post-rc1
+    * Debugging ps-west issue with timeouts.   
+   * Aaron
+    * Working on cacti issue
+    * EPEL packages XML-RPC, broke the config daemon.
+    * bwctl crashes with udp tests
+   * Antoine
+    * Been given green-light to put sLS into production
+    * Finishing last version of MDM MP. Once that is done, want to fully integrate stuff into git (probably next week)
+   * Murilo
+    * Joined for first time, welcome.
+  * Cacti issue
+   * Have fix, will get out today
+  * Support rotation
+   * Will add two people per slot, one U.S. and one European. May do this longer term due to timezones.
+  * Review 3.4 status (ready for internal testing?)
+   * Ready to build for internal testing
+   * Dan will share notes on 854
+   * Antoine can setup mirror on server. Will work with Aaron.
+  * Ping and OWAMP event types
+   * Andy will update event types with -bidir at the end.
+  * Ability to register service access levels (i.e. public vs. private)
+   * ACTION: Andy will add list of values.
+
+=== 20140625Video === 
+
+Attendees: Jason, Sowmya, Murilo, Roland, Ivan, Dan, Michael, Aaron
+  
+==== Agenda Topics ====
+  * Developer Updates
+   * Ivan
+    * Working on deploying the LS. Delayed slightly by deployers illness, but back on track
+   * Roland
+    * No update
+   * Andy
+    * Added ping/owamp types in esmond
+    * Built NetInstall
+    * Talked to OSG about central MA
+    * Debugged some maddash issues
+   * Jason
+    * Working on web site. Can give you access to draft version if you want it.
+   * Sowmya
+    * No major updates, debugging ps-west issues.
+   * Murilo
+    * Working on publishing data from CLMP to new MA 
+   * Michael
+    * Kernel build, updated the wiki 
+   * Dan,
+    * RC candidate installed on a few hosts
+   * Aaron
+    * Working on NDT signed RPMS
+    * x86_64, working on i386. Can't sign within mock because must be prompted for password
+    * Helping NDT developers do release. Need to get Flash client working. Working through some packaging issues.
+   * Antoine
+    * Working on final MDM internal release
+    * New PS UI version will be out in one or two weeks
+    * Will share MP with Murilo to test compatibility
+  * RC2 Status
+   * Goal is to have everything squared away by next week's call so can do a release after we are back from July 4th holiday
+
+=== 20140702Video === 
+
+Attendees: Dan, 
+Excused: Brian, Jason
+  
+==== Agenda Topics ====
+  * Developer Updates
+   * Andy
+   * Dan
+   * Ivan
+   * Antoine
+   * Aaron
+   * Sowmya
+   * Murilo
+  * RC2 Status
+  * pS Developer that can make CANS (September 15-17, 2014 in NYC)
+
+==== Notes ====
+  * Developer Updates
+   * Andy
+     * Just working on RC2
+   * Dan
+    * Just working RC2
+   * Ivan
+    * Working on LS
+    * A few question of POW process. Confirmed POW does not have to fix, just make sure someone does
+   * Antoine
+    * No update
+   * Aaron
+    * Doing RC2 testing 
+    * Putting together an NDT release
+   * Sowmya
+    * Working on getting ps-west to new VM. Crashed earlier this week 
+   * Murilo
+    * Finished script to insert into MA
+    * Will send Andy email to coordinate testing MA
+    * Will work with Antoine on MP testing
+    * Will revive iperf3 vs nuttcp thread
+  * RC2 Status
+   * Issues from last week closed
+   * A few questions on the graphs, but hopefully good enough for rc2
+   * Andy will do new build today and we can re-evaluate next week
+  * pS Developer that can make CANS (September 15-17, 2014 in NYC)
+   * Tabled until next week. No one on call planning to go, nor able to promise they can go.
+
+=== 20140709Video === 
+
+Attendees: Dan, Michael, Andy, Ivan, Sowmya, Antoine, Andrew, Eric
+  
+==== Agenda Topics ====
+  * Developer Updates
+   * Andy
+   * Dan
+   * Ivan
+   * Antoine
+   * Aaron
+   * Sowmya
+   * Murilo
+  * RC2 Status
+   * Are we ready? These would be the current release notes: http://psps.perfsonar.net/toolkit/releasenotes/pspt-3_4rc2.html
+  * pS Developer that can make CANS (September 15-17, 2014 in NYC)
+
+==== Notes ====
+  * Developer Updates
+   * Andy
+    * Cleaning out issue tracker
+    * Wrestling with LiveCD
+    *  Upgraded pnwg-owamp
+   * Dan
+    * Cleaned up summary tables
+    * Added redirection for graphs
+   * Michael
+    * Fixed reverse direction issues and data not being displayed
+    * Working on getting toggle issue. Will try to have by end of week
+   * Ivan
+    * No updates
+   * Antoine
+    * sLS is running. Testing seems to work. Sowmya will need to test
+    * It is being monitored by GEANT production team. Nagios checks are looking at sLS port.
+    * Sowmya will add to global list of files
+   * Aaron
+    * Made changes to BWCTL so defaults to wider port range
+    * Threw together patch to parallelize registration
+    * Working on NDT RPMs
+    * Working on packaging NDT flash client and others
+   * Sowmya
+    * Confirmed ps-west was a hypervisor issue. Moved it to a new hypervizor and it is doing much better. It also has a bigger resource pool.
+    * Working on making ActiveMQ stand-alone server to help with performance issues
+   * Andrew 
+    * Working on sLS GUI. He has added more advanced search. It has more boolean operators 
+    * Also doing general improvements
+   * Eric
+    * Working on survey and reviewing web site.
+  * RC2 Status
+   * LiveCD giving trouble will probably fix
+   * Goal is to have last few graphing things fixed, firewall issues and few otehr small things discussed fixed by Friday for announcement Friday or Monday.
+  * IU Configuration question
+   * NOC noted it would be nice to having includes in owmesh.conf
+   * Aaron noted the mesconfig does, andy sent link to USATLAS files that use them as example
+
+
+=== 20140716Video === 
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Andy
+   * Dan
+   * Ivan
+   * Aaron
+   * Sowmya
+   * Murilo
+  * RC2 Status
+  * LiveCD vs Full Install: What do we want to do?
+  * Graphing bwctl and owamp from separate hosts on same plot
+    * Issue 949
+  * BWCTL options available through GUI
+  * Testing strategy
+  * pS Developer that can make CANS (September 15-17, 2014 in NYC)
+
+==== Notes ====
+ * Developer Updates
+   * Andy
+    * Working on getting new code on ESnet
+    * Working on setting up test host for dual-hosts
+   * Aaron
+    * Released new version of toolkit rpm that removes JOwping
+    * Been playing with revisor to build full install. Created wiki page.
+    * Will send something to list on full install soon
+   * Brian
+    * Spoke with NSRC, interested in perfSONAR training in Africa. Very interested in Ubuntu/Debian.
+   * Murilo
+    * We might be able to help with Debian. 
+    * Working on MA. Working with Andy on MA verification. 
+   * Sowmya
+    * Added GEANT sLS to global list of files
+    * Worked on debugging RNP sLS. Wrong version of sLS got restarted. 
+    * Auto-detection of lat/long
+   * Dan
+    * Testing RC and had question on iperf output
+    * Has two hosts for RC testing. Purchase of hardware went through.
+    * Would it be useful to have test between IU and ESnet hosts?
+   * Michael
+    * Working on showing and hiding charts. retransmits have been off by default.
+    * Brian: Retransmits need the 1 second intervals.
+    * Will commit after this meeting
+   * Roland
+    * Presented roadmap, and was well-received. Also got question on Debian support. Will ask Antoine if they are interested.
+    * At GEANT meeting, strong desire for unified implementation and a few feature requests
+   * Ivan
+    * Tested OWAMP MP and ready
+  * RC2 Status
+   * 
+  * Meeting in Indy
+   * Tentatively set meeting Thursday Oct 30th at Tech Exchange. 
+  * LiveCD vs Full Install: What do we want to do?
+   * Cost/benefit is clear. Brian will talk to ESnet management
+   * Roland pointed out useful for marketing. Maybe do a VM image instead?
+  * Graphing bwctl and owamp from separate hosts on same plot
+   * Mesh config is probably easier, can leverage site and host objects, user has to specify
+   * Toolkit is trickier because not explicit what is paired together
+   * Decided to continue next week
+  * BWCTL options available through GUI
+    * Decided to continue next week
+
+=== 20140723Video === 
+
+Attendees: Andy, Jason, Murilo, Aaron, Sowmya, Brian, Roland, Ivan, Luke, Michael
+  
+==== Agenda Topics ====
+ * Developer Updates
+  * Andy
+  * Ivan
+  * Roland
+  * Jason
+  * Aaron
+  * Brian
+  * Sowmya
+  * Michael
+ * Graphing bwctl and owamp from separate hosts on same plot
+ * Packaging & OSG Assistance
+ * BWCTL GUI options
+  
+==== Notes ====
+ * Developer Updates
+  * Andy
+   * RC2 out. yay!
+   * Testing dual-homed tests
+   * Will work on install docs next
+  * Ivan
+    * No news
+  * Roland
+    * See Ivan's update
+    * Need to talk to Antoine about oppd status
+  * Jason
+    * Making a push on the web site
+    * Working on performance issues. Looks like issues with some people's iptables
+  * Aaron
+    * Working on updating bwctl with some port improvements and iperf3 binding
+    * Added JSON page that presents service status
+    * Auto-adds traceroute tests to toolkit host
+    * Working on specific timed tests
+  * Brian
+    * Looking at test meshes
+  * Sowmya
+    * Running pub/sub on ps-east again.
+  * Michael
+    * Continued working on charts
+  * Luke
+    * No updates
+ * Graphing bwctl and owamp from separate hosts on same plot
+  * Action: Michael will work with Andy on parameters. Andy will add paremeters to mesh config.
+ * Packaging & OSG Assistance
+  * Exploring ways OSG can get more involved.
+ * BWCTL GUI options
+  * Action: Aaron will make it so regular testing does not blow away changes
+
+=== 20140730Video === 
+
+ * Attendees: Brian, Ivan, Aaron, Dan, Michael, Sowmya, Murilo, Eric, Fausto, Rade, Stefan
+ * Excused: Jason
+
+==== Agenda Topics ====
+
+ * Developer Updates
+  * Andy
+  * Ivan
+  * Roland
+  * Jason
+  * Aaron
+  * Brian
+  * Sowmya
+  * Michael
+  * Murilo
+ * TBD
+ 
+==== Notes ====
+ * Developer Updates
+  * Jason (Excused)
+   * At a meeting today, continuing to work on pS Web things
+  * Andy
+   * New kernel available for testing
+   * Working on some test hosts. Passed a few graph issues to Dan
+  * Brian
+   * Andrew Sides has an updated interface
+   * Tech Exchange reg open. Dev meeting on thursday
+  * Ivan
+   * No updates
+  * Antoine
+   * No updates. Been on holiday
+  * Aaron
+   * New iperf3 and bwctl
+  * Dan
+   * Cleaning up the graphs. Better error handling
+   * Working on multiple source and dest pairings. Will commit after the call.
+  * Michael
+   * Working on dynamic axes on graphs
+  * Sowmya
+   * Working on sLS in South Africa
+  * Murilo
+   * No updates. Welcome to Fausto!
+  * Rade
+   * First meeting. Welcome to Rade and Stefan!
+ * Action: Everyone check your 3.4 issues. We will plan to look at them late next week. Hopefully do RC2 by end of month.
+
+=== 20140806Video === 
+
+ * Attendees: John H., Roland, Andy, Sowmya, Murilo, Dan, Michael, Aaron, Antoine, Fausto
+
+==== Agenda Topics ====
+
+ * Developer Updates
+  * Andy
+  * Ivan
+  * Roland
+  * Jason
+  * Aaron
+  * Brian
+  * Sowmya
+  * Michael
+  * Murilo
+ * TBD
+ 
+==== Notes ====
+ * Developer Updates
+  * Andy
+    * New kernels and LiveCD
+    * Testing on dual-homed hosts. Seeing strange loss patterns.
+    * Esnet 3.4 deployment started
+    * Working on maddash graphs this afternoon
+  * Roland
+    * Putting finishing touches on oppd packages
+  * Murilo
+    * No update
+  * Sowmya
+    * South African LS is up, troubleshooting a few things
+    * ps-east is running ok, needs to do some more accuracy checks and other things next week
+    * Will work on migrating data
+  * Dan
+    * Debugging a bunch of charting things
+    * Out on vacation next Wednesday
+  * Michael
+    * Committed code for dynamic axes 
+    * Think missing data bug might be duplicate timestamps. Can happen with summarized data especially.
+  * Fausto
+    * No update
+  * Antoine
+    * will be doing final release of pS UI. You can do federated login to the UI using edugain.
+    * Devs working on packaging next for toolkit
+    * Also making use of sLS.
+    * Will contact Brian/Jason about getting perfSONAR UI on web page
+  * John
+    * Continuing with perfSONAR workshops. Doing APAN next week. OIN series coming-up.
+    * Page where linked where small-form factor info 
+
+=== 20140813Video === 
+
+ * Attendees: Roland, Antoine, Sowmya, Andy, Brian, Michael, Fausto, Murilo
+
+==== Agenda Topics ====
+
+ * Developer Updates
+  * Andy
+  * Ivan
+  * Roland
+  * Jason - Can't make call this week.  www.perfsonar.net has been moved over, we are awaiting any grand announcement because the CSS/colors/format/branding may still change.  
+  * Aaron
+  * Brian
+  * Sowmya
+  * Michael
+  * Murilo
+ * 3.4 status
+ * Latency metric on new graphs
+ * moving future calls to a new VC system: proposal to use https://www.zoom.us 
+ 
+==== Notes ====
+ * Developer Updates
+  * Andy
+    * New kernel and livecd
+    * Working on dual interface testing
+    * Rolling 
+  * Roland
+    * No updates
+  * Antoine
+    * Added psUI wiki page. Wil talk to Jason about getting it added
+  * Sowmya
+    * Stress testing the sLS cache
+  * Brian
+    * No updates
+  * Murilo
+   * No update
+  * Fausto
+   * No updates
+  * Michael
+   * Fixed a bunch of bugs
+   * Andy will share some issues 
+ * 3.4 status
+   * Goal to have next RC in two weeks
+   * Please have code in by next week
+   * Brian and Andy will do an issue pass
+ * Latency metric on new graphs
+   * Decided on minimum, toggle others. Just talking about latency.
+ * moving future calls to a new VC system: proposal to use https://www.zoom.us 
+   * Will start 10 minutes early next week and try Zoom 
+
+=== 20140818ChartsVideo === 
+
+ * Attendees: Brian, Andy, Jason, Michael
+
+Meeting for discussing the state of charts for RC3 and beyond.
+
+==== Items that need to be done for 3.4 release ====
+ * ~~ Ability to share chart URL ~~
+ * ~~ Add additional chart parameters to the URL ~~ - See issue 959
+ * Scaling problem Pagination on table to help with scaling problem with many tests - See issue 972 
+ * ~~ Improve display so throughput/latency don't overwrite each other so much ~~
+ * Add median option for latency - See issue 977
+ * ~~Negative latency: add a warning for now~~
+   * if not too hard, add a overlay icon on the lower axis
+ * optional Log scale for packet loss (if not too hard)
+
+==== Items that need to be done for RC3 ====
+ * ~~Add ping to charts~~
+ * ~~Style issues~~
+ * ~~ Add retransmits to throughput tooltips ~~
+ * ~~Use base data for < 1 day timeframes (maybe 3-days if reasonable)~~
+ * Scaling problem Pagination on table to help with scaling problem with many tests - See issue 972
+
+
+Done
+ * ~~Remove -PS from table page header - See issue 968~~
+ * ~~Make links to charts more obvious/add "Click on a hostname to see a graph of the results" ~~
+ * ~~Fix weird whitespace with multiple hosts at top of individual chart page~~
+~~ Style issues ~~
+ * ~~Red/green may be bad for color-blind people (will someone follow-up on this)? - See issue 969~~
+ * ~~Traceroute page link on chart~~ - issue 976
+
+===== Scaling issues =====
+There are some scaling issues with the table that lists the test hosts. If there are too many tests, it times out. Need to make this scale. For now we'll focus on pagination, but here are some other possibilities.
+
+* Pagination? Maybe some MA-side stuff to help with this.
+* Parallelize?
+* Have a threshold that doesn’t get you the summaries if it’s over the threshold? ? Add a button to load them with a disclaimer that it may take a while?
+* Progressively load them? (not something we can do with the current library)
+ 
+===== Questions =====
+
+Eventually will want to see v4 and v6 on the same plot. How to best handle this?
+
+If someone has configured v4 and v6 testing on the same host?
+Currently if you pass in hostnames you get everything? 
+
+
+===== Notes on Negative latency =====
+ * Not sure what we want to do.
+ * May be helpful to show a warning that you have negative latency
+ * Link or popup with more info - 2 main causes:
+  * Bad clock skew (ntp config)
+  * testing to something extremely close (hard to get good accuracy with clocks between them)
+ * Overlay an icon indicating that you have negative latency at the top or bottom, 
+
+
+==== Items that can wait until 3.4.1 ====
+ * Zooming is difficult, sometimes get stuck
+ * Reset zoom button and/or double-click to reset it?
+
+
+===== Indicate Failures =====
+Might also be able to plot bwctl errors and failures (event type: failures):
+ * show icon at top or bottom at timestamp where those occur (good with other types as well)
+
+
+==== other 3.4.1 items ====
+Create a separate "details" page
+
+Box plots:
+ * grabs stuff from JSON
+ * nice but not high priority
+ * Wait to do it right — add to detail page in the future
+
+Might also be able to plot bwctl errors and failures (event type: failures):
+ * Show icon at top or bottom  at timestamp where those occur (good with other types as well)#summary August 20, 2014 Conference Call
+
+=== 20140820Video === 
+
+ * Attendees: Andy, Jason, Brian, Roland, Antoine, Aaron, Michael, Fausto
+
+==== Agenda Topics ====
+
+ * Developer Updates
+  * Andy
+  * Ivan
+  * Roland
+  * Jason 
+  * Aaron
+  * Brian
+  * Sowmya
+  * Michael
+  * Murilo
+ * 3.4 status
+ * moving future calls to a new VC system: proposal to use https://www.zoom.us 
+ 
+==== Notes ====
+  * Developer Updates
+  * Andy
+   * Working on new docs 
+   * Added pagination to esmond
+   * Working on expanding ESnet rollout of esmond
+   * BWCTLD upgraded
+  * Antoine
+    * Talking to Jason about pSUI docs
+  * Jason 
+    * Debugging a few performance issues
+  * Brian
+    * Sent out surveys, got some responses already
+    * Playing with GridFTP logs
+    * South African LS 
+  * Aaron
+    * bwctl debugging. seems to be between hosts running iperf3
+  * Roland
+    * Working on document
+    * Worked on OPPD package
+     * Andy testing stuff today
+  * Michael
+   * Working on charts
+   * Plotting ping data
+   * Looking at better colors for the color blind
+  * Fausto
+   * No updates
+ * 3.4 status
+  * Will re-evaluate next week where we are at. Gerrting close on rc2.
+  * Action: Andy contact USATLAS about rc2 testing
+ * moving future calls to a new VC system: proposal to use https://www.zoom.us 
+  * Use zoom for future calls
+
+=== 20140827Video === 
+
+ * Attendees: Brian, Dan, Michael, Aaron, Antoine, Alex, Rade, Stefan, Fausto, Murilo
+
+==== Agenda Topics ====
+
+ * Developer Updates
+  * Andy
+  * Ivan
+  * Roland
+  * Jason 
+    * Unavailable this week due to travel
+    * Still tinkering with web site and working on some documentation with the LHC guys.   
+  * Aaron
+  * Brian
+  * Sowmya
+  * Michael
+  * Murilo
+ * 3.4 status
+ 
+==== Notes ====
+ * Developer Updates
+  * Andy
+   * Updated esnet hosts to new MA
+   * Debugging MA with aaron
+   * Some profiling of the nagios checks. Some pretty high initialization time. 
+   * Working on install docs
+  * Brian
+   * Survey results are interesting. Lots of request for Debian support.
+   * Added a public central MA at perfsonar-archive.es.net. Plan to use it for gridftp data and cubox testsing
+   * Has an ARM repo with RPMs. Testing it still
+  * Dan
+   * No updates
+  * Michael
+   * Working on remaining tasks for charts. Added ping, updating color scheme, many other tasks. 
+   * Action: Build a new RPM. 
+  * Aaron
+   * Debugging bwctl
+  * Antoine
+   * Testing 3.4 and OPPD
+   * Action: Level 1 and Level 2 need to updated. Andy will create issue. Add oppd.
+  * Rade and Stefan
+   * Looking at new sLS
+   * Action: Antoine will start email thread with Sowmya, Andy, Stefan and Rade to work-out details
+   * Action: Aaron will send jabber info to list again
+   * Working on pSUI
+  * Murilo
+   * Interested in displaying lots of tests on graphs.
+  * Fausto
+   * No updates 
+  * Alex
+   * Would like to talk to Brian about perfSONAR topics. Will schedule a call.
+ * 3.4 status
+  * Looks like next week should have everything done
+
+=== 20140903Video === 
+
+
+ * Attendees: Jason, Aaron, Sowmya. Michael, Brian, Szymon, Rade, Stefan, Antoine, Eric, Murilo, Fausto, Alex
+
+==== Agenda Topics ====
+
+ * Developer Updates
+  * Andy
+  * Ivan
+  * Roland
+  * Jason 
+  * Aaron
+  * Brian
+  * Sowmya
+  * Michael
+  * Murilo
+ * 3.4 status
+ 
+==== Notes ====
+ * Developer Updates
+  * Andy
+   * ESnet software update went well
+   * Working on docs
+  * Jason
+   * A lot of people interested in L2 measurements
+   * Working on documentation
+  * Aaron
+   * Minor fixes earlier today to issues
+   * BWCTL protocol documentation
+   * Can't recreate segfaults 
+  * Syzmon
+   * First call, plan to join more in the future
+  * Sowmya
+   * Starting LS
+   * Needs to look at timeouts
+  * Rade
+   * Looking at pS UI bugs with Antoine
+  * Stefan
+   * see Rade's update
+  * Antoine
+   * Looking at various OPPD issues
+  * Brian
+   * New iperf3 updates
+   * Survey responses are in. Summarizing soon. 
+  * Fausto
+   * See Murilo updates
+  * Murilo
+   * Found LS registration bug
+   * Working on MA integration
+  * Alex
+   * Looking at road map stuff
+   * Looking at federated stuff
+  * Michael
+   * Wrapped-up the color scheme
+   * Fixed test list page to compress results if number of tests
+   * Dan working on horizontal scaling
+   * Test hosts working way through system
+ * 3.4rc status
+  * All commits will be in by end of day, internal testing images tomorrow
+  * Andy will continue on documentation
+  * Eric and Brian to verify LiveCD can be discontinued on Friday. Email goes out Monday. 
+
+=== 20140910Video === 
+
+ * Attendees: Aaron, Sowmya, Rade, Stefan, Antoine, Dan, Ivan, Murilo, Fausto
+
+==== Agenda Topics ====
+ * Developer Updates
+ * 3.4 status
+
+==== Notes ====
+ * Developer Updates
+  * Andy
+   * added more to install docs
+   * Building kernel
+   * Refactored nagios checks to decrease dashboard load and increase esmond client libs
+   * Worked with Nick B. to get a working perfcube
+  * Aaron
+   * Upgraded OWAMP limits in place
+   * Some changes for netinstall to work better on USB
+  * Sowmya
+   * Working on other non-perfSONAR stuff
+  * Antoine
+   * Testing new image
+   * Is going to try building image
+  * Dan
+   * Added link to traceroute information 
+   * Adding link to graph
+   * Working on pagination 
+  * Murilo
+   * No updates
+  * Fausto
+   * No updates
+  * Ivan
+   * No updates
+  * Rade
+   * Working on pSUI Debian package
+   * Sent email about sLS
+  * Jason
+   * Unavailable this week.  Working on creating a support note on the LiveCD for the community along with some updated documentation for the web site to be used with the new release.  
+  * Szymon
+   * Attending E-infrastructure Autumn Workshops (http://www.terena.org/activities/development-support/Moldova2014/programme1.html) with presentation about monitoring and pS. After discussions I will work with Georgia and Azerbaijan (Armenia already did) to establish pS presence between Black and Caspian see. In future a hands-on training for installation and system tuning may be necessary for the countries here.
+ * 3.4 status
+  * It's official, no LiveCD
+  * Michael has ben out sick, but a few more graph changes should be in by end of week that add links to traceroute stuff.
+  * Aaron committed some NetInstall changes during call to work better with USB
+  * Target early next week to announce
+
+=== 20140917Video === 
+
+ * Attendees: Rade, Stefan, Andy, Antoine, Roland, Ivan, Sowmya, Dan, Michael, Brian, Szymon, Fausto, Murilo, Marco, Shawn
+ * Excused:
+  * Jason: At a workshop today, have some feedback for future enhancements I will file bugs on.  
+
+==== Agenda Topics ==v
+ * Developer Updates
+ * 3.4 status
+ * Toolkit's with multiple interfaces questions
+  * Are source routes added by GUI?
+  * Should we label as "beta" for time-being?
+ * Smarter throughput thresholds for nagios checks
+
+
+==== Notes ====
+  * Developer Updates
+   * Andy
+    * LHCONE meeting 
+    * Built new RC images
+    * Updated docs some more
+   * Rade
+    * Fixed bug in pSUI communicating with owamp MP
+    * Fixed debian package bug
+   * Antoine
+    * Tested full install images, found a few things that he will pass along
+    * Some OWAMP MP bug fixes
+   * Roland
+    * Need to do some OPPD stuff
+    * Action: Send out link to Andy to OPPD docs
+   * Ivan
+    * No updates
+   * Sowmya
+    * No updates
+   * Dan
+    * Work on graph performance and zooming
+   * Michael
+    * Worked on last features for RC, they are all committed
+    * Doing pagination, andy needs to look at sorting
+   * Brian
+    * Collected enough data on dual-homed hardware, so gonna start deploying soon
+   * Szymon
+    * Attended conference last week and gave talk on perfsonar. Many interested in installing. 
+   * Shawn
+    * Planning to attend dev meeting in Indy
+    * Brian asked if shawn could test dual-homing. Have hardware, but no human cycles
+    * Murilo indicated they have done dual-homed testing, and also found they did not bump into each other
+   * Fausto
+    * Marco will be replacing 
+   * Murilo
+    * No updates
+ * 3.4 status
+  * Dan working on change
+  * andy will build images 
+ * Toolkit's with multiple interfaces questions
+  * Are source routes added by GUI?
+  * Should we label as "beta" for time-being?
+ * Smarter throughput thresholds for nagios checks
+  * Group like LHCONE see different throughput results, often due to high variation in latency 
+  * Other cases too like mixing 1G and 10G
+  * Function of latency or step function of latency
+  * Ability to override thresholds on box-by-box basis
+ * Indy developer meeting
+  * start thinking about agenda, will have agenda bash next week
+ * LiveCD support
+  * Confirming it has been discontinued. Jason sending email
+ * Central MA
+  * Shawn mentioned probably going to need to start with pull
+  * Still exploring push, but may need more advanced queuing  
+
+
+=== 20140924Video === 
+
+ * Attendees: Shawn, Aaron, Roland, Brian Ivan, Szymon, Fausto, Michael, Dan, Antoine
+ * Apologies: 
+  * Jason - At a workshop - ongoing web stuff.  
+
+==== Agenda Topics ====
+ * Developer Updates
+ * 3.4 status
+ * Agenda Bash for Oct Face-to-Face Developer Meeting
+
+
+==== Notes ====
+ * Developer Updates
+    * Andy
+     * Merit talk yesterday 
+     * Working on docs with Brian
+     * Issue clean-up so stuff not Fixed and marked as 3.4 needs to get done
+    * Shawn
+     * Working with WLCG metrics group
+     * Working with Soichi to do some more dynamic mesh config generation
+    * Aaron
+     * Added mesh config fix to report errors better
+     * Debugging ARP issues with Shawn
+    * Roland
+     * Approval to send devs to meeting (probably 5-6 people)
+     * Looking at Debian packages, proposal by Friday to dev list, then on to project management
+    * Brian
+     * No updates
+    * Ivan
+     * No updates
+    * Szymon
+     * Andy will send reply about documentation
+    * Fausto
+     * No updates
+    * Antoine
+     * OPPD log file missing 
+     * Looking at Debian package missing
+    * Michael
+     * Added a URL parameter for zoom range
+     * Added negative latency notice
+    * Dan
+     * Started putting together some automated builds of package 
+ * 3.4 status
+  * RC3 out Monday, a few issues cropped-up
+  * 5 issues in tracker
+  * Get issues done by this Friday
+  * have everything tested by a week from Friday
+  * Target release for Oct 6th
+ * Agenda Bash for Oct Face-to-Face Developer Meeting
+  * Assign people to certain projects, have them lead the project
+  * Brian will send out tentative agenda before next week
+
+=== 20141001Video === 
+
+ * Attendees: Rade, Stefan, Roland, Shawn, Aaron, Sowmya, Dan, John H., Brian, Szymon, Andy
+ * Apologies: 
+  * Jason - shellshock damage control + small web updates.  Workshop at CYBERA went well, couple of dev suggestions will put into issue tracker
+
+==== Agenda Topics ====
+ * Developer Updates
+ * Shellshock and auto-updates
+ * Should NDT and/or NPAD be disabled by default?
+ * 3.4 status
+ * agenda for Oct30 meeting
+
+==== Notes ====
+ * Developer Updates
+  * Andy
+   * Dealing with shellshock
+   * Working on doc, just havemeshconfig section
+   * Testing new BWCTL
+ * Rade
+  * Fixed some pSUI bugs. Something changed with BWCTL MP
+  * Will write email to Szymon with details 
+ * Roland
+  * New OPPD things fixed
+ * Shawn
+  * Put together page on shellshock
+  * Using it as chance to update configs
+  * Internally will discuss at pundit things like want from dev team
+  * Contacted paristraceroute devs. They will be providing RPMs.
+ * Aaron
+  * New Shellshock RPMs
+  * Found BWCTL issue, was trying to take iface name and use it as hostname
+ * Sowmya
+  * ps-west went down last Wed. Underlying VM issue,w as not getting requested resources
+ * Szymon
+  * No updates 
+ * Brian
+  * No updates
+ * Dan
+  * See Aaron's update
+ * John 
+  * Working with APAN to push out shellshock updates
+ * Shellshock and auto-updates
+  * Agreed on plan outlined in email
+  * Andy taking issue since Aaron out the next couple days
+  * Andy will make lots of notices in docs and on services page about this could break things
+ * Should NDT and/or NPAD be disabled by default?
+  * Decided both will be off for new installs. NPAD sparsely used, groups like WLCG do not require NDT and NDY may interfere with tests
+ * 3.4 status
+  * Outstanding issues:
+    * BWCTL issue
+    * Dual-interface display issue
+    * Finish docs
+    * Potential user migration issue
+  * Shoot for Monday but may slip
+ * agenda for Oct30 meeting
+  * A few things can be 5 min lightning talks
+  * Brian will take another pass and send around
+
+=== 20141008Video === 
+
+ * Attendees:Ivan, Brian, Jason, Andy, Aaron, Shawn, Roland, Dan, Michael, Eric, Alex
+
+==== Agenda Topics ====
+ * Developer Updates
+ * perfSONAR 3.4 after party
+  * LiveCD ISO location
+  * Datastax repo
+  * Reported Issues
+  * review agenda for devel meeting: https://docs.google.com/spreadsheets/d/1sz_f4wKt4Or71PzlZvjJFnXSo8hP3-ZM5om37XyeWLE/edit?usp=sharing
+
+==== Notes ====
+ * Developer Updates
+  * Andy
+   * Worked on getting 3.4 out mostly
+   * Looking at services directory host on stats.es.net with Andrew Sides and Brian to fix some instabilities
+   * Saw 125 hosts this morning when stats was working
+  * Brian
+   * No updates
+  * Jason
+   * Shellshock week
+   * Working on web site 
+   * Will do deep dive on docs.es.net
+  * Aaron
+   * Fixed parsing error in regular testing config
+   * BWCTL man pages update
+  * Shawn
+   * Getting documentation in order for WLCG.
+   * Tighten up IP tables by default
+    * Remove NDT and NPAD
+    * Limit 80/443 to local subnet and WLCG monitoring hosts
+   * Working on auto-generated mesh based on OSG and WLCG database
+   * Trying dual-stacked IPv4/IPv6 host
+  * Roland
+   * Antoine been looking at Debian stuff 
+  * Eric
+   * Request for hosting docs.perfsonar.net in the works
+  * Dan
+   * Did post-mortem on shellshock
+   * Helping IU upgrade to 3.4
+   * Will talk to IU group to scan web page
+  * Michael
+   * No updates
+ * perfSONAR 3.4 after party
+  * LiveCD ISO location
+   * Keep where it is
+  * Datastax repo
+   * Action: Andy to look into pulling it down automatically into repo
+  * Reported Issues
+   * Aaron fixed minor regular testing parsing issue, should not affect most toolkit users
+   * Andy working with George Uhl on problem displaying data
+   * Nothing major, more coming in as we talk
+ * Developer Meeting in Indy
+  * Agenda looks good
+  * Video will be available
+
+=== 20141015Video === 
+
+ * Attendees: Jason, Dan, Michael, Rade, Roland, Ivan, Brian, Aaron, Szymon
+
+==== Agenda Topics ====
+ * Developer Updates
+ * Support rotation updates
+ * SSLv3 Vulnerability
+ * Debian Packages
+ * Plans for 3.4 release
+
+==== Notes ====
+ * Developer Updates
+  * Andy
+   * Working on documentation
+  * Jason
+   * Sent around email about POODLE
+   * Cleaning-up web site
+  * Brian
+   * No updates
+  * Dan
+   * working more on build automation
+   * getting ready for tech exchange
+  * Michael
+   * Working on enhancements to charts
+  * Rade
+   * Worked on pSUI 1.3.2 release
+   * Finishing federated login
+   * Working on sLS integration
+  * Roland
+   * No updates
+  * Ivan
+   * No updates
+  * Aaron
+   * Last night issue with perfsonar.net web site due to shared memcached instance. Two sites contained exact same key
+   * Number of small fixes and changes, cleaned-up source repo
+  * Szymon
+   * no updates
+  * Antoine
+   * Updating wiki on psUI, sending announcement later today
+   * Looking at Debian port see agenda
+ * Support rotation updates
+  * See wiki page
+ * SSLv3 Vulnerability
+  * Wait for SSL patch
+ * Plans for 3.4.1 release
+  * Do a small release next week with compiled fixes
+ * Debian port
+  * Questions about whether we should use /opt
+  * Should we do real perl libraries? Maybe.
+ * Branches and tags
+  * Hard to tag perfsonar currently since a bunch of software in same directory
+  * Challenge is the Shared library
+  * Action: Dan will see if there is an easy way to split things out
+
+=== 20141020DevMeeting === 
+
+Agenda: https://docs.google.com/spreadsheets/d/1sz_f4wKt4Or71PzlZvjJFnXSo8hP3-ZM5om37XyeWLE/edit?usp=sharing
+
+==== Pre-Meeting Reading ====
+ * *NDT Future* - https://docs.google.com/presentation/d/12lqg-vOspZtnt05UZa0yftfhEGfLYfI07HPt49AV1Aw/edit
+ * *perfSONAR Packaging and Bundles* - https://docs.google.com/document/d/1qt7FK2LaNoVPCyUnJy7wHI5yMtHMHSZwvMidy-xOBSU/edit?usp=sharing
+ * *BWCTL 2.0* - https://docs.google.com/presentation/d/14oRvVC6qjsa_R4_AdqMkiNIoV1JPguQD5UAKmKYoj80/edit?usp=sharing
+ * *MaDDash Updates* - https://docs.google.com/a/es.net/document/d/1pBMOb1X1Ce_PPlZOKovjk0JgRoiejl3y_E5Z9Wi4DC4/edit#
+ * *Auto-configuration of Nodes* - https://docs.google.com/document/d/1P7PgAs8rFKYY1sxrEqdDoN9gy-6hQ4OjFmDgmHAA1HU/edit?usp=sharing
+ * *psUI* -  https://docs.google.com/presentation/d/1P873wHM8Im2SaWoEaTGKj6Fp0NdRsUlCNVRUhzpbUMw/edit?usp=sharing
+ * *Documentation review* - https://docs.google.com/document/d/1LKlrEfZib9tiMyrkDJGWMcqgiboOgnoZFoonc1nUHEA/edit?usp=sharing
+ * *PuNDIT and perfSONAR* - https://docs.google.com/presentation/d/1Jp0ebDw-GkMuV7zCI71iDlycxTz34theOPmnjdTJsRY/edit?usp=sharing
+ * *Debian port* - https://docs.google.com/presentation/d/1vH4_OWCxqLzRhxIifqDmcIQbunHyFnOH9MzXf4_q4hU/edit?usp=sharing
+
+==== Meeting Notes ====
+{{{
+Present:
+Andy Lake
+Sowmya Balasubramanian
+Eric Boyd
+Shawn McKee
+John Hicks
+Michael Johnson
+David Ripley
+Jen Schopf
+Rade Martinovic
+Takatoshi Ikeda
+Luke Fowler
+Dan Doyle
+Antoine Delvaux
+Roland Karch
+Brian Tierney
+Aaron Brown
+Szymon Trocha
+Domenico Vicinanza
+Ivan Garnizov (via video)
+
+Overall future strategic themes:
+Increase usability
+Increase impact
+Improve project efficiency
+Support for Advanced Networking (SDN, Network Virtualization, Dynamic Networks)
+Small / cheap node support (from 1k to 100k nodes)
+User interface refresh
+Security assessment 
+
+Lightning Talks
+
+Andy - autoconfig
+- Motivation is for large scale deployments (small nodes or otherwise) to reduce human driven configuration
+- Possible use case not only “I want to test to a bunch of pre-existing things, but also want those things to test to me"
+     - Security issue potentially?
+- Big issue is AuthN and AuthZ
+     - Who should be allowed to send data to central MA or make additions to mesh config?
+     - Maybe simplest answer is IP based so particular subnets are allowed to auto register
+     - Maybe solved just via external ACLs
+     - Additions to lookup service to help identify
+
+Aaron - bwctl rewrite issues/plans
+- Limited protocol, limited support for supported tools, limited ability to make new clients
+- Codebase is “problematic”, has since surpassed original design scope
+- limits file not descriptive enough or flexible
+- Most fundamental aspect is fixing protocol
+- Potentially want to get away from C due to inherent complexity, minor concern over dependencies if moving to a higher language
+- Need to consider legacy support, can’t just drop them arbitrarily
+- How to differentiate old vs new, different ports? Something in protocol?
+- Removal of “peer ports"
+- Removal of NTP requirement, not necessary for throughput testing (but yes for others)
+
+Sowmya - lookup service cache
+- Problem right now is having to hit every lookup service to try and find the information
+     - As number of lookup servers rises, overall performance drops as a result
+- Proposed solution is to use cache
+     - Cache subscribed to each lookup service so contains all information
+     - Have a cache paired up with each lookup service to maintain geographic diversity
+     - Caches readonly
+- Information about cache included in lookup bootstrap file for finding where they are
+- Concerns about scalability, if we go to 10x metadata and 10x nodes, will cache become too big?
+     - Backend is built on mongodb, can be horizontally scaled without outward changes
+- Suggestion for something like “recursive DNS” or “authoritative DNS” responses when hitting a lookup service instead of using separate caching mechanism
+- Eric => wants some plan of what the goal for scaling is so that as new parts are developed they can be considered if it will be problematic
+
+Dan - automation / release
+- Start with unit tests, goal is to start small and grow instead of going 0-100 overnight
+- Have a testlab that could run nightlies, maybe via something like Docker that could? 
+     - Each organization donate a particular host to this global testlab, gain geographic diversity
+- Schedule demo / tutorial over next few weeks to get everyone up to speed
+
+Break
+
+Shawn - PUNDIT
+- New NSF project to use perfSONAR data to identify and localize network problems
+     - Identify problems that I can do something about, and not require constantly observing dashboard
+- Requires access to raw data from OWAMP
+     - Would need bundling with existing pS tools to have access, default off for installations
+     - OWAMP traditionally summarizes and deletes data, would need to be left to PUNDIT to delete
+     - Only analyzes local data, reports data out to central PUNDIT server for mass analysis
+- Active collaboration with paris-traceroute developers, including 6mos 1FTE of their developer time to help iron out initial issues
+- Toolkit enhanced to support PUNDIT agent:
+     - turning it on / off
+     - support defining central PUNDIT server
+     - replacing traceroute with paris-traceroute
+- Funding for project for 2 years
+- Still need to evaluate impact of running the agent on a toolkit host
+- Open question - is there interest in having a lightweight bandwidth estimator (similar to pathchar)?
+     - won’t try to fill the pipe
+     - work above 1G
+- Open issue - have ability to put data into Esmond or some other thing to integrate on charts if problems are discovered
+- Migrate existing PUNDIT code to pS repo?
+     - Not needed
+- Desire to have this included in CI environment, built and tested along with other pS components
+
+
+Fire Alarm / Lunch
+
+
+Takatoshi - perfSONAR update in Asia
+- Multiple networks in > 10 countries in Asia Pacific have deployed pS
+- Proposal to SINET for using perfSONAR, concerns about revealing usage data
+- Planning to update everything to 3.4 before SC2014
+
+
+Dan - small node
+- Jury still out on hardware, aim is to recommend / support 1-2 hardware instances
+     - Mirabox likely candidate
+- Likely Debian based due to ARM architecture, depends on how well Debian porting goes, may need to reevaluate
+
+
+Antoine - Debian support
+- Filesystem location changes
+- Lots of dependency differences / non existing dependencies
+- Naming differences
+- Issues with building related to organization in repository
+
+
+Brian - bundling
+- Existing components broken out into several different bundles for various needs
+- Come up with better naming, “perfSONAR Light” not very descriptive
+- Andy thinks we likely need to break out more components, more rows in table ie more components in each package but same overall functionality
+- Support both Debian/RH based systems for most things
+     - 1 FTE of support? 0.5 today
+
+
+Andy - Maddash
+- Been a while since last refresh
+- 1.1 
+is UI cleanup (more check states, auto refresh, etc)
+improved checks
+ability to flag tests as “bad” like while a new disk is shipping out
+     - flag as bad for set duration to avoid test getting permanently marked
+- 2.0 
+is more heavy duty UI refresh, redesign. Ability to create custom views, email notifications
+     - utilize nagios for alerting / flapping / etc?
+     - integration with existing nagios instances?
+     - Eric => be able to see “partner” maddash instances from current maddash, see all adjacencies 
+          - maybe store this information in the LS?
+     - ability to more cleanly define multiple tests between same hosts
+
+
+Rade - web interface GUI
+- phase 1, convergence to pS_PS
+     - desire to support graphs in this UI similar to those existing in dashboard
+- SAML-based authN + authZ with eduGAIN -> browser based, non equivalent with eduROAM
+- long term desire to merge both UIs into a single UI?
+     - current UIs serve different use cases, one is larger view of network, one is more test centric
+     - let both evolve and make their way towards convergence over time
+- adaptive design
+- How to put both interfaces into the lookup services, have both UIs cross link to eachother?
+
+
+Break
+
+
+Luke - web interface GUI updates
+- desire to make UI not look like it’s from 2006
+- identify use cases
+     - person who wants to get at data (either on demand test or historical data)
+     - person who configures the testing and parameters of machine
+- moving desire from toolkit view to a more central meshconfig GUI
+     - a different type of user trying to troubleshoot a problem and needs view of things like topology and lots of test results
+     - mesh administrator user
+- need to determine information
+     - interview use cases from users that toolkit (or perfsonar in general) could be extended to help with
+     - what sorts of technical skills do we need on team (graphic design, usability, etc)
+- convergence of various UIs?
+     - maybe not a useful idea, maddash on toolkit is different view of data, one more global one more local
+     - different view for different user type
+- bring visual consistency to various parts of the project
+     - style guide?
+
+
+Roland - documentation / website review
+- consolidate micro sites, ie perfsonar.geant.net onto perfsonar.net instead
+- not trying to get rid of micro sites necessarily, but push main data onto main site
+- just utilize git to push documentation, script will pull it onto site within 15 minutes
+     - could create “printable” documentation as well if desired, ie convert to PDF at runtime
+- need for documentation / resources for specific communities?
+     - unsure, possibly no
+     - geant has been doing this historically
+- performance related issues on documentation website
+     - unresponsive script warnings due to large data
+     - long-ish load times 
+     - possibly related to running on a VM, to be investigated
+
+
+An aside, should perfsonar be on facebook?
+- Possibly useful due to someone else squatting on name
+- Could be venue to make announcements, gain exposure
+- Eric to investigate
+- Andy created page
+
+
+Aaron - NDT
+- web10G is dead, Google has abandoned it in favor of something else. no certain future funding
+     - no support for CentOS6 either
+     - no idea what future of Google project is, what to do in meanwhile for NDT support     
+- most users just want a “speedtest.net” style application without all the extra information, almost all less than 1G
+- websockets seem safer / less likely to “go away” than java / flash
+     - need to verify that websockets provide sufficient performance, might need to engage something else like a downloadable thing?
+     - might need to sunset the project entirely if doesn’t work?
+- likely take some flak for dropping web10G and/or reduction of prior NDT capabilities, need to address subject and deal with it
+
+
+Eric - SDN
+- not part of 3.5
+- how to detect / measure / monitor when the network changes due to an event
+- not a part of say the toolkit, make perfsonar more of a “library” that SDN applications can use when they do something to rapidly begin testing / measuring it
+- need to write down some use cases, nebulously defined right now
+     - is there any immediate impact on other projects we’re working on?
+- towards end of 3.5, defined formal architecture for 3.6 roadmap
+
+
+Luke - security
+- none of us are security professionals
+- various aspects to it:
+     - security during development process
+     - security of overall application
+- offer from CTSC at IU to provide resources towards security analysis of pS
+- Bill Nickless could also be a resource, has funding for this sort of thing, provided extensive feedback post Shellshock
+- Shawn => we could provide some documentation on security aspects that team has already touched, provide launch point for others when reviewing / analyzing toolkit security
+- Make port / vulnerability scanning part of the build automation process
+    
+
+Moved Developer call from Wedn 11am to Thurs 11am starting next week Thurs Nov 6
+
+Assigning people to tasks 
+- need to finalize at next Monday meeting between Luke, Brian, Eric
+}}}
+
+=== 20141022Video === 
+
+ * Attendees: Andy, Jason, Roland, Ivan, Sowmya, Aaron, Antoine, Michael, Dan, Szymon, Brian
+
+==== Agenda Topics ====
+ * Developer Updates
+ * 3.4.1 status
+ * perfSONAR Graphs
+ * LS bootstrap file location
+
+==== Notes ====
+ * Developer Updates
+  * Action: Create wiki page for dev meeting
+  * Andy
+   * Fixed bug in check_owdelay. Action: Ping people that runs dashboards
+   * Fixed some low hanging fruit for 3.4.1
+   * Answering lots of emails
+  * Jason
+   * Web site doing well
+   * Working on generic perfSONAR slide deck
+   * Busy next 3 weeks with SC
+  * Roland
+   * No updates
+  * Ivan
+   * No updates
+  * Aaron
+   * No updates
+   * Talked about ESnet bwctl issue. Roland recalls similar issue but may have been fixed.
+  * Antoine
+   * Question about where to commit things. Answer was master
+   * Talked about options for OPPD to writing to MA
+  * Dan
+   * Prep work for meeting next week
+  * Michael
+   * Working on perfomance enhancements for graphs
+  * Szymon
+   * Asked about Java 8 update?
+  * Brian
+   * perfCube running at office in ESnet
+   * I2 to ESnet layer 2 test mesh seems to be working
+  * Sowmya
+   * No updates
+ * 3.4.1 status
+  * Shooting for Monday
+ * perfSONAR Graphs
+  * Michael made a bunch of short-term fixes that will help 
+  * Dan to look at mod_perl in short-term
+ * Andy, Dan and Michael all looking at various long-term improvments on both front- and back-ends
+ * LS bootstrap file location
+  * Ok to move perfsonar.net
+  * Action: Andy will setup google code repo, and two reverse proxies will point at it
+ * No meeting next week, face-to-face on Thursday
+
+=== 20141106Video === 
+
+* Attendees: Ivan, Brian, Jason, Dan, Michael, Aaron, Roland, Sowmya, Eric
+* Apologise: Szymon (I'm not able to attend calls on Thursday)
+
+==== Agenda Topics ====
+ * Developer Updates
+  * Andy
+   * Esmond performance improvements
+  * Ivan 
+   * Finished deployment of two perfsonar boxes on DANTE 100G network
+   * Will send LS registration question to list
+  * Brian
+   * Performance testing Mira box. Only 1 core but two NICs. Same price has CuBox. Does 800Mbps.
+  * Jason
+   * SC installation 
+   * Powerpoint template
+  * Dan
+   * Automation bits polished-up
+   * Will be playing with Mira box
+  * Michael
+   * Looking at low cost nodes. Grabbing a BananaPi, looks interesting.
+   * Looking at barbones kits
+   * Looking at security related items. Requesting security scans.
+  * Aaron
+   * Kernels out 
+   * Some web socket performance testing. Can do mid-500mbps on back-to-back testing. Can get 1Gbps to loopback.
+  * Roland
+   * Looking at some new deployment scenarios
+  * Sowmya
+   * Working on LS Cache design document
+  * Antoine
+   * New person working on debian
+  * Eric
+   * See project team item
+ * Project Teams
+  * Management group has organized project teams per last week's discussion
+  * Re-format meeting so teams report on progress in first 10-15 minutes
+  * In two weeks have initial design document and project plan (does not need to be perfect)
+ * Deployment Scenarios and Strategies
+  * Best common practices for grabbing updates packages
+  * Ivan curious how others do it
+   * Esnet uses cfengine to manage hosts. Has own repo for PS packages that only gets packages after they are tested. Test by manually updating 2-3 hosts first then push to internal repo.
+   * IU: Same thing but use Puppet instead of cfengine
+   * Ivan will join related project teams and we will continue discussion
+ * Jenkins demo 
+
+=== 20141113Video === 
+
+ * Attendees: Antoine, Aaron, Brian, Sowmya, Dan, Michael, Szymon, Eric, Ivan
+ * Excused: Jason (@ SC14), Luke, John H.
+
+==== Agenda Topics ====
+ * Developer Updates
+   * Jason - Sent the training group doc to the mailing list.  Won't be attending this or next week.   
+
+==== Notes ====
+  * Developer Updates
+   * Andy
+    * Metadata performance improvements
+    * Working on project plan for assigned teams
+   * Antoine
+    * No updates
+    * Hakan will join next week and possibly work on bwctl with Aaron
+   * Aaron
+    * Updated mesh config to grab multiple meshes at once for Shawn and Soichi
+    * NDT rc release in very near feature. Will include Flash client.
+   * Brian
+    * No updates
+   * Sowmya
+    * Working on sLS design document
+   * Dan
+    * Hardware ordered for small box testing: Mirabox, bananaPi, BeagleBone Black, intel-based dual NIC nodes
+    * Aaron helped rebuild 3.4 bundles
+    * December 4th is when IU security folks will join
+   * Michael
+    * New toolkit UI docs
+    * Testing vulnerability scanners and made some requests to campus
+   * Szymon
+    * Looking at Michael's doc
+   * Eric
+    * Reaching out to various groups to start planning for 3.6 and SDN
+    * Ivan: Suggested Eric also contact GEANT SDN group
+    * Need to firm up future of I2 NDT hosts
+   * Ivan
+    * Port 8090 needs to be open
+   * Jason - Sent the training group doc to the mailing list.  Won't be attending this or next week.   
+ * OPPD Port and sLS port
+  * Short-term: Port 8090 needs to be open
+  * Long-term: May go away IF new bwctl and OPPD merge
+ * Other
+  * Dan will create everyone Jenkins accounts and schedule separate meetings to discuss more details
+  * Two weeks from now meeting is cancelled due to Thanksgiving
+
+=== 20141204Video === 
+
+ * Attendees: Jason, Hakan, Andy, Antoine, Brian, Aaron, Luke, Dan, Michael, Soraya, Sowmya, Eric
+ * Apologise: Szymon, Valentin, Roland
+
+==== Agenda Topics ====
+ * Normalize project plan
+ 
+==== Notes ====
+ * Normalize project plan
+  * Action: Everyone will normalize smartsheet with time set to "developer days" and not worry about dates at this point. This needs to be done by start of work day on Monday.
+   * If you do not have access to smartsheet, click on the link Soraya sent and click the button to request access
+  * Security talk needs to be re-scheduled from next week to a later date. Preference is for after the 1st of the year, but if that does not work we will fallback to the 18th.
+
+
+
+=== 20141211Video === 
+
+ * Attendees: Hakan, Brian, Jason, Rade,Soraya, Aaron, Roland, Shawn, Antoine, Dan, Michael, John H., Sowmya, Ivan
+ * Apologise: Szymon
+
+==== Agenda Topics ====
+ * Project plan review
+ 
+==== Notes ====
+ * Project plan review
+  * Everyone filled in estimated FTE time
+  * Managers need to review and prioritize things
+ * Debian Port
+  * Antoine will send some patches with changes, can also look at branch
+ * BWCTL issue
+  * zerocopy on by default
+  * Discussed options on zerocopy defaults and how to set them. Agreed to leave as default but need to document. Also look at adding options to overwrite.
+  * Looking at race condition as well
