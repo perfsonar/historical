@@ -38,6 +38,6 @@ The current rotation includes:
   * November 1-15, 2014: _NA_: Sowmya, _EU_: Ivan
   * November 16-30, 2014: _NA_: Andy, _EU_: Rade
   * December 1-15, 2014: _NA_: Jason, _EU_: Roland
-  * December 16-31, 2014: _NA_: Dan, _EU_: Szymon
-  * January 1-15, 2014: _NA_: Michael, _EU_: Antoine   
+  * December 16-31, 2014: _NA_: Michael, _EU_: Szymon
+  * January 1-15, 2014: _NA_: Dan, _EU_: Antoine   
  
