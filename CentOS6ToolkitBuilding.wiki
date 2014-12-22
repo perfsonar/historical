@@ -14,7 +14,7 @@ To build this kernel, you will need a host with CentOS 6, and the 'rpm-build' pa
 ==== Preparing The Kernel Source ====
   * Download the most recent kernel Source RPM for CentOS 6
     * Try http://vault.centos.org
-	* Navigate to the proper release, i.e. http://vault.centos.org/6.5/updates/Source/SPackages/
+	* Navigate to the proper release, i.e. http://vault.centos.org/6.6/updates/Source/SPackages/
   * Unpack the kernel source RPM (eg. `rpm -ivh kernel-2.6.32-279.2.1.el6.src.rpm`) by doing:
     * rpm2cpio kernel-2.6.32-279.2.1.el6.src.rpm | cpio -id
     * This will unpack the kernel source RPM into the same directory you are in
