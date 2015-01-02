@@ -214,7 +214,7 @@ curl "http://archive.example.net/esmond/perfsonar/archive/?time-range=86400&even
 === Limiting results returned ===
 The following options are available to limit the results returned and do things like pagination of results:
 || Filter || Description ||
-||limit|| The maximum number of results to return. If not set then all results are returned. ||
+||limit|| The maximum number of results to return. If not set then 1000 results are returned. ||
 ||offset|| The number of tests to skip. Useful for pagination. ||
 
 Examples of these options are provided below:
