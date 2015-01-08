@@ -2,12 +2,18 @@
 
 =  January 8, 2015 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/5:00PM CET =
 
- * Attendees: TBD
+ * Attendees: Andy, Kurt, Roland, John, Ivan, Jason, Aaron, Brian, Joe B., Eric, Soraya, Luke, Dan, Michael, Sowmya
  * Apologise: Szymon
 
 == Agenda Topics ==
-
  * GN4 Multi-domain Monitoring Task
+ * Project Planning
+  * Reviewed road map
+  * Comments about some of biz model working
+  * Debian might be ready by 3.5
+  * Eric will add some wording about risks
+  * Some questions about 6mos cadence between 3.6 and 3.7 need to change
+  * Action: Project leads should update spreadsheet before weekly meetig. Soraya will setup reminder. 
  * TBD
  
 == Notes ==
