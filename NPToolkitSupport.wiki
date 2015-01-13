@@ -8,7 +8,7 @@ There will be two primary support people at all times, on a .5 month rotation. C
 The current rotation includes: 
 
  * Aaron Brown
- *  Jason Zurawski (Will leave regular rotation at end of 2014)
+ *  Jason Zurawski (Currently Supportis Emeritus)
  * Andy Lake
  * Sowmya Balasubramanian
  * Brian Tierney
@@ -24,20 +24,19 @@ The current rotation includes:
 (Please volunteer if you'd like to be added to the rotation!)
 
 = Schedule =
-  * June 16-30, 2014: Jason (Backup: Antoine)
-   * Jason swapped with Brian July 16-31
-  * July 1-15, 2014: Aaron  (Backup: Ivan)
-  * July 16-31, 2014: Brian (Backup: Rade)
-   * Brian swapped with Jason June 16-30
-  * August 1-15, 2014: Andy (Backup: Roland)
-  * August 16-31, 2014: Sowmya (Backup: Szymon)
-  * September 1-15, 2014: Michael
-  * September 16-30, 2014: Dan
-  * October 1-15, 2014: Brian
-  * October 16-31, 2014: _NA_: Aaron, _EU_: Antoine  
-  * November 1-15, 2014: _NA_: Sowmya, _EU_: Ivan
-  * November 16-30, 2014: _NA_: Andy, _EU_: Rade
-  * December 1-15, 2014: _NA_: Jason, _EU_: Roland
-  * December 16-31, 2014: _NA_: Michael, _EU_: Szymon
   * January 1-15, 2014: _NA_: Dan, _EU_: Antoine   
- 
+  * January 16-31, 2014: _NA_: Brian, _EU_: Ivan
+  * February 1-14, 2014: _NA_: Aaron, _EU_:  Rade
+  * February 15-28, 2014: _NA_: Sowmya, _EU_: Roland
+  * March 1-15, 2014: _NA_: Andy, _EU_: Szymon
+  * March 16-31, 2014: _NA_: Michael, _EU_: Antoine
+  * April 1-15, 2014: _NA_: Dan, _EU_: Ivan
+  * April 16-30, 2014: _NA_: Brian, _EU_: Rade   
+  * May 1-15, 2014: _NA_: Aaron, _EU_:  Roland
+  * May 16-31, 2014: _NA_: Sowmya, _EU_: Szymon
+  * June 1-14, 2014: _NA_: Andy, _EU_: Antoine
+  * June 15-30, 2014: _NA_: Michael, _EU_: Ivan
+  * July 1-15, 2014: _NA_: Dan, _EU_: Rade
+  * July 16-31, 2014: _NA_: Brian, _EU_: Roland
+  * August 1-15, 2014: _NA_: Aaron, _EU_: Szymon
+  * August 16-31, 2014: _NA_: Sowmya, _EU_:  Antoine
