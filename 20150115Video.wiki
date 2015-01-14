@@ -6,7 +6,7 @@
  * Apologies:
 
 == Agenda Topics ==
- * Security Assessment Discussion (Von Welch and Baron Miller)
+ * Security Assessment Discussion (Von Welch and Barton Miller)
  * Project Planning 
  
 == Notes ==
