@@ -1,5 +1,8 @@
 #summary Current Roadmap for the perfSONAR
 
+*NOTE: The information is out of date! Current Roadmap is here:
+http://www.perfsonar.net/project-information/project-roadmap/*
+
 == Development Roadmap for perfSONAR Toolkit 3.5 (2015 release) ==
 
 The following tasks are under consideration for release 3.5. These were discussed at the [http://meetings.internet2.edu/media/medialibrary/2014/04/08/20140408-perfSONAR-Roadmap-Internet2-Global-Summit.pdf Internet2 Global Summit]. Also see [https://code.google.com/p/perfsonar-ps/issues/list?can=2&q=milestone=Release3.5 v3.5 issues] in the issue tracker. 
