@@ -18,9 +18,9 @@
  * Some deployments centrally managed and closely monitored by OSG
  * Main goal is to keep security admins at end sites happy
  * Next steps: Von will evaluate it and get back with suggestions. There might be multiple subprojects:
-  1. Software dev best practices
-  2. Keeping appliances safe
-  3. Walkthrough of vulnerability handling
+  # Software dev best practices
+  # Keeping appliances safe
+  # Walkthrough of vulnerability handling
  * Project Planning 
   * Reviewed spreadsheet
   * Aaron will fill out BWCTL
