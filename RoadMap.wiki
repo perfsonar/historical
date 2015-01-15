@@ -1,7 +1,7 @@
 #summary Current Roadmap for the perfSONAR
 
 *NOTE: The information is out of date! Current Roadmap is here:
-http://www.perfsonar.net/project-information/project-roadmap/*
+http://www.perfsonar.net/project-information/project-roadmap/ *
 
 == Development Roadmap for perfSONAR Toolkit 3.5 (2015 release) ==
 
