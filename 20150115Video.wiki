@@ -2,7 +2,7 @@
 
 =  January 15, 2015 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/5:00PM CET =
 
- * Attendees: 
+ * Attendees: Eric, Soraya, Von, Dan, Michael, Luke, Aaron, Brian, Rade, Shawn, Syzmon, Antoine, John H.
  * Apologies: Jason
 
 == Agenda Topics ==
@@ -10,7 +10,28 @@
  * Project Planning 
  
 == Notes ==
-
+ * Security Assessment Discussion (Von Welch and Barton Miller)
+  * Von on grant to help NSF on cybersecurity
+  * Large software development project, but want to minimize work required to keep secure and up-to-date for users
+ * Have standard software dev concerns, some of the "appliance" concerns are new ground
+ * If box gets compromised, people may not want to lose data
+ * Some deployments centrally managed and closely monitored by OSG
+ * Main goal is to keep security admins at end sites happy
+ * Next steps: Von will evaluate it and get back with suggestions. There might be multiple subprojects:
+  1. Software dev best practices
+  2. Keeping appliances safe
+  3. Walkthrough of vulnerability handling
+ * Project Planning 
+  * Reviewed spreadsheet
+  * Aaron will fill out BWCTL
+  * Rade will fill-out PS UI
+  * Dan may push out some dates on hardware
+ * Stale node
+  * Can ask lookup service what versions are
+  * Would like to know how much a host is used potentially. Ideas included having bwctl report when a test is run to a central server or getting info on regular tests from MAs
+  * Andy complained about using the word "value" and trying to equate that with "staleness" or "how many tests are being run"
+ * MaDDash
+  * Eric shared that at I2 interested in a way to better visualize sparse meshes. Andy agrees that it would be a good thing to look at in 2.0
 == Future Agenda Topics ==
 
 == Actions  ==
