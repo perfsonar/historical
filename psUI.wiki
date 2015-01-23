@@ -21,11 +21,11 @@ A user guide describing how to use the psUI user interface can be [http://downlo
  * how to configure authentication with an indentity provider
 
 == Packages ==
-Current version of the psUI is 1.3.2 and can be downloaded as:
- * an [http://downloads.perfsonar.eu/repositories/rpm/stable/6/noarch/Packages/perfsonar-ui-web-1.3.2-rpm.rpm RPM package] for RHEL 6, CentOS 6 or Scientific Linux 6.
- * a [http://downloads.perfsonar.eu/repositories/deb/pool/main/p/perfsonar-ui-web/perfsonar-ui-web_1.3.2_all.deb Debian 7 package].
+Current version of the psUI is 1.4.0 and can be downloaded as:
+ * an [http://downloads.perfsonar.eu/repositories/rpm/stable/6/noarch/Packages/perfsonar-ui-web-1.4.0-rpm.rpm RPM package] for RHEL 6, CentOS 6 or Scientific Linux 6.
+ * a [http://downloads.perfsonar.eu/repositories/deb/pool/main/p/perfsonar-ui-web/perfsonar-ui-web_1.4.0_all.deb Debian 7 package].
 
-See the full [https://forge.geant.net/forge/display/perfsonar/psUI+version+1.3.2 release notes for version 1.3.2] for further details.
+See the full [https://forge.geant.net/forge/display/perfsonar/psUI+version+1.4.0 release notes for version 1.4.0] for further details.
 
 == Source Code ==
 The perfSONAR UI source code can be [http://svn.geant.net/GEANT/SA2/ps-visualisation-tools/perfsonar-ui-web/ browsed] or retreived with subversion: `svn co http://svn.geant.net/GEANT/SA2/ps-visualisation-tools/perfsonar-ui-web/`
