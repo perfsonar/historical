@@ -497,6 +497,40 @@ foreach my $m(@{$md}){
 }
 }}}
 
+===Querying Subintervals===
+{{{
+# Define filters
+my $filters = new perfSONAR_PS::Client::Esmond::ApiFilters();
+$filters->source("host1.example.net");
+$filters->destination("host2.example.net");
+$filters->time_range(86400);
+$filters->event_type('packet-retransmits-subintervals');
+
+# Connect to api
+my $client = new perfSONAR_PS::Client::Esmond::ApiConnect(
+    url => 'http://archive.example.net/esmond/perfsonar/archive',
+    filters => $filters
+);
+
+#get measurements matching filters
+my $md = $client->get_metadata();
+die $client->error if($client->error); #check for errors
+#loop through all measurements
+foreach my $m(@{$md}){
+    # get data of a particular event type
+    my $et = $m->get_event_type("packet-retransmits-subintervals");
+    my $data = $et->get_data();
+    die $et->error if($et->error); #check for errors
+    #print all data
+    foreach my $d(@{$data}){
+        print "Time: " . $d->datetime . "\n";
+        foreach my $subint(@{$d->val}){
+            print "\tstart=" . $subint->{start} . ",duration=" . $subint->{duration} . ",value=" . $subint->{val} . "\n";
+        }
+    }
+}
+}}}
+
 = Publishing Data =
 
 == Quickstart ==
