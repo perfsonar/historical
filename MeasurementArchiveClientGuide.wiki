@@ -615,7 +615,7 @@ There are no summaries supported for the packet-trace type currently.
 
 Data such as throughput and packet retransmits is also available for subintervals of an individual test. No summarizations are avilable for this data type.
 {{{
-curl "http://archive.example.net/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/packet-retransmit-subintervals/base?time-range=86400"
+curl "http://archive.example.net/esmond/perfsonar/archive/f6b732e9f351487a96126f0c25e5e546/packet-retransmits-subintervals/base?time-range=86400"
 }}}
 
 Results:
