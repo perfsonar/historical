@@ -1508,6 +1508,14 @@ A few of the common event types have been covered in previous sections, but a fu
 ||histogram-rtt||A histogram describing the observed packet round-trip times over a over a time period. Buckets always in milliseconds.||
 ||histogram-ttl||A histogram describing the observed number of hops (time-to-live) of packets over a time period from source to destination.||
 ||histogram-ttl-reverse||A histogram describing the observed number of hops (time-to-live) of packets over a time period from destination to source.||
+||ntp-delay||The round trip delay time to the NTP server in milliseconds.||
+||ntp-dispersion||The maximum error of the local clock relative to the NTP reference clock in milliseconds.||
+||ntp-jitter||Short-term variations in the clock frequency. The RMS deviation of the NTP offset in milliseconds.||
+||ntp-offset||The time difference between the system clock and the NTP reference clock in milliseconds.||
+||ntp-polling-interval||The NTP polling interval in seconds.||
+||ntp-reach||An integer representing the reachability register, which is technically an octal value. If all is well and NTP has been running for a while, this should read 377. It may be lower during startup or if the NTP servers is unreachable on some attempts.||
+||ntp-stratum||An integer indicating the NTP stratum of the local host (number of servers to a reference clock). 1=Primary (has a hardware clock), 2-15=Secondary reference (via NTP), 16=Unsynchronized||
+||ntp-wander||Long-term variations in NTP RMS frequency jitter in PPM (parts per million) - a measure of long-term clock stability.||
 ||packet-duplicates||The number of duplicate packets observed in a sample for a single direction.||
 ||packet-duplicates-bidir||The number of duplicate packets observed for a complete packet round trip (from source to destination and then back to source)||
 ||packet-loss-rate||The number of packets lost divided by the number of packets sent.||
