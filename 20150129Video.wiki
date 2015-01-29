@@ -3,7 +3,7 @@
 =  January 29, 2015 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/5:00PM CET =
 
  * Attendees:
- * Apologies: Roland (on the road, presenting perfSONAR to MD-VPN), Rade and Antoine (on the road, the same meeting as Roland)
+ * Apologies: Roland (on the road, presenting perfSONAR to MD-VPN), Rade and Antoine (on the road, the same meeting as Roland), Aaron (Sick Day)
 
 == Agenda Topics ==
  * Project Planning 
