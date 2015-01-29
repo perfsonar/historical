@@ -2,16 +2,31 @@
 
 =  January 29, 2015 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/5:00PM CET =
 
- * Attendees:
+ * Attendees: Andy, Ivan, Brian, Dan, Michael, Hakan, Szymon, Eric, Valentin
  * Apologies: Roland (on the road, presenting perfSONAR to MD-VPN), Rade and Antoine (on the road, the same meeting as Roland), Aaron (Sick Day), Jason & John (@ perfSONAR Deep Dive)
 
 == Agenda Topics ==
  * Project Planning 
+ * 3.4.2
  * Automation Discussion (Ivan)
- 
+
 == Notes ==
- 
+  * Project Planning 
+   * Things mostly on track.
+   * Dan needs hardware commitments soon. Not currently a problem but may be in the future. 
+   * Action: Michael working to identify usability group and will update timelines if needed
+   * Action: Andy will add MaDDash testing and release
+   * Acion; Sowmya will check packaging dates
+ * 3.4.2
+  * Action: Look at issue tracker and have stuff done by next week's call.
+ * Automation Discussion (Ivan)
+  * IU volunteered to host Nagios
+  * Internet2 and ESnet will provide some test hosts
+  * Lots of details to be worked out still, but broader picture coming together
+
 == Future Agenda Topics ==
+ 
+ * Running perfSONAR on A VM
 
 == Actions  ==
 
