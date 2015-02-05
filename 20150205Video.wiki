@@ -2,7 +2,7 @@
 
 =  February 5 2015 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/5:00PM CET =
 
- * Attendees: 
+ * Attendees: Andy, Hakan, Brian, Valentin, Jason, Rade, Antoine, Sowmya, Aaron, Eric, Michael, Dan, Luke, Shawn, Ivan
  * Apologies: Szymon
 
 == Agenda Topics ==
@@ -11,7 +11,18 @@
  * Running perfSONAR on a VM
 
 == Notes ==
-
+ * Project Planning 
+    * General comment that projects slip by few days. So far end dates seem OK, but need to keep our eye on it.
+    * Action: Eric will contact Soraya about adding expected and actual finish dates or similar    
+ * 3.4.2
+  * Pushed back a few remaining issues as they were non-critical
+  * We are ready to build, Andy will do that today and tomorrow
+  * Eric brought up question of whether we should make 3.4.2 known earlier. Group decided RC announcement serves that purpose, and we don't always know what will be in it until the end. May revisit in future.
+ * Running perfSONAR on a VM
+  * I2 trying to determine what subset of data is useful
+  * Lots of questions about what is safe to expose, what is useful to expose
+  * Antoine noted this also came up at last workshop. Another approach was to certify VM environments that run well.
+  
 == Future Agenda Topics ==
 
 
