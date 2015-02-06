@@ -1,0 +1,234 @@
+#summary February 5, 2015 pS Doc Conference Call
+
+=  February 5 2015 pS Doc Conference Call, 12pm EST =
+
+== Attendees ==
+
+{{{
+	Trupti (GEANT)
+	Jason (ESnet)
+	John (Internet2)
+	Brian (ESnet)
+	Eric (Internet2)
+	Jen (Indiana)
+}}}
+
+== Agenda Topics ==
+
+{{{
+	0) Agenda Bash
+	1) Update on upcoming training sessions. (Even very tentative).
+	2) Update on development of training materials (roadmap).
+	3) Feedback from trainers on tools. (Any feature requests from recent training sessions?)
+	3) Strategic discussion on where we want to target training.
+}}}
+
+== Notes ==
+
+{{{
+	Who runs these meetings? TBD.  Eric will today, maybe jason later
+
+		Won't be an hour, won't be all the time
+
+		Purpose - talk about training events, so we can coordinate.  Talk about materials, so we can share
+
+	Preliminary comments:
+
+		Materials will live online: http://www.perfsonar.net/about/training-materials/
+
+		Existing set of training materials finished early Jan that included:
+
+			Basic to intermediate levels of instruction (hands on expected) in how to get things running
+
+			Use cases
+
+			regional collaboration
+		
+			maddash
+
+		Why aren't these up there now?  Two reasons:
+
+			1) need to make a content neutral (e.g. no event metadata) versions that incorporate some of the changes.  Consider these 'living' documents
+
+			2) need to carve out an area for past event materials (box/google folder?  just static links?  not sure yet)
+
+				After each event, the static (dead) documents life here until time stops
+
+		'Hiding' material vs deleting it
+
+			Some discussion on if events just take the basic set of slides - and then 'hide' things that are not needed.  
+
+			Some concern about if that would cause confusion.  Will research it.  
+
+	Lets talk events:
+
+		Feb 26/27, Atlanta GA, Southern Partnership in Advanced Networking Workshop 1: South Carolina and Georgia (Clemson CC-NIE)
+
+			John and Jason attending - will be using existing materials (beginner audience) but shortened to fit 4 hrs
+
+		Mar 18/18, Pittsburg PA, OIN
+
+			Jason and others
+
+			OIN likes using 'OIN' branded materials.  There are two ways we can address this:
+
+				1) make it so the conversion from pS to OIN is easy (not hard in PPT)
+
+				2) Get permission to just use perfSONAR branded materials from the overlords
+
+		Mar 24 ESCC, Berkeley CA
+
+			Brian will be talking about perfSONAR security only
+
+		May 26/27/28, Kansas City MO, OIN
+
+			Jason and others
+
+		GLIF?  Doesn't make much sense
+
+		I2GS?  Also hard to do this one due to the length of the event and not the right crowd
+
+		TERRENA?  Trupti didn't know what was planned, but can ask.
+		
+		NSRC Events (summer)
+
+			Kenya
+
+			Phillipines
+
+		APAN (summer)
+
+			John was approached.  No details yet
+
+		Tech X - If there is a tutorials track? Eric will ask 
+
+		BTR Events
+
+			John will send what he has planned
+
+		SC15 - want to avoid
+
+	Calendar?
+		Want to be careful with this - we need a public/private view
+
+			Public - for events that are confirmed
+
+			Private - for things that are not confirmed and/or closed off (OINs)
+
+		Jason envisions a google calander:
+
+			Integrate with the web site - we are all owners
+
+			We can add things as we need to, and make them 'private' so that the public view doesn't reveal the info
+
+		John will investigate
+
+	Topics that need materials still
+
+		NAGIOS (advanced and basic)
+
+			Need to also generate documentation for pS project as a part of this
+
+		Configuration managers (CFEngine, Puppet, etc)
+
+			Work with IU folks that are doing this for pS
+
+		perfSONAR-UI
+
+			EU side of house needs to work on this one
+
+		pS for different actors
+
+			viewpoint of a CIO, commercial entity, etc..  Talk about ROIs and all that other stuff that these parties care about.  
+
+	Timeline doc
+
+		Needs to be revised to add new people
+
+		Move the priority of actors things (immediate use)
+
+		assign people to other tasks
+
+		slip things in march/feb to later (busy couple of months)
+
+	Other things learned from previous 2 events:
+
+		Timing and pacing need to be worked on (especially for those that are not familiar)
+
+			add in bumpers to the slides to pause the action 
+
+		Notes for each slide - since not everyone is Jason
+
+		Each presenter needs access to a 'live' machine to do demos.  IU people can access IU machines, ditto for ESnet.  Internet2 folks don't have access to observatory anymore.  John needs to find a host he can log into to do demos.  
+
+	Feedback from attendees
+
+		How do we get feedback to the project?
+
+		Jason has taken notes, then transcribes them and sends to dev list (Release manager can yay/nay them)
+
+		We need a permanent survey mechaism - send to group immediately after each event and poke them once or twice for answers
+
+			Survey monkey?  IU/Internet2 have accounts - ESnet doesn't
+
+			Google docs are easy to manage too and may be prefered
+
+		John to investigate - then we can make general questions as a group
+
+	Jason @ Quilt
+
+		not a perfsonar talk - more about engagement
+
+		'what about setting up dashboards'
+
+			it will be mentioned, its not the focus though
+
+			not the right crowd to talk policy - that comes later
+}}}
+
+== Actions  ==
+
+{{{
+	Jason to see how to handle OIN vs. pS materials
+
+	Eric to find out if there is a tutorial track at tech x
+
+	Jason to experiment with slide hiding and PDF output
+
+	Trupti to ask Roland/Domenico about TERRENA activities
+
+	John to send BTR events that are planned
+
+	John to investigate a google calendar for tracking
+
+	Jason to update timeline document
+
+	Jason to talk with Andy about NAGIOS documentation
+
+	Jason to talk with configuration group about documentation
+
+	John to get access to a perfSONAR node from Internet2 so he can do demos
+
+	John to investigate survey monkey
+
+	Jason to think about a policy document that goes with the responsibilities of running a dashboard
+}}}
+
+== Where ==
+
+Join from PC, Mac, iOS or Android: https://ESnet.zoom.us/j/465462292
+ 
+Or join by phone: 
+
+    +1 (415) 762-9988 or +1 (646) 568-7788 US Toll
+    Meeting ID: 465 462 292 
+    International numbers available: https://ESnet.zoom.us/zoomconference 
+
+Or join from a H.323/SIP room system: 
+
+    Dial: 162.255.36.11 (US East) or 162.255.37.11 (US West) 
+    Meeting ID: 465 462 292 
+
+== Last Updated ==
+
+$Id$
