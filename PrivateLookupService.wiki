@@ -5,7 +5,7 @@ Deploying a private perfSONAR LS instance involves the following steps:
 
   # Installation of sLS 
   # Configuring sLS
-  # Installation of LS BootStrap Service
+  # Installation of LS "BootStrap" Service
   # Configuring the bootstrap file
   # Configuring the toolkit instances
   
@@ -22,6 +22,11 @@ Configure the LS host and port information. The rest of the settings can have th
 
 == 3. Installation of LS BootStrap Service ==
   * Download and install perl-perfSONAR_PS-SimpleLS-BootStrap-server-3.4-3.pSPS.noarch.rpm
+    For example:
+{{{
+    rpm -hUv http://software.internet2.edu/rpms/el6/x86_64/main/RPMS/Internet2-repo-0.5-3.noarch.rpm
+    yum -y install perl-perfSONAR_PS-SimpleLS-BootStrap-server-3.4-3.pSPS
+}}}
   
 
 == 4. Configuring the bootstrap file ==
@@ -39,7 +44,7 @@ Configure the LS host and port information. The rest of the settings can have th
 The bootstrap client is installed in each toolkit instance but it comes with the default bootstrap URL, which is the global LS bootstrap.
 
 To change it:
-  *The config file is located in /opt/SimpleLS/bootstrap/etc
+  * The config file is located in /opt/SimpleLS/bootstrap/etc
   * Edit hosts-client.yml.
   * Set the locator information with the complete URL of the activehosts.json file (the one you configured for web access in Step 4. Configuring the bootstrap file)
   * Start/Restart the client by running {{{ service simple_ls_bootstrap_client start|restart|stop }}}
