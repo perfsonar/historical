@@ -1,0 +1,51 @@
+#summary This page describes how to deploy a private lookup-service
+
+= Introduction =
+Deploying a private perfSONAR LS instance involves the following steps:
+
+  # Installation of sLS 
+  # Configuring sLS
+  # Installation of LS BootStrap Service
+  # Configuring the bootstrap file
+  # Configuring the toolkit instances
+  
+
+
+== 1. Installation of sLS ==
+The sLS installation instructions can be found here: http://code.google.com/p/perfsonar-ps/wiki/NewLSInstallation
+
+== 2. Configuring sLS ==
+If you use the rpm, the config files will be installed in /etc/lookup-service
+
+=== lookupservice.yml ===
+Configure the LS host and port information. The rest of the settings can have the default values.
+
+== 3. Installation of LS BootStrap Service ==
+  * Download and install perl-perfSONAR_PS-SimpleLS-BootStrap-server-3.4-3.pSPS.noarch.rpm
+  
+
+== 4. Configuring the bootstrap file ==
+  * If you used the rpm then, the config file can be found in /opt/SimpleLS/bootstrap/etc
+  * Edit the hosts-server.yml file
+  * Each host entry contains the following: locator, priority and status
+    * locator: the sLS URL of the private instance
+    * priority: Currently we do not use the priority field. So, this can be set to ~
+    * status: Set it to 'unknown'
+  * Save the configuration
+  * Start/Restart the bootstrap service using {{{service simple_ls_bootstrap_server start|stop|restart }}}
+  * This will output an activehosts.json file. Make sure the file is accessible via web.
+
+== 5. Configuring toolkit instances ==
+The bootstrap client is installed in each toolkit instance but it comes with the default bootstrap URL, which is the global LS bootstrap.
+
+To change it:
+  *The config file is located in /opt/SimpleLS/bootstrap/etc
+  * Edit hosts-client.yml.
+  * Set the locator information with the complete URL of the activehosts.json file (the one you configured for web access in Step 4. Configuring the bootstrap file)
+  * Start/Restart the client by running {{{ service simple_ls_bootstrap_client start|restart|stop }}}
+
+
+= A word about Security =
+The private sLS instance will not be globally visible but can still be accessible if the URL is available. If you want a private sLS for security reasons, there are 2 ways of achieving this:
+  * you can use a private address that can be accessed only within your LAN.
+  *  you can secure access by using ACLs or IPTables,
