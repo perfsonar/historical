@@ -21,11 +21,11 @@ If you use the rpm, the config files will be installed in /etc/lookup-service
 Configure the LS host and port information. The rest of the settings can have the default values.
 
 == 3. Installation of LS BootStrap Service ==
-  * Download and install perl-perfSONAR_PS-SimpleLS-BootStrap-server-3.4-3.pSPS.noarch.rpm
+  * Download and install the rpm perl-perfSONAR_PS-SimpleLS-BootStrap-server
     For example:
 {{{
     rpm -hUv http://software.internet2.edu/rpms/el6/x86_64/main/RPMS/Internet2-repo-0.5-3.noarch.rpm
-    yum -y install perl-perfSONAR_PS-SimpleLS-BootStrap-server-3.4-3.pSPS
+    yum -y install perl-perfSONAR_PS-SimpleLS-BootStrap-server
 }}}
   
 
