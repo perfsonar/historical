@@ -1,3 +1,3 @@
 #summary Instructions to install and run the new SimpleLookupService
 
-Page moved to [https://code.google.com/p/simple-lookup-service/wiki/sLSInstallation]
+Page moved to http://github.com/esnet/simple-lookup-service/wiki/LSInstallation
