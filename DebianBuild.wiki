@@ -8,28 +8,45 @@ This document will describe how to actually build the packages from the code rep
 == Building host ==
 
 The building host needs the following packages to be installed prior to any build:
- * build-essential
- * devscripts
- * debhelper
- * dh-make
- * dh-make-perl
- * dh-exec
- * quilt
+ * the usual Debian building scripts and packages:
+  * build-essential
+  * devscripts
+  * debhelper
+  * dh-make
+  * dh-make-perl
+  * dh-exec
+  * dh-autoreconf
+ * git-buildpackage (to easily manage the debian packaging files in the git repository)
+ * quilt (to manage the Debian patches)
+ * qemu-user-static (to compile for other architectures)
 
-This can be easily installed with:
+On a regular Debian 7 host, this can be easily installed with:
 {{{
-aptitude install build-essential devscripts debhelper dh-make dh-make-perl dh-exec quilt
+apt-get -y install build-essential devscripts debhelper dh-make dh-make-perl dh-exec dh-autoreconf git-buildpackage qemu-user-static quilt
 }}}
 
 == Building a single package ==
-
-As a regular use, launch the following build command in the package directory (you must have a debian directory inside the package directory):
+=== First setup ===
+If you build the packages for the first time on the building host, you'll first need to setup the required qemu chroot or images.  This can be done with a command like (tailor the `DIST` and `ARCH` variables to your needs):
 {{{
-debuild -us -uc -b
+DIST=wheezy ARCH=armhf git-pbuilder create --debootstrap qemu-debootstrap
 }}}
 
+=== Actual build===
+As a regular user, launch the following build command in the package directory with a checkout of the Debian branch you want to build for (you must have a debian directory inside the package directory):
+{{{
+ARCH=armhf gbp buildpackage
+}}}
+
+=== Maintaining the qemu chroot ===
+The chroot and qemu images need to be updated from time to time to have the latest versions of the build packages.  Keeping the images updated is as simple as running:
+{{{
+DIST=wheezy ARCH=armhf git-pbuilder update
+}}}
 
 == Building multiple packages ==
+To build multiple packages, we'll prefer to use the perfSONAR Jenkins infrastructure.
 
+The setup we use is using the [http://jenkins-debian-glue.org jenkins-debian-glue] packages and configuration.  The internal of this setup is similar to the use of git-buildpackage described above, but everything is automatised by jenkins-debian-glue if you give it the correct configuration.
 
 == Building the toolkit images ==

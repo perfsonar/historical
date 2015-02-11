@@ -29,8 +29,22 @@ We'll have 2 set of names:
 
 === Version and release numbering ===
 
-=== Debian specifics ===
-When there are Debian specifics to packaging that cannot be ported back to the main building rules, build patches can be used.  They resides in the `debian/patches` directory and are usually maintained with the `quilt` command.
+=== Debian build files ===
+The `git-buildpackage` package provides a very useful set of tools to maintain Debian packaging files and directives in a separated branch along side the original source code.  Refer to the man page for more information.
+
+Our setup uses the following convention:
+ * original source code is in the `master` branch or a similar one,
+ * the source code maintainers tag each release in a documented and reliable way that is compatible with `git-buildpackage` conventions
+ * the Debian packaging files are stored in separate branches named with the Debian release they are targeting, i.e.:
+  * `debian/wheezy`
+  * `debian/jessie`
+ * the `git-buildpackage` specific configurations for each package are stored in the `debian/gbp.conf` file in each Debian branch
+
+=== Debian specific patches ===
+When there are Debian specific patches to be applied to the source code, a full clean packaging cannot be ported back to the main building rules, build patches can be used.  They resides in the `debian/patches` directory and are usually maintained with the `quilt` command.
+
+=== Git branching and tagging ===
+To make a proper use of `git-buildpackage` we need to follow its conventions with regards to branching and tagging.  The Debian packaging files are contained in the `debian/*` branches.
 
 == List of Debian packages ==
 Here is the list of Debian packages foreseen for the Debian port, a list of services and a list of libraries used by the services:
