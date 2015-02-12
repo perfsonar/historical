@@ -3,7 +3,7 @@
 =  February 12, 2015 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/5:00PM CET =
 
  * Attendees: 
- * Apologies: Jason (no updates to report, FWIW), Szymon, Rade (nothing new)
+ * Apologies: Jason (no updates to report, FWIW), Szymon, Rade (nothing new), Antoine
 
 == Agenda Topics ==
  * Project Planning 
