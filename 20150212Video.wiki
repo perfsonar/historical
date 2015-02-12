@@ -2,14 +2,40 @@
 
 =  February 12, 2015 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/5:00PM CET =
 
- * Attendees: 
+ * Attendees: Brian, Sowmya, Roland, Hakan, Eric, Luke, Dan, Michael, Andy, Soraya, Ivan, Valentin
  * Apologies: Jason (no updates to report, FWIW), Szymon, Rade (nothing new), Antoine
 
 == Agenda Topics ==
  * Project Planning 
  * 3.4.2
-
+ * VM Discussion
+ * Small Node Poll results
 == Notes ==
+ * Project Planning 
+  * Auto config started and on track. 
+  * BWCTL on track
+  * MaDDash on track
+   * Andy will add option to list other links in menu
+  * Debian port - see antoine email
+  * LS scalability
+   * Sowmya ready for others to test, will send instructions
+   * Eric looking at IU managed sLS and Singapore node
+  * Build and Test system
+   *  Toolkit now building, working on ISOs
+   * Have test platform commitments, proceeding with next steps
+  * New GUI
+   * Usability person lined-up, will start working with them
+  * $100 Nodes
+   * Survey complete. Discussion later.
+  * Bundling
+   * Sowmya has iptables and sysctl package
+ * 3.4.2
+  * Aaron, Dan, Andy all looking at full install issues. Will skip for rc if not ready by Tuesday.
+  * NTP servers is non-blocking issue
+ * VM Discussion
+  * Group agreed document a good start
+ * Small Node Poll results
+  * Many interesting results. People seem more interested in more slightly capable nodes. 
   
 == Future Agenda Topics ==
 
