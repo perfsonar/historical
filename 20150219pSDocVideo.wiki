@@ -1,0 +1,211 @@
+#summary February 19, 2015 pS Doc Conference Call
+
+=  February 19 2015 pS Doc Conference Call, 12pm EST =
+
+== Attendees ==
+
+{{{
+	Jason (ESnet)
+	Hans (NSRC)
+	John (Internet2)
+	Dale (NSRC)
+	Eric (Internet2)
+	Brian (ESnet)
+	Ben (GRNOC)
+	Trupti (GEANT)
+}}}
+
+== Agenda Topics ==
+
+{{{
+	Review current web presence (https://www.perfsonar.net/about/training-materials/ - Jason)
+	Review Roadmap (attached - Jason)
+	Calendar Project (John)
+	Additional Training Opportunities (All)
+	AOB
+}}}
+
+== Notes ==
+
+{{{
+	Dale will be at APAN/APRICOT.  Talking about perfSONAR a little bit in some sessions.  
+
+		John will talk about engineering and testbeds.  Meeting with SINET people.  
+
+	Review current web presence (https://www.perfsonar.net/about/training-materials/)
+
+		out there and live, Brian sent to community lists
+
+		eric comments - characterizing the audience is good - we can do that in the future too
+
+		brian - approachable overview?
+
+			see the top of the page
+
+		say something about the branding of the slides on the main page (e.g. not strip things)
+
+			creative commons licence, etc. (title page of the presentations)
+
+		creative commons adoption - run it by perfSONAR steering (don't involve legal) - https://creativecommons.org/licenses/
+
+			managers make a recommendation to adopt CCL
+
+	Review Roadmap (attached - Jason)
+
+		Review of the current one
+		
+		get it posted to the web
+
+			sub section of the current roadmap + link to the training area
+
+		Eric: to dale - let us know if things are missing (Hervey being out has hampered things - but that will get back soon)
+
+			Hans: bouncing around the idea of more analysis and understanding of the results (more theory than practice). People need to understand what they are seeing
+
+			'being able to explain a graph' - do it as a video, etc.
+
+		Eric: add a deck that wasn't presented, but available
+
+			TODO on what we would like see happen in a region/campus/country 'aftermath'  
+
+			review what is up there - there is something that is close.  
+
+		surveys - are we doing anyting to measure the effects of a workshop?
+
+			immediate + 6/months
+
+	Calendar Project (John)
+
+		John has a google calendar started (BtR site visits, things we talked about, OIN)
+
+			in his personal GMail account
+
+			people should send gmail accounts to john
+
+			public/private events, etc
+
+		can we embed that in the perfSONAR web site (CMS)
+
+	Additional Training Opportunities (All)
+
+
+
+
+		Feb 26/27, Atlanta GA, Southern Partnership in Advanced Networking Workshop 1: South Carolina and Georgia (Clemson CC-NIE)
+
+			John and Jason attending - will be using existing materials (beginner audience) but shortened to fit 4 hrs
+
+		KINBER Webinar (Mar 4) - Jason, will be more DMZ than perfSONAR
+
+		GPN Webinar (Mar 13) - Jason, perfSONAR topics
+
+		GEANT Events:
+
+			GN3+ Symposium (March?)
+
+				Roland - will use existing pS materials and maybe a demo
+
+			STF (March?)
+
+				Roland - will use existing pS materials and maybe a demo
+
+			Trupti will send a report to the list after the events on feedback.  
+
+		Mar 18/18, Pittsburg PA, OIN
+
+			Jason and others
+
+		Mar 24 ESCC, Berkeley CA
+
+			Brian will be talking about perfSONAR security only
+
+		May 26/27/28, Kansas City MO, OIN
+
+			Jason and others
+
+		TNC
+
+			Talk accepted on converged perfSONAR.  
+
+			Dale notes there are some extra slots at the event - working with organizers to do something on emerging regions
+
+		Deep Dive (Santa Cruz) - details emerging (June)
+
+			Jason + maybe John/Matt
+		
+		NSRC Events (summer)
+
+			Kenya
+
+			Phillipines
+
+		APAN (summer)
+
+			John was approached.  No details yet.
+
+			Dale: malasya - MYREN - associated training NSRC/pS thing (not clear yet)
+
+			challenging to do a '2 day' event at APAN.  Do want to consider leave behind though
+
+			Try to get the barriers to upgrading” from the locals - not important, no resources, lazy, etc,
+
+	AOB
+
+		poll for next call - apan is the next week and march is challenging
+
+		hervey will be back soon from recovery.  
+}}}
+
+== Actions  ==
+
+{{{
+	Jason to talk with Andy about NAGIOS documentation
+
+	Jason to talk with configuration group about documentation
+
+	John to get access to a perfSONAR node from Internet2 so he can do demos
+
+	Jason to think about a policy document that goes with the responsibilities of running a dashboard
+
+
+	Everyone to send John gmail identities for google calendar sharing
+
+	Jason to find out about embedding a calendar in the CMS for perfSONAR
+
+	Jason to update and post roadmap to web site with corrections from today
+
+		Add in a ‘theory’ item
+
+	Jason to create a generic survey in Google Docs for use at events as well as a general QA doc that can be used by presenters.  
+
+	Brian and Eric to work on CC license adoption w/ perfSONAR Steering
+
+	Jason to update doc page to have a disclaimer about branding.  
+
+	Eric to review current regional slide deck to see if this fits the mark for his ‘aftermath’ thought. 
+
+	NSRC & IU International to determine why some NRENs haven’t upgraded to 3.3 yet.  If there is something the project can do to change the language in our notices, we can do that.  
+
+	All will self assign to the roadmap, or we will start assigning
+
+	Jason will start to fill in ‘notes’ and pacing instructions for slides.  
+}}}
+
+== Where ==
+
+Join from PC, Mac, iOS or Android: https://ESnet.zoom.us/j/465462292
+ 
+Or join by phone: 
+
+    +1 (415) 762-9988 or +1 (646) 568-7788 US Toll
+    Meeting ID: 465 462 292 
+    International numbers available: https://ESnet.zoom.us/zoomconference 
+
+Or join from a H.323/SIP room system: 
+
+    Dial: 162.255.36.11 (US East) or 162.255.37.11 (US West) 
+    Meeting ID: 465 462 292 
+
+== Last Updated ==
+
+$Id$
