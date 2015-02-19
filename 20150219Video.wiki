@@ -2,7 +2,7 @@
 
 =  February 19, 2015 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/5:00PM CET =
 
- * Attendees: 
+ * Attendees: John H., Aaron, Dan, Michael, Ivan, Hakan, Eric, Brian, Andy, Antoine 
  * Apologies: Jason (nothing to report)
 
 == Agenda Topics ==
@@ -10,7 +10,21 @@
  * 3.4.2
 
 == Notes ==
- 
+ * Project Planning 
+ * 3.4.2
+  * Full install still being problematic, don't need to hold-up RC tho
+  * Fixed a bunch of stuff
+   * Regular testing and mesh config yielding duplicate tests
+   * Added script to clean-up after regular testing
+   * Fixed auto-updates, call to post script during new install was mishandling parameters. 
+   * Fixed fail2ban issue where it started sending emails
+   * Michael added errors to BWCTL graphs
+   * Andy testing NetInstall, if people give him go ahead by end of tomorrow, will do release Monday
+ * Test Mesh 
+  * Will be testing Debian and CentOS together
+  * Will need mesh config, dashboard etc.
+  * Dan will have google doc up detailing test, and will work on getting existing nodes from IU and ESnet working
+  * Will add sLS maybe in a couple months, first step is to get mesh working
 == Future Agenda Topics ==
 
 
