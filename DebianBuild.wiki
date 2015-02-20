@@ -49,4 +49,16 @@ To build multiple packages, we'll prefer to use the perfSONAR Jenkins infrastruc
 
 The setup we use is using the [http://jenkins-debian-glue.org jenkins-debian-glue] packages and configuration.  The internal of this setup is similar to the use of git-buildpackage described above, but everything is automatised by jenkins-debian-glue if you give it the correct configuration.
 
+=== Installing jenkins-debian-glue ===
+To install the `jenkins-debian-glue` package we need to add its repository from http://jenkins.grml.org/job/jenkins-debian-glue-release-binaries/ and then run:
+
+{{{
+apt-get -y install jenkins-debian-glue jenkins-debian-glue-buildenv-lintian
+}}}
+
+== Configuring the Jenkins jobs ===
+As per the [http://jenkins-debian-glue.org/getting_started/manual/ jenkins-debian-glue documentation] you'll need to setup a source package job and a dependant binary job.  The binary job is automatically run after each source build and is taking care of building for multiple architectures thanks to a configuration matrix.
+
+See the comments in the Jenkins job as further documentation.
+
 == Building the toolkit images ==

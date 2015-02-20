@@ -38,7 +38,7 @@ Our setup uses the following convention:
  * the Debian packaging files are stored in separate branches named with the Debian release they are targeting, i.e.:
   * `debian/wheezy`
   * `debian/jessie`
- * the `git-buildpackage` specific configurations for each package are stored in the `debian/gbp.conf` file in each Debian branch
+ * the `git-buildpackage` specific configurations for each package are stored in the `debian/gbp.conf` file in each Debian branch, this file should contain everyting that is needed for gbp to work under our Jenkins environment.
 
 === Debian specific patches ===
 When there are Debian specific patches to be applied to the source code, a full clean packaging cannot be ported back to the main building rules, build patches can be used.  They resides in the `debian/patches` directory and are usually maintained with the `quilt` command.
@@ -62,8 +62,12 @@ perfsonar-regulartesting
 perfsonar-sls-bootstrap-client
 perfsonar-sls-bootstrap-server
 perfsonar-service-test
-perfsonar-toolkit
 
+perfsonar-toolkit
+perfsonar-endpoint
+perfsonar-core
+
+perfsonar-common
 libperfsonar-perl
 libperfsonar-sls-perl
 libperfsonar-net-perl
