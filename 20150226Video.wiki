@@ -7,6 +7,7 @@
 
 == Agenda Topics ==
  * Project Planning 
+  * Smartsheet: https://app.smartsheet.com/b/home?lx=KcuwC5QaC5XMBGBsBD6dqw
  * 3.4.2
 
 == Notes ==
