@@ -3,7 +3,7 @@
 =  March 5, 2015 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/5:00PM CET =
 
  * Attendees: Andy, Brian, Dan, Michael, Soraya, Eric, Ivan, Antoine, Valentin, Sowmya, Aaron
- * Apologies: Jason (on a plane), Szymon
+ * Apologies: Jason (on a plane), Szymon, Hakan
 
 == Agenda Topics ==
  * Project Planning 
