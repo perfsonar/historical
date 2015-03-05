@@ -2,16 +2,48 @@
 
 =  March 5, 2015 Conference Call 4:00PM GMT/11:00AM EST/8:00AM PST/5:00PM CET =
 
- * Attendees: 
+ * Attendees: Andy, Brian, Dan, Michael, Soraya,
  * Apologies: Jason (on a plane), Szymon
 
 == Agenda Topics ==
  * Project Planning 
   * Smartsheet: https://app.smartsheet.com/b/home?lx=KcuwC5QaC5XMBGBsBD6dqw
  * 3.4.2
+ * New UI
+ * Test mesh
+
 
 == Notes ==
- 
+ * Project Planning 
+  * Smartsheet: https://app.smartsheet.com/b/home?lx=KcuwC5QaC5XMBGBsBD6dqw
+  * Central Management
+   * starting up next week. End date has not changed yet. There are risks with the GUI and we have started using buffer time.
+  * Auto Config
+   * Hopefully finishing up next week
+  * BWCTL 
+   * Pushing back alpha a few days
+  * Debian
+   * Released some test packages.
+  * LS Scalability
+   * Working on transitioning cache to production
+  * Build
+   * Have some hardware commitments, Dan setup mesh
+   * Ivan has some questions about restarts
+  * GUI
+   * Mock-up sent
+  *  PS UI
+   * Will update Rade's contact info
+  * $100 nodes
+   * Progressing
+  * Bundling
+   * on track
+ * 3.4.2
+  * Debugging issue with regular testing. Hopeful getting close to a solution. May be related to owamp restarts
+ * Full DVD still giving problems
+ * New UI
+   * Range of topics covered from placement of services to how we do logins. 
+   * Also some notes about how to better add some traceroute tools. 
+
 == Future Agenda Topics ==
 
 == Actions  ==
