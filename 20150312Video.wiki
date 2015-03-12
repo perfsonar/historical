@@ -2,19 +2,45 @@
 
 =  March 12, 2015 Conference Call *3:00PM UTC/GMT*/11:00AM EDT/8:00AM PDT/*4:00PM CET* =
 
- * Attendees: TBD
+ * Attendees: Andy, Eric, Brian, Dan, Michael, Ivana, Sowmya, Valentin, Luke, John H., Palo, Antoine, Shawn , Scott Chevalier, Soraya, Aaron, Szymon
  * Apologies: Jason (at OIN)
 
 == Agenda Topics ==
  * owamp as a service supporting tool (Ivana Golub) 
+  * Action: Will continue discussion on email
  * Project Planning 
   * Smartsheet: https://app.smartsheet.com/b/home?lx=KcuwC5QaC5XMBGBsBD6dqw
  * 3.4.2
 
 
 == Notes ==
- * TBD
-
+ ** owamp as a service supporting tool (Ivana Golub) 
+  * Action: Will continue discussion on email
+ * Project Planning 
+  * Smartsheet: https://app.smartsheet.com/b/home?lx=KcuwC5QaC5XMBGBsBD6dqw
+ * 3.4.2
+   * Central Management
+    * Puppet work progressing. Michael updated dates and fleshed-out tasks more.
+    * MeshConfig GUI moved this summer
+    * Esmond profiling moved back to next week
+   * AutoConfig
+    * hopefully done next week
+   * BWCTL
+    * need to update Release
+   * Debian on track
+   * sLS on track
+   * test Config on track
+    * Initial mesh up and running
+   * UI on track
+   * PS UI
+    * Announced 1.4.1 to mailing list
+   * $100 nodes on track
+   * Bundling
+    * working on endpoint bundle 
+ * 3.4.2
+  * Closer on regular testing
+  * Full install DVD still not working
+  * Andy to update release notes with JSON::XS changes
 == Future Agenda Topics ==
 
  * TBD
