@@ -5,7 +5,7 @@ Version:		3.3.1
 Name:			perfSONAR_PS-Bundles
 Summary:		Bundles of the perfSONAR-PS Software
 Release:		%{relnum}.%{disttag}
-License:		Distributable, see LICENSE
+License:		ASL 2.0
 Group:			Applications/Communications
 URL:			http://psps.perfsonar.net/
 BuildArch:		noarch
